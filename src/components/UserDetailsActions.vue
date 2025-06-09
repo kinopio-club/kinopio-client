@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -14,21 +15,30 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    }
-  })
   updateExploreSpaces()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -67,8 +77,8 @@ const closeDialogs = () => {
   state.spacePickerIsVisible = false
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 
 // user
@@ -84,11 +94,11 @@ const userIsSignedIn = computed(() => {
 
 const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
 // const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const userSettingsIsVisible = computed(() => globalStore.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = () => {
-  const value = !store.state.userSettingsIsVisible
-  store.dispatch('closeAllDialogs')
-  store.commit('userSettingsIsVisible', value)
+  const value = !globalStore.userSettingsIsVisible
+  globalStore.closeAllDialogs()
+  globalStore.userSettingsIsVisible = value
 }
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const signOut = async () => {
@@ -130,7 +140,7 @@ const clearUserSpaces = () => {
 
 // follow favorite
 
-const isLoadingFavorites = computed(() => store.state.isLoadingFavorites)
+const isLoadingFavorites = computed(() => globalStore.isLoadingFavorites)
 const updateFavoriteUser = () => {
   const user = props.user
   const value = !isFavoriteUser.value
@@ -158,8 +168,8 @@ const updateExploreSpaces = async () => {
 // groups
 
 const toggleGroupsIsVisible = () => {
-  store.commit('closeAllDialogs')
-  store.commit('groupsIsVisible', true)
+  globalStore.closeAllDialogs()
+  globalStore.groupsIsVisible = true
 }
 </script>
 

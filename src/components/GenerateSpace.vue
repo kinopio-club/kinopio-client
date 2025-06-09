@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -17,7 +18,7 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import sample from 'lodash-es/sample'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -39,7 +40,7 @@ const state = reactive({
   background: ''
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 
 const promptInput = computed({
   get () {
@@ -203,7 +204,7 @@ const importSpace = async () => {
     console.info('🧚 space to import', space)
     await spaceStore.saveSpace(space)
     await spaceStore.loadSpace(space)
-    store.dispatch('closeAllDialogs')
+    globalStore.closeAllDialogs()
   } catch (error) {
     console.error('🚒 importSpace', error, state.newSpace)
   }

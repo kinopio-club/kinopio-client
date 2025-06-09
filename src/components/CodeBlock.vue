@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -10,7 +11,7 @@ import { highlight } from 'macrolight'
 import codeLanguages from '@/data/codeLanguages.json'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -56,12 +57,12 @@ const syntaxHighlightHTML = computed(() => {
 // language picker
 
 const languagePickerIsVisible = computed(() => {
-  const isVisible = store.state.codeLanguagePickerIsVisible
-  const isCard = store.state.codeLanguagePickerCardId === props.parentCardId
+  const isVisible = globalStore.codeLanguagePickerIsVisible
+  const isCard = globalStore.codeLanguagePickerCardId === props.parentCardId
   return isVisible && isCard
 })
 const toggleCodeLanguagePicker = async (event) => {
-  const value = !store.state.codeLanguagePickerIsVisible
+  const value = !globalStore.codeLanguagePickerIsVisible
   let element = event.target.closest('.button-wrap')
   if (element) {
     element = element.querySelector('button')
@@ -75,26 +76,26 @@ const toggleCodeLanguagePicker = async (event) => {
     pageX: window.scrollX,
     pageY: window.scrollY
   }
-  store.dispatch('closeAllDialogs')
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsDraggingCard = false
   await nextTick()
-  store.commit('codeLanguagePickerIsVisible', value)
-  store.commit('codeLanguagePickerPosition', position)
-  store.commit('codeLanguagePickerCardId', props.parentCardId)
+  globalStore.codeLanguagePickerIsVisible = value
+  globalStore.codeLanguagePickerPosition = position
+  globalStore.codeLanguagePickerCardId = props.parentCardId
 }
 
 // copy code
 
 const copy = async (event) => {
-  store.commit('clearNotificationsWithPosition')
-  store.dispatch('closeAllDialogs')
+  globalStore.clearNotificationsWithPosition()
+  globalStore.closeAllDialogs()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(props.content)
-    store.commit('addNotificationWithPosition', { message: 'Copied Code', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied Code', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 </script>

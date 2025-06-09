@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -13,7 +14,7 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -32,27 +33,27 @@ const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 
-const spaceUserListIsVisible = computed(() => store.state.spaceUserListIsVisible)
+const spaceUserListIsVisible = computed(() => globalStore.spaceUserListIsVisible)
 const dialogIsVisible = computed(() => {
   const isVisible = spaceUserListIsVisible.value
   if (props.isSpectators) {
-    return isVisible && store.state.spaceUserListIsSpectators
+    return isVisible && globalStore.spaceUserListIsSpectators
   } else {
-    return isVisible && !store.state.spaceUserListIsSpectators
+    return isVisible && !globalStore.spaceUserListIsSpectators
   }
 })
 const toggleSpaceUserListIsVisible = () => {
   const value = dialogIsVisible.value
-  store.commit('closeAllDialogs')
-  store.commit('spaceUserListIsVisible', !value)
-  store.commit('spaceUserListIsSpectators', props.isSpectators)
+  globalStore.closeAllDialogs()
+  globalStore.spaceUserListIsVisible = !value
+  globalStore.spaceUserListIsSpectators = props.isSpectators
 }
 const isActive = computed(() => {
   const isVisible = spaceUserListIsVisible.value
   if (props.isSpectators) {
-    return isVisible && store.state.spaceUserListIsSpectators
+    return isVisible && globalStore.spaceUserListIsSpectators
   } else {
-    return isVisible && !store.state.spaceUserListIsSpectators
+    return isVisible && !globalStore.spaceUserListIsSpectators
   }
 })
 

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -17,7 +18,7 @@ import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -28,27 +29,36 @@ let currentIteration, updatePositionTimer
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
-  store.subscribe(mutation => {
-    // on resultsFilter addSpace
-    if (mutation.type === 'triggerSpaceDetailsUpdateLocalSpaces') {
-      updateLocalSpaces()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      // on resultsFilter addSpace
+      if (name === 'triggerSpaceDetailsUpdateLocalSpaces') {
+        updateLocalSpaces()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   if (value) {
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     init()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -74,23 +84,23 @@ const init = async () => {
 
 // current space
 
-const isLoadingSpace = computed(() => store.state.isLoadingSpace)
+const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
 const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
 const spaceName = computed(() => spaceStore.name)
 
 // dialog
 
-const spaceDetailsIsPinned = computed(() => store.state.spaceDetailsIsPinned)
+const spaceDetailsIsPinned = computed(() => globalStore.spaceDetailsIsPinned)
 const style = computed(() => {
   return { maxHeight: state.dialogHeight + 'px' }
 })
 const backButtonIsVisible = computed(() => {
-  const spaceId = store.state.prevSpaceIdInSession
+  const spaceId = globalStore.prevSpaceIdInSession
   return spaceId && spaceId !== spaceStore.id
 })
 const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 
 // dialog heights
@@ -182,7 +192,7 @@ const removeLabel = computed(() => {
 })
 const clearAllFilters = () => {
   closeDialogs()
-  store.commit('triggerClearAllSpaceFilters')
+  globalStore.triggerClearAllSpaceFilters()
 }
 const toggleSpaceFiltersIsVisible = () => {
   const isVisible = state.spaceFiltersIsVisible
@@ -278,14 +288,14 @@ const addSpace = async () => {
   window.scrollTo(0, 0)
   await spaceStore.createSpace()
   updateLocalSpaces()
-  store.commit('triggerFocusSpaceDetailsName')
+  globalStore.triggerFocusSpaceDetailsName()
 }
 
 // select space
 
 const changeSpace = (space) => {
   spaceStore.changeSpace(space)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   closeDialogs()
 }
 
@@ -300,12 +310,12 @@ const removeSpaceFromSpaces = (spaceId) => {
 const updateLocalSpaces = async () => {
   if (!props.visible) { return }
   let cacheSpaces = await cache.getAllSpaces()
-  cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
+  cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, globalStore.currentUser)
   state.spaces = cacheSpaces
 }
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
-  const isOffline = computed(() => !store.state.isOnline)
+  const isOffline = computed(() => !globalStore.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true

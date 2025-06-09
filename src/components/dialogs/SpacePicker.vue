@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -18,7 +19,7 @@ import fuzzy from '@/libs/fuzzy.js'
 import dayjs from 'dayjs'
 import sortBy from 'lodash-es/sortBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -164,11 +165,11 @@ const selectSpace = (space) => {
 }
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const toggleNewSpaceIsVisible = async () => {
   state.newSpaceIsVisible = !state.newSpaceIsVisible

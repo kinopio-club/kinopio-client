@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -44,13 +45,13 @@ import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
 
-let unsubscribe
+let unsubscribes
 
 let updateNotificationsIntervalTimer
 
@@ -65,59 +66,64 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
   updatePosition()
   updateNotifications()
-  store.commit('isLoadingSpace', true)
+  globalStore.isLoadingSpace = true
   updateNotificationsIntervalTimer = setInterval(() => {
     updateNotifications()
   }, 1000 * 60 * 10) // 10 minutes
-  unsubscribe = store.subscribe((mutation, state) => {
-    const type = mutation.type
-    if (type === 'closeAllDialogs') {
-      closeAllDialogs()
-    } else if (type === 'triggerSpaceDetailsVisible') {
-      updateSpaceDetailsIsVisible(true)
-    } else if (type === 'triggerUpdateHeaderAndFooterPosition') {
-      updatePosition()
-    } else if (type === 'triggerSpaceDetailsInfoIsVisible') {
-      updateSpaceDetailsInfoIsVisible(true)
-    } else if (type === 'triggerSignUpOrInIsVisible') {
-      updateSignUpOrInIsVisible(true)
-    } else if (type === 'triggerAppsAndExtensionsIsVisible') {
-      updateAppsAndExtensionsIsVisible(true)
-    } else if (type === 'triggerKeyboardShortcutsIsVisible') {
-      updateKeyboardShortcutsIsVisible(true)
-    } else if (type === 'triggerUpgradeUserIsVisible') {
-      updateUpgradeUserIsVisible(true)
-    } else if (type === 'triggerDonateIsVisible') {
-      updateDonateIsVisible(true)
-    } else if (type === 'currentUserIsPainting') {
-      if (state.currentUserIsPainting) {
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        closeAllDialogs()
+      } else if (name === 'triggerSpaceDetailsVisible') {
+        updateSpaceDetailsIsVisible(true)
+      } else if (name === 'triggerUpdateHeaderAndFooterPosition') {
+        updatePosition()
+      } else if (name === 'triggerSpaceDetailsInfoIsVisible') {
+        updateSpaceDetailsInfoIsVisible(true)
+      } else if (name === 'triggerSignUpOrInIsVisible') {
+        updateSignUpOrInIsVisible(true)
+      } else if (name === 'triggerAppsAndExtensionsIsVisible') {
+        updateAppsAndExtensionsIsVisible(true)
+      } else if (name === 'triggerKeyboardShortcutsIsVisible') {
+        updateKeyboardShortcutsIsVisible(true)
+      } else if (name === 'triggerUpgradeUserIsVisible') {
+        updateUpgradeUserIsVisible(true)
+      } else if (name === 'triggerDonateIsVisible') {
+        updateDonateIsVisible(true)
+      } else if (name === 'currentUserIsPainting') {
+        if (state.currentUserIsPainting) {
+          addReadOnlyJiggle()
+        }
+      } else if (name === 'triggerReadOnlyJiggle') {
         addReadOnlyJiggle()
+      } else if (name === 'triggerUpdateNotifications' || name === 'triggerUserIsLoaded') {
+        updateNotifications()
+      } else if (name === 'triggerShowNextSearchCard') {
+        showNextSearchCard()
+      } else if (name === 'triggerShowPreviousSearchCard') {
+        showPreviousSearchCard()
+      } else if (name === 'triggerHideTouchInterface') {
+        hidden()
+      } else if (name === 'triggerTemplatesIsVisible') {
+        updateTemplatesIsVisible(true)
+      } else if (name === 'triggerRemovedIsVisible') {
+        updateSidebarIsVisible(true)
+      } else if (name === 'triggerImportIsVisible') {
+        updateImportIsVisible(true)
+      } else if (name === 'triggerClearUserNotifications') {
+        clearNotifications()
       }
-    } else if (type === 'triggerReadOnlyJiggle') {
-      addReadOnlyJiggle()
-    } else if (type === 'triggerUpdateNotifications' || type === 'triggerUserIsLoaded') {
-      updateNotifications()
-    } else if (type === 'triggerShowNextSearchCard') {
-      showNextSearchCard()
-    } else if (type === 'triggerShowPreviousSearchCard') {
-      showPreviousSearchCard()
-    } else if (type === 'triggerHideTouchInterface') {
-      hidden()
-    } else if (type === 'triggerTemplatesIsVisible') {
-      updateTemplatesIsVisible(true)
-    } else if (type === 'triggerRemovedIsVisible') {
-      updateSidebarIsVisible(true)
-    } else if (type === 'triggerImportIsVisible') {
-      updateImportIsVisible(true)
-    } else if (type === 'triggerClearUserNotifications') {
-      clearNotifications()
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -143,7 +149,7 @@ const state = reactive({
   importIsVisible: false
 })
 
-const isPinchZooming = computed(() => store.state.isPinchZooming)
+const isPinchZooming = computed(() => globalStore.isPinchZooming)
 watch(() => isPinchZooming.value, (value, prevValue) => {
   if (value) {
     fadeOut()
@@ -153,7 +159,7 @@ watch(() => isPinchZooming.value, (value, prevValue) => {
     cancelFadeOut()
   }
 })
-const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
 watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
     fadeOut()
@@ -164,18 +170,18 @@ watch(() => isTouchScrolling.value, (value, prevValue) => {
   }
 })
 
-const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
+const importArenaChannelIsVisible = computed(() => globalStore.importArenaChannelIsVisible)
 const kinopioDomain = computed(() => consts.kinopioDomain())
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const userSettingsIsVisible = computed(() => globalStore.userSettingsIsVisible)
 const isSpace = computed(() => {
-  const isOther = isEmbedMode.value || store.state.isAddPage
+  const isOther = isEmbedMode.value || globalStore.isAddPage
   const isSpace = !isOther
   return isSpace
 })
 const userCanEditSpace = computed(() => userStore.getUserCanEditSpace)
 const userCanOnlyComment = computed(() => userStore.getUserIsCommentOnly)
 const isUpgraded = computed(() => userStore.isUpgraded)
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
@@ -189,7 +195,7 @@ const toolbarIsVisible = computed(() => {
 
 const shouldShowChangelogIsUpdated = computed(() => {
   const isNotHelloSpace = !spaceStore.getSpaceIsHello
-  return store.state.changelogIsUpdated && isNotHelloSpace && userCanEditSpace.value
+  return globalStore.changelogIsUpdated && isNotHelloSpace && userCanEditSpace.value
 })
 
 // current space
@@ -208,7 +214,7 @@ const currentSpaceName = computed(() => {
 const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
-  return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)
+  return Boolean(globalStore.isLoadingSpace || globalStore.isJoiningSpace || globalStore.isReconnectingToBroadcast || globalStore.isLoadingOtherItems || globalStore.sendingQueue.length)
 })
 const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   if (spaceHasStatus.value) {
@@ -230,19 +236,19 @@ const shouldShowInExplore = computed(() => {
   return spaceStore.showInExplore
 })
 const backButtonIsVisible = computed(() => {
-  const spaceId = store.state.prevSpaceIdInSession
+  const spaceId = globalStore.prevSpaceIdInSession
   return spaceId && spaceId !== spaceStore.id
 })
 const changeToPrevSpace = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   const id = spaceStore.id
   spaceStore.loadPrevSpaceInSession()
-  store.commit('prevSpaceIdInSession', id)
+  globalStore.updatePrevSpaceIdInSession = id
 }
 
 // search filters
 
-const searchResultsCount = computed(() => store.state.searchResultsCards.length)
+const searchResultsCount = computed(() => globalStore.searchResultsCards.length)
 const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const searchResultsOrFilters = computed(() => {
   if (searchResultsCount.value || totalFiltersActive.value) {
@@ -252,17 +258,17 @@ const searchResultsOrFilters = computed(() => {
   }
 })
 const focusOnCard = (card) => {
-  store.dispatch('focusOnCardId', card.id)
-  store.commit('previousResultItem', card)
+  globalStore.updateFocusOnCardId(card.id)
+  globalStore.previousResultItem = card
 }
 const showNextSearchCard = () => {
-  if (!store.state.search) { return }
-  const cards = store.state.searchResultsCards
-  if (!store.state.previousResultItem.id) {
+  if (!globalStore.search) { return }
+  const cards = globalStore.searchResultsCards
+  if (!globalStore.previousResultItem.id) {
     focusOnCard(cards[0])
     return
   }
-  const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
+  const currentIndex = cards.findIndex(card => card.id === globalStore.previousResultItem.id)
   let index = currentIndex + 1
   if (cards.length === index) {
     index = 0
@@ -270,13 +276,13 @@ const showNextSearchCard = () => {
   focusOnCard(cards[index])
 }
 const showPreviousSearchCard = () => {
-  if (!store.state.search) { return }
-  const cards = store.state.searchResultsCards
-  if (!store.state.previousResultItem.id) {
+  if (!globalStore.search) { return }
+  const cards = globalStore.searchResultsCards
+  if (!globalStore.previousResultItem.id) {
     focusOnCard(cards[0])
     return
   }
-  const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
+  const currentIndex = cards.findIndex(card => card.id === globalStore.previousResultItem.id)
   let index = currentIndex - 1
   if (index < 0) {
     index = cards.length - 1
@@ -284,9 +290,9 @@ const showPreviousSearchCard = () => {
   focusOnCard(cards[index])
 }
 const clearSearchAndFilters = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('clearSearch')
-  store.dispatch('clearAllFilters')
+  globalStore.closeAllDialogs()
+  globalStore.clearSearch()
+  globalStore.clearAllFilters()
 }
 
 // notifications
@@ -299,7 +305,7 @@ const notificationsUnreadCount = computed(() => {
 
 // embed
 
-const isEmbedMode = computed(() => store.state.isEmbedMode)
+const isEmbedMode = computed(() => globalStore.isEmbedMode)
 const openKinopio = () => {
   const url = currentSpaceUrl.value
   const title = `${currentSpaceName.value} – Kinopio`
@@ -320,18 +326,18 @@ const removeReadOnlyJiggle = () => {
 
 // visible
 
-const isPresentationMode = computed(() => store.state.isPresentationMode)
+const isPresentationMode = computed(() => globalStore.isPresentationMode)
 const isVisible = computed(() => {
   if (isPresentationMode.value) { return }
-  if (store.state.isAddPage) { return }
-  const contentDialogIsVisible = store.state.cardDetailsIsVisibleForCardId || store.state.connectionDetailsIsVisibleForConnectionId
-  if (contentDialogIsVisible && store.getters.isTouchDevice && !state.sidebarIsVisible) {
+  if (globalStore.isAddPage) { return }
+  const contentDialogIsVisible = globalStore.cardDetailsIsVisibleForCardId || globalStore.connectionDetailsIsVisibleForConnectionId
+  if (contentDialogIsVisible && globalStore.getIsTouchDevice && !state.sidebarIsVisible) {
     return false
   } else {
     return true
   }
 })
-const offlineIsVisible = computed(() => store.state.offlineIsVisible)
+const offlineIsVisible = computed(() => globalStore.offlineIsVisible)
 const closeAllDialogs = () => {
   state.aboutIsVisible = false
   state.spaceDetailsInfoIsVisible = false
@@ -345,14 +351,14 @@ const closeAllDialogs = () => {
   state.notificationsIsVisible = false
   state.templatesIsVisible = false
   state.importIsVisible = false
-  if (!store.state.spaceDetailsIsPinned) {
+  if (!globalStore.spaceDetailsIsPinned) {
     state.spaceDetailsIsVisible = false
   }
-  if (!store.state.sidebarIsPinned) {
+  if (!globalStore.sidebarIsPinned) {
     state.sidebarIsVisible = false
   }
 }
-const pricingIsVisible = computed(() => store.state.pricingIsVisible)
+const pricingIsVisible = computed(() => globalStore.pricingIsVisible)
 const updateAppsAndExtensionsIsVisible = (value) => {
   state.appsAndExtensionsIsVisible = value
 }
@@ -373,12 +379,12 @@ const updateSpaceDetailsInfoIsVisible = (value) => {
 }
 const togglePricingIsVisible = () => {
   const value = !pricingIsVisible.value
-  store.dispatch('closeAllDialogs')
-  store.commit('pricingIsVisible', value)
+  globalStore.closeAllDialogs()
+  globalStore.pricingIsVisible = value
 }
 const toggleAboutIsVisible = () => {
   const isVisible = state.aboutIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.aboutIsVisible = !isVisible
 }
 const updateSpaceDetailsIsVisible = (value) => {
@@ -386,7 +392,7 @@ const updateSpaceDetailsIsVisible = (value) => {
 }
 const toggleSpaceDetailsIsVisible = () => {
   const isVisible = state.spaceDetailsIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.spaceDetailsIsVisible = !isVisible
 }
 const updateSignUpOrInIsVisible = (value) => {
@@ -394,17 +400,17 @@ const updateSignUpOrInIsVisible = (value) => {
 }
 const toggleSignUpOrInIsVisible = () => {
   const isVisible = state.signUpOrInIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.signUpOrInIsVisible = !isVisible
 }
 const toggleShareIsVisible = () => {
   const isVisible = state.shareIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.shareIsVisible = !isVisible
 }
 const toggleNotificationsIsVisible = () => {
   const isVisible = state.notificationsIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.notificationsIsVisible = !isVisible
   if (state.notificationsIsVisible) {
     updateNotifications()
@@ -415,25 +421,25 @@ const updateSidebarIsVisible = (value) => {
 }
 const toggleSidebarIsVisible = () => {
   const isVisible = state.sidebarIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.sidebarIsVisible = !isVisible
 }
 const toggleSpaceStatusIsVisible = () => {
   const isVisible = state.spaceStatusIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.spaceStatusIsVisible = !isVisible
 }
 const toggleOfflineIsVisible = () => {
-  const isVisible = store.state.offlineIsVisible
-  store.dispatch('closeAllDialogs')
-  store.commit('offlineIsVisible', !isVisible)
+  const isVisible = globalStore.offlineIsVisible
+  globalStore.closeAllDialogs()
+  globalStore.offlineIsVisible = !isVisible
 }
 const searchAndFilterTitle = computed(() => `Search and Filter (${utils.metaKey()}-F)`)
-const searchIsVisible = computed(() => store.state.searchIsVisible)
+const searchIsVisible = computed(() => globalStore.searchIsVisible)
 const toggleSearchIsVisible = () => {
   const isVisible = searchIsVisible.value
-  store.dispatch('closeAllDialogs')
-  store.commit('searchIsVisible', !isVisible)
+  globalStore.closeAllDialogs()
+  globalStore.searchIsVisible = !isVisible
 }
 const setLoadingSignUpOrIn = (value) => {
   state.loadingSignUpOrIn = value
@@ -443,14 +449,14 @@ const updateUpgradeUserIsVisible = (value) => {
 }
 const toggleUpgradeUserIsVisible = () => {
   const isVisible = state.upgradeUserIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.upgradeUserIsVisible = !isVisible
 }
 
 // hide
 
 const hidden = (event) => {
-  if (!store.getters.isTouchDevice) { return }
+  if (!globalStore.getIsTouchDevice) { return }
   hiddenIteration = 0
   if (hiddenTimer) { return }
   hiddenTimer = window.requestAnimationFrame(hiddenFrame)
@@ -472,7 +478,7 @@ const cancelHidden = () => {
 
 // fade out
 
-const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
+const isFadingOut = computed(() => globalStore.isFadingOutDuringTouch)
 const fadeOut = () => {
   fadeOutIteration = 0
   if (fadeOutTimer) { return }
@@ -482,13 +488,13 @@ const fadeOut = () => {
 const cancelFadeOut = () => {
   window.cancelAnimationFrame(fadeOutTimer)
   fadeOutTimer = undefined
-  store.commit('isFadingOutDuringTouch', false)
+  globalStore.isFadingOutDuringTouch = false
   cancelUpdatePosition()
   updatePosition()
 }
 const fadeOutFrame = () => {
   fadeOutIteration++
-  store.commit('isFadingOutDuringTouch', true)
+  globalStore.isFadingOutDuringTouch = true
   if (shouldCancelFadeOut) {
     cancelFadeOut()
   } else if (fadeOutIteration < fadeOutDuration) {
@@ -499,7 +505,7 @@ const fadeOutFrame = () => {
 // position
 
 const updatePosition = () => {
-  if (!store.getters.isTouchDevice) { return }
+  if (!globalStore.getIsTouchDevice) { return }
   updatePositionIteration = 0
   if (updatePositionTimer) { return }
   updatePositionTimer = window.requestAnimationFrame(updatePositionFrame)

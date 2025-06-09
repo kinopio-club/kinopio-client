@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -16,7 +17,7 @@ import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -40,14 +41,14 @@ const props = defineProps({
   errorIsLoading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   state.tipsIsVisible = false
   if (value) {
     updateHeights()
     updateUserShowInExploreUpdatedAt()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -177,10 +178,10 @@ const updateFilter = async (value) => {
   state.isLoadingExploreSearchResults = false
 }
 const focusPreviousItem = () => {
-  store.commit('triggerPickerNavigationKey', 'ArrowUp')
+  globalStore.triggerPickerNavigationKey('ArrowUp')
 }
 const focusNextItem = () => {
-  store.commit('triggerPickerNavigationKey', 'ArrowDown')
+  globalStore.triggerPickerNavigationKey('ArrowDown')
 }
 const selectItem = () => {
   const liElement = resultsElement.value.querySelector('li.hover')

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -14,7 +15,7 @@ import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -22,13 +23,23 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
+let unsubscribes
+
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    }
-  })
   loadFavoriteUsers()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -46,7 +57,7 @@ const state = reactive({
 })
 
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
-const isLoadingSpace = computed(() => store.state.isLoadingSpace)
+const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
 
 // visits
 
@@ -102,28 +113,28 @@ const loadFavoriteUsers = async () => {
   }
   state.isLoadingFavorites = false
 }
-const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const userDetailsIsVisible = computed(() => globalStore.userDetailsIsVisible)
 const userDetailsSelectedUser = computed(() => {
   if (!userDetailsIsVisible.value) { return }
-  return store.state.userDetailsUser
+  return globalStore.userDetailsUser
 })
 const toggleUserDetails = (event, user) => {
-  const shouldShow = !store.state.userDetailsIsVisible
+  const shouldShow = !globalStore.userDetailsIsVisible
   closeDialogs()
   if (shouldShow) {
     showUserDetails(event, user)
   }
 }
 const closeDialogs = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
 }
 const showUserDetails = async (event, user) => {
   const element = event.target
   const options = { element, shouldIgnoreZoom: true, offsetY: -300 }
   const position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsUser', user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
+  globalStore.userDetailsUser = user
+  globalStore.userDetailsPosition = position
+  globalStore.userDetailsIsVisible = true
 }
 </script>
 

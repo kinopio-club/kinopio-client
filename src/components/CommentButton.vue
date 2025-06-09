@@ -1,23 +1,33 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Comments from '@/components/dialogs/Comments.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const buttonElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'closeAllDialogs') {
-      state.commentsIsVisible = false
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        state.commentsIsVisible = false
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({
@@ -36,10 +46,10 @@ const blur = () => {
   element.blur()
 }
 
-const isCommentMode = computed(() => store.state.isCommentMode)
+const isCommentMode = computed(() => globalStore.isCommentMode)
 const toggleCommentsIsVisible = () => {
   const value = !state.commentsIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.commentsIsVisible = value
   blur()
 }

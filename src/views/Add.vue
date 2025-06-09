@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -16,7 +17,7 @@ import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -64,13 +65,13 @@ onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
 })
 
-const isOffline = computed(() => !store.state.isOnline)
+const isOffline = computed(() => !globalStore.isOnline)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const currentUser = computed(() => userStore.getUserAllState)
-const isAddPage = computed(() => store.state.isAddPage)
+const isAddPage = computed(() => globalStore.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
 const textareaPlaceholder = computed(() => 'Add cards by typing here, or paste a URL')
@@ -297,7 +298,7 @@ const toggleFilterIsVisible = async () => {
   state.filterIsVisible = value
   if (value) {
     await nextTick()
-    store.commit('triggerFocusResultsFilter')
+    globalStore.triggerFocusResultsFilter()
   } else {
     clearFilter()
   }

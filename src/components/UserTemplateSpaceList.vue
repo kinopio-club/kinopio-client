@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -11,7 +12,7 @@ import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -53,8 +54,8 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const triggerTemplatesIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerTemplatesIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerTemplatesIsVisible()
 }
 
 // spaces

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -10,18 +11,27 @@ import utils from '@/utils.js'
 import uniq from 'lodash-es/uniq'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerMoreFiltersIsNotVisible') {
-      state.moreSearchFiltersVisible = false
-    }
-  })
-})
+let unsubscribes
 
+onMounted(() => {
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerMoreFiltersIsNotVisible') {
+        state.moreSearchFiltersVisible = false
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
 const state = reactive({
   moreSearchFiltersVisible: false
 })
@@ -33,10 +43,10 @@ const toggleMoreSearchFiltersVisible = () => {
 
 // dialog pinned
 
-const dialogIsPinned = computed(() => store.state.searchIsPinned)
+const dialogIsPinned = computed(() => globalStore.searchIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  store.dispatch('searchIsPinned', isPinned)
+  globalStore.searchIsPinned = isPinned
 }
 
 // filters
@@ -63,8 +73,8 @@ const toggleFilterComments = () => {
   userStore.updateUser({ filterComments: value })
 }
 const clearSearchAndFilters = () => {
-  store.commit('clearSearch')
-  store.dispatch('clearAllFilters')
+  globalStore.clearSearch()
+  globalStore.clearAllFilters()
 }
 </script>
 

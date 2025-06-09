@@ -1,15 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 
 import Box from '@/components/Box.vue'
 import BoxSnapGuide from '@/components/BoxSnapGuide.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 
-const isPainting = computed(() => store.state.currentUserIsPainting)
+const isPainting = computed(() => globalStore.currentUserIsPainting)
 const unlockedBoxes = computed(() => boxStore.getBoxesIsNotLocked)
 const lockedBoxes = computed(() => boxStore.getBoxesIsLocked)
 </script>

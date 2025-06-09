@@ -1,19 +1,20 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
-
 export const useAnalyticsStore = defineStore('analytics', {
   getters: {
     shouldSend () {
+      const globalStore = useGlobalStore()
       if (consts.isDevelopment()) { return }
       // if (userStore.analyticsIsDisabled) { return }
-      if (!store.state.isOnline) { return }
+      if (!globalStore.isOnline) { return }
       return true
     }
   },

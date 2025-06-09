@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -10,7 +11,7 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
@@ -26,23 +27,9 @@ let controlPointOddY = lineMaxHeight / 2
 const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
-      const update = mutation.payload
-      update.startPoint = updateRemotePosition(update.startPoint)
-      update.curve = createCurve(update.startPoint)
-      addRemoteCurve(update)
-      remotePainting()
-    } else if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
-      removeRemoteFramesByUser(mutation.payload.userId)
-      remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
-    } else if (mutation.type === 'triggerUploadComplete') {
-      removeUploadIsDraggedOver()
-    }
-  })
   canvas = document.getElementById('drop-guide-line')
   remoteCanvas = document.getElementById('remote-drop-guide-line')
   context = canvas.getContext('2d')
@@ -53,14 +40,34 @@ onMounted(() => {
   window.addEventListener('dragleave', removeUploadIsDraggedOver)
   window.addEventListener('dragend', removeUploadIsDraggedOver)
   window.addEventListener('drop', addCardsAndUploadFiles)
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateRemoteDropGuideLine') {
+        const update = args[0]
+        update.startPoint = updateRemotePosition(update.startPoint)
+        update.curve = createCurve(update.startPoint)
+        addRemoteCurve(update)
+        remotePainting()
+      } else if (name === 'triggerUpdateStopRemoteUserDropGuideLine') {
+        removeRemoteFramesByUser(args[0].userId)
+        remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
+      } else if (name === 'triggerUploadComplete') {
+        removeUploadIsDraggedOver()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('dragenter', checkIfUploadIsDraggedOver)
   window.removeEventListener('dragover', checkIfUploadIsDraggedOver)
   window.removeEventListener('dragleave', removeUploadIsDraggedOver)
   window.removeEventListener('dragend', removeUploadIsDraggedOver)
   window.removeEventListener('drop', addCardsAndUploadFiles)
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -152,7 +159,7 @@ const paintCurve = (context, curve) => {
 // Remote Painting
 
 const updateRemotePosition = (position) => {
-  const zoom = store.getters.spaceZoomDecimal
+  const zoom = globalStore.spaceZoomDecimal
   const space = document.getElementById('space')
   const rect = space.getBoundingClientRect()
   position = {

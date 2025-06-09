@@ -1,11 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -18,7 +19,7 @@ import helloSpace from '@/data/hello.json'
 import { nanoid } from 'nanoid'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop suppor
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -39,10 +40,10 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     clearErrors()
     createSessionToken()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     focusEmail()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -94,7 +95,7 @@ const focusEmail = async () => {
   if (!element) { return }
   element.focus()
 }
-const groupToJoinOnLoad = computed(() => store.state.groupToJoinOnLoad)
+const groupToJoinOnLoad = computed(() => globalStore.groupToJoinOnLoad)
 
 // errors
 
@@ -201,7 +202,7 @@ const signUp = async (event) => {
   const response = await apiStore.signUp({ email, password, currentUser, sessionToken })
   const newUser = await response.json()
   if (isSuccess(response)) {
-    store.commit('clearAllNotifications')
+    globalStore.clearAllNotifications()
     userStore.updateUserState(newUser)
     // save spaces to remote
     await backupLocalSpaces()
@@ -213,7 +214,7 @@ const signUp = async (event) => {
     notifyIsJoiningGroup()
     userStore.checkIfShouldJoinGroup()
     await addCollaboratorToInvitedSpaces()
-    store.commit('triggerUpdateWindowHistory')
+    globalStore.triggerUpdateWindowHistory()
     themeStore.restoreTheme()
   } else {
     await handleErrors(newUser)
@@ -232,8 +233,8 @@ const signIn = async (event) => {
   const result = await response.json()
   state.loading.signUpOrIn = false
   if (isSuccess(response)) {
-    store.commit('isLoadingSpace', true)
-    store.commit('addNotification', { message: 'Signing In…' })
+    globalStore.isLoadingSpace = true
+    globalStore.addNotification({ message: 'Signing In…' })
     userStore.updateUserState(result)
     // update edited local spaces to remote user
     await removeUneditedSpace('Hello Kinopio')
@@ -247,18 +248,18 @@ const signIn = async (event) => {
     // add remote spaces
     const spaces = await apiStore.getUserSpaces()
     await cache.addSpaces(spaces)
-    store.commit('clearAllNotifications')
+    globalStore.clearAllNotifications()
     await addCollaboratorToInvitedSpaces()
-    store.commit('triggerSpaceDetailsVisible')
-    store.commit('isLoadingFavorites', true)
+    globalStore.triggerSpaceDetailsVisible()
+    globalStore.isLoadingFavorites = true
     userStore.restoreUserAssociatedData()
-    store.commit('triggerUpdateNotifications')
+    globalStore.triggerUpdateNotifications()
     themeStore.restoreTheme()
     if (shouldLoadLastSpace) {
       await spaceStore.loadLastSpace()
-      store.commit('triggerUpdateWindowHistory')
+      globalStore.triggerUpdateWindowHistory()
     }
-    store.commit('isLoadingSpace', false)
+    globalStore.isLoadingSpace = false
   } else {
     await handleErrors(result)
   }
@@ -272,14 +273,14 @@ const isSuccess = (response) => {
 }
 const notifySignedIn = () => {
   state.loading.signUpOrIn = false
-  store.dispatch('closeAllDialogs')
-  store.commit('removeNotificationByMessage', 'Signing In…')
-  store.commit('addNotification', { message: 'Signed In', type: 'success' })
-  store.commit('currentUserIsInvitedButCannotEditCurrentSpace', false)
+  globalStore.closeAllDialogs()
+  globalStore.removeNotificationByMessage('Signing In…')
+  globalStore.addNotification({ message: 'Signed In', type: 'success' })
+  globalStore.currentUserIsInvitedButCannotEditCurrentSpace = false
 }
 const notifyIsJoiningGroup = () => {
-  if (!store.state.shouldNotifyIsJoiningGroup) { return }
-  store.commit('notifyIsJoiningGroup', true)
+  if (!globalStore.shouldNotifyIsJoiningGroup) { return }
+  globalStore.updateNotifyIsJoiningGroup(true)
 }
 
 // update spaces on success

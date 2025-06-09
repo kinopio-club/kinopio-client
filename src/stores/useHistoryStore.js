@@ -34,7 +34,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
@@ -231,12 +231,13 @@ export const useHistoryStore = defineStore('history', {
     // Undo
 
     undo () {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
+      const toolbarIsDrawing = globalStore.currentUserToolbar === 'drawing'
       if (toolbarIsDrawing) {
-        store.commit('triggerDrawingUndo', null, { root: true })
+        globalStore.triggerDrawingUndo()
         return
       }
       if (isPaused) { return }
@@ -314,12 +315,13 @@ export const useHistoryStore = defineStore('history', {
     // Redo
 
     redo (patch) {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
+      const toolbarIsDrawing = globalStore.currentUserToolbar === 'drawing'
       if (toolbarIsDrawing) {
-        store.commit('triggerDrawingRedo', null, { root: true })
+        globalStore.triggerDrawingRedo()
         return
       }
       if (!patch) {

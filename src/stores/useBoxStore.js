@@ -1,5 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
@@ -7,8 +9,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
-
-import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -42,9 +42,10 @@ export const useBoxStore = defineStore('boxes', {
       return boxes.filter(box => !box.isLocked)
     },
     getBoxesSelected () {
-      let ids = store.state.multipleBoxesSelectedIds
+      const globalStore = useGlobalStore()
+      let ids = globalStore.multipleBoxesSelectedIds
       if (!ids.length) {
-        ids = [store.state.currentDraggingBoxId]
+        ids = [globalStore.currentDraggingBoxId]
       }
       ids = ids.filter(id => Boolean(id))
       const boxes = ids.map(id => this.byId[id])
@@ -64,7 +65,8 @@ export const useBoxStore = defineStore('boxes', {
       }
     },
     getBoxesResizing () {
-      const ids = store.state.currentUserIsResizingBoxIds
+      const globalStore = useGlobalStore()
+      const ids = globalStore.currentUserIsResizingBoxIds
       // if (this.isSelectedIds.length) {
       //   boxIds = this.isSelectedIds
       // }
@@ -141,6 +143,7 @@ export const useBoxStore = defineStore('boxes', {
       this.allIds.push(box.id)
     },
     async createBox (box, isResizing) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
@@ -148,13 +151,13 @@ export const useBoxStore = defineStore('boxes', {
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
       // broadcastStore.update({ updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' })
-      // historyStore.add({ boxes: [box] }, { root: true })
+      // historyStore.add({ boxes: [box] })
       if (isResizing) {
         historyStore.pause()
-        store.commit('currentUserIsResizingBox', true, { root: true })
-        store.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
+        globalStore.currentUserIsResizingBox = true
+        globalStore.currentUserIsResizingBoxIds = [box.id]
       }
-      await apiStore.addToQueue({ name: 'createBox', body: box }, { root: true })
+      await apiStore.addToQueue({ name: 'createBox', body: box })
     },
 
     // update
@@ -197,7 +200,7 @@ export const useBoxStore = defineStore('boxes', {
       if (!updates.isBroadcast) {
         // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' })
       }
-      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
       await spaceStore.updateSpace({
         editedAt: new Date(),
         editedByUserId: userStore.id
@@ -231,11 +234,11 @@ export const useBoxStore = defineStore('boxes', {
         const idIndex = this.allIds.indexOf(id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
-        await apiStore.addToQueue({ name: 'removeBox', body: { id } }, { root: true })
+        await apiStore.addToQueue({ name: 'removeBox', body: { id } })
         // broadcastStore.update({ updates: box, type: 'removeBox', handler: 'currentBoxes/remove' })
       }
       const boxes = ids.map(id => this.getBox(id))
-      // historyStore.add({ boxes, isRemoved: true }, { root: true })
+      // historyStore.add({ boxes, isRemoved: true })
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       await nextTick()
       const connectionStore = useConnectionStore()
@@ -248,24 +251,26 @@ export const useBoxStore = defineStore('boxes', {
     // position
 
     updatePageSize (box) {
+      const globalStore = useGlobalStore()
       const boxY = box.y + box.resizeHeight
-      if (boxY >= store.state.pageHeight) {
-        store.commit('pageHeight', boxY, { root: true })
+      if (boxY >= globalStore.pageHeight) {
+        globalStore.pageHeight = boxY
       }
       const boxX = box.x + box.resizeWidth
-      if (boxX >= store.state.pageWidth) {
-        store.commit('pageWidth', boxX, { root: true })
+      if (boxX >= globalStore.pageWidth) {
+        globalStore.pageWidth = boxX
       }
     },
     moveBoxes ({ endCursor, prevCursor, delta }) {
+      const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
-      const zoom = store.getters.spaceCounterZoomDecimal
+      const zoom = globalStore.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
-      if (store.state.shouldSnapToGrid) {
+      if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
       }
@@ -287,7 +292,7 @@ export const useBoxStore = defineStore('boxes', {
         this.updatePageSize(update)
       })
       this.updateBoxes(updates)
-      store.commit('boxesWereDragged', true, { root: true })
+      globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
       this.updateBoxSnapGuides(updates)
@@ -333,6 +338,7 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBox(update)
     },
     resizeBoxes (ids, delta) {
+      const globalStore = useGlobalStore()
       const updates = []
       ids.forEach(id => {
         const rect = utils.boxElementDimensions({ id })
@@ -346,8 +352,8 @@ export const useBoxStore = defineStore('boxes', {
         const box = { id, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         updates.push(box)
         this.updatePageSize(box)
-        store.commit('currentUserIsResizingBox', true, { root: true })
-        store.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
+        globalStore.currentUserIsResizingBox = true
+        globalStore.currentUserIsResizingBoxIds = [box.id]
       })
       const connectionStore = useConnectionStore()
       connectionStore.updateConnectionPaths(ids)
@@ -434,16 +440,17 @@ export const useBoxStore = defineStore('boxes', {
       return { cards, boxes }
     },
     selectItemsInSelectedBoxes () {
+      const globalStore = useGlobalStore()
       const { boxes, cards } = this.itemsContainedInSelectedBoxes()
       // boxes
       const boxIds = boxes.map(box => box.id)
-      store.dispatch('multipleBoxesSelectedIds', boxIds)
+      globalStore.updateMultipleBoxesSelectedIds(boxIds)
       // cards
-      const isMultipleBoxesSelected = Boolean(store.state.multipleBoxesSelectedIds.length)
+      const isMultipleBoxesSelected = Boolean(globalStore.multipleBoxesSelectedIds.length)
       const cardIds = cards.map(card => card.id)
-      store.dispatch('multipleCardsSelectedIds', cardIds)
+      globalStore.updateMultipleCardsSelectedIds(cardIds)
       if (!isMultipleBoxesSelected) {
-        store.commit('preventMultipleSelectedActionsIsVisible', true)
+        globalStore.preventMultipleSelectedActionsIsVisible = true
       }
     },
 
@@ -458,12 +465,13 @@ export const useBoxStore = defineStore('boxes', {
       return { side, origin: item, target: targetBox, time }
     },
     updateBoxSnapGuides (items, isCards) {
+      const globalStore = useGlobalStore()
       if (!items.length) { return }
-      if (store.state.shouldSnapToGrid) { return }
+      if (globalStore.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       const targetBoxes = this.getBoxesSelectableInViewport()
-      const prevSnapGuides = store.state.snapGuides
+      const prevSnapGuides = globalStore.snapGuides
       let snapGuides = []
       if (isCards) {
         items = [utils.boundaryRectFromItems(items)]

@@ -1,10 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 // import utils from '@/utils.js'
 import User from '@/components/User.vue'
-const store = useStore()
 
 const state = reactive({
   aboutMeIsVisible: false

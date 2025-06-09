@@ -1,5 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -7,8 +9,6 @@ import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useThemeStore } from '@/stores/useThemeStore'
-
-import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -120,14 +120,15 @@ export const useUserStore = defineStore('users', {
       return (isUpgraded && !isCreator)
     },
     getUserTotalItemFadingFiltersActive () {
+      const globalStore = useGlobalStore()
       let userFilters = 0
       if (this.filterUnchecked) {
         userFilters += 1
       }
-      const tagNames = store.state.filteredTagNames
-      const connections = store.state.filteredConnectionTypeIds
-      const frames = store.state.filteredFrameIds
-      const boxes = store.state.filteredBoxIds
+      const tagNames = globalStore.filteredTagNames
+      const connections = globalStore.filteredConnectionTypeIds
+      const frames = globalStore.filteredFrameIds
+      const boxes = globalStore.filteredBoxIds
       return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
     getUserIsUnableToEditUnlessSignedIn () {
@@ -254,7 +255,8 @@ export const useUserStore = defineStore('users', {
       return userFilters
     },
     getUserIsReadOnlyInvitedToSpace (space) {
-      return store.state.spaceReadOnlyKey.spaceId === space.id
+      const globalStore = useGlobalStore()
+      return globalStore.spaceReadOnlyKey.spaceId === space.id
     },
     getItemIsCreatedByUser (connection) {
       return this.id === connection.userId
@@ -293,12 +295,13 @@ export const useUserStore = defineStore('users', {
       this.updateUserState(user)
     },
     async restoreUserAssociatedData () {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const groupStore = useGroupStore()
       try {
-        store.commit('isLoadingFavorites', true, { root: true })
+        globalStore.isLoadingFavorites = true
         if (!this.getUserIsSignedIn) {
-          store.commit('isLoadingFavorites', false, { root: true })
+          globalStore.isLoadingFavorites = false
           return
         }
         const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces, tags, groups] = await Promise.all([
@@ -328,21 +331,23 @@ export const useUserStore = defineStore('users', {
         if (groups) {
           groupStore.restoreGroup(groups)
         }
-        store.commit('isLoadingFavorites', false, { root: true })
+        globalStore.isLoadingFavorites = false
       } catch (error) {
         console.error('🚒 restoreUserAssociatedData', error)
       }
     },
     checkIfShouldJoinGroup () {
+      const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
-      if (!store.state.groupToJoinOnLoad) { return }
+      if (!globalStore.groupToJoinOnLoad) { return }
       if (this.getUserIsSignedIn) {
         groupStore.joinGroup()
       } else {
-        store.commit('notifySignUpToJoinGroup', true, { root: true })
+        globalStore.notifySignUpToJoinGroup = true
       }
     },
     async initializeUser () {
+      const globalStore = useGlobalStore()
       const themeStore = useThemeStore()
       const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
@@ -355,7 +360,7 @@ export const useUserStore = defineStore('users', {
         this.createNewUser()
         themeStore.restoreTheme()
       }
-      store.commit('triggerUserIsLoaded', null, { root: true })
+      globalStore.triggerUserIsLoaded()
       this.checkIfShouldJoinGroup()
       console.log('🍍', { ...this.$state })
     },
@@ -382,7 +387,7 @@ export const useUserStore = defineStore('users', {
         await cache.updateUser(key, update[key])
         this.broadcastUpdate({ [key]: update[key] })
       }
-      await apiStore.addToQueue({ name: 'updateUser', body: update }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUser', body: update })
     },
 
     // favorites
@@ -400,7 +405,7 @@ export const useUserStore = defineStore('users', {
         userNotificationStore.removeFavoriteSpace(space)
       }
       const body = { spaceId: space.id, value: shouldAdd }
-      await apiStore.addToQueue({ name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
+      await apiStore.addToQueue({ name: 'updateFavoriteSpace', body, spaceId: space.id })
     },
     async updateUserFavoriteUser (user, shouldAdd) {
       const apiStore = useApiStore()
@@ -415,7 +420,7 @@ export const useUserStore = defineStore('users', {
         userNotificationStore.removeFavoriteUser(user)
       }
       const body = { favoriteUserId: user.id, value: shouldAdd }
-      await apiStore.addToQueue({ name: 'updateFavoriteUser', body }, { root: true })
+      await apiStore.addToQueue({ name: 'updateFavoriteUser', body })
     },
     async updateUserFavoriteColor (color, shouldAdd) {
       const apiStore = useApiStore()
@@ -428,7 +433,7 @@ export const useUserStore = defineStore('users', {
         })
       }
       const body = { color, value: shouldAdd }
-      await apiStore.addToQueue({ name: 'updateFavoriteColor', body }, { root: true })
+      await apiStore.addToQueue({ name: 'updateFavoriteColor', body })
     },
 
     async updateUserFavoriteSpaceIsEdited (space) {
@@ -477,11 +482,11 @@ export const useUserStore = defineStore('users', {
       const count = this.cardsCreatedCount + delta
       // update raw vanity count
       this.cardsCreatedCountRaw = count
-      await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } })
       // update count
       if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
-      await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }
@@ -512,24 +517,25 @@ export const useUserStore = defineStore('users', {
         body: {
           emailIsVerified: true
         }
-      }, { root: true })
+      })
     },
 
     // are.na
 
     async updateUserArenaAccessToken (arenaReturnedCode) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       console.info('updateArenaAccessToken')
-      store.commit('importArenaChannelIsVisible', true, { root: true })
-      store.commit('isAuthenticatingWithArena', true, { root: true })
+      globalStore.importArenaChannelIsVisible = true
+      globalStore.isAuthenticatingWithArena = true
       const { arenaAccessToken } = await apiStore.updateArenaAccessToken(arenaReturnedCode)
       this.arenaAccessToken = arenaAccessToken
-      store.commit('importArenaChannelIsVisible', true, { root: true })
-      store.commit('isAuthenticatingWithArena', false, { root: true })
+      globalStore.importArenaChannelIsVisible = true
+      globalStore.isAuthenticatingWithArena = false
       await apiStore.addToQueue({
         name: 'updateUser',
         body: { arenaAccessToken }
-      }, { root: true })
+      })
     },
 
     // drawing
@@ -552,14 +558,15 @@ export const useUserStore = defineStore('users', {
     // notify
 
     notifyReadOnly (position) {
+      const globalStore = useGlobalStore()
       const canEditSpace = this.getUserCanEditSpace
       if (canEditSpace) { return }
       const cannotEdit = this.getUserIsUnableToEditUnlessSignedIn
       const notificationWithPosition = document.querySelector('.notifications-with-position .item')
       if (cannotEdit) {
-        store.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+        globalStore.addNotificationWithPosition({ message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' })
       } else {
-        store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+        globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
       }
     },
 
@@ -581,7 +588,7 @@ export const useUserStore = defineStore('users', {
           spaceId,
           isHidden
         }
-      }, { root: true })
+      })
     }
 
   }

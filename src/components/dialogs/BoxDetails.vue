@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -16,7 +17,7 @@ import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -34,9 +35,9 @@ const state = reactive({
   backgroundPickerIsVisible: false
 })
 
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(currentBox.value))
-const id = computed(() => store.state.boxDetailsIsVisibleForBoxId)
+const id = computed(() => globalStore.boxDetailsIsVisibleForBoxId)
 // box state
 
 const currentBox = computed(() => {
@@ -68,9 +69,9 @@ const visible = computed(() => utils.objectHasKeys(currentBox.value))
 watch(() => visible.value, async (value, prevValue) => {
   await nextTick()
   if (!value) {
-    store.commit('currentDraggingBoxId', '')
-    store.dispatch('multipleBoxesSelectedIds', [])
-    store.commit('preventMultipleSelectedActionsIsVisible', false)
+    globalStore.currentDraggingBoxId = ''
+    globalStore.updateMultipleBoxesSelectedIds([])
+    globalStore.preventMultipleSelectedActionsIsVisible = false
     boxStore.updateBoxInfoDimensions(prevBoxId)
   }
 })
@@ -96,7 +97,7 @@ const update = (updates) => {
 
 const styles = computed(() => {
   let zoom = spaceCounterZoomDecimal.value
-  if (store.state.isTouchDevice) {
+  if (globalStore.isTouchDevice) {
     zoom = utils.pinchCounterZoomDecimal()
   }
   const backgroundColor = colord(currentBox.value.color).alpha(1).toRgbString()
@@ -128,13 +129,13 @@ const focusName = async () => {
 }
 const selectName = () => {
   // select all in new boxes, else put cursor at end (like cards)
-  const currentBoxIsNew = store.state.currentBoxIsNew
+  const currentBoxIsNew = globalStore.currentBoxIsNew
   const element = nameElement.value
   const length = name.value.length
   if (length && element) {
     element.setSelectionRange(0, length)
   }
-  store.commit('currentBoxIsNew', false)
+  globalStore.currentBoxIsNew = false
 }
 const textareaSizes = () => {
   const element = dialogElement.value
@@ -221,16 +222,16 @@ const closeDialogs = () => {
   state.backgroundPickerIsVisible = false
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 const blur = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
   await nextTick()
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const scrollIntoViewAndFocus = async () => {
   scrollIntoView()
@@ -244,7 +245,7 @@ const scrollIntoViewAndFocus = async () => {
 
 const isFilteredInSpace = computed({
   get () {
-    const boxIds = store.state.filteredBoxIds
+    const boxIds = globalStore.filteredBoxIds
     return boxIds.includes(currentBox.value.id)
   },
   set () {
@@ -252,12 +253,12 @@ const isFilteredInSpace = computed({
   }
 })
 const toggleFilteredInSpace = () => {
-  const filtered = store.state.filteredBoxIds
+  const filtered = globalStore.filteredBoxIds
   const boxId = currentBox.value.id
   if (filtered.includes(boxId)) {
-    store.commit('removeFromFilteredBoxId', boxId)
+    globalStore.removeFromFilteredBoxId(boxId)
   } else {
-    store.commit('addToFilteredBoxId', boxId)
+    globalStore.addToFilteredBoxId(boxId)
   }
 }
 </script>

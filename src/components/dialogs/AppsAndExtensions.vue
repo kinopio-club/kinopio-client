@@ -1,28 +1,40 @@
 <script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
+const globalStore = useGlobalStore()
 
 let shouldRestoreUrlPath, title, pathname
 const dialog = ref(null)
+
+let unsubscribes
 
 onMounted(() => {
   updateCurrentDeviceView()
   state.isAndroid = utils.isAndroid()
   shouldRestoreUrlPath = true
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'closeAllDialogs') {
-      const element = dialog.value
-      if (!element) { return }
-      if (shouldRestoreUrlPath) {
-        shouldRestoreUrlPath = false
-        restoreUrlPath()
+  window.addEventListener('resize', updateDialogHeight)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        const element = dialog.value
+        if (!element) { return }
+        if (shouldRestoreUrlPath) {
+          shouldRestoreUrlPath = false
+          restoreUrlPath()
+        }
       }
     }
-  })
-  window.addEventListener('resize', updateDialogHeight)
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -54,7 +66,7 @@ const toggleIsDesktop = (value) => {
   state.isDesktop = value
 }
 const updateCurrentDeviceView = () => {
-  if (store.getters.isTouchDevice) {
+  if (globalStore.getIsTouchDevice) {
     state.isDesktop = false
   } else {
     state.isDesktop = true

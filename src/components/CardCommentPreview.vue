@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
@@ -9,7 +10,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
@@ -23,7 +24,7 @@ const backgroundColor = computed(() => {
   return props.card.backgroundColor
 })
 const styles = computed(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.spaceCounterZoomDecimal
   const offset = 6
   return {
     left: `${props.card.x + offset}px`,

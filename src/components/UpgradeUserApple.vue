@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -10,7 +11,7 @@ import postMessage from '@/postMessage.js'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -78,9 +79,9 @@ const handleSubscriptionSuccess = (event) => {
   }
   userStore.isUpgraded = true
   userStore.appleSubscriptionIsActive = true
-  store.commit('notifyCardsCreatedIsOverLimit', false)
+  globalStore.updateNotifyCardsCreatedIsOverLimit(false)
   if (!utils.dialogIsVisible()) {
-    store.commit('addNotification', {
+    globalStore.addNotification({
       message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
       type: 'success',
       isPersistentItem: true

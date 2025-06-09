@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -13,7 +14,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -66,7 +67,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 const hideUserDetails = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
 }
 
 // session token
@@ -81,8 +82,8 @@ const createSessionToken = () => {
 
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 
 // emails
@@ -157,8 +158,8 @@ const sendInvites = async () => {
 
 const notifySuccessAndClose = () => {
   const message = `Sent ${emailsLength.value} Invite ${emailPlural.value}`
-  store.commit('addNotification', { message, type: 'success', icon: 'mail' })
-  store.commit('triggerCloseChildDialogs')
+  globalStore.addNotification({ message, type: 'success', icon: 'mail' })
+  globalStore.triggerCloseChildDialogs()
 }
 </script>
 

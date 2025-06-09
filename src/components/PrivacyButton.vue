@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -10,7 +11,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -25,7 +26,7 @@ const props = defineProps({
 
 const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
-const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
+const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // privacy state
 

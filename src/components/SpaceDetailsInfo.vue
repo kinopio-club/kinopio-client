@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -19,7 +20,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -29,19 +30,22 @@ const nameElement = ref(null)
 let unsubscribes
 
 onMounted(() => {
-  store.subscribe(async (mutation) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
-      await nextTick()
-      await nextTick()
-      const element = nameElement.value
-      if (!element) { return }
-      element.focus()
-      element.setSelectionRange(0, element.value.length)
-    }
-  })
   textareaSize()
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      } else if (name === 'triggerFocusSpaceDetailsName') {
+        await nextTick()
+        await nextTick()
+        const element = nameElement.value
+        if (!element) { return }
+        element.focus()
+        element.setSelectionRange(0, element.value.length)
+      }
+    }
+  )
   const spaceStoreUnsubscribe = spaceStore.$onAction(
     async ({ name, args }) => {
       if (name === 'restoreSpace') {
@@ -56,6 +60,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStoreUnsubscribe()
     spaceStoreUnsubscribe()
   }
 })
@@ -101,7 +106,7 @@ const updateLocalSpaces = () => {
   emit('updateLocalSpaces')
 }
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
-const isLoadingSpace = computed(() => store.state.isLoadingSpace)
+const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
 const currentSpaceIsUserTemplate = computed(() => currentSpace.value.isTemplate)
 const pendingUpload = computed(() => {
   const currentSpace = spaceStore.getSpaceAllState
@@ -114,7 +119,7 @@ const pendingUpload = computed(() => {
 })
 const remotePendingUpload = computed(() => {
   const currentSpace = spaceStore.getSpaceAllState
-  const remotePendingUploads = store.state.remotePendingUploads
+  const remotePendingUploads = globalStore.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const inProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === currentSpace.id
@@ -132,7 +137,7 @@ const spaceName = computed({
     textareaSize()
     spaceStore.updateSpace({ name: newName })
     updateLocalSpaces()
-    store.commit('triggerUpdateWindowTitle')
+    globalStore.triggerUpdateWindowTitle()
   }
 })
 const textareaSize = () => {
@@ -151,13 +156,13 @@ const toggleCurrentSpaceIsUserTemplate = async () => {
 
 // dialog
 
-const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
+const dialogIsPinned = computed(() => globalStore.spaceDetailsIsPinned)
 const updateDialogHeight = () => {
   emit('updateDialogHeight')
 }
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  store.dispatch('spaceDetailsIsPinned', isPinned)
+  globalStore.spaceDetailsIsPinned(isPinned)
 }
 const toggleBackgroundIsVisible = () => {
   const isVisible = state.backgroundIsVisible
@@ -197,7 +202,7 @@ const closeDialogsAndEmit = () => {
   emit('closeDialogs')
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // group

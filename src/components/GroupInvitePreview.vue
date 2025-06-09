@@ -1,14 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const groupStore = useGroupStore()
 const themeStore = useThemeStore()
 
@@ -44,29 +45,29 @@ const enableIsActive = () => {
   state.isActive = true
 }
 const handleMouseEnterUrlButton = () => {
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
-  if (store.state.currentUserIsDraggingCard) { return }
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+  if (globalStore.currentUserIsDraggingCard) { return }
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
 const openUrl = async (event) => {
   const prevIsActive = state.isActive
   state.isActive = false
-  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
   if (event) {
     if (event.metaKey || event.ctrlKey) {
       window.open(url.value) // opens url in new tab
-      store.commit('preventDraggedCardFromShowingDetails', true)
+      globalStore.preventDraggedCardFromShowingDetails = true
       return
     } else {
       event.preventDefault()
       event.stopPropagation()
     }
   }
-  store.dispatch('closeAllDialogs')
-  if (store.state.cardsWereDragged) {
+  globalStore.closeAllDialogs()
+  if (globalStore.cardsWereDragged) {
     return
   }
   window.location = url.value
@@ -124,7 +125,7 @@ const updateGroup = async () => {
 .group-invite-preview
   a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
-    :class="{ active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails, 'preview-content': props.parentIsCardDetails }"
+    :class="{ active: state.isActive, 'is-being-dragged': globalStore.preventDraggedCardFromShowingDetails, 'preview-content': props.parentIsCardDetails }"
     :style="{ background: background }"
     target="_blank"
     :href="url"

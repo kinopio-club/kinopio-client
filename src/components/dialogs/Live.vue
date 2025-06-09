@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
@@ -34,9 +35,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     updateResultsSectionHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 

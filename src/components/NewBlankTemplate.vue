@@ -1,14 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 // import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -23,7 +24,15 @@ onMounted(() => {
   //     }
   //   }
   // )
+  // const globalStoreUnsubscribe = globalStore.$onAction(
+  //   ({ name, args }) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
+  //   }
+  // )
   // unsubscribes = () => {
+  //   globalStoreUnsubscribe()
   //   cardStoreUnsubscribe()
   // }
 })

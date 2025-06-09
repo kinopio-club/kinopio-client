@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -13,7 +13,6 @@ import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 
 import randomColor from 'randomcolor'
 
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -58,7 +57,7 @@ const updateDialogHeight = async () => {
 }
 
 const closeDialogs = () => {
-  // store.commit('triggerCloseChildDialogs')
+  // globalStore.triggerCloseChildDialogs()
 }
 const clearErrors = () => {
   state.error.missingName = false

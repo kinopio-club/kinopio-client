@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 
 const props = defineProps({
@@ -22,7 +23,7 @@ const spaceIsCurrentSpace = (spaceId) => {
   return spaceId === spaceStore.id
 }
 const spaceIsFocused = (spaceId) => {
-  return store.state.previousResultItem.id === spaceId
+  return globalStore.previousResultItem.id === spaceId
 }
 
 const selectSpace = (spaceId) => {

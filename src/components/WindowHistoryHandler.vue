@@ -1,32 +1,38 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const router = useRouter()
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerUpdateWindowHistory') {
-      update(mutation.payload)
-    } else if (mutation.type === 'triggerUpdateWindowTitle') {
-      updateWindowTitle()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateWindowHistory') {
+        update(args[0])
+      } else if (name === 'triggerUpdateWindowTitle') {
+        updateWindowTitle()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const update = async (space) => {
@@ -34,16 +40,16 @@ const update = async (space) => {
   updateWindowTitle()
 }
 const updateWindowHistory = async (space) => {
-  const isEmbedMode = store.state.isEmbedMode
+  const isEmbedMode = globalStore.isEmbedMode
   space = space || spaceStore.getSpaceAllState
   const spaceUrl = utils.url(space)
   const preventUpdate = window.location.pathname.includes(spaceUrl) || spaceUrl.startsWith('loading--')
   if (preventUpdate) { return }
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
-  store.commit('currentSpacePath', spaceUrl, { root: true })
+  globalStore.currentSpacePath = spaceUrl
   if (navigator.standalone || isEmbedMode) { return }
   await router.push('/' + spaceUrl)
-  const state = utils.clone(store.state)
+  const state = globalStore.getGlobalAllState
   history.replaceState({ ...history.state, ...state }, '')
 }
 const updateWindowTitle = () => {

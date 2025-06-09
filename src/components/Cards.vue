@@ -1,15 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 
 import Card from '@/components/Card.vue'
 import CardCommentPreview from '@/components/CardCommentPreview.vue'
 import utils from '@/utils.js'
-const cardStore = useCardStore()
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
 
 const cards = computed(() => cardStore.getAllCards)
 const lockedCards = computed(() => cards.value.filter(card => card.isLocked))
@@ -18,7 +18,7 @@ const unlockedCards = computed(() => cards.value.filter(card => !card.isLocked))
 // card comment preview
 
 const currentHoveredCard = computed(() => {
-  const cardId = store.state.currentUserIsHoveringOverCardId
+  const cardId = globalStore.currentUserIsHoveringOverCardId
   if (!cardId) { return }
   const card = cardStore.getCard(cardId)
   return card
@@ -30,16 +30,16 @@ const currentHoveredCardIsComment = computed(() => {
 })
 const cardCommentPreviewIsVisible = computed(() => {
   if (shouldPrevent.value) { return }
-  const cardId = store.state.currentUserIsHoveringOverCardId
-  const cardDetailsIsVisible = cardId === store.state.cardDetailsIsVisibleForCardId
+  const cardId = globalStore.currentUserIsHoveringOverCardId
+  const cardDetailsIsVisible = cardId === globalStore.cardDetailsIsVisibleForCardId
   if (cardDetailsIsVisible) { return }
   return currentHoveredCardIsComment.value
 })
 const shouldPrevent = computed(() => {
-  const isHoveringOverConnector = store.state.currentUserIsHoveringOverConnectorItemId
-  const isHoveringOverCheckbox = store.state.currentUserIsHoveringOverCheckboxCardId
-  const isHoveringOverLinkButton = store.state.currentUserIsHoveringOverUrlButtonCardId
-  const isInteractingWithItem = store.getters.isInteractingWithItem
+  const isHoveringOverConnector = globalStore.currentUserIsHoveringOverConnectorItemId
+  const isHoveringOverCheckbox = globalStore.currentUserIsHoveringOverCheckboxCardId
+  const isHoveringOverLinkButton = globalStore.currentUserIsHoveringOverUrlButtonCardId
+  const isInteractingWithItem = globalStore.isInteractingWithItem
   return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox || isHoveringOverLinkButton
 })
 </script>

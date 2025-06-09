@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
@@ -125,9 +125,10 @@ export const useThemeStore = defineStore('theme', {
     // theme is system
 
     updateThemeIsSystem (value) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       userStore.updateUser({ themeIsSystem: value })
-      store.commit('triggerUpdateTheme', null, { root: true })
+      globalStore.triggerUpdateTheme()
     },
     toggleThemeIsSystem () {
       const userStore = useUserStore()
@@ -153,6 +154,7 @@ export const useThemeStore = defineStore('theme', {
       this.updateTheme(theme)
     },
     updateTheme (themeName) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const normalizedThemeName = themeName || 'light'
       // colors
@@ -163,7 +165,7 @@ export const useThemeStore = defineStore('theme', {
         utils.setCssVariable(key, colors[key])
       })
       userStore.updateUser({ theme: normalizedThemeName })
-      store.commit('triggerUpdateTheme', null, { root: true })
+      globalStore.triggerUpdateTheme()
     },
     restoreTheme () {
       const userStore = useUserStore()

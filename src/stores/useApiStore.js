@@ -1,11 +1,11 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useThemeStore } from '@/stores/useThemeStore'
-
-import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -155,10 +155,11 @@ const normalizeCollaboratorKey = (space) => {
 export const useApiStore = defineStore('api', {
   actions: {
     handleServerError ({ name, error, shouldNotNotifyUser }) {
+      const globalStore = useGlobalStore()
       console.error('🚒 handleServerError', name, error)
       if (!shouldNotNotifyUser) { return }
-      store.commit('notifyConnectionError', true, { root: true })
-      store.commit('notifyConnectionErrorName', name, { root: true })
+      globalStore.updateNotifyConnectionError(true)
+      globalStore.updateNotifyConnectionErrorName(name)
     },
 
     // adds auth credentials to fetch options
@@ -221,9 +222,10 @@ export const useApiStore = defineStore('api', {
     // Send Queue Operations
 
     async handleServerOperationsError ({ error, response }) {
+      const globalStore = useGlobalStore()
       if (!response) {
         console.error('🚒 handleServerOperationsError', error, response)
-        store.commit('notifyServerCouldNotSave', true, { root: true })
+        globalStore.updateNotifyServerCouldNotSave(true)
         return
       }
       const data = await response.json()
@@ -236,25 +238,26 @@ export const useApiStore = defineStore('api', {
         const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
         if (isCritical) {
           console.error('🚒 critical serverOperationsError operation', operation)
-          store.commit('notifyServerCouldNotSave', true, { root: true })
+          globalStore.updateNotifyServerCouldNotSave(true)
         } else {
           console.warn('🚑 non-critical serverOperationsError operation', operation)
         }
-        // store.dispatch('moveFailedSendingQueueOperationBackIntoQueue', operation, { root: true })
+        // globalStore.moveFailedSendingQueueOperationBackIntoQueue(operation)
       })
       // clear sending queue
-      store.commit('clearSendingQueue', null, { root: true })
+      globalStore.clearSendingQueue()
     },
     async sendQueue () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const globalStore = useGlobalStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       const body = squashQueue(queue)
-      store.commit('sendingQueue', body, { root: true })
+      globalStore.sendingQueue = body
       cache.clearQueue()
       // send
       let response
@@ -267,12 +270,12 @@ export const useApiStore = defineStore('api', {
         if (response.ok) {
           console.info('🛬 operations ok', body)
           // clear sendingQueue on success
-          store.commit('clearSendingQueue', null, { root: true })
+          globalStore.clearSendingQueue()
         } else {
           throw response.statusText
         }
-        if (store.state.notifyServerCouldNotSave) {
-          store.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
+        if (globalStore.notifyServerCouldNotSave) {
+          globalStore.addNotification({ message: 'Reconnected to server', type: 'success' })
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)
@@ -301,9 +304,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getChangelog () {
-      const isOnline = store.state.isOnline
+      const globalStore = useGlobalStore()
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      const isSpacePage = store.getters.isSpacePage
+      const isSpacePage = globalStore.isSpacePage
       if (!isSpacePage) { return }
       try {
         const response = await fetch(`${consts.apiHost()}/meta/changelog`)
@@ -313,10 +317,11 @@ export const useApiStore = defineStore('api', {
       }
     },
     async updateDateImage () {
+      const globalStore = useGlobalStore()
       try {
         const response = await fetch(`${consts.apiHost()}/space/date-image`)
         const data = await normalizeResponse(response)
-        store.commit('dateImageUrl', data.url, { root: true })
+        globalStore.dateImageUrl = data.url
         return data.url
       } catch (error) {
         this.handleServerError({ name: 'updateDateImage', error })
@@ -376,9 +381,10 @@ export const useApiStore = defineStore('api', {
     // User
 
     async getUser () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -389,9 +395,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserFavoriteSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -402,9 +409,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserFavoriteUsers () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -415,9 +423,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserFavoriteColors () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -428,9 +437,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserHiddenSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -441,10 +451,11 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getFollowingUsersSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isSpacePage = store.getters.isSpacePage
-      const isOnline = store.state.isOnline
+      const isSpacePage = globalStore.isSpacePage
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
@@ -457,9 +468,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -472,12 +484,13 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserGroupSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const groupStore = useGroupStore()
       const groups = groupStore.getCurrentUserGroup
       if (!groups.length) { return }
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -490,9 +503,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserRemovedSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -503,9 +517,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserInboxSpace () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -516,9 +531,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpacesNotificationUnsubscribed () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -529,9 +545,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getGroupsNotificationUnsubscribed () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -542,10 +559,11 @@ export const useApiStore = defineStore('api', {
       }
     },
     async spaceNotificationResubscribe (space) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const user = userStore
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -556,10 +574,11 @@ export const useApiStore = defineStore('api', {
       }
     },
     async groupNotificationResubscribe (group) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const user = userStore
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -570,9 +589,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async deleteUserPermanent () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'DELETE' })
@@ -615,9 +635,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async updateUserFavorites (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'PATCH' })
@@ -631,8 +652,9 @@ export const useApiStore = defineStore('api', {
     // Space
 
     async getExploreSpaces () {
-      const isSpacePage = store.getters.isSpacePage
-      const isOnline = store.state.isOnline
+      const globalStore = useGlobalStore()
+      const isSpacePage = globalStore.isSpacePage
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
@@ -646,8 +668,9 @@ export const useApiStore = defineStore('api', {
     },
 
     async getEveryoneSpaces () {
-      const isSpacePage = store.getters.isSpacePage
-      const isOnline = store.state.isOnline
+      const globalStore = useGlobalStore()
+      const isSpacePage = globalStore.isSpacePage
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
@@ -660,8 +683,9 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getLiveSpaces () {
-      const isSpacePage = store.getters.isSpacePage
-      const isOnline = store.state.isOnline
+      const globalStore = useGlobalStore()
+      const isSpacePage = globalStore.isSpacePage
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
@@ -674,11 +698,12 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpace ({ space, shouldRequestRemote, spaceReadOnlyKey }) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       try {
         const apiKey = userStore.apiKey
-        const isOnline = store.state.isOnline
+        const isOnline = globalStore.isOnline
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
         console.info('🛬 getting remote space', space.id)
@@ -690,8 +715,9 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpaceUpdatedAt (space) {
+      const globalStore = useGlobalStore()
       try {
-        const isOnline = store.state.isOnline
+        const isOnline = globalStore.isOnline
         if (!isOnline) { return }
         // console.info('🛬 getting remote space updatedAt', space.id)
         const options = await this.requestOptions({ method: 'GET' })
@@ -702,9 +728,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpaceFavorites () {
+      const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
       try {
-        const isOnline = store.state.isOnline
+        const isOnline = globalStore.isOnline
         if (!isOnline) { return }
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space favorites', spaceId)
@@ -716,9 +743,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpaceHistory () {
+      const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
       try {
-        const isOnline = store.state.isOnline
+        const isOnline = globalStore.isOnline
         if (!isOnline) { return }
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space history', spaceId)
@@ -730,8 +758,9 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpaceAnonymously (space) {
+      const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!isOnline) { return }
       const invitedSpaces = await cache.invitedSpaces()
       const invite = invitedSpaces.find(invitedSpace => invitedSpace.id === space.id) || {}
@@ -757,9 +786,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async searchExploreSpaces (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -850,9 +880,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpaceRemovedCards (space) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -863,9 +894,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getSpaceCollaboratorKey (space) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -876,9 +908,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async addSpaceCollaborator ({ spaceId, collaboratorKey }) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       const userId = userStore.id
       try {
@@ -892,10 +925,11 @@ export const useApiStore = defineStore('api', {
       }
     },
     async removeSpaceCollaborator ({ space, user }) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const body = {
@@ -912,9 +946,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async restoreRemovedSpace (space) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'PATCH' })
@@ -925,9 +960,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async sendSpaceInviteEmails (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -941,7 +977,8 @@ export const useApiStore = defineStore('api', {
     // Other Items Queue
 
     async addToGetOtherItemsQueue ({ cardIds, spaceIds, invites }) {
-      const isOnline = store.state.isOnline
+      const globalStore = useGlobalStore()
+      const isOnline = globalStore.isOnline
       if (!isOnline) { return }
       otherItemsQueue = {
         cardIds: uniq(otherItemsQueue.cardIds.concat(cardIds)),
@@ -958,7 +995,8 @@ export const useApiStore = defineStore('api', {
     // Get Other Items Queue
 
     async sendOtherItemsQueue () {
-      store.commit('isLoadingOtherItems', true, { root: true })
+      const globalStore = useGlobalStore()
+      globalStore.isLoadingOtherItems = true
       const { cardIds, spaceIds, invites } = otherItemsQueue
       clearOtherItemsQueue()
       const body = { cardIds, spaceIds, invites }
@@ -967,20 +1005,21 @@ export const useApiStore = defineStore('api', {
         const options = await this.requestOptions({ body, method: 'POST' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
         const data = await normalizeResponse(response)
-        store.commit('updateOtherItems', data, { root: true })
+        globalStore.updateOtherItems(data)
       } catch (error) {
         this.handleServerError({ name: 'getSpaces', error })
       }
       clearOtherItemsQueue()
-      store.commit('isLoadingOtherItems', false, { root: true })
+      globalStore.isLoadingOtherItems = false
     },
 
     // Card
 
     async getCardsWithLinkToSpaceId (spaceId) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -991,9 +1030,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async updateCards (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'PATCH' })
@@ -1004,9 +1044,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createCards (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1017,9 +1058,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createCard (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1030,9 +1072,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createCardInInbox (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1043,9 +1086,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async searchCards (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1077,9 +1121,10 @@ export const useApiStore = defineStore('api', {
     // ConnectionType
 
     async updateConnectionTypes (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'PATCH' })
@@ -1090,9 +1135,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createConnectionTypes (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1106,9 +1152,10 @@ export const useApiStore = defineStore('api', {
     // Connection
 
     async updateConnections (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'PATCH' })
@@ -1119,9 +1166,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createConnections (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1135,9 +1183,10 @@ export const useApiStore = defineStore('api', {
     // Boxes
 
     async createBoxes (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1151,9 +1200,10 @@ export const useApiStore = defineStore('api', {
     // Tag
 
     async getCardsWithTag (name) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       name = encodeURI(name)
       try {
@@ -1165,9 +1215,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async getUserTags (removeUnusedTags) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         let params = ''
@@ -1260,9 +1311,10 @@ export const useApiStore = defineStore('api', {
     // Notifications
 
     async getNotifications () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -1274,9 +1326,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async deleteAllNotifications () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'DELETE' })
@@ -1290,6 +1343,7 @@ export const useApiStore = defineStore('api', {
     // Services
 
     async updateArenaAccessToken (arenaReturnedCode) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       try {
         const currentUserIsSignedIn = userStore.getUserIsSignedIn
@@ -1306,8 +1360,8 @@ export const useApiStore = defineStore('api', {
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 updateArenaAccessToken', error)
-        store.commit('triggerArenaAuthenticationError', null, { root: true })
-        store.commit('isAuthenticatingWithArena', false, { root: true })
+        globalStore.triggerArenaAuthenticationError()
+        globalStore.isAuthenticatingWithArena = false
       }
     },
     async urlPreview ({ url, card }) {
@@ -1384,9 +1438,10 @@ export const useApiStore = defineStore('api', {
     // Downloads
 
     async downloadAllSpaces () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
@@ -1400,25 +1455,27 @@ export const useApiStore = defineStore('api', {
     // Group
 
     async getUserGroups () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        store.commit('isLoadingGroups', true, { root: true })
+        globalStore.isLoadingGroups = true
         const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/groups`, options)
-        store.commit('isLoadingGroups', false, { root: true })
+        globalStore.isLoadingGroups = false
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getUserGroups', error })
       }
-      store.commit('isLoadingGroups', false, { root: true })
+      globalStore.isLoadingGroups = false
     },
     async getGroup (groupId) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         console.info('🛬 getting remote group', groupId)
@@ -1430,9 +1487,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createGroup (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1443,9 +1501,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async createGroupUser (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1456,9 +1515,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async removeGroupUser (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'DELETE' })
@@ -1469,9 +1529,10 @@ export const useApiStore = defineStore('api', {
       }
     },
     async deleteGroupPermanent (body) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = store.state.isOnline
+      const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ body, method: 'DELETE' })

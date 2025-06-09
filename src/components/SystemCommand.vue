@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
-const store = useStore()
 
 const props = defineProps({
   command: String,
@@ -21,17 +22,17 @@ const clickCommand = () => {
   const templates = commandIsTemplates.value
   const newSpace = commandIsNewSpace.value
   const apps = commandIsApps.value
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (explore) {
-    store.commit('triggerExploreIsVisible')
+    globalStore.triggerExploreIsVisible()
   } else if (templates) {
-    store.commit('triggerTemplatesIsVisible')
+    globalStore.triggerTemplatesIsVisible()
   } else if (newSpace) {
     spaceStore.createSpace()
-    store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
-    store.commit('triggerSpaceDetailsInfoIsVisible')
+    globalStore.addNotification({ message: 'New space created (N)', icon: 'add', type: 'success' })
+    globalStore.triggerSpaceDetailsInfoIsVisible()
   } else if (apps) {
-    store.commit('triggerAppsAndExtensionsIsVisible')
+    globalStore.triggerAppsAndExtensionsIsVisible()
   }
 }
 

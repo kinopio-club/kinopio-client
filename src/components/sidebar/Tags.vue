@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -12,23 +13,26 @@ import cache from '@/cache.js'
 import uniqBy from 'lodash-es/uniqBy'
 import debounce from 'lodash-es/debounce'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
-let unsubscribes, unsubscribe
+let unsubscribes
 
 const resultsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateResultsSectionHeight)
   init()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'shouldHideFooter' && props.visible) {
-      updateTags()
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'shouldHideFooter' && props.visible) {
+        updateTags()
+      }
     }
-  })
+  )
   const tagMutations = [
     'addTag',
     'removeTag',
@@ -48,12 +52,12 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStoreUnsubscribe()
     spaceStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
   unsubscribes()
-  unsubscribe()
 })
 
 const props = defineProps({
@@ -106,13 +110,13 @@ const toggleShouldShowCurrentSpaceTags = () => {
 // update tag
 
 const removeTag = (tagToRemove) => {
-  store.commit('tagDetailsIsVisible', false)
+  globalStore.tagDetailsIsVisible = false
   let tags = utils.clone(state.tags)
   tags = tags.filter(tag => {
     return tag.name !== tagToRemove.name
   })
   state.tags = tags
-  store.commit('remoteTagsIsFetched', false)
+  globalStore.remoteTagsIsFetched = false
 }
 const updateTagColor = (updated) => {
   let tags = utils.clone(state.tags)
@@ -123,7 +127,7 @@ const updateTagColor = (updated) => {
     return tag
   })
   state.tags = tags
-  store.commit('remoteTagsIsFetched', false)
+  globalStore.remoteTagsIsFetched = false
 }
 
 // tags list
@@ -138,15 +142,15 @@ const updateTags = async () => {
 }
 const debouncedUpdateRemoteTags = debounce(async () => {
   if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = store.state.remoteTagsIsFetched
+  const remoteTagsIsFetched = globalStore.remoteTagsIsFetched
   let remoteTags
   if (remoteTagsIsFetched) {
-    remoteTags = store.state.remoteTags
+    remoteTags = globalStore.remoteTags
   } else {
     state.isLoadingRemoteTags = true
     remoteTags = await apiStore.getUserTags(true) || []
-    store.commit('remoteTags', remoteTags)
-    store.commit('remoteTagsIsFetched', true)
+    globalStore.remoteTags = remoteTags
+    globalStore.remoteTagsIsFetched = true
     state.isLoadingRemoteTags = false
   }
   remoteTags = uniqBy(remoteTags, 'name')

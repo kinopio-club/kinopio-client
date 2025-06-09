@@ -1,6 +1,7 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -11,29 +12,40 @@ import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 const themeStore = useThemeStore()
 
+let unsubscribes
+
 onMounted(() => {
   updateNameSegments()
   updatePrimaryBackgroundColor()
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateOtherCard') {
-      if (!props.otherCard) { return }
-      if (mutation.payload !== props.otherCard.id) { return }
-      updateNameSegments()
-    } else if (mutation.type === 'triggerUpdateTheme') {
-      updatePrimaryBackgroundColor()
-    }
-  })
   window.addEventListener('touchend', disableIsActive)
   window.addEventListener('mouseup', disableIsActive)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateOtherCard') {
+        if (!props.otherCard) { return }
+        if (args[0] !== props.otherCard.id) { return }
+        updateNameSegments()
+      } else if (name === 'triggerUpdateTheme') {
+        updatePrimaryBackgroundColor()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
-watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+onBeforeUnmount(() => {
+  unsubscribes()
+})
+
+watch(() => globalStore.preventDraggedCardFromShowingDetails, (value, prevValue) => {
   disableIsActive()
 })
 
@@ -52,10 +64,10 @@ const state = reactive({
   isActive: null
 })
 
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 const isActive = computed(() => {
-  const isFromParentCard = store.state.currentSelectedOtherItem.parentCardId === props.parentCardId
-  const otherCardDetailsIsVisible = store.state.otherCardDetailsIsVisible
+  const isFromParentCard = globalStore.currentSelectedOtherItem.parentCardId === props.parentCardId
+  const otherCardDetailsIsVisible = globalStore.otherCardDetailsIsVisible
   return otherCardDetailsIsVisible && isFromParentCard
 })
 const updatePrimaryBackgroundColor = () => {
@@ -84,7 +96,7 @@ const styles = computed(() => {
 
 // update card
 
-watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
+watch(() => globalStore.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
     updateNameSegments()
   }
@@ -119,7 +131,7 @@ const updateNameSegments = () => {
 const showOtherCardDetailsIsVisible = async (event) => {
   state.isActive = false
   if (utils.isMultiTouch(event)) { return }
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
   if (props.otherCard) {
     otherItem = utils.clone(props.otherCard)
@@ -129,15 +141,15 @@ const showOtherCardDetailsIsVisible = async (event) => {
     cardStore.incrementCardZ(props.parentCardId)
   }
   if (props.shouldCloseAllDialogs) {
-    store.dispatch('closeAllDialogs')
+    globalStore.closeAllDialogs()
   }
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.currentUserIsDraggingCard = false
   const position = utils.cursorPositionInSpace(event)
-  store.commit('otherItemDetailsPosition', position)
-  store.commit('currentSelectedOtherItem', otherItem)
-  store.commit('otherCardDetailsIsVisible', true)
-  store.commit('triggerCancelLocking')
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.otherItemDetailsPosition = position
+  globalStore.currentSelectedOtherItem = otherItem
+  globalStore.otherCardDetailsIsVisible = true
+  globalStore.triggerCancelLocking()
+  globalStore.currentUserIsDraggingCard = false
   event.stopPropagation()
   // broadcast
   const updates = {

@@ -1,6 +1,7 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore, mapState, mapGetters } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -12,17 +13,27 @@ import consts from '@/consts.js'
 
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
+let unsubscribes
+
 onMounted(() => {
-  store.commit('clearNotificationsWithPosition')
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  globalStore.clearNotificationsWithPosition()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
@@ -100,14 +111,14 @@ const copyInviteUrl = async (event) => {
   } else {
     url = commentOnlyUrl.value
   }
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(url)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyInviteUrl', error, url)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const inviteButtonLabel = computed(() => {

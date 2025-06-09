@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -14,19 +15,28 @@ import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRemovedIsVisible') {
-      toggleSection('removed')
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerRemovedIsVisible') {
+        toggleSection('removed')
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -36,9 +46,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     restoreUserLastSidebarSection()
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -72,14 +82,14 @@ const updateDialogHeight = async () => {
 
 // pin dialog
 
-const dialogIsPinned = computed(() => store.state.sidebarIsPinned)
+const dialogIsPinned = computed(() => globalStore.sidebarIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  store.dispatch('sidebarIsPinned', isPinned)
+  globalStore.sidebarIsPinned = isPinned
 }
 const closeDialogs = () => {
-  store.commit('tagDetailsIsVisible', false)
-  store.commit('triggerCloseChildDialogs')
+  globalStore.tagDetailsIsVisible = false
+  globalStore.triggerCloseChildDialogs()
 }
 
 // current section

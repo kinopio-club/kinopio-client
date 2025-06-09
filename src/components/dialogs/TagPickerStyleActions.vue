@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -12,7 +13,7 @@ import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -50,13 +51,13 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // tags list
 
 const currentTags = computed(() => {
-  return props.tagNamesInCard || store.getters.allTags
+  return props.tagNamesInCard || globalStore.allTags
 })
 const updateTags = async () => {
   const spaceTags = spaceStore.getSpaceTags
@@ -70,15 +71,15 @@ const updateTags = async () => {
 }
 const updateRemoteTags = async () => {
   if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = store.state.remoteTagsIsFetched
+  const remoteTagsIsFetched = globalStore.remoteTagsIsFetched
   let remoteTags
   if (remoteTagsIsFetched) {
-    remoteTags = store.state.remoteTags
+    remoteTags = globalStore.remoteTags
   } else {
     state.loading = true
     remoteTags = await apiStore.getUserTags() || []
-    store.commit('remoteTags', remoteTags)
-    store.commit('remoteTagsIsFetched', true)
+    globalStore.remoteTags = remoteTags
+    globalStore.remoteTagsIsFetched = true
     state.loading = false
   }
   const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })

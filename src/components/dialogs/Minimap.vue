@@ -1,12 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 
 const dialogElement = ref(null)
@@ -51,10 +52,10 @@ const updateSize = async () => {
 
 // pin dialog
 
-const dialogIsPinned = computed(() => store.state.minimapIsPinned)
+const dialogIsPinned = computed(() => globalStore.minimapIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  store.dispatch('minimapIsPinned', isPinned)
+  globalStore.minimapIsPinned = isPinned
 }
 
 // boxes
@@ -68,7 +69,7 @@ const boxColorClasses = (box) => {
   return utils.colorClasses({ backgroundColor: box.color })
 }
 const scrollIntoView = (box) => {
-  store.dispatch('focusOnBoxId', box.id)
+  globalStore.focusOnBoxId = box.id
 }
 </script>
 

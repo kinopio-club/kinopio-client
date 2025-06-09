@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -10,8 +11,8 @@ import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -139,7 +140,7 @@ const showNone = async () => {
     shouldHideUrlPreviewImage: false
   }
   cardStore.updateCard(update)
-  store.commit('removeUrlPreviewLoadingForCardIds', props.card.id)
+  globalStore.removeUrlPreviewLoadingForCardIds(props.card.id)
 }
 </script>
 

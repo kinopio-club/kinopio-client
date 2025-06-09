@@ -1,14 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
-const store = useStore()
 
 const emit = defineEmits(['updateDialogHeight'])
 
@@ -37,8 +38,8 @@ const askToAddToExplore = () => {
   emit('updateDialogHeight')
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 </script>
 

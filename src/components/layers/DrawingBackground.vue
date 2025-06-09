@@ -1,16 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import debounce from 'lodash-es/debounce'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 // this canvas is a rasterized duplicate of DrawingCanvas above it
 const canvasElement = ref(null)
 let canvas, context
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   canvas = canvasElement.value
@@ -18,25 +19,31 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('scroll', scroll)
   updatePrevScroll()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerUpdateDrawingBackground') {
-      update()
-    } else if (mutation.type === 'spaceZoomPercent') {
-      updateCanvasSize()
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateDrawingBackground') {
+        update()
+      } else if (name === 'spaceZoomPercent') {
+        updateCanvasSize()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', scroll)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
   prevScroll: { x: 0, y: 0 }
 })
 
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
+const viewportHeight = computed(() => globalStore.viewportHeight)
+const viewportWidth = computed(() => globalStore.viewportWidth)
 const styles = computed(() => {
   const value = {
     top: state.prevScroll.y + 'px',
@@ -66,7 +73,7 @@ const scroll = () => {
   updatePrevScroll()
 }
 const updateCanvasSize = debounce(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.spaceCounterZoomDecimal
   canvas.width = viewportWidth.value * zoom
   canvas.height = viewportHeight.value * zoom
 }, 20)

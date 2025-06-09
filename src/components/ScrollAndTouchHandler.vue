@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
@@ -8,7 +9,7 @@ import { useHistoryStore } from '@/stores/useHistoryStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const historyStore = useHistoryStore()
@@ -35,7 +36,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchend', touchEnd)
 })
 
-const isSpacePage = computed(() => store.getters.isSpacePage)
+const isSpacePage = computed(() => globalStore.isSpacePage)
 
 // wheel
 
@@ -60,18 +61,18 @@ const handleMouseWheelEvents = (event) => {
   let speed = Math.max(Math.abs(deltaY), 1)
   speed = Math.min(maxSpeed, speed)
   updateZoomOrigin(event)
-  store.dispatch('zoomSpace', { shouldZoomIn, shouldZoomOut, speed })
+  globalStore.zoomSpace({ shouldZoomIn, shouldZoomOut, speed })
 }
 
 // scroll
 
 const updateZoomOrigin = (event) => {
   const cursor = utils.cursorPositionInPage(event)
-  store.dispatch('zoomOrigin', cursor)
+  globalStore.zoomOrigin = cursor
 }
 const scroll = () => {
-  if (store.state.userHasScrolled) { return }
-  store.commit('userHasScrolled', true)
+  if (globalStore.userHasScrolled) { return }
+  globalStore.userHasScrolled = true
 }
 
 // touch start
@@ -82,7 +83,7 @@ const touchStart = (event) => {
     multiTouchAction = null
     return
   }
-  store.commit('shouldAddCard', false)
+  globalStore.shouldAddCard = false
   const touches = event.touches.length
   if (touches >= 2) {
     toggleIsPinchZooming(event)
@@ -101,14 +102,14 @@ const touchMove = (event) => {
   const isFromDialog = event.target.closest('dialog')
   if (isFromDialog) { return }
   shouldCancelUndo = true
-  store.commit('isTouchScrolling', true)
+  globalStore.isTouchScrolling = true
 }
 
 // touch end
 
 const touchEnd = () => {
   if (!isSpacePage.value) { return }
-  store.commit('isPinchZooming', false)
+  globalStore.isPinchZooming = false
   checkIfInertiaScrollEnd()
   if (shouldCancelUndo) {
     shouldCancelUndo = false
@@ -118,10 +119,10 @@ const touchEnd = () => {
   if (!multiTouchAction) { return }
   if (multiTouchAction === 'undo') {
     historyStore.undo()
-    store.commit('addNotification', { message: 'Undo', icon: 'undo' })
+    globalStore.addNotification({ message: 'Undo', icon: 'undo' })
   } else if (multiTouchAction === 'redo') {
     historyStore.redo()
-    store.commit('addNotification', { message: 'Redo', icon: 'redo' })
+    globalStore.addNotification({ message: 'Redo', icon: 'redo' })
   }
   multiTouchAction = null
 }
@@ -140,7 +141,7 @@ const checkIfInertiaScrollEnd = () => {
     } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
       clearInterval(inertiaScrollEndIntervalTimer)
       inertiaScrollEndIntervalTimer = null
-      store.commit('isTouchScrolling', false)
+      globalStore.isTouchScrolling = false
     } else {
       prevPosition = current
     }
@@ -151,7 +152,7 @@ const checkIfInertiaScrollEnd = () => {
 
 const toggleIsPinchZooming = (event) => {
   if (utils.shouldIgnoreTouchInteraction(event)) { return }
-  store.commit('isPinchZooming', true)
+  globalStore.isPinchZooming = true
 }
 </script>
 

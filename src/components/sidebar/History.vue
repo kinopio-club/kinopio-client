@@ -1,16 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -54,7 +55,7 @@ const state = reactive({
   unknownServerError: false
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
@@ -109,30 +110,30 @@ const relativeDate = (operation) => {
 // copy
 
 const copyOperations = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
     let text = utils.clone(state.operations)
     text = JSON.stringify(text)
     await navigator.clipboard.writeText(text)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const copyOperation = async (event, operation) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
     operation = JSON.stringify(operation)
     await navigator.clipboard.writeText(operation)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 

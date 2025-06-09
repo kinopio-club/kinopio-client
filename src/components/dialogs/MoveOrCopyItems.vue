@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -14,7 +15,7 @@ import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -41,7 +42,7 @@ const state = reactive({
 })
 
 watch(() => props.visible, async (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   await nextTick()
   if (value) {
     closeDialogs()
@@ -52,7 +53,7 @@ watch(() => props.visible, async (value, prevValue) => {
 
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
@@ -90,8 +91,8 @@ const selectedSpaceIsRecentSpace = (space) => {
 
 // items
 
-const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
-const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
+const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
+const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
 const multipleCardsIsSelected = computed(() => {
   const numberOfCards = multipleCardsSelectedIds.value.length
   return Boolean(numberOfCards > 1)
@@ -134,14 +135,14 @@ const buttonLabel = computed(() => {
 // copy text
 
 const copyText = async () => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(text.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 
@@ -201,8 +202,8 @@ const moveOrCopyToSpace = async () => {
   }
   userStore.updateUserCardsCreatedCount(items.cards)
   connectionStore.removeAllUnusedConnectionTypes()
-  store.dispatch('clearMultipleSelected')
-  store.dispatch('closeAllDialogs')
+  globalStore.clearMultipleSelected()
+  globalStore.closeAllDialogs()
 }
 const removeCards = (cards) => {
   const ids = cards.map(card => card.id)
@@ -216,8 +217,8 @@ const removeBoxes = (boxes) => {
 // should upgrade user
 
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 const isCardsCreatedIsOverLimit = () => {
   if (props.actionIsMove) { return }
@@ -230,14 +231,14 @@ const isCardsCreatedIsOverLimit = () => {
 const notifySuccess = () => {
   const action = utils.pastTense(actionLabel.value)
   const message = `${itemsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
-  store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message, items: newItems })
-  store.commit('notifyMoveOrCopyToSpace', true)
+  globalStore.notifyMoveOrCopyToSpaceDetails = { id: state.selectedSpace.id, name: state.selectedSpace.name, message, items: newItems }
+  globalStore.notifyMoveOrCopyToSpace = true
 }
 const notifyNewSpaceSuccess = (newSpace) => {
   const action = utils.pastTense(actionLabel.value)
   const message = `${newSpace.name} added with ${itemsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
-  store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message, items: newItems })
-  store.commit('notifyMoveOrCopyToSpace', true)
+  globalStore.notifyMoveOrCopyToSpaceDetails = { id: newSpace.id, name: newSpace.name, message, items: newItems }
+  globalStore.notifyMoveOrCopyToSpace = true
 }
 </script>
 

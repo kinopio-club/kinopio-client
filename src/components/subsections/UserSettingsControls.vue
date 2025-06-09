@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -9,7 +10,7 @@ import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -83,7 +84,7 @@ const updateOutsideSpaceBackgroundIsStatic = (value) => {
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const outsideSpaceStyles = computed(() => {
   return {
-    backgroundColor: store.state.outsideSpaceBackgroundColor
+    backgroundColor: globalStore.outsideSpaceBackgroundColor
   }
 })
 const toggleOutsideSpaceColorTipsIsVisible = () => {

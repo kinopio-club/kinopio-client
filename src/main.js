@@ -1,6 +1,5 @@
 import App from './App.vue'
 import router from './router'
-import store from './store/store'
 
 import { createPinia } from 'pinia'
 import { createApp, h } from 'vue'
@@ -15,5 +14,4 @@ const pinia = createPinia()
 
 app.use(router)
 app.use(pinia)
-app.use(store) // vuex store
 app.mount('#app')

@@ -1,11 +1,10 @@
 <script setup>
 
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useCardStore } from '@/stores/useCardStore'
 
 const cardStore = useCardStore()
-const store = useStore()
 
 const props = defineProps({
   card: Object

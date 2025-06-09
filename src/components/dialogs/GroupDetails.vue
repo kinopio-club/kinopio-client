@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -16,7 +17,7 @@ import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -55,8 +56,8 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 const closeDialogs = () => {
-  store.commit('userDetailsIsVisible', false)
-  store.commit('triggerCloseChildDialogs')
+  globalStore.userDetailsIsVisible = false
+  globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = computed(() => {
   return state.childDialogIsVisible
@@ -102,19 +103,19 @@ const groupUsers = computed(() => {
   return users
 })
 const selectedUser = computed(() => {
-  const userDetailsIsVisible = store.state.userDetailsIsVisible
+  const userDetailsIsVisible = globalStore.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
-  return store.state.userDetailsUser
+  return globalStore.userDetailsUser
 })
 const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
 }
 const showUserDetails = (event, user) => {
-  const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
+  const shouldHideUserDetails = user.id === globalStore.userDetailsUser.id
   if (shouldHideUserDetails) {
     closeDialogs()
-    store.commit('userDetailsUser', {})
+    globalStore.userDetailsUser = {}
     return
   }
   const element = event.target
@@ -122,9 +123,9 @@ const showUserDetails = (event, user) => {
   const position = utils.childDialogPositionFromParent(options)
   const userListBadgeOffsetY = 60
   position.y = position.y - userListBadgeOffsetY
-  store.commit('userDetailsUser', user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
+  globalStore.userDetailsUser = user
+  globalStore.userDetailsPosition = position
+  globalStore.userDetailsIsVisible = true
 }
 
 // remove group
@@ -137,7 +138,7 @@ const deleteGroupPermanent = async () => {
   state.loading.deleteGroupPermanent = true
   try {
     await groupStore.removeGroup(props.group)
-    store.commit('triggerCloseGroupDetailsDialog')
+    globalStore.triggerCloseGroupDetailsDialog()
   } catch (error) {
     state.removeGroupConfirmationIsVisible = false
     state.unknownServerError = true

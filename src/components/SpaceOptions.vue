@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -10,7 +11,7 @@ import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -47,7 +48,7 @@ const removeCurrentSpace = async () => {
     spaceStore.removeCollaboratorFromSpace(userStore.getUserAllState)
   } else {
     spaceStore.removeSpace()
-    store.commit('notifyCurrentSpaceIsNowRemoved', true)
+    globalStore.notifyCurrentSpaceIsNowRemoved = true
   }
   emit('removeSpaceId', currentSpaceId)
   await changeToPrevSpace()
@@ -59,7 +60,7 @@ const changeToPrevSpace = async () => {
   const cachedSpaces = await cache.getAllSpaces()
   const spaces = cachedSpaces.filter(space => space.id !== currentSpaceId)
   const recentSpace = spaces[0]
-  if (store.state.prevSpaceIdInSession) {
+  if (globalStore.prevSpaceIdInSession) {
     spaceStore.loadPrevSpaceInSession()
   } else if (recentSpace) {
     spaceStore.changeSpace(recentSpace)
@@ -74,7 +75,7 @@ const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
   const currentSpaceId = spaceStore.id
   await userStore.updateUserHiddenSpace(currentSpaceId, value)
-  store.commit('notifySpaceIsHidden', value)
+  globalStore.notifySpaceIsHidden = value
   emit('updateLocalSpaces')
 }
 

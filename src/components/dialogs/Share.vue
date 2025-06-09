@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -17,7 +18,7 @@ import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -33,14 +34,14 @@ const props = defineProps({
 })
 
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   closeDialogs()
   if (value) {
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     spaceStore.updateSpacePreviewImage()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -81,14 +82,14 @@ const spaceUrl = computed(() => {
   return url.href
 })
 const copySpaceUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(spaceUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const webShareIsSupported = computed(() => navigator.share)
@@ -120,7 +121,7 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.emailInvitesIsVisible = false
   state.childDialogIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
@@ -130,8 +131,8 @@ const childDialogIsVisible = (value) => {
 // toggles
 
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const togglePrivacyPickerIsVisible = () => {
   const isVisible = state.privacyPickerIsVisible

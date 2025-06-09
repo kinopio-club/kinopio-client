@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -9,21 +10,21 @@ import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
+const spaceShouldHaveBorderRadius = computed(() => globalStore.spaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
 const isSpacePage = computed(() => {
-  const isOther = store.state.isAddPage
+  const isOther = globalStore.isAddPage
   const isSpace = !isOther
   return isSpace
 })
 const isThemeDark = computed(() => userStore.theme === 'dark')
 const backgroundIsDefault = computed(() => !spaceStore.background)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 
 // Styles
 

@@ -1,22 +1,33 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
+let unsubscribes
+
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'closeAllDialogs') {
-      closeAllDialogs()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        closeAllDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -39,7 +50,7 @@ const toggleColorPickerIsVisible = () => {
   const value = !state.colorPickerIsVisible
   closeAllDialogs()
   state.colorPickerIsVisible = value
-  store.commit('drawingEraserIsActive', false)
+  globalStore.drawingEraserIsActive = false
 }
 const drawingColor = computed(() => {
   return userStore.drawingColor || userStore.color
@@ -47,7 +58,7 @@ const drawingColor = computed(() => {
 const updateDrawingColor = (value) => {
   userStore.updateUser({ drawingColor: value })
 }
-const recentColors = computed(() => store.state.drawingStrokeColors)
+const recentColors = computed(() => globalStore.drawingStrokeColors)
 
 // size
 
@@ -63,11 +74,11 @@ const currentBrushSize = computed(() => userStore.drawingBrushSize)
 
 // eraser
 
-const drawingEraserIsActive = computed(() => store.state.drawingEraserIsActive)
+const drawingEraserIsActive = computed(() => globalStore.drawingEraserIsActive)
 const toggleEraser = () => {
   const value = !drawingEraserIsActive.value
   closeAllDialogs()
-  store.commit('drawingEraserIsActive', value)
+  globalStore.drawingEraserIsActive = value
 }
 </script>
 

@@ -1,30 +1,37 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Slider from '@/components/Slider.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
 
 const increment = 10
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerSpaceZoomReset') {
-      updateSpaceZoomFromTrigger(max.value)
-      window.scrollTo(0, 0)
-    } else if (mutation.type === 'triggerCenterZoomOrigin') {
-      centerZoomOrigin()
-    } else if (mutation.type === 'triggerSpaceZoomOutMax') {
-      zoomOutOrInMax()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerSpaceZoomReset') {
+        updateSpaceZoomFromTrigger(max.value)
+        window.scrollTo(0, 0)
+      } else if (name === 'triggerCenterZoomOrigin') {
+        centerZoomOrigin()
+      } else if (name === 'triggerSpaceZoomOutMax') {
+        zoomOutOrInMax()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -34,16 +41,15 @@ const state = reactive({
 
 const max = computed(() => consts.spaceZoom.max) // 100
 const min = computed(() => consts.spaceZoom.min) // 20
-const spaceZoomPercent = computed(() => store.state.spaceZoomPercent)
+const spaceZoomPercent = computed(() => globalStore.spaceZoomPercent)
 const minKeyboardShortcut = computed(() => 'Z')
 
 const isMobileOrTouch = computed(() => {
-  const isMobile = utils.isMobile()
-  return store.isTouchDevice || isMobile
+  return globalStore.getIsTouchDevice
 })
 const closeAllDialogs = () => {
-  store.dispatch('clearMultipleSelected')
-  store.dispatch('closeAllDialogs')
+  globalStore.clearMultipleSelected()
+  globalStore.closeAllDialogs()
 }
 
 // zoom
@@ -56,27 +62,27 @@ const updateSpaceZoomFromTrigger = (percent) => {
   }
   percent = Math.max(percent, min.value)
   percent = Math.min(percent, max.value)
-  store.commit('spaceZoomPercent', percent)
+  globalStore.spaceZoomPercent = percent
 }
 const updateSpaceZoomPercent = (percent) => {
   percent = percent / 100
   percent = Math.round(min.value + (max.value - min.value) * percent)
-  store.commit('spaceZoomPercent', percent)
+  globalStore.spaceZoomPercent = percent
 }
 const centerZoomOrigin = () => {
   const scroll = { x: window.scrollX, y: window.scrollY }
   const origin = {
-    x: scroll.x + (store.state.viewportWidth / 6),
-    y: scroll.y + (store.state.viewportHeight / 6)
+    x: scroll.x + (globalStore.viewportWidth / 6),
+    y: scroll.y + (globalStore.viewportHeight / 6)
   }
-  store.dispatch('zoomOrigin', origin)
+  globalStore.zoomOrigin = origin
 }
 const zoomOutOrInMax = () => {
   centerZoomOrigin()
-  if (store.state.spaceZoomPercent === min.value) {
-    store.commit('spaceZoomPercent', max.value)
+  if (globalStore.spaceZoomPercent === min.value) {
+    globalStore.spaceZoomPercent = max.value
   } else {
-    store.commit('spaceZoomPercent', min.value)
+    globalStore.spaceZoomPercent = min.value
   }
 }
 
@@ -87,7 +93,7 @@ const updateSpaceZoom = (percent) => {
   updateSpaceZoomPercent(percent)
 }
 const resetZoom = () => {
-  store.commit('zoomOrigin', { x: 0, y: 0 })
+  globalStore.zoomOrigin = { x: 0, y: 0 }
 }
 const removeAnimations = () => {
   state.animateJiggleRight = false

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -19,7 +20,7 @@ import postMessage from '@/postMessage.js'
 import randomColor from 'randomcolor'
 import { colord, extend } from 'colord'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -28,7 +29,7 @@ const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 const historyStore = useHistoryStore()
 
-let unsubscribe
+let unsubscribes
 
 const borderWidth = 2
 
@@ -49,27 +50,31 @@ let prevSelectedBox
 const boxElement = ref(null)
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    const { type, payload } = mutation
-    if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
-      updateRemoteConnections()
-    } else if (type === 'isLoadingSpace') {
-      updateCurrentConnections()
-    } else if (type === 'triggerUpdateItemCurrentConnections') {
-      const itemId = payload
-      if (itemId !== props.box.id) { return }
-      updateCurrentConnections()
-    }
-  })
   initViewportObserver()
   updateCurrentConnections()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
+        updateRemoteConnections()
+      } else if (name === 'isLoadingSpace') {
+        updateCurrentConnections()
+      } else if (name === 'triggerUpdateItemCurrentConnections') {
+        const itemId = args[0]
+        if (itemId !== props.box.id) { return }
+        updateCurrentConnections()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onUpdated(() => {
   initViewportObserver()
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -88,13 +93,13 @@ const state = reactive({
   remoteConnectionColor: ''
 })
 
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserColor = computed(() => userStore.color)
 const name = computed(() => props.box.name)
 const currentBoxIsSelected = computed(() => {
-  const selected = store.state.multipleBoxesSelectedIds
+  const selected = globalStore.multipleBoxesSelectedIds
   return selected.find(id => props.box.id === id)
 })
 
@@ -246,7 +251,7 @@ const classes = computed(() => {
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
     filtered: isFiltered.value,
-    transition: !store.state.currentBoxIsNew || !store.state.currentUserIsResizingBox
+    transition: !globalStore.currentBoxIsNew || !globalStore.currentUserIsResizingBox
   }
 })
 
@@ -261,7 +266,7 @@ const isFilteredByUnchecked = computed(() => {
   return !isChecked.value && hasCheckbox.value
 })
 const isFilteredByBox = computed(() => {
-  const boxIds = store.state.filteredBoxIds
+  const boxIds = globalStore.filteredBoxIds
   return boxIds.includes(props.box.id)
 })
 const isFiltered = computed(() => {
@@ -281,15 +286,15 @@ const startResizing = (event) => {
   if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
   historyStore.pause()
-  store.dispatch('closeAllDialogs')
-  store.commit('currentUserIsResizingBox', true)
-  store.commit('preventMultipleSelectedActionsIsVisible', true)
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsResizingBox = true
+  globalStore.preventMultipleSelectedActionsIsVisible = true
   let boxIds = [props.box.id]
-  const multipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds
+  const multipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds
   if (multipleBoxesSelectedIds.length) {
     boxIds = multipleBoxesSelectedIds
   }
-  store.commit('currentUserIsResizingBoxIds', boxIds)
+  globalStore.currentUserIsResizingBoxIds = boxIds
   const updates = {
     userId: userStore.id,
     boxIds
@@ -352,16 +357,16 @@ const updateCurrentConnections = async () => {
   await nextTick()
   state.currentConnections = connectionStore.getItemsConnections(props.box.id)
 }
-const isPainting = computed(() => store.state.currentUserIsPainting)
+const isPainting = computed(() => globalStore.currentUserIsPainting)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentBoxIsBeingDragged = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox
-  const isCurrent = store.state.currentDraggingBoxId === props.box.id
+  const isDragging = globalStore.currentUserIsDraggingBox
+  const isCurrent = globalStore.currentDraggingBoxId === props.box.id
   return isDragging && (isCurrent || currentBoxIsSelected.value)
 })
 const isResizing = computed(() => {
-  const isResizing = store.state.currentUserIsResizingBox
-  const isCurrent = store.state.currentUserIsResizingBoxIds.includes(props.box.id)
+  const isResizing = globalStore.currentUserIsResizingBox
+  const isCurrent = globalStore.currentUserIsResizingBoxIds.includes(props.box.id)
   return isResizing && isCurrent
 })
 const startBoxInfoInteraction = (event) => {
@@ -369,65 +374,65 @@ const startBoxInfoInteraction = (event) => {
     return
   }
   if (!currentBoxIsSelected.value) {
-    store.dispatch('clearMultipleSelected')
+    globalStore.clearMultipleSelected()
   }
-  store.commit('currentDraggingBoxId', '')
-  store.dispatch('closeAllDialogs')
-  store.commit('currentUserIsDraggingBox', true)
-  store.commit('currentDraggingBoxId', props.box.id)
+  globalStore.currentDraggingBoxId = ''
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsDraggingBox = true
+  globalStore.currentDraggingBoxId = props.box.id
   boxStore.incrementBoxZ(props.box.id)
 }
 const updateIsHover = (value) => {
-  if (store.state.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingBox) { return }
   if (isPainting.value) { return }
   state.isHover = value
   if (value) {
-    store.commit('currentUserIsHoveringOverBoxId', props.box.id)
+    globalStore.currentUserIsHoveringOverBoxId = props.box.id
     updateCurrentConnections()
   } else {
-    store.commit('currentUserIsHoveringOverBoxId', '')
+    globalStore.currentUserIsHoveringOverBoxId = ''
   }
 }
 const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
-  if (store.state.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsPainting) { return }
   if (isMultiTouch) { return }
-  if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
-  if (!canEditBox.value) { store.commit('triggerReadOnlyJiggle') }
+  if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (!canEditBox.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteBoxesDragging' })
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (isMeta) {
-    store.dispatch('multipleBoxesSelectedIds', [])
+    globalStore.updateMultipleBoxesSelectedIds([])
   } else {
-    store.dispatch('clearMultipleSelected')
+    globalStore.clearMultipleSelected()
   }
-  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (globalStore.preventDraggedBoxFromShowingDetails) { return }
   if (isMeta) { return }
-  store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
+  globalStore.updateBoxDetailsIsVisibleForBoxId(props.box.id)
   event.stopPropagation() // prevent stopInteractions() from closing boxDetails
-  store.commit('currentUserIsDraggingBox', false)
-  store.commit('boxesWereDragged', false)
+  globalStore.currentUserIsDraggingBox = false
+  globalStore.boxesWereDragged = false
 }
 const currentBoxDetailsIsVisible = computed(() => {
-  return props.box.id === store.state.boxDetailsIsVisibleForBoxId
+  return props.box.id === globalStore.boxDetailsIsVisibleForBoxId
 })
 
 // Remote
 
 const isRemoteSelected = computed(() => {
-  const remoteBoxesSelected = store.state.remoteBoxesSelected
+  const remoteBoxesSelected = globalStore.remoteBoxesSelected
   const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
   return Boolean(selectedBox)
 })
 const isRemoteBoxDetailsVisible = computed(() => {
-  const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
+  const remoteBoxDetailsVisible = globalStore.remoteBoxDetailsVisible
   const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
   return Boolean(visibleBox)
 })
 const remoteBoxDetailsVisibleColor = computed(() => {
-  const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
+  const remoteBoxDetailsVisible = globalStore.remoteBoxDetailsVisible
   const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
   if (visibleBox) {
     const user = spaceStore.getSpaceUserById(visibleBox.userId)
@@ -437,12 +442,12 @@ const remoteBoxDetailsVisibleColor = computed(() => {
   }
 })
 const isRemoteBoxDragging = computed(() => {
-  const remoteBoxesDragging = store.state.remoteBoxesDragging
+  const remoteBoxesDragging = globalStore.remoteBoxesDragging
   const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
   return Boolean(isDragging)
 })
 const remoteSelectedColor = computed(() => {
-  const remoteBoxesSelected = store.state.remoteBoxesSelected
+  const remoteBoxesSelected = globalStore.remoteBoxesSelected
   const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
   if (selectedBox) {
     const user = spaceStore.getSpaceUserById(selectedBox.userId)
@@ -452,7 +457,7 @@ const remoteSelectedColor = computed(() => {
   }
 })
 const remoteUserResizingBoxesColor = computed(() => {
-  const remoteUserResizingBoxes = store.state.remoteUserResizingBoxes
+  const remoteUserResizingBoxes = globalStore.remoteUserResizingBoxes
   if (!remoteUserResizingBoxes.length) { return }
   let user = remoteUserResizingBoxes.find(user => user.boxIds.includes(props.box.id))
   if (user) {
@@ -463,7 +468,7 @@ const remoteUserResizingBoxesColor = computed(() => {
   }
 })
 const remoteBoxDraggingColor = computed(() => {
-  const remoteBoxesDragging = store.state.remoteBoxesDragging
+  const remoteBoxesDragging = globalStore.remoteBoxesDragging
   const draggingBox = remoteBoxesDragging.find(box => box.boxId === props.box.id)
   if (draggingBox) {
     const user = spaceStore.getSpaceUserById(draggingBox.userId)
@@ -546,11 +551,11 @@ const lockingAnimationFrame = (timestamp) => {
   }
 }
 const notifyPressAndHoldToDrag = () => {
-  const hasNotified = store.state.hasNotifiedPressAndHoldToDrag
+  const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
   if (!hasNotified) {
-    store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
+    globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
   }
-  store.commit('hasNotifiedPressAndHoldToDrag', true)
+  globalStore.hasNotifiedPressAndHoldToDrag = true
 }
 const updateTouchPosition = (event) => {
   initialTouchEvent = event
@@ -594,7 +599,7 @@ const endBoxInfoInteractionTouch = (event) => {
 // connections
 
 const isConnectingTo = computed(() => {
-  const connectingToId = store.state.currentConnectionSuccess.id
+  const connectingToId = globalStore.currentConnectionSuccess.id
   const isConnecting = connectingToId === props.box.id
   if (isConnecting) {
     postMessage.sendHaptics({ name: 'softImpact' })
@@ -602,7 +607,7 @@ const isConnectingTo = computed(() => {
   return isConnecting
 })
 const isConnectingFrom = computed(() => {
-  return store.state.currentConnectionStartItemIds.includes(props.box.id)
+  return globalStore.currentConnectionStartItemIds.includes(props.box.id)
 })
 const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 const connectorIsVisible = computed(() => {
@@ -618,14 +623,14 @@ const connectorIsVisible = computed(() => {
 })
 const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
-  const isPresentationMode = store.state.isPresentationMode
+  const isPresentationMode = globalStore.isPresentationMode
   const isNotHovering = !state.isHover
   const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
   return isPresentationMode && isNotHovering && isNotConnected
 })
 
 const updateRemoteConnections = () => {
-  const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
+  const connection = globalStore.remoteCurrentConnections.find(remoteConnection => {
     const isConnectedToStart = remoteConnection.startItemId === props.box.id
     const isConnectedToEnd = remoteConnection.endItemId === props.box.id
     return isConnectedToStart || isConnectedToEnd
@@ -650,29 +655,29 @@ const checkboxState = computed({
   }
 })
 const toggleBoxChecked = () => {
-  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (globalStore.preventDraggedBoxFromShowingDetails) { return }
   if (!canEditBox.value) { return }
   const value = !isChecked.value
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   boxStore.toggleBoxChecked(props.box.id, value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
-  store.commit('currentUserIsDraggingBox', false)
+  globalStore.currentUserIsDraggingBox = false
   const userId = userStore.id
   broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteBoxesDragging' })
   event.stopPropagation()
-  store.commit('preventMultipleSelectedActionsIsVisible', false)
-  store.dispatch('clearMultipleSelected')
-  store.commit('currentDraggingBoxId', '')
-  store.dispatch('multipleBoxesSelectedIds', [])
+  globalStore.preventMultipleSelectedActionsIsVisible = false
+  globalStore.clearMultipleSelected()
+  globalStore.currentDraggingBoxId = ''
+  globalStore.updateMultipleBoxesSelectedIds([])
 }
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
-  if (store.state.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingBox) { return }
   if (currentBoxIsBeingDragged.value) { return }
   if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
-  if (store.state.boxDetailsIsVisibleForBoxId) { return }
+  if (globalStore.boxDetailsIsVisibleForBoxId) { return }
   let boxes = boxStore.getAllBoxes
   boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
@@ -693,7 +698,7 @@ const isInCheckedBox = computed(() => {
 
 // box focus
 
-const isFocusing = computed(() => props.box.id === store.state.focusOnBoxId)
+const isFocusing = computed(() => props.box.id === globalStore.focusOnBoxId)
 const focusColor = computed(() => {
   if (isFocusing.value) {
     return currentUserColor.value

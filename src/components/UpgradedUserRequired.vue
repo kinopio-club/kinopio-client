@@ -1,12 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const store = useStore()
 
 const props = defineProps({
   message: String
@@ -19,12 +20,12 @@ const visible = computed(() => {
 })
 
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 
 </script>

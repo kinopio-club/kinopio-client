@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
@@ -8,7 +9,7 @@ import utils from '@/utils.js'
 import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 
 const dialogElement = ref(null)
@@ -34,7 +35,7 @@ watch(() => props.visible, async (value, prevValue) => {
 })
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // types

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
@@ -8,7 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
@@ -65,15 +66,15 @@ const isLightInDarkTheme = computed(() => {
 // unlock
 
 const unlockBox = (event) => {
-  if (store.state.currentUserIsDrawingConnection) { return }
+  if (globalStore.currentUserIsDrawingConnection) { return }
   event.stopPropagation()
   // notify read only if user cannot edit
   if (!canEditBox.value) {
     const position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
     return
   }
-  store.commit('currentUserIsDraggingBox', false)
+  globalStore.currentUserIsDraggingBox = false
   boxStore.updateBox({
     id: props.box.id,
     isLocked: false

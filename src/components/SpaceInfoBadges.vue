@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, watch } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -8,7 +8,6 @@ import GroupLabel from '@/components/GroupLabel.vue'
 
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const store = useStore()
 
 const props = defineProps({
   spaceGroup: Object,

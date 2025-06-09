@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -11,24 +12,16 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
+let unsubscribes
 let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerExploreIsVisible') {
-      toggleExploreIsVisible()
-    } else if (mutation.type === 'closeAllDialogs') {
-      closeDialogs()
-    } else if (mutation.type === 'triggerUserIsLoaded') {
-      updateSpaces()
-    }
-  })
   // update spaces
   window.addEventListener('online', updateLiveSpaces)
   window.addEventListener('online', updateSpaces)
@@ -39,11 +32,27 @@ onMounted(() => {
   updateSpacesIntervalTimer = setInterval(() => {
     updateSpaces()
   }, 1000 * 60 * 10) // 10 minutes
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerExploreIsVisible') {
+        toggleExploreIsVisible()
+      } else if (name === 'closeAllDialogs') {
+        closeDialogs()
+      } else if (name === 'triggerUserIsLoaded') {
+        updateSpaces()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('online', updateLiveSpaces)
   clearInterval(updateLiveSpacesIntervalTimer)
   clearInterval(updateSpacesIntervalTimer)
+  unsubscribes()
 })
 
 const state = reactive({
@@ -77,7 +86,7 @@ const closeDialogs = () => {
   state.favoritesIsVisible = false
 }
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 
 const normalizeCount = (count) => {
   if (count > 9) {
@@ -124,7 +133,7 @@ const clearUnreadSpacesCounts = () => {
 
 const toggleExploreIsVisible = () => {
   const isVisible = state.exploreIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.exploreIsVisible = !isVisible
 }
 const updateSpaces = async () => {
@@ -150,7 +159,7 @@ const updateSpaces = async () => {
 
 const toggleLiveIsVisible = () => {
   const isVisible = state.liveIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.liveIsVisible = !isVisible
   if (state.liveIsVisible) {
     updateLiveSpaces()

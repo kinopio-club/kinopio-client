@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -12,24 +13,29 @@ import consts from '@/consts.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerSelectedItemsAlignLeft') {
-      alignLeft()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerSelectedItemsAlignLeft') {
+        alignLeft()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onMounted(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -45,11 +51,11 @@ const props = defineProps({
   editableBoxes: Object
 })
 
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
 const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
-const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
-const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
-const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
+const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
+const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnectionsSelectedIds)
+const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
 const canDistribute = computed(() => {
@@ -320,14 +326,14 @@ const updateConnectionPaths = async () => {
   let connections = []
   const cardIds = utils.clone(multipleCardsSelectedIds.value)
   const connectionIds = utils.clone(multipleConnectionsSelectedIds.value)
-  // store.commit('clearMultipleSelected')
+  // globalStore.clearMultipleSelected()
   if (!cardIds.length) { return }
   cardIds.forEach(cardId => {
     const cardConnections = connectionStore.getItemsConnections(cardId)
     connections = connections.concat(cardConnections)
   })
-  store.commit('multipleCardsSelectedIds', cardIds)
-  store.commit('multipleConnectionsSelectedIds', connectionIds)
+  globalStore.multipleCardsSelectedIds = cardIds
+  globalStore.multipleConnectionsSelectedIds = connectionIds
   // updates
   connections = uniqBy(connections, 'id')
   connectionStore.updateConnectionPaths(connectionIds)

@@ -1,34 +1,44 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
 import UserDetailsActions from '@/components/UserDetailsActions.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerScrollUserDetailsIntoView' && visible.value) {
-      scrollUserDetailsIntoView()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerScrollUserDetailsIntoView' && visible.value) {
+        scrollUserDetailsIntoView()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
-const visible = computed(() => store.state.userDetailsIsVisible)
-const user = computed(() => store.state.userDetailsUser)
-const position = computed(() => store.state.userDetailsPosition)
+const visible = computed(() => globalStore.userDetailsIsVisible)
+const user = computed(() => globalStore.userDetailsUser)
+const position = computed(() => globalStore.userDetailsPosition)
 
 const styles = computed(() => {
   let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
-  let zoom = store.getters.spaceCounterZoomDecimal
+  let zoom = globalStore.spaceCounterZoomDecimal
   if (shouldIgnoreZoom) {
     zoom = 1
   }
-  if (store.state.isTouchDevice) {
+  if (globalStore.isTouchDevice) {
     zoom = utils.pinchCounterZoomDecimal()
     if (zoom > 1) {
       x = x * zoom
@@ -49,7 +59,7 @@ const styles = computed(() => {
 const scrollUserDetailsIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 </script>

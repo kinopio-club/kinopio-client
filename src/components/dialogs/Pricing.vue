@@ -1,6 +1,7 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -13,7 +14,7 @@ import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -22,13 +23,23 @@ const props = defineProps({
 })
 const dialog = ref(null)
 
+let unsubscribes
+
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({
@@ -41,9 +52,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -75,7 +86,7 @@ const toggleAboutGroupsIsVisible = () => {
   state.aboutGroupsIsVisible = value
 }
 const closeDialogs = () => {
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 const closeChildDialogs = () => {
   state.upgradeFAQIsVisible = false

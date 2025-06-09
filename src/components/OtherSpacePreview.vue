@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -9,7 +10,7 @@ import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -34,12 +35,12 @@ const canEditCard = computed(() => {
 })
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 const changeSpace = () => {
   if (isInvite.value) {
     window.location = props.url
   }
-  store.commit('closeAllDialogs')
+  globalStore.closeAllDialogs()
   spaceStore.changeSpace(props.otherSpace)
 }
 

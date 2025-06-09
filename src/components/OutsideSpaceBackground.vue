@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
@@ -13,7 +14,7 @@ import { colord, extend } from 'colord'
 import mixPlugin from 'colord/plugins/mix'
 extend([mixPlugin])
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
@@ -71,7 +72,7 @@ onBeforeUnmount(() => {
   cancel()
   unsubscribes()
 })
-const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
+const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
 watch(() => isTouching.value, (value, prevValue) => {
   if (value) {
     shouldNotUpdate = true
@@ -89,12 +90,12 @@ const cancel = () => {
   window.cancelAnimationFrame(colorCycleTimer)
   colorCycleTimer = undefined
 }
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => spaceStore.backgroundTint)
 const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const preventTouchScrolling = (event) => {
-  const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
+  const shouldPrevent = globalStore.currentUserIsResizingBox || globalStore.currentUserIsPaintingLocked
   if (shouldPrevent) {
     event.preventDefault()
   }
@@ -131,7 +132,7 @@ const updateBackgroundColor = () => {
     backgroundColor = colord(backgroundColor).mix(tint, 0.5).toHex()
   }
   // save color
-  store.commit('outsideSpaceBackgroundColor', backgroundColor)
+  globalStore.outsideSpaceBackgroundColor = backgroundColor
   updateMetaThemeColor(backgroundColor)
   // update canvas bk
   context.clearRect(0, 0, canvas.width, canvas.height)
@@ -157,8 +158,8 @@ const updateMetaThemeColor = (color) => {
 }
 const styles = computed(() => {
   const canvasSize = 10
-  const widthScale = store.state.viewportWidth / canvasSize
-  const heightScale = store.state.viewportHeight / canvasSize
+  const widthScale = globalStore.viewportWidth / canvasSize
+  const heightScale = globalStore.viewportHeight / canvasSize
   const scale = Math.max(widthScale, heightScale)
   const styles = { transform: `scale(${scale})` }
   return styles

@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -15,7 +16,7 @@ const badgeElement = ref(null)
 const progressElement = ref(null)
 const buttonElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
@@ -23,17 +24,22 @@ onMounted(() => {
   window.addEventListener('mouseup', endMovePlayhead)
   window.addEventListener('touchend', endMovePlayhead)
   updateButtonPosition()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'spaceZoomPercent') {
-      updateButtonPosition()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'spaceZoomPercent') {
+        updateButtonPosition()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('mousemove', dragPlayhead)
   window.removeEventListener('mouseup', endMovePlayhead)
   window.removeEventListener('touchend', endMovePlayhead)
+  unsubscribes()
 })
 
 const emit = defineEmits(['updatePlayhead', 'resetPlayhead', 'removeAnimations'])

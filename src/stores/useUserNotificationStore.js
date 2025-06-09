@@ -6,7 +6,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import uniq from 'lodash-es/uniq'
@@ -78,7 +78,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         userId,
         recipientUserIds
       }
-      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
     async removeFavoriteUser (favoriteUser) {
       const apiStore = useApiStore()
@@ -90,7 +90,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         userId,
         recipientUserIds
       }
-      await apiStore.addToQueue({ name: 'removeUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'removeUserNotification', body: notification })
     },
 
     // Space
@@ -106,7 +106,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         recipientUserIds,
         spaceId: favoriteSpace.id
       }
-      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
     async removeFavoriteSpace (favoriteSpace) {
       const apiStore = useApiStore()
@@ -119,7 +119,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         recipientUserIds,
         spaceId: favoriteSpace.id
       }
-      await apiStore.addToQueue({ name: 'removeUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'removeUserNotification', body: notification })
     },
 
     // Card
@@ -144,7 +144,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         spaceId: spaceStore.id
       }
       notifiedCardIds.push(cardId)
-      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
 
     // Group
@@ -169,7 +169,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         spaceId: spaceStore.id,
         groupId
       }
-      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
 
     // Ask to Add Space to Explore
@@ -188,7 +188,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         spaceId,
         recipientUserIds
       }
-      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     }
 
   }

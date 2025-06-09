@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -9,7 +10,7 @@ import consts from '@/consts.js'
 
 import throttle from 'lodash-es/throttle'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -24,9 +25,9 @@ const props = defineProps({
   visible: Boolean
 })
 
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+const viewportHeight = computed(() => globalStore.viewportHeight)
+const viewportWidth = computed(() => globalStore.viewportWidth)
+const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
 const strokeColor = computed(() => userStore.getUserDrawingColor)
 
 const strokeDiameter = computed(() => {
@@ -42,7 +43,7 @@ const drawingCursorStyles = (styles) => {
   const color = strokeColor.value
   let svg
   // eraser cursor
-  if (store.state.drawingEraserIsActive) {
+  if (globalStore.drawingEraserIsActive) {
     const crossScale = 0.25
     const crossSize = diameter * crossScale // cross size relative to circle size
     const crossOffset = (diameter - crossSize) / 2 // center the ✕
@@ -82,15 +83,15 @@ const preventTouchScrolling = (event) => {
 
 const startDrawing = (event) => {
   if (utils.isMultiTouch(event)) { return }
-  store.commit('currentUserIsDrawing', true)
-  store.commit('triggerStartDrawing', event)
+  globalStore.currentUserIsDrawing = true
+  globalStore.triggerStartDrawing(event)
 }
 const draw = throttle((event) => {
-  store.commit('triggerDraw', event)
+  globalStore.triggerDraw(event)
 }, 16) // 60fps
 
 const endDrawing = () => {
-  store.commit('currentUserIsDrawing', false)
+  globalStore.currentUserIsDrawing = false
 }
 </script>
 

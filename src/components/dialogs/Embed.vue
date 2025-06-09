@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -9,9 +10,9 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import privacy from '@/data/privacy.js'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const store = useStore()
 
 // let unsubscribes
 
@@ -36,7 +37,7 @@ const state = reactive({
 })
 
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   if (value) {
     toggleIframeIsVisible()
     updateDialogHeight()
@@ -58,7 +59,7 @@ const spaceIsPublic = computed(() => {
 const isEmbedable = computed(() => {
   return currentUserIsSignedIn.value && spaceIsPublic.value
 })
-const spaceZoomPercent = computed(() => store.state.spaceZoomPercent)
+const spaceZoomPercent = computed(() => globalStore.spaceZoomPercent)
 const url = computed(() => {
   const spaceId = spaceStore.id
   const zoom = spaceZoomPercent.value
@@ -74,18 +75,18 @@ const iframe = computed(() => {
 const updateZoom = (percent) => {
   percent = percent / 100
   percent = Math.round(state.min + (state.max - state.min) * percent)
-  store.commit('spaceZoomPercent', percent)
+  globalStore.spaceZoomPercent = percent
 }
 const toggleIframeIsVisible = (event) => {
   state.iframeIsVisible = true
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
 }
 const toggleUrlIsVisible = () => {
   state.iframeIsVisible = false
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
 }
 const copy = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   let value
   if (state.iframeIsVisible) {
     value = iframe.value
@@ -95,15 +96,15 @@ const copy = async (event) => {
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copy', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const privacyName = (number) => {
   const state = privacy.states()[number]

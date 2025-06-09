@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -17,7 +18,7 @@ import sortBy from 'lodash-es/sortBy'
 import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -42,7 +43,7 @@ const state = reactive({
 
 // dialog
 
-const visible = computed(() => Boolean(store.state.connectionDetailsIsVisibleForConnectionId))
+const visible = computed(() => Boolean(globalStore.connectionDetailsIsVisibleForConnectionId))
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     updatePinchCounterZoomDecimal()
@@ -63,7 +64,7 @@ const isThemeDarkAndTypeColorLight = computed(() => {
   return isThemeDark && typeColorIsLight
 })
 const styles = computed(() => {
-  const position = store.state.connectionDetailsPosition
+  const position = globalStore.connectionDetailsPosition
   let zoom
   if (utils.isSignificantlyPinchZoomed()) {
     zoom = pinchCounterZoomDecimal.value
@@ -78,12 +79,12 @@ const styles = computed(() => {
 })
 const updateResultsSectionMaxHeight = () => {
   const pinchZoom = utils.visualViewport().scale
-  const position = store.state.connectionDetailsPosition
+  const position = globalStore.connectionDetailsPosition
   if (!infoSectionElement.value) { return }
   const infoSection = infoSectionElement.value.getBoundingClientRect()
   const resultsActions = resultsActionsElement.value?.getBoundingClientRect()
   const dialogInfoHeight = infoSection.height + (resultsActions?.height || 0)
-  const maxHeight = (store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
+  const maxHeight = (globalStore.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
   const minHeight = 300
   let height = Math.max(minHeight, maxHeight)
   height = Math.round(height)
@@ -94,7 +95,7 @@ const scrollIntoView = async () => {
   const element = dialogElement.value
   updateResultsSectionMaxHeight()
   await nextTick()
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const scrollIntoViewAndFocus = async () => {
   scrollIntoView()
@@ -108,25 +109,25 @@ const scrollIntoViewAndFocus = async () => {
   }
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const focus = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
   historyStore.pause()
   state.inputIsFocused = true
 }
 const updatePinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
 }
 const blur = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
   historyStore.resume()
   const connectionType = utils.clone(currentConnectionType.value)
   historyStore.add({ connectionTypes: [connectionType], useSnapshot: true })
   state.inputIsFocused = false
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // space
@@ -134,14 +135,14 @@ const closeAllDialogs = () => {
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
-const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
+const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
+const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 
 // current connection
 
 const currentConnection = computed(() => {
-  const id = store.state.connectionDetailsIsVisibleForConnectionId
+  const id = globalStore.connectionDetailsIsVisibleForConnectionId
   return connectionStore.getConnection(id)
 })
 watch(() => currentConnection.value, async (value, prevValue) => {
@@ -152,7 +153,7 @@ watch(() => currentConnection.value, async (value, prevValue) => {
     scrollIntoViewAndFocus()
     connectionStore.updatePrevConnectionTypeId(currentConnectionType.value.id)
   } else {
-    store.commit('shouldHideConnectionOutline', false)
+    globalStore.shouldHideConnectionOutline = false
   }
 })
 const currentConnectionType = computed(() => {
@@ -190,7 +191,7 @@ const addConnectionType = () => {
 }
 const removeConnection = () => {
   connectionStore.removeConnection(currentConnection.value.id)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   connectionStore.removeAllUnusedConnectionTypes()
 }
 const changeConnectionType = (type) => {
@@ -205,7 +206,7 @@ const changeConnectionType = (type) => {
 
 const isFilteredInSpace = computed({
   get () {
-    const types = store.state.filteredConnectionTypeIds
+    const types = globalStore.filteredConnectionTypeIds
     return types.includes(currentConnectionType.value.id)
   },
   set () {
@@ -213,12 +214,12 @@ const isFilteredInSpace = computed({
   }
 })
 const toggleFilteredInSpace = () => {
-  const filtered = store.state.filteredConnectionTypeIds
+  const filtered = globalStore.filteredConnectionTypeIds
   const typeId = currentConnectionType.value.id
   if (filtered.includes(typeId)) {
-    store.commit('removeFromFilteredConnectionTypeId', typeId)
+    globalStore.removeFromFilteredConnectionTypeId(typeId)
   } else {
-    store.commit('addToFilteredConnectionTypeId', typeId)
+    globalStore.addToFilteredConnectionTypeId(typeId)
   }
 }
 
@@ -243,7 +244,7 @@ const toggleColorPicker = () => {
 }
 const closeColorPicker = () => {
   state.colorPickerIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 const updateTypeColor = (newColor) => {
   const update = {

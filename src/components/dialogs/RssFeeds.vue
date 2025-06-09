@@ -1,19 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
 })
 
 const state = reactive({
@@ -30,15 +30,15 @@ const exploreUrl = computed(() => `${consts.apiHost()}/space/explore-spaces/feed
 const everyoneUrl = computed(() => `${consts.apiHost()}/space/everyone-spaces/feed.json`)
 
 const copyUrl = async (event, url) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(url)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
     console.info('🍇 copy rss url', url)
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 </script>

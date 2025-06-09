@@ -1,12 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import cache from '@/cache.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const analyticsStore = useAnalyticsStore()
 
@@ -23,13 +24,13 @@ const shouldAddSpaceDirectly = computed(() => !props.parentIsInDialog)
 const addNewSpace = async (event) => {
   if (event.metaKey || event.ctrlKey) {
     window.open('/new') // opens url in new tab
-    store.commit('preventDraggedCardFromShowingDetails', true)
+    globalStore.preventDraggedCardFromShowingDetails = true
     return
   } else {
     event.preventDefault()
     event.stopPropagation()
   }
-  store.commit('isLoadingSpace', true)
+  globalStore.isLoadingSpace = true
   const cachedSpaces = await cache.getAllSpaces()
   const noUserSpaces = !cachedSpaces.length
   window.scrollTo(0, 0)
@@ -39,9 +40,9 @@ const addNewSpace = async (event) => {
     emitAll()
   }
   if (shouldAddSpaceDirectly.value) {
-    store.dispatch('closeAllDialogs')
+    globalStore.closeAllDialogs()
     await spaceStore.createSpace()
-    store.commit('triggerSpaceDetailsInfoIsVisible')
+    globalStore.triggerSpaceDetailsInfoIsVisible()
   }
   analyticsStore.event('AddSpaceButton')
 }

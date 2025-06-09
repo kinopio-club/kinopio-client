@@ -5,7 +5,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -200,7 +200,7 @@ export const useGroupStore = defineStore('groups', {
     async updateGroup (group) {
       const apiStore = useApiStore()
       this.update(group)
-      await apiStore.addToQueue({ name: 'updateGroup', body: group }, { root: true })
+      await apiStore.addToQueue({ name: 'updateGroup', body: group })
     },
     async updateUserRole (update) {
       const apiStore = useApiStore()
@@ -214,7 +214,7 @@ export const useGroupStore = defineStore('groups', {
         return user
       })
       this.update(group)
-      await apiStore.addToQueue({ name: 'updateGroupUser', body: update }, { root: true })
+      await apiStore.addToQueue({ name: 'updateGroupUser', body: update })
     },
     async updateOtherGroups (otherGroup) {
       const apiStore = useApiStore()
@@ -227,39 +227,40 @@ export const useGroupStore = defineStore('groups', {
     // user
 
     async joinGroup () {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
-      const group = store.state.groupToJoinOnLoad
+      const group = globalStore.groupToJoinOnLoad
       if (!group) { return }
-      store.commit('notifyIsJoiningGroup', true, { root: true })
+      globalStore.updateNotifyIsJoiningGroup(true)
       try {
         const response = await apiStore.createGroupUser({
           groupId: group.groupId,
           collaboratorKey: group.collaboratorKey,
           userId
         })
-        store.commit('addNotification', {
+        globalStore.addNotification({
           badge: 'Joined Group',
           message: `${response.group.name}`,
           type: 'success',
           isPersistentItem: true,
           group: response.group
-        }, { root: true })
-        store.commit('triggerSpaceDetailsVisible', null, { root: true })
+        })
+        globalStore.triggerSpaceDetailsVisible()
         this.update(response.group)
         console.info('👫 joined group', response.group)
       } catch (error) {
         console.error('🚒 joinGroup', error)
-        store.commit('addNotification', {
+        globalStore.addNotification({
           message: 'Failed to Join Group',
           type: 'danger',
           icon: 'group',
           isPersistentItem: true
-        }, { root: true })
+        })
       }
-      store.commit('notifyIsJoiningGroup', false, { root: true })
-      store.commit('groupToJoinOnLoad', null, { root: true })
+      globalStore.updateNotifyIsJoiningGroup(false)
+      globalStore.groupToJoinOnLoad = null
     },
     removeGroupUser ({ groupId, userId }) {
       let group = this.getGroup(groupId)

@@ -1,12 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
 import UserDetailsActions from '@/components/UserDetailsActions.vue'
 import utils from '@/utils.js'
-
-const store = useStore()
 
 const dialogElement = ref(null)
 

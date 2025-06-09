@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -11,8 +12,8 @@ import Loader from '@/components/Loader.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -68,8 +69,8 @@ const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 const toggleCustomAmountIsVisible = async (value) => {
   value = !state.customAmountIsVisible

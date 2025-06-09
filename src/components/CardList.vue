@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -17,28 +18,36 @@ import isToday from 'dayjs/plugin/isToday'
 
 dayjs.extend(isToday)
 
-const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
+const globalStore = useGlobalStore()
 
 const itemsPerPage = 15
-
 const resultsListElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerRemoveCardFromCardList') {
-      const card = mutation.payload
-      state.removedCardIds.push(card.id)
-    }
-  })
   updateScroll()
   resultsListElement.value.closest('section').addEventListener('scroll', updateScroll)
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
   }
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerRemoveCardFromCardList') {
+        const card = args[0]
+        state.removedCardIds.push(card.id)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['selectCard', 'removeCard'])
@@ -66,7 +75,7 @@ const normalizedCards = computed(() => {
   return items.map(card => {
     card = cardStore.cardWithNameSegments(card)
     card.user = spaceStore.getSpaceUserById(card.userId)
-    store.commit('updateOtherUsers', card.user)
+    globalStore.updateOtherUsers(card.user)
     if (!card.user) {
       card.user = {
         id: '',
@@ -88,11 +97,11 @@ const removeCard = (card) => {
   emit('removeCard', card)
 }
 const cardIsActive = (card) => {
-  const isCardDetailsVisible = store.state.cardDetailsIsVisibleForCardId === card.id
+  const isCardDetailsVisible = globalStore.cardDetailsIsVisibleForCardId === card.id
   return isCardDetailsVisible || card.isLoading || isCurrentCard(card)
 }
 const cardIsFocused = (card) => {
-  return store.state.previousResultItem.id === card.id
+  return globalStore.previousResultItem.id === card.id
 }
 const cardDate = (card) => {
   return props.dateIsCreatedAt || card.nameUpdatedAt || card.updatedAt

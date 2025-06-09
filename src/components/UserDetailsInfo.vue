@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -11,7 +12,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -46,7 +47,7 @@ const toggleColorPicker = () => {
 }
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 
 // user info

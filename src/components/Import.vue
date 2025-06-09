@@ -1,8 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -13,7 +14,7 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -36,8 +37,8 @@ const isLoadingJson = computed(() => state.loading && state.format === 'json')
 const isLoadingCanvas = computed(() => state.loading && state.format === 'canvas')
 
 const toggleImportArenaChannelIsVisible = () => {
-  store.commit('closeAllDialogs')
-  store.commit('importArenaChannelIsVisible', true)
+  globalStore.closeAllDialogs()
+  globalStore.importArenaChannelIsVisible = true
 }
 
 const newTypeColor = () => {
@@ -127,7 +128,7 @@ const validateSchema = (space, schema) => {
 const importSpace = async (space) => {
   try {
     const user = userStore.getUserAllState
-    store.commit('isLoadingSpace', true)
+    globalStore.isLoadingSpace = true
     validate(space)
     if (state.format === 'canvas') {
       const typeColor = newTypeColor()
@@ -140,7 +141,7 @@ const importSpace = async (space) => {
     await spaceStore.saveSpace(uniqueNewSpace)
     await spaceStore.loadSpace(uniqueNewSpace)
     updateSpaces()
-    store.commit('triggerFocusSpaceDetailsName')
+    globalStore.triggerFocusSpaceDetailsName()
   } catch (error) {
     console.error('🚒', error)
     if (!state.errors.length) {

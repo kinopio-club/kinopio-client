@@ -1,29 +1,39 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const maxIterations = 200 // 👀 PaintSelectCanvas maxIterations
 let visibleTimer, currentIteration
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe((mutation) => {
-    if (mutation.type === 'triggerUpdateRemoteUserCursor') {
-      let cursor = mutation.payload
-      if (cursor.userId !== props.user.id) { return }
-      cursor = updateRemotePosition(cursor)
-      state.x = Math.round(cursor.x)
-      state.y = Math.round(cursor.y)
-      state.color = props.user.color
-      currentIteration = 0
-      userLabelVisibleTimer()
-      updateIsOnscreen()
-      updateOffscreenLabelPosition()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateRemoteUserCursor') {
+        let cursor = args[0]
+        if (cursor.userId !== props.user.id) { return }
+        cursor = updateRemotePosition(cursor)
+        state.x = Math.round(cursor.x)
+        state.y = Math.round(cursor.y)
+        state.color = props.user.color
+        currentIteration = 0
+        userLabelVisibleTimer()
+        updateIsOnscreen()
+        updateOffscreenLabelPosition()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -50,7 +60,7 @@ const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
 
 // position
 
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
 const updateRemotePosition = (position) => {
   const zoom = spaceZoomDecimal.value
   const scroll = { x: window.scrollX, y: window.scrollY }
@@ -71,7 +81,7 @@ const position = computed(() => {
 
 // offscreen position
 
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
 const updateIsOnscreen = () => {
   state.isOnscreen = utils.isRectInsideViewport({
     x: state.x,

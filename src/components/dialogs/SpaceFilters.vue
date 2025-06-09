@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -12,20 +13,29 @@ import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerClearAllSpaceFilters') {
-      clearAllFilters()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerClearAllSpaceFilters') {
+        clearAllFilters()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({

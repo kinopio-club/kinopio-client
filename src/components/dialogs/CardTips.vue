@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -43,7 +44,7 @@ const toggleMarkdownInfoIsVisible = () => {
 }
 const showCardSettings = () => {
   userStore.updateUser({ prevSettingsSection: 'cards' })
-  store.commit('userSettingsIsVisible', true)
+  globalStore.userSettingsIsVisible = true
 }
 
 // dialog position
@@ -53,7 +54,7 @@ const scrollIntoView = async () => {
   if (utils.isMobile()) { return }
   await nextTick()
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }

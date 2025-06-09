@@ -1,14 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -81,12 +82,12 @@ const checkIfShouldPrevent = (event) => {
   }
   // if (shouldPrevent) {
   //   const position = utils.cursorPositionInPage(event)
-  //   store.commit('addNotificationWithPosition', { message: 'Could Not Add', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  //   globalStore.addNotificationWithPosition({ message: 'Could Not Add', position, type: 'danger', layer: 'app', icon: 'cancel' })
   // }
   return shouldPrevent
 }
 const toggleShowInExplore = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const shouldPrevent = checkIfShouldPrevent(event)
   if (shouldPrevent) { return }
   if (props.space) {
@@ -101,9 +102,9 @@ const notifyShowInExplore = (event) => {
   const shouldShow = showInExplore.value
   const position = utils.cursorPositionInPage(event)
   if (shouldShow) {
-    store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } else {
-    store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
   }
 }
 const emitUpdateShowInExplore = () => {
@@ -131,8 +132,8 @@ const updateSpacePrivacy = async () => {
   }
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const clearErrors = () => {
   state.error.userNeedsToSignUpOrIn = false

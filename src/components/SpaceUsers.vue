@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -12,7 +13,7 @@ import utils from '@/utils.js'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -39,8 +40,8 @@ const state = reactive({
   shouldShowUsersButtonSpectators: false
 })
 
-const isEmbedMode = computed(() => store.state.isEmbedMode)
-const isAddPage = computed(() => store.state.isAddPage)
+const isEmbedMode = computed(() => globalStore.isEmbedMode)
+const isAddPage = computed(() => globalStore.isAddPage)
 const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
@@ -104,7 +105,7 @@ const users = computed(() => {
 //   let spectators = utils.clone(currentSpace.value.spectators)
 //   // if not a space member, currentUser is specatator
 //   if (!currentUserIsSpaceMember.value) {
-//     const user = utils.clone(store.state.currentUser)
+//     const user = utils.clone(globalStore.currentUser)
 //     spectators.push(user)
 //     spectators = appendCurrentUser(spectators)
 //   }

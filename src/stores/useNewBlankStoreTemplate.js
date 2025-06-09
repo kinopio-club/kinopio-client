@@ -7,7 +7,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -62,9 +62,9 @@ export const useCardStore = defineStore('cards', {
       // normalize card
       this.addCardToState(card)
       // if (!updates.isBroadcast) {
-      // broadcastStore.update({ updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
-      // historyStore.add({ connections: [connection] }, { root: true })
-      await apiStore.addToQueue({ name: 'createCard', body: card }, { root: true })
+      // broadcastStore.update({ updates: connection, type: 'addConnection', handler: 'currentConnections/create' })
+      // historyStore.add({ connections: [connection] })
+      await apiStore.addToQueue({ name: 'createCard', body: card })
     },
 
     // update
@@ -115,7 +115,7 @@ export const useCardStore = defineStore('cards', {
         const idIndex = this.allIds.indexOf(card.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
-        await apiStore.addToQueue({ name: 'removeCard', body: card }, { root: true })
+        await apiStore.addToQueue({ name: 'removeCard', body: card })
       }
     },
     async removeCard (card) {

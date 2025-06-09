@@ -1,12 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -16,16 +17,16 @@ const props = defineProps({
 
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
-const currentUserToolbar = computed(() => store.state.currentUserToolbar)
+const currentUserToolbar = computed(() => globalStore.currentUserToolbar)
 watch(() => currentUserToolbar.value, (value, prevValue) => {
   if (value) {
-    store.dispatch('closeAllDialogs')
-    store.dispatch('clearMultipleSelected')
+    globalStore.closeAllDialogs()
+    globalStore.clearMultipleSelected()
   }
 })
 
 const currentUserToolbarIsBox = computed(() => {
-  if (store.state.currentUserIsResizingBox) { return }
+  if (globalStore.currentUserIsResizingBox) { return }
   return currentUserToolbar.value === 'box'
 })
 const currentUserToolbarIsDrawing = computed(() => {
@@ -34,9 +35,9 @@ const currentUserToolbarIsDrawing = computed(() => {
 
 const toggleToolbar = (value) => {
   if (value === currentUserToolbar.value) {
-    store.dispatch('currentUserToolbar', 'card')
+    globalStore.updateCurrentUserToolbar('card')
   } else {
-    store.dispatch('currentUserToolbar', value)
+    globalStore.updateCurrentUserToolbar(value)
   }
 }
 </script>

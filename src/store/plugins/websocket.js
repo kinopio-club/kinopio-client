@@ -6,6 +6,7 @@
 
 // TODO convert to pinia action subscriber plugin
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { getActivePinia } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -109,6 +110,7 @@ const closeWebsocket = (store) => {
 
 export default function createWebSocketPlugin () {
   return store => {
+    const globalStore = useGlobalStore()
     const userStore = useUserStore()
     const spaceStore = useSpaceStore()
     const broadcastStore = useBroadcastStore()
@@ -122,8 +124,8 @@ export default function createWebSocketPlugin () {
           websocket.onopen = (event) => {
             currentUserIsConnected = true
             broadcastStore.joinSpaceRoom()
-            if (store.state.isReconnectingToBroadcast) {
-              store.commit('isReconnectingToBroadcast', false)
+            if (globalStore.isReconnectingToBroadcast) {
+              globalStore.isReconnectingToBroadcast = false
             }
           }
           websocket.onclose = (event) => {
@@ -135,7 +137,7 @@ export default function createWebSocketPlugin () {
             const shouldPrevent = checkIfShouldPreventBroadcast(store)
             console.warn('🌌', event, shouldPrevent)
             if (shouldPrevent) { return }
-            store.commit('isReconnectingToBroadcast', true)
+            globalStore.isReconnectingToBroadcast = true
           }
 
           // receive 🌜
@@ -168,7 +170,7 @@ export default function createWebSocketPlugin () {
               spaceStore.addUserToJoinedSpace(user)
             } else if (message === 'updateUserPresence') {
               spaceStore.updateUserPresence(updates)
-              store.commit('updateOtherUsers', updates.user, { root: true })
+              globalStore.updateOtherUsers(updates.user)
             } else if (message === 'userLeftRoom') {
               spaceStore.removeIdleClientFromSpace(user || updates.user)
               store.commit('clearRemoteMultipleSelected', data)

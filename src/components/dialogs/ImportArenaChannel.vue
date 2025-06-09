@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -13,25 +14,28 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
-// let unsubscribes
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerArenaAuthenticationError') {
-      state.error.unknownServerError = true
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerArenaAuthenticationError') {
+        state.error.unknownServerError = true
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
-  // unsubscribes()
+  unsubscribes()
 })
 
 let arena = {}
@@ -75,7 +79,7 @@ const updateDialogHeight = async () => {
 }
 
 const arenaAccessToken = computed(() => userStore.arenaAccessToken)
-const isAuthenticatingWithArena = computed(() => store.state.isAuthenticatingWithArena)
+const isAuthenticatingWithArena = computed(() => globalStore.isAuthenticatingWithArena)
 const authorizeUrl = computed(() => {
   if (isAuthenticatingWithArena.value) { return }
   return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`
@@ -83,7 +87,7 @@ const authorizeUrl = computed(() => {
 
 const forgetArenaAccessToken = () => {
   userStore.updateUser({ arenaAccessToken: '' })
-  store.commit('addNotification', { message: 'Removed your Are.na access token from Kinopio', type: 'success' })
+  globalStore.addNotification({ message: 'Removed your Are.na access token from Kinopio', type: 'success' })
 }
 const importChannel = async () => {
   if (state.loading) { return }
@@ -172,8 +176,8 @@ const importSpace = async (space) => {
     cache.saveSpace(space)
     await apiStore.createSpace(space)
     spaceStore.changeSpace(space)
-    store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
-    store.dispatch('closeAllDialogs')
+    globalStore.addNotification({ message: 'Are.na channel imported', type: 'success' })
+    globalStore.closeAllDialogs()
   } catch (error) {
     console.error('🚒 importSpace', error)
   }
@@ -216,7 +220,7 @@ const cardPositions = ({ currentIndex, lastCard }) => {
   const cardWidth = 235
   const cardHeight = 235
   const cardMargin = 20
-  const viewportWidth = store.state.viewportWidth - (cardWidth + cardMargin)
+  const viewportWidth = globalStore.viewportWidth - (cardWidth + cardMargin)
   x = startX
   y = startY
   if (lastCard) {

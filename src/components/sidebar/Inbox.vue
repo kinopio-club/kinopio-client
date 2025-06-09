@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -17,7 +18,7 @@ import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -44,7 +45,7 @@ const state = reactive({
   noInboxCardsFound: false
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
@@ -65,7 +66,7 @@ const updateInboxCardsLocal = async () => {
   }
 }
 const updateInboxCardsRemote = async () => {
-  if (!store.state.isOnline) { return }
+  if (!globalStore.isOnline) { return }
   await spaceStore.updateInboxCache()
   updateInboxCardsLocal()
 }
@@ -110,11 +111,11 @@ const updateCardIsLoading = (newCard) => {
 const selectCard = async (card) => {
   if (card.isLoading) { return }
   if (!canEditSpace.value) {
-    store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
     return
   }
   updateCardIsLoading(card)
-  const scroll = store.getters.windowScrollWithSpaceOffset()
+  const scroll = globalStore.windowScrollWithSpaceOffset()
   const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()
@@ -124,7 +125,7 @@ const selectCard = async (card) => {
   const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
   cardStore.createCard(newCard, skipCardDetailsIsVisible)
-  store.dispatch('focusOnCardId', newCard.id)
+  globalStore.updateFocusOnCardId(newCard.id)
   removeCardFromInbox(card)
 }
 const removeCard = (card) => {

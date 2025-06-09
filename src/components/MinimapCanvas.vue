@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -10,7 +11,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -31,17 +32,11 @@ onMounted(async () => {
   window.addEventListener('resize', init)
   window.addEventListener('pointerup', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
-  unsubscribe = store.subscribe(async mutation => {
-    const type = mutation.type
-    const mutations = [
-      'isLoadingSpace',
-      'triggerEndDrawing'
-    ]
-    if (mutations.includes(mutation.type)) {
-      await nextTick()
-      init()
-    }
-  })
+
+  const globalStoreActions = [
+    'isLoadingSpace',
+    'triggerEndDrawing'
+  ]
   const boxStoreActions = [
     'updateBoxes',
     'createBox'
@@ -63,6 +58,14 @@ onMounted(async () => {
   const spaceStoreActions = [
     'loadSpace'
   ]
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (globalStoreActions.includes(name)) {
+        await nextTick()
+        init()
+      }
+    }
+  )
   const cardStoreUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
@@ -92,6 +95,7 @@ onMounted(async () => {
     }
   )
   unsubscribes = () => {
+    globalStoreUnsubscribe()
     cardStoreUnsubscribe()
     connectionStoreUnsubscribe()
     boxStoreUnsubscribe()
@@ -137,10 +141,10 @@ watch(() => props.space, (value, prevValue) => {
 })
 
 const pageHeight = computed(() => {
-  return props.pageHeight || store.state.pageHeight
+  return props.pageHeight || globalStore.pageHeight
 })
 const pageWidth = computed(() => {
-  return props.pageWidth || store.state.pageWidth
+  return props.pageWidth || globalStore.pageWidth
 })
 const ratio = computed(() => {
   if (pageWidth.value > pageHeight.value) {
@@ -151,7 +155,7 @@ const ratio = computed(() => {
 })
 
 const styles = computed(() => {
-  const color = props.backgroundColor || store.state.outsideSpaceBackgroundColor
+  const color = props.backgroundColor || globalStore.outsideSpaceBackgroundColor
   return { backgroundColor: color }
 })
 
@@ -297,11 +301,11 @@ const updateScroll = () => {
   state.scrollY = window.scrollY
 }
 const viewportStyle = computed(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.spaceCounterZoomDecimal
   const color = userStore.color
   // viewport box
-  let width = (store.state.viewportWidth * zoom) * ratio.value
-  let height = (store.state.viewportHeight * zoom) * ratio.value
+  let width = (globalStore.viewportWidth * zoom) * ratio.value
+  let height = (globalStore.viewportHeight * zoom) * ratio.value
   let left = (state.scrollX * zoom) * ratio.value
   let top = (state.scrollY * zoom) * ratio.value
   // constraints
@@ -339,8 +343,8 @@ const positionInSpace = (event) => {
   return { x, y }
 }
 const positionInViewportCenter = (position) => {
-  let x = position.x - (store.state.viewportWidth / 2)
-  let y = position.y - (store.state.viewportHeight / 2)
+  let x = position.x - (globalStore.viewportWidth / 2)
+  let y = position.y - (globalStore.viewportHeight / 2)
   x = Math.max(0, x)
   y = Math.max(0, y)
   return { x, y }

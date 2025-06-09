@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const themeStore = useThemeStore()
 
@@ -17,7 +18,7 @@ onMounted(() => {
   window.addEventListener('touchend', disableIsActive)
   window.addEventListener('mouseup', disableIsActive)
 })
-watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+watch(() => globalStore.preventDraggedCardFromShowingDetails, (value, prevValue) => {
   disableIsActive()
 })
 
@@ -44,7 +45,7 @@ const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
 })
-const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
+const isInteractingWithItem = computed(() => globalStore.isInteractingWithItem)
 
 // colors
 
@@ -75,10 +76,10 @@ const previewImageIsVisible = computed(() => {
 // embed play button
 
 const handleMouseEnterPlayButton = () => {
-  store.commit('preventDraggedCardFromShowingDetails', true)
+  globalStore.preventDraggedCardFromShowingDetails = true
 }
 const handleMouseLeavePlayButton = () => {
-  store.commit('preventDraggedCardFromShowingDetails', false)
+  globalStore.preventDraggedCardFromShowingDetails = false
 }
 
 // iframe embed (spotify, youtube, etc.)
@@ -87,24 +88,24 @@ const toggleShouldDisplayIframe = (event) => {
   event.preventDefault()
   event.stopPropagation()
   if (isTwitterUrl.value) { return }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   cardStore.incrementCardZ(props.card.id)
-  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
+  const iframeIsVisibleForCardId = globalStore.iframeIsVisibleForCardId
   let value
   if (props.card.id === iframeIsVisibleForCardId) {
     value = true
   }
   value = !value
   if (value) {
-    store.commit('iframeIsVisibleForCardId', props.card.id)
+    globalStore.iframeIsVisibleForCardId = props.card.id
     // addAutoplay()
   } else {
     // removeAutoplay()
-    store.commit('iframeIsVisibleForCardId', '')
+    globalStore.iframeIsVisibleForCardId = ''
   }
 }
 const shouldDisplayIframe = computed(() => {
-  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
+  const iframeIsVisibleForCardId = globalStore.iframeIsVisibleForCardId
   return props.card.id === iframeIsVisibleForCardId
 })
 const iframeHeight = computed(() => {
@@ -203,34 +204,34 @@ const enableIsActive = () => {
   state.isActive = true
 }
 const handleMouseEnterUrlButton = () => {
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
-  if (store.state.currentUserIsDraggingCard) { return }
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+  if (globalStore.currentUserIsDraggingCard) { return }
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
 const handleTouchMove = () => {
-  store.commit('preventDraggedCardFromShowingDetails', true)
+  globalStore.preventDraggedCardFromShowingDetails = true
   disableIsActive()
 }
 const openUrl = async (event, url) => {
-  const userIsConnecting = store.state.currentConnectionStartItemIds.length
+  const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   if (userIsConnecting) { return }
   state.isActive = false
-  store.commit('clearAllInteractingWithAndSelected')
-  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  globalStore.clearAllInteractingWithAndSelected()
+  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
   if (event) {
     if (event.metaKey || event.ctrlKey) {
       window.open(url) // opens url in new tab
-      store.commit('preventDraggedCardFromShowingDetails', true)
+      globalStore.preventDraggedCardFromShowingDetails = true
       return
     } else {
       event.preventDefault()
       event.stopPropagation()
     }
   }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (event.type === 'touchend') {
     window.location = url
   } else {
@@ -255,7 +256,7 @@ const openUrl = async (event, url) => {
     v-if="!shouldHideInfo"
     :title="props.card.urlPreviewUrl"
     :href="props.card.urlPreviewUrl"
-    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': globalStore.preventDraggedCardFromShowingDetails }"
     :style="{background: background}"
     target="_blank"
     @mouseenter="handleMouseEnterUrlButton"

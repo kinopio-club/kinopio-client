@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -15,7 +16,7 @@ import consts from '@/consts.js'
 import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -72,12 +73,12 @@ const state = reactive({
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 const closeImagePicker = () => {
   cardStore.clearCardNameUploadPlaceholder(props.cardId)
@@ -110,7 +111,7 @@ const focusSearchInput = () => {
   const length = searchInputElement.value.length
   element.focus()
   element.setSelectionRange(length, length)
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const clearSearch = () => {
   state.search = ''
@@ -199,7 +200,7 @@ const searchGiphy = async (isStickers) => {
 const searchService = debounce(async () => {
   clearErrors()
   state.loading = true
-  const isOffline = !store.state.isOnline
+  const isOffline = !globalStore.isOnline
   if (isOffline) {
     state.loading = false
     state.error.userIsOffline = true
@@ -354,8 +355,8 @@ const scrollIntoView = () => {
   if (!props.visible) { return }
   const element = dialogElement.value
   if (!element) { return }
-  store.commit('scrollElementIntoView', { element })
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.scrollElementIntoView({ element })
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -371,7 +372,7 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 </script>
 

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore, mapState, mapGetters } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
@@ -33,6 +34,7 @@ import debounce from 'lodash-es/debounce'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
@@ -50,43 +52,46 @@ const openingPreDuration = 5 // ms
 const openingDuration = 400 // ms
 let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
-const store = useStore()
-
 const dialogElement = ref(null)
 const nameElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe(async (mutation, state) => {
-    if (mutation.type === 'triggerUnloadPage' && visible.value) {
-      closeCard()
-    } else if (mutation.type === 'triggerSplitCard' && visible.value) {
-      const cardId = mutation.payload
-      if (cardId !== card.value.id) { return }
-      splitCards()
-    } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
-      const cardId = mutation.payload
-      if (prevCardId) {
-        updateDimensions(prevCardId)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'triggerUnloadPage' && visible.value) {
+        closeCard()
+      } else if (name === 'triggerSplitCard' && visible.value) {
+        const cardId = args[0]
+        if (cardId !== card.value.id) { return }
+        splitCards()
+      } else if (name === 'cardDetailsIsVisibleForCardId') {
+        const cardId = args[0]
+        if (prevCardId) {
+          updateDimensions(prevCardId)
+        }
+        if (!cardId) { return }
+        prevCardId = cardId
+        showCard(cardId)
+      } else if (name === 'triggerUpdateCardDetailsCardName') {
+        const { cardId, name } = args[0]
+        if (cardId !== card.value.id) { return }
+        cancelOpening()
+        updateCardName(name)
+      } else if (name === 'triggerUpdateCardDimensionsAndPaths') {
+        const cardId = args[0]
+        if (cardId !== card.value.id) { return }
+        await updateDimensionsAndPaths()
       }
-      if (!cardId) { return }
-      prevCardId = cardId
-      showCard(cardId)
-    } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
-      const { cardId, name } = mutation.payload
-      if (cardId !== card.value.id) { return }
-      cancelOpening()
-      updateCardName(name)
-    } else if (mutation.type === 'triggerUpdateCardDimensionsAndPaths') {
-      const cardId = mutation.payload
-      if (cardId !== card.value.id) { return }
-      await updateDimensionsAndPaths()
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -132,14 +137,14 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
-const cardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
+const cardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
 const card = computed(() => {
   return cardStore.getCard(cardId.value) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    store.commit('preventMultipleSelectedActionsIsVisible', false)
+    globalStore.preventMultipleSelectedActionsIsVisible = false
   } else {
     closeCard()
   }
@@ -152,11 +157,11 @@ const closeCardAndFocus = (event) => {
     hidePickers()
     return
   }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
 }
 const closeDialogs = (shouldSkipGlobalDialogs) => {
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
   state.imagePickerIsVisible = false
   state.cardTipsIsVisible = false
   state.shareCardIsVisible = false
@@ -166,10 +171,10 @@ const closeDialogs = (shouldSkipGlobalDialogs) => {
   hideOtherItemDetailsIsVisible()
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const triggerUpgradeUserIsVisible = () => {
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.triggerUpgradeUserIsVisible()
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
@@ -177,29 +182,29 @@ const clearErrors = () => {
   state.error.unknownUploadError = false
 }
 const hideOtherItemDetailsIsVisible = () => {
-  store.commit('otherCardDetailsIsVisible', false)
+  globalStore.otherCardDetailsIsVisible = false
 }
 const showTagDetailsIsVisible = (event, tag) => {
   closeDialogs()
   const element = event.target.closest('.tag')
   const tagRect = element.getBoundingClientRect()
-  store.commit('tagDetailsPosition', {
+  globalStore.tagDetailsPosition = {
     x: window.scrollX + tagRect.x + 2,
     y: window.scrollY + tagRect.y + tagRect.height - 2,
     pageX: window.scrollX,
     pageY: window.scrollY
-  })
-  store.commit('currentSelectedTag', tag)
-  store.commit('tagDetailsIsVisible', true)
+  }
+  globalStore.currentSelectedTag = tag
+  globalStore.tagDetailsIsVisible = true
 }
 
 // styles
 
 const styles = computed(() => {
-  let zoom = store.getters.spaceCounterZoomDecimal
+  let zoom = globalStore.spaceCounterZoomDecimal
   if (utils.isAndroid()) {
     zoom = utils.visualViewport().scale
-  } else if (store.state.isTouchDevice) {
+  } else if (globalStore.isTouchDevice) {
     // on iOS, keyboard focus zooms
     zoom = 1
   }
@@ -220,7 +225,7 @@ const rowIsBelowItemActions = computed(() => nameMetaRowIsVisible.value || badge
 const nameMetaRowIsVisible = computed(() => state.nameSplitIntoCardsCount)
 const badgesRowIsVisible = computed(() => tagsInCard.value.length || isInSearchResultsCards.value)
 const triggerUpdateHeaderAndFooterPosition = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const scrollIntoViewAndFocus = async () => {
   let behavior
@@ -231,10 +236,9 @@ const scrollIntoViewAndFocus = async () => {
   scrollIntoView(behavior)
   focusName()
   triggerUpdatePaintSelectCanvasPositionOffset()
-  triggerUpdateHeaderAndFooterPosition()
 }
 const triggerUpdatePaintSelectCanvasPositionOffset = () => {
-  store.commit('triggerUpdatePaintSelectCanvasPositionOffset')
+  globalStore.triggerUpdatePaintSelectCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
 }
 
@@ -265,12 +269,12 @@ const updatePaths = async (cardId) => {
 const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
 const isInSearchResultsCards = computed(() => {
-  const results = store.state.searchResultsCards
+  const results = globalStore.searchResultsCards
   if (!results.length) { return }
   return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
+const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // user
 
@@ -321,11 +325,11 @@ const handleEnterKey = (event) => {
   const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
   console.info('🎹 enter', {
-    shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
+    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
     pickersIsVisible
   })
-  if (store.state.shouldPreventNextEnterKey) {
-    store.commit('shouldPreventNextEnterKey', false)
+  if (globalStore.shouldPreventNextEnterKey) {
+    globalStore.shouldPreventNextEnterKey = false
   } else if (pickersIsVisible) {
     triggerPickerSelectItem(event)
     hidePickers()
@@ -335,16 +339,16 @@ const handleEnterKey = (event) => {
   } else if (isCompositionEvent) {
   } else {
     closeCard()
-    store.dispatch('closeAllDialogs')
-    store.commit('shouldPreventNextEnterKey', false)
-    store.commit('triggerAddCard')
+    globalStore.closeAllDialogs()
+    globalStore.shouldPreventNextEnterKey = false
+    globalStore.triggerAddCard()
   }
 }
 const removeCard = () => {
   if (!canEditCard.value) { return }
   historyStore.resume()
   cardStore.removeCards([cardId.value])
-  store.commit('cardDetailsIsVisibleForCardId', '')
+  globalStore.updateCardDetailsIsVisibleForCardId('')
   triggerUpdateHeaderAndFooterPosition()
 }
 const toggleShouldShowItemActions = async () => {
@@ -366,7 +370,7 @@ const scrollIntoView = async (behavior) => {
   await nextTick()
   await nextTick()
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element, behavior })
+  globalStore.scrollElementIntoView({ element, behavior })
 }
 const showCard = async (cardId) => {
   await nextTick()
@@ -380,35 +384,35 @@ const showCard = async (cardId) => {
   await nextTick()
   startOpening()
   const item = cardStore.getCard(cardId)
-  store.dispatch('checkIfItemShouldIncreasePageSize', item)
+  globalStore.checkIfItemShouldIncreasePageSize(item)
   state.previousSelectedTag = {}
   updateMediaUrls()
   const connections = connectionStore.getItemConnections(cardId)
-  store.commit('updateCurrentCardConnections', connections)
+  globalStore.updateCurrentCardConnections(connections)
   prevCardName = card.value.name
   historyStore.pause()
   textareaSizes()
 }
 const closeCard = async () => {
-  store.commit('triggerHideTouchInterface')
+  globalStore.triggerHideTouchInterface()
   const cardId = prevCardId
   const item = cardStore.getCard(cardId)
   nameElement.value.blur() // safari scroll fix
   closeDialogs(true)
   cancelOpening()
   spaceStore.removeUnusedTagsFromCard(cardId)
-  store.commit('updateCurrentCardConnections')
-  store.commit('triggerUpdateHeaderAndFooterPosition')
-  store.commit('shouldPreventNextEnterKey', false)
+  globalStore.updateCurrentCardConnections()
+  globalStore.triggerUpdateHeaderAndFooterPosition()
+  globalStore.shouldPreventNextEnterKey = false
   if (!item) { return }
   const cardHasName = Boolean(item.name)
   const cardHasPendingUpload = uploadStore.hasPendingUploadForCardId(cardId)
   if (!cardHasName && !cardHasPendingUpload) {
     cardStore.removeCard(cardId)
   }
-  store.dispatch('updatePageSizes')
+  globalStore.updatePageSizes()
   updateDimensionsAndPaths(cardId)
-  store.dispatch('checkIfItemShouldIncreasePageSize', item)
+  globalStore.checkIfItemShouldIncreasePageSize(item)
   historyStore.resume()
   if (item.name || prevCardName) {
     historyStore.add({ cards: [item], useSnapshot: true })
@@ -427,15 +431,15 @@ const copyCardUrl = async (event) => {
   if (!state.shareCardIsVisible) { return }
   const canShare = spaceStore.getSpaceIsRemote
   if (!canShare) { return }
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   const url = cardUrl()
   try {
     await navigator.clipboard.writeText(url)
-    store.commit('addNotificationWithPosition', { message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 
@@ -458,9 +462,9 @@ const resetTextareaHeight = () => {
   nameElement.value.style.height = 'initial'
 }
 const focusName = async (position) => {
-  if (store.state.shouldPreventNextFocusOnName) {
+  if (globalStore.shouldPreventNextFocusOnName) {
     triggerUpdateHeaderAndFooterPosition()
-    store.commit('shouldPreventNextFocusOnName', false)
+    globalStore.shouldPreventNextFocusOnName = false
     return
   }
   await nextTick()
@@ -483,8 +487,8 @@ const name = computed({
     return card.value.name || ''
   },
   set (newName) {
-    if (store.state.shouldPreventNextEnterKey) {
-      store.commit('shouldPreventNextEnterKey', false)
+    if (globalStore.shouldPreventNextEnterKey) {
+      globalStore.shouldPreventNextEnterKey = false
       updateCardName(newName.trim())
     } else {
       updateCardName(newName)
@@ -499,7 +503,7 @@ const name = computed({
   }
 })
 const updateCardName = async (newName) => {
-  const cardId = store.state.cardDetailsIsVisibleForCardId
+  const cardId = globalStore.cardDetailsIsVisibleForCardId
   if (card.value.id !== cardId) {
     return
   }
@@ -536,7 +540,7 @@ const normalizedName = computed(() => {
 })
 const clickName = (event) => {
   triggerUpdatePaintSelectCanvasPositionOffset()
-  store.commit('searchIsVisible', false)
+  globalStore.searchIsVisible = false
   if (isCursorInsideTagBrackets()) {
     showTagPicker()
     event.stopPropagation()
@@ -597,8 +601,8 @@ const cancelOpeningAnimationFrame = () => {
   shouldCancelOpening = false
 }
 const startOpening = () => {
-  if (store.state.preventCardDetailsOpeningAnimation || !card.value.name) {
-    store.commit('preventCardDetailsOpeningAnimation', false)
+  if (globalStore.preventCardDetailsOpeningAnimation || !card.value.name) {
+    globalStore.currentDraggingCardId = false
     return
   }
   shouldCancelOpening = false
@@ -639,7 +643,7 @@ const openingAnimationFrame = (timestamp) => {
 
 // tags
 
-const currentSelectedTag = computed(() => store.state.currentSelectedTag)
+const currentSelectedTag = computed(() => globalStore.currentSelectedTag)
 
 const showTagPicker = () => {
   state.tag.pickerSearch = ''
@@ -740,7 +744,7 @@ const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
   for (const tagName of addTagsNames) {
-    const tag = store.getters.newTag({
+    const tag = globalStore.newTag({
       name: tagName,
       defaultColor: state.newTagColor || userStore.color,
       cardId: card.value.id,
@@ -761,8 +765,8 @@ const updateTags = async () => {
   await updatePreviousTags()
 }
 const hideTagDetailsIsVisible = () => {
-  store.commit('currentSelectedTag', {})
-  store.commit('tagDetailsIsVisible', false)
+  globalStore.currentSelectedTag = {}
+  globalStore.tagDetailsIsVisible = false
 }
 const updateCurrentSearchTag = async (tag) => {
   state.currentSearchTag = tag
@@ -783,7 +787,7 @@ const updateTagBracketsWithTag = async (tag) => {
   }
   updateCardName(newName)
   moveCursorPastTagEnd()
-  store.commit('shouldPreventNextEnterKey', false)
+  globalStore.shouldPreventNextEnterKey = false
 }
 
 // pickers
@@ -827,7 +831,7 @@ const triggerPickerNavigation = (event) => {
   const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
   const shouldTrigger = pickerIsVisible && !modifierKey
   if (shouldTrigger) {
-    store.commit('triggerPickerNavigationKey', event.key)
+    globalStore.triggerPickerNavigationKey(event.key)
     event.preventDefault()
   }
 }
@@ -836,7 +840,7 @@ const triggerPickerSelectItem = (event) => {
   const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
   const shouldTrigger = pickerIsVisible && !modifierKey
   if (shouldTrigger) {
-    store.commit('triggerPickerSelect')
+    globalStore.triggerPickerSelect()
     event.preventDefault()
   }
   // prevent trailing ]
@@ -938,7 +942,7 @@ const otherCardIsVisible = computed(() => {
   return isCardLink && hasUrls.value
 })
 const otherCard = computed(() => {
-  const item = store.getters.otherCardById(card.value.linkToCardId)
+  const item = globalStore.otherCardById(card.value.linkToCardId)
   return item
 })
 const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
@@ -950,7 +954,7 @@ const otherSpaceIsVisible = computed(() => {
   return isCardLink && hasUrls.value
 })
 const otherSpace = computed(() => {
-  const space = store.getters.otherSpaceById(card.value.linkToSpaceId)
+  const space = globalStore.otherSpaceById(card.value.linkToSpaceId)
   return space
 })
 const otherSpaceUrl = computed(() => {
@@ -1019,7 +1023,7 @@ const urlPreviewIsVisible = computed(() => {
   return Boolean(value)
 })
 const isLoadingUrlPreview = computed(() => {
-  const isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
+  const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
   return Boolean(isLoading)
 })
 const toggleUrlsIsVisible = () => {
@@ -1042,7 +1046,7 @@ const removeUrlPreview = async () => {
     urlPreviewDescription: '',
     urlPreviewIframeUrl: ''
   }
-  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   cardStore.updateCard(update)
 }
 
@@ -1067,7 +1071,7 @@ const addImageOrFile = async (file) => {
     updateCardName(newName)
   }
   // add new image or file url
-  store.commit('triggerUploadComplete', {
+  globalStore.triggerUploadComplete({
     cardId,
     spaceId,
     url: file.url
@@ -1175,7 +1179,7 @@ const splitCards = (event, isPreview) => {
 const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   cardStore.createCards(newCards)
   // update y positions
   // wait for cards to be added to dom
@@ -1183,12 +1187,12 @@ const addSplitCards = async (newCards) => {
     for (const newCard of newCards) {
       const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
-      newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
+      newCard.y = prevCard.y + (prevCardRect.height * globalStore.spaceCounterZoomDecimal) + spaceBetweenCards
       cardStore.updateCard(newCard)
-      store.commit('triggerUpdateUrlPreview', newCard.id)
+      globalStore.triggerUpdateUrlPreview(newCard.id)
       prevCard = newCard
     }
-    store.dispatch('updatePageSizes')
+    globalStore.updatePageSizes()
   }, 150)
 }
 
@@ -1296,7 +1300,7 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
   hideSpacePicker()
   await nextTick()
   focusName(position)
-  store.commit('shouldPreventNextEnterKey', false)
+  globalStore.shouldPreventNextEnterKey = false
   const update = {
     id: card.value.id,
     shouldShowOtherSpacePreviewImage: true
@@ -1357,10 +1361,10 @@ const checkIfShouldShowSpacePicker = () => {
 // touch mobile
 
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 const updatePinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
 }
 </script>
 

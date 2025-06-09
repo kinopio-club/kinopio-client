@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -18,7 +19,7 @@ import consts from '@/consts.js'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -26,19 +27,29 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const analyticsStore = useAnalyticsStore()
 
+let unsubscribes
+
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    const { type } = mutation
-    if (type === 'triggerCloseChildDialogs' && props.visible) {
-      const shouldPreventEmit = true
-      closeDialogs(shouldPreventEmit)
-    } else if (type === 'triggerSelectedCardsContainInBox') {
-      containItemsInNewBox()
-    } else if (type === 'triggerUpdateTheme') {
-      updateDefaultColor(utils.cssVariable('secondary-background'))
-    }
-  })
   updateDefaultColor(utils.cssVariable('secondary-background'))
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs' && props.visible) {
+        const shouldPreventEmit = true
+        closeDialogs(shouldPreventEmit)
+      } else if (name === 'triggerSelectedCardsContainInBox') {
+        containItemsInNewBox()
+      } else if (name === 'triggerUpdateTheme') {
+        updateDefaultColor(utils.cssVariable('secondary-background'))
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['closeDialogs'])
@@ -88,7 +99,7 @@ const closeDialogs = (shouldPreventEmit) => {
   state.tagPickerIsVisible = false
   state.colorPickerIsVisible = false
   state.fontPickerIsVisible = false
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
   if (shouldPreventEmit === true) { return }
   emit('closeDialogs')
 }
@@ -134,7 +145,7 @@ const label = computed(() => {
   }
   return label?.toUpperCase()
 })
-const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
+const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBoxId))
 const cardIds = computed(() => props.cards.map(card => card.id))
 
 // update name
@@ -239,10 +250,10 @@ const containItemsInNewBox = async () => {
     resizeHeight: rect.height + (padding + paddingTop)
   }
   boxStore.createBox(box)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   await nextTick()
   await nextTick()
-  store.commit('boxDetailsIsVisibleForBoxId', box.id)
+  globalStore.updateBoxDetailsIsVisibleForBoxId(box.id)
   analyticsStore.event('containItemsInNewBox')
 }
 

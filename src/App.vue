@@ -1,21 +1,22 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const broadcastStore = useBroadcastStore()
 const themeStore = useThemeStore()
+const globalStore = useGlobalStore()
 
 let statusRetryCount = 0
 
@@ -24,11 +25,6 @@ let unsubscribes
 onMounted(() => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUserIsLoaded') {
-      updateSystemTheme()
-    }
-  })
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
@@ -37,6 +33,11 @@ onMounted(() => {
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
+    }
+  )
   const broadcastStoreUnsubscribe = broadcastStore.$onAction(
     ({ name, args }) => {
       if (name === 'joinSpaceRoom') {
@@ -46,6 +47,7 @@ onMounted(() => {
   )
   unsubscribes = () => {
     broadcastStoreUnsubscribe()
+    globalStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -53,24 +55,24 @@ onBeforeUnmount(() => {
 })
 
 const spaceName = computed(() => spaceStore.name)
-const isSpacePage = computed(() => store.getters.isSpacePage)
+const isSpacePage = computed(() => globalStore.isSpacePage)
 
 // styles and position
 
 const pageWidth = computed(() => {
   if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
+  const size = Math.max(globalStore.pageWidth, globalStore.viewportWidth)
   return size + 'px'
 })
 const pageHeight = computed(() => {
   if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageHeight, store.state.viewportHeight)
+  const size = Math.max(globalStore.pageHeight, globalStore.viewportHeight)
   return size + 'px'
 })
 const pageCursor = computed(() => {
-  const isPanning = store.state.currentUserIsPanning
-  const isPanningReady = store.state.currentUserIsPanningReady
-  const toolbarIsBox = store.state.currentUserToolbar === 'box'
+  const isPanning = globalStore.currentUserIsPanning
+  const isPanningReady = globalStore.currentUserIsPanningReady
+  const toolbarIsBox = globalStore.currentUserToolbar === 'box'
   if (isPanning) {
     return 'grabbing'
   } else if (isPanningReady) {
@@ -80,7 +82,7 @@ const pageCursor = computed(() => {
   }
   return undefined
 })
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
 
 // users
 
@@ -91,7 +93,7 @@ const currentUserId = computed(() => userStore.id)
 const updateIsOnline = () => {
   const clientStatus = window.navigator.onLine
   if (!clientStatus) {
-    store.dispatch('isOnline', false)
+    globalStore.isOnline = false
     return
   }
   updateServerIsOnline()
@@ -102,10 +104,10 @@ const updateServerIsOnline = async () => {
   const serverStatus = await apiStore.getStatus()
   console.info('server online status', serverStatus)
   if (serverStatus) {
-    store.dispatch('isOnline', true)
+    globalStore.isOnline = true
   // error offline
   } else {
-    store.dispatch('isOnline', false)
+    globalStore.isOnline = false
   }
   // retry
   let delay // delay increases up to ~15 minutes
@@ -131,7 +133,7 @@ const updateSystemTheme = () => {
 // remote
 
 const broadcastUserLabelCursor = (event) => {
-  if (!store.getters.isSpacePage) { return }
+  if (!globalStore.isSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
   updates.userId = userStore.id
@@ -139,7 +141,7 @@ const broadcastUserLabelCursor = (event) => {
   broadcastStore.update({ updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
 }
 const isTouchDevice = () => {
-  store.commit('isTouchDevice', true)
+  globalStore.isTouchDevice = true
 }
 
 // rss

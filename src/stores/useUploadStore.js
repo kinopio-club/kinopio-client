@@ -1,12 +1,13 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -67,9 +68,11 @@ export const useUploadStore = defineStore('upload', {
       })
     },
     async uploadFile ({ file, cardId, spaceId, boxId }) {
+      const globalStore = useGlobalStore()
       const broadcastStore = useBroadcastStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const cardStore = useCardStore()
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
@@ -91,7 +94,7 @@ export const useUploadStore = defineStore('upload', {
       return new Promise(resolve => {
         const request = new XMLHttpRequest()
         // progress
-        request.upload.onprogress = (event) => {
+        request.upload.onprogress = async (event) => {
           const percentComplete = event.loaded / event.total * 100
           const percentCompleteDisplay = Math.floor(percentComplete)
           console.info(`🛫 Uploading ${fileName} for ${id}, percent: ${percentCompleteDisplay}`)
@@ -104,7 +107,7 @@ export const useUploadStore = defineStore('upload', {
             id: uploadId
           }
           this.updatePendingUpload(updates)
-          broadcastStore.updateStore({ updates, type: 'updateRemotePendingUploads' }, { root: true })
+          broadcastStore.updateStore({ updates, type: 'updateRemotePendingUploads' })
           // end
           if (percentComplete >= 100) {
             const complete = {
@@ -114,15 +117,13 @@ export const useUploadStore = defineStore('upload', {
               url: `${consts.cdnHost}/${key}`
             }
             console.info('🛬 Upload completed or failed', event, complete)
-            store.commit('triggerUploadComplete', complete, { root: true })
+            globalStore.triggerUploadComplete(complete)
             this.removePendingUpload({ cardId, spaceId, boxId })
             resolve(request.response)
-            nextTick(() => {
-              nextTick(() => {
-                const card = { id: cardId }
-                store.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
-              })
-            })
+            await nextTick()
+            await nextTick()
+            const card = { id: cardId }
+            cardStore.updateCardNameRemovePlaceholders(cardId)
           }
         }
         // start
@@ -135,24 +136,26 @@ export const useUploadStore = defineStore('upload', {
     async addCardsAndUploadFiles ({ files, event, position }) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const cardStore = useCardStore()
+      const globalStore = useGlobalStore()
       position = position || utils.cursorPositionInSpace(event)
-      store.dispatch('currentUser/notifyReadOnly', position, { root: true })
+      userStore.notifyReadOnly(position)
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) {
-        store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
+        globalStore.addNotification({ message: 'You can only upload files on spaces you can edit', type: 'info' })
         return
       }
       const cardIds = []
       if (!userStore.getUserIsSignedIn) {
-        store.commit('addNotificationWithPosition', { message: 'Sign Up or In', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
-        store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
+        globalStore.addNotificationWithPosition({ message: 'Sign Up or In', position, type: 'info', layer: 'space', icon: 'cancel' })
+        globalStore.addNotification({ message: 'To upload files, you need to Sign Up or In', type: 'info' })
         return
       }
       // check if outside space
       const isOutsideSpace = utils.isPositionOutsideOfSpace(position)
       if (isOutsideSpace) {
         position = utils.cursorPositionInPage(event)
-        store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' }, { root: true })
+        globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
         return
       }
       // check sizeLimit
@@ -161,8 +164,8 @@ export const useUploadStore = defineStore('upload', {
         return utils.isFileTooBig({ file, userIsUpgraded })
       })
       if (filesTooBig) {
-        store.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
-        store.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
+        globalStore.addNotificationWithPosition({ message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' })
+        globalStore.addNotification({ message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' })
         return
       }
       // add cards
@@ -179,7 +182,7 @@ export const useUploadStore = defineStore('upload', {
           name: consts.uploadPlaceholder,
           id: cardId
         }
-        store.dispatch('currentCards/add', { card: newCard }, { root: true })
+        cardStore.createCard(newCard)
         const fileName = utils.normalizeFileUrl(file.name)
         const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({
@@ -200,14 +203,14 @@ export const useUploadStore = defineStore('upload', {
           await this.uploadFile({ file, cardId })
         } catch (error) {
           console.error('🚒', error)
-          store.commit('addNotificationWithPosition', { message: error.message, position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
-          store.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
+          globalStore.addNotificationWithPosition({ message: error.message, position, type: 'danger', layer: 'space', icon: 'cancel' })
+          globalStore.addNotification({ message: error.message, type: 'danger' })
         }
       }))
       // remove placeholders from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
-        store.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
+        cardStore.updateCardNameRemovePlaceholders(cardId)
       })
     }
 

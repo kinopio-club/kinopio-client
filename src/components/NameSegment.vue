@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
@@ -13,7 +14,7 @@ import fonts from '@/data/fonts.js'
 import createFuzzySearch from '@nozbe/microfuzz'
 import smartquotes from 'smartquotes'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 let shouldCancel = false
 
@@ -30,8 +31,8 @@ const emit = defineEmits(['showTagDetailsIsVisible'])
 
 // state
 
-const currentSelectedTag = computed(() => { return store.state.currentSelectedTag })
-const currentSelectedOtherItem = computed(() => { return store.state.currentSelectedOtherItem })
+const currentSelectedTag = computed(() => { return globalStore.currentSelectedTag })
+const currentSelectedOtherItem = computed(() => { return globalStore.currentSelectedOtherItem })
 
 // styling
 
@@ -120,11 +121,11 @@ const matchIndexes = (name) => {
 // click
 
 const updateShouldCancel = (event) => {
-  shouldCancel = store.state.preventDraggedCardFromShowingDetails
+  shouldCancel = globalStore.preventDraggedCardFromShowingDetails
 }
 const openUrl = (event, url) => {
   event.preventDefault()
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (shouldCancel) {
     shouldCancel = false
   } else {

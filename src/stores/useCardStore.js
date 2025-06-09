@@ -9,7 +9,7 @@ import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -54,12 +54,13 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardsSelectableByY () {
+      const globalStore = useGlobalStore()
       let cards = this.allIds.map(id => this.byId[id])
       // filter
       cards = cards.filter(card => {
         if (card.isLocked) { return }
         if (card.isRemoved) { return }
-        if (store.state.filterComments && card.isComment) { return }
+        if (globalStore.filterComments && card.isComment) { return }
         return true
       })
       // sort by y
@@ -80,9 +81,10 @@ export const useCardStore = defineStore('cards', {
       return cards.filter(card => !card.isLocked && !card.isRemoved)
     },
     getCardsSelected () {
-      let ids = store.state.multipleCardsSelectedIds
+      const globalStore = useGlobalStore()
+      let ids = globalStore.multipleCardsSelectedIds
       if (!ids.length) {
-        ids = [store.state.currentDraggingCardId]
+        ids = [globalStore.currentDraggingCardId]
       }
       ids = ids.filter(id => Boolean(id))
       const cards = ids.map(id => this.byId[id])
@@ -247,13 +249,14 @@ export const useCardStore = defineStore('cards', {
     // create
 
     normailzeNewCard (card) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
-      const isComment = store.state.isCommentMode || userStore.getUserIsCommentOnly
+      const isComment = globalStore.isCommentMode || userStore.getUserIsCommentOnly
       card.id = id || nanoid()
       card.x = x || position.x
       card.y = y || position.y
@@ -279,21 +282,24 @@ export const useCardStore = defineStore('cards', {
       this.allIds.push(card.id)
     },
     async createCard (card, skipCardDetailsIsVisible) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const userNotificationStore = useUserNotificationStore()
       if (spaceStore.getShouldPreventAddCard) {
-        store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+        globalStore.updateNotifyCardsCreatedIsOverLimit(true)
         return
       }
       card = this.normailzeNewCard(card)
       this.addCardToState(card)
       if (!skipCardDetailsIsVisible) {
-        store.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+        globalStore.updateCardDetailsIsVisibleForCardId(card.id)
       }
-      if (card.isParentCard) { store.commit('parentCardId', card.id, { root: true }) }
+      if (card.isParentCard) {
+        globalStore.parentCardId = card.id
+      }
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
@@ -388,6 +394,15 @@ export const useCardStore = defineStore('cards', {
         connectionStore.updateConnectionPaths(ids)
       }
     },
+    updateCardNameRemovePlaceholders (cardId) {
+      const card = this.getCard(cardId)
+      if (!card) { return }
+      const name = card.name.replaceAll(consts.uploadPlaceholder, '')
+      this.updateCard({
+        id: card.id,
+        name
+      })
+    },
 
     // remove
 
@@ -437,7 +452,7 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
-      // historyStore.add({ cards, isRemoved: true }, { root: true })
+      // historyStore.add({ cards, isRemoved: true })
       // ?await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       const connectionStore = useConnectionStore()
       connectionStore.removeConnectionsFromItems(ids)
@@ -456,7 +471,7 @@ export const useCardStore = defineStore('cards', {
       } else {
         this.addCardToState(card)
         await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
-        await apiStore.addToQueue({ name: 'restoreRemovedCard', body: card }, { root: true })
+        await apiStore.addToQueue({ name: 'restoreRemovedCard', body: card })
         userStore.updateUserCardsCreatedCount([card])
       }
     },
@@ -464,25 +479,27 @@ export const useCardStore = defineStore('cards', {
     // position
 
     updatePageSize (card) {
+      const globalStore = useGlobalStore()
       const cardY = card.y + card.height
-      if (cardY >= store.state.pageHeight) {
-        store.commit('pageHeight', cardY, { root: true })
+      if (cardY >= globalStore.pageHeight) {
+        globalStore.pageHeight = cardY
       }
       const cardX = card.x + card.width
-      if (cardX >= store.state.pageWidth) {
-        store.commit('pageWidth', cardX, { root: true })
+      if (cardX >= globalStore.pageWidth) {
+        globalStore.pageWidth = cardX
       }
     },
     moveCards ({ endCursor, prevCursor, delta }) {
+      const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const zoom = store.getters.spaceCounterZoomDecimal
+      const zoom = globalStore.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
-      if (store.state.shouldSnapToGrid) {
+      if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
       }
@@ -504,7 +521,7 @@ export const useCardStore = defineStore('cards', {
         updates.push(update)
       })
       this.updateCards(updates)
-      store.commit('cardsWereDragged', true, { root: true })
+      globalStore.cardsWereDragged = true
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
       boxStore.updateBoxSnapGuides(cards, true)
@@ -520,6 +537,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
     },
     incrementCardZ (id) {
+      const globalStore = useGlobalStore()
       // highest z
       const cards = this.getAllCards
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
@@ -530,7 +548,7 @@ export const useCardStore = defineStore('cards', {
       }
       // update
       const updates = []
-      let ids = store.state.multipleCardsSelectedIds
+      let ids = globalStore.multipleCardsSelectedIds
       if (!ids.length) {
         ids = [id]
       }
@@ -561,7 +579,8 @@ export const useCardStore = defineStore('cards', {
       }
     },
     async distributeCardsVertically (cards) {
-      const zoom = store.getters.spaceCounterZoomDecimal
+      const globalStore = useGlobalStore()
+      const zoom = globalStore.spaceCounterZoomDecimal
       let prevCard
       let index = 0
       for (const card of cards) {
@@ -603,7 +622,8 @@ export const useCardStore = defineStore('cards', {
       }
     },
     async updateCardsDimensions (ids) {
-      const zoom = store.getters.spaceCounterZoomDecimal
+      const globalStore = useGlobalStore()
+      const zoom = globalStore.spaceCounterZoomDecimal
       ids = ids || this.allIds
       let cards = ids.map(id => this.getCard(id))
       cards = cards.filter(card => Boolean(card))
@@ -611,7 +631,7 @@ export const useCardStore = defineStore('cards', {
       if (!cards.length) { return }
       await nextTick()
       const updatedCards = []
-      store.commit('shouldExplicitlyRenderCardIds', ids, { root: true })
+      globalStore.updateShouldExplicitlyRenderCardIds(ids)
       const updates = []
       cards.forEach(card => {
         card.prevWidth = card.width
@@ -653,10 +673,11 @@ export const useCardStore = defineStore('cards', {
     // card details
 
     showCardDetails (id) {
+      const globalStore = useGlobalStore()
       this.incrementCardZ(id)
-      store.commit('cardDetailsIsVisibleForCardId', id, { root: true })
-      store.commit('parentCardId', id, { root: true })
-      store.commit('loadSpaceFocusOnCardId', '', { root: true })
+      globalStore.updateCardDetailsIsVisibleForCardId(id)
+      globalStore.parentCardId = id
+      globalStore.loadSpaceFocusOnCardId = ''
     },
 
     // checked
@@ -731,7 +752,7 @@ export const useCardStore = defineStore('cards', {
         width = Math.max(minImageWidth, width)
         width = Math.round(width)
         updates.push({ id, resizeWidth: width })
-        // broadcastStore.update({ updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        // broadcastStore.update({ updates, type: 'resizeCard', handler: 'currentCards/update' })
       })
       const connectionStore = useConnectionStore()
       connectionStore.updateConnectionPaths(ids)
@@ -788,6 +809,7 @@ export const useCardStore = defineStore('cards', {
       }, 100)
     },
     async pasteCard (card, id) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       card.id = id || nanoid()
@@ -799,12 +821,12 @@ export const useCardStore = defineStore('cards', {
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
         tags.forEach(tag => {
-          tag = store.getters.newTag({
+          tag = globalStore.newTag({
             name: tag,
             defaultColor: userStore.color,
             cardId: card.id,
             spaceId
-          }, { root: true })
+          })
           spaceStore.addTag(tag)
         })
       }

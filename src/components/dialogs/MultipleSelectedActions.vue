@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -20,7 +21,7 @@ import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -40,41 +41,41 @@ const state = reactive({
 })
 
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 const closeDialogs = () => {
   state.copyItemsIsVisible = false
   state.moveItemsIsVisible = false
   state.shareCardIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
-const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
-const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
-const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
+const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnectionsSelectedIds)
+const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
+const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
 
 const visible = computed(() => {
   const isSelectedItems = multipleConnectionsSelectedIds.value.length || multipleCardsSelectedIds.value.length || multipleBoxesSelectedIds.value.length
-  return store.state.multipleSelectedActionsIsVisible && isSelectedItems
+  return globalStore.multipleSelectedActionsIsVisible && isSelectedItems
 })
 watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
-    store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+    globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
     checkIsCardsConnected()
     scrollIntoView()
     closeDialogs()
     historyStore.snapshots()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
     historyStore.resume()
     historyStore.add({ cards: prevCards, boxes: prevBoxes, useSnapshot: true })
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 const isThemeDarkAndUserColorLight = computed(() => {
@@ -87,9 +88,9 @@ const colorClasses = computed(() => {
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
 
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 
@@ -148,9 +149,9 @@ const multipleItemsSelected = computed(() => {
   return Boolean(total > 1)
 })
 const styles = computed(() => {
-  const position = store.state.multipleSelectedActionsPosition
+  const position = globalStore.multipleSelectedActionsPosition
   let zoom = spaceCounterZoomDecimal.value
-  if (store.state.isTouchDevice) {
+  if (globalStore.isTouchDevice) {
     zoom = 1 / utils.visualViewport().scale
   }
   return {
@@ -248,7 +249,7 @@ const connectCards = (event) => {
   connections.forEach(connection => {
     connection.type = type
     connectionStore.createConnection(connection)
-    store.dispatch('addToMultipleConnectionsSelected', connection.id)
+    globalStore.addToMultipleConnectionsSelected(connection.id)
   })
 }
 const disconnectCards = () => {
@@ -330,11 +331,11 @@ const editableBoxes = computed(() => {
 const splitCard = () => {
   // open card details and trigger the split from there
   const cardId = cards.value[0].id
-  store.dispatch('clearMultipleSelected')
-  store.dispatch('closeAllDialogs')
-  store.commit('preventCardDetailsOpeningAnimation', true)
-  store.commit('cardDetailsIsVisibleForCardId', cardId)
-  store.commit('triggerSplitCard', cardId)
+  globalStore.clearMultipleSelected()
+  globalStore.closeAllDialogs()
+  globalStore.currentDraggingCardId = true
+  globalStore.updateCardDetailsIsVisibleForCardId(cardId)
+  globalStore.triggerSplitCard(cardId)
 }
 const positionNewCards = async (newCards) => {
   const spaceBetweenCards = 12
@@ -356,7 +357,7 @@ const positionNewCards = async (newCards) => {
     }
   })
   cardStore.updateCards(newCards)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 const cardsSortedByY = () => {
   return cards.value.sort((a, b) => {
@@ -469,8 +470,8 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   if (!shouldRemoveCardsOnly) {
     editableBoxes.value.forEach(box => boxStore.removeBox(box.id))
   }
-  store.dispatch('closeAllDialogs')
-  store.dispatch('clearMultipleSelected')
+  globalStore.closeAllDialogs()
+  globalStore.clearMultipleSelected()
 }
 
 </script>

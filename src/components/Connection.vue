@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -10,7 +11,7 @@ import { useUploadStore } from '@/stores/useUploadStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
@@ -18,11 +19,8 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
 
-let unsubscribe
 let unsubscribes
-
 let animationTimer, isMultiTouch, startCursor, currentCursor
-
 let observer
 
 const connectionElement = ref(null)
@@ -30,29 +28,31 @@ const connectionPathElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'clearMultipleSelected') {
-      const selectedIds = store.state.multipleConnectionsSelectedIds
-      const selected = selectedIds.includes(props.connection.id) || store.state.connectionDetailsIsVisibleForConnectionId === props.connection.id
-      if (!selected) {
-        cancelAnimation()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'clearMultipleSelected') {
+        const selectedIds = globalStore.multipleConnectionsSelectedIds
+        const selected = selectedIds.includes(props.connection.id) || globalStore.connectionDetailsIsVisibleForConnectionId === props.connection.id
+        if (!selected) {
+          cancelAnimation()
+        } else if (name === 'triggerConnectionDetailsIsVisible') {
+          const connectionId = args[0]
+          if (connectionId !== props.connection.id) { return }
+          const isFromStore = true
+          showConnectionDetails(args[0].event, isFromStore)
+        } else if (name === 'triggerUpdatePathWhileDragging') {
+          const connections = args[0]
+          if (!visible.value) { return }
+          connections.forEach(connection => {
+            if (connection.id !== props.connection.id) { return }
+            updatePathWhileDragging(connection.path)
+          })
+        } else if (name === 'closeAllDialogs') {
+          updatePathWhileDragging(null)
+        }
       }
-    } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
-      if (mutation.payload.connectionId === props.connection.id) {
-        const isFromStore = true
-        showConnectionDetails(mutation.payload.event, isFromStore)
-      }
-    } else if (mutation.type === 'triggerUpdatePathWhileDragging') {
-      const connections = mutation.payload
-      if (!visible.value) { return }
-      connections.forEach(connection => {
-        if (connection.id !== props.connection.id) { return }
-        updatePathWhileDragging(connection.path)
-      })
-    } else if (mutation.type === 'closeAllDialogs') {
-      updatePathWhileDragging(null)
     }
-  })
+  )
   const cardStoreUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (name === 'moveCards') {
@@ -61,12 +61,12 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStoreUnsubscribe()
     cardStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribe()
   unsubscribes()
 })
 
@@ -112,7 +112,7 @@ const connectionStyles = computed(() => {
     width: rect.width + 'px',
     height: rect.height + 'px'
   }
-  if (store.state.currentUserIsDraggingCard) {
+  if (globalStore.currentUserIsDraggingCard) {
     styles.pointerEvents = 'none'
   }
   return styles
@@ -130,7 +130,7 @@ const connectionPathClasses = computed(() => {
     active: isActive.value,
     filtered: isFiltered.value,
     hover: isHovered.value,
-    'hide-connection-outline': store.state.shouldHideConnectionOutline,
+    'hide-connection-outline': globalStore.shouldHideConnectionOutline,
     'is-hidden-by-opacity': isHiddenByCommentFilter.value,
     'is-connected-to-comment': isConnectedToCommentCard.value,
     'is-connected-to-checked-item': isConnectedToCheckedItem.value
@@ -166,19 +166,19 @@ const isConnectedToCommentCard = computed(() => {
   return startItem.isComment || endItem.isComment
 })
 const isConnectedToMultipleCardsSelected = computed(() => {
-  const cardIds = store.state.multipleCardsSelectedIds
+  const cardIds = globalStore.multipleCardsSelectedIds
   if (!cardIds.length) { return }
   return cardIds.find(cardId => {
     return (cardId === props.connection.startItemId || cardId === props.connection.endItemId)
   })
 })
 const isHoveredOverConnectedItem = computed(() => {
-  const itemId = store.state.currentUserIsHoveringOverCardId || store.state.currentUserIsHoveringOverBoxId
+  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId
   if (!itemId) { return }
   return (itemId === props.connection.startItemId || itemId === props.connection.endItemId)
 })
 const isCurrentItemConnection = computed(() => {
-  return store.state.currentItemConnections.includes(props.connection.id)
+  return globalStore.currentItemConnections.includes(props.connection.id)
 })
 const isConnectedToCheckedItem = computed(() => {
   const { startItem, endItem } = items.value
@@ -200,11 +200,11 @@ const addCardsAndUploadFiles = (event) => {
 // selected
 
 const isSelected = computed(() => {
-  const selectedIds = store.state.multipleConnectionsSelectedIds
+  const selectedIds = globalStore.multipleConnectionsSelectedIds
   return selectedIds.includes(props.connection.id)
 })
 const isRemoteSelected = computed(() => {
-  const isSelected = store.state.remoteConnectionsSelected.find(connection => connection.connectionId === props.connection.id)
+  const isSelected = globalStore.remoteConnectionsSelected.find(connection => connection.connectionId === props.connection.id)
   return isSelected
 })
 
@@ -212,16 +212,16 @@ const isRemoteSelected = computed(() => {
 
 const detailsIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
-  const detailsId = store.state.connectionDetailsIsVisibleForConnectionId
+  const detailsId = globalStore.connectionDetailsIsVisibleForConnectionId
   return detailsId === props.connection.id
 })
 const remoteDetailsIsVisible = computed(() => {
-  const isSelected = store.state.remoteConnectionDetailsVisible.find(connection => connection.connectionId === props.connection.id)
+  const isSelected = globalStore.remoteConnectionDetailsVisible.find(connection => connection.connectionId === props.connection.id)
   return isSelected
 })
 const showConnectionDetails = (event, isFromStore) => {
   if (isMultiTouch) { return }
-  if (!canEditSpace.value) { store.commit('triggerReadOnlyJiggle') }
+  if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
   if (!isFromStore) {
     currentCursor = utils.cursorPositionInViewport(event)
     if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
@@ -230,16 +230,16 @@ const showConnectionDetails = (event, isFromStore) => {
     console.error('🚒 missing connection path', props.connection.id, props.connection.path)
     return
   }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (event.shiftKey) {
-    store.dispatch('toggleMultipleConnectionsSelected', props.connection.id)
-    store.commit('previousMultipleConnectionsSelectedIds', utils.clone(store.state.multipleConnectionsSelectedIds))
+    globalStore.toggleMultipleConnectionsSelected(props.connection.id)
+    globalStore.previousMultipleConnectionsSelectedIds = globalStore.multipleConnectionsSelectedIds
     return
   }
   const dialogPosition = utils.cursorPositionInSpace(event)
-  store.dispatch('connectionDetailsIsVisibleForConnectionId', props.connection.id)
-  store.commit('connectionDetailsPosition', dialogPosition)
-  store.dispatch('clearMultipleSelected')
+  globalStore.connectionDetailsIsVisibleForConnectionId(props.connection.id)
+  globalStore.connectionDetailsPosition = dialogPosition
+  globalStore.clearMultipleSelected()
 }
 const showConnectionDetailsOnKeyup = (event) => {
   showConnectionDetails(event)
@@ -249,7 +249,7 @@ const showConnectionDetailsOnKeyup = (event) => {
 // label
 
 const isDraggingCurrentConnectionLabel = computed(() => {
-  const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
+  const connectionId = globalStore.currentUserIsDraggingConnectionIdLabel
   if (!connectionId) { return }
   const connection = connectionStore.getConnection(connectionId)
   if (!connection) { return }
@@ -269,13 +269,13 @@ const isHiddenByCommentFilter = computed(() => {
   return startItemIsComment || endItemIsComment || isConnectedToCommentCard.value
 })
 const filtersIsActive = computed(() => {
-  const types = store.state.filteredConnectionTypeIds
-  const frames = store.state.filteredFrameIds
-  const tags = store.state.filteredTagNames
+  const types = globalStore.filteredConnectionTypeIds
+  const frames = globalStore.filteredFrameIds
+  const tags = globalStore.filteredTagNames
   return Boolean(types.length + frames.length + tags.length)
 })
 const isCardsFilteredByFrame = computed(() => {
-  const frameIds = store.state.filteredFrameIds
+  const frameIds = globalStore.filteredFrameIds
   const startItem = items.value.startItem
   const endItem = items.value.endItem
   const startItemInFilter = frameIds.includes(startItem.frameId)
@@ -283,7 +283,7 @@ const isCardsFilteredByFrame = computed(() => {
   return startItemInFilter || endItemInFilter
 })
 const isConnectionFilteredByType = computed(() => {
-  const typeIds = store.state.filteredConnectionTypeIds
+  const typeIds = globalStore.filteredConnectionTypeIds
   if (!connectionType.value) { return }
   return typeIds.includes(connectionType.value.id)
 })
@@ -309,22 +309,22 @@ const directionIsVisible = computed(() => {
 
 // path
 
-const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
-const remoteBoxesIsDragging = computed(() => Boolean(store.state.remoteBoxesDragging.length))
+const remoteCardsIsDragging = computed(() => Boolean(globalStore.remoteCardsDragging.length))
+const remoteBoxesIsDragging = computed(() => Boolean(globalStore.remoteBoxesDragging.length))
 const remoteItemsIsDragging = computed(() => remoteCardsIsDragging.value || remoteBoxesIsDragging.value)
 const remoteItemsDragging = computed(() => {
-  const cards = utils.clone(store.state.remoteCardsSelected)
-  const boxes = utils.clone(store.state.remoteBoxesSelected)
+  const cards = utils.clone(globalStore.remoteCardsSelected)
+  const boxes = utils.clone(globalStore.remoteBoxesSelected)
   return cards.concat(boxes)
 })
 const remoteItemsSelected = computed(() => {
-  const cards = utils.clone(store.state.remoteCardsSelected)
-  const boxes = utils.clone(store.state.remoteBoxesSelected)
+  const cards = utils.clone(globalStore.remoteCardsSelected)
+  const boxes = utils.clone(globalStore.remoteBoxesSelected)
   return cards.concat(boxes)
 })
 const multipleItemsSelectedIds = computed(() => {
-  const cards = utils.clone(store.state.multipleCardsSelectedIds)
-  const boxes = utils.clone(store.state.multipleBoxesSelectedIds)
+  const cards = utils.clone(globalStore.multipleCardsSelectedIds)
+  const boxes = utils.clone(globalStore.multipleBoxesSelectedIds)
   return cards.concat(boxes)
 })
 const updatedPath = (path, controlPoint, x, y) => {
@@ -383,7 +383,7 @@ const cancelAnimation = () => {
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
-  if (store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
   return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
 })
 watch(() => shouldAnimate.value, (value, prevValue) => {
@@ -424,7 +424,7 @@ const focusOnDialog = async (event) => {
 
 const startDraggingConnection = (event) => {
   checkIsMultiTouch(event)
-  store.commit('shouldHideConnectionOutline', true)
+  globalStore.shouldHideConnectionOutline = true
   startCursor = utils.cursorPositionInViewport(event)
 }
 
@@ -440,16 +440,16 @@ const isActive = computed(() => {
     isDraggingCurrentConnectionLabel.value
 })
 const isHovered = computed(() => {
-  if (store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox) { return }
-  return props.connection.id === store.state.currentUserIsHoveringOverConnectionId ||
-    props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel ||
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
+  return props.connection.id === globalStore.currentUserIsHoveringOverConnectionId ||
+    props.connection.id === globalStore.currentUserIsDraggingConnectionIdLabel ||
     isHoveredOverConnectedItem.value
 })
 const handleMouseEnter = () => {
-  store.commit('currentUserIsHoveringOverConnectionId', props.connection.id)
+  globalStore.currentUserIsHoveringOverConnectionId = props.connection.id
 }
 const handleMouseLeave = () => {
-  store.commit('currentUserIsHoveringOverConnectionId', '')
+  globalStore.currentUserIsHoveringOverConnectionId = ''
 }
 const checkIsMultiTouch = (event) => {
   isMultiTouch = false
@@ -461,7 +461,7 @@ const checkIsMultiTouch = (event) => {
 // is visible in viewport
 
 const initViewportObserver = async () => {
-  if (store.state.disableViewportOptimizations) { return }
+  if (globalStore.disableViewportOptimizations) { return }
   await nextTick()
   try {
     const callback = (entries, observer) => {

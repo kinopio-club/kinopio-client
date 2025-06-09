@@ -9,7 +9,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
 
-import store from '@/store/store.js' // TEMP Import Vuex store
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
@@ -38,7 +38,7 @@ export const useSpaceStore = defineStore('space', {
 
   getters: {
     getSpaceAllState () {
-      return { ...this } // In method syntax, 'this' refers to the store instance
+      return { ...this } // 'this' refers to the store instance
     },
     getSpaceAllItems () {
       const cardStore = useCardStore()
@@ -117,14 +117,15 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const cards = store.state.multipleCardsSelectedIds.map(cardId => {
+      const globalStore = useGlobalStore()
+      const cards = globalStore.multipleCardsSelectedIds.map(cardId => {
         return cardStore.getCard(cardId)
       })
-      const boxes = store.state.multipleBoxesSelectedIds.map(boxId => {
+      const boxes = globalStore.multipleBoxesSelectedIds.map(boxId => {
         return boxStore.getBox(boxId)
       })
       const connections = connectionStore.getAllConnections.filter(connection => {
-        const selectedIds = store.state.multipleCardsSelectedIds.concat(store.state.multipleBoxesSelectedIds)
+        const selectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
         const isStartCardMatch = selectedIds.includes(connection.startItemId)
         const isEndCardMatch = selectedIds.includes(connection.endItemId)
         return isStartCardMatch && isEndCardMatch
@@ -224,6 +225,7 @@ export const useSpaceStore = defineStore('space', {
       return members.find(member => member.id === userId)
     },
     getSpaceUserById (userId) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const groupStore = useGroupStore()
       // current user
@@ -236,7 +238,7 @@ export const useSpaceStore = defineStore('space', {
         return user
       }
       // commenters
-      const otherUser = store.getters.otherUserById(userId)
+      const otherUser = globalStore.otherUserById(userId)
       if (otherUser) {
         return otherUser
       }
@@ -245,7 +247,8 @@ export const useSpaceStore = defineStore('space', {
       return groupUser
     },
     getSpaceReadOnlyKey (space) {
-      const readOnlyKey = store.state.spaceReadOnlyKey
+      const globalStore = useGlobalStore()
+      const readOnlyKey = globalStore.spaceReadOnlyKey
       if (space.id === readOnlyKey.spaceId) {
         return readOnlyKey.key
       } else {
@@ -256,9 +259,10 @@ export const useSpaceStore = defineStore('space', {
     // init
 
     async initializeSpace () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
-      store.commit('isLoadingSpace', true, { root: true })
-      const spaceUrl = store.state.spaceUrlToLoad
+      globalStore.isLoadingSpace = true
+      const spaceUrl = globalStore.spaceUrlToLoad
       // restore from url
       if (spaceUrl) {
         console.info('🚃 Restore space from url', spaceUrl)
@@ -266,14 +270,14 @@ export const useSpaceStore = defineStore('space', {
         const space = { id: spaceId }
         await this.loadSpace(space)
       // restore inbox space
-      } else if (store.state.loadInboxSpace) {
+      } else if (globalStore.loadInboxSpace) {
         console.info('🚃 Restore inbox space')
         await this.loadInboxSpace()
       // create new space
-      } else if (store.state.loadNewSpace) {
+      } else if (globalStore.loadNewSpace) {
         console.info('🚃 Create new space')
         await this.createSpace()
-        store.commit('loadNewSpace', false, { root: true })
+        globalStore.loadNewSpace = false
       // restore last space
       } else if (userStore.lastSpaceId) {
         console.info('🚃 Restore last space', userStore.lastSpaceId)
@@ -284,15 +288,16 @@ export const useSpaceStore = defineStore('space', {
         shouldLoadNewHelloSpace = true
       }
       await this.checkIfShouldCreateNewUserSpaces()
-      store.commit('triggerUpdateWindowHistory', null, { root: true })
-      store.commit('isLoadingSpace', false, { root: true })
+      globalStore.triggerUpdateWindowHistory()
+      globalStore.isLoadingSpace = false
     },
 
     // load
 
     async loadPrevSpaceInSession () {
-      const prevSpaceIdInSession = store.state.prevSpaceIdInSession
-      const prevSpacePosition = store.state.prevSpaceIdInSessionPagePosition
+      const globalStore = useGlobalStore()
+      const prevSpaceIdInSession = globalStore.prevSpaceIdInSession
+      const prevSpacePosition = globalStore.prevSpaceIdInSessionPagePosition
       if (!prevSpaceIdInSession) { return }
       let space = await cache.space(prevSpaceIdInSession)
       if (space.id) {
@@ -308,6 +313,7 @@ export const useSpaceStore = defineStore('space', {
       })
     },
     restoreSpace (space) {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
@@ -324,12 +330,13 @@ export const useSpaceStore = defineStore('space', {
       delete space.connections
       this.$patch(space)
       console.log('🍍', space)
-      store.dispatch('updatePageSizes')
+      globalStore.updatePageSizes()
     },
     async getRemoteSpace (space) {
       const userStore = useUserStore()
       const apiStore = useApiStore()
-      const collaboratorKey = store.state.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
+      const globalStore = useGlobalStore()
+      const collaboratorKey = globalStore.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       if (collaboratorKey) {
         space.collaboratorKey = collaboratorKey.collaboratorKey
       }
@@ -341,7 +348,7 @@ export const useSpaceStore = defineStore('space', {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await apiStore.getSpaceAnonymously(space)
           cache.saveInvitedSpace(remoteSpace)
-          store.commit('clearSpaceCollaboratorKeys', null, { root: true })
+          globalStore.clearSpaceCollaboratorKeys()
         } else if (this.getSpaceIsRemote) {
           remoteSpace = await apiStore.getSpaceAnonymously(space)
         }
@@ -353,6 +360,7 @@ export const useSpaceStore = defineStore('space', {
       }
     },
     async loadRemoteSpace (space) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       let remoteSpace
       try {
@@ -361,45 +369,46 @@ export const useSpaceStore = defineStore('space', {
         console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         const preventRepeatError = loadSpaceIdsError.includes(space.id)
         if (preventRepeatError) {
-          store.commit('notifySpaceNotFound', true, { root: true })
+          globalStore.updateNotifySpaceNotFound(true)
           return
         }
         if (error.status === 404) {
-          store.commit('notifySpaceNotFound', true, { root: true })
+          globalStore.updateNotifySpaceNotFound(true)
           this.loadLastSpace(space) //
         }
         if (error.status === 401) {
-          store.commit('notifySpaceNotFound', true, { root: true })
+          globalStore.updateNotifySpaceNotFound(true)
           this.removeLocalSpaceIfUserIsRemoved(space) //
           this.loadLastSpace(space) //
           cache.removeInvitedSpace(space)
           userStore.updateUserFavoriteSpace(space, false)
         }
         if (error.status === 500) {
-          store.commit('notifyConnectionError', true, { root: true })
+          globalStore.updateNotifyConnectionError(true)
         }
       }
       if (!remoteSpace) {
-        store.commit('isLoadingSpace', false, { root: true })
+        globalStore.isLoadingSpace = false
         return
       }
       // only restore current space
-      if (remoteSpace.id !== store.state.id) { return }
+      if (remoteSpace.id !== globalStore.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
     clearStateMeta () {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
+      const globalStore = useGlobalStore()
       const user = { id: userStore.id }
       isLoadingRemoteSpace = false
-      store.commit('notifySpaceIsRemoved', false, { root: true })
-      store.commit('spaceUrlToLoad', '', { root: true })
-      store.commit('userHasScrolled', false, { root: true })
+      globalStore.notifySpaceIsRemoved = false
+      globalStore.spaceUrlToLoad = ''
+      globalStore.userHasScrolled = false
       broadcastStore.leaveSpaceRoom({ user, type: 'userLeftRoom' })
-      store.commit('clearAllNotifications', null, { root: true })
-      store.commit('clearSpaceFilters', null, { root: true })
-      store.commit('clearSearch', null, { root: true })
-      store.commit('shouldPreventNextEnterKey', false, { root: true })
+      globalStore.clearAllNotifications()
+      globalStore.clearSpaceFilters()
+      globalStore.clearSearch()
+      globalStore.shouldPreventNextEnterKey = false
     },
     restoreSpaceLocal (space) {
       const historyStore = useHistoryStore()
@@ -419,17 +428,18 @@ export const useSpaceStore = defineStore('space', {
       this.restoreSpace(space)
     },
     async loadSpace (space) {
+      const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
       space.connections = utils.migrationConnections(space.connections)
-      if (!store.state.isEmbedMode) {
-        store.commit('triggerSpaceZoomReset', null, { root: true })
+      if (!globalStore.isEmbedMode) {
+        globalStore.triggerSpaceZoomReset()
       }
-      store.commit('isAddPage', false, { root: true })
+      globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
       space = utils.normalizeSpace(cachedSpace)
       this.clearStateMeta()
-      store.commit('resetPageSizes', null, { root: true })
+      globalStore.resetPageSizes()
       // load local space while fetching remote space
       try {
         const [localData, remoteData] = await Promise.all([
@@ -440,16 +450,16 @@ export const useSpaceStore = defineStore('space', {
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        store.commit('triggerUpdateWindowTitle', null, { root: true })
+        globalStore.triggerUpdateWindowTitle()
         groupStore.loadGroup(remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
-          store.commit('isLoadingSpace', false, { root: true })
+          globalStore.isLoadingSpace = false
           this.updateSpacePreviewImage()
           // always update drawing
           this.drawingImage = remoteSpace.drawingImage
           await cache.updateSpaceByUpdates({ drawingImage: remoteSpace.drawingImage }, this.id)
-          store.commit('triggerDrawingRedraw', null, { root: true })
+          globalStore.triggerDrawingRedraw()
           return
         }
         await this.restoreSpaceRemote(remoteSpace)
@@ -459,12 +469,12 @@ export const useSpaceStore = defineStore('space', {
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
-      store.dispatch('updateCurrentSpaceIsUnavailableOffline', space.id, { root: true })
-      store.dispatch('updateCurrentUserIsInvitedButCannotEditCurrentSpace', space, { root: true })
+      globalStore.updateCurrentSpaceIsUnavailableOffline(space.id)
+      globalStore.updateCurrentUserIsInvitedButCannotEditCurrentSpace(space)
       // focus card
-      const cardId = store.state.focusOnCardId
+      const cardId = globalStore.focusOnCardId
       if (cardId) {
-        store.commit('triggerScrollCardIntoView', cardId, { root: true })
+        globalStore.triggerScrollCardIntoView(cardId)
       }
     },
     async loadInboxSpace (prevFailedSpace) {
@@ -522,37 +532,39 @@ export const useSpaceStore = defineStore('space', {
       }
     },
     async changeSpace (space) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
-      store.dispatch('prevSpaceIdInSession', this.id, { root: true })
-      store.commit('clearAllInteractingWithAndSelected', null, { root: true })
+      globalStore.updatePrevSpaceIdInSession(this.id)
+      globalStore.clearAllInteractingWithAndSelected()
       console.info('🚟 Change space', space)
-      store.commit('isLoadingSpace', true, { root: true })
-      store.commit('notifySpaceIsRemoved', false, { root: true })
-      store.commit('currentUserToolbar', 'card', { root: true })
+      globalStore.isLoadingSpace = true
+      globalStore.notifySpaceIsRemoved = false
+      globalStore.currentUserToolbar('card')
       space = utils.migrationEnsureRemovedCards(space)
       await this.loadSpace(space)
-      store.commit('triggerUpdateWindowHistory', space, { root: true })
+      globalStore.triggerUpdateWindowHistory(space)
       const userIsMember = userStore.getUserIsSpaceMember
       if (!userIsMember) { return }
-      store.commit('parentCardId', '', { root: true })
+      globalStore.parentCardId = ''
       this.updateUserLastSpaceId()
-      const cardId = store.state.loadSpaceFocusOnCardId
+      const cardId = globalStore.loadSpaceFocusOnCardId
       if (cardId) {
-        store.dispatch('focusOnCardId', cardId, { root: true })
+        globalStore.updateFocusOnCardId(cardId)
       }
-      store.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
+      globalStore.restoreMultipleSelectedItemsToLoad()
       const body = { id: space.id, updatedAt: new Date() }
       await apiStore.addToQueue({
         name: 'updateSpace',
         body
-      }, { root: true })
+      })
       await cache.updateSpace('updatedAt', body.updatedAt, space.id)
     },
 
     // save
 
     async saveSpace () {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const space = this.getSpaceAllState
@@ -561,12 +573,12 @@ export const useSpaceStore = defineStore('space', {
       cache.saveSpace(space)
       this.addUserToSpace(user)
       this.incrementCardsCreatedCountFromSpace(space)
-      store.commit('isLoadingSpace', false, { root: true })
-      store.commit('triggerUpdateWindowHistory', null, { root: true })
+      globalStore.isLoadingSpace = false
+      globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
         name: 'createSpace',
         body: space
-      }, { root: true })
+      })
       // const cardStore = useCardStore()
       // cardStore.updateCardsDimensions()
     },
@@ -589,6 +601,7 @@ export const useSpaceStore = defineStore('space', {
       this.changeSpace(space)
     },
     async duplicateSpace () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const space = this.getSpaceAllItems
@@ -596,17 +609,18 @@ export const useSpaceStore = defineStore('space', {
       broadcastStore.leaveSpaceRoom({ user: { id: user.id }, type: 'userLeftRoom' })
       let uniqueNewSpace = utils.resetSpaceMeta({ space, user, type: 'copy' })
       uniqueNewSpace = await cache.updateIdsInSpace(space)
-      store.commit('clearSearch', null, { root: true })
+      globalStore.clearSearch()
       isLoadingRemoteSpace = false
-      store.commit('resetPageSizes', null, { root: true })
+      globalStore.resetPageSizes()
       this.restoreSpace(uniqueNewSpace)
       await this.saveSpace()
-      store.commit('addNotification', { message: 'Duplicated Space', type: 'success' }, { root: true })
+      globalStore.addNotification({ message: 'Duplicated Space', type: 'success' })
     },
     async createNewSpace (name) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const user = userStore.getUserAllState
-      store.commit('triggerSpaceZoomReset', null, { root: true })
+      globalStore.triggerSpaceZoomReset()
       let space = utils.clone(newSpace)
       space.name = name || utils.newSpaceName()
       space.id = nanoid()
@@ -633,7 +647,7 @@ export const useSpaceStore = defineStore('space', {
           x: 73,
           y: 125,
           z: 0,
-          name: `${moonPhaseSystemCommandIcon} ${date} ${store.getters.dateImageUrl}`,
+          name: `${moonPhaseSystemCommandIcon} ${date} ${globalStore.getDateImageUrl}`,
           width: 144,
           height: 144,
           resizeWidth: 144
@@ -649,12 +663,13 @@ export const useSpaceStore = defineStore('space', {
       space.previewThumbnailImage = null
       const nullCardUsers = true
       const uniqueNewSpace = await cache.updateIdsInSpace(space, nullCardUsers)
-      store.commit('clearSearch', null, { root: true })
+      globalStore.clearSearch()
       isLoadingRemoteSpace = false
-      store.commit('resetPageSizes', null, { root: true })
+      globalStore.resetPageSizes()
       await this.restoreSpace(uniqueNewSpace)
     },
     async createSpace () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const user = { id: userStore.id }
@@ -662,9 +677,10 @@ export const useSpaceStore = defineStore('space', {
       await this.createNewSpace()
       await this.saveSpace()
       this.updateUserLastSpaceId()
-      store.commit('notifySignUpToEditSpace', false, { root: true })
+      globalStore.notifySignUpToEditSpace = false
     },
     async createNewHelloSpace () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const user = userStore.getUserAllState
       let space = utils.newHelloSpace(user)
@@ -674,8 +690,8 @@ export const useSpaceStore = defineStore('space', {
       space.readOnlyKey = nanoid()
       if (shouldLoadNewHelloSpace) {
         space = await cache.updateIdsInSpace(space)
-        store.commit('clearSearch', null, { root: true })
-        store.commit('resetPageSizes', null, { root: true })
+        globalStore.clearSearch()
+        globalStore.resetPageSizes()
         this.restoreSpace(space)
         this.addUserToSpace(user)
         this.updateOtherUsers()
@@ -685,9 +701,10 @@ export const useSpaceStore = defineStore('space', {
         const nullCardUsers = true
         await cache.updateIdsInSpace(space, nullCardUsers)
       }
-      store.commit('triggerUpdateWindowTitle', null, { root: true })
+      globalStore.triggerUpdateWindowTitle()
     },
     async createNewInboxSpace (shouldCreateWithoutLoading) {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const userStore = useUserStore()
       let space = utils.clone(inboxSpace)
@@ -706,10 +723,10 @@ export const useSpaceStore = defineStore('space', {
         const nullCardUsers = true
         await cache.updateIdsInSpace(space, nullCardUsers) // saves space
       } else {
-        store.commit('isLoadingSpace', true, { root: true })
-        store.commit('clearSearch', null, { root: true })
+        globalStore.isLoadingSpace = true
+        globalStore.clearSearch()
         isLoadingRemoteSpace = false
-        store.commit('resetPageSizes', null, { root: true })
+        globalStore.resetPageSizes()
         this.restoreSpace(space)
         await nextTick()
         cardStore.updateCardsDimensions()
@@ -749,6 +766,7 @@ export const useSpaceStore = defineStore('space', {
       userStore.updateUser({ lastSpaceId: this.id })
     },
     async updateOtherUsers () {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const cardStore = useCardStore()
       const cards = cardStore.getAllCards
@@ -769,13 +787,14 @@ export const useSpaceStore = defineStore('space', {
       try {
         const users = await apiStore.getPublicUsers(otherUserIds)
         users.forEach(user => {
-          store.commit('updateOtherUsers', user, { root: true })
+          globalStore.updateOtherUsers(user)
         })
       } catch (error) {
         console.warn('🚑 updateOtherUsers', error)
       }
     },
     async updateOtherItems (options) {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const userStore = useUserStore()
       const apiStore = useApiStore()
@@ -790,9 +809,9 @@ export const useSpaceStore = defineStore('space', {
         let space, card
         // don't update if item already exists
         if (spaceId) {
-          const space = store.getters.otherSpaceById(spaceId)
+          const space = globalStore.otherSpaceById(spaceId)
         } else if (cardId) {
-          const card = store.getters.otherCardById(cardId)
+          const card = globalStore.otherCardById(cardId)
         }
         if (space || card) { return }
         // add options to items to fetch
@@ -824,8 +843,8 @@ export const useSpaceStore = defineStore('space', {
       for (const key of keys) {
         this[key] = update[key]
       }
-      broadcastStore.update({ update, type: 'updateSpace' }, { root: true })
-      await apiStore.addToQueue({ name: 'updateUser', body: update }, { root: true })
+      broadcastStore.update({ update, type: 'updateSpace' })
+      await apiStore.addToQueue({ name: 'updateUser', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
     updateGroupMeta (space) {
@@ -836,24 +855,26 @@ export const useSpaceStore = defineStore('space', {
     // remove
 
     async removeSpace () {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const space = this.getSpaceAllState
       this.decrementCardsCreatedCountFromSpace(space)
       await cache.removeSpace(space)
-      store.commit('prevSpaceIdInSession', '', { root: true })
+      globalStore.updatePrevSpaceIdInSession = ''
       await apiStore.addToQueue({
         name: 'removeSpace',
         body: { id: space.id }
-      }, { root: true })
+      })
     },
     async deleteSpace (space) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       await cache.deleteSpace(space)
-      store.commit('prevSpaceIdInSession', '', { root: true })
+      globalStore.updatePrevSpaceIdInSession = ''
       await apiStore.addToQueue({
         name: 'deleteSpace',
         body: space
-      }, { root: true })
+      })
     },
     async deleteAllRemovedSpaces () {
       const apiStore = useApiStore()
@@ -863,15 +884,16 @@ export const useSpaceStore = defineStore('space', {
       for (const space of removedSpaces) {
         await cache.deleteSpace(space)
       }
-      await apiStore.addToQueue({ name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
+      await apiStore.addToQueue({ name: 'deleteAllRemovedSpaces', body: { userId } })
     },
     async removeCurrentUserFromSpace () {
+      const globalStore = useGlobalStore()
       const spaceIdToRemove = this.id
       const name = this.name
       const space = { id: spaceIdToRemove }
       this.loadLastSpace()
       await cache.removeSpace(space)
-      store.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
+      globalStore.addNotification({ message: `You were removed as a collaborator from ${name}`, type: 'info' })
     },
     removeEmptyCards () {
       const cardStore = useCardStore()
@@ -943,11 +965,12 @@ export const useSpaceStore = defineStore('space', {
       }
     },
     async removeCollaboratorFromSpace (user) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const space = this.getSpaceAllState
-      broadcastStore.update({ user, type: 'userLeftSpace' }, { root: true })
+      broadcastStore.update({ user, type: 'userLeftSpace' })
       apiStore.removeSpaceCollaborator({ space, user })
       this.collaborators = this.collaborators.filter(collaborator => {
         return collaborator.id !== user.id
@@ -958,10 +981,10 @@ export const useSpaceStore = defineStore('space', {
         this.loadLastSpace()
         cache.removeInvitedSpace(space)
         cache.deleteSpace(space)
-        store.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
+        globalStore.addNotification({ message: `You left ${space.name}`, type: 'success' })
       } else {
         const userName = user.name || 'User'
-        store.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
+        globalStore.addNotification({ message: `${userName} removed from space`, type: 'success' })
       }
     },
     async removeUserFromSpace (removeUser) {
@@ -975,25 +998,27 @@ export const useSpaceStore = defineStore('space', {
     // notify
 
     notifySpaceIsOpen () {
+      const globalStore = useGlobalStore()
       if (this.isRemoved) { return }
       const userStore = useUserStore()
       const isSpaceMember = userStore.getUserIsSpaceMember
       const spaceIsOpen = this.privacy === 'open'
       if (!isSpaceMember && spaceIsOpen) {
-        store.commit('addNotification', { message: 'This space is open to comments', icon: 'comment', type: 'success' }, { root: true })
+        globalStore.addNotification({ message: 'This space is open to comments', icon: 'comment', type: 'success' })
       }
     },
 
     // user card count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       if (this.getSpaceCreatorIsUpgraded) { return }
       if (userStore.isUpgraded) { return }
       const cardsCreatedLimit = consts.cardsCreatedLimit
       const value = cardsCreatedLimit - userStore.cardsCreatedCount
       if (utils.isBetween({ value, min: 0, max: 15 })) {
-        store.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
+        globalStore.notifyCardsCreatedIsNearLimit = true
       }
     },
     incrementCardsCreatedCountFromSpace (space) {
@@ -1097,10 +1122,11 @@ export const useSpaceStore = defineStore('space', {
       })
     },
     checkIfShouldPauseConnectionDirections () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const prefersReducedMotion = consts.userPrefersReducedMotion()
       const userSetting = userStore.shouldPauseConnectionDirections
-      const isInteracting = store.getters.isInteractingWithItem
+      const isInteracting = globalStore.isInteractingWithItem
       const shouldPause = prefersReducedMotion || userSetting || isInteracting
       if (shouldPause) {
         this.pauseConnectionDirections()
@@ -1112,10 +1138,11 @@ export const useSpaceStore = defineStore('space', {
     // inbox
 
     async updateInboxCache () {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
-      const isOffline = !store.state.isOnline
+      const isOffline = !globalStore.isOnline
       if (this.getSpaceIsInbox) { return }
       if (!isSignedIn) { return }
       if (isOffline) { return }

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -13,8 +14,8 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -92,7 +93,7 @@ const toggleCurrentUserSpacesIsVisibleOnly = () => {
 }
 const changeSpace = (space) => {
   spaceStore.changeSpace(space)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 const updateLinks = async () => {
   const spaceId = spaceStore.id

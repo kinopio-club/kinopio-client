@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -23,7 +24,7 @@ import debounce from 'lodash-es/debounce'
 import times from 'lodash-es/times'
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -34,7 +35,7 @@ const searchInputElement = ref(null)
 const inputElement = ref(null)
 const dialogElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 const props = defineProps({
   visible: Boolean,
@@ -47,20 +48,25 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   refreshGradients()
   updateDefaultColor()
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUploadComplete') {
-      const { spaceId, url, cardId } = mutation.payload
-      if (cardId) { return }
-      if (spaceId !== props.space?.id) { return }
-      updateBackground(url)
-    } else if (mutation.type === 'triggerUpdateTheme') {
-      updateDefaultColor()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUploadComplete') {
+        const { spaceId, url, cardId } = args[0]
+        if (cardId) { return }
+        if (spaceId !== props.space?.id) { return }
+        updateBackground(url)
+      } else if (name === 'triggerUpdateTheme') {
+        updateDefaultColor()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -104,7 +110,7 @@ watch(() => props.visible, (value, prevValue) => {
     if (state.error.isNotImageUrl) {
       removeBackground()
     }
-    store.commit('clearNotificationsWithPosition')
+    globalStore.clearNotificationsWithPosition()
   }
 })
 
@@ -136,8 +142,8 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !isVisible
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const closeDialogs = async () => {
   state.colorPickerIsVisible = false
@@ -184,7 +190,7 @@ const focusAndSelectSearchInput = async () => {
   element.setSelectionRange(0, length)
 }
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 const toggleUrlInputIsVisible = () => {
   state.urlInputIsVisible = !state.urlInputIsVisible
@@ -322,7 +328,7 @@ const uploadFile = async () => {
   const spaceId = props.space?.id
   const input = inputElement.value
   const file = input.files[0]
-  const userIsUpgraded = store.state.currentUser.isUpgraded
+  const userIsUpgraded = globalStore.currentUser.isUpgraded
   const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
   if (isFileTooBig) {
     state.error.sizeLimit = true
@@ -352,7 +358,7 @@ const pendingUpload = computed(() => {
   })
 })
 const remotePendingUpload = computed(() => {
-  const remotePendingUploads = store.state.remotePendingUploads
+  const remotePendingUploads = globalStore.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const isInProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === props.space?.id

@@ -1,16 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const store = useStore()
 
 // date cards
 
-const dateImageUrl = computed(() => store.state.dateImageUrl)
+const dateImageUrl = computed(() => globalStore.getDateImageUrl)
 const shouldHideDateCards = computed(() => { return userStore.shouldHideDateCards })
 const toggleShouldHideDateCards = () => {
   const value = !shouldHideDateCards.value

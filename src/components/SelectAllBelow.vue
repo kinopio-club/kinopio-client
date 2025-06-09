@@ -1,12 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -28,18 +29,18 @@ const state = reactive({
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const isSelectingY = computed(() => store.state.isSelectingY)
+const isSelectingY = computed(() => globalStore.isSelectingY)
 const updateIsSelectingY = (value) => {
-  if (store.state.isSelectingX) {
+  if (globalStore.isSelectingX) {
     value = false
   }
-  store.commit('isSelectingY', value)
+  globalStore.isSelectingY = value
 }
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
   if (toolbarIsDrawing.value) { return }
-  if (store.state.isSelectingX) { return }
-  if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
+  if (globalStore.isSelectingX) { return }
+  if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
   return state.isVisible
 })
 
@@ -62,10 +63,10 @@ const updateIsMetaKey = (event) => {
 const handleMouseMove = (event) => {
   if (!event.target.closest) { return }
   if (!canEditSpace.value) { return }
-  if (store.state.currentUserIsPainting) { return }
-  if (store.state.currentUserIsDraggingCard) { return }
-  if (store.state.currentUserIsDraggingBox) { return }
-  if (store.state.isEmbedMode) { return }
+  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.isEmbedMode) { return }
   updateIsMetaKey(event)
   const edgeThreshold = 30
   const toolbar = document.querySelector('#toolbar').getBoundingClientRect()
@@ -115,11 +116,11 @@ const handleMouseUp = (event) => {
 
 const selectItems = (event) => {
   const position = utils.cursorPositionInSpace(event)
-  store.commit('preventMultipleSelectedActionsIsVisible', true)
+  globalStore.preventMultipleSelectedActionsIsVisible = true
   if (state.isMetaKey) {
-    store.commit('triggerSelectAllItemsAboveCursor', position)
+    globalStore.triggerSelectAllItemsAboveCursor(position)
   } else {
-    store.commit('triggerSelectAllItemsBelowCursor', position)
+    globalStore.triggerSelectAllItemsBelowCursor(position)
   }
 }
 </script>

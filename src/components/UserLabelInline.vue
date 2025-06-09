@@ -1,11 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const labelElement = ref(null)
 
@@ -32,9 +33,9 @@ const userName = computed(() => {
 
 // user details
 
-const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const userDetailsIsVisible = computed(() => globalStore.userDetailsIsVisible)
 const userDetailsIsUser = computed(() => {
-  const userDetailsUser = store.state.userDetailsUser
+  const userDetailsUser = globalStore.userDetailsUser
   return props.user?.id === userDetailsUser.id
 })
 const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value && userDetailsIsUser.value)
@@ -43,7 +44,7 @@ const toggleUserDetailsIsVisible = () => {
   event.stopPropagation()
   const isVisible = userDetailsIsVisibleForUser.value
   if (isVisible) {
-    store.commit('userDetailsIsVisible', false)
+    globalStore.userDetailsIsVisible = false
     return
   }
   showUserDetails()
@@ -55,9 +56,9 @@ const showUserDetails = () => {
   //   options.offsetX = -190
   // }
   const position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsUser', props.user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
+  globalStore.userDetailsUser = props.user
+  globalStore.userDetailsPosition = position
+  globalStore.userDetailsIsVisible = true
 }
 const title = computed(() => {
   return props.title || props.user?.name

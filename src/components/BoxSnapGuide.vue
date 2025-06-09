@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -8,25 +9,30 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribes
 
 let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
 onMounted(() => {
   updateRect()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'clearDraggingItems') {
-      cancelWaitingAnimationFrame()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'clearDraggingItems') {
+        cancelWaitingAnimationFrame()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -39,19 +45,19 @@ const state = reactive({
 })
 watch(() => state.snapStatus, (value, prevValue) => {
   if (value === 'ready') {
-    store.commit('notifyBoxSnappingIsReady', true)
+    globalStore.notifyBoxSnappingIsReady = true
   } else {
-    store.commit('notifyBoxSnappingIsReady', false)
+    globalStore.notifyBoxSnappingIsReady = false
   }
 })
 
 const currentBoxIsSelected = computed(() => {
-  const selected = store.state.multipleBoxesSelectedIds
+  const selected = globalStore.multipleBoxesSelectedIds
   return selected.find(id => props.box.id === id)
 })
 const currentBoxIsBeingDragged = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox
-  const isCurrent = store.state.currentDraggingBoxId === props.box.id
+  const isDragging = globalStore.currentUserIsDraggingBox
+  const isCurrent = globalStore.currentDraggingBoxId === props.box.id
   return isDragging && (isCurrent || currentBoxIsSelected.value)
 })
 const otherBoxes = computed(() => {
@@ -61,7 +67,7 @@ const otherBoxes = computed(() => {
 // is snapping
 
 const currentBoxSnapGuide = computed(() => {
-  const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
+  const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
   if (isMultipleBoxesSelectedIds) { return }
   const guides = boxStore.boxSnapGuides
   return guides.find(guide => {
@@ -80,7 +86,7 @@ watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
 
 const userColor = computed(() => userStore.color)
 const snapGuideSide = computed(() => {
-  const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
+  const isDraggingItem = globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingCard
   if (!isDraggingItem) { return }
   const snapGuide = currentBoxSnapGuide.value
   if (!snapGuide) { return null }

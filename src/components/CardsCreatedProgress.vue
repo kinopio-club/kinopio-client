@@ -1,22 +1,33 @@
 <script setup>
-import { reactive, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
-import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
+import { reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
+let unsubscribes
+
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({
@@ -28,17 +39,17 @@ const cardsCreatedLimit = computed(() => consts.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (currentUserIsSignedIn) {
-    store.commit('triggerUpgradeUserIsVisible')
+    globalStore.triggerUpgradeUserIsVisible()
   } else {
-    store.commit('triggerSignUpOrInIsVisible')
+    globalStore.triggerSignUpOrInIsVisible()
   }
 }
 
 const toggleFreeLimitFAQIsVisible = () => {
   const value = !state.freeLimitFAQIsVisible
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
   state.freeLimitFAQIsVisible = value
 }
 const closeChildDialogs = () => {

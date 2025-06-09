@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -9,7 +10,7 @@ import UserSettingsControls from '@/components/subsections/UserSettingsControls.
 import UserSettingsCards from '@/components/subsections/UserSettingsCards.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -19,19 +20,19 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
 
-const visible = computed(() => store.state.userSettingsIsVisible)
+const visible = computed(() => globalStore.userSettingsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
     updateDialogHeight()
     restoreUserPrevSettingsSection()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 const closeChildDialogs = () => {
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 
 const state = reactive({
@@ -69,11 +70,11 @@ const restoreUserPrevSettingsSection = () => {
 
 // pin
 
-const userSettingsIsPinned = computed(() => { return store.state.userSettingsIsPinned })
+const userSettingsIsPinned = computed(() => { return globalStore.userSettingsIsPinned })
 const toggleUserSettingsIsPinned = () => {
   closeChildDialogs()
   const value = !userSettingsIsPinned.value
-  store.dispatch('userSettingsIsPinned', value)
+  globalStore.userSettingsIsPinned = value
 }
 
 </script>

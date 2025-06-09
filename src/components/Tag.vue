@@ -1,10 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-
-const store = useStore()
 
 const emit = defineEmits(['clickTag'])
 

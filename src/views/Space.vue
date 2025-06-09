@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -56,10 +57,10 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
-const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -68,15 +69,15 @@ const analyticsStore = useAnalyticsStore()
 const broadcastStore = useBroadcastStore()
 const historyStore = useHistoryStore()
 
-let unsubscribe
+let unsubscribes
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
 const init = async () => {
-  if (store.state.shouldNotifyIsJoiningGroup) {
-    store.commit('notifyIsJoiningGroup', true)
+  if (globalStore.shouldNotifyIsJoiningGroup) {
+    globalStore.updateNotifyIsJoiningGroup(true)
   }
   apiStore.updateDateImage()
   analyticsStore.event('pageview')
@@ -84,7 +85,7 @@ const init = async () => {
   await spaceStore.initializeSpace()
   broadcastStore.connect()
   await groupStore.initializeGroups()
-  await store.dispatch('updateTags')
+  await globalStore.updateTags()
   checkIfShouldShowExploreOnLoad()
 }
 init()
@@ -108,18 +109,9 @@ onMounted(() => {
   window.addEventListener('beforeunload', unloadPage)
   window.addEventListener('popstate', loadSpaceOnBackOrForward)
   document.fonts.ready.then(event => {
-    store.commit('webfontIsLoaded', true)
-  })
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace
-      dragItemsOnNextTick()
-    } else if (mutation.type === 'triggerAddBox') {
-      const event = mutation.payload
-      addBox(event)
-    }
+    globalStore.webfontIsLoaded = true
   })
   updateIconsNotDraggable()
-
   setTimeout(() => {
     spaceStore.updateInboxCache()
   }, 15000) // 15 seconds after mounted
@@ -134,10 +126,22 @@ onMounted(() => {
     spaceStore.updateInboxCache()
     apiStore.updateDateImage()
   }, 1000 * 60 * 60 * 1) // every 1 hour
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace
+        dragItemsOnNextTick()
+      } else if (name === 'triggerAddBox') {
+        const event = args[0]
+        addBox(event)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
@@ -151,6 +155,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(hourlyTasks)
+  unsubscribes()
 })
 
 const state = reactive({
@@ -158,53 +163,59 @@ const state = reactive({
 })
 
 const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
-const isPainting = computed(() => store.state.currentUserIsPainting)
-const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
-const isPanning = computed(() => store.state.currentUserIsPanning)
+const isPainting = computed(() => globalStore.currentUserIsPainting)
+const isPanningReady = computed(() => globalStore.currentUserIsPanningReady)
+const isPanning = computed(() => globalStore.currentUserIsPanning)
 const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
-const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
-const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
-const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
-const isResizingBox = computed(() => store.state.currentUserIsResizingBox)
-const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
+const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
+const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
+const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
+const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
+const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
+const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const checkIfShouldShowExploreOnLoad = () => {
-  const shouldShow = store.state.shouldShowExploreOnLoad
+  const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
-    store.commit('triggerExploreIsVisible', null)
+    globalStore.triggerExploreIsVisible()
   }
-  store.commit('shouldShowExploreOnLoad', false)
+  globalStore.shouldShowExploreOnLoad = false
 }
 
 // page size
 
-watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
+watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
-watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
+watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
   if (prevValue && !value) {
     afterResizeCards()
   }
   updatePageSizeFromMutation(value)
 })
-watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
+watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
-// watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
+watch(() => isInteracting.value, (value, prevValue) => {
+  if (value) {
+    globalStore.preventMultipleSelectedActionsIsVisible = true
+  }
+})
+// watch(() => globalStore.currentUserIsResizingBox, (value, prevValue) => {
 //   if (prevValue && !value) {
 //     afterResizeBoxes()
 //   }
 //   updatePageSizeFromMutation(value)
 // })
+
 const updatePageSizeFromMutation = async (value) => {
   if (!value) {
     await nextTick()
-    store.dispatch('updatePageSizes')
+    globalStore.updatePageSizes()
   }
 }
 const updateViewportSizes = () => {
-  store.dispatch('updateViewportSizes')
+  globalStore.updateViewportSizes()
 }
 
 // user
@@ -218,15 +229,15 @@ const users = computed(() => {
 
 // styles
 
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
+const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.spaceCounterZoomDecimal
   return {
     width: `${pageWidth.value * zoom}px`,
     height: `${pageHeight.value * zoom}px`,
-    transform: store.getters.zoomTransform
+    transform: globalStore.zoomTransform
   }
 })
 
@@ -242,7 +253,7 @@ const loadSpaceOnBackOrForward = (event) => {
 const unloadPage = () => {
   broadcastStore.close()
   spaceStore.removeEmptyCards()
-  store.commit('triggerUnloadPage')
+  globalStore.triggerUnloadPage()
 }
 
 // cards
@@ -258,29 +269,29 @@ const addCard = (event) => {
   if (spaceIsReadOnly.value) { return }
   const newCard = { position, isParentCard }
   cardStore.createCard(newCard)
-  store.commit('childCardId', '')
+  globalStore.childCardId = ''
 }
 const addOrCloseCard = (event) => {
   const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
-  if (store.state.shouldAddCard) {
+  if (globalStore.shouldAddCard) {
     let position = utils.cursorPositionInSpace(event)
     // prevent addCard if position is outside space
     if (utils.isPositionOutsideOfSpace(position)) {
       position = utils.cursorPositionInPage(event)
-      store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+      globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
       return
     }
     // add card
     addCard(event)
   // close item details
-  } else if ((store.state.cardDetailsIsVisibleForCardId || store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
-    store.dispatch('closeAllDialogs')
+  } else if ((globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
+    globalStore.closeAllDialogs()
   }
 }
 const tiltCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
-  const cardIds = store.state.currentUserIsTiltingCardIds
+  const cardIds = globalStore.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
     delta = -delta
@@ -288,35 +299,35 @@ const tiltCards = (event) => {
   cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
-  if (!store.state.currentUserIsTiltingCard) { return }
+  if (!globalStore.currentUserIsTiltingCard) { return }
   historyStore.resume()
-  const cardIds = store.state.currentUserIsTiltingCardIds
+  const cardIds = globalStore.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
   historyStore.add({ cards, useSnapshot: true })
-  store.commit('currentUserIsTiltingCard', false)
+  globalStore.currentUserIsTiltingCard = false
   broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
 const resizeCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
-  const cardIds = store.state.currentUserIsResizingCardIds
+  const cardIds = globalStore.currentUserIsResizingCardIds
   const deltaX = endCursor.x - prevCursor.x
   cardStore.resizeCards(cardIds, deltaX)
 }
 const stopResizingCards = async () => {
-  if (!store.state.currentUserIsResizingCard) { return }
+  if (!globalStore.currentUserIsResizingCard) { return }
   historyStore.resume()
-  const cardIds = store.state.currentUserIsResizingCardIds
+  const cardIds = globalStore.currentUserIsResizingCardIds
   const cards = cardIds.map(id => cardStore.getCard(id))
   historyStore.add({ cards, useSnapshot: true })
   await cardStore.updateCardsDimensions(cardIds)
-  store.commit('currentUserIsResizingCard', false)
+  globalStore.currentUserIsResizingCard = false
   broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
 const afterResizeCards = () => {
-  if (!store.state.shouldSnapToGrid) { return }
-  const cardIds = store.state.currentUserIsResizingCardIds
+  if (!globalStore.shouldSnapToGrid) { return }
+  const cardIds = globalStore.currentUserIsResizingCardIds
   const cards = cardIds.map(cardId => {
     let { id, resizeWidth } = cardStore.getCard(cardId)
     resizeWidth = utils.roundToNearest(resizeWidth)
@@ -340,18 +351,18 @@ const addBox = (event) => {
   let position = utils.cursorPositionInSpace(event)
   if (utils.isPositionOutsideOfSpace(position)) {
     position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
   userStore.notifyReadOnly(position)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) {
-    store.dispatch('currentUserToolbar', 'card')
+    globalStore.updateCurrentUserToolbar('card')
     return
   }
   const isResizing = true
   boxStore.createBox(position, isResizing)
-  store.commit('currentBoxIsNew', true)
+  globalStore.currentBoxIsNew = true
   event.preventDefault() // allows dragging boxes without scrolling on touch
 }
 const resizeBoxes = () => {
@@ -359,7 +370,7 @@ const resizeBoxes = () => {
   const boxes = boxStore.getBoxesResizing
   const ids = boxes.map(box => box.id)
 
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.spaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
     y: endCursor.y - prevCursor.y
@@ -371,7 +382,7 @@ const resizeBoxes = () => {
   boxStore.resizeBoxes(ids, delta)
 }
 const stopResizingBoxes = () => {
-  if (!store.state.currentUserIsResizingBox) { return }
+  if (!globalStore.currentUserIsResizingBox) { return }
   historyStore.resume()
 
   // const boxes = boxStore.getBoxesResizing
@@ -379,45 +390,45 @@ const stopResizingBoxes = () => {
 
   // useConnectionStore.updateConnectionPaths(boxIds)
   // historyStore.add({ boxes, useSnapshot: true })
-  store.commit('currentUserIsResizingBox', false)
-  store.dispatch('currentUserToolbar', 'card')
+  globalStore.currentUserIsResizingBox = false
+  globalStore.updateCurrentUserToolbar('card')
   broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
-  // store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
+  // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
 const checkIfShouldSnapBoxes = (event) => {
-  if (!store.state.boxesWereDragged) { return }
+  if (!globalStore.boxesWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    if (!store.state.notifyBoxSnappingIsReady) { return }
+    if (!globalStore.notifyBoxSnappingIsReady) { return }
     boxStore.updateBoxSnapToPosition(snapGuide)
   })
 }
 const checkIfShouldExpandBoxes = (event) => {
-  if (!store.state.cardsWereDragged) { return }
+  if (!globalStore.cardsWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    if (!store.state.notifyBoxSnappingIsReady) { return }
+    if (!globalStore.notifyBoxSnappingIsReady) { return }
     console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
 const unselectCardsInDraggedBox = () => {
-  if (!store.state.currentDraggingBoxId) { return }
-  if (store.state.multipleBoxesSelectedIds.length) { return }
-  store.dispatch('clearMultipleSelected')
+  if (!globalStore.currentDraggingBoxId) { return }
+  if (globalStore.multipleBoxesSelectedIds.length) { return }
+  globalStore.clearMultipleSelected()
 }
 const showBoxDetails = async (event) => {
-  if (!store.state.currentBoxIsNew) { return }
+  if (!globalStore.currentBoxIsNew) { return }
   if (utils.isMobile()) { return }
-  const boxId = store.state.currentUserIsResizingBoxIds[0]
+  const boxId = globalStore.currentUserIsResizingBoxIds[0]
   await nextTick()
   await nextTick()
   updateSizeForNewBox(boxId)
-  store.commit('boxDetailsIsVisibleForBoxId', boxId)
+  globalStore.updateBoxDetailsIsVisibleForBoxId(boxId)
 }
 const updateSizeForNewBox = (boxId) => {
   const box = boxStore.getBox(boxId)
@@ -450,10 +461,10 @@ const dragItems = () => {
   boxStore.moveBoxes({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
-  const isInitialDrag = !store.state.boxesWereDragged
+  const isInitialDrag = !globalStore.boxesWereDragged
   if (isInitialDrag) {
     const updates = {
-      boxId: store.state.currentDraggingBoxId,
+      boxId: globalStore.currentDraggingBoxId,
       userId: userStore.id
     }
     broadcastStore.updateStore({ updates, type: 'addToRemoteBoxesDragging' })
@@ -470,17 +481,17 @@ const footerDialogIsVisible = () => {
 }
 const checkIfShouldHideFooter = (event) => {
   if (event.target.nodeType !== 1) { return } // firefox check
-  const isTouchDevice = store.state.isTouchDevice
+  const isTouchDevice = globalStore.isTouchDevice
   if (!isTouchDevice) { return }
   const node = event.target.nodeName
   const isTextarea = node === 'TEXTAREA'
   const isInput = node === 'INPUT'
   if (footerDialogIsVisible()) {
-    store.commit('shouldHideFooter', false)
+    globalStore.shouldHideFooter = false
   } else if (isTextarea || isInput) {
-    store.commit('shouldHideFooter', true)
+    globalStore.shouldHideFooter = true
   } else {
-    store.commit('shouldHideFooter', false)
+    globalStore.shouldHideFooter = false
   }
 }
 
@@ -488,12 +499,12 @@ const checkIfShouldHideFooter = (event) => {
 
 const showMultipleSelectedActions = (event) => {
   if (spaceIsReadOnly.value) { return }
-  if (store.state.preventMultipleSelectedActionsIsVisible) { return }
-  const isMultipleSelected = store.state.multipleCardsSelectedIds.length || store.state.multipleConnectionsSelectedIds.length || store.state.multipleBoxesSelectedIds.length
+  if (globalStore.preventMultipleSelectedActionsIsVisible) { return }
+  const isMultipleSelected = globalStore.multipleCardsSelectedIds.length || globalStore.multipleConnectionsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length
   if (isMultipleSelected) {
     const position = utils.cursorPositionInSpace(event)
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
+    globalStore.multipleSelectedActionsPosition = position
+    globalStore.updateMultipleSelectedActionsIsVisible(true)
   }
 }
 
@@ -504,10 +515,7 @@ const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 // interactions
 
 const isInteracting = computed(() => {
-  if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
-    store.commit('preventMultipleSelectedActionsIsVisible', true)
-    return true
-  } else { return false }
+  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value
 })
 const blurButtonClick = (event) => {
   const isMouseOrTouchEvent = event.type.includes('mouse') || event.type.includes('touch')
@@ -542,15 +550,15 @@ const updateShouldSnapToGrid = (event) => {
   let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
-  if (!store.state.shouldSnapToGrid && shouldSnap) {
-    const item = store.getters.currentInteractingItem
-    store.commit('snapGuideLinesOrigin', {
+  if (!globalStore.shouldSnapToGrid && shouldSnap) {
+    const item = globalStore.currentInteractingItem
+    globalStore.snapGuideLinesOrigin = {
       x: item.x,
       y: item.y
-    })
+    }
   }
   // should snap to grid
-  store.commit('shouldSnapToGrid', shouldSnap)
+  globalStore.shouldSnapToGrid = shouldSnap
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
@@ -558,7 +566,7 @@ const interact = (event) => {
   if (isDraggingCard.value) {
     dragItems()
   } else if (isDraggingBox.value) {
-    store.commit('currentDraggingCardId', '')
+    globalStore.currentDraggingCardId = ''
     dragBoxes(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
@@ -572,14 +580,14 @@ const interact = (event) => {
 const checkShouldShowDetails = () => {
   const shouldShow = !utils.cursorsAreClose(state.startCursor, endCursor)
   if (!shouldShow) { return }
-  if (store.state.currentUserIsDraggingCard) {
-    store.commit('preventDraggedCardFromShowingDetails', true)
-  } else if (store.state.currentUserIsDraggingBox) {
-    store.commit('preventDraggedBoxFromShowingDetails', true)
+  if (globalStore.currentUserIsDraggingCard) {
+    globalStore.preventDraggedCardFromShowingDetails = true
+  } else if (globalStore.currentUserIsDraggingBox) {
+    globalStore.preventDraggedBoxFromShowingDetails = true
   }
 }
 const cursor = () => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.spaceCounterZoomDecimal
   let cursor
   if (utils.objectHasKeys(prevCursor)) {
     cursor = prevCursor
@@ -609,8 +617,8 @@ const shouldCancelInteraction = (event) => {
     return true
   }
   if (eventIsFromTextarea(event)) { return true }
-  if (store.state.shouldCancelNextMouseUpInteraction) {
-    store.commit('shouldCancelNextMouseUpInteraction', false)
+  if (globalStore.shouldCancelNextMouseUpInteraction) {
+    globalStore.shouldCancelNextMouseUpInteraction = false
     return true
   }
   if (!event.target.closest) { return } // event is outside window
@@ -623,21 +631,21 @@ const shouldCancelInteraction = (event) => {
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
 const isDevelpmentBadgeVisible = computed(() => {
-  if (store.state.isPresentationMode) { return }
+  if (globalStore.isPresentationMode) { return }
   return consts.isDevelopment()
 })
 const handleTouchEnd = (event) => {
-  store.commit('isPinchZooming', false)
-  store.commit('isTouchScrolling', false)
+  globalStore.isPinchZooming = false
+  globalStore.isTouchScrolling = false
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
-  const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
+  const isCardsSelected = globalStore.currentDraggingCardId || globalStore.multipleCardsSelectedIds.length
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {
-    store.commit('triggerUpdateHeaderAndFooterPosition')
+    globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
@@ -647,27 +655,27 @@ const stopInteractions = async (event) => {
   unselectCardsInDraggedBox()
   showMultipleSelectedActions(event)
   showBoxDetails(event)
-  store.commit('preventMultipleSelectedActionsIsVisible', false)
-  store.commit('importArenaChannelIsVisible', false)
-  store.commit('shouldAddCard', false)
-  store.commit('preventDraggedCardFromShowingDetails', false)
-  store.commit('preventDraggedBoxFromShowingDetails', false)
+  globalStore.preventMultipleSelectedActionsIsVisible = false
+  globalStore.importArenaChannelIsVisible = false
+  globalStore.shouldAddCard = false
+  globalStore.preventDraggedCardFromShowingDetails = false
+  globalStore.preventDraggedBoxFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
-  store.commit('currentUserIsPainting', false)
-  store.commit('currentUserIsPaintingLocked', false)
-  store.commit('currentUserIsDraggingCard', false)
-  store.commit('currentUserIsDraggingBox', false)
-  store.commit('boxesWereDragged', false)
-  store.commit('cardsWereDragged', false)
-  store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
+  globalStore.currentUserIsPainting = false
+  globalStore.currentUserIsPaintingLocked = false
+  globalStore.currentUserIsDraggingCard = false
+  globalStore.currentUserIsDraggingBox = false
+  globalStore.boxesWereDragged = false
+  globalStore.cardsWereDragged = false
+  globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   prevCursor = undefined
-  store.commit('clearDraggingItems')
+  globalStore.clearDraggingItems()
   await nextTick()
   await nextTick()
-  store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
-  store.commit('shouldSnapToGrid', false)
+  globalStore.clearShouldExplicitlyRenderCardIds()
+  globalStore.shouldSnapToGrid = false
 }
 </script>
 

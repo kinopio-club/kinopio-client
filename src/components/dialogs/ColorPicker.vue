@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -15,7 +16,7 @@ import { colord, extend } from 'colord'
 import labPlugin from 'colord/plugins/lab'
 extend([labPlugin])
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -74,13 +75,13 @@ const updateDialogHeight = async () => {
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 const triggerUpdateHeaderAndFooterPosition = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 
 // recent colors

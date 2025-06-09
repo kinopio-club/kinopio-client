@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -12,11 +13,11 @@ import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribes
 
 const footerElement = ref(null)
 
@@ -28,28 +29,33 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
   window.addEventListener('resize', updatePosition)
   updatePosition()
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
-      updatePosition()
-    } else if (mutation.type === 'triggerHideTouchInterface') {
-      hideOnTouch()
-    } else if (mutation.type === 'isPresentationMode') {
-      if (!mutation.payload) {
-        store.commit('shouldExplicitlyHideFooter', false)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateHeaderAndFooterPosition') {
+        updatePosition()
+      } else if (name === 'triggerHideTouchInterface') {
+        hideOnTouch()
+      } else if (name === 'isPresentationMode') {
+        if (!args[0]) {
+          globalStore.shouldExplicitlyHideFooter = false
+        }
+      } else if (name === 'closeAllDialogs') {
+        if (!globalStore.minimapIsPinned) {
+          hideMinimap()
+        }
+      } else if (name === 'triggerMinimapIsVisible') {
+        toggleMinimap()
       }
-    } else if (mutation.type === 'closeAllDialogs') {
-      if (!store.state.minimapIsPinned) {
-        hideMinimap()
-      }
-    } else if (mutation.type === 'triggerMinimapIsVisible') {
-      toggleMinimap()
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   window.removeEventListener('resize', updatePosition)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -58,13 +64,13 @@ const state = reactive({
   minimapIsVisible: false
 })
 
-const isPinchZooming = computed(() => store.state.isPinchZooming)
+const isPinchZooming = computed(() => globalStore.isPinchZooming)
 watch(() => isPinchZooming.value, (value, prevValue) => {
   if (value) {
     updatePosition()
   }
 })
-const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
 watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
     if (!utils.isAndroid()) { return }
@@ -74,18 +80,18 @@ watch(() => isTouchScrolling.value, (value, prevValue) => {
   }
 })
 
-const isAddPage = computed(() => store.state.isAddPage)
-const isEmbedMode = computed(() => store.state.isEmbedMode)
+const isAddPage = computed(() => globalStore.isAddPage)
+const isEmbedMode = computed(() => globalStore.isEmbedMode)
 const currentUser = computed(() => userStore.getUserAllState)
-const shouldExplicitlyHideFooter = computed(() => store.state.shouldExplicitlyHideFooter)
-const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
-const multipleSelectedActionsIsVisible = computed(() => store.state.multipleSelectedActionsIsVisible)
-const connectionDetailsIsVisibleForConnectionId = computed(() => store.state.connectionDetailsIsVisibleForConnectionId)
-const shouldHideFooter = computed(() => store.state.shouldHideFooter)
-const isTouchDevice = computed(() => store.getters.isTouchDevice)
+const shouldExplicitlyHideFooter = computed(() => globalStore.shouldExplicitlyHideFooter)
+const cardDetailsIsVisibleForCardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
+const multipleSelectedActionsIsVisible = computed(() => globalStore.multipleSelectedActionsIsVisible)
+const connectionDetailsIsVisibleForConnectionId = computed(() => globalStore.connectionDetailsIsVisibleForConnectionId)
+const shouldHideFooter = computed(() => globalStore.shouldHideFooter)
+const isTouchDevice = computed(() => globalStore.getIsTouchDevice)
 const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
-const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
+const isFadingOut = computed(() => globalStore.isFadingOutDuringTouch)
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
 // visible
@@ -102,7 +108,7 @@ const leftIsVisble = computed(() => {
 const leftControlsIsVisible = computed(() => {
   if (isPresentationMode.value) { return }
   if (shouldExplicitlyHideFooter.value) { return }
-  // const isTouchDevice = store.state.isTouchDevice
+  // const isTouchDevice = globalStore.isTouchDevice
   // if (!isTouchDevice) { return true }
   if (contentDialogIsVisible.value) { return }
   if (shouldHideFooter.value) { return }
@@ -110,9 +116,9 @@ const leftControlsIsVisible = computed(() => {
 })
 const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
-  if (store.state.minimapIsPinned) { return true }
+  if (globalStore.minimapIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
-  // const isTouchDevice = store.state.isTouchDevice
+  // const isTouchDevice = globalStore.isTouchDevice
   // if (!isTouchDevice) { return true }
   if (contentDialogIsVisible.value) { return }
   if (shouldHideFooter.value) { return }
@@ -121,10 +127,10 @@ const rightControlsIsVisible = computed(() => {
 
 // presentation mode
 
-const isPresentationMode = computed(() => store.state.isPresentationMode)
+const isPresentationMode = computed(() => globalStore.isPresentationMode)
 const togglePresentationMode = () => {
   const value = !isPresentationMode.value
-  store.commit('isPresentationMode', value)
+  globalStore.isPresentationMode = value
 }
 
 // minimap
@@ -161,16 +167,16 @@ const cancelHidden = () => {
 
 // settings
 
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const userSettingsIsVisible = computed(() => globalStore.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = () => {
-  const value = !store.state.userSettingsIsVisible
-  store.commit('userSettingsIsVisible', value)
+  const value = !globalStore.userSettingsIsVisible
+  globalStore.userSettingsIsVisible = value
 }
 
 // position
 
 const updatePosition = async () => {
-  if (!store.state.isTouchScrolling) {
+  if (!globalStore.isTouchScrolling) {
     updatePositionFrame()
     return
   }

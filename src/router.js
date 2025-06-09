@@ -1,11 +1,11 @@
-import Space from '@/views/Space.vue'
-import store from '@/store/store.js'
-import consts from './consts.js'
-
 import { createRouter, createWebHistory } from 'vue-router'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+
+import Space from '@/views/Space.vue'
+import consts from './consts.js'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,9 +21,10 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('./views/Add.vue'),
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         window.document.title = 'Add Card'
         const urlParams = new URLSearchParams(window.location.search)
-        store.commit('isAddPage', true)
+        globalStore.isAddPage = true
         next()
       }
     }, {
@@ -31,8 +32,9 @@ const router = createRouter({
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
-        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
+        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         next()
       }
     }, {
@@ -40,8 +42,9 @@ const router = createRouter({
       name: 'beta',
       component: Space,
       beforeEnter: (to, from, next) => {
-        store.commit('isBeta', true)
-        store.commit('addNotification', { message: 'No features currently in Beta' }) // 'No features currently in Beta'
+        const globalStore = useGlobalStore()
+        globalStore.isBeta = true
+        globalStore.addNotification({ message: 'No features currently in Beta' }) // 'No features currently in Beta'
         next()
       }
     }, {
@@ -49,9 +52,10 @@ const router = createRouter({
       name: 'confirm-email',
       component: Space,
       redirect: to => {
+        const globalStore = useGlobalStore()
         const userStore = useUserStore()
         userStore.updateUserEmailIsVerified()
-        store.commit('addNotification', { message: 'Email Confirmed', type: 'success' })
+        globalStore.addNotification({ message: 'Email Confirmed', type: 'success' })
         return '/'
       }
     }, {
@@ -59,11 +63,12 @@ const router = createRouter({
       name: 'reset-password',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
         const apiKey = urlParams.get('apiKey')
         if (apiKey) {
-          store.commit('updatePasswordApiKey', apiKey)
-          store.commit('passwordResetIsVisible', true)
+          globalStore.updatePasswordApiKey = apiKey
+          globalStore.passwordResetIsVisible = true
         }
         next()
         history.replaceState({}, document.title, window.location.origin)
@@ -84,42 +89,47 @@ const router = createRouter({
       path: '/explore',
       component: Space,
       beforeEnter: (to, from, next) => {
-        store.commit('shouldShowExploreOnLoad', true)
+        const globalStore = useGlobalStore()
+        globalStore.shouldShowExploreOnLoad = true
         next()
       }
     }, {
       path: '/new',
       component: Space,
       beforeEnter: (to, from, next) => {
-        store.commit('loadNewSpace', true)
+        const globalStore = useGlobalStore()
+        globalStore.loadNewSpace = true
         next()
       }
     }, {
       path: '/inbox',
       component: Space,
       beforeEnter: (to, from, next) => {
-        store.commit('loadInboxSpace', true)
+        const globalStore = useGlobalStore()
+        globalStore.loadInboxSpace = true
         next()
       }
     }, {
       path: '/:space/:card',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
-          store.commit('isPresentationMode', true)
+          globalStore.isPresentationMode = true
         }
         if (urlParams.get('comment')) {
-          store.commit('isCommentMode', true)
+          globalStore.isCommentMode = true
         }
-        store.dispatch('updateSpaceAndCardUrlToLoad', path)
+        globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
     }, {
       path: '/embed',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
         const spaceId = urlParams.get('spaceId')
         const zoomLimit = {
@@ -129,9 +139,9 @@ const router = createRouter({
         let zoom = urlParams.get('zoom')
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
-        store.commit('spaceUrlToLoad', spaceId)
-        store.commit('spaceZoomPercent', zoom)
-        store.commit('isEmbedMode', true)
+        globalStore.spaceUrlToLoad = spaceId
+        globalStore.spaceZoomPercent = zoom
+        globalStore.isEmbedMode = true
         next()
       }
     }, {
@@ -139,7 +149,8 @@ const router = createRouter({
       name: 'donation-success',
       component: Space,
       beforeEnter: (to, from, next) => {
-        store.commit('notifyThanksForDonating', true)
+        const globalStore = useGlobalStore()
+        globalStore.notifyThanksForDonating = true
         next()
       }
     }, {
@@ -147,10 +158,11 @@ const router = createRouter({
       name: 'subscription-success',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
         const sessionId = urlParams.get('sessionId')
         if (sessionId) {
-          store.commit('notifyThanksForUpgrading', true)
+          globalStore.notifyThanksForUpgrading = true
         }
         next()
       }
@@ -159,11 +171,12 @@ const router = createRouter({
       name: 'groupInvite',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
         const groupId = urlParams.get('groupId')
         const collaboratorKey = urlParams.get('collaboratorKey')
-        store.commit('groupToJoinOnLoad', { groupId, collaboratorKey })
-        store.commit('shouldNotifyIsJoiningGroup', true)
+        globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
+        globalStore.shouldNotifyIsJoiningGroup = true
         next()
       }
     }, {
@@ -171,37 +184,38 @@ const router = createRouter({
       name: 'invite',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const userStore = useUserStore()
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
-          store.commit('isPresentationMode', true)
+          globalStore.isPresentationMode = true
         }
         if (urlParams.get('comment')) {
-          store.commit('isCommentMode', true)
+          globalStore.isCommentMode = true
         }
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         const readOnlyKey = urlParams.get('readOnlyKey')
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
-        store.commit('disableViewportOptimizations', isDisableViewportOptimizations)
+        globalStore.disableViewportOptimizations = isDisableViewportOptimizations
         userStore.initializeUser()
-        store.commit('isLoadingSpace', true)
+        globalStore.isLoadingSpace = true
         if (!spaceId) {
-          store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
+          globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
           next()
           return
         }
-        store.commit('isPresentationMode', isPresentationMode)
+        globalStore.isPresentationMode = isPresentationMode
         // edit
         if (collaboratorKey) {
-          inviteToEdit({ next, store, spaceId, collaboratorKey })
+          inviteToEdit({ next, spaceId, collaboratorKey })
         // read only
         } else if (readOnlyKey) {
-          inviteToReadOnly({ next, store, spaceId, readOnlyKey })
+          inviteToReadOnly({ next, spaceId, readOnlyKey })
         // error
         } else {
-          store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
+          globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
           next()
         }
       }
@@ -209,12 +223,13 @@ const router = createRouter({
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
-          store.commit('isPresentationMode', true)
+          globalStore.isPresentationMode = true
         }
-        store.dispatch('updateSpaceAndCardUrlToLoad', path)
+        globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
     }
@@ -228,36 +243,38 @@ router.beforeEach(async (to, from) => {
 
 export default router
 
-const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
+const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
+  const globalStore = useGlobalStore()
   const userStore = useUserStore()
   const apiStore = useApiStore()
   const apiKey = userStore.apiKey
   if (!apiKey) {
-    store.commit('spaceUrlToLoad', spaceId)
-    store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+    globalStore.spaceUrlToLoad = spaceId
+    globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
     next()
     return
   }
   // join
   try {
     await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey })
-    store.commit('spaceUrlToLoad', spaceId)
-    store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
-    store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+    globalStore.spaceUrlToLoad = spaceId
+    globalStore.addNotification({ message: 'You can now edit this space', type: 'success' })
+    globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
   } catch (error) {
     console.error('🚒 inviteToEdit', error)
     if (error.status === 401) {
-      store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+      globalStore.addNotification({ message: 'Space could not be found, or your invite was invalid', type: 'danger' })
     } else {
-      store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+      globalStore.addNotification({ message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
     }
   }
   // load
   next()
 }
 
-const inviteToReadOnly = ({ next, store, spaceId, readOnlyKey }) => {
-  store.commit('spaceUrlToLoad', spaceId)
-  store.commit('spaceReadOnlyKey', { spaceId, key: readOnlyKey })
+const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
+  const globalStore = useGlobalStore()
+  globalStore.spaceUrlToLoad = spaceId
+  globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }
   next()
 }

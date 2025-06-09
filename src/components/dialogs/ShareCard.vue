@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
-const store = useStore()
 
 const dialog = ref(null)
 
@@ -23,8 +24,8 @@ const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 const canShare = computed(() => spaceStore.getSpaceIsRemote)
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 
 // scroll into view
@@ -36,7 +37,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 const scrollIntoView = async () => {
   await nextTick()
-  store.commit('scrollElementIntoView', { element: dialog.value })
+  globalStore.scrollElementIntoView({ element: dialog.value })
 }
 
 // copy url
@@ -48,15 +49,15 @@ const cardUrl = () => {
   return url
 }
 const copyUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   const url = cardUrl()
   try {
     await navigator.clipboard.writeText(url)
-    store.commit('addNotificationWithPosition', { message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -17,7 +18,7 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -41,9 +42,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     state.filteredNotifications = props.notifications
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
     markAllAsRead()
     state.filteredNotifications = null
   }
@@ -88,13 +89,13 @@ const cardUrl = (notification) => {
   return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
 }
 const cardDetailsIsVisible = (cardId) => {
-  return store.state.cardDetailsIsVisibleForCardId === cardId
+  return globalStore.cardDetailsIsVisibleForCardId === cardId
 }
 const showCardDetails = (notification) => {
   const space = utils.clone(notification.space)
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
-    store.commit('loadSpaceFocusOnCardId', card.id)
+    globalStore.loadSpaceFocusOnCardId = card.id
     spaceStore.changeSpace(space)
   } else {
     cardStore.showCardDetails(card.id)
@@ -157,7 +158,7 @@ const userName = (notification) => {
   }
 }
 const deleteUserNotifications = async () => {
-  store.commit('triggerClearUserNotifications')
+  globalStore.triggerClearUserNotifications()
   await apiStore.deleteAllNotifications()
 }
 
@@ -169,7 +170,7 @@ const primaryAction = (notification) => {
   }
 }
 const changeSpace = (spaceId) => {
-  store.commit('cardDetailsIsVisibleForCardId', null)
+  globalStore.updateCardDetailsIsVisibleForCardId(null)
   if (isCurrentSpace(spaceId)) { return }
   const space = { id: spaceId }
   spaceStore.changeSpace(space)

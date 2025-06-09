@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -14,27 +15,35 @@ import fuzzy from '@/libs/fuzzy.js'
 import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
-
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerPickerNavigationKey') {
-      if (!props.visible) { return }
-      const key = mutation.payload
-      triggerPickerNavigationKey(key)
-    } else if (mutation.type === 'triggerPickerSelect') {
-      if (!props.visible) { return }
-      triggerPickerSelect()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPickerNavigationKey') {
+        if (!props.visible) { return }
+        const key = args[0]
+        triggerPickerNavigationKey(key)
+      } else if (name === 'triggerPickerSelect') {
+        if (!props.visible) { return }
+        triggerPickerSelect()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['selectTag', 'closeDialog', 'currentTag', 'newTagColor'])
@@ -80,7 +89,7 @@ const closeDialog = () => {
 }
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // tags list
@@ -113,15 +122,15 @@ const updateTags = async () => {
 }
 const updateRemoteTags = async () => {
   if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = store.state.remoteTagsIsFetched
+  const remoteTagsIsFetched = globalStore.remoteTagsIsFetched
   let remoteTags
   if (remoteTagsIsFetched) {
-    remoteTags = store.state.remoteTags
+    remoteTags = globalStore.remoteTags
   } else {
     state.loading = true
     remoteTags = await apiStore.getUserTags() || []
-    store.commit('remoteTags', remoteTags)
-    store.commit('remoteTagsIsFetched', true)
+    globalStore.remoteTags = remoteTags
+    globalStore.remoteTagsIsFetched = true
     state.loading = false
   }
   const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })

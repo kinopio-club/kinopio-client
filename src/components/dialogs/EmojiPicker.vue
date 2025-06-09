@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
 import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
@@ -9,7 +9,6 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 
 import fuzzy from '@/libs/fuzzy.js'
 
-const store = useStore()
 const apiStore = useApiStore()
 
 const dialogElement = ref(null)

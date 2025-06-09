@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
@@ -13,7 +14,7 @@ import AboutMe from '@/components/AboutMe.vue'
 
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
@@ -23,7 +24,7 @@ let checkKinopioUpdatesIntervalTimer
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  const isOffline = !store.state.isOnline
+  const isOffline = !globalStore.isOnline
   if (isOffline) { return }
   initChangelog()
 })
@@ -35,9 +36,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     closeDialogs()
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -69,8 +70,8 @@ const updateDialogHeight = async () => {
 
 // check changelog updates
 
-const changelogIsUpdated = computed(() => store.state.changelogIsUpdated)
-const changelog = computed(() => store.state.changelog)
+const changelogIsUpdated = computed(() => globalStore.changelogIsUpdated)
+const changelog = computed(() => globalStore.changelog)
 const initChangelog = async () => {
   await updateChangelog()
   if (!utils.arrayHasItems(changelog.value)) { return }
@@ -83,7 +84,7 @@ const updateChangelog = async () => {
     let posts = await apiStore.getChangelog()
     if (!posts) { return }
     posts = posts.slice(0, 20)
-    store.commit('changelog', posts)
+    globalStore.changelog = posts
     checkChangelogIsUpdated()
   } catch (error) {
     console.error('🚒 updateChangelog', error)
@@ -95,10 +96,10 @@ const checkChangelogIsUpdated = async () => {
   if (!prevId) {
     // first time visitors are updated to latest changelog
     cache.updatePrevReadChangelogId(newId)
-    store.commit('changelogIsUpdated', false)
+    globalStore.changelogIsUpdated = false
   } else {
     const isUpdated = prevId !== newId
-    store.commit('changelogIsUpdated', isUpdated)
+    globalStore.changelogIsUpdated = isUpdated
   }
 }
 
@@ -108,23 +109,23 @@ const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
   const changelogId = changelog.value[0].id
   cache.updatePrevReadChangelogId(changelogId)
-  store.commit('changelogIsUpdated', false)
+  globalStore.changelogIsUpdated = false
   spaceStore.changeSpace(space)
-  store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
+  globalStore.addNotification({ message: 'Changelog space opened', type: 'success' })
 }
 
 // donate
 
 const triggerDonateIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerDonateIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerDonateIsVisible()
 }
 
 // keyboard shortcuts
 
 const toggleKeyboardShortcutsIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerKeyboardShortcutsIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerKeyboardShortcutsIsVisible()
 }
 
 // apps and extensions
@@ -148,7 +149,7 @@ const toggleHelpIsVisible = () => {
 const changeSpaceToRoadmap = () => {
   const space = { id: consts.roadmapSpaceId() }
   spaceStore.changeSpace(space)
-  store.commit('addNotification', { message: 'Roadmap space opened', type: 'success' })
+  globalStore.addNotification({ message: 'Roadmap space opened', type: 'success' })
 }
 
 </script>

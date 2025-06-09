@@ -1,9 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import privacyData from '@/data/privacy.js'
-const store = useStore()
 
 const props = defineProps({
   privacy: String,

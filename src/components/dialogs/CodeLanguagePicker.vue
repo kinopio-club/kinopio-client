@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import codeLanguages from '@/data/codeLanguages.json'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 
 const dialog = ref(null)
@@ -23,12 +24,12 @@ const state = reactive({
   filteredCodeLanguages: codeLanguages,
   focusOnId: null
 })
-const visible = computed(() => store.state.codeLanguagePickerIsVisible)
+const visible = computed(() => globalStore.codeLanguagePickerIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) { scrollIntoView() }
 })
-const position = computed(() => store.state.codeLanguagePickerPosition)
-const cardId = computed(() => store.state.codeLanguagePickerCardId)
+const position = computed(() => globalStore.codeLanguagePickerPosition)
+const cardId = computed(() => globalStore.codeLanguagePickerCardId)
 
 // languages
 
@@ -47,7 +48,7 @@ const selectLanguage = (language) => {
     codeBlockLanguage: language.name
   }
   cardStore.updateCard(update)
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // results list input
@@ -101,10 +102,10 @@ const languageColorStyle = (language) => {
 
 const styles = computed(() => {
   // adapted from card details
-  let zoom = store.getters.spaceCounterZoomDecimal
+  let zoom = globalStore.spaceCounterZoomDecimal
   if (utils.isAndroid()) {
     zoom = utils.visualViewport().scale
-  } else if (store.state.isTouchDevice) {
+  } else if (globalStore.isTouchDevice) {
     zoom = 1
   }
   const transform = `scale(${zoom})`
@@ -127,7 +128,7 @@ const scrollIntoView = async () => {
   await nextTick()
   await nextTick()
   const element = dialog.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 </script>
 
