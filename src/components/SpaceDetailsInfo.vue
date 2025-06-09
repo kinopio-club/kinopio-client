@@ -162,7 +162,7 @@ const updateDialogHeight = () => {
 }
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  globalStore.spaceDetailsIsPinned(isPinned)
+  globalStore.spaceDetailsIsPinned = isPinned
 }
 const toggleBackgroundIsVisible = () => {
   const isVisible = state.backgroundIsVisible

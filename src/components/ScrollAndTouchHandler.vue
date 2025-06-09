@@ -68,7 +68,7 @@ const handleMouseWheelEvents = (event) => {
 
 const updateZoomOrigin = (event) => {
   const cursor = utils.cursorPositionInPage(event)
-  globalStore.zoomOrigin = cursor
+  globalStore.updateZoomOrigin(cursor)
 }
 const scroll = () => {
   if (globalStore.userHasScrolled) { return }

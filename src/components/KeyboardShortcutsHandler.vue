@@ -367,7 +367,7 @@ const handleMouseDownEvents = (event) => {
   }
   if (isRightClick && userDisablePan) {
     if (!isCanvasScope(event)) { return }
-    globalStore.triggerSonarPing(event)
+    globalStore.normalizeTriggerSonarPing(event)
   }
 }
 // on mouse move
@@ -404,7 +404,7 @@ const handleMouseUpEvents = async (event) => {
   const timeDelta = currentTime - prevRightClickTime
   const timesAreClose = timeDelta < 400 // ms
   if (shouldPan && cursorsAreClose && timesAreClose && !globalStore.multipleSelectedActionsIsVisible) {
-    globalStore.triggerSonarPing(event)
+    globalStore.normalizeTriggerSonarPing(event)
   }
 }
 // on scroll

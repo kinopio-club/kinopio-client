@@ -93,7 +93,7 @@ const currentUserId = computed(() => userStore.id)
 const updateIsOnline = () => {
   const clientStatus = window.navigator.onLine
   if (!clientStatus) {
-    globalStore.isOnline = false
+    globalStore.updateIsOnline(false)
     return
   }
   updateServerIsOnline()
@@ -104,10 +104,10 @@ const updateServerIsOnline = async () => {
   const serverStatus = await apiStore.getStatus()
   console.info('server online status', serverStatus)
   if (serverStatus) {
-    globalStore.isOnline = true
+    globalStore.updateIsOnline(true)
   // error offline
   } else {
-    globalStore.isOnline = false
+    globalStore.updateIsOnline(false)
   }
   // retry
   let delay // delay increases up to ~15 minutes

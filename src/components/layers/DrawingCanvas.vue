@@ -438,7 +438,7 @@ const updatePageSizes = (strokes) => {
     width: x + drawingBrushSizeDiameter + padding.width,
     height: y + drawingBrushSizeDiameter + padding.height
   }
-  globalStore.updatePageSizes(rect)
+  globalStore.updatePageSizesFromRect(rect)
 }
 </script>
 

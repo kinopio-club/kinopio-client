@@ -589,6 +589,16 @@ export const useUserStore = defineStore('users', {
           isHidden
         }
       })
+    },
+
+    // filters
+
+    clearUserFilters () {
+      this.filterShowUsers = false
+      this.filterShowDateUpdated = false
+      this.filterShowAbsoluteDates = false
+      this.filterUnchecked = false
+      this.filterComments = false
     }
 
   }

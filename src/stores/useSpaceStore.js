@@ -536,6 +536,7 @@ export const useSpaceStore = defineStore('space', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       globalStore.updatePrevSpaceIdInSession(this.id)
+      globalStore.updatePrevSpaceIdInSessionPagePosition()
       globalStore.clearAllInteractingWithAndSelected()
       console.info('🚟 Change space', space)
       globalStore.isLoadingSpace = true

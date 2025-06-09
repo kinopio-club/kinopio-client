@@ -75,7 +75,7 @@ const centerZoomOrigin = () => {
     x: scroll.x + (globalStore.viewportWidth / 6),
     y: scroll.y + (globalStore.viewportHeight / 6)
   }
-  globalStore.zoomOrigin = origin
+  globalStore.updateZoomOrigin(origin)
 }
 const zoomOutOrInMax = () => {
   centerZoomOrigin()
