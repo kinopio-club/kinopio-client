@@ -20,7 +20,7 @@ const layer = (index) => {
   }
   return styles
 }
-const spaceShouldHaveBorderRadius = computed(() => globalStore.spaceShouldHaveBorderRadius)
+const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
 </script>
 
 <template lang="pug">

@@ -49,11 +49,11 @@ const state = reactive({
 })
 
 const updateScroll = () => {
-  state.scroll = globalStore.windowScrollWithSpaceOffset()
+  state.scroll = globalStore.getWindowScrollWithSpaceOffset()
 }
 
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
 const isDarkTheme = computed(() => themeStore.getIsThemeDark)

@@ -51,7 +51,7 @@ const props = defineProps({
   editableBoxes: Object
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
 const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
 const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnectionsSelectedIds)

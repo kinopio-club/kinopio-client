@@ -102,7 +102,7 @@ const languageColorStyle = (language) => {
 
 const styles = computed(() => {
   // adapted from card details
-  let zoom = globalStore.spaceCounterZoomDecimal
+  let zoom = globalStore.getSpaceCounterZoomDecimal
   if (utils.isAndroid()) {
     zoom = utils.visualViewport().scale
   } else if (globalStore.isTouchDevice) {

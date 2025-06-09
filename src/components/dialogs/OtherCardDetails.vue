@@ -55,7 +55,7 @@ const visible = computed(() => {
   }
   return isVisible
 })
-const otherSpace = computed(() => globalStore.otherSpaceById(otherCard.value.spaceId))
+const otherSpace = computed(() => globalStore.getOtherSpaceById(otherCard.value.spaceId))
 const otherCard = computed(() => globalStore.currentSelectedOtherItem)
 const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
 const canEditOtherCard = computed(() => {
@@ -70,7 +70,7 @@ const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 
 const styles = computed(() => {
   const position = globalStore.otherItemDetailsPosition
-  let zoom = globalStore.spaceCounterZoomDecimal
+  let zoom = globalStore.getSpaceCounterZoomDecimal
   if (globalStore.isTouchDevice) {
     zoom = 1 / utils.visualViewport().scale
   }

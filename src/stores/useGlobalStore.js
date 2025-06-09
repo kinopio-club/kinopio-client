@@ -285,46 +285,36 @@ export const useGlobalStore = defineStore('global', {
     getGlobalAllState () {
       return { ...this } // 'this' refers to the store instance
     },
-    // getIsSpacePage
-    isSpacePage () {
+    getIsSpacePage () {
       if (window.location.pathname === '/add') { return }
       return !this.isAddPage
     },
-    // getSpaceZoomDecimal
-    spaceZoomDecimal () {
+    getSpaceZoomDecimal () {
       return this.spaceZoomPercent / 100
     },
-    // getSpaceCounterZoomDecimal
-    spaceCounterZoomDecimal () {
-      return 1 / this.spaceZoomDecimal
+    getSpaceCounterZoomDecimal () {
+      return 1 / this.getSpaceZoomDecimal
     },
-    // getIsTouchDevice
-    // this.isTouchDevice is in state
     getIsTouchDevice () {
       return this.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
-    // getZoomTransform
-    zoomTransform () {
-      const zoom = this.spaceZoomDecimal
+    getZoomTransform () {
+      const zoom = this.getSpaceZoomDecimal
       const origin = this.zoomOrigin
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    // getWindowScrollWithSpaceOffset
-    windowScrollWithSpaceOffset () {
+    getWindowScrollWithSpaceOffset () {
       const scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
     },
-    // getIsInteractingWithItem
-    isInteractingWithItem () {
+    getIsInteractingWithItem () {
       return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox
     },
-    // getIsMultipleItemsSelected
-    isMultipleItemsSelected () {
+    getIsMultipleItemsSelected () {
       return this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length
     },
-    // getSpaceShouldHaveBorderRadius
-    spaceShouldHaveBorderRadius () {
+    getSpaceShouldHaveBorderRadius () {
       const isNativeApp = consts.isSecureAppContext
       const isZoomedOut = this.spaceZoomPercent !== 100
       if (isNativeApp || isZoomedOut) { return true }
@@ -337,8 +327,7 @@ export const useGlobalStore = defineStore('global', {
         return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
       }
     },
-    // getAllTags
-    allTags () {
+    getAllTags () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const allTags = this.tags
@@ -351,8 +340,7 @@ export const useGlobalStore = defineStore('global', {
   },
 
   actions: {
-    // getShouldScrollAtEdges
-    shouldScrollAtEdges (event) {
+    getShouldScrollAtEdges (event) {
       if (window.visualViewport.scale > 1) { return }
       let isPainting
       if (event.touches) {
@@ -365,12 +353,10 @@ export const useGlobalStore = defineStore('global', {
       const isDraggingBox = this.currentUserIsDraggingBox
       return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox
     },
-    // getOtherUserById
-    otherUserById (userId) {
+    getOtherUserById (userId) {
       return this.otherUsers[userId]
     },
-    // getOtherSpaceById
-    otherSpaceById (spaceId) {
+    getOtherSpaceById (spaceId) {
       const otherSpaces = this.otherItems.spaces.filter(Boolean)
       const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space

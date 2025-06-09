@@ -14,7 +14,7 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-const spaceShouldHaveBorderRadius = computed(() => globalStore.spaceShouldHaveBorderRadius)
+const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
 const isSpacePage = computed(() => {
   const isOther = globalStore.isAddPage

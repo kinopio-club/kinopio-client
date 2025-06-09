@@ -201,7 +201,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.spaceCounterZoomDecimal
+  let zoom = globalStore.getSpaceCounterZoomDecimal
   if (utils.isAndroid()) {
     zoom = utils.visualViewport().scale
   } else if (globalStore.isTouchDevice) {
@@ -954,7 +954,7 @@ const otherSpaceIsVisible = computed(() => {
   return isCardLink && hasUrls.value
 })
 const otherSpace = computed(() => {
-  const space = globalStore.otherSpaceById(card.value.linkToSpaceId)
+  const space = globalStore.getOtherSpaceById(card.value.linkToSpaceId)
   return space
 })
 const otherSpaceUrl = computed(() => {
@@ -1187,7 +1187,7 @@ const addSplitCards = async (newCards) => {
     for (const newCard of newCards) {
       const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
-      newCard.y = prevCard.y + (prevCardRect.height * globalStore.spaceCounterZoomDecimal) + spaceBetweenCards
+      newCard.y = prevCard.y + (prevCardRect.height * globalStore.getSpaceCounterZoomDecimal) + spaceBetweenCards
       cardStore.updateCard(newCard)
       globalStore.triggerUpdateUrlPreview(newCard.id)
       prevCard = newCard

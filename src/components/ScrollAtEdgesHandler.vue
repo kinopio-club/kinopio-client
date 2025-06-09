@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
 
 const initInteractions = (event) => {
   currentEvent = event
-  const shouldScrollAtEdges = globalStore.shouldScrollAtEdges(event)
+  const shouldScrollAtEdges = globalStore.getShouldScrollAtEdges(event)
   const position = utils.cursorPositionInViewport(event)
   const zoom = spaceZoomDecimal.value
   startCursor = position
@@ -80,7 +80,7 @@ const interact = (event) => {
   const isTouch = Boolean(event.touches)
   const isInteracting = isLeftMouseButtonDown || isTouch
   if (!isInteracting) { return }
-  const shouldScrollAtEdges = globalStore.shouldScrollAtEdges(event)
+  const shouldScrollAtEdges = globalStore.getShouldScrollAtEdges(event)
   if (shouldScrollAtEdges) {
     updateMovementDirection()
   }
@@ -120,8 +120,8 @@ const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const shouldPreventResize = computed(() => currentUserIsPainting.value || isDrawingConnection.value || isResizingCard.value)
 
 // scroll

@@ -67,7 +67,7 @@ const state = reactive({
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
 const isInteracting = computed(() => {
-  const isInteractingWithItem = globalStore.isInteractingWithItem
+  const isInteractingWithItem = globalStore.getIsInteractingWithItem
   const isPainting = globalStore.currentUserIsPainting
   const isPanning = globalStore.currentUserIsPanningReady
   const isDrawing = globalStore.currentUserIsDrawing

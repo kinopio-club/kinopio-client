@@ -36,7 +36,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchend', touchEnd)
 })
 
-const isSpacePage = computed(() => globalStore.isSpacePage)
+const isSpacePage = computed(() => globalStore.getIsSpacePage)
 
 // wheel
 

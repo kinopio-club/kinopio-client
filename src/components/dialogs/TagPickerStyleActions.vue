@@ -57,7 +57,7 @@ const scrollIntoView = async () => {
 // tags list
 
 const currentTags = computed(() => {
-  return props.tagNamesInCard || globalStore.allTags
+  return props.tagNamesInCard || globalStore.getAllTags
 })
 const updateTags = async () => {
   const spaceTags = spaceStore.getSpaceTags

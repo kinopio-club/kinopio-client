@@ -105,7 +105,7 @@ const position = computed(() => {
 })
 const styles = computed(() => {
   const isChildDialog = cardDetailsIsVisibleForCardId.value || visibleFromTagList.value
-  let zoom = globalStore.spaceZoomDecimal
+  let zoom = globalStore.getSpaceZoomDecimal
   if (isChildDialog) {
     zoom = 1
   }
@@ -166,7 +166,7 @@ const cachedOrOtherSpaceById = async (spaceId) => {
   } else if (utils.objectHasKeys(cachedSpace)) {
     return cachedSpace
   } else {
-    return globalStore.otherSpaceById(spaceId)
+    return globalStore.getOtherSpaceById(spaceId)
   }
 }
 

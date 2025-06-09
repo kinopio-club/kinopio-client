@@ -93,7 +93,7 @@ const state = reactive({
   remoteConnectionColor: ''
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserColor = computed(() => userStore.color)

@@ -14,7 +14,7 @@ const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
 
-const visible = computed(() => globalStore.isSpacePage)
+const visible = computed(() => globalStore.getIsSpacePage)
 const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
@@ -38,8 +38,8 @@ const backgroundTint = computed(() => {
 
 // styles
 
-const spaceShouldHaveBorderRadius = computed(() => globalStore.spaceShouldHaveBorderRadius)
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {

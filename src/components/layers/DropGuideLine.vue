@@ -159,7 +159,7 @@ const paintCurve = (context, curve) => {
 // Remote Painting
 
 const updateRemotePosition = (position) => {
-  const zoom = globalStore.spaceZoomDecimal
+  const zoom = globalStore.getSpaceZoomDecimal
   const space = document.getElementById('space')
   const rect = space.getBoundingClientRect()
   position = {

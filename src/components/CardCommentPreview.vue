@@ -24,7 +24,7 @@ const backgroundColor = computed(() => {
   return props.card.backgroundColor
 })
 const styles = computed(() => {
-  const zoom = globalStore.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   const offset = 6
   return {
     left: `${props.card.x + offset}px`,

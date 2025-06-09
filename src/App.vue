@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
 })
 
 const spaceName = computed(() => spaceStore.name)
-const isSpacePage = computed(() => globalStore.isSpacePage)
+const isSpacePage = computed(() => globalStore.getIsSpacePage)
 
 // styles and position
 
@@ -82,7 +82,7 @@ const pageCursor = computed(() => {
   }
   return undefined
 })
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 // users
 
@@ -133,7 +133,7 @@ const updateSystemTheme = () => {
 // remote
 
 const broadcastUserLabelCursor = (event) => {
-  if (!globalStore.isSpacePage) { return }
+  if (!globalStore.getIsSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
   updates.userId = userStore.id

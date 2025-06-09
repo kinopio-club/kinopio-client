@@ -90,7 +90,7 @@ const cancel = () => {
   window.cancelAnimationFrame(colorCycleTimer)
   colorCycleTimer = undefined
 }
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => spaceStore.backgroundTint)
 const isThemeDark = computed(() => themeStore.getIsThemeDark)

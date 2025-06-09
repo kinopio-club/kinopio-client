@@ -238,7 +238,7 @@ export const useSpaceStore = defineStore('space', {
         return user
       }
       // commenters
-      const otherUser = globalStore.otherUserById(userId)
+      const otherUser = globalStore.getOtherUserById(userId)
       if (otherUser) {
         return otherUser
       }
@@ -809,7 +809,7 @@ export const useSpaceStore = defineStore('space', {
         let space, card
         // don't update if item already exists
         if (spaceId) {
-          const space = globalStore.otherSpaceById(spaceId)
+          const space = globalStore.getOtherSpaceById(spaceId)
         } else if (cardId) {
           const card = globalStore.otherCardById(cardId)
         }
@@ -1126,7 +1126,7 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const prefersReducedMotion = consts.userPrefersReducedMotion()
       const userSetting = userStore.shouldPauseConnectionDirections
-      const isInteracting = globalStore.isInteractingWithItem
+      const isInteracting = globalStore.getIsInteractingWithItem
       const shouldPause = prefersReducedMotion || userSetting || isInteracting
       if (shouldPause) {
         this.pauseConnectionDirections()

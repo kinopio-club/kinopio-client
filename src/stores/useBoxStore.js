@@ -264,7 +264,7 @@ export const useBoxStore = defineStore('boxes', {
     moveBoxes ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
-      const zoom = globalStore.spaceCounterZoomDecimal
+      const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,

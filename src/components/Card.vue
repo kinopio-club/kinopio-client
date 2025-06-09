@@ -507,7 +507,7 @@ const shouldJiggle = computed(() => {
   const max = 500
   const cardIsTooBig = width.value > max || props.card.height > max
   if (cardIsTooBig) { return }
-  const isMultipleItemsSelected = globalStore.isMultipleItemsSelected
+  const isMultipleItemsSelected = globalStore.getIsMultipleItemsSelected
   const isShiftKeyDown = globalStore.currentUserIsBoxSelecting
   if (isMultipleItemsSelected || isShiftKeyDown) { return }
   return isConnectingTo.value || isConnectingFrom.value
@@ -944,11 +944,11 @@ const nameSegments = computed(() => {
     // invite
     } else if (segment.isInviteLink) {
       const { spaceId, collaboratorKey } = segment
-      segment.otherSpace = globalStore.otherSpaceById(spaceId)
+      segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
     // space or card
     } else if (segment.isLink) {
       const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
-      segment.otherSpace = globalStore.otherSpaceById(spaceId)
+      segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
       segment.otherCard = globalStore.otherCardById(cardId)
     // text
     } else if (segment.isText) {
@@ -1680,7 +1680,7 @@ const isValidStickySize = (width, height, min) => {
   return isWidth || isHeight
 }
 const updateStickyStretchResistance = () => {
-  const zoom = globalStore.spaceZoomDecimal
+  const zoom = globalStore.getSpaceZoomDecimal
   let { height, width } = props.card
   height = height * zoom
   width = width * zoom

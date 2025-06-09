@@ -60,7 +60,7 @@ const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
 
 // position
 
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const updateRemotePosition = (position) => {
   const zoom = spaceZoomDecimal.value
   const scroll = { x: window.scrollX, y: window.scrollY }
@@ -81,7 +81,7 @@ const position = computed(() => {
 
 // offscreen position
 
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const updateIsOnscreen = () => {
   state.isOnscreen = utils.isRectInsideViewport({
     x: state.x,

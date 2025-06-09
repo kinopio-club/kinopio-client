@@ -229,15 +229,15 @@ const users = computed(() => {
 
 // styles
 
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
-  const zoom = globalStore.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   return {
     width: `${pageWidth.value * zoom}px`,
     height: `${pageHeight.value * zoom}px`,
-    transform: globalStore.zoomTransform
+    transform: globalStore.getZoomTransform
   }
 })
 
@@ -370,7 +370,7 @@ const resizeBoxes = () => {
   const boxes = boxStore.getBoxesResizing
   const ids = boxes.map(box => box.id)
 
-  const zoom = globalStore.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
     y: endCursor.y - prevCursor.y
@@ -587,7 +587,7 @@ const checkShouldShowDetails = () => {
   }
 }
 const cursor = () => {
-  const zoom = globalStore.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   let cursor
   if (utils.objectHasKeys(prevCursor)) {
     cursor = prevCursor

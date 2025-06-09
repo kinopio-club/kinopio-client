@@ -88,9 +88,9 @@ const colorClasses = computed(() => {
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 

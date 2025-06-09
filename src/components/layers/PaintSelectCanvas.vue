@@ -178,7 +178,7 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
-const spaceZoomDecimal = computed(() => globalStore.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const clearHightlightedItems = () => {
   highlightedItems = { cardIds: {}, boxIds: {}, connectionIds: {} }
 }
@@ -563,7 +563,7 @@ const painting = (event) => {
   if (!toolbarIsCard.value) { return }
   if (!isPainting) { return }
   if (globalStore.isPinchZooming) { return }
-  if (globalStore.shouldScrollAtEdges(event) && event.cancelable) {
+  if (globalStore.getShouldScrollAtEdges(event) && event.cancelable) {
     event.preventDefault() // prevents touch swipe viewport scrolling
   }
   startPaintingCirclesTimer()

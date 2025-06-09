@@ -105,7 +105,7 @@ const currentUserStyles = computed(() => {
   }
   return styles
 })
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const remoteUserBoxSelectStyles = computed(() => globalStore.remoteUserBoxSelectStyles)
 const remotePreviousUserBoxSelectStyles = computed(() => globalStore.remotePreviousUserBoxSelectStyles)
 

@@ -73,7 +73,7 @@ const scroll = () => {
   updatePrevScroll()
 }
 const updateCanvasSize = debounce(() => {
-  const zoom = globalStore.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   canvas.width = viewportWidth.value * zoom
   canvas.height = viewportHeight.value * zoom
 }, 20)

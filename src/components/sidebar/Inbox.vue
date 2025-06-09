@@ -115,7 +115,7 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  const scroll = globalStore.windowScrollWithSpaceOffset()
+  const scroll = globalStore.getWindowScrollWithSpaceOffset()
   const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()

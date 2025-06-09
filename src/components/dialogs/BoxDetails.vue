@@ -35,7 +35,7 @@ const state = reactive({
   backgroundPickerIsVisible: false
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.spaceCounterZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(currentBox.value))
 const id = computed(() => globalStore.boxDetailsIsVisibleForBoxId)
 // box state

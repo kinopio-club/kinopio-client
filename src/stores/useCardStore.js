@@ -493,7 +493,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const zoom = globalStore.spaceCounterZoomDecimal
+      const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,
@@ -580,7 +580,7 @@ export const useCardStore = defineStore('cards', {
     },
     async distributeCardsVertically (cards) {
       const globalStore = useGlobalStore()
-      const zoom = globalStore.spaceCounterZoomDecimal
+      const zoom = globalStore.getSpaceCounterZoomDecimal
       let prevCard
       let index = 0
       for (const card of cards) {
@@ -623,7 +623,7 @@ export const useCardStore = defineStore('cards', {
     },
     async updateCardsDimensions (ids) {
       const globalStore = useGlobalStore()
-      const zoom = globalStore.spaceCounterZoomDecimal
+      const zoom = globalStore.getSpaceCounterZoomDecimal
       ids = ids || this.allIds
       let cards = ids.map(id => this.getCard(id))
       cards = cards.filter(card => Boolean(card))

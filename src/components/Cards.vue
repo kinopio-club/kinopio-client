@@ -39,7 +39,7 @@ const shouldPrevent = computed(() => {
   const isHoveringOverConnector = globalStore.currentUserIsHoveringOverConnectorItemId
   const isHoveringOverCheckbox = globalStore.currentUserIsHoveringOverCheckboxCardId
   const isHoveringOverLinkButton = globalStore.currentUserIsHoveringOverUrlButtonCardId
-  const isInteractingWithItem = globalStore.isInteractingWithItem
+  const isInteractingWithItem = globalStore.getIsInteractingWithItem
   return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox || isHoveringOverLinkButton
 })
 </script>

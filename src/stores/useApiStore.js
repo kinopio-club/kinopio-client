@@ -307,7 +307,7 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      const isSpacePage = globalStore.isSpacePage
+      const isSpacePage = globalStore.getIsSpacePage
       if (!isSpacePage) { return }
       try {
         const response = await fetch(`${consts.apiHost()}/meta/changelog`)
@@ -454,7 +454,7 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isSpacePage = globalStore.isSpacePage
+      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       if (!isSpacePage) { return }
@@ -653,7 +653,7 @@ export const useApiStore = defineStore('api', {
 
     async getExploreSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.isSpacePage
+      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
@@ -669,7 +669,7 @@ export const useApiStore = defineStore('api', {
 
     async getEveryoneSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.isSpacePage
+      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
@@ -684,7 +684,7 @@ export const useApiStore = defineStore('api', {
     },
     async getLiveSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.isSpacePage
+      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }

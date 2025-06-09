@@ -826,7 +826,7 @@ const selectAllItemsBelowCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = globalStore.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
   let cards = cardStore.getAllCardsSortedByY
@@ -845,7 +845,7 @@ const selectAllItemsAboveCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = globalStore.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
   let cards = cardStore.getAllCardsSortedByY
@@ -864,7 +864,7 @@ const selectAllItemsRightOfCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = globalStore.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
   let cards = cardStore.getAllCardsSortedByX
@@ -885,7 +885,7 @@ const selectAllItemsLeftOfCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = globalStore.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
   let cards = cardStore.getAllCardsSortedByX

@@ -45,7 +45,7 @@ const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
 })
-const isInteractingWithItem = computed(() => globalStore.isInteractingWithItem)
+const isInteractingWithItem = computed(() => globalStore.getIsInteractingWithItem)
 
 // colors
 

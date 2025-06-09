@@ -34,7 +34,7 @@ const position = computed(() => globalStore.userDetailsPosition)
 
 const styles = computed(() => {
   let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
-  let zoom = globalStore.spaceCounterZoomDecimal
+  let zoom = globalStore.getSpaceCounterZoomDecimal
   if (shouldIgnoreZoom) {
     zoom = 1
   }

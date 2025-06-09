@@ -301,7 +301,7 @@ const updateScroll = () => {
   state.scrollY = window.scrollY
 }
 const viewportStyle = computed(() => {
-  const zoom = globalStore.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   const color = userStore.color
   // viewport box
   let width = (globalStore.viewportWidth * zoom) * ratio.value
