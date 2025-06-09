@@ -2119,7 +2119,7 @@ export const useGlobalStore = defineStore('global', {
       }
       broadcastStore.updateStore({ updates, type: 'updateRemoteConnectionsSelected' })
     },
-    connectionDetailsIsVisibleForConnectionId (connectionId) {
+    updateConnectionDetailsIsVisibleForConnectionId (connectionId) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       this.connectionDetailsIsVisibleForConnectionId = connectionId

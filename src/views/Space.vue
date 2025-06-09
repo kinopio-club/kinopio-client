@@ -196,11 +196,6 @@ watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
-watch(() => isInteracting.value, (value, prevValue) => {
-  if (value) {
-    globalStore.preventMultipleSelectedActionsIsVisible = true
-  }
-})
 // watch(() => globalStore.currentUserIsResizingBox, (value, prevValue) => {
 //   if (prevValue && !value) {
 //     afterResizeBoxes()
@@ -516,6 +511,11 @@ const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 
 const isInteracting = computed(() => {
   return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value
+})
+watch(() => isInteracting.value, (value, prevValue) => {
+  if (value) {
+    globalStore.preventMultipleSelectedActionsIsVisible = true
+  }
 })
 const blurButtonClick = (event) => {
   const isMouseOrTouchEvent = event.type.includes('mouse') || event.type.includes('touch')

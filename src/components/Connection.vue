@@ -237,7 +237,7 @@ const showConnectionDetails = (event, isFromStore) => {
     return
   }
   const dialogPosition = utils.cursorPositionInSpace(event)
-  globalStore.connectionDetailsIsVisibleForConnectionId(props.connection.id)
+  globalStore.updateConnectionDetailsIsVisibleForConnectionId(props.connection.id)
   globalStore.connectionDetailsPosition = dialogPosition
   globalStore.clearMultipleSelected()
 }
