@@ -49,7 +49,8 @@ const updateWindowHistory = async () => {
   globalStore.currentSpacePath = spaceUrl
   if (navigator.standalone || isEmbedMode) { return }
   await router.push('/' + spaceUrl)
-  const state = globalStore.getGlobalAllState
+  let state = globalStore.getGlobalAllState
+  state = JSON.parse(JSON.stringify(state))
   history.replaceState({ ...history.state, ...state }, '')
 }
 const updateWindowTitle = () => {
