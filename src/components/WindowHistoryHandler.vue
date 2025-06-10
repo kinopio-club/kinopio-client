@@ -21,7 +21,7 @@ onMounted(() => {
   const globalStoreUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateWindowHistory') {
-        update(args[0])
+        update()
       } else if (name === 'triggerUpdateWindowTitle') {
         updateWindowTitle()
       }
@@ -35,13 +35,13 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const update = async (space) => {
-  await updateWindowHistory(space)
+const update = async () => {
+  await updateWindowHistory()
   updateWindowTitle()
 }
-const updateWindowHistory = async (space) => {
+const updateWindowHistory = async () => {
   const isEmbedMode = globalStore.isEmbedMode
-  space = space || spaceStore.getSpaceAllState
+  const space = spaceStore.getSpaceAllState
   const spaceUrl = utils.url(space)
   const preventUpdate = window.location.pathname.includes(spaceUrl) || spaceUrl.startsWith('loading--')
   if (preventUpdate) { return }

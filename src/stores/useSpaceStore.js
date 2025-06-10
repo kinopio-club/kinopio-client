@@ -546,7 +546,7 @@ export const useSpaceStore = defineStore('space', {
       globalStore.currentUserToolbar('card')
       space = utils.migrationEnsureRemovedCards(space)
       await this.loadSpace(space)
-      globalStore.triggerUpdateWindowHistory(space)
+      globalStore.triggerUpdateWindowHistory()
       const userIsMember = userStore.getUserIsSpaceMember
       if (!userIsMember) { return }
       globalStore.parentCardId = ''
