@@ -284,7 +284,7 @@ export const useGlobalStore = defineStore('global', {
   }),
   getters: {
     getGlobalAllState () {
-      return { ...this } // 'this' refers to the store instance
+      return { ...this.$state }
     },
     getIsSpacePage () {
       if (window.location.pathname === '/add') { return }

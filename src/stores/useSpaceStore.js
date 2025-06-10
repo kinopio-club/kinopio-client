@@ -38,7 +38,7 @@ export const useSpaceStore = defineStore('space', {
 
   getters: {
     getSpaceAllState () {
-      return { ...this } // 'this' refers to the store instance
+      return { ...this.$state }
     },
     getSpaceAllItems () {
       const cardStore = useCardStore()

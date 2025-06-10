@@ -103,7 +103,7 @@ export const useUserStore = defineStore('users', {
 
   getters: {
     getUserAllState () {
-      return { ...this }
+      return { ...this.$state }
     },
     getUserIsSignedIn () {
       return Boolean(this.apiKey)
