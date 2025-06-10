@@ -543,7 +543,7 @@ export const useSpaceStore = defineStore('space', {
       console.info('🚟 Change space', space)
       globalStore.isLoadingSpace = true
       globalStore.notifySpaceIsRemoved = false
-      globalStore.currentUserToolbar('card')
+      globalStore.currentUserToolbar = 'card'
       space = utils.migrationEnsureRemovedCards(space)
       await this.loadSpace(space)
       globalStore.triggerUpdateWindowHistory()

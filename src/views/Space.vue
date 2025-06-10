@@ -445,7 +445,6 @@ const dragItemsOnNextTick = async () => {
 }
 const dragItems = () => {
   historyStore.pause()
-  const prevCursor = cursor()
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
@@ -575,7 +574,7 @@ const interact = (event) => {
   } else if (isResizingBox.value) {
     resizeBoxes()
   }
-  prevCursor = utils.cursorPositionInViewport(event)
+  prevCursor = endCursor
 }
 const checkShouldShowDetails = () => {
   const shouldShow = !utils.cursorsAreClose(state.startCursor, endCursor)
@@ -585,21 +584,6 @@ const checkShouldShowDetails = () => {
   } else if (globalStore.currentUserIsDraggingBox) {
     globalStore.preventDraggedBoxFromShowingDetails = true
   }
-}
-const cursor = () => {
-  const zoom = globalStore.getSpaceCounterZoomDecimal
-  let cursor
-  if (utils.objectHasKeys(prevCursor)) {
-    cursor = prevCursor
-  } else {
-    cursor = state.startCursor
-  }
-  cursor = {
-    x: cursor.x * zoom,
-    y: cursor.y * zoom
-  }
-  // if shift key held down
-  return cursor
 }
 const eventIsFromTextarea = (event) => {
   if (event.target.nodeType !== 1) { return } // firefox check

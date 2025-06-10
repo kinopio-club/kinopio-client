@@ -305,7 +305,7 @@ const handleMetaKeyShortcuts = (event) => {
     // Toggle Zoom Out
   } else if (keyZ && isSpaceScope) {
     event.preventDefault()
-    globalStore.SpaceZoomOutMax()
+    globalStore.triggerSpaceZoomOutMax()
   } else if (keyP && isSpaceScope && !isMeta) {
     const value = !globalStore.isPresentationMode
     globalStore.isPresentationMode = value
