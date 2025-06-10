@@ -454,20 +454,17 @@ export const useSpaceStore = defineStore('space', {
         if (!remoteSpace) { return }
         globalStore.triggerUpdateWindowTitle()
         groupStore.loadGroup(remoteSpace)
-        const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
-        if (spaceIsUnchanged) {
-          globalStore.isLoadingSpace = false
-          this.updateSpacePreviewImage()
-          // always update drawing
-          this.drawingImage = remoteSpace.drawingImage
-          await cache.updateSpaceByUpdates({ drawingImage: remoteSpace.drawingImage }, this.id)
-          globalStore.triggerDrawingRedraw()
-          return
-        }
+        this.updateSpacePreviewImage()
+        // space
         await this.restoreSpaceRemote(remoteSpace)
         this.saveSpaceToCache()
         this.notifySpaceIsOpen()
         this.updateUserLastSpaceId()
+        globalStore.isLoadingSpace = false
+        // drawing
+        this.drawingImage = remoteSpace.drawingImage
+        globalStore.triggerDrawingRedraw()
+        await cache.updateSpaceByUpdates({ drawingImage: remoteSpace.drawingImage }, this.id)
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
