@@ -186,7 +186,7 @@ const clearHightlightedItems = () => {
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = cardStore.getAllCards
+  const selectableCards = cardStore.getCardsIsNotLocked
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
