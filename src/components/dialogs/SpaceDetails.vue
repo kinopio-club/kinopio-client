@@ -310,7 +310,7 @@ const removeSpaceFromSpaces = (spaceId) => {
 const updateLocalSpaces = async () => {
   if (!props.visible) { return }
   let cacheSpaces = await cache.getAllSpaces()
-  cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, globalStore.currentUser)
+  cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, userStore.getUserAllState)
   state.spaces = cacheSpaces
 }
 const updateWithRemoteSpaces = async () => {
