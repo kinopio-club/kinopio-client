@@ -676,6 +676,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   GroupLabel(:group="spaceGroup")
+                  img.icon.inbox-icon(v-if="currentSpaceIsInbox" src="@/assets/inbox.svg")
+
                   //- span(v-if="currentSpaceIsTemplate")
                   //-   img.icon.templates(src="@/assets/templates.svg")
                   //- span
@@ -695,8 +697,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 //-   PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true" :isSmall="true")
 
                 //- inbox badge
-                .label-badge.secondary(v-if="currentSpaceIsInbox")
-                  img.icon.inbox-icon(src="@/assets/inbox.svg")
+                //- .label-badge.secondary(v-if="currentSpaceIsInbox")
                 //- template badge
                 //- .label-badge
                 //-   //- (v-if="currentSpaceIsTemplate")
@@ -961,7 +962,7 @@ header
 
   .inbox-icon
     width 12px
-    vertical-align 0
+    vertical-align 1px
 
   .icon.sidebar
     vertical-align -1px
