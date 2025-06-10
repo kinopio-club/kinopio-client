@@ -1501,10 +1501,10 @@ export const useGlobalStore = defineStore('global', {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.isLoadingSpace = value
     // },
-    isJoiningSpace (value) {
-      utils.typeCheck({ value, type: 'boolean' })
-      this.isJoiningSpace = value
-    },
+    // isJoiningSpace (value) {
+    //   utils.typeCheck({ value, type: 'boolean' })
+    //   this.isJoiningSpace = value
+    // },
     // isLoadingOtherItems (value) {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.isLoadingOtherItems = value

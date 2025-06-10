@@ -24,6 +24,7 @@ console.info('🌳 websocket clientId', clientId)
 const showDebugMessages = false
 
 const joinSpaceRoom = (store, payload) => {
+  const globalStore = useGlobalStore()
   const spaceStore = useSpaceStore()
   const userStore = useUserStore()
   console.info('🌙 joining', websocket)
@@ -32,21 +33,21 @@ const joinSpaceRoom = (store, payload) => {
   const user = userStore.getUserAllState
   const currentSpaceIsRemote = spaceStore.getSpaceIsRemote
   if (!currentSpaceIsRemote) {
-    store.commit('isJoiningSpace', false)
+    globalStore.isJoiningSpace = false
     return
   }
   if (currentSpaceRoom === space.id) {
-    store.commit('isJoiningSpace', false)
+    globalStore.isJoiningSpace = false
     return
   }
   if (websocket.readyState === 0) {
     console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
-    store.commit('isJoiningSpace', false)
+    globalStore.isJoiningSpace = false
     return
   }
   const spaceIsLoadedOrCached = Boolean(spaceStore.cards.length) // proxy for checking if user can view space
   if (!spaceIsLoadedOrCached) {
-    store.commit('isJoiningSpace', false)
+    globalStore.isJoiningSpace = false
     return
   }
   currentSpaceRoom = space.id
@@ -57,7 +58,7 @@ const joinSpaceRoom = (store, payload) => {
     clientId
   }))
   console.info('🌜 joinSpaceRoom', space.name)
-  store.commit('isJoiningSpace', false)
+  globalStore.isJoiningSpace = false
 }
 
 const sendEvent = (store, payload, type) => {
@@ -93,8 +94,9 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   spaceStore.updateOtherItems(options)
 }
 const checkIfShouldNotifyOffscreenCardCreated = (store, data) => {
+  const globalStore = useGlobalStore()
   if (data.message === 'createCard') {
-    store.commit('triggerNotifyOffscreenCardCreated', data.updates.card)
+    globalStore.triggerNotifyOffscreenCardCreated(data.updates.card)
   }
 }
 const checkIfShouldPreventBroadcast = (store) => {
@@ -103,8 +105,9 @@ const checkIfShouldPreventBroadcast = (store) => {
   return !spaceIsRemote
 }
 const closeWebsocket = (store) => {
+  const globalStore = useGlobalStore()
   if (!websocket) { return }
-  store.commit('isJoiningSpace', true)
+  globalStore.isJoiningSpace = true
   websocket.close()
 }
 
@@ -118,7 +121,7 @@ export default function createWebSocketPlugin () {
       ({ name, args }) => {
       // on connect
         if (name === 'connect') {
-          store.commit('isJoiningSpace', true)
+          globalStore.isJoiningSpace = true
           const host = consts.websocketHost()
           websocket = new WebSocket(host)
           websocket.onopen = (event) => {
@@ -130,7 +133,7 @@ export default function createWebSocketPlugin () {
           }
           websocket.onclose = (event) => {
             console.warn('🌚', event)
-            store.commit('isJoiningSpace', true)
+            globalStore.isJoiningSpace = true
             broadcastStore.reconnect()
           }
           websocket.onerror = (event) => {
@@ -155,7 +158,7 @@ export default function createWebSocketPlugin () {
             if (message === 'connected') {
               // presence
             } else if (handler) {
-              store.commit(handler, updates)
+              globalStore[handler](updates)
               checkIfShouldUpdateLinkToItem(store, data)
               checkIfShouldNotifyOffscreenCardCreated(store, data)
               // pinia
@@ -173,7 +176,7 @@ export default function createWebSocketPlugin () {
               globalStore.updateOtherUsers(updates.user)
             } else if (message === 'userLeftRoom') {
               spaceStore.removeIdleClientFromSpace(user || updates.user)
-              store.commit('clearRemoteMultipleSelected', data)
+              globalStore.clearRemoteMultipleSelected(data)
             } else if (message === 'userLeftSpace') {
               spaceStore.removeCollaboratorFromSpace(updates.user)
               if (updates.user.id === userStore.id) {
@@ -181,7 +184,7 @@ export default function createWebSocketPlugin () {
               }
               // other
             } else if (data.type === 'store') {
-              store.commit(`${message}`, updates)
+              globalStore[message](updates)
             } else {
               spaceStore[message](updates)
             }
