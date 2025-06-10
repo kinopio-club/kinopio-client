@@ -183,7 +183,7 @@ const cardsIsSelected = computed(() => multipleCardsSelectedIds.value.length > 0
 const multipleCardsIsSelected = computed(() => multipleCardsSelectedIds.value.length > 1)
 const cards = computed(() => {
   let cards = multipleCardsSelectedIds.value.map(cardId => {
-    cardStore.getCard(cardId)
+    return cardStore.getCard(cardId)
   })
   cards = cards.filter(card => Boolean(card))
   prevCards = cards
