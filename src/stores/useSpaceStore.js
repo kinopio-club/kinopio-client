@@ -321,15 +321,15 @@ export const useSpaceStore = defineStore('space', {
       const connectionStore = useConnectionStore()
       space = utils.removeRemovedCardsFromSpace(space)
       // initialize items
-      cardStore.initializeCards(space.cards)
-      boxStore.initializeBoxes(space.boxes)
-      connectionStore.initializeConnectionTypes(space.connectionTypes)
-      connectionStore.initializeConnections(space.connections)
+      cardStore.initializeCards(space?.cards)
+      boxStore.initializeBoxes(space?.boxes)
+      connectionStore.initializeConnectionTypes(space?.connectionTypes)
+      connectionStore.initializeConnections(space?.connections)
       // remove unused attrs
-      delete space.cards
-      delete space.boxes
-      delete space.connectionTypes
-      delete space.connections
+      delete space?.cards
+      delete space?.boxes
+      delete space?.connectionTypes
+      delete space?.connections
       this.$patch(space)
       console.log('🍍 space', this.getSpaceAllState)
       globalStore.updatePageSizes()

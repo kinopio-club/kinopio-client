@@ -100,7 +100,7 @@ export const useBoxStore = defineStore('boxes', {
     },
     // init
 
-    initializeBoxes (boxes) {
+    initializeBoxes (boxes = []) {
       const byId = {}
       const allIds = []
       boxes.forEach(box => {

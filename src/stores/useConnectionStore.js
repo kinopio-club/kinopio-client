@@ -126,7 +126,7 @@ export const useConnectionStore = defineStore('connections', {
       this.typeById = []
       this.typeAllIds = {}
     },
-    initializeConnections (connections) {
+    initializeConnections (connections = []) {
       const byId = {}
       const allIds = []
       connections.forEach(connection => {
@@ -136,7 +136,7 @@ export const useConnectionStore = defineStore('connections', {
       this.byId = byId
       this.allIds = allIds
     },
-    initializeConnectionTypes (connectionTypes) {
+    initializeConnectionTypes (connectionTypes = []) {
       const byId = {}
       const allIds = []
       connectionTypes.forEach(type => {

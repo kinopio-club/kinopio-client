@@ -234,7 +234,7 @@ export const useCardStore = defineStore('cards', {
       this.allIds = {}
       tallestCardHeight = 0
     },
-    initializeCards (cards) {
+    initializeCards (cards = []) {
       const byId = {}
       const allIds = []
       cards.forEach(card => {
