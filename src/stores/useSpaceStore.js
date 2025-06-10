@@ -261,6 +261,7 @@ export const useSpaceStore = defineStore('space', {
     async initializeSpace () {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       globalStore.isLoadingSpace = true
       const spaceUrl = globalStore.spaceUrlToLoad
       // restore from url
@@ -290,6 +291,7 @@ export const useSpaceStore = defineStore('space', {
       await this.checkIfShouldCreateNewUserSpaces()
       globalStore.triggerUpdateWindowHistory()
       globalStore.isLoadingSpace = false
+      broadcastStore.connect()
     },
 
     // load
@@ -329,7 +331,7 @@ export const useSpaceStore = defineStore('space', {
       delete space.connectionTypes
       delete space.connections
       this.$patch(space)
-      console.log('🍍', space)
+      console.log('🍍 space', this.getSpaceAllState)
       globalStore.updatePageSizes()
     },
     async getRemoteSpace (space) {

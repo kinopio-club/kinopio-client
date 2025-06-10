@@ -214,7 +214,7 @@ const currentSpaceName = computed(() => {
 const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
-  return Boolean(globalStore.isLoadingSpace || globalStore.isJoiningSpace || globalStore.isReconnectingToBroadcast || globalStore.isLoadingOtherItems || globalStore.sendingQueue.length)
+  return Boolean(globalStore.isLoadingSpace || globalStore.isJoiningSpace || globalStore.isConnectingToBroadcast || globalStore.isLoadingOtherItems || globalStore.sendingQueue.length)
 })
 const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   if (spaceHasStatus.value) {

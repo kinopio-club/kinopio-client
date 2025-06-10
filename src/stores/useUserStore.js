@@ -362,7 +362,7 @@ export const useUserStore = defineStore('users', {
       }
       globalStore.triggerUserIsLoaded()
       this.checkIfShouldJoinGroup()
-      console.log('🍍', { ...this.$state })
+      console.log('🍍 user', this.getUserAllState)
     },
 
     // update

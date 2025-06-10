@@ -26,7 +26,6 @@ export const useGlobalStore = defineStore('global', {
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
-    isReconnectingToBroadcast: false,
     isBeta: false,
     shouldHideConnectionOutline: false,
     changelogIsUpdated: false,
@@ -218,7 +217,6 @@ export const useGlobalStore = defineStore('global', {
 
     // loading
     isLoadingSpace: false,
-    isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
     groupToJoinOnLoad: null, // { groupId, collaboratorKey }
@@ -233,6 +231,9 @@ export const useGlobalStore = defineStore('global', {
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
+    // loading broadcast
+    isConnectingToBroadcast: false,
+    isJoiningSpace: false,
 
     // notifications
     notifications: [],
@@ -567,9 +568,9 @@ export const useGlobalStore = defineStore('global', {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.isOnline = value
     // },
-    // isReconnectingToBroadcast (value) {
+    // isConnectingToBroadcast (value) {
     //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isReconnectingToBroadcast = value
+    //   this.isConnectingToBroadcast = value
     // },
     // isBeta (value) {
     //   utils.typeCheck({ value, type: 'boolean' })

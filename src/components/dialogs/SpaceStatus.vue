@@ -41,7 +41,7 @@ const updateSpaceIsCached = async () => {
 const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
 const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 const isJoiningSpace = computed(() => globalStore.isJoiningSpace)
-const isReconnectingToBroadcast = computed(() => globalStore.isReconnectingToBroadcast)
+const isConnectingToBroadcast = computed(() => globalStore.isConnectingToBroadcast)
 
 // saving
 
@@ -55,7 +55,7 @@ const pluralChanges = computed(() => {
 // connected
 
 const isConnected = computed(() => {
-  const value = !isLoadingSpace.value && !isJoiningSpace.value && !isReconnectingToBroadcast.value && !isSavingOperations.value
+  const value = !isLoadingSpace.value && !isJoiningSpace.value && !isConnectingToBroadcast.value && !isSavingOperations.value
   return value
 })
 </script>
@@ -69,8 +69,7 @@ dialog.space-status(v-if="visible" :open="visible" ref="dialog")
       div(v-else)
         Loader(:visible="true")
         span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
-        span(v-else-if="isJoiningSpace") Connecting to Broadcast
-        span(v-else-if="isReconnectingToBroadcast") Reconnecting
+        span(v-else-if="isJoiningSpace || isConnectingToBroadcast") Connecting to Collaboration Broadcast
         span(v-else-if="isSavingOperations") Syncing
       .button-wrap
         button.small-button(@click.left="refreshBrowser" title="Refresh browser")
@@ -82,7 +81,7 @@ dialog.space-status(v-if="visible" :open="visible" ref="dialog")
     div(v-if="(isLoadingSpace || isLoadingOtherItems) && state.spaceIsCached")
       span.badge.info You can edit right now
       span and your changes will sync once connected
-    div(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
+    div(v-else-if="isJoiningSpace || isConnectingToBroadcast")
       span.badge.info You can edit right now
       span {{' '}}
       span but cannot collaborate yet, your changes will sync once connected
