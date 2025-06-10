@@ -694,7 +694,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 //- .label-badge
                 //-   PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true" :isSmall="true")
 
-                GroupLabel(:group="spaceGroup")
                 //- inbox badge
                 .label-badge.secondary(v-if="currentSpaceIsInbox")
                   img.icon.inbox-icon(src="@/assets/inbox.svg")

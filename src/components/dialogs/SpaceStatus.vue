@@ -69,7 +69,7 @@ dialog.space-status(v-if="visible" :open="visible" ref="dialog")
       div(v-else)
         Loader(:visible="true")
         span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
-        span(v-else-if="isJoiningSpace || isConnectingToBroadcast") Connecting to Collaboration Broadcast
+        span(v-else-if="isJoiningSpace || isConnectingToBroadcast") Connecting to Broadcast
         span(v-else-if="isSavingOperations") Syncing
       .button-wrap
         button.small-button(@click.left="refreshBrowser" title="Refresh browser")
