@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 // Adjust this value to change the momentum decay
 // Lower values (closer to 0.92) make the scrolling slower and smoother
@@ -26,31 +27,36 @@ let shouldStartPanning,
   momentumTimer,
   shouldCancelMomentumTimer
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('mousedown', cancelMomentum)
   window.addEventListener('mousemove', checkIfShouldStartPanning)
   window.addEventListener('mouseup', checkIfShouldStartMomentum)
   window.addEventListener('wheel', cancelMomentum)
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerPanningStart') {
-      shouldStartPanning = true
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPanningStart') {
+        shouldStartPanning = true
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mousedown', cancelMomentum)
   window.removeEventListener('mousemove', checkIfShouldStartPanning)
   window.removeEventListener('mouseup', checkIfShouldStartMomentum)
   window.removeEventListener('wheel', cancelMomentum)
-  unsubscribe()
+  unsubscribes()
 })
 
 // handle pointer events
 
 const checkIfShouldStartPanning = (event) => {
-  if (store.state.currentUserIsPanning) {
+  if (globalStore.currentUserIsPanning) {
     event.preventDefault()
     updatePanningPosition(event)
     initPanning(event)

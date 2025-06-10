@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
@@ -13,7 +17,11 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialog = ref(null)
 
@@ -26,14 +34,14 @@ const props = defineProps({
 })
 
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   closeDialogs()
   if (value) {
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/updateSpacePreviewImage')
+    globalStore.shouldExplicitlyHideFooter = true
+    spaceStore.updateSpacePreviewImage()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -49,16 +57,16 @@ const state = reactive({
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
-const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const spaceIsRemote = computed(() => spaceStore.getSpaceIsRemote)
+const spaceIsPublic = computed(() => spaceStore.privacy !== 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 // add to explore
 
 const exploreSectionIsVisible = computed(() => {
-  const showInExplore = store.state.currentSpace.showInExplore
+  const showInExplore = spaceStore.showInExplore
   const shouldShowAskToAddToExplore = !isSpaceMember.value && !showInExplore
   return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
 })
@@ -66,7 +74,7 @@ const exploreSectionIsVisible = computed(() => {
 // copy url
 
 const spaceUrl = computed(() => {
-  let url = store.getters['currentSpace/url']
+  let url = spaceStore.getSpaceUrl
   url = new URL(url)
   if (state.isShareInPresentationMode) {
     url.searchParams.set('present', true)
@@ -74,19 +82,19 @@ const spaceUrl = computed(() => {
   return url.href
 })
 const copySpaceUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(spaceUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const webShareIsSupported = computed(() => navigator.share)
 const webShare = () => {
-  const spaceName = store.state.currentSpace.name
+  const spaceName = spaceStore.name
   const data = {
     title: 'Kinopio Space',
     text: spaceName,
@@ -113,7 +121,7 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.emailInvitesIsVisible = false
   state.childDialogIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
@@ -123,8 +131,8 @@ const childDialogIsVisible = (value) => {
 // toggles
 
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const togglePrivacyPickerIsVisible = () => {
   const isVisible = state.privacyPickerIsVisible
@@ -152,15 +160,15 @@ const emailInvitesIsVisible = (value) => {
 // users
 
 const users = computed(() => {
-  let items = utils.clone(store.state.currentSpace.users)
-  items = items.concat(store.state.currentSpace.collaborators)
+  let items = utils.clone(spaceStore.users)
+  items = items.concat(spaceStore.collaborators)
   return items
 })
 
 // groups
 
-const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
 </script>
 

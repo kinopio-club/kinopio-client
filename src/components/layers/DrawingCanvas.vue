@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -9,7 +14,11 @@ import cache from '@/cache.js'
 import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
 
 const canvasElement = ref(null)
 let canvas, context
@@ -21,7 +30,7 @@ let remoteStrokes = []
 let redoStrokes = []
 let drawingImage, drawingImageUrl
 
-let unsubscribe, unsubscribeActions
+let unsubscribes
 
 onMounted(() => {
   canvas = canvasElement.value
@@ -33,60 +42,68 @@ onMounted(() => {
   updatePrevScroll()
   clearCanvas()
   clearStrokes()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerStartDrawing') {
-      startDrawing(mutation.payload)
-    } else if (mutation.type === 'triggerDraw') {
-      draw(mutation.payload)
-    } else if (mutation.type === 'spaceZoomPercent') {
-      updateCanvasSize()
-    } else if (mutation.type === 'triggerAddRemoteDrawingStroke') {
-      const stroke = mutation.payload.stroke
-      remoteStrokes.push(stroke)
-      renderStroke(stroke, true)
-      store.commit('triggerUpdateDrawingBackground')
-    } else if (mutation.type === 'triggerRemoveRemoteDrawingStroke') {
-      const stroke = mutation.payload.stroke
-      remoteStrokes = remoteStrokes.filter(points => {
-        return points[0].id !== stroke[0].id
-      })
-      redraw()
-    } else if (mutation.type === 'triggerDrawingUndo') {
-      undo()
-    } else if (mutation.type === 'triggerDrawingRedo') {
-      redo()
-    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') {
-      clearCanvas()
-      redraw()
-    } else if (mutation.type === 'triggerRestoreSpaceRemoteComplete' || mutation.type === 'triggerDrawingRedraw') {
-      redraw()
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerStartDrawing') {
+        startDrawing(args[0])
+      } else if (name === 'triggerDraw') {
+        draw(args[0])
+      } else if (name === 'spaceZoomPercent') {
+        updateCanvasSize()
+      } else if (name === 'triggerAddRemoteDrawingStroke') {
+        const stroke = args[0].stroke
+        remoteStrokes.push(stroke)
+        renderStroke(stroke, true)
+        globalStore.triggerUpdateDrawingBackground()
+      } else if (name === 'triggerRemoveRemoteDrawingStroke') {
+        const stroke = args[0].stroke
+        remoteStrokes = remoteStrokes.filter(points => {
+          return points[0].id !== stroke[0].id
+        })
+        redraw()
+      } else if (name === 'triggerDrawingUndo') {
+        undo()
+      } else if (name === 'triggerDrawingRedo') {
+        redo()
+      } else if (name === 'triggerRestoreSpaceLocalComplete') { // TODO replace w spaceStore restoreSpace watcher
+        clearCanvas()
+        redraw()
+      } else if (name === 'triggerDrawingRedraw') {
+        redraw()
+      }
     }
-    unsubscribeActions = store.subscribeAction(action => {
-      const actions = ['currentSpace/loadSpace', 'currentSpace/changeSpace', 'currentSpace/addSpace']
-      if (actions.includes(action.type)) {
+  )
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      const actions = ['loadSpace', 'changeSpace', 'createSpace']
+      if (actions.includes(name)) {
         clearStrokes()
       }
-    })
-  })
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('scroll', scroll)
   window.removeEventListener('resize', updateCanvasSize)
-  unsubscribe()
-  unsubscribeActions()
+  unsubscribes()
 })
 
 const state = reactive({
   prevScroll: { x: 0, y: 0 }
 })
 
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+const viewportHeight = computed(() => globalStore.viewportHeight)
+const viewportWidth = computed(() => globalStore.viewportWidth)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
 const styles = computed(() => {
   const value = {
     top: state.prevScroll.y + 'px',
@@ -108,9 +125,9 @@ const clearStrokes = () => {
 
 // points
 
-const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
+const strokeColor = computed(() => userStore.getUserDrawingColor)
 const strokeDiameter = computed(() => {
-  const diameter = store.state.currentUser.drawingBrushSize
+  const diameter = userStore.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
 })
 const createPoint = (event) => {
@@ -121,7 +138,7 @@ const createPoint = (event) => {
     y,
     color: strokeColor.value,
     diameter: strokeDiameter.value,
-    isEraser: store.state.drawingEraserIsActive
+    isEraser: globalStore.drawingEraserIsActive
   }
 }
 
@@ -129,9 +146,9 @@ const createPoint = (event) => {
 
 const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'addRemoteDrawingStroke',
@@ -140,9 +157,9 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'removeRemoteDrawingStroke',
@@ -259,7 +276,7 @@ const redrawSpaceDrawingImage = () => {
 }
 const restoreSpaceDrawingImage = async () => {
   return new Promise((resolve, reject) => {
-    let url = store.state.currentSpace.drawingImage
+    let url = spaceStore.drawingImage
     if (!url) {
       resolve()
       return
@@ -298,14 +315,14 @@ const restoreSpaceDrawingImage = async () => {
 
 const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   isDrawing = true
   currentStrokeId = nanoid()
   currentStroke = []
   const point = createPoint(event)
   renderStroke([point])
   currentStroke.push(point)
-  store.commit('triggerUpdateDrawingBackground')
+  globalStore.triggerUpdateDrawingBackground()
 }
 
 // draw
@@ -315,7 +332,7 @@ const draw = (event) => {
   if (!isDrawing) { return }
   currentStroke.push(createPoint(event))
   renderStroke(currentStroke)
-  store.commit('triggerUpdateDrawingBackground')
+  globalStore.triggerUpdateDrawingBackground()
 }
 const redraw = async () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
@@ -327,26 +344,26 @@ const redraw = async () => {
   remoteStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
-  store.commit('triggerUpdateDrawingBackground')
+  globalStore.triggerUpdateDrawingBackground()
 }
 
 // stop
 
 const updateCache = async (strokes) => {
   const dataUrl = await imageDataUrl(strokes)
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
-  store.commit('triggerEndDrawing')
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  globalStore.triggerEndDrawing()
+  spaceStore.updateSpacePreviewImage()
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)
   updateCache(strokes)
   updatePageSizes(strokes)
   if (isRemovedStroke) {
-    await store.dispatch('api/addToQueue', { name: 'removeDrawingStroke', body: { stroke } })
+    await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   } else {
-    await store.dispatch('api/addToQueue', { name: 'createDrawingStroke', body: { stroke } })
+    await apiStore.addToQueue({ name: 'createDrawingStroke', body: { stroke } })
   }
 }
 const endDrawing = async (event) => {
@@ -355,7 +372,7 @@ const endDrawing = async (event) => {
     isDrawing = false
     return
   }
-  store.commit('addToDrawingStrokeColors', currentStroke[0].color)
+  globalStore.addToDrawingStrokeColors(currentStroke[0].color)
   currentStrokes.push(currentStroke)
   saveStroke({ stroke: currentStroke })
   currentStroke = []
@@ -394,7 +411,7 @@ const scroll = () => {
   redraw()
 }
 const updateCanvasSize = debounce(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   canvas.width = viewportWidth.value * zoom
   canvas.height = viewportHeight.value * zoom
   redraw()
@@ -414,14 +431,14 @@ const updatePageSizes = (strokes) => {
     })
   })
   const padding = {
-    width: store.state.viewportWidth / 2,
-    height: store.state.viewportHeight / 2
+    width: globalStore.viewportWidth / 2,
+    height: globalStore.viewportHeight / 2
   }
   const rect = {
     width: x + drawingBrushSizeDiameter + padding.width,
     height: y + drawingBrushSizeDiameter + padding.height
   }
-  store.commit('updatePageSizes', rect)
+  globalStore.updatePageSizesFromRect(rect)
 }
 </script>
 

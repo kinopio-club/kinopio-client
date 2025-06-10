@@ -1,8 +1,5 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-
-const store = useStore()
 
 </script>
 

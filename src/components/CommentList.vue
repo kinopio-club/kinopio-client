@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import CardList from '@/components/CardList.vue'
 import utils from '@/utils.js'
@@ -8,10 +11,12 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const comments = computed(() => {
-  let cards = store.getters['currentCards/all']
+  let cards = cardStore.getAllCards
   cards = utils.clone(cards)
   cards = cards.filter(card => {
     if (card.isComment) { return true }
@@ -28,14 +33,14 @@ const comments = computed(() => {
 })
 
 const showCardDetails = (card) => {
-  const filterComments = store.state.currentUser.filterComments
+  const filterComments = userStore.filterComments
   if (filterComments) {
-    store.dispatch('currentUser/toggleFilterComments', false)
+    userStore.updateCard({ filterComments: false })
   }
-  store.dispatch('currentCards/showCardDetails', card.id)
+  cardStore.showCardDetails(card.id)
 }
 const userById = (userId) => {
-  return store.getters['currentSpace/userById'](userId)
+  return spaceStore.getSpaceUserById(userId)
 }
 </script>
 

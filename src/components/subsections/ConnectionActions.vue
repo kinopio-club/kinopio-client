@@ -1,6 +1,8 @@
 <script setup>
-import { reactive, computed, onMounted, watch } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
@@ -8,7 +10,11 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const connectionStore = useConnectionStore()
+
+let unsubscribes
 
 const props = defineProps({
   visible: Boolean,
@@ -25,11 +31,19 @@ const state = reactive({
 })
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs' && props.visible) {
-      closeDialogs()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs' && props.visible) {
+        closeDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const colorClasses = computed(() => {
@@ -47,20 +61,17 @@ const canEditAllConnections = computed(() => {
   return props.canEdit || props.canEditAll.connections
 })
 const connectionTypes = computed(() => {
-  let types = uniq(store.state.multipleConnectionsSelectedIds)
-  types = types.map(id => {
-    const connection = store.getters['currentConnections/byId'](id)
-    if (!connection) { return }
-    return store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+  const ids = globalStore.multipleConnectionsSelectedIds
+  let types = ids.forEach(id => {
+    return connectionStore.getConnectionConnectionType(id)
   })
-  types = types.filter(type => Boolean(type))
   types = uniqBy(types, 'id')
   types = uniqBy(types, 'color')
   return types
 })
 const editableConnectionTypes = computed(() => {
   return uniq(props.connections.map(connection => {
-    return store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+    return connectionStore.getConnectionType(connection.connectionTypeId)
   }))
 })
 

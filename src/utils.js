@@ -18,6 +18,7 @@ import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
 import cloneDeep from 'lodash-es/cloneDeep'
+// import merge from 'lodash-es/merge'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
@@ -576,7 +577,7 @@ export default {
     }
   },
   splitCardNameByParagraphAndSentence (prevName) {
-    const maxCardCharacterLimit = consts.defaultCharacterLimit
+    const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
     let cardNames = paragraphs.map(paragraph => {
       let sentences
@@ -638,7 +639,7 @@ export default {
     // https://regexr.com/5784j
     return string.replace(/\.$/g, '')
   },
-  removeTrailingSlash (string) {
+  clearTrailingSlash (string) {
     if (!string) { return }
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
@@ -1015,10 +1016,13 @@ export default {
 
   // Cards
 
+  cardElement (card) {
+    return document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+  },
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
-    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    const element = this.cardElement(card)
     if (!element) { return }
     const cardId = card.id
     card.shouldRender = element.dataset.shouldRender
@@ -1046,16 +1050,7 @@ export default {
     box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
-  updateCardDimensionsDataWhileDragging (card) {
-    if (!card) { return }
-    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
-    if (!element) { return }
-    element.dataset.x = card.x
-    element.dataset.y = card.y
-    element.dataset.width = card.width
-    element.dataset.height = card.height
-  },
-  removeAllCardDimensions (card) {
+  clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = cardWrapElement.querySelector('.card-content-wrap')
@@ -1541,45 +1536,71 @@ export default {
     }
     return cardsCountIsUnchanged && boxesCountIsUnchanged // && editedAtIsUnchanged
   },
-  mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
-    prevItems = prevItems.filter(item => Boolean(item))
-    newItems = newItems.filter(item => Boolean(item))
-    selectedItemIds = selectedItemIds || []
-    const prevIds = prevItems.map(item => item.id)
-    const newIds = newItems.map(item => item.id)
-    newItems = this.normalizeItems(newItems)
-    prevItems = this.normalizeItems(prevItems)
-    const addItems = []
-    const updateItems = []
-    const removeItems = []
-    newIds.forEach(id => {
-      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
-      const itemExists = prevIds.includes(id)
-      if (selectedItem) {
-        const prevItem = prevItems[id]
-        const newItem = newItems[id]
-        // use prevItem position to avoid ppsition item jumping while selected items dragging
-        newItem.x = prevItem.x
-        newItem.y = prevItem.y
-        updateItems.push(newItem)
-      } else if (itemExists) {
-        updateItems.push(newItems[id])
-      } else {
-        addItems.push(newItems[id])
-      }
-    })
-    prevIds.forEach(id => {
-      const prevItemNotFoundInNewItems = !newIds.includes(id)
-      const threshold = 30 * 1000 // 30 seconds
-      const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
-      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
-      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession && !selectedItem
-      if (itemIsRemoved) {
-        removeItems.push(prevItems[id])
-      }
-    })
-    return { addItems, updateItems, removeItems }
-  },
+  // mergeSpaceItems({ prevItems, newItems, selectedItemIds = [] }) {
+  //   const filteredPrevItems = prevItems.filter(Boolean)
+  //   const filteredNewItems = newItems.filter(Boolean)
+  //   const prevIds = filteredPrevItems.map(({ id }) => id)
+  //   const newIds = filteredNewItems.map(({ id }) => id)
+  //   const normalizedNew = this.normalizeItems(filteredNewItems)
+  //   const normalizedPrev = this.normalizeItems(filteredPrevItems)
+  //   const items = normalizedNew // [ id: {object } ]
+  //   const threshold = 30 * 1000 // 30 seconds
+  //   const now = Date.now()
+
+  //   // const addItems = []
+  //   // const updateItems = []
+  //   // const removeItems = []
+
+  //   newIds.forEach(id => {
+  //     const isSelected = selectedItemIds.includes(id)
+  //     const isUpdated = prevIds.includes(id)
+  //     const prevItem = normalizedPrev[id]
+  //     const newItem = normalizedNew[id]
+  //     const threshold = 30 * 1000 // 30 seconds
+  //     const now = Date.now()
+  //     // const isNewUpdate = dayjs(now).diff(prevItem.updatedAt) >= threshold
+
+  //     // add prev to new
+
+  //     // merge prev updates
+
+  //     // use selected prev positions to avoid ppsition jumping while dragging
+  //     if (isSelected) {
+  //       const { x, y } = prevItem
+  //       items[id].x = x
+  //       items[id].y = y
+  //     }
+
+  //     prevIds.filter(prevId => {
+  //       // .filter(id => {
+  //       // const isNew = !newIds.includes(prevId)
+  //         const isNotInNewItems = !newIds.includes(id)
+  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
+  //         return isNotInNewItems && isOldUpdate
+  //       // })
+  //     })
+
+  //     if (isUpdated) {
+  //       items[id] = { ...prevItem, ...newItem}
+  //     } else {
+  //       items.push()
+  //       addItems.push(normalizedNew[id])
+  //     }
+  //   })
+  //   // Handle removals
+  //   removeItems.push(
+  //     ...prevIds
+  //       .filter(id => {
+  //         const isNotInNewItems = !newIds.includes(id)
+  //         const isNotSelected = !selectedItemIds.includes(id)
+  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
+  //         return isNotInNewItems && isNotSelected && isOldUpdate
+  //       })
+  //       .map(id => normalizedPrev[id])
+  //   )
+  //   // return items , denomarlized
+  //   return { addItems, updateItems, removeItems }
+  // },
   newSpaceBackground (space, currentUser) {
     if (currentUser.defaultSpaceBackgroundGradient) {
       space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient
@@ -1686,6 +1707,10 @@ export default {
     space.userId = userId
     space.editedByUserId = userId
     return space
+  },
+  excludeCurrentUser (users, currentUserId) {
+    users = users.filter(user => user.id !== currentUserId)
+    return users
   },
   itemUserId (user, item, nullItemUsers) {
     let userId
@@ -2365,14 +2390,14 @@ export default {
       return 'link'
     }
   },
-  removeTrackingQueryStringsFromURLs (name) {
+  clearTrackingQueryStringsFromUrls (name) {
     const urls = this.urlsFromString(name)
     // https://www.bleepingcomputer.com/PoC/qs.html
     // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
     const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
     urls.forEach(url => {
       url = url.trim()
-      url = this.removeTrailingSlash(url)
+      url = this.clearTrailingSlash(url)
       const queryString = this.queryString(url)
       const domain = this.urlWithoutQueryString(url)
       if (!queryString) { return }
@@ -2399,7 +2424,7 @@ export default {
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
       url = url.trim()
-      url = this.removeTrailingSlash(url)
+      url = this.clearTrailingSlash(url)
       if (!this.urlIsWebsite(url)) { return }
       const queryString = this.queryString(url) || ''
       const domain = this.urlWithoutQueryString(url)
@@ -3035,7 +3060,7 @@ export default {
           id: edge.id,
           startItemId: edge.fromNode,
           endItemId: edge.toNode,
-          controlPoint: 'q00,00', // straight line
+          controlPoint: consts.straightLineConnectionPathControlPoint,
           directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
           connectionTypeId: typeId,
           labelIsVisible: Boolean(edge.label)

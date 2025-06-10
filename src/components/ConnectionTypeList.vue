@@ -1,14 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 // import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-const store = useStore()
 
 // onMounted(() => {
 //   store.subscribe((mutation, state) => {
-//     if (mutation.type === 'triggerCloseChildDialogs') {
+//     if (name === 'triggerCloseChildDialogs') {
 //       hideColorPicker()
 //     }
 //   })

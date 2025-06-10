@@ -1,26 +1,45 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const cardStore = useCardStore()
 
-// let unsubscribe
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+// let unsubscribes
 
 const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  // unsubscribe = store.subscribe(mutation => {
-  //   if (mutation.type === 'abc') {
-  //     xyz()
+  // const cardStoreUnsubscribe = cardStore.$onAction(
+  //   ({name, args}) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
   //   }
-  // })
+  // )
+  // const globalStoreUnsubscribe = globalStore.$onAction(
+  //   ({ name, args }) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
+  //   }
+  // )
+  // unsubscribes = () => {
+  //   globalStoreUnsubscribe()
+  //   cardStoreUnsubscribe()
+  // }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-//   unsubscribe()
+//   unsubscribes()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -46,11 +65,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const themeName = computed(() => store.state.currentUser.theme)
+const themeName = computed(() => userStore.theme)
 const incrementBy = () => {
   state.count = state.count + 1
   emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
+  // themeStore.updateThemeIsSystem(false)
 }
 </script>
 

@@ -1,22 +1,38 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let dateIsUpdated
 let updatedAbsoluteDate
+let unsubscribes
 
 onMounted(() => {
   dateIsUpdated = false
   updatedAbsoluteDate = ''
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs' && props.visible) {
-      closeDialogsFromParent()
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs' && props.visible) {
+        closeDialogsFromParent()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['closeDialogs'])
@@ -37,25 +53,25 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
-const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
+const shouldShowItemActions = computed(() => userStore.shouldShowItemActions)
 const closeDialogsFromParent = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
 }
 const closeDialogs = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
   emit('closeDialogs')
 }
 const scrollParentIntoView = () => {
   const element = props.parentElement
   if (!element) { return }
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // date
 
 const dateUpdatedAt = computed(() => {
   const date = props.card.nameUpdatedAt || props.card.createdAt
-  const showAbsoluteDate = store.state.currentUser.filterShowAbsoluteDates
+  const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
       return new Date(date).toLocaleString()
@@ -68,8 +84,8 @@ const dateUpdatedAt = computed(() => {
 })
 const toggleFilterShowAbsoluteDates = () => {
   closeDialogs()
-  const value = !store.state.currentUser.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  const value = !userStore.filterShowAbsoluteDates
+  userStore.updateUser('filterShowAbsoluteDates', value)
 }
 
 // user
@@ -77,17 +93,16 @@ const toggleFilterShowAbsoluteDates = () => {
 const createdByUserIsNotEmpty = computed(() => utils.objectHasKeys(props.createdByUser))
 const isUpdatedByDifferentUser = computed(() => props.createdByUser.id !== props.updatedByUser.id)
 const userDetailsIsUser = (user) => {
-  if (!store.state.userDetailsIsVisible) { return }
-  const userDetailsUser = store.state.userDetailsUser
+  if (!globalStore.userDetailsIsVisible) { return }
+  const userDetailsUser = globalStore.userDetailsUser
   return user.id === userDetailsUser.id
 }
 
 // settings
 
 const showCardSettings = () => {
-  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
-  // store.dispatch('closeAllDialogs')
-  store.commit('userSettingsIsVisible', true)
+  userStore.updateUser({ prevSettingsSection: 'cards' })
+  globalStore.userSettingsIsVisible = true
 }
 </script>
 

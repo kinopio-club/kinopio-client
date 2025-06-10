@@ -1,21 +1,22 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const props = defineProps({
   layer: String // app, space
 })
 
 const items = computed(() => {
-  let itemsInLayer = store.state.notificationsWithPosition.filter(item => item.layer === props.layer)
+  let itemsInLayer = globalStore.notificationsWithPosition.filter(item => item.layer === props.layer)
   itemsInLayer = utils.clone(itemsInLayer)
   itemsInLayer = itemsInLayer.map(item => {
     const isReadOnlyMessage = item.message === 'Space is Read Only'
-    if (store.state.currentSpaceIsUnavailableOffline && isReadOnlyMessage) {
+    if (globalStore.currentSpaceIsUnavailableOffline && isReadOnlyMessage) {
       item.message = 'Space is Unavailable Offline'
       item.icon = 'offline'
     }
@@ -24,7 +25,7 @@ const items = computed(() => {
   return itemsInLayer
 })
 const remove = () => {
-  store.commit('removeNotificationWithPosition')
+  globalStore.removeNotificationWithPosition()
 }
 </script>
 

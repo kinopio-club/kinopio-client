@@ -1,6 +1,5 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
@@ -8,8 +7,6 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
-
-const store = useStore()
 
 const emit = defineEmits(['selectGroup'])
 

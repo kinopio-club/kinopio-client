@@ -1,15 +1,23 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
+import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
-const store = useStore()
 
-let unsubscribe
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+let unsubscribes
 
 const footerElement = ref(null)
 
@@ -21,28 +29,33 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
   window.addEventListener('resize', updatePosition)
   updatePosition()
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
-      updatePosition()
-    } else if (mutation.type === 'triggerHideTouchInterface') {
-      hideOnTouch()
-    } else if (mutation.type === 'isPresentationMode') {
-      if (!mutation.payload) {
-        store.commit('shouldExplicitlyHideFooter', false)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateHeaderAndFooterPosition') {
+        updatePosition()
+      } else if (name === 'triggerHideTouchInterface') {
+        hideOnTouch()
+      } else if (name === 'isPresentationMode') {
+        if (!args[0]) {
+          globalStore.shouldExplicitlyHideFooter = false
+        }
+      } else if (name === 'closeAllDialogs') {
+        if (!globalStore.minimapIsPinned) {
+          hideMinimap()
+        }
+      } else if (name === 'triggerMinimapIsVisible') {
+        toggleMinimap()
       }
-    } else if (mutation.type === 'closeAllDialogs') {
-      if (!store.state.minimapIsPinned) {
-        hideMinimap()
-      }
-    } else if (mutation.type === 'triggerMinimapIsVisible') {
-      toggleMinimap()
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   window.removeEventListener('resize', updatePosition)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -51,13 +64,13 @@ const state = reactive({
   minimapIsVisible: false
 })
 
-const isPinchZooming = computed(() => store.state.isPinchZooming)
+const isPinchZooming = computed(() => globalStore.isPinchZooming)
 watch(() => isPinchZooming.value, (value, prevValue) => {
   if (value) {
     updatePosition()
   }
 })
-const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
 watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
     if (!utils.isAndroid()) { return }
@@ -67,49 +80,57 @@ watch(() => isTouchScrolling.value, (value, prevValue) => {
   }
 })
 
-const isAddPage = computed(() => store.state.isAddPage)
-const isEmbedMode = computed(() => store.state.isEmbedMode)
-const currentUser = computed(() => store.state.currentUser)
-const shouldExplicitlyHideFooter = computed(() => store.state.shouldExplicitlyHideFooter)
-const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
-const multipleSelectedActionsIsVisible = computed(() => store.state.multipleSelectedActionsIsVisible)
-const connectionDetailsIsVisibleForConnectionId = computed(() => store.state.connectionDetailsIsVisibleForConnectionId)
-const shouldHideFooter = computed(() => store.state.shouldHideFooter)
-const isTouchDevice = computed(() => store.getters.isTouchDevice)
+const isAddPage = computed(() => globalStore.isAddPage)
+const isEmbedMode = computed(() => globalStore.isEmbedMode)
+const currentUser = computed(() => userStore.getUserAllState)
+const shouldExplicitlyHideFooter = computed(() => globalStore.shouldExplicitlyHideFooter)
+const cardDetailsIsVisibleForCardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
+const multipleSelectedActionsIsVisible = computed(() => globalStore.multipleSelectedActionsIsVisible)
+const connectionDetailsIsVisibleForConnectionId = computed(() => globalStore.connectionDetailsIsVisibleForConnectionId)
+const shouldHideFooter = computed(() => globalStore.shouldHideFooter)
+const isTouchDevice = computed(() => globalStore.getIsTouchDevice)
 const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
-const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const isFadingOut = computed(() => globalStore.isFadingOutDuringTouch)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
 // visible
 
+const contentDialogIsVisible = computed(() => Boolean(cardDetailsIsVisibleForCardId.value || multipleSelectedActionsIsVisible.value || connectionDetailsIsVisibleForConnectionId.value))
 const isVisible = computed(() => {
   if (isAddPage.value) { return }
   return true
 })
 const leftIsVisble = computed(() => {
-  // if (isPresentationMode.value) { return }
   if (isEmbedMode.value) { return }
   return true
 })
-const controlsIsVisible = computed(() => {
-  // if (isPresentationMode.value) { return }
-  if (store.state.minimapIsPinned) { return true }
+const leftControlsIsVisible = computed(() => {
+  if (isPresentationMode.value) { return }
   if (shouldExplicitlyHideFooter.value) { return }
-  const isTouchDevice = store.state.isTouchDevice
-  if (!isTouchDevice) { return true }
-  const contentDialogIsVisible = Boolean(cardDetailsIsVisibleForCardId.value || multipleSelectedActionsIsVisible.value || connectionDetailsIsVisibleForConnectionId.value)
-  if (contentDialogIsVisible) { return }
+  // const isTouchDevice = globalStore.isTouchDevice
+  // if (!isTouchDevice) { return true }
+  if (contentDialogIsVisible.value) { return }
+  if (shouldHideFooter.value) { return }
+  return true
+})
+const rightControlsIsVisible = computed(() => {
+  // if (isPresentationMode.value) { return }
+  if (globalStore.minimapIsPinned) { return true }
+  if (shouldExplicitlyHideFooter.value) { return }
+  // const isTouchDevice = globalStore.isTouchDevice
+  // if (!isTouchDevice) { return true }
+  if (contentDialogIsVisible.value) { return }
   if (shouldHideFooter.value) { return }
   return true
 })
 
 // presentation mode
 
-const isPresentationMode = computed(() => store.state.isPresentationMode)
+const isPresentationMode = computed(() => globalStore.isPresentationMode)
 const togglePresentationMode = () => {
   const value = !isPresentationMode.value
-  store.commit('isPresentationMode', value)
+  globalStore.isPresentationMode = value
 }
 
 // minimap
@@ -144,10 +165,18 @@ const cancelHidden = () => {
   state.isHiddenOnTouch = false
 }
 
+// settings
+
+const userSettingsIsVisible = computed(() => globalStore.userSettingsIsVisible)
+const toggleUserSettingsIsVisible = () => {
+  const value = !globalStore.userSettingsIsVisible
+  globalStore.userSettingsIsVisible = value
+}
+
 // position
 
 const updatePosition = async () => {
-  if (!store.state.isTouchScrolling) {
+  if (!globalStore.isTouchScrolling) {
     updatePositionFrame()
     return
   }
@@ -192,19 +221,33 @@ const updatePositionInVisualViewport = () => {
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
+      template(v-if="leftControlsIsVisible")
+      .footer-button-wrap
+        DiscoveryButtons
+      //- TEMP move fav button into share?
+      .footer-button-wrap
+        FavoriteSpaceButton(:isSmall="true")
+      .button-wrap.input-button-wrap.footer-button-wrap
+        button.small-button.translucent-button
+          span C
+          //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
+          //- remove from user settings
       Notifications
 
-  .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
+  .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
+    //- presentation mode
+    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
+        img.icon.settings(src="@/assets/presentation.svg")
+    .button-wrap.input-button-wrap.footer-button-wrap
+      button.small-button(@click="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
+        span S
     //- minimap
     .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: state.minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
         img.icon.minimap(src="@/assets/minimap.svg")
       Minimap(:visible="state.minimapIsVisible")
-    //- presentation mode
-    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
-        img.icon.settings(src="@/assets/presentation.svg")
 </template>
 
 <style lang="stylus">
@@ -304,5 +347,26 @@ footer
     vertical-align 0px
     width 13px
     margin-left 6px
+
+  .space-functions-row
+    > .segmented-buttons,
+    &.segmented-buttons
+      display inline-block
+      > .button-wrap
+        > button
+          border-radius 0
+          border-right 0
+          .loader
+            margin 0
+        &:first-child
+          > button
+            border-top-left-radius var(--entity-radius)
+            border-bottom-left-radius var(--entity-radius)
+            border-right 0
+        &:last-child
+          > button
+            border-top-right-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
+            border-right 1px solid var(--primary-border)
 
   </style>

@@ -1,6 +1,9 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
 import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
@@ -9,16 +12,28 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
 const dialog = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeUpgradeFAQ()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeUpgradeFAQ()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -29,9 +44,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     console.info('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -41,7 +56,7 @@ const state = reactive({
   period: 'year' // year, life
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const toggleUpgradeFAQIsVisible = () => {
   state.upgradeFAQIsVisible = !state.upgradeFAQIsVisible
@@ -49,7 +64,7 @@ const toggleUpgradeFAQIsVisible = () => {
 const closeUpgradeFAQ = () => {
   state.upgradeFAQIsVisible = false
 }
-const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
+const studentDiscountIsAvailable = computed(() => userStore.studentDiscountIsAvailable)
 const paymentProcessor = computed(() => {
   if (isSecureAppContextIOS.value) {
     return 'Apple'
@@ -90,8 +105,8 @@ const price = (period) => {
 // dialog
 
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -100,7 +115,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 const closeChildDialogs = () => {
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 </script>
 

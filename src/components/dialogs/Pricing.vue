@@ -1,6 +1,9 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -10,20 +13,33 @@ import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
 })
 const dialog = ref(null)
 
+let unsubscribes
+
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({
@@ -36,9 +52,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -49,10 +65,10 @@ const updateDialogHeight = async () => {
 }
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
+const studentDiscountIsAvailable = computed(() => userStore.studentDiscountIsAvailable)
 const monthlyPrice = computed(() => consts.price('month').amount)
 const yearlyPrice = computed(() => {
-  const isStudentDiscount = store.state.currentUser.studentDiscountIsAvailable
+  const isStudentDiscount = userStore.studentDiscountIsAvailable
   return consts.price('year', isStudentDiscount).amount
 })
 const lifePrice = computed(() => consts.price('life').amount)
@@ -70,7 +86,7 @@ const toggleAboutGroupsIsVisible = () => {
   state.aboutGroupsIsVisible = value
 }
 const closeDialogs = () => {
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 const closeChildDialogs = () => {
   state.upgradeFAQIsVisible = false
@@ -79,8 +95,8 @@ const closeChildDialogs = () => {
 
 // free cards from space member
 
-const spaceCreatorIsUpgraded = computed(() => store.getters['currentSpace/spaceCreatorIsUpgraded'])
-const spaceUser = computed(() => store.state.currentSpace.users[0])
+const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
+const spaceUser = computed(() => spaceStore.users[0])
 
 </script>
 
@@ -143,8 +159,6 @@ dialog.pricing
   table
     td
       max-width 120px
-  @media(max-height 650px)
-    top -60px !important
   .title-row
     align-items flex-start
     .button-wrap,

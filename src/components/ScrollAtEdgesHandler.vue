@@ -1,30 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const historyStore = useHistoryStore()
 
+let unsubscribes
 const threshold = 50
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth, currentEvent
 let movementDirection = {}
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'currentUserIsPaintingLocked' && mutation.payload) {
-      stopScrollTimer()
-    }
-    if (mutation.type === 'triggeredTouchCardDragPosition') {
-      const position = store.state.triggeredTouchCardDragPosition
-      const event = {
-        clientX: position.x,
-        clientY: position.y
-      }
-      stopScrollTimer()
-      initInteractions(event)
-    }
-  })
   window.addEventListener('mousedown', initInteractions)
   window.addEventListener('touchstart', initInteractions)
   // bind events to window to receive events when mouse is outside window
@@ -32,6 +26,25 @@ onMounted(() => {
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', stopInteractions)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'currentUserIsPaintingLocked' && args[0]) {
+        stopScrollTimer()
+      }
+      if (name === 'triggeredTouchCardDragPosition') {
+        const position = globalStore.triggeredTouchCardDragPosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        stopScrollTimer()
+        initInteractions(event)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mousedown', initInteractions)
@@ -40,19 +53,20 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', stopInteractions)
+  unsubscribes()
 })
 
 // interacting
 
 const initInteractions = (event) => {
   currentEvent = event
-  const shouldScrollAtEdges = store.getters.shouldScrollAtEdges(event)
+  const shouldScrollAtEdges = globalStore.getShouldScrollAtEdges(event)
   const position = utils.cursorPositionInViewport(event)
   const zoom = spaceZoomDecimal.value
   startCursor = position
   endCursor = position
-  maxHeight = Math.max(6500, store.state.viewportHeight) * zoom
-  maxWidth = Math.max(6500, store.state.viewportWidth) * zoom
+  maxHeight = Math.max(6500, globalStore.viewportHeight) * zoom
+  maxWidth = Math.max(6500, globalStore.viewportWidth) * zoom
   if (shouldScrollAtEdges) {
     updateMovementDirection()
   }
@@ -66,7 +80,7 @@ const interact = (event) => {
   const isTouch = Boolean(event.touches)
   const isInteracting = isLeftMouseButtonDown || isTouch
   if (!isInteracting) { return }
-  const shouldScrollAtEdges = store.getters.shouldScrollAtEdges(event)
+  const shouldScrollAtEdges = globalStore.getShouldScrollAtEdges(event)
   if (shouldScrollAtEdges) {
     updateMovementDirection()
   }
@@ -88,10 +102,10 @@ const stopInteractions = () => {
 
 // user
 
-const currentUserIsPainting = computed(() => store.state.currentUserIsPainting)
-const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
-const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
-const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
+const currentUserIsPainting = computed(() => globalStore.currentUserIsPainting)
+const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
+const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
+const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
 
 // position
 
@@ -102,12 +116,12 @@ const cursor = () => {
     return startCursor
   }
 }
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const viewportHeight = computed(() => globalStore.viewportHeight)
+const viewportWidth = computed(() => globalStore.viewportWidth)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const shouldPreventResize = computed(() => currentUserIsPainting.value || isDrawingConnection.value || isResizingCard.value)
 
 // scroll
@@ -222,9 +236,9 @@ const scrollBy = (delta) => {
     const viewport = utils.visualViewport()
     zoom = viewport.scale
   }
-  const currentUserIsBoxSelecting = store.state.currentUserIsBoxSelecting
-  const isDraggingCard = store.state.currentUserIsDraggingCard
-  const isDraggingBox = store.state.currentUserIsDraggingBox
+  const currentUserIsBoxSelecting = globalStore.currentUserIsBoxSelecting
+  const isDraggingCard = globalStore.currentUserIsDraggingCard
+  const isDraggingBox = globalStore.currentUserIsDraggingBox
   const isDraggingItem = isDraggingCard || isDraggingBox
   delta = {
     left: Math.round(delta.x * zoom),
@@ -236,17 +250,17 @@ const scrollBy = (delta) => {
       x: delta.left * slowMultiplier,
       y: delta.top * slowMultiplier
     }
-    store.dispatch('history/pause')
+    historyStore.pause()
     if (isDraggingCard || isDraggingBox) {
-      store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
-      store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
+      cardStore.moveCards({ endCursor, prevCursor, delta: itemDelta })
+      boxStore.moveBoxes({ endCursor, prevCursor, delta: itemDelta })
     }
   }
   if (isDrawingConnection.value) {
-    store.commit('triggerDrawConnectionFrame', currentEvent)
+    globalStore.triggerDrawConnectionFrame(currentEvent)
   }
   if (currentUserIsPainting.value && !currentUserIsBoxSelecting) {
-    store.commit('triggerPaintFramePosition', currentEvent)
+    globalStore.triggerPaintFramePosition(currentEvent)
   }
   window.scrollBy(delta)
 }
@@ -258,7 +272,7 @@ const increasePageWidth = (delta) => {
   const cursorIsRightSideOfPage = (pageWidth.value - prevCursorPage.x) < threshold
   if (cursorIsRightSideOfPage) {
     const width = pageWidth.value + delta.x
-    store.commit('pageWidth', width)
+    globalStore.pageWidth = width
   }
 }
 const increasePageHeight = (delta) => {
@@ -266,7 +280,7 @@ const increasePageHeight = (delta) => {
   const cursorIsBottomSideOfPage = (pageHeight.value - prevCursorPage.y) < threshold
   if (cursorIsBottomSideOfPage) {
     const height = pageHeight.value + delta.y
-    store.commit('pageHeight', height)
+    globalStore.pageHeight = height
   }
 }
 

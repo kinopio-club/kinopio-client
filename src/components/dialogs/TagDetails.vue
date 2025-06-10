@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -13,7 +18,11 @@ import uniqBy from 'lodash-es/uniqBy'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -37,28 +46,28 @@ const state = reactive({
   cachedSpaces: []
 })
 
-const visible = computed(() => store.state.tagDetailsIsVisible)
+const visible = computed(() => globalStore.tagDetailsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (!value) {
-    store.commit('tagDetailsPositionShouldUpdate', false)
+    globalStore.tagDetailsPositionShouldUpdate = false
     closeDialogs()
   }
 })
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const currentSpaceId = computed(() => store.state.currentSpace.id)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUser = computed(() => store.state.currentUser)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const currentSpaceId = computed(() => spaceStore.id)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUser = computed(() => userStore.getUserAllState)
 const isDark = computed(() => utils.colorIsDark(color.value))
 
 // current tag
 
 const currentTag = computed(() => {
   // name, color, cardId
-  const tag = store.state.currentSelectedTag
+  const tag = globalStore.currentSelectedTag
   if (tag.spaceId) {
     return tag
   } else {
-    return store.getters['currentSpace/tagByName'](tag.name)
+    return spaceStore.getSpaceTagByName(tag.name)
   }
 })
 watch(() => currentTag.value, async (tag, prevValue) => {
@@ -82,21 +91,21 @@ const name = computed(() => {
 
 // styles and position
 
-const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
+const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 const updatePinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
 }
-const visibleFromTagList = computed(() => store.state.tagDetailsIsVisibleFromTagList)
+const visibleFromTagList = computed(() => globalStore.tagDetailsIsVisibleFromTagList)
 const position = computed(() => {
   if (utils.objectHasKeys(state.newPosition)) {
     return state.newPosition
   } else {
-    return store.state.tagDetailsPosition
+    return globalStore.tagDetailsPosition
   }
 })
 const styles = computed(() => {
-  const isChildDialog = cardDetailsIsVisibleForCardId.value.valye || visibleFromTagList.value
-  let zoom = store.getters.spaceZoomDecimal
+  const isChildDialog = cardDetailsIsVisibleForCardId.value || visibleFromTagList.value
+  let zoom = globalStore.getSpaceZoomDecimal
   if (isChildDialog) {
     zoom = 1
   }
@@ -114,8 +123,8 @@ const styles = computed(() => {
   }
 })
 const updatePosition = () => {
-  if (!store.state.tagDetailsPositionShouldUpdate) { return }
-  const origin = store.state.tagDetailsPosition
+  if (!globalStore.tagDetailsPositionShouldUpdate) { return }
+  const origin = globalStore.tagDetailsPosition
   const delta = {
     x: window.scrollX - origin.pageX,
     y: window.scrollY - origin.pageY
@@ -132,7 +141,7 @@ const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
   if (!element) { return }
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const updateResultsSectionHeight = async () => {
   if (!visible.value) { return }
@@ -150,43 +159,43 @@ const updateDialogHeight = async () => {
 // spaces
 
 const cachedOrOtherSpaceById = async (spaceId) => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const cachedSpace = await cache.space(spaceId)
   if (spaceId === currentSpace.id) {
     return utils.clone(currentSpace)
   } else if (utils.objectHasKeys(cachedSpace)) {
     return cachedSpace
   } else {
-    return store.getters.otherSpaceById(spaceId)
+    return globalStore.getOtherSpaceById(spaceId)
   }
 }
 
 // current card
 
-const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
+const cardDetailsIsVisibleForCardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
 const currentCard = computed(() => {
-  const currentCardId = cardDetailsIsVisibleForCardId.value.valye
-  const currentCard = store.getters['currentCards/byId'](currentCardId)
-  const tagCard = store.getters['currentCards/byId'](store.state.currentSelectedTag.cardId)
-  return currentCard || tagCard
+  const currentCardId = cardDetailsIsVisibleForCardId.value
+  const card = cardStore.getCard(currentCardId)
+  const tagCard = cardStore.getCard(globalStore.currentSelectedTag.cardId)
+  return card || tagCard
 })
-const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value.valye && !visibleFromTagList.value)
+const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value && !visibleFromTagList.value)
 const focusOnCard = async (card) => {
   card = card || currentCard.value
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   const isCurrentSpace = currentSpaceId.value !== card.spaceId
   if (isCurrentSpace) {
-    store.commit('loadSpaceFocusOnCardId', card.id)
+    globalStore.loadSpaceFocusOnCardId = card.id
     let space
     if (card.spaceId) {
       space = { id: card.spaceId }
     } else {
       space = await cache.space(card.spaceId)
     }
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   } else {
     const cardId = card.id || currentTag.value.cardId
-    store.dispatch('focusOnCardId', cardId)
+    globalStore.updateFocusOnCardId(cardId)
   }
 }
 
@@ -197,7 +206,7 @@ const remoteCards = async () => {
   state.loading = true
   try {
     let cards
-    cards = await store.dispatch('api/getCardsWithTag', name.value) || []
+    cards = await apiStore.getCardsWithTag(name.value) || []
     cards = utils.clone(cards)
     cards = sortBy(cards, card => dayjs(card.updatedAt).valueOf())
     cards = cards.reverse()
@@ -211,7 +220,7 @@ const remoteCards = async () => {
 }
 const updateCards = async () => {
   state.cards = []
-  const cardsInCurrentSpace = utils.clone(store.getters['currentCards/withTagName'](name.value))
+  const cardsInCurrentSpace = cardStore.getCardsWithTagName(name.value)
   const cardsInCachedSpaces = await cache.allCardsByTagName(name.value)
   // cache cards
   let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
@@ -240,7 +249,7 @@ const updateCardsWithTagColor = (name, newColor) => {
 const updateTagNameColor = (newColor) => {
   const tag = utils.clone(currentTag.value)
   tag.color = newColor
-  store.dispatch('currentSpace/updateTagNameColor', tag)
+  spaceStore.updateTagNameColor(tag)
   updateCardsWithTagColor(tag.name, newColor)
 }
 
@@ -250,7 +259,7 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
 const removeTag = () => {
-  store.dispatch('currentSpace/removeTags', currentTag.value)
+  spaceStore.removeTags(currentTag.value)
 }
 
 // cards list
@@ -285,12 +294,10 @@ const groupedItems = computed(() => {
   return groups
 })
 const selectCardsWithTag = () => {
-  let cards = store.getters['currentCards/withTagName'](currentTag.value.name)
-  cards = cards.filter(card => Boolean(card))
-  if (!cards.length) { return }
+  const cards = cardStore.getCardsWithTagName(currentTag.value.name)
   const cardIds = cards.map(card => card.id)
-  store.dispatch('closeAllDialogs')
-  store.commit('multipleCardsSelectedIds', cardIds)
+  globalStore.closeAllDialogs()
+  globalStore.multipleCardsSelectedIds = cardIds
 }
 const sortCurrentSpaceIsFirst = (groups) => {
   const currentSpaceGroup = groups.find(group => group.spaceId === currentSpaceId.value)
@@ -312,8 +319,8 @@ const segmentTagColor = (segment) => {
   if (name.value === segment.name) {
     return color.value
   }
-  const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const userTag = store.getters['currentUser/tagByName'](segment.name)
+  const spaceTag = spaceStore.getSpaceTagByName(segment.name)
+  const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
   } else if (userTag) {
@@ -397,7 +404,7 @@ const shouldHideResultsFilter = computed(() => {
 })
 const isFilteredInSpace = computed({
   get () {
-    const tags = store.state.filteredTagNames
+    const tags = globalStore.filteredTagNames
     return tags.includes(currentTag.value.name)
   },
   set () {
@@ -405,12 +412,12 @@ const isFilteredInSpace = computed({
   }
 })
 const toggleFilteredInSpace = () => {
-  const filtered = store.state.filteredTagNames
+  const filtered = globalStore.filteredTagNames
   const tagName = currentTag.value.name
   if (filtered.includes(tagName)) {
-    store.commit('removeFromFilteredTagNames', tagName)
+    globalStore.removeFromFilteredTagNames(tagName)
   } else {
-    store.commit('addToFilteredTagNames', tagName)
+    globalStore.addToFilteredTagNames(tagName)
   }
 }
 const updateFilter = (filter) => {
@@ -426,10 +433,10 @@ const spaceIsCurrentSpace = (spaceId) => {
   return spaceId === currentSpaceId.value
 }
 const changeSpace = (spaceId) => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   if (spaceIsCurrentSpace(spaceId)) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 
 </script>

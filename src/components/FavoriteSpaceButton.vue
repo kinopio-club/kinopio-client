@@ -1,31 +1,38 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const emit = defineEmits(['updateLocalSpaces'])
 
 const props = defineProps({
-  parentIsDialog: Boolean
+  parentIsDialog: Boolean,
+  isSmall: Boolean
 })
 
 const isTranslucentButton = computed(() => {
   if (props.parentIsDialog) { return }
-  return !store.state.currentUser.shouldIncreaseUIContrast
+  return !userStore.shouldIncreaseUIContrast
 })
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite']())
+const isFavoriteSpace = computed(() => spaceStore.getSpaceIsFavorite())
 const toggleIsFavoriteSpace = () => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   const value = !isFavoriteSpace.value
-  store.dispatch('currentUser/updateFavoriteSpace', { space, value })
+  userStore.updateUserFavoriteSpace(space, value)
   emit('updateLocalSpaces')
 }
 </script>
 
 <template lang="pug">
-  button.favorite-space-button(v-if="isOnline" :class="{active: isFavoriteSpace && props.parentIsDialog, 'translucent-button': isTranslucentButton}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
+  button.favorite-space-button(v-if="isOnline" :class="{active: isFavoriteSpace && props.parentIsDialog, 'translucent-button': isTranslucentButton, 'small-button': props.isSmall}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
     img.icon(v-show="isFavoriteSpace" src="@/assets/heart.svg")
     img.icon(v-show="!isFavoriteSpace" src="@/assets/heart-empty.svg")
 </template>

@@ -1,6 +1,9 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore, mapState, mapGetters } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -9,15 +12,28 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import randomColor from 'randomcolor'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.commit('clearNotificationsWithPosition')
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  globalStore.clearNotificationsWithPosition()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
@@ -33,20 +49,20 @@ const state = reactive({
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const spaceName = computed(() => store.state.currentSpace.name)
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
+const spaceName = computed(() => spaceStore.name)
 const randomUser = computed(() => {
-  const luminosity = store.state.currentUser.theme
+  const luminosity = userStore.theme
   const color = randomColor({ luminosity })
   return { color }
 })
-const collaboratorKey = computed(() => store.state.currentSpace.collaboratorKey)
+const collaboratorKey = computed(() => spaceStore.collaboratorKey)
 const toggleTipsIsVisible = () => {
   state.tipsIsVisible = !state.tipsIsVisible
 }
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 const closeDialogs = () => {
   emit('closeDialogs')
 }
@@ -62,14 +78,14 @@ const toggleInviteType = (type) => {
 // urls
 
 const editUrl = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
   console.info('🍇 invite edit url', url)
   return url
 })
 const readOnlyUrl = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
@@ -77,7 +93,7 @@ const readOnlyUrl = computed(() => {
   return url
 })
 const commentOnlyUrl = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: true })
   console.info('🍇 invite comment only url', url)
@@ -95,14 +111,14 @@ const copyInviteUrl = async (event) => {
   } else {
     url = commentOnlyUrl.value
   }
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(url)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyInviteUrl', error, url)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const inviteButtonLabel = computed(() => {

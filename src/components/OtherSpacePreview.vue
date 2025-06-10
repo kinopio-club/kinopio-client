@@ -1,11 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   otherSpace: Object,
@@ -19,21 +27,21 @@ const state = reactive({
   previewImageIsHover: false
 })
 
-const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
+const cardIsCreatedByCurrentUser = computed(() => userStore.getUserIsCardCreator(props.card))
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
   return false
 })
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 const changeSpace = () => {
   if (isInvite.value) {
     window.location = props.url
   }
-  store.commit('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', props.otherSpace)
+  globalStore.closeAllDialogs()
+  spaceStore.changeSpace(props.otherSpace)
 }
 
 // space info
@@ -64,7 +72,7 @@ const togglePreviewImageIsVisible = (value) => {
     id: props.card.id,
     shouldShowOtherSpacePreviewImage: value
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 const previewImageHover = (value) => {
   state.previewImageIsHover = value

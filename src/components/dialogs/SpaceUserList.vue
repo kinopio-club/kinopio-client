@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
@@ -9,7 +14,11 @@ import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -21,7 +30,7 @@ const state = reactive({
   groupIsVisible: false
 })
 
-const visible = computed(() => store.state.spaceUserListIsVisible)
+const visible = computed(() => globalStore.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   state.groupIsVisible = false
   if (value) {
@@ -35,13 +44,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
-const currentUserCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const currentSpace = computed(() => store.state.currentSpace)
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 // list type
 
-const isSpectatorsList = computed(() => store.state.spaceUserListIsSpectators)
+const isSpectatorsList = computed(() => globalStore.spaceUserListIsSpectators)
 const isCollaboratorsList = computed(() => !isSpectatorsList.value)
 const label = computed(() => {
   let string = 'Collaborators'
@@ -53,7 +62,7 @@ const label = computed(() => {
 
 // group
 
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const toggleGroupIsVisible = () => {
   const value = !state.groupIsVisible
   closeDialogs()
@@ -68,7 +77,7 @@ const users = computed(() => {
   if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
-    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+    const groupUsers = groupStore.getGroupUsersWhoAddedCards
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)
@@ -80,35 +89,35 @@ const users = computed(() => {
 
 // commenters
 
-const commenters = computed(() => utils.clone(store.getters['currentCards/commenters']))
+const commenters = computed(() => cardStore.getCardCommenters)
 
 // handle userlist events
 
 const selectedUser = computed(() => {
-  const userDetailsIsVisible = store.state.userDetailsIsVisible
+  const userDetailsIsVisible = globalStore.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
-  return store.state.userDetailsUser
+  return globalStore.userDetailsUser
 })
 const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
 }
 const showUserDetails = (event, user) => {
-  const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
+  const shouldHideUserDetails = user.id === globalStore.userDetailsUser.id
   if (shouldHideUserDetails) {
     closeDialogs()
-    store.commit('userDetailsUser', {})
+    globalStore.userDetailsUser = {}
     return
   }
   const element = event.target
   const options = { element, offsetX: 0, shouldIgnoreZoom: true }
   const position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsUser', user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
+  globalStore.userDetailsUser = user
+  globalStore.userDetailsPosition = position
+  globalStore.userDetailsIsVisible = true
 }
 const closeDialogs = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
   state.groupIsVisible = false
 }
 </script>

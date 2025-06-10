@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
@@ -21,7 +25,7 @@ const state = reactive({
   spaceIsCached: false
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 const refreshBrowser = () => {
   window.location.reload()
@@ -34,14 +38,14 @@ const updateSpaceIsCached = async () => {
 
 // loading
 
-const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const isJoiningSpace = computed(() => store.state.isJoiningSpace)
-const isReconnectingToBroadcast = computed(() => store.state.isReconnectingToBroadcast)
+const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
+const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
+const isJoiningSpace = computed(() => globalStore.isJoiningSpace)
+const isReconnectingToBroadcast = computed(() => globalStore.isReconnectingToBroadcast)
 
 // saving
 
-const sendingQueue = computed(() => store.state.sendingQueue)
+const sendingQueue = computed(() => globalStore.sendingQueue)
 const isSavingOperations = computed(() => Boolean(sendingQueue.value.length))
 const pluralChanges = computed(() => {
   const condition = sendingQueue.value.length !== 1

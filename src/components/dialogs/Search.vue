@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
@@ -11,23 +16,36 @@ import utils from '@/utils.js'
 import dayjs from 'dayjs'
 import orderBy from 'lodash-es/orderBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerSearchScopeIsRemote') {
-      updateScopeIsCurrentSpace(false)
-    } else if (mutation.type === 'triggerSearchScopeIsCurrentSpace') {
-      updateScopeIsCurrentSpace(true)
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerSearchScopeIsRemote') {
+        updateScopeIsCurrentSpace(false)
+      } else if (name === 'triggerSearchScopeIsCurrentSpace') {
+        updateScopeIsCurrentSpace(true)
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -45,30 +63,30 @@ watch(() => props.visible, (value, prevValue) => {
   updateHeights()
   if (value) {
     state.hasSearched = false
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     if (utils.isMobile()) { return }
     triggerFocusResultsFilter()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 const triggerFocusResultsFilter = async () => {
   await nextTick()
-  store.commit('triggerFocusResultsFilter')
+  globalStore.triggerFocusResultsFilter()
 }
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 // search
 
-const search = computed(() => store.state.search)
+const search = computed(() => globalStore.search)
 const noResults = computed(() => state.hasSearched && !cards.value.length)
 const updateScopeIsCurrentSpace = (value) => {
   state.scopeIsCurrentSpace = value
   updateSearch(search.value)
 }
 const updateSearch = async (search) => {
-  store.commit('search', search)
+  globalStore.search = search
   if (!search) {
     clearSearch()
   }
@@ -84,22 +102,22 @@ const updateSearch = async (search) => {
 }
 const searchRemoteCards = async (search) => {
   state.isLoading = true
-  const results = await store.dispatch('api/searchCards', { query: search })
-  store.commit('searchResultsCards', results)
+  const results = await apiStore.searchCards({ query: search })
+  globalStore.searchResultsCards = results
   state.isLoading = false
   state.hasSearched = true
 }
 const updateResultsFromResultsFilter = (cards) => {
-  store.commit('previousResultItem', {})
-  store.commit('searchResultsCards', cards)
+  globalStore.previousResultItem = {}
+  globalStore.searchResultsCards = cards
 }
 const clearSearch = async () => {
   await nextTick()
-  store.commit('clearSearch')
+  globalStore.clearSearch()
   state.hasSearched = false
 }
-const searchResultsCards = computed(() => store.state.searchResultsCards)
-const previousResultItem = computed(() => store.state.previousResultItem)
+const searchResultsCards = computed(() => globalStore.searchResultsCards)
+const previousResultItem = computed(() => globalStore.previousResultItem)
 const cards = computed(() => {
   let cards
   if (search.value) {
@@ -116,7 +134,7 @@ const cardsToSearch = computed(() => {
   }
 })
 const recentlyUpdatedCards = computed(() => {
-  let cards = utils.clone(store.getters['currentCards/all'])
+  let cards = cardStore.getAllCards
   cards = cards.filter(card => card.name)
   cards = cards.map(card => {
     const date = card.nameUpdatedAt || card.createdAt
@@ -130,9 +148,9 @@ const recentlyUpdatedCards = computed(() => {
 // select items
 
 const selectCard = (card) => {
-  const isCardInCurrentSpace = card.spaceId === store.state.currentSpace.id
+  const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
-    store.dispatch('focusOnCardId', card.id)
+    globalStore.updateFocusOnCardId(card.id)
     focusItem(card)
   } else {
     selectSpaceCard(card)
@@ -140,19 +158,19 @@ const selectCard = (card) => {
   closeDialogs()
 }
 const changeSpace = (spaceId) => {
-  if (store.state.currentSpace.id === spaceId) { return }
+  if (spaceStore.id === spaceId) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const selectSpaceCard = (card) => {
   changeSpace(card.spaceId)
-  store.commit('loadSpaceFocusOnCardId', card.id)
+  globalStore.loadSpaceFocusOnCardId = card.id
 }
 
 // keyboard nav
 
 const selectCurrentFocusedItem = () => {
-  store.commit('shouldPreventNextEnterKey', true)
+  globalStore.shouldPreventNextEnterKey = true
   const card = previousResultItem.value
   selectCard(card)
 }
@@ -187,12 +205,12 @@ const focusFirstItem = () => {
   focusItem(items[0])
 }
 const focusItem = (item) => {
-  store.commit('previousResultItem', item)
+  globalStore.previousResultItem = item
 }
 
 // dialog
 
-const dialogIsPinned = computed(() => store.state.searchIsPinned)
+const dialogIsPinned = computed(() => globalStore.searchIsPinned)
 const placeholder = computed(() => {
   let text = 'Search Cards'
   let shift = ''
@@ -205,7 +223,7 @@ const placeholder = computed(() => {
   return text
 })
 const closeDialogs = () => {
-  store.commit('triggerMoreFiltersIsNotVisible')
+  globalStore.triggerMoreFiltersIsNotVisible()
 }
 const updateHeights = () => {
   if (!props.visible) {
@@ -242,8 +260,8 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element) - 2
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 
 </script>

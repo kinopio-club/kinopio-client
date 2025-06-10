@@ -2,8 +2,6 @@
 // import utils from '@/utils.js'
 
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
 
 const props = defineProps({
   visible: Boolean

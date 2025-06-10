@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import TagList from '@/components/TagList.vue'
 import utils from '@/utils.js'
@@ -9,36 +13,51 @@ import cache from '@/cache.js'
 import uniqBy from 'lodash-es/uniqBy'
 import debounce from 'lodash-es/debounce'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
-let unsubscribe
+let unsubscribes
 
 const resultsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateResultsSectionHeight)
   init()
-  const tagMutations = [
-    'currentSpace/addTag',
-    'currentSpace/removeTag',
-    'currentSpace/removeTags',
-    'currentSpace/removeTagsFromCard',
-    'currentSpace/deleteTagsFromAllRemovedCardsPermanent'
-  ]
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'currentSpace/removeTags') {
-      removeTag(mutation.payload)
-    } else if (mutation.type === 'currentSpace/updateTagNameColor') {
-      updateTagColor(mutation.payload)
-    } else if (tagMutations.includes(mutation.type) && props.visible) {
-      updateTags()
-    } else if (mutation.type === 'shouldHideFooter' && props.visible) {
-      updateTags()
+
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'shouldHideFooter' && props.visible) {
+        updateTags()
+      }
     }
-  })
+  )
+  const tagMutations = [
+    'addTag',
+    'removeTag',
+    'removeTags',
+    'removeTagsFromCard',
+    'deleteTagsFromAllRemovedCardsPermanent'
+  ]
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'removeTags') {
+        removeTag(args[0])
+      } else if (name === 'updateTagNameColor') {
+        updateTagColor(args[0])
+      } else if (tagMutations.includes(name) && props.visible) {
+        updateTags()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -72,32 +91,32 @@ const updateResultsSectionHeight = async () => {
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const filteredTags = computed(() => {
   let tags = state.tags
   if (shouldShowCurrentSpaceTags.value) {
-    tags = store.getters['currentSpace/spaceTags']
+    tags = spaceStore.getSpaceTags
   }
   console.info('♠︎ filteredTags', tags)
   return tags
 })
 
-const shouldShowCurrentSpaceTags = computed(() => store.state.currentUser.shouldShowCurrentSpaceTags)
+const shouldShowCurrentSpaceTags = computed(() => userStore.shouldShowCurrentSpaceTags)
 const toggleShouldShowCurrentSpaceTags = () => {
   const value = !shouldShowCurrentSpaceTags.value
-  store.dispatch('currentUser/update', { shouldShowCurrentSpaceTags: value })
+  userStore.updateUser({ shouldShowCurrentSpaceTags: value })
 }
 
 // update tag
 
 const removeTag = (tagToRemove) => {
-  store.commit('tagDetailsIsVisible', false)
+  globalStore.tagDetailsIsVisible = false
   let tags = utils.clone(state.tags)
   tags = tags.filter(tag => {
     return tag.name !== tagToRemove.name
   })
   state.tags = tags
-  store.commit('remoteTagsIsFetched', false)
+  globalStore.remoteTagsIsFetched = false
 }
 const updateTagColor = (updated) => {
   let tags = utils.clone(state.tags)
@@ -108,13 +127,13 @@ const updateTagColor = (updated) => {
     return tag
   })
   state.tags = tags
-  store.commit('remoteTagsIsFetched', false)
+  globalStore.remoteTagsIsFetched = false
 }
 
 // tags list
 
 const updateTags = async () => {
-  const spaceTags = store.getters['currentSpace/spaceTags']
+  const spaceTags = spaceStore.getSpaceTags
   state.tags = spaceTags || []
   const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
@@ -123,15 +142,15 @@ const updateTags = async () => {
 }
 const debouncedUpdateRemoteTags = debounce(async () => {
   if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = store.state.remoteTagsIsFetched
+  const remoteTagsIsFetched = globalStore.remoteTagsIsFetched
   let remoteTags
   if (remoteTagsIsFetched) {
-    remoteTags = store.state.remoteTags
+    remoteTags = globalStore.remoteTags
   } else {
     state.isLoadingRemoteTags = true
-    remoteTags = await store.dispatch('api/getUserTags', true) || []
-    store.commit('remoteTags', remoteTags)
-    store.commit('remoteTagsIsFetched', true)
+    remoteTags = await apiStore.getUserTags(true) || []
+    globalStore.remoteTags = remoteTags
+    globalStore.remoteTagsIsFetched = true
     state.isLoadingRemoteTags = false
   }
   remoteTags = uniqBy(remoteTags, 'name')

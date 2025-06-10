@@ -1,8 +1,10 @@
 <script setup>
 
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
+
+import { useCardStore } from '@/stores/useCardStore'
+
+const cardStore = useCardStore()
 
 const props = defineProps({
   card: Object
@@ -16,7 +18,7 @@ const increment = () => {
     id: props.card.id,
     counterValue: count
   }
-  store.dispatch('currentCards/updateCounter', { card, shouldIncrement: true })
+  cardStore.updateCardCounter({ card, shouldIncrement: true })
 }
 const decrement = () => {
   let count = counterValue.value - 1
@@ -25,7 +27,7 @@ const decrement = () => {
     id: props.card.id,
     counterValue: count
   }
-  store.dispatch('currentCards/updateCounter', { card, shouldDecrement: true })
+  cardStore.updateCardCounter({ card, shouldDecrement: true })
 }
 </script>
 

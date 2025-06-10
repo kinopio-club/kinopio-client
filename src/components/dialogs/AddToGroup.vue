@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import GroupList from '@/components/GroupList.vue'
 import AboutGroups from '@/components/subsections/AboutGroups.vue'
@@ -8,7 +9,7 @@ import Loader from '@/components/Loader.vue'
 import AddGroup from '@/components/dialogs/AddGroup.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const dialogElement = ref(null)
 
@@ -43,7 +44,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const isLoadingGroups = computed(() => store.state.isLoadingGroups)
+const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
 
 // select group
 
@@ -65,8 +66,8 @@ const toggleAddGroupIsVisible = () => {
   state.addGroupIsVisible = value
 }
 const toggleGroupsIsVisible = () => {
-  store.commit('closeAllDialogs')
-  store.commit('groupsIsVisible', true)
+  globalStore.closeAllDialogs()
+  globalStore.groupsIsVisible = true
 }
 </script>
 

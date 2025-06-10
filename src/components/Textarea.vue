@@ -1,10 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-const store = useStore()
 
 const textareaWrapElement = ref(null)
 
@@ -68,7 +66,7 @@ const safeHtmlStringWithMatches = computed(() => {
 
 // max length
 
-const maxLength = computed(() => props.maxLength || consts.defaultCharacterLimit)
+const maxLength = computed(() => props.maxLength || consts.cardCharacterLimit)
 const isMaxLength = computed(() => state.newName?.length >= (maxLength.value - 1))
 
 // focus

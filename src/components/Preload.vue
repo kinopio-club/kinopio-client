@@ -1,20 +1,28 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
-const store = useStore()
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
 
-let unsubscribe
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'isLoadingSpace') {
-      updateImageUrls()
+  const globalStoreUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'isLoadingSpace') {
+        updateImageUrls()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -22,7 +30,7 @@ const state = reactive({
 })
 
 const updateImageUrls = () => {
-  const cards = store.getters['currentCards/all']
+  const cards = cardStore.getAllCards
   let urls = cards.map(card => card.urlPreviewImage)
   urls = urls.filter(url => Boolean(url))
   state.imageUrls = urls
