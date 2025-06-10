@@ -394,7 +394,7 @@ export const useSpaceStore = defineStore('space', {
         return
       }
       // only restore current space
-      if (remoteSpace.id !== globalStore.id) { return }
+      if (remoteSpace.id !== this.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
     clearStateMeta () {
