@@ -66,7 +66,7 @@ onMounted(() => {
         const cardId = args[0]
         if (cardId !== card.value.id) { return }
         splitCards()
-      } else if (name === 'cardDetailsIsVisibleForCardId') {
+      } else if (name === 'updateCardDetailsIsVisibleForCardId') {
         const cardId = args[0]
         if (prevCardId) {
           updateDimensions(prevCardId)
