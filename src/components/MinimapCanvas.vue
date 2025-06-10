@@ -23,7 +23,6 @@ let startPanningPosition
 const itemRadius = 1
 const canvasElement = ref(null)
 
-let unsubscribe
 let unsubscribes
 
 onMounted(async () => {
@@ -103,7 +102,6 @@ onMounted(async () => {
   }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', init)
   window.removeEventListener('pointerup', endPanningViewport)
