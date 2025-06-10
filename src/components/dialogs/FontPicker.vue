@@ -102,6 +102,7 @@ dialog.font-picker
   min-height 200px
   overflow auto
   width 160px
+  top calc(100% + 4px)
   .font-size-buttons
     .small-button
       padding 0 5px

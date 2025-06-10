@@ -523,7 +523,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
           span h2
       //- Fonts
       button.toggle-fonts-button.small-button(v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
-        span Fonts
+        span Aa
       FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
     .button-wrap(v-if="isCards")
@@ -616,4 +616,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
     border-top-right-radius 0
     width calc(100% - 4px)
     text-align center
+    span
+      font-size 15px
+      vertical-align initial
 </style>
