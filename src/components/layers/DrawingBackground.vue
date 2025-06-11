@@ -17,9 +17,8 @@ onMounted(() => {
   canvas = canvasElement.value
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  window.addEventListener('scroll', scroll)
   updatePrevScroll()
-
+  window.addEventListener('scroll', updatePrevScroll)
   const globalStoreUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateDrawingBackground') {
@@ -34,7 +33,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', scroll)
+  window.removeEventListener('scroll', updatePrevScroll())
   unsubscribes()
 })
 
@@ -44,13 +43,6 @@ const state = reactive({
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
-const styles = computed(() => {
-  const value = {
-    top: state.prevScroll.y + 'px',
-    left: state.prevScroll.x + 'px'
-  }
-  return value
-})
 
 const clear = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
@@ -61,6 +53,14 @@ const update = () => {
   context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height)
 }
 
+const styles = computed(() => {
+  const value = {
+    top: state.prevScroll.y + 'px',
+    left: state.prevScroll.x + 'px'
+  }
+  return value
+})
+
 // scroll and resize
 
 const updatePrevScroll = () => {
@@ -68,9 +68,6 @@ const updatePrevScroll = () => {
     x: window.scrollX,
     y: window.scrollY
   }
-}
-const scroll = () => {
-  updatePrevScroll()
 }
 const updateCanvasSize = debounce(() => {
   const zoom = globalStore.getSpaceCounterZoomDecimal
