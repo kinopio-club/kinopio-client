@@ -48,6 +48,7 @@ import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
+import DrawingBackgroundStatic from '@/components/DrawingBackgroundStatic.vue'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -680,6 +681,7 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
+  DrawingBackgroundStatic
   DrawingBackground
   ItemsLocked
   #box-backgrounds
@@ -687,6 +689,7 @@ main#space.space(
   Boxes
   Cards
   ItemUnlockButtons
+  DrawingBackgroundStatic(:isForeground="true")
   DrawingCanvas
   BoxDetails
   CardDetails

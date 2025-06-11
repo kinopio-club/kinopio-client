@@ -80,10 +80,9 @@ onMounted(() => {
         undo()
       } else if (name === 'triggerDrawingRedo') {
         redo()
-      } else if (name === 'triggerRestoreSpaceLocalComplete') { // TODO replace w spaceStore restoreSpace watcher
-        clearCanvas()
-        redraw()
       } else if (name === 'triggerDrawingRedraw') {
+        globalStore.drawingImageDataUrl = ''
+        clearCanvas()
         redraw()
       }
     }
@@ -369,16 +368,16 @@ const redraw = async () => {
 
 // stop
 
-const updateCache = async (strokes) => {
-  const dataUrl = await imageDataUrl(strokes)
-  const currentSpaceId = spaceStore.id
-  await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
+const updateCache = async (dataUrl) => {
+  await cache.updateSpace('drawingImage', dataUrl, spaceStore.id)
+  globalStore.drawingImageDataUrl = dataUrl
   globalStore.triggerEndDrawing()
   spaceStore.updateSpacePreviewImage()
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)
-  updateCache(strokes)
+  const dataUrl = await imageDataUrl(strokes)
+  updateCache(dataUrl)
   updatePageSizes(strokes)
   if (isRemovedStroke) {
     await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })

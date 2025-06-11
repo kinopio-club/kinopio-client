@@ -952,14 +952,14 @@ const focusOnSearchCardFilter = async (event) => {
   globalStore.closeAllDialogs()
   globalStore.searchIsVisible = true
   if (event.shiftKey) {
-    globalStore.SearchScopeIsRemote()
+    globalStore.triggerSearchScopeIsRemote()
   } else {
-    globalStore.SearchScopeIsLocal()
+    globalStore.triggerSearchScopeIsLocal()
   }
   await nextTick()
   await nextTick()
   await nextTick()
-  globalStore.FocusResultsFilter()
+  globalStore.triggerFocusResultsFilter()
 }
 
 // Lock Cards
