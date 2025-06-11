@@ -42,7 +42,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', updatePrevScroll())
+  window.removeEventListener('scroll', updatePrevScroll)
   unsubscribes()
 })
 
