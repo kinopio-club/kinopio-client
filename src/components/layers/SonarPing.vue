@@ -24,17 +24,25 @@ onMounted(() => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', updateScroll)
 
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'spaceZoomPercent') {
+        updateScroll()
+      }
+    }
+  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerSonarPing') {
         const ping = args[0]
         createRipples(ping)
-      } else if (name === 'spaceZoomPercent') {
-        updateScroll()
       }
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })

@@ -28,6 +28,7 @@ onMounted(() => {
   updateLinks()
   updateResultsSectionHeight()
   window.addEventListener('resize', updateResultsSectionHeight)
+
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
@@ -40,6 +41,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateResultsSectionHeight)
   unsubscribes()
 })
 

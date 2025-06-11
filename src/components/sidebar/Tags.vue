@@ -33,7 +33,7 @@ onMounted(() => {
       }
     }
   )
-  const tagMutations = [
+  const tagActions = [
     'addTag',
     'removeTag',
     'removeTags',
@@ -46,7 +46,7 @@ onMounted(() => {
         removeTag(args[0])
       } else if (name === 'updateTagNameColor') {
         updateTagColor(args[0])
-      } else if (tagMutations.includes(name) && props.visible) {
+      } else if (tagActions.includes(name) && props.visible) {
         updateTags()
       }
     }
@@ -57,6 +57,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateResultsSectionHeight)
   unsubscribes()
 })
 

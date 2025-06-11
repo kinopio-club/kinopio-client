@@ -17,6 +17,7 @@ onMounted(() => {
   state.isAndroid = utils.isAndroid()
   shouldRestoreUrlPath = true
   window.addEventListener('resize', updateDialogHeight)
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {

@@ -17,6 +17,7 @@ let unsubscribes
 
 onMounted(() => {
   state.userDetailsInlineIsVisible = false
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {

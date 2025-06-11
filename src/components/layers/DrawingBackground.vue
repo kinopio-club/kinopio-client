@@ -14,11 +14,11 @@ let canvas, context
 let unsubscribes
 
 onMounted(() => {
+  window.addEventListener('scroll', updatePrevScroll)
   canvas = canvasElement.value
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   updatePrevScroll()
-  window.addEventListener('scroll', updatePrevScroll)
 
   const globalStateUnsubscribe = globalStore.$subscribe(
     (mutation, state) => {
@@ -33,8 +33,6 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerUpdateDrawingBackground') {
         update()
-      } else if (name === 'spaceZoomPercent') {
-        updateCanvasSize()
       }
     }
   )

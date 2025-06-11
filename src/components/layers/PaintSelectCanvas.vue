@@ -92,7 +92,7 @@ onMounted(() => {
 
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
-      if (name === 'args[0]') {
+      if (name === 'triggerPaintFramePosition') {
         const event = args[0]
         const position = utils.cursorPositionInSpace(event)
         createPaintingCircle(event)

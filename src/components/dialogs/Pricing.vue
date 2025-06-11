@@ -39,6 +39,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
   unsubscribes()
 })
 

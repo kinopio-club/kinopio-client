@@ -33,6 +33,7 @@ let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       // on resultsFilter addSpace
@@ -46,6 +47,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateHeights)
   unsubscribes()
 })
 

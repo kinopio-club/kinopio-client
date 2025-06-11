@@ -14,31 +14,6 @@ const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-onMounted(() => {
-  console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
-  // const cardActionUnsubscribe = cardStore.$onAction(
-  //   ({name, args}) => {
-  //     if (name === 'moveCards') {
-  //       cancelAnimation()
-  //     }
-  //   }
-  // )
-  // const globalActionUnsubscribe = globalStore.$onAction(
-  //   ({ name, args }) => {
-  //     if (name === 'moveCards') {
-  //       cancelAnimation()
-  //     }
-  //   }
-  // )
-  // unsubscribes = () => {
-  //   cardActionUnsubscribe()
-  //   globalActionUnsubscribe()
-  // }
-})
-// onBeforeUnmount(() => {
-//   unsubscribes()
-// })
-
 const emit = defineEmits(['addTag', 'selectTag', 'closeDialogs'])
 
 const props = defineProps({

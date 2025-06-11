@@ -48,6 +48,7 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   refreshGradients()
   updateDefaultColor()
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUploadComplete') {

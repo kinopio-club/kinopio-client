@@ -126,6 +126,7 @@ onMounted(() => {
     spaceStore.updateInboxCache()
     apiStore.updateDateImage()
   }, 1000 * 60 * 60 * 1) // every 1 hour
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace

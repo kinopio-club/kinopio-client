@@ -33,24 +33,31 @@ let drawingImage, drawingImageUrl
 let unsubscribes
 
 onMounted(() => {
-  canvas = canvasElement.value
-  context = canvas.getContext('2d')
-  context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('pointerup', endDrawing)
   window.addEventListener('scroll', scroll)
   window.addEventListener('resize', updateCanvasSize)
+  canvas = canvasElement.value
+  context = canvas.getContext('2d')
+  context.scale(window.devicePixelRatio, window.devicePixelRatio)
   updatePrevScroll()
   clearCanvas()
   clearStrokes()
 
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'spaceZoomPercent') {
+        updateCanvasSize()
+      }
+    }
+  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerStartDrawing') {
         startDrawing(args[0])
       } else if (name === 'triggerDraw') {
         draw(args[0])
-      } else if (name === 'spaceZoomPercent') {
-        updateCanvasSize()
       } else if (name === 'triggerAddRemoteDrawingStroke') {
         const stroke = args[0].stroke
         remoteStrokes.push(stroke)
@@ -83,6 +90,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
     spaceActionUnsubscribe()
   }

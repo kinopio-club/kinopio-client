@@ -26,6 +26,7 @@ let unsubscribes
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   updateExploreSpaces()
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
