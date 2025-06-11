@@ -488,7 +488,7 @@ label // used for checkbox buttons
       width 10px
       height 10px
       vertical-align 0
-    span
+    span.small-button-text
       font-size 12px
       vertical-align 1px
   &.fixed-height

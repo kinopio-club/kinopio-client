@@ -233,7 +233,7 @@ export const useSpaceStore = defineStore('space', {
         return userStore
       }
       // collaborators
-      const user = this.memberById(userId)
+      const user = this.getSpaceMemberById(userId)
       if (user?.id === userId) {
         return user
       }

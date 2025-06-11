@@ -329,7 +329,7 @@ const uploadFile = async () => {
   const spaceId = props.space?.id
   const input = inputElement.value
   const file = input.files[0]
-  const userIsUpgraded = globalStore.currentUser.isUpgraded
+  const userIsUpgraded = userStore.isUpgraded
   const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
   if (isFileTooBig) {
     state.error.sizeLimit = true

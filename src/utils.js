@@ -1585,14 +1585,14 @@ export default {
   //   // return items , denomarlized
   //   return { addItems, updateItems, removeItems }
   // },
-  newSpaceBackground (space, currentUser) {
-    if (currentUser.defaultSpaceBackgroundGradient) {
-      space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient
+  newSpaceBackground (space, user) {
+    if (user.defaultSpaceBackgroundGradient) {
+      space.backgroundGradient = user.defaultSpaceBackgroundGradient
       space.backgroundIsGradient = true
     } else {
-      space.background = currentUser.defaultSpaceBackground
+      space.background = user.defaultSpaceBackground
     }
-    space.backgroundTint = currentUser.defaultSpaceBackgroundTint
+    space.backgroundTint = user.defaultSpaceBackgroundTint
     return space
   },
   updateSpaceCardsCreatedThroughPublicApi (space) {
