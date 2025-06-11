@@ -844,8 +844,9 @@ export const useSpaceStore = defineStore('space', {
       for (const key of keys) {
         this[key] = update[key]
       }
+      update.id = this.id
       broadcastStore.update({ update, type: 'updateSpace' })
-      await apiStore.addToQueue({ name: 'updateUser', body: update })
+      await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
     updateGroupMeta (space) {
