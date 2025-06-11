@@ -453,6 +453,7 @@ export const useCardStore = defineStore('cards', {
     // position
 
     updatePageSize (card) {
+      if (!card) { return }
       const globalStore = useGlobalStore()
       const cardY = card.y + card.height
       if (cardY >= globalStore.pageHeight) {
@@ -490,14 +491,8 @@ export const useCardStore = defineStore('cards', {
           width: card.width,
           height: card.height
         }
-        // this.updatePageSize(update)
-        // this.byId[update.id] = {
-        //   ...this.byId[update.id],
-        //   ...update
-        // }
-        // return card
-        // updates.push(update)
       })
+      this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       const itemIds = cards.map(card => card.id)
