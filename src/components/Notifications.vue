@@ -143,7 +143,6 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (document.visibilityState !== 'visible') { return }
   if (state.notifySpaceOutOfSync) { return }
   if (globalStore.isLoadingSpace) { return }
-  console.info('☎️ checkIfShouldNotifySpaceOutOfSync…')
   try {
     if (!currentUserIsSignedIn.value) { return }
     globalStore.isLoadingSpace = true
@@ -159,13 +158,13 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     const remoteSpaceeditedAt = dayjs(remoteSpace.editedAt)
     const deltaMinutes = remoteSpaceeditedAt.diff(spaceeditedAt, 'minute')
     const editedAtIsChanged = deltaMinutes >= 1
-    console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-      editedAtIsChanged,
-      spaceeditedAt: spaceeditedAt.fromNow(),
-      remoteSpaceeditedAt: remoteSpaceeditedAt.fromNow(),
-      deltaMinutes
-    })
     if (editedAtIsChanged) {
+      console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+        editedAtIsChanged,
+        spaceeditedAt: spaceeditedAt.fromNow(),
+        remoteSpaceeditedAt: remoteSpaceeditedAt.fromNow(),
+        deltaMinutes
+      })
       state.notifySpaceOutOfSync = true
     }
   } catch (error) {
