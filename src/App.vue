@@ -107,11 +107,11 @@ const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
   const serverStatus = await apiStore.getStatus()
-  console.info('server online status', serverStatus)
   if (serverStatus) {
     globalStore.updateIsOnline(true)
   // error offline
   } else {
+    console.info('server online status', serverStatus)
     globalStore.updateIsOnline(false)
   }
   // retry
