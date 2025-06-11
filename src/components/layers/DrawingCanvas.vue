@@ -51,6 +51,11 @@ onMounted(() => {
       const value = mutation.events.newValue
       if (name === 'spaceZoomPercent') {
         updateCanvasSize()
+      } else if (name === 'currentUserToolbar') {
+        if (globalStore.getToolbarIsDrawing) {
+          clearCanvas()
+          redraw()
+        }
       }
     }
   )
@@ -120,6 +125,9 @@ const styles = computed(() => {
   const value = {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
+  }
+  if (!globalStore.getToolbarIsDrawing) {
+    value.display = 'none'
   }
   return value
 })
