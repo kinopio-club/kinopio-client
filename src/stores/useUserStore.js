@@ -273,10 +273,10 @@ export const useUserStore = defineStore('users', {
       if (user.apiKey) {
         postMessage.send({ name: 'setApiKey', value: user.apiKey })
       }
-      await cache.saveUser(user)
-      Object.keys(user).forEach(item => {
-        this[item] = user[item]
+      Object.keys(user).forEach(key => {
+        this[key] = user[key]
       })
+      await cache.saveUser(user)
     },
     async createNewUser () {
       console.info('🌸 Create new user')
