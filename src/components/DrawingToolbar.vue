@@ -15,7 +15,7 @@ const spaceStore = useSpaceStore()
 let unsubscribes
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
         closeAllDialogs()
@@ -23,7 +23,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

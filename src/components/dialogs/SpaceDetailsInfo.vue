@@ -10,7 +10,7 @@ const globalStore = useGlobalStore()
 let unsubscribes
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerSpaceDetailsInfoIsVisible') {
         globalStore.triggerFocusSpaceDetailsName()
@@ -18,7 +18,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

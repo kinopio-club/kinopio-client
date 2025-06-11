@@ -18,7 +18,7 @@ const spaceStore = useSpaceStore()
 let unsubscribes
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerMoreFiltersIsNotVisible') {
         state.moreSearchFiltersVisible = false
@@ -26,7 +26,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

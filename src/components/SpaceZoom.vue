@@ -13,7 +13,7 @@ const increment = 10
 let unsubscribes
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerSpaceZoomReset') {
         updateSpaceZoomFromTrigger(max.value)
@@ -26,7 +26,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 

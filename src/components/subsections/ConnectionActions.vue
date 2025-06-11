@@ -31,7 +31,7 @@ const state = reactive({
 })
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs' && props.visible) {
         closeDialogs()
@@ -39,7 +39,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

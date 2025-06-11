@@ -34,7 +34,7 @@ onMounted(() => {
   window.addEventListener('mousemove', checkIfShouldStartPanning)
   window.addEventListener('mouseup', checkIfShouldStartMomentum)
   window.addEventListener('wheel', cancelMomentum)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerPanningStart') {
         shouldStartPanning = true
@@ -42,7 +42,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

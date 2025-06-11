@@ -58,7 +58,7 @@ const nameElement = ref(null)
 let unsubscribes
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (name === 'triggerUnloadPage' && visible.value) {
         closeCard()
@@ -87,7 +87,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

@@ -57,7 +57,7 @@ onMounted(async () => {
   const spaceStoreActions = [
     'loadSpace'
   ]
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (globalStoreActions.includes(name)) {
         await nextTick()
@@ -65,28 +65,28 @@ onMounted(async () => {
       }
     }
   )
-  const cardStoreUnsubscribe = cardStore.$onAction(
+  const cardActionUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
         init()
       }
     }
   )
-  const connectionStoreUnsubscribe = connectionStore.$onAction(
+  const connectionActionUnsubscribe = connectionStore.$onAction(
     ({ name, args }) => {
       if (connectionStoreActions.includes(name)) {
         init()
       }
     }
   )
-  const boxStoreUnsubscribe = boxStore.$onAction(
+  const boxActionUnsubscribe = boxStore.$onAction(
     ({ name, args }) => {
       if (boxStoreActions.includes(name)) {
         init()
       }
     }
   )
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
         init()
@@ -94,11 +94,11 @@ onMounted(async () => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    cardStoreUnsubscribe()
-    connectionStoreUnsubscribe()
-    boxStoreUnsubscribe()
-    spaceStoreUnsubscribe()
+    globalActionUnsubscribe()
+    cardActionUnsubscribe()
+    connectionActionUnsubscribe()
+    boxActionUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

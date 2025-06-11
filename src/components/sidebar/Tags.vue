@@ -26,7 +26,7 @@ onMounted(() => {
   window.addEventListener('resize', updateResultsSectionHeight)
   init()
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'shouldHideFooter' && props.visible) {
         updateTags()
@@ -40,7 +40,7 @@ onMounted(() => {
     'removeTagsFromCard',
     'deleteTagsFromAllRemovedCardsPermanent'
   ]
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'removeTags') {
         removeTag(args[0])
@@ -52,8 +52,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    spaceStoreUnsubscribe()
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

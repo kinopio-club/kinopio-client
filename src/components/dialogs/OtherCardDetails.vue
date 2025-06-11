@@ -21,7 +21,7 @@ const apiStore = useApiStore()
 let unsubscribes
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       // update otherCard if dialog is visible before otherCard is loaded
       if (name === 'updateOtherItems') {
@@ -34,7 +34,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

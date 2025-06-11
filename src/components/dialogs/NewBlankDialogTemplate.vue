@@ -18,14 +18,14 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  // const cardStoreUnsubscribe = cardStore.$onAction(
+  // const cardActionUnsubscribe = cardStore.$onAction(
   //   ({name, args}) => {
   //     if (name === 'moveCards') {
   //       cancelAnimation()
   //     }
   //   }
   // )
-  // const globalStoreUnsubscribe = globalStore.$onAction(
+  // const globalActionUnsubscribe = globalStore.$onAction(
   //   ({ name, args }) => {
   //     if (name === 'moveCards') {
   //       cancelAnimation()
@@ -33,8 +33,8 @@ onMounted(() => {
   //   }
   // )
   // unsubscribes = () => {
-  //   globalStoreUnsubscribe()
-  //   cardStoreUnsubscribe()
+  //   globalActionUnsubscribe()
+  //   cardActionUnsubscribe()
   // }
 })
 onBeforeUnmount(() => {

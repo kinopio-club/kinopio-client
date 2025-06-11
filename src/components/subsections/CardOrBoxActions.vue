@@ -32,7 +32,7 @@ let unsubscribes
 onMounted(() => {
   updateDefaultColor(utils.cssVariable('secondary-background'))
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs' && props.visible) {
         const shouldPreventEmit = true
@@ -45,7 +45,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

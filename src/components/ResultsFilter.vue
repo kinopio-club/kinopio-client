@@ -24,7 +24,7 @@ onMounted(() => {
   }
   clearExpiredFilter()
   autoFocus()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (name === 'closeAllDialogs') {
         const element = resultsFilterElement.value
@@ -44,7 +44,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

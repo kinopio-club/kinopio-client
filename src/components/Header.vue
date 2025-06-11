@@ -71,7 +71,7 @@ onMounted(() => {
     updateNotifications()
   }, 1000 * 60 * 10) // 10 minutes
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
         closeAllDialogs()
@@ -117,7 +117,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

@@ -43,7 +43,7 @@ onMounted(() => {
   clearCanvas()
   clearStrokes()
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerStartDrawing') {
         startDrawing(args[0])
@@ -74,7 +74,7 @@ onMounted(() => {
       }
     }
   )
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       const actions = ['loadSpace', 'changeSpace', 'createSpace']
       if (actions.includes(name)) {
@@ -83,8 +83,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    spaceStoreUnsubscribe()
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

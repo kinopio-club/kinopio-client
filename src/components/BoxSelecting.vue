@@ -33,7 +33,7 @@ let previouslySelectedConnectionIds = []
 let previouslySelectedBoxesIds = []
 
 onMounted(() => {
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'currentUserIsBoxSelecting') {
         const isSelecting = args[0]
@@ -64,7 +64,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

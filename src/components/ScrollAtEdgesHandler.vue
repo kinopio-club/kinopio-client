@@ -26,7 +26,7 @@ onMounted(() => {
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', stopInteractions)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'currentUserIsPaintingLocked' && args[0]) {
         stopScrollTimer()
@@ -43,7 +43,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

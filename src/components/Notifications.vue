@@ -33,7 +33,7 @@ const templateElement = ref(null)
 
 onMounted(() => {
   update()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'addNotification') {
         update()
@@ -50,7 +50,7 @@ onMounted(() => {
       }
     }
   )
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
         toggleNotifySpaceOutOfSync(false)
@@ -58,8 +58,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    spaceStoreUnsubscribe()
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
   }
   window.addEventListener('visibilitychange', updatePageVisibilityChange)
   window.addEventListener('focus', updatePageVisibilityChangeOnFocus)

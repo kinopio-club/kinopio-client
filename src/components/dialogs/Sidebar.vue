@@ -24,7 +24,7 @@ let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerRemovedIsVisible') {
         toggleSection('removed')
@@ -32,7 +32,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

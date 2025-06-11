@@ -24,7 +24,7 @@ onMounted(() => {
   window.addEventListener('mouseup', endMovePlayhead)
   window.addEventListener('touchend', endMovePlayhead)
   updateButtonPosition()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'spaceZoomPercent') {
         updateButtonPosition()
@@ -32,7 +32,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

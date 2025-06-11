@@ -41,7 +41,7 @@ onMounted(() => {
   window.addEventListener('dragend', removeUploadIsDraggedOver)
   window.addEventListener('drop', addCardsAndUploadFiles)
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateRemoteDropGuideLine') {
         const update = args[0]
@@ -58,7 +58,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

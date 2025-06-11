@@ -42,7 +42,7 @@ onMounted(() => {
     state.currentPage = totalPages.value
   }
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerPickerNavigationKey') {
         const key = args[0]
@@ -63,7 +63,7 @@ onMounted(() => {
       }
     }
   )
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
         state.focusOnId = spaceStore.id
@@ -71,8 +71,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    spaceStoreUnsubscribe()
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 

@@ -90,7 +90,7 @@ onMounted(() => {
   window.addEventListener('visibilitychange', clearRect)
   clearHightlightedItems()
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'args[0]') {
         const event = args[0]
@@ -124,7 +124,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

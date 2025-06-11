@@ -23,7 +23,7 @@ let unsubscribes
 onMounted(() => {
   updateOperations()
   window.addEventListener('pointerdown', updatePrevPosition)
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'changeSpace') {
         clearOperations()
@@ -31,7 +31,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    spaceStoreUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

@@ -55,7 +55,7 @@ onMounted(() => {
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   start()
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'updateSpace') {
         if (args[0].backgroundTint) {
@@ -65,7 +65,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    spaceStoreUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

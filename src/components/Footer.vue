@@ -29,7 +29,7 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
   window.addEventListener('resize', updatePosition)
   updatePosition()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateHeaderAndFooterPosition') {
         updatePosition()
@@ -49,7 +49,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

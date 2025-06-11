@@ -33,12 +33,12 @@ onMounted(() => {
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
     }
   )
-  const broadcastStoreUnsubscribe = broadcastStore.$onAction(
+  const broadcastActionUnsubscribe = broadcastStore.$onAction(
     ({ name, args }) => {
       if (name === 'joinSpaceRoom') {
         updateMetaRSSFeed()
@@ -46,8 +46,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    broadcastStoreUnsubscribe()
-    globalStoreUnsubscribe()
+    broadcastActionUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

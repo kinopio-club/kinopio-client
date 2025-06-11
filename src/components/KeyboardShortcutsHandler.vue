@@ -46,7 +46,7 @@ onMounted(() => {
   window.addEventListener('copy', handleCopyCutEvent)
   window.addEventListener('cut', handleCopyCutEvent)
   window.addEventListener('paste', handlePasteEvent)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerAddCard') {
         const options = args[0]
@@ -70,7 +70,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

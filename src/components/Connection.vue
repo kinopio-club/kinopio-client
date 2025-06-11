@@ -28,7 +28,7 @@ const connectionPathElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearMultipleSelected') {
         const selectedIds = globalStore.multipleConnectionsSelectedIds
@@ -53,7 +53,7 @@ onMounted(() => {
       }
     }
   )
-  const cardStoreUnsubscribe = cardStore.$onAction(
+  const cardActionUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (name === 'moveCards') {
         cancelAnimation()
@@ -61,8 +61,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    cardStoreUnsubscribe()
+    globalActionUnsubscribe()
+    cardActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

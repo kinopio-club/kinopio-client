@@ -19,7 +19,7 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   updatePrevScroll()
   window.addEventListener('scroll', updatePrevScroll)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateDrawingBackground') {
         update()
@@ -29,11 +29,11 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
+    window.removeEventListener('scroll', updatePrevScroll())
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', updatePrevScroll())
   unsubscribes()
 })
 

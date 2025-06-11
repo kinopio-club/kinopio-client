@@ -20,7 +20,7 @@ onMounted(() => {
   dateIsUpdated = false
   updatedAbsoluteDate = ''
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs' && props.visible) {
         closeDialogsFromParent()
@@ -28,7 +28,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

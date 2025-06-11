@@ -24,7 +24,7 @@ onMounted(() => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', updateScroll)
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerSonarPing') {
         const ping = args[0]
@@ -35,7 +35,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

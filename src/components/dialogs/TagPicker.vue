@@ -26,7 +26,7 @@ let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerPickerNavigationKey') {
         if (!props.visible) { return }
@@ -39,7 +39,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

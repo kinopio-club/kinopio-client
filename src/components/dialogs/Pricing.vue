@@ -27,7 +27,7 @@ let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
         closeChildDialogs()
@@ -35,7 +35,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

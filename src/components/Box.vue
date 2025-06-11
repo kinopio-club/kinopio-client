@@ -52,7 +52,7 @@ const boxElement = ref(null)
 onMounted(() => {
   initViewportObserver()
   updateCurrentConnections()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
         updateRemoteConnections()
@@ -66,7 +66,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onUpdated(() => {

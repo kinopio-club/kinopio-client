@@ -20,7 +20,7 @@ let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
 onMounted(() => {
   updateRect()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
         cancelWaitingAnimationFrame()
@@ -28,7 +28,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

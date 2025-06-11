@@ -48,7 +48,7 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   refreshGradients()
   updateDefaultColor()
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUploadComplete') {
         const { spaceId, url, cardId } = args[0]
@@ -61,7 +61,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

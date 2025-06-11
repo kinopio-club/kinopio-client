@@ -48,7 +48,7 @@ onMounted(() => {
     updateConnectionRect()
   }, 50)
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdatePathWhileDragging') {
         const connections = args[0]
@@ -61,7 +61,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
+    globalActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

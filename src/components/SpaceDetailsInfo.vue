@@ -32,7 +32,7 @@ let unsubscribes
 onMounted(() => {
   textareaSize()
 
-  const globalStoreUnsubscribe = globalStore.$onAction(
+  const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
         closeDialogs()
@@ -46,7 +46,7 @@ onMounted(() => {
       }
     }
   )
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     async ({ name, args }) => {
       if (name === 'restoreSpace') {
         // reset and update textareaSize
@@ -60,8 +60,8 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStoreUnsubscribe()
-    spaceStoreUnsubscribe()
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

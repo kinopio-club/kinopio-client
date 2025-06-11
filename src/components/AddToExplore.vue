@@ -18,7 +18,7 @@ let unsubscribes
 let prevPrivacy = ''
 
 onMounted(() => {
-  const spaceStoreUnsubscribe = spaceStore.$onAction(
+  const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
         clearErrors()
@@ -26,7 +26,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    spaceStoreUnsubscribe()
+    spaceActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
