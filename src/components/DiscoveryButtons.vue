@@ -26,6 +26,7 @@ onMounted(() => {
   window.addEventListener('online', updateLiveSpaces)
   window.addEventListener('online', updateSpaces)
   updateLiveSpaces()
+  updateSpaces()
   updateLiveSpacesIntervalTimer = setInterval(() => {
     updateLiveSpaces()
   }, 1000 * 60 * 5) // 5 minutes
