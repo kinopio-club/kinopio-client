@@ -34,6 +34,8 @@ let unsubscribes
 
 onMounted(() => {
   window.addEventListener('pointerup', endDrawing)
+  window.addEventListener('mouseup', endDrawing)
+  window.addEventListener('touchend', endDrawing)
   window.addEventListener('scroll', scroll)
   window.addEventListener('resize', updateCanvasSize)
   canvas = canvasElement.value
@@ -97,6 +99,8 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
+  window.removeEventListener('mouseup', endDrawing)
+  window.removeEventListener('touchend', endDrawing)
   window.removeEventListener('scroll', scroll)
   window.removeEventListener('resize', updateCanvasSize)
   unsubscribes()
