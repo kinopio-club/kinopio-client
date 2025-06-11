@@ -71,6 +71,17 @@ onMounted(() => {
     updateNotifications()
   }, 1000 * 60 * 10) // 10 minutes
 
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'currentUserIsPainting') {
+        if (value) {
+          addReadOnlyJiggle()
+        }
+      }
+    }
+  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
@@ -91,10 +102,6 @@ onMounted(() => {
         updateUpgradeUserIsVisible(true)
       } else if (name === 'triggerDonateIsVisible') {
         updateDonateIsVisible(true)
-      } else if (name === 'currentUserIsPainting') {
-        if (state.currentUserIsPainting) {
-          addReadOnlyJiggle()
-        }
       } else if (name === 'triggerReadOnlyJiggle') {
         addReadOnlyJiggle()
       } else if (name === 'triggerUpdateNotifications' || name === 'triggerUserIsLoaded') {
@@ -117,6 +124,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })

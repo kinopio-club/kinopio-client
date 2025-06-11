@@ -65,6 +65,8 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('mouseup', stopDragging)
+  window.removeEventListener('pointermove', drag)
   unsubscribes()
 })
 

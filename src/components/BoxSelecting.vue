@@ -33,10 +33,12 @@ let previouslySelectedConnectionIds = []
 let previouslySelectedBoxesIds = []
 
 onMounted(() => {
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
       if (name === 'currentUserIsBoxSelecting') {
-        const isSelecting = args[0]
+        const isSelecting = value
         // before start selection
         if (isSelecting) {
           shouldSelect = true
@@ -64,7 +66,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalActionUnsubscribe()
+    globalStateUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

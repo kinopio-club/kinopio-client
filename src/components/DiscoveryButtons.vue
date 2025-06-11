@@ -50,6 +50,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('online', updateLiveSpaces)
+  window.removeEventListener('online', updateSpaces)
   clearInterval(updateLiveSpacesIntervalTimer)
   clearInterval(updateSpacesIntervalTimer)
   unsubscribes()

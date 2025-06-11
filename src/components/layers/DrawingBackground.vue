@@ -19,6 +19,16 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   updatePrevScroll()
   window.addEventListener('scroll', updatePrevScroll)
+
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'spaceZoomPercent') {
+        updateCanvasSize()
+      }
+    }
+  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateDrawingBackground') {
@@ -29,11 +39,12 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
-    window.removeEventListener('scroll', updatePrevScroll())
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updatePrevScroll())
   unsubscribes()
 })
 

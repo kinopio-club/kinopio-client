@@ -28,6 +28,7 @@ const connectionPathElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearMultipleSelected') {

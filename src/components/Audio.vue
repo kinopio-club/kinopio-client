@@ -16,6 +16,7 @@ let unsubscribes
 onMounted(() => {
   const audio = audioElement.value
   audio.addEventListener('loadedmetadata', getTotalTime)
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerPauseAllAudio' && state.isPlaying) {

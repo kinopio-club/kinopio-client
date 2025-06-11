@@ -34,6 +34,7 @@ onMounted(() => {
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
   }
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerRemoveCardFromCardList') {

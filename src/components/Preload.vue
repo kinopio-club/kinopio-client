@@ -10,15 +10,17 @@ const cardStore = useCardStore()
 let unsubscribes
 
 onMounted(() => {
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
       if (name === 'isLoadingSpace') {
         updateImageUrls()
       }
     }
   )
   unsubscribes = () => {
-    globalActionUnsubscribe()
+    globalStateUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

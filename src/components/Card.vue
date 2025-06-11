@@ -121,7 +121,6 @@ onMounted(async () => {
     globalActionUnsubscribe()
   }
 })
-
 onBeforeUnmount(() => {
   removeViewportObserver()
   unsubscribes()

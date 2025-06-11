@@ -26,6 +26,7 @@ onMounted(() => {
   updatePrimaryBackgroundColor()
   window.addEventListener('touchend', disableIsActive)
   window.addEventListener('mouseup', disableIsActive)
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateOtherCard') {
@@ -42,6 +43,8 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('touchend', disableIsActive)
+  window.removeEventListener('mouseup', disableIsActive)
   unsubscribes()
 })
 

@@ -32,8 +32,17 @@ onMounted(async () => {
   window.addEventListener('pointerup', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
 
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    async (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'isLoadingSpace') {
+        await nextTick()
+        init()
+      }
+    }
+  )
   const globalStoreActions = [
-    'isLoadingSpace',
     'triggerEndDrawing'
   ]
   const boxStoreActions = [
@@ -94,6 +103,7 @@ onMounted(async () => {
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
     cardActionUnsubscribe()
     connectionActionUnsubscribe()

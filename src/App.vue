@@ -33,6 +33,7 @@ onMounted(() => {
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
@@ -51,6 +52,10 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateSystemTheme)
+  window.removeEventListener('online', updateIsOnline)
+  window.removeEventListener('offline', updateIsOnline)
   unsubscribes()
 })
 

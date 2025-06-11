@@ -52,12 +52,20 @@ const boxElement = ref(null)
 onMounted(() => {
   initViewportObserver()
   updateCurrentConnections()
+
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'isLoadingSpace') {
+        updateCurrentConnections()
+      }
+    }
+  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
         updateRemoteConnections()
-      } else if (name === 'isLoadingSpace') {
-        updateCurrentConnections()
       } else if (name === 'triggerUpdateItemCurrentConnections') {
         const itemId = args[0]
         if (itemId !== props.box.id) { return }
@@ -66,6 +74,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })

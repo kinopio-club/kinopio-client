@@ -29,16 +29,24 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
   window.addEventListener('resize', updatePosition)
   updatePosition()
+
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'isPresentationMode') {
+        if (!value) {
+          globalStore.shouldExplicitlyHideFooter = false
+        }
+      }
+    }
+  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateHeaderAndFooterPosition') {
         updatePosition()
       } else if (name === 'triggerHideTouchInterface') {
         hideOnTouch()
-      } else if (name === 'isPresentationMode') {
-        if (!args[0]) {
-          globalStore.shouldExplicitlyHideFooter = false
-        }
       } else if (name === 'closeAllDialogs') {
         if (!globalStore.minimapIsPinned) {
           hideMinimap()
@@ -49,6 +57,7 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
+    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })

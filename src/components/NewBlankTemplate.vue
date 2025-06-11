@@ -1,10 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useGlobalStore } from '@/stores/useGlobalStore'
 
 // import utils from '@/utils.js'
 
@@ -13,32 +13,35 @@ const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-// let unsubscribes
+let unsubscribes
 
 onMounted(() => {
   console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
-  // const cardActionUnsubscribe = cardStore.$onAction(
-  //   ({name, args}) => {
-  //     if (name === 'moveCards') {
-  //       cancelAnimation()
-  //     }
-  //   }
-  // )
-  // const globalActionUnsubscribe = globalStore.$onAction(
-  //   ({ name, args }) => {
-  //     if (name === 'moveCards') {
-  //       cancelAnimation()
-  //     }
-  //   }
-  // )
-  // unsubscribes = () => {
-  //   globalActionUnsubscribe()
-  //   cardActionUnsubscribe()
-  // }
+
+  const globalStateUnsubscribe = globalStore.$subscribe(
+    (mutation, state) => {
+      const name = mutation.events.key
+      const value = mutation.events.newValue
+      if (name === 'spaceZoomPercent') {
+        console.log('spaceZoomPercent')
+      }
+    }
+  )
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'clearDraggingItems') {
+        console.log('clearDraggingItems')
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalStateUnsubscribe()
+    globalActionUnsubscribe()
+  }
 })
-// onBeforeUnmount(() => {
-//   unsubscribes()
-// })
+onBeforeUnmount(() => {
+  unsubscribes()
+})
 
 const emit = defineEmits(['updateCount'])
 

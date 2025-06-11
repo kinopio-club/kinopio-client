@@ -29,6 +29,7 @@ onMounted(() => {
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', stopInteractions)
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerDrawConnectionFrame') {
@@ -46,7 +47,6 @@ onMounted(() => {
     globalActionUnsubscribe()
   }
 })
-
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)

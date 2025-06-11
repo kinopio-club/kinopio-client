@@ -14,6 +14,7 @@ let unsubscribes
 
 onMounted(() => {
   focusNameInput()
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {

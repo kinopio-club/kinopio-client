@@ -55,6 +55,7 @@ onMounted(() => {
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   start()
+
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'updateSpace') {
