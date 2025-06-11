@@ -24,10 +24,7 @@ let tallestCardHeight = 0
 export const useCardStore = defineStore('cards', {
   state: () => ({
     byId: {},
-    allIds: [],
-    dirtyCardIds: new Set(),
-    pendingUpdates: new Map(),
-    isUpdating: false
+    allIds: []
   }),
 
   getters: {
@@ -339,27 +336,6 @@ export const useCardStore = defineStore('cards', {
 
     // update
 
-    processPendingUpdates () {
-      const updatedCards = {}
-      this.pendingUpdates.forEach((updates, id) => {
-        updatedCards[id] = {
-          ...this.byId[id],
-          ...updates
-        }
-      })
-      // Batch state update
-      this.byId = {
-        ...this.byId,
-        ...updatedCards
-      }
-      // Clear queues
-      this.pendingUpdates.clear()
-      this.dirtyCardIds.clear()
-      this.isUpdating = false
-    },
-    updateCard (update) {
-      this.updateCards([update])
-    },
     async updateCards (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -368,17 +344,12 @@ export const useCardStore = defineStore('cards', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       updates = updates.filter(update => userStore.getUserCanEditCard(update))
-      updates.forEach(({ id, ...changes }) => {
-        this.pendingUpdates.set(id, {
-          ...this.pendingUpdates.get(id) || {},
-          ...changes
-        })
-        this.dirtyCardIds.add(id)
+      updates.forEach(update => {
+        this.byId[update.id] = {
+          ...this.byId[update.id],
+          ...update
+        }
       })
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-        this.isUpdating = true
-      }
       // server tasks
       if (!updates.isBroadcast) {
         broadcastStore.update({ updates, storeName: 'cardStore', actionName: 'updateCards' })
@@ -393,6 +364,9 @@ export const useCardStore = defineStore('cards', {
         const ids = updates.map(update => update.id)
         connectionStore.updateConnectionPaths(ids)
       }
+    },
+    updateCard (update) {
+      this.updateCards([update])
     },
     updateCardNameRemovePlaceholders (cardId) {
       const card = this.getCard(cardId)
@@ -507,22 +481,26 @@ export const useCardStore = defineStore('cards', {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      const cards = this.getCardsSelected
-      const updates = []
-      cards.forEach(card => {
-        const update = {
+      let cards = this.getCardsSelected
+      cards = cards.map(card => {
+        return {
           id: card.id,
           x: card.x + delta.x,
           y: card.y + delta.y,
           width: card.width,
           height: card.height
         }
-        this.updatePageSize(update)
-        updates.push(update)
+        // this.updatePageSize(update)
+        // this.byId[update.id] = {
+        //   ...this.byId[update.id],
+        //   ...update
+        // }
+        // return card
+        // updates.push(update)
       })
-      this.updateCards(updates)
+      this.updateCards(cards)
       globalStore.cardsWereDragged = true
-      const itemIds = updates.map(update => update.id)
+      const itemIds = cards.map(card => card.id)
       connectionStore.updateConnectionPaths(itemIds)
       boxStore.updateBoxSnapGuides(cards, true)
     },

@@ -13,37 +13,34 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 
-export const useCardStore = defineStore('cards', {
+export const useItemStore = defineStore('items', {
   state: () => ({
     byId: {},
-    allIds: [],
-    dirtyCardIds: new Set(),
-    pendingUpdates: new Map(),
-    isUpdating: false
+    allIds: []
   }),
 
   getters: {
     // getters take no params, and are invoked like object properties
-    // blankStore.getAllCards
-    getAllCards () {
+    // blankStore.getAllItems
+    getAllItems () {
       return this.allIds.map(id => this.byId[id])
     }
   },
 
   actions: {
 
-    getCard (id) {
+    getItem (id) {
       return this.byId[id]
     },
 
     // init
 
-    initializeCards (cards) {
+    initializeItems (items) {
       const byId = {}
       const allIds = []
-      cards.forEach(card => {
-        byId[card.id] = card
-        allIds.push(card.id)
+      items.forEach(item => {
+        byId[item.id] = item
+        allIds.push(item.id)
       })
       this.byId = byId
       this.allIds = allIds
@@ -51,75 +48,53 @@ export const useCardStore = defineStore('cards', {
 
     // create
 
-    addCardToState (card) {
-      this.byId[card.id] = card
-      this.allIds.push(card.id)
+    addItemToState (item) {
+      this.byId[item.id] = item
+      this.allIds.push(item.id)
     },
-    async createCard (card) {
+    async createItem (item) {
       const apiStore = useApiStore()
       const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
-      // normalize card
-      this.addCardToState(card)
+      // normalize item
+      this.addItemToState(item)
       // if (!updates.isBroadcast) {
       // broadcastStore.update({ updates: connection, type: 'addConnection', handler: 'currentConnections/create' })
       // historyStore.add({ connections: [connection] })
-      await apiStore.addToQueue({ name: 'createCard', body: card })
+      await apiStore.addToQueue({ name: 'createItem', body: item })
     },
 
     // update
 
-    processPendingUpdates () {
-      const updatedCards = {}
-      this.pendingUpdates.forEach((updates, id) => {
-        updatedCards[id] = {
-          ...this.byId[id],
-          ...updates
+    updateItems (updates) {
+      updates.forEach(update => {
+        this.byId[update.id] = {
+          ...this.byId[update.id],
+          ...update
         }
       })
-      // Batch state update
-      this.byId = {
-        ...this.byId,
-        ...updatedCards
-      }
-      // Clear queues
-      this.pendingUpdates.clear()
-      this.dirtyCardIds.clear()
-      this.isUpdating = false
+      // save to server, cache, broadcast
     },
-    updateCards (updates) {
-      updates.forEach(({ id, ...changes }) => {
-        this.pendingUpdates.set(id, {
-          ...this.pendingUpdates.get(id) || {},
-          ...changes
-        })
-        this.dirtyCardIds.add(id)
-      })
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-        this.isUpdating = true
-      }
-    },
-    updateCard (update) {
-      this.updatedCards([update])
+    updateItem (update) {
+      this.updatedItems([update])
     },
 
     // remove
 
-    async removeCards (cards) {
+    async removeItems (items) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
-      for (const card of cards) {
-        const idIndex = this.allIds.indexOf(card.id)
+      for (const item of items) {
+        const idIndex = this.allIds.indexOf(item.id)
         this.allIds.splice(idIndex, 1)
-        delete this.byId[card.id]
-        await apiStore.addToQueue({ name: 'removeCard', body: card })
+        delete this.byId[item.id]
+        await apiStore.addToQueue({ name: 'removeItem', body: item })
       }
     },
-    async removeCard (card) {
-      await this.removeCards([card])
+    async removeItem (item) {
+      await this.removeItems([item])
     }
 
   }

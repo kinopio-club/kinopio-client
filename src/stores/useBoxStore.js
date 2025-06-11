@@ -23,9 +23,6 @@ export const useBoxStore = defineStore('boxes', {
   state: () => ({
     byId: {},
     allIds: [],
-    dirtyBoxIds: new Set(),
-    pendingUpdates: new Map(),
-    isUpdating: false,
     boxSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
@@ -162,40 +159,17 @@ export const useBoxStore = defineStore('boxes', {
 
     // update
 
-    processPendingUpdates () {
-      const updatedBoxes = {}
-      this.pendingUpdates.forEach((updates, id) => {
-        updatedBoxes[id] = {
-          ...this.byId[id],
-          ...updates
-        }
-      })
-      // Batch state update
-      this.byId = {
-        ...this.byId,
-        ...updatedBoxes
-      }
-      // Clear queues
-      this.pendingUpdates.clear()
-      this.dirtyBoxIds.clear()
-      this.isUpdating = false
-    },
     async updateBoxes (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       // const broadcastStore = useBroadcastStore()
-      updates.forEach(({ id, ...changes }) => {
-        this.pendingUpdates.set(id, {
-          ...this.pendingUpdates.get(id) || {},
-          ...changes
-        })
-        this.dirtyBoxIds.add(id)
+      updates.forEach(update => {
+        this.byId[update.id] = {
+          ...this.byId[update.id],
+          ...update
+        }
       })
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-        this.isUpdating = true
-      }
       // server tasks
       if (!updates.isBroadcast) {
         // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' })

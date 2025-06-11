@@ -23,9 +23,6 @@ export const useConnectionStore = defineStore('connections', {
     allIds: [],
     typeById: {},
     typeAllIds: [],
-    dirtyConnectionIds: new Set(),
-    pendingUpdates: new Map(),
-    isUpdating: false,
     prevConnectionTypeId: ''
   }),
 
@@ -224,19 +221,13 @@ export const useConnectionStore = defineStore('connections', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      const canEditSpace = userStore.getUserCanEditSpace
-      if (!canEditSpace) { return }
-      updates.forEach(({ id, ...changes }) => {
-        this.pendingUpdates.set(id, {
-          ...this.pendingUpdates.get(id) || {},
-          ...changes
-        })
-        this.dirtyConnectionIds.add(id)
+      if (!userStore.getUserCanEditSpace) { return }
+      updates.forEach(update => {
+        this.byId[update.id] = {
+          ...this.byId[update.id],
+          ...update
+        }
       })
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-        this.isUpdating = true
-      }
       // server tasks
       if (!updates.isBroadcast) {
         broadcastStore.update({ updates, storeName: 'connectionStore', actionName: 'updateConnections' })
@@ -247,24 +238,6 @@ export const useConnectionStore = defineStore('connections', {
     },
     updateConnection (update) {
       this.updateConnections([update])
-    },
-    processPendingUpdates () {
-      const updatedConnections = {}
-      this.pendingUpdates.forEach((updates, id) => {
-        updatedConnections[id] = {
-          ...this.byId[id],
-          ...updates
-        }
-      })
-      // Batch state update
-      this.byId = {
-        ...this.byId,
-        ...updatedConnections
-      }
-      // Clear queues
-      this.pendingUpdates.clear()
-      this.dirtyConnectionIds.clear()
-      this.isUpdating = false
     },
     updatePrevConnectionTypeId (id) {
       this.prevConnectionTypeId = id
