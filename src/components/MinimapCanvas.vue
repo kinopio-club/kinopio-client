@@ -198,15 +198,14 @@ const initCanvas = async () => {
 // drawing
 
 const drawDrawing = async () => {
-  const space = await cache.space(spaceStore.id)
-  if (!space.drawingImage) { return }
+  if (!globalStore.drawingImageUrl) { return }
   const image = new Image()
   image.onload = () => {
     const width = image.width * ratio.value
     const height = image.height * ratio.value
     context.drawImage(image, 0, 0, width, height)
   }
-  image.src = space.drawingImage
+  image.src = globalStore.drawingImageUrl
 }
 
 // connections
