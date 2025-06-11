@@ -277,14 +277,7 @@ const imageDataUrl = async (strokes) => {
       offscreenContext.moveTo(point.x, point.y)
     })
   })
-  let dataUrl
-  if (currentUserIsSignedIn.value) {
-    dataUrl = dataUrlFromOffscreenCanvas(offscreenCanvas, 'image/webp', 0.5)
-  } else {
-    // anon users use png because dataUrl is saved to server on sign up/in
-    dataUrl = dataUrlFromOffscreenCanvas(offscreenCanvas)
-  }
-  return dataUrl
+  return dataUrlFromOffscreenCanvas(offscreenCanvas)
 }
 
 // restore
