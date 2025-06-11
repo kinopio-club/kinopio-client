@@ -240,10 +240,6 @@ export const useBoxStore = defineStore('boxes', {
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      endCursor = {
-        x: endCursor.x * zoom,
-        y: endCursor.y * zoom
-      }
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -252,6 +248,11 @@ export const useBoxStore = defineStore('boxes', {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
+
       const boxes = this.getBoxesSelected
       const updates = []
       boxes.forEach(box => {

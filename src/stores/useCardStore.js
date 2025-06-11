@@ -470,10 +470,6 @@ export const useCardStore = defineStore('cards', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      endCursor = {
-        x: endCursor.x * zoom,
-        y: endCursor.y * zoom
-      }
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -482,14 +478,16 @@ export const useCardStore = defineStore('cards', {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
       let cards = this.getCardsSelected
       cards = cards.map(card => {
         return {
           id: card.id,
-          x: card.x + delta.x,
-          y: card.y + delta.y,
-          width: card.width,
-          height: card.height
+          x: Math.round(card.x + delta.x),
+          y: Math.round(card.y + delta.y)
         }
       })
       this.updatePageSize(cards[0])
