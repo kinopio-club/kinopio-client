@@ -103,7 +103,7 @@ const viewportWidth = computed(() => globalStore.viewportWidth)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
+const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
 const styles = computed(() => {
   const value = {
     top: state.prevScroll.y + 'px',

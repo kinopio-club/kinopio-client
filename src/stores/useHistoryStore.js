@@ -235,8 +235,7 @@ export const useHistoryStore = defineStore('history', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const toolbarIsDrawing = globalStore.currentUserToolbar === 'drawing'
-      if (toolbarIsDrawing) {
+      if (globalStore.getToolbarIsDrawing) {
         globalStore.triggerDrawingUndo()
         return
       }
@@ -319,8 +318,7 @@ export const useHistoryStore = defineStore('history', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const toolbarIsDrawing = globalStore.currentUserToolbar === 'drawing'
-      if (toolbarIsDrawing) {
+      if (globalStore.getToolbarIsDrawing) {
         globalStore.triggerDrawingRedo()
         return
       }

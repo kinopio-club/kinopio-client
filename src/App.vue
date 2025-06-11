@@ -72,7 +72,7 @@ const pageHeight = computed(() => {
 const pageCursor = computed(() => {
   const isPanning = globalStore.currentUserIsPanning
   const isPanningReady = globalStore.currentUserIsPanningReady
-  const toolbarIsBox = globalStore.currentUserToolbar === 'box'
+  const toolbarIsBox = globalStore.getToolbarIsBox
   if (isPanning) {
     return 'grabbing'
   } else if (isPanningReady) {

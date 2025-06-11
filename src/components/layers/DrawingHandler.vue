@@ -27,7 +27,7 @@ const props = defineProps({
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
-const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
+const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
 const strokeColor = computed(() => userStore.getUserDrawingColor)
 
 const strokeDiameter = computed(() => {

@@ -93,7 +93,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsHoveringOverUrlButtonCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
-    currentUserToolbar: 'card', // card, box
+    currentUserToolbar: 'card', // card, box, drawing
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
@@ -337,6 +337,12 @@ export const useGlobalStore = defineStore('global', {
       const tags = spaceTags.concat(userTags).concat(allTags)
       // tags = uniqBy(tags, 'name') // removed for perf reasons
       return tags || []
+    },
+    getToolbarIsDrawing () {
+      return this.currentUserToolbar === 'drawing'
+    },
+    getToolbarIsBox () {
+      return this.currentUserToolbar === 'box'
     }
   },
 

@@ -25,12 +25,12 @@ watch(() => currentUserToolbar.value, (value, prevValue) => {
   }
 })
 
-const currentUserToolbarIsBox = computed(() => {
+const toolbarIsBox = computed(() => {
   if (globalStore.currentUserIsResizingBox) { return }
-  return currentUserToolbar.value === 'box'
+  return globalStore.getToolbarIsBox
 })
-const currentUserToolbarIsDrawing = computed(() => {
-  return currentUserToolbar.value === 'drawing'
+const toolbarIsDrawing = computed(() => {
+  return globalStore.getToolbarIsDrawing
 })
 
 const toggleToolbar = (value) => {
@@ -44,29 +44,29 @@ const toggleToolbar = (value) => {
 
 <template lang="pug">
 nav#toolbar.toolbar(v-if="visible")
-  DrawingToolbar(:visible="currentUserToolbarIsDrawing")
+  DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
     //- Box
     .segmented-buttons
       .button-wrap
         button(
           title="Draw Box (B)"
-          :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+          :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('box')"
         )
           img.icon.box-icon(src="@/assets/box.svg")
-        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="currentUserToolbarIsBox")
+        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
           span Draw Box (B)
 
       //- Drawing
       .button-wrap
         button.drawing-button(
           title="Drawing (D)"
-          :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
+          :class="{ active: toolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('drawing')"
         )
           img.icon.pencil-icon(src="@/assets/pencil.svg")
-        .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
+        .label-badge.toolbar-badge-wrap.jiggle(v-if="toolbarIsDrawing")
           span Drawing (D)
 </template>
 

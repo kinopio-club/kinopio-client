@@ -141,7 +141,7 @@ const handleShortcuts = (event) => {
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
-  const toolbarIsDrawing = globalStore.currentUserToolbar === 'drawing'
+  const toolbarIsDrawing = globalStore.getToolbarIsDrawing
   const canEditSpace = userStore.getUserCanEditSpace
   // ?
   if (key === '?' && isSpaceScope) {
@@ -239,7 +239,7 @@ const handleMetaKeyShortcuts = (event) => {
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
-  const toolbarIsDrawing = globalStore.currentUserToolbar === 'drawing'
+  const toolbarIsDrawing = globalStore.getToolbarIsDrawing
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
     const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
@@ -333,7 +333,7 @@ const handleMouseDownEvents = (event) => {
   const isMiddleClick = middleMouseButton === event.button
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
-  const toolbarIsBox = globalStore.currentUserToolbar === 'box'
+  const toolbarIsBox = globalStore.getToolbarIsBox
   const isNotConnecting = !globalStore.currentUserIsDrawingConnection
   const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !globalStore.currentUserIsResizingBox
   const userDisablePan = userStore.shouldDisableRightClickToPan

@@ -38,9 +38,8 @@ const updateIsSelectingX = (value) => {
   }
   globalStore.isSelectingX = value
 }
-const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
-  if (toolbarIsDrawing.value) { return }
+  if (globalStore.getToolbarIsDrawing) { return }
   if (globalStore.isSelectingY) { return }
   if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
   return state.isVisible

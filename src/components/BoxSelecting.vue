@@ -80,9 +80,8 @@ const currentUserIsBoxSelecting = computed(() => globalStore.currentUserIsBoxSel
 const startPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectMove))
 const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace)
-const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
 const shouldPreventBoxSelecting = computed(() => {
-  if (toolbarIsDrawing.value) { return true }
+  if (globalStore.getToolbarIsDrawing) { return true }
   const isDraggingItem = globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox
   return isDraggingItem
 })

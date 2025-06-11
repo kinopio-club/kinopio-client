@@ -168,8 +168,7 @@ const userCannotEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const isPanning = computed(() => globalStore.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => globalStore.currentUserToolbar === 'card')
-const toolbarIsBox = computed(() => globalStore.currentUserToolbar === 'box')
-const toolbarIsDrawing = computed(() => globalStore.currentUserToolbar === 'drawing')
+const toolbarIsBox = computed(() => globalStore.getToolbarIsBox)
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
@@ -440,7 +439,7 @@ const createPaintingCircles = (event) => {
   prevCursor = state.currentCursor
 }
 const startPainting = (event) => {
-  if (toolbarIsDrawing.value) { return }
+  if (globalStore.getToolbarIsDrawing) { return }
   if (!isCanvasScope(event)) { return }
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
