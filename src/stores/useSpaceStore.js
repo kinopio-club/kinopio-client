@@ -462,7 +462,8 @@ export const useSpaceStore = defineStore('space', {
         this.updateUserLastSpaceId()
         globalStore.isLoadingSpace = false
         // drawing
-        this.drawingImage = remoteSpace.drawingImage
+        this.drawingImage = utils.drawingImageUrl(remoteSpace.drawingImage)
+        globalStore.drawingImageUrl = this.drawingImage
         globalStore.triggerDrawingRedraw()
         await cache.updateSpaceByUpdates({ drawingImage: remoteSpace.drawingImage }, this.id)
       } catch (error) {

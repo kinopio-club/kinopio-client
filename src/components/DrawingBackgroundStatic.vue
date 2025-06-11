@@ -18,7 +18,7 @@ const props = defineProps({
   isForeground: Boolean
 })
 
-const drawingImageDataUrl = computed(() => globalStore.drawingImageDataUrl)
+const drawingImageUrl = computed(() => globalStore.drawingImageUrl)
 
 // styles
 
@@ -27,10 +27,7 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
-  const value = {
-    width: `${pageWidth.value}px`,
-    height: `${pageHeight.value}px`
-  }
+  const value = {}
   if (props.isForeground) {
     value.mixBlendMode = 'hard-light'
   }
@@ -43,7 +40,7 @@ const styles = computed(() => {
 </script>
 
 <template lang="pug">
-img.drawing-background-static(:style="styles" :src="drawingImageDataUrl")
+img.drawing-background-static(:style="styles" :src="drawingImageUrl")
 </template>
 
 <style lang="stylus">

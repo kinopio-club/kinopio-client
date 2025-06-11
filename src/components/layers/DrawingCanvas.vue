@@ -81,7 +81,6 @@ onMounted(() => {
       } else if (name === 'triggerDrawingRedo') {
         redo()
       } else if (name === 'triggerDrawingRedraw') {
-        globalStore.drawingImageDataUrl = ''
         clearCanvas()
         redraw()
       }
@@ -288,7 +287,7 @@ const redrawSpaceDrawingImage = () => {
 }
 const restoreSpaceDrawingImage = async () => {
   return new Promise((resolve, reject) => {
-    let url = spaceStore.drawingImage
+    const url = spaceStore.drawingImage
     if (!url) {
       resolve()
       return
@@ -299,11 +298,7 @@ const restoreSpaceDrawingImage = async () => {
       return
     }
     try {
-      const isDataUrl = url.startsWith('data:')
       const prevUrl = url
-      if (!isDataUrl) {
-        url = `${url}?q=${nanoid()}` // cache-busting
-      }
       drawingImage = new Image()
       drawingImage.crossOrigin = 'anonymous' // cors
       drawingImage.onload = () => {
@@ -316,6 +311,7 @@ const restoreSpaceDrawingImage = async () => {
         reject(error)
       }
       drawingImage.src = url
+      // globalStore.drawingImageUrl = url
     } catch (error) {
       console.error('🚒 restoreSpaceDrawingImage', error, url)
       reject(error)
@@ -363,7 +359,7 @@ const redraw = async () => {
 
 const updateCache = async (dataUrl) => {
   await cache.updateSpace('drawingImage', dataUrl, spaceStore.id)
-  globalStore.drawingImageDataUrl = dataUrl
+  globalStore.drawingImageUrl = dataUrl
   globalStore.triggerEndDrawing()
   spaceStore.updateSpacePreviewImage()
 }

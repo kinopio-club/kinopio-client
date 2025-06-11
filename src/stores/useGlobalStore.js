@@ -102,7 +102,7 @@ export const useGlobalStore = defineStore('global', {
     // drawing
     drawingEraserIsActive: false,
     drawingStrokeColors: [],
-    drawingImageDataUrl: '',
+    drawingImageUrl: '',
 
     // box-selecting
     currentUserIsBoxSelecting: false,
