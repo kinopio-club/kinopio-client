@@ -116,7 +116,7 @@ const toggleEraser = () => {
 .drawing-toolbar
   position absolute
   top 29px
-  left 36px
+  left 31px
   display block
   dialog
     top 23px
@@ -126,5 +126,8 @@ const toggleEraser = () => {
     display flex
     justify-content center
     align-items center
-
+  .segmented-buttons
+    button:first-child
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
 </style>
