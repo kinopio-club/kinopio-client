@@ -137,6 +137,7 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const isDevelopment = computed(() => consts.isDevelopment())
 const cardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
 const card = computed(() => {
   return cardStore.getCard(cardId.value) || {}
@@ -1575,6 +1576,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    .badge.info(v-if="isDevelopment")
+      span CARDID:
+      br
+      span {{cardId}}
 </template>
 
 <style lang="stylus">
