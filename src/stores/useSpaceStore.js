@@ -433,9 +433,7 @@ export const useSpaceStore = defineStore('space', {
       const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
       space.connections = utils.migrationConnections(space.connections)
-      if (!globalStore.isEmbedMode) {
-        globalStore.triggerSpaceZoomReset()
-      }
+      globalStore.spaceZoomPercent = 100
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
