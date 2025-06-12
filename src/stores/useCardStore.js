@@ -226,11 +226,6 @@ export const useCardStore = defineStore('cards', {
 
     // init
 
-    clear () {
-      this.byId = []
-      this.allIds = {}
-      tallestCardHeight = 0
-    },
     initializeCards (cards = []) {
       const byId = {}
       const allIds = []

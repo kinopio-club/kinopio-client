@@ -117,12 +117,6 @@ export const useConnectionStore = defineStore('connections', {
 
     // init
 
-    clear () {
-      this.byId = []
-      this.allIds = {}
-      this.typeById = []
-      this.typeAllIds = {}
-    },
     initializeConnections (connections = []) {
       const byId = {}
       const allIds = []
