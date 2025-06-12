@@ -364,7 +364,7 @@ const infoStyles = computed(() => {
 
 const updateCurrentConnections = async () => {
   await nextTick()
-  state.currentConnections = connectionStore.getItemsConnections(props.box.id)
+  state.currentConnections = connectionStore.getConnectionsByItemId(props.box.id)
 }
 const isPainting = computed(() => globalStore.currentUserIsPainting)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)

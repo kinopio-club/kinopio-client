@@ -23,7 +23,10 @@ export const useConnectionStore = defineStore('connections', {
     allIds: [],
     typeById: {},
     typeAllIds: [],
-    prevConnectionTypeId: ''
+    prevConnectionTypeId: '',
+    // indexes
+    byStartItemId: {}, // { startItemId: [ id1, id2 ] }
+    byEndItemId: {}
   }),
 
   getters: {
@@ -68,20 +71,29 @@ export const useConnectionStore = defineStore('connections', {
     getConnectionType (id) {
       return this.typeById[id]
     },
-    getItemsConnections (itemIds) {
-      let connections = this.getAllConnections
-      connections = connections.filter(connection => {
-        const start = itemIds.includes(connection.startItemId)
-        const end = itemIds.includes(connection.endItemId)
-        return start || end
+    getConnectionByStartItemId (itemId) {
+      const ids = this.byStartItemId[itemId] || []
+      return ids.map(id => this.getConnection(id))
+    },
+    getConnectionByEndItemId (itemId) {
+      const ids = this.byEndItemId[itemId] || []
+      return ids.map(id => this.getConnection(id))
+    },
+    getConnectionsByItemIds (itemIds) {
+      const connections = []
+      itemIds.forEach(itemId => {
+        const startMatches = this.getConnectionByStartItemId(itemId)
+        const endMatches = this.getConnectionByEndItemId(itemId)
+        startMatches.forEach(match => connections.push(match))
+        endMatches.forEach(match => connections.push(match))
       })
       return connections
     },
-    getItemConnections (itemId) {
-      return this.getItemsConnections([itemId])
+    getConnectionsByItemId (itemId) {
+      return this.getConnectionsByItemIds([itemId])
     },
     getItemConnectionTypes (itemId) {
-      const connections = this.getItemConnections(itemId)
+      const connections = this.getConnectionsByItemId(itemId)
       const typeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = typeIds.map(id => this.getConnectionType(id))
       return connectionTypes
@@ -112,7 +124,8 @@ export const useConnectionStore = defineStore('connections', {
     },
     getConnectionTypeByName (name) {
       const types = this.getAllConnectionTypes
-      return types.find(type => type.name === name)
+      const type = types.find(type => type.name === name)
+      return type
     },
 
     // init
@@ -120,12 +133,26 @@ export const useConnectionStore = defineStore('connections', {
     initializeConnections (connections = []) {
       const byId = {}
       const allIds = []
+      const byStartItemId = {}
+      const byEndItemId = {}
       connections.forEach(connection => {
         byId[connection.id] = connection
         allIds.push(connection.id)
+        // init arrays for indexes
+        if (!byStartItemId[connection.startItemId]) {
+          byStartItemId[connection.startItemId] = []
+        }
+        if (!byEndItemId[connection.endItemId]) {
+          byEndItemId[connection.endItemId] = []
+        }
+        // add to indexes
+        byStartItemId[connection.startItemId].push(connection.id)
+        byEndItemId[connection.endItemId].push(connection.id)
       })
       this.byId = byId
       this.allIds = allIds
+      this.byStartItemId = byStartItemId
+      this.byEndItemId = byEndItemId
     },
     initializeConnectionTypes (connectionTypes = []) {
       const byId = {}
@@ -143,6 +170,8 @@ export const useConnectionStore = defineStore('connections', {
     addConnectionToState (connection) {
       this.byId[connection.id] = connection
       this.allIds.push(connection.id)
+      this.byStartItemId[connection.startItemId].push(connection.id)
+      this.byEndItemId[connection.endItemId].push(connection.id)
     },
     addConnectionTypeToState (type) {
       this.typeById[type.id] = type
@@ -264,6 +293,17 @@ export const useConnectionStore = defineStore('connections', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const id of ids) {
+        // remove from indexes
+        const connection = this.getConnection(id)
+        if (this.byStartItemId[connection.startItemId]) {
+          this.byStartItemId[connection.startItemId] = this.byStartItemId[connection.startItemId]
+            .filter(id => id !== connection.id)
+        }
+        if (this.byEndItemId[connection.endItemId]) {
+          this.byEndItemId[connection.endItemId] = this.byEndItemId[connection.endItemId]
+            .filter(id => id !== connection.id)
+        }
+        // remove from state
         const idIndex = this.allIds.indexOf(id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
@@ -294,7 +334,7 @@ export const useConnectionStore = defineStore('connections', {
       }
     },
     removeConnectionsFromItems (itemIds) {
-      const connections = this.getItemsConnections(itemIds)
+      const connections = this.getConnectionsByItemIds(itemIds)
       const connectionIds = connections.map(connection => connection.id)
       this.removeConnections(connectionIds)
     },
@@ -306,7 +346,7 @@ export const useConnectionStore = defineStore('connections', {
 
     async updateConnectionPaths (itemIds) {
       const globalStore = useGlobalStore()
-      const connections = this.getItemsConnections(itemIds)
+      const connections = this.getConnectionsByItemIds(itemIds)
       const updates = []
       connections.forEach(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })

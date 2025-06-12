@@ -631,7 +631,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getItemConnections(props.card.id))
+const connectedConnectionTypes = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
 
 // card buttons
 
@@ -1607,7 +1607,7 @@ const handleMouseLeaveCheckbox = () => {
   globalStore.currentUserIsHoveringOverCheckboxCardId = ''
 }
 const updateCurrentConnections = () => {
-  state.currentConnections = connectionStore.getItemConnections(props.card.id)
+  state.currentConnections = connectionStore.getConnectionsByItemId(props.card.id)
 }
 const handleMouseEnterUrlButton = () => {
   globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
@@ -1839,7 +1839,7 @@ const updateOtherItems = () => {
       linkToSpaceId: null,
       linkToCardId: null
     }
-    cardStore.update(update)
+    cardStore.updateCard(update)
     return
   }
   if (!url) { return }
@@ -1863,7 +1863,7 @@ const updateOtherSpaceOrCardItems = (url) => {
     linkToCardId: cardId,
     linkToSpaceCollaboratorKey: null
   }
-  cardStore.update(update)
+  cardStore.updateCard(update)
   spaceStore.updateOtherItems({ spaceId, cardId })
 }
 const updateOtherInviteItems = (url) => {
@@ -1876,7 +1876,7 @@ const updateOtherInviteItems = (url) => {
       linkToCardId: null,
       linkToSpaceCollaboratorKey: collaboratorKey
     }
-    cardStore.update(update)
+    cardStore.updateCard(update)
   }
   spaceStore.updateOtherItems({ spaceId, collaboratorKey })
 }

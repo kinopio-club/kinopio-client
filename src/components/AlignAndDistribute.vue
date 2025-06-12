@@ -329,7 +329,7 @@ const updateConnectionPaths = async () => {
   // globalStore.clearMultipleSelected()
   if (!cardIds.length) { return }
   cardIds.forEach(cardId => {
-    const cardConnections = connectionStore.getItemsConnections(cardId)
+    const cardConnections = connectionStore.getConnectionsByItemId(cardId)
     connections = connections.concat(cardConnections)
   })
   globalStore.multipleCardsSelectedIds = cardIds

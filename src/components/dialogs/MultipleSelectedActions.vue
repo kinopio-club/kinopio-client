@@ -254,7 +254,7 @@ const connectCards = (event) => {
 }
 const disconnectCards = () => {
   const cardIds = multipleCardsSelectedIds.value
-  const connections = connectionStore.getItemsConnections(cardIds)
+  const connections = connectionStore.getConnectionsByItemIds(cardIds)
   const ids = connections.map(connection => connection.id)
   connectionStore.removeConnections(ids)
   connectionStore.removeAllUnusedConnectionTypes()

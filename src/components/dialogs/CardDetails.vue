@@ -388,7 +388,7 @@ const showCard = async (cardId) => {
   globalStore.checkIfItemShouldIncreasePageSize(item)
   state.previousSelectedTag = {}
   updateMediaUrls()
-  const connections = connectionStore.getItemConnections(cardId)
+  const connections = connectionStore.getConnectionsByItemId(cardId)
   globalStore.updateCurrentCardConnections(connections)
   prevCardName = card.value.name
   historyStore.pause()
