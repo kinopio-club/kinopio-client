@@ -27,9 +27,8 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
-  const value = {}
-  if (props.isForeground) {
-    value.mixBlendMode = 'hard-light'
+  const value = {
+    backgroundImage: `url('${drawingImageUrl.value}')`
   }
   if (globalStore.getToolbarIsDrawing) {
     value.display = 'none'
@@ -40,7 +39,7 @@ const styles = computed(() => {
 </script>
 
 <template lang="pug">
-img.drawing-background-static(:style="styles" :src="drawingImageUrl")
+.drawing-background-static(:style="styles" :class="{ 'is-foreground': props.isForeground }")
 </template>
 
 <style lang="stylus">
@@ -48,4 +47,9 @@ img.drawing-background-static(:style="styles" :src="drawingImageUrl")
   position absolute
   pointer-events none
   z-index 0
+  width 100%
+  height 100%
+  &.is-foreground
+    mix-blend-mode hard-light
+    z-index var(--max-z)
 </style>

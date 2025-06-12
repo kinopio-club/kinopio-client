@@ -53,6 +53,7 @@ onMounted(() => {
         updateCanvasSize()
       } else if (name === 'currentUserToolbar') {
         if (globalStore.getToolbarIsDrawing) {
+          updateCanvasSize()
           updatePrevScroll()
           clearCanvas()
           redraw()
@@ -423,6 +424,7 @@ const scroll = () => {
   redraw()
 }
 const updateCanvasSize = debounce(() => {
+  if (!globalStore.toolbarIsDrawing) { return }
   const zoom = globalStore.getSpaceCounterZoomDecimal
   canvas.width = viewportWidth.value * zoom
   canvas.height = viewportHeight.value * zoom
