@@ -548,7 +548,6 @@ aside.notifications(@click.left="closeAllDialogs")
 
 <style lang="stylus">
 .notifications
-  margin-bottom 10px
   display flex
   flex-direction column
   align-items flex-start

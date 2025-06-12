@@ -222,6 +222,7 @@ const updatePositionInVisualViewport = () => {
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
+      Notifications
       template(v-if="leftControlsIsVisible")
       .footer-button-wrap
         DiscoveryButtons
@@ -233,7 +234,6 @@ const updatePositionInVisualViewport = () => {
           span C
           //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
           //- remove from user settings
-      Notifications
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
