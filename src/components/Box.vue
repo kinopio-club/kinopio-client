@@ -51,30 +51,15 @@ const boxElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-  updateCurrentConnections()
 
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events.key
-      const value = mutation.events.newValue
-      if (name === 'isLoadingSpace') {
-        updateCurrentConnections()
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
         updateRemoteConnections()
-      } else if (name === 'triggerUpdateItemCurrentConnections') {
-        const itemId = args[0]
-        if (itemId !== props.box.id) { return }
-        updateCurrentConnections()
       }
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -97,7 +82,6 @@ const state = reactive({
   isVisibleInViewport: false,
   shouldRenderParent: false,
   // connections
-  currentConnections: [],
   isRemoteConnecting: false,
   remoteConnectionColor: ''
 })
@@ -362,10 +346,6 @@ const infoStyles = computed(() => {
 
 // interacting
 
-const updateCurrentConnections = async () => {
-  await nextTick()
-  state.currentConnections = connectionStore.getConnectionsByItemId(props.box.id)
-}
 const isPainting = computed(() => globalStore.currentUserIsPainting)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentBoxIsBeingDragged = computed(() => {
@@ -397,7 +377,6 @@ const updateIsHover = (value) => {
   state.isHover = value
   if (value) {
     globalStore.currentUserIsHoveringOverBoxId = props.box.id
-    updateCurrentConnections()
   } else {
     globalStore.currentUserIsHoveringOverBoxId = ''
   }
@@ -790,7 +769,6 @@ const focusColor = computed(() => {
       :visible="connectorIsVisible"
       :isHiddenByOpacity="connectorIsHiddenByOpacity"
       :box="box"
-      :itemConnections="state.currentConnections"
       :isConnectingTo="isConnectingTo"
       :isConnectingFrom="isConnectingFrom"
       :isVisibleInViewport="state.isVisibleInViewport"

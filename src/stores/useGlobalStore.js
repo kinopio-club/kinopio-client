@@ -481,7 +481,6 @@ export const useGlobalStore = defineStore('global', {
     triggerSonarPing (event) {},
     triggerUpdatePathWhileDragging (connections) {},
     triggerUpdateCardDimensionsAndPaths (cardId) {},
-    triggerUpdateItemCurrentConnections (itemId) {},
     triggerCloseGroupDetailsDialog () {},
     triggerPanningStart () {},
     triggerClearUserNotifications () {},

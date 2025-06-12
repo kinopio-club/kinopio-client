@@ -170,6 +170,14 @@ export const useConnectionStore = defineStore('connections', {
     addConnectionToState (connection) {
       this.byId[connection.id] = connection
       this.allIds.push(connection.id)
+      // init arrays for indexes
+      if (!this.byStartItemId[connection.startItemId]) {
+        this.byStartItemId[connection.startItemId] = []
+      }
+      if (!this.byEndItemId[connection.endItemId]) {
+        this.byEndItemId[connection.endItemId] = []
+      }
+      // add to indexes
       this.byStartItemId[connection.startItemId].push(connection.id)
       this.byEndItemId[connection.endItemId].push(connection.id)
     },

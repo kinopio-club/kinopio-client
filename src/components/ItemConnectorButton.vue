@@ -21,7 +21,6 @@ const props = defineProps({
   isHiddenByOpacity: Boolean,
   card: Object,
   box: Object,
-  itemConnections: Array,
   isConnectingTo: Boolean,
   isConnectingFrom: Boolean,
   isVisibleInViewport: Boolean,
@@ -29,15 +28,6 @@ const props = defineProps({
   currentBackgroundColor: String,
   parentDetailsIsVisible: Boolean,
   backgroundIsTransparent: Boolean
-})
-const state = reactive({
-  connectedConnectionTypes: []
-})
-watch(() => props.visible, (value, prevValue) => {
-  updateConnectedConnectionTypes()
-})
-watch(() => props.itemConnections, (value, prevValue) => {
-  updateConnectedConnectionTypes()
 })
 
 const item = computed(() => props.card || props.box)
@@ -70,13 +60,11 @@ const isLightInDarkTheme = computed(() => {
 
 // connections
 
-const updateConnectedConnectionTypes = async () => {
-  await nextTick()
-  state.connectedConnectionTypes = connectionStore.getItemConnectionTypes(item.value.id)
-}
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(item.value.id))
+const itemConnections = computed(() => connectionStore.getConnectionsByItemId(item.value.id))
 const currentConnectionColor = computed(() => globalStore.currentConnectionColor)
 const connectionFromAnotherItemConnectedToCurrentItem = (anotherItemId) => {
-  return props.itemConnections.find(connection => {
+  return itemConnections.value.find(connection => {
     const isConnectedToStart = connection.startItemId === anotherItemId
     const isConnectedToEnd = connection.endItemId === anotherItemId
     return isConnectedToStart || isConnectedToEnd
@@ -85,7 +73,7 @@ const connectionFromAnotherItemConnectedToCurrentItem = (anotherItemId) => {
 const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   let currentItemConnection
   otherItemIds.find(anotherItemId => {
-    return props.itemConnections.find(connection => {
+    return itemConnections.value.find(connection => {
       const isConnectedToStart = connection.startItemId === anotherItemId
       const isConnectedToEnd = connection.endItemId === anotherItemId
       if (isConnectedToStart || isConnectedToEnd) {
@@ -97,12 +85,12 @@ const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   return currentItemConnection
 }
 const connectionTypeColorisDark = computed(() => {
-  const type = last(state.connectedConnectionTypes)
+  const type = last(connectedConnectionTypes.value)
   if (!type) { return }
   return utils.colorIsDark(type.color)
 })
 const hasConnections = computed(() => {
-  const connections = props.itemConnections
+  const connections = itemConnections.value
   return Boolean(connections.length)
 })
 const createCurrentConnection = (event) => {
@@ -150,7 +138,7 @@ const connectorButtonBackground = computed(() => {
 })
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
-  if (!utils.arrayHasItems(state.connectedConnectionTypes) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
+  if (!utils.arrayHasItems(connectedConnectionTypes.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
     connectedToAnotherItemBeingDraggedColor.value ||
     connectedToConnectionDetailsIsVisibleColor.value ||
@@ -194,7 +182,7 @@ const connectedToAnotherItemBeingDraggedColor = computed(() => {
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = globalStore.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
-  const connectionWithDetailsVisible = props.itemConnections.find(connection => connection.id === connectionDetailsVisibleId)
+  const connectionWithDetailsVisible = itemConnections.value.find(connection => connection.id === connectionDetailsVisibleId)
   if (!connectionWithDetailsVisible) { return }
   const connectionType = connectionStore.getConnectionType(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
@@ -203,7 +191,7 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
 const currentUserIsHoveringOverConnectorColor = computed(() => {
   const itemId = globalStore.currentUserIsHoveringOverConnectorItemId
 
-  const connection = props.itemConnections.find(connection => {
+  const connection = itemConnections.value.find(connection => {
     const isStart = connection.startItemId === itemId
     const isEnd = connection.endItemId === itemId
     return isStart || isEnd
@@ -213,13 +201,13 @@ const currentUserIsHoveringOverConnectorColor = computed(() => {
 // a connection that is connected to this item is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
   const connectionId = globalStore.currentUserIsHoveringOverConnectionId || globalStore.currentUserIsDraggingConnectionIdLabel
-  const connection = props.itemConnections.find(currentItemConnection => currentItemConnection.id === connectionId)
+  const connection = itemConnections.value.find(currentItemConnection => currentItemConnection.id === connectionId)
   return connectionColor(connection)
 })
 // a connection that is connected to this item, is paint selected
 const currentUserIsMultipleSelectedConnectionColor = computed(() => {
   const connectionIds = globalStore.multipleConnectionsSelectedIds
-  const connection = props.itemConnections.find(currentItemConnection => connectionIds.includes(currentItemConnection.id))
+  const connection = itemConnections.value.find(currentItemConnection => connectionIds.includes(currentItemConnection.id))
   return connectionColor(connection)
 })
 // this item, or another item connected to this item, is being hovered over
@@ -283,7 +271,7 @@ const handleMouseLeaveConnector = () => {
       .color(:style="{ background: currentConnectionColor}")
     template(v-else-if="props.isRemoteConnecting")
       .color(:style="{ background: props.remoteConnectionColor }")
-    template(v-else v-for="type in state.connectedConnectionTypes")
+    template(v-else v-for="type in connectedConnectionTypes")
       .color(:style="{ background: type?.color}")
 
   button.inline-button.connector-button(

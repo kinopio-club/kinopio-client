@@ -86,7 +86,6 @@ onMounted(async () => {
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
   initViewportObserver()
-  updateCurrentConnections()
 
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -110,10 +109,6 @@ onMounted(async () => {
         updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
       } else if (name === 'triggerCancelLocking') {
         cancelLocking()
-      } else if (name === 'triggerUpdateItemCurrentConnections') {
-        const itemId = args[0]
-        if (itemId !== props.card.id) { return }
-        updateCurrentConnections()
       }
     }
   )
@@ -162,7 +157,6 @@ const state = reactive({
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
   isVisibleInViewport: false,
-  currentConnections: [],
   shouldRenderParent: false,
   safeColors: {}
 })
@@ -1594,7 +1588,6 @@ const handleMouseEnter = () => {
   if (currentCardIsBeingDragged.value) { return }
   initStickToCursor()
   globalStore.currentUserIsHoveringOverCardId = props.card.id
-  updateCurrentConnections()
 }
 const handleMouseLeave = () => {
   unstickToCursor()
@@ -1605,9 +1598,6 @@ const handleMouseEnterCheckbox = () => {
 }
 const handleMouseLeaveCheckbox = () => {
   globalStore.currentUserIsHoveringOverCheckboxCardId = ''
-}
-const updateCurrentConnections = () => {
-  state.currentConnections = connectionStore.getConnectionsByItemId(props.card.id)
 }
 const handleMouseEnterUrlButton = () => {
   globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
@@ -2080,7 +2070,6 @@ const focusColor = computed(() => {
             :visible="connectorIsVisible"
             :isHiddenByOpacity="connectorIsHiddenByOpacity"
             :card="card"
-            :itemConnections="state.currentConnections"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
             :isVisibleInViewport="state.isVisibleInViewport"
