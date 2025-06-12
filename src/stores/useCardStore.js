@@ -305,10 +305,6 @@ export const useCardStore = defineStore('cards', {
         broadcastStore.update({ updates: card, storeName: 'cardStore', actionName: 'createCard' })
       }
       await apiStore.addToQueue({ name: 'createCard', body: card })
-      await spaceStore.updateSpace({
-        editedAt: new Date(),
-        editedByUserId: userStore.id
-      })
     },
     async createCards (cards, shouldOffsetPosition) {
       const userStore = useUserStore()
@@ -324,10 +320,6 @@ export const useCardStore = defineStore('cards', {
         card = this.normailzeNewCard(card)
         card.shouldUpdateUrlPreview = true
         card.urlPreviewIsVisible = true
-      })
-      await spaceStore.updateSpace({
-        editedAt: new Date(),
-        editedByUserId: userStore.id
       })
       cards.forEach(card => {
         this.createCard(card)

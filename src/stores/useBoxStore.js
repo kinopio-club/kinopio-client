@@ -175,10 +175,6 @@ export const useBoxStore = defineStore('boxes', {
         // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' })
       }
       await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
-      await spaceStore.updateSpace({
-        editedAt: new Date(),
-        editedByUserId: userStore.id
-      })
       // TODO history? if unpaused
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       // update connection paths
