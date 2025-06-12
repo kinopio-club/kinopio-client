@@ -53,6 +53,7 @@ onMounted(() => {
         updateCanvasSize()
       } else if (name === 'currentUserToolbar') {
         if (globalStore.getToolbarIsDrawing) {
+          updatePrevScroll()
           clearCanvas()
           redraw()
         }
@@ -415,6 +416,9 @@ const updatePrevScroll = () => {
   }
 }
 const scroll = () => {
+  if (!globalStore.getToolbarIsDrawing) {
+    return
+  }
   updatePrevScroll()
   redraw()
 }
