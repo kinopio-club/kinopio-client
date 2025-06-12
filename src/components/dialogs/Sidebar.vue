@@ -142,6 +142,10 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Favorites
           button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
             img.icon(src="@/assets/heart-empty.svg")
+          //- Stats
+          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
+            img.icon.stats(src="@/assets/stats.svg")
+
           //- Tags
           button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
@@ -150,9 +154,6 @@ dialog#sidebar.sidebar.is-pinnable(
             span Links
         //- second row
         .segmented-buttons
-          //- Stats
-          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
-            img.icon.stats(src="@/assets/stats.svg")
           //- Removed
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
