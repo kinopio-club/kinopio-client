@@ -23,8 +23,6 @@ const isSpacePage = computed(() => {
 })
 const isThemeDark = computed(() => userStore.theme === 'dark')
 const backgroundIsDefault = computed(() => !spaceStore.background)
-const pageHeight = computed(() => globalStore.pageHeight)
-const pageWidth = computed(() => globalStore.pageWidth)
 
 // Styles
 
@@ -45,8 +43,8 @@ const backgroundStyles = computed(() => {
     backgroundImage = `image-set(${backgroundImage} 2x)`
   }
   styles.backgroundImage = backgroundImage
-  styles.width = `${pageWidth.value}px`
-  styles.height = `${pageHeight.value}px`
+  styles.width = `${globalStore.pageWidth}px`
+  styles.height = `${globalStore.pageHeight}px`
   return styles
 })
 

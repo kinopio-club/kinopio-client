@@ -80,6 +80,11 @@ const merge = (accumulator, currentValue) => {
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
+    const shouldNotSquashOperations = ['createDrawingStroke', 'removeDrawingStroke']
+    if (shouldNotSquashOperations.includes(request.name)) {
+      squashed.push(request)
+      return
+    }
     // check if request has already been squashed
     const isSquashed = squashed.find(queueItem => {
       return queueItem.name === request.name && queueItem.body.id === request.body.id

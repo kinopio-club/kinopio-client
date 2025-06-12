@@ -391,8 +391,7 @@ export const useGlobalStore = defineStore('global', {
         spaceId
       }
     },
-    // getCurrentInteractingItem
-    currentInteractingItem () {
+    getCurrentInteractingItem () {
       const boxStore = useBoxStore()
       const cardStore = useCardStore()
       let boxId = this.currentDraggingBoxId

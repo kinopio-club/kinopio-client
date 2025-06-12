@@ -22,11 +22,7 @@ const drawingImageUrl = computed(() => globalStore.drawingImageUrl)
 
 // styles
 
-const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
-const pageHeight = computed(() => globalStore.pageHeight)
-const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
-  const zoom = 1 / spaceZoomDecimal.value
   const value = {
     backgroundImage: `url('${drawingImageUrl.value}')`
   }
@@ -49,6 +45,7 @@ const styles = computed(() => {
   z-index 0
   width 100%
   height 100%
+  background-repeat no-repeat
   &.is-foreground
     mix-blend-mode hard-light
     z-index var(--max-z)

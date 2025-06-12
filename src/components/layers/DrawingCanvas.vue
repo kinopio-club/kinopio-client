@@ -11,7 +11,6 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 
-import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
 
 const globalStore = useGlobalStore()
@@ -28,7 +27,6 @@ let currentStrokeId = ''
 let currentStrokes = []
 let remoteStrokes = []
 let redoStrokes = []
-let drawingImage, drawingImageUrl
 
 let unsubscribes
 
@@ -37,7 +35,7 @@ onMounted(() => {
   window.addEventListener('mouseup', endDrawing)
   window.addEventListener('touchend', endDrawing)
   window.addEventListener('scroll', scroll)
-  window.addEventListener('resize', updateCanvasSize)
+  window.addEventListener('resize', redraw)
   canvas = canvasElement.value
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -46,23 +44,22 @@ onMounted(() => {
   clearStrokes()
 
   const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
+    async (mutation, state) => {
       const name = mutation.events.key
       const value = mutation.events.newValue
-      if (name === 'spaceZoomPercent') {
-        updateCanvasSize()
+      if (name === 'spaceZoomPercent' || name === 'zoomOrigin') {
+        await nextTick()
+        scroll()
       } else if (name === 'currentUserToolbar') {
         if (globalStore.getToolbarIsDrawing) {
-          updateCanvasSize()
           updatePrevScroll()
-          clearCanvas()
           redraw()
         }
       }
     }
   )
   const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
+    async ({ name, args }) => {
       if (name === 'triggerStartDrawing') {
         startDrawing(args[0])
       } else if (name === 'triggerDraw') {
@@ -83,7 +80,6 @@ onMounted(() => {
       } else if (name === 'triggerDrawingRedo') {
         redo()
       } else if (name === 'triggerDrawingRedraw') {
-        clearCanvas()
         redraw()
       }
     }
@@ -107,7 +103,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', endDrawing)
   window.removeEventListener('touchend', endDrawing)
   window.removeEventListener('scroll', scroll)
-  window.removeEventListener('resize', updateCanvasSize)
+  window.removeEventListener('resize', redraw)
   unsubscribes()
 })
 
@@ -121,16 +117,6 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
-const styles = computed(() => {
-  const value = {
-    top: state.prevScroll.y + 'px',
-    left: state.prevScroll.x + 'px'
-  }
-  if (!globalStore.getToolbarIsDrawing) {
-    value.display = 'none'
-  }
-  return value
-})
 
 // clear
 
@@ -232,12 +218,9 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.stroke()
   broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
-const dataUrlFromOffscreenCanvas = (offscreenCanvas, type, quality) => {
-  type = type || 'image/png'
-  quality = quality || 0.8
-  // cannot use canvas.toDataUrl() with offscreen canvas
+const dataUrlFromOffscreenCanvas = (offscreenCanvas) => {
   return new Promise((resolve, reject) => {
-    offscreenCanvas.convertToBlob({ type, quality })
+    offscreenCanvas.convertToBlob()
       .then(blob => {
         const reader = new FileReader()
         reader.onload = () => resolve(reader.result)
@@ -247,15 +230,10 @@ const dataUrlFromOffscreenCanvas = (offscreenCanvas, type, quality) => {
       .catch(reject)
   })
 }
-
-const imageDataUrl = async (strokes) => {
+const updateDrawingBackgroundStatic = async (strokes) => {
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  // render prev drawingImage
-  if (drawingImage) {
-    offscreenContext.drawImage(drawingImage, 0, 0)
-  }
   // render strokes
   strokes.forEach(stroke => {
     if (!stroke || stroke.length === 0) { return }
@@ -278,47 +256,8 @@ const imageDataUrl = async (strokes) => {
       offscreenContext.moveTo(point.x, point.y)
     })
   })
-  return dataUrlFromOffscreenCanvas(offscreenCanvas)
-}
-
-// restore
-
-const redrawSpaceDrawingImage = () => {
-  const { x, y } = viewportPosition({ x: 0, y: 0 })
-  context.drawImage(drawingImage, x, y)
-}
-const restoreSpaceDrawingImage = async () => {
-  return new Promise((resolve, reject) => {
-    const url = spaceStore.drawingImage
-    if (!url) {
-      resolve()
-      return
-    }
-    if (url === drawingImageUrl) {
-      redrawSpaceDrawingImage()
-      resolve()
-      return
-    }
-    try {
-      const prevUrl = url
-      drawingImage = new Image()
-      drawingImage.crossOrigin = 'anonymous' // cors
-      drawingImage.onload = () => {
-        redrawSpaceDrawingImage()
-        drawingImageUrl = prevUrl
-        resolve()
-      }
-      drawingImage.onerror = (error) => {
-        console.error('🚒 drawingImage.onerror', error, url)
-        reject(error)
-      }
-      drawingImage.src = url
-      // globalStore.drawingImageUrl = url
-    } catch (error) {
-      console.error('🚒 restoreSpaceDrawingImage', error, url)
-      reject(error)
-    }
-  })
+  const dataUrl = await dataUrlFromOffscreenCanvas(offscreenCanvas)
+  globalStore.drawingImageUrl = dataUrl
 }
 
 // start
@@ -345,9 +284,9 @@ const draw = (event) => {
   globalStore.triggerUpdateDrawingBackground()
 }
 const redraw = async () => {
-  context.clearRect(0, 0, canvas.width, canvas.height)
+  clearCanvas()
   context.globalCompositeOperation = 'source-over'
-  await restoreSpaceDrawingImage()
+  currentStrokes = spaceStore.drawingStrokes
   currentStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
@@ -355,26 +294,22 @@ const redraw = async () => {
     renderStroke(stroke, true)
   })
   globalStore.triggerUpdateDrawingBackground()
+  updatePageSizes(currentStrokes)
 }
 
 // stop
 
-const updateCache = async (dataUrl) => {
-  await cache.updateSpace('drawingImage', dataUrl, spaceStore.id)
-  globalStore.drawingImageUrl = dataUrl
-  globalStore.triggerEndDrawing()
-  spaceStore.updateSpacePreviewImage()
-}
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)
-  const dataUrl = await imageDataUrl(strokes)
-  updateCache(dataUrl)
+  await updateDrawingBackgroundStatic(strokes)
+  globalStore.triggerEndDrawing()
   updatePageSizes(strokes)
   if (isRemovedStroke) {
     await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   } else {
     await apiStore.addToQueue({ name: 'createDrawingStroke', body: { stroke } })
   }
+  await cache.updateSpace('drawingStrokes', strokes, spaceStore.id)
 }
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
@@ -411,9 +346,10 @@ const redo = () => {
 // scroll and resize
 
 const updatePrevScroll = () => {
+  const zoom = globalStore.getSpaceZoomDecimal
   state.prevScroll = {
-    x: window.scrollX,
-    y: window.scrollY
+    x: window.scrollX * zoom,
+    y: window.scrollY * zoom
   }
 }
 const scroll = () => {
@@ -423,13 +359,6 @@ const scroll = () => {
   updatePrevScroll()
   redraw()
 }
-const updateCanvasSize = debounce(() => {
-  if (!globalStore.toolbarIsDrawing) { return }
-  const zoom = globalStore.getSpaceCounterZoomDecimal
-  canvas.width = viewportWidth.value * zoom
-  canvas.height = viewportHeight.value * zoom
-  redraw()
-}, 20)
 const updatePageSizes = (strokes) => {
   let x = 0
   let y = 0
@@ -454,20 +383,36 @@ const updatePageSizes = (strokes) => {
   }
   globalStore.updatePageSizesFromRect(rect)
 }
+
+const styles = computed(() => {
+  const value = {
+    top: state.prevScroll.y + 'px',
+    left: state.prevScroll.x + 'px'
+  }
+  if (!globalStore.getToolbarIsDrawing) {
+    value.display = 'none'
+  }
+  return value
+})
+
+const spaceWidth = computed(() => globalStore.viewportWidth * globalStore.getSpaceCounterZoomDecimal)
+const spaceHeight = computed(() => globalStore.viewportHeight * globalStore.getSpaceCounterZoomDecimal)
+
 </script>
 
 <template lang="pug">
 canvas#drawing-canvas.drawing-canvas(
   ref="canvasElement"
-  :width="viewportWidth"
-  :height="viewportHeight"
+  :width="spaceWidth"
+  :height="spaceHeight"
   :style="styles"
 )
 </template>
 
 <style lang="stylus">
 canvas.drawing-canvas
-  position fixed
+  position absolute
+  transform-origin top left
   background transparent
   top 0
   left 0

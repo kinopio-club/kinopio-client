@@ -81,9 +81,10 @@ const styles = computed(() => {
 // scroll and resize
 
 const updatePrevScroll = () => {
+  const zoom = globalStore.getSpaceZoomDecimal
   state.prevScroll = {
-    x: window.scrollX,
-    y: window.scrollY
+    x: window.scrollX * zoom,
+    y: window.scrollY * zoom
   }
 }
 const updateCanvasSize = debounce(() => {

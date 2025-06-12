@@ -139,6 +139,9 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Inbox
           button(@click.left="toggleSection('inbox')" :class="{ active: state.inboxIsVisible}" title="Move from Inbox")
             img.icon(src="@/assets/inbox.svg")
+          //- Favorites
+          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
+            img.icon(src="@/assets/heart-empty.svg")
           //- Tags
           button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
@@ -147,9 +150,6 @@ dialog#sidebar.sidebar.is-pinnable(
             span Links
         //- second row
         .segmented-buttons
-          //- Favorites
-          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
-            img.icon(src="@/assets/heart-empty.svg")
           //- Stats
           button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
             img.icon.stats(src="@/assets/stats.svg")
@@ -208,11 +208,11 @@ dialog#sidebar.sidebar.is-pinnable(
 
   .segmented-buttons-wrap
     .segmented-buttons
-      &:first-child
-        button,
-        label
-          &:last-child
-            border-bottom-right-radius 0
+      // &:first-child
+      //   button,
+      //   label
+      //     &:last-child
+      //       border-bottom-right-radius 0
       // middle row
       // &:nth-child(2)
       //   margin-top -1px
@@ -230,6 +230,6 @@ dialog#sidebar.sidebar.is-pinnable(
           &:first-child
             border-top-left-radius 0
           &:last-child
-            border-top-right-radius var(--entity-radius)
+            border-top-right-radius 0
 
 </style>

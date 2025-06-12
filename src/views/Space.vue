@@ -31,7 +31,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
 import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
-import DrawingBackground from '@/components/layers/DrawingBackground.vue'
+import DrawingCanvasBackground from '@/components/layers/DrawingCanvasBackground.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
@@ -48,7 +48,7 @@ import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
-import DrawingBackgroundStatic from '@/components/DrawingBackgroundStatic.vue'
+import DrawingImageBackground from '@/components/DrawingImageBackground.vue'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -76,6 +76,7 @@ let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // expose pinia stores to browser console for developers
+window.globalStore = useGlobalStore()
 window.cardStore = useCardStore()
 window.boxStore = useBoxStore()
 window.userStore = useUserStore()
@@ -559,7 +560,7 @@ const updateShouldSnapToGrid = (event) => {
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
   if (!globalStore.shouldSnapToGrid && shouldSnap) {
-    const item = globalStore.currentInteractingItem
+    const item = globalStore.getCurrentInteractingItem
     globalStore.snapGuideLinesOrigin = {
       x: item.x,
       y: item.y
@@ -692,15 +693,15 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
-  DrawingBackgroundStatic
-  DrawingBackground
+  DrawingImageBackground
+  DrawingCanvasBackground
   ItemsLocked
   #box-backgrounds
   Connections
   Boxes
   Cards
   ItemUnlockButtons
-  DrawingBackgroundStatic(:isForeground="true")
+  DrawingImageBackground(:isForeground="true")
   DrawingCanvas
   BoxDetails
   CardDetails
