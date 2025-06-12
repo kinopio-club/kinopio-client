@@ -399,6 +399,7 @@ export const useCardStore = defineStore('cards', {
       const cardsToDelete = []
       ids.forEach(id => {
         const card = this.getCard(id)
+        if (!card) { return }
         if (card.name) {
           cardsToRemove.push(card)
         } else {
