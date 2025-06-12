@@ -126,37 +126,33 @@ const addCardToSpaceLocal = async (card) => {
 
 <template lang="pug">
 section.add-to-inbox(v-if="props.visible")
-  .row.title-row
-    div
-      span Add to Inbox
-    .button-wrap
-      button.small-button(@click="loadInboxSpace")
-        img.icon(src="@/assets/inbox.svg")
-        span Inbox
-  .textarea-wrap
-    textarea.name(
-      name="cardName"
-      ref="textareaElement"
-      rows="1"
-      :placeholder="textareaPlaceholder"
-      v-model="name"
-      :maxlength="maxCardCharacterLimit"
-      @keydown.enter.exact.prevent="addCard"
-      @keyup.alt.enter.exact.stop
-      @keyup.ctrl.enter.exact.stop
-      @keydown.alt.enter.exact.stop="insertLineBreak"
-      @keydown.ctrl.enter.exact.stop="insertLineBreak"
-    )
-  .row
-    button(@click="addCard")
-      img.icon.add-icon(src="@/assets/add.svg")
-      span Add
-    .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
-      span Upgrade for more cards
-    .badge.error-badge.danger(v-if="state.error.maxLength")
-      span Max Length {{maxCardCharacterLimit}}
-    .badge.error-badge.danger(v-if="state.error.unknownServerError")
-      span (シ_ _)シ Something went wrong, Please try again or contact support
+  section.subsection
+    .row
+      p Add to Inbox
+    .textarea-wrap
+      textarea.name(
+        name="cardName"
+        ref="textareaElement"
+        rows="1"
+        :placeholder="textareaPlaceholder"
+        v-model="name"
+        :maxlength="maxCardCharacterLimit"
+        @keydown.enter.exact.prevent="addCard"
+        @keyup.alt.enter.exact.stop
+        @keyup.ctrl.enter.exact.stop
+        @keydown.alt.enter.exact.stop="insertLineBreak"
+        @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      )
+    .row
+      button(@click="addCard")
+        img.icon.add-icon(src="@/assets/add.svg")
+        span Add
+      .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
+        span Upgrade for more cards
+      .badge.error-badge.danger(v-if="state.error.maxLength")
+        span Max Length {{maxCardCharacterLimit}}
+      .badge.error-badge.danger(v-if="state.error.unknownServerError")
+        span (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">

@@ -142,9 +142,14 @@ const addCard = (card) => {
 template(v-if="visible")
   AddToInbox(:visible="isOnline" @addCard="addCard")
   section.inbox
-    span Move from Inbox
-    Loader(:visible="state.isLoading" :isSmall="true")
-    OfflineBadge
+    .row.title-row
+      div
+        span Move from Inbox
+        Loader(:visible="state.isLoading" :isSmall="true")
+        OfflineBadge
+      button.small-button(@click="loadInboxSpace")
+        img.icon(src="@/assets/inbox.svg")
+        img.icon.visit(src="@/assets/visit.svg")
 
   section.results-section.inbox(v-if="isOnline")
     ul.results-list(v-if="state.cards.length")
