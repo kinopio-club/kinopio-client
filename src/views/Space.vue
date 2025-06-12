@@ -187,25 +187,25 @@ const checkIfShouldShowExploreOnLoad = () => {
 // page size
 
 watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+  updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
   if (prevValue && !value) {
     afterResizeCards()
   }
-  updatePageSizeFromMutation(value)
+  updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+  updatePageSizes(value)
 })
 // watch(() => globalStore.currentUserIsResizingBox, (value, prevValue) => {
 //   if (prevValue && !value) {
 //     afterResizeBoxes()
 //   }
-//   updatePageSizeFromMutation(value)
+//   updatePageSizes(value)
 // })
 
-const updatePageSizeFromMutation = async (value) => {
+const updatePageSizes = async (value) => {
   if (!value) {
     await nextTick()
     globalStore.updatePageSizes()
