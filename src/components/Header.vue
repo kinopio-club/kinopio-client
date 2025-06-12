@@ -650,21 +650,16 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UpdatePassword
         SpaceUserList
         UserGroups
-        //- Share
-        .button-wrap
-          button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-            span Share
-          Share(:visible="state.shareIsVisible")
         .button-wrap
           .segmented-buttons
+            //- Share
+            button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Share
             //- Notifications
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
-            //- Sidebar
-            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
-              img.icon.sidebar(src="@/assets/sidebar.svg")
-          Sidebar(:visible="state.sidebarIsVisible")
+          Share(:visible="state.shareIsVisible")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
@@ -682,7 +677,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             //- Name
             .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
-                .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
+                .space-name-wrap(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   GroupLabel(:group="spaceGroup")
                   img.icon.inbox-icon(v-if="currentSpaceIsInbox" src="@/assets/inbox.svg")
 
@@ -756,6 +751,12 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+
+        //- Sidebar
+        .button-wrap
+          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
+            img.icon.sidebar(src="@/assets/sidebar.svg")
+          Sidebar(:visible="state.sidebarIsVisible")
 
     //- 3rd row
     //- .row
@@ -871,27 +872,16 @@ header
     > .search
       vertical-align 0
 
-  // .space-details-row
-  //   button
-  //     white-space nowrap
-  //     overflow hidden
-  //     text-overflow ellipsis
-  //   .space-name-button
-  //     max-width 100%
-  //     .icon.templates
-  //       margin-right 4px
-  //   dialog
-  //     max-width initial
-  //   .space-name-button-wrap
-  //     max-width 55dvw
-  //     @media(max-width 550px)
-  //       max-width 35dvw
-  //     &.back-button-is-visible
-  //       @media(max-width 550px)
-  //         max-width 31dvw
-  //     > button
-  //       .privacy-icon
-  //         margin-left 6px
+  .space-details-button
+    display flex
+  .space-name-wrap
+    display flex
+  .space-name
+    max-width 20dvw
+    display table-cell
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
 
   // should not bubble down into dialogs
   .space-details-row,

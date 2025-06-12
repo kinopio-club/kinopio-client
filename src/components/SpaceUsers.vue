@@ -196,7 +196,7 @@ const isMaxMembersCount = computed(() => users.value.length > maxMembersCount)
   width 100%
   flex-shrink 1
   margin-left 6px
-  max-width 30%
+  max-width 30vw
   > .users
     padding-right 6px
     display flex
