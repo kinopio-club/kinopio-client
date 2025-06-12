@@ -75,6 +75,13 @@ let unsubscribes
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
+// expose pinia stores to browser console for developers
+window.cardStore = useCardStore()
+window.boxStore = useBoxStore()
+window.userStore = useUserStore()
+window.spaceStore = useSpaceStore()
+window.groupStore = useGroupStore()
+
 // init user and space app state
 const init = async () => {
   if (globalStore.shouldNotifyIsJoiningGroup) {
