@@ -89,7 +89,7 @@ const users = computed(() => {
 
 // commenters
 
-const commenters = computed(() => cardStore.getCardCommenters)
+const commenters = computed(() => cardStore.getCommentCardUsers)
 
 // handle userlist events
 

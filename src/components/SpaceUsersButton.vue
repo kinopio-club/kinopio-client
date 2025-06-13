@@ -85,7 +85,7 @@ const recentUser = computed(() => {
   return last(spaceUsers.value)
 })
 const isCommenters = computed(() => Boolean(commenters.value.length))
-const commenters = computed(() => cardStore.getCardCommenters) // TODO move to userStore
+const commenters = computed(() => cardStore.getCommentCardUsers)
 const spaceUsersLabel = computed(() => {
   const condition = spaceUsers.value.length !== 1
   let collaboratorsString = utils.pluralize('Collaborator', condition)

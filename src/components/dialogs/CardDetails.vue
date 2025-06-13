@@ -517,9 +517,6 @@ const updateCardName = async (newName) => {
   }
   cardStore.updateCard(update)
   cardStore.updateCardDimensions(cardId)
-  // TODO
-  // update connectionpaths for item (id)
-
   updateMediaUrls()
   await updateTags()
   updateDimensionsAndPathsDebounced()

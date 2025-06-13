@@ -88,7 +88,7 @@ const isTilting = computed(() => {
 
 // resize
 
-const isComment = computed(() => cardStore.getIsCardComment(props.card))
+const isComment = computed(() => cardStore.getIsCommentCard(props.card))
 const resizeIsVisible = computed(() => {
   return props.visible && !isComment.value
 })

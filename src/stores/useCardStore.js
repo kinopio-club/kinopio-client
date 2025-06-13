@@ -87,11 +87,16 @@ export const useCardStore = defineStore('cards', {
       const cards = ids.map(id => this.byId[id])
       return cards
     },
-    getCardCommenters () {
+    getCommentCards () {
+      const cards = this.getAllCards.filter(card => {
+        return card.isComment || utils.isNameComment(card.name)
+      })
+      return cards
+    },
+    getCommentCardUsers () {
       const spaceStore = useSpaceStore()
       let users = []
-      let cards = this.allIds.map(id => this.byId[id])
-      cards = cards.filter(card => !card.isRemoved)
+      const cards = this.getCommentCards
       cards.forEach(card => {
         users.push(card.userId)
         users.push(card.nameUpdatedByUserId)
@@ -135,7 +140,7 @@ export const useCardStore = defineStore('cards', {
     getCard (id) {
       return this.byId[id]
     },
-    getIsCardComment (card) {
+    getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
     },
     getVerticallyAlignedCardsBelow (cards, id, deltaHeight = 0) {
