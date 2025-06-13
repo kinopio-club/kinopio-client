@@ -82,6 +82,7 @@ window.boxStore = useBoxStore()
 window.userStore = useUserStore()
 window.spaceStore = useSpaceStore()
 window.groupStore = useGroupStore()
+console.info('🍍 Pinia stores exposed: window.globalStore, window.spaceStore, window.userStore, window.cardStore, window.boxStore, window.groupStore')
 
 // init user and space app state
 const init = async () => {
