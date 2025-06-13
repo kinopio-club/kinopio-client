@@ -80,7 +80,9 @@ export default function webSocketPlugin () {
     // Send join message
     currentSpaceRoom = spaceId
     websocket.send(JSON.stringify({
-      name: 'joinSpaceRoom',
+      message: {
+        name: 'joinSpaceRoom'
+      },
       spaceId,
       user,
       clientId
