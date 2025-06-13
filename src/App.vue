@@ -143,7 +143,7 @@ const broadcastUserLabelCursor = (event) => {
   if (!updates) { return }
   updates.userId = userStore.id
   updates.zoom = spaceZoomDecimal.value
-  broadcastStore.update({ updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
 }
 const isTouchDevice = () => {
   globalStore.isTouchDevice = true

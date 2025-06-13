@@ -159,9 +159,9 @@ const showOtherCardDetailsIsVisible = async (event) => {
     userId: userStore.id,
     cardId: props.parentCardId
   }
-  broadcastStore.updateStore({ updates, type: 'clearRemoteCardsDragging' })
+  broadcastStore.update({ updates, action: 'clearRemoteCardsDragging' })
   await nextTick()
-  broadcastStore.updateStore({ updates, type: 'updateRemoteCardDetailsVisible' })
+  broadcastStore.update({ updates, action: 'updateRemoteCardDetailsVisible' })
 }
 const disableIsActive = () => {
   state.isActive = false

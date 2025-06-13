@@ -81,7 +81,7 @@ const broadcastShowBoxDetails = () => {
     boxId: currentBox.value.id,
     userId: userStore.id
   }
-  broadcastStore.updateStore({ updates, type: 'updateRemoteBoxDetailsVisible' })
+  broadcastStore.update({ updates, action: 'updateRemoteBoxDetailsVisible' })
 }
 const update = (updates) => {
   const keys = Object.keys(updates)

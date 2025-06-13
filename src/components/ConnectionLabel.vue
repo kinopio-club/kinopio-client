@@ -303,7 +303,7 @@ const startDragging = (event) => {
     userColor: userStore.color,
     connectionId: props.connection.id
   }
-  broadcastStore.updateStore({ updates, type: 'updateRemoteUserDraggingConnectionLabel' })
+  broadcastStore.update({ updates, action: 'updateRemoteUserDraggingConnectionLabel' })
   // save start positions
   if (!cursorStart.x) {
     cursorStart = utils.cursorPositionInSpace(event)
@@ -320,7 +320,7 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  broadcastStore.updateStore({ updates: { userId: userStore.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'removeRemoteUserDraggingConnectionLabel' })
   if (!labelRelativePosition.value.x) { return }
   historyStore.add({
     connections: [{

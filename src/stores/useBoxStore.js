@@ -143,11 +143,11 @@ export const useBoxStore = defineStore('boxes', {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const historyStore = useHistoryStore()
-      // const broadcastStore = useBroadcastStore()
+      const broadcastStore = useBroadcastStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
-      // if (!updates.isBroadcast) {
-      // broadcastStore.update({ updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' })
+      if (box.isFromBroadcast) { return }
+      broadcastStore.update({ updates: box, store: 'boxStore', action: 'createBox' })
       // historyStore.add({ boxes: [box] })
       if (isResizing) {
         historyStore.pause()
@@ -163,7 +163,7 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      // const broadcastStore = useBroadcastStore()
+      const broadcastStore = useBroadcastStore()
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
@@ -171,11 +171,6 @@ export const useBoxStore = defineStore('boxes', {
         }
       })
       // server tasks
-      if (!updates.isBroadcast) {
-        // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' })
-      }
-      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
-      // TODO history? if unpaused
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       // update connection paths
       const connectionStore = useConnectionStore()
@@ -184,6 +179,10 @@ export const useBoxStore = defineStore('boxes', {
         const ids = updates.map(update => update.id)
         connectionStore.updateConnectionPaths(ids)
       }
+      if (updates.isFromBroadcast) { return }
+      broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxes' })
+      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
+      // TODO history? if unpaused
     },
     async updateBox (update) {
       await this.updateBoxes([update])
@@ -191,12 +190,19 @@ export const useBoxStore = defineStore('boxes', {
 
     // remove
 
+    removeBoxesRemote (ids) {
+      for (const id of ids) {
+        const idIndex = this.allIds.indexOf(id)
+        this.allIds.splice(idIndex, 1)
+        delete this.byId[id]
+      }
+    },
     async removeBoxes (ids) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const historyStore = useHistoryStore()
-      // const broadcastStore = useBroadcastStore()
+      const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       const updates = []
@@ -205,7 +211,7 @@ export const useBoxStore = defineStore('boxes', {
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
         await apiStore.addToQueue({ name: 'removeBox', body: { id } })
-        // broadcastStore.update({ updates: box, type: 'removeBox', handler: 'currentBoxes/remove' })
+        broadcastStore.update({ updates: ids, store: 'boxStore', action: 'removeBoxesRemote' })
       }
       const boxes = ids.map(id => this.getBox(id))
       // historyStore.add({ boxes, isRemoved: true })

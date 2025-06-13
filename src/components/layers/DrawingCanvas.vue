@@ -164,8 +164,7 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
       userId: userStore.id,
       stroke
     },
-    type: 'addRemoteDrawingStroke',
-    handler: 'triggerAddRemoteDrawingStroke'
+    action: 'triggerAddRemoteDrawingStroke'
   })
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
@@ -175,8 +174,7 @@ const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
       userId: userStore.id,
       stroke
     },
-    type: 'removeRemoteDrawingStroke',
-    handler: 'triggerRemoveRemoteDrawingStroke'
+    action: 'triggerRemoveRemoteDrawingStroke'
   })
 }
 

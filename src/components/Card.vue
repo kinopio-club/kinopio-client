@@ -274,7 +274,7 @@ const toggleCardChecked = () => {
   cancelLocking()
   globalStore.currentUserIsDraggingCard = false
   const userId = userStore.id
-  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteCardsDragging' })
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
   event.stopPropagation()
 }
 
@@ -831,13 +831,13 @@ const checkIfUploadIsDraggedOver = (event) => {
       cardId: props.card.id,
       userId: userStore.id
     }
-    broadcastStore.updateStore({ updates, type: 'addToRemoteUploadDraggedOverCards' })
+    broadcastStore.update({ updates, action: 'addToRemoteUploadDraggedOverCards' })
   }
 }
 const removeUploadIsDraggedOver = () => {
   state.uploadIsDraggedOver = false
   const userId = userStore.id
-  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteUploadDraggedOverCards' })
 }
 const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
@@ -1219,7 +1219,7 @@ const startDraggingCard = (event) => {
     cardId: props.card.id,
     userId: userStore.id
   }
-  broadcastStore.updateStore({ updates, type: 'addToRemoteCardsDragging' })
+  broadcastStore.update({ updates, action: 'addToRemoteCardsDragging' })
   globalStore.parentCardId = props.card.id
   globalStore.childCardId = ''
   checkIfShouldDragMultipleCards(event)
@@ -1420,7 +1420,7 @@ const showCardDetails = (event) => {
     return
   }
   const userId = userStore.id
-  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteCardsDragging' })
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
   state.preventDraggedButtonBadgeFromShowingDetails = globalStore.preventDraggedCardFromShowingDetails
   if (globalStore.preventDraggedCardFromShowingDetails) { return }
   globalStore.closeAllDialogs()
@@ -1445,7 +1445,7 @@ const showCardDetailsTouch = (event) => {
     showCardDetails(event)
   }
   const userId = userStore.id
-  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteCardsDragging' })
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
 }
 const touchIsNearTouchPosition = (event) => {
   const currentPosition = utils.cursorPositionInViewport(event)

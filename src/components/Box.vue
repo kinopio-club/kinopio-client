@@ -292,7 +292,7 @@ const startResizing = (event) => {
     userId: userStore.id,
     boxIds
   }
-  broadcastStore.updateStore({ updates, type: 'updateRemoteUserResizingBoxes' })
+  broadcastStore.update({ updates, action: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
 const resizeColorClass = computed(() => {
@@ -389,7 +389,7 @@ const endBoxInfoInteraction = (event) => {
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (!canEditBox.value) { globalStore.triggerReadOnlyJiggle() }
-  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   globalStore.closeAllDialogs()
   if (isMeta) {
     globalStore.updateMultipleBoxesSelectedIds([])
@@ -652,7 +652,7 @@ const toggleBoxChecked = () => {
   cancelLocking()
   globalStore.currentUserIsDraggingBox = false
   const userId = userStore.id
-  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   event.stopPropagation()
   globalStore.preventMultipleSelectedActionsIsVisible = false
   globalStore.clearMultipleSelected()

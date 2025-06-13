@@ -367,26 +367,25 @@ export const useUserStore = defineStore('users', {
 
     // update
 
-    broadcastUpdate (updates) {
+    broadcastUpdateUser (update) {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const permission = utils.capitalizeFirstLetter(this.getUserSpacePermission) // User, Collaborator, Spectator
-      const type = `update${permission}`
-      broadcastStore.updateUser({ id: spaceStore.id, updates, type, userId: this.id })
+      const action = `update${permission}`
+      broadcastStore.update({ updates: update, store: 'spaceStore', action })
       const user = { ...this.$state }
       user.userId = user.id
       spaceStore.updateUser(user)
       spaceStore.updateCollaborator(user)
     },
-
     async updateUser (update) {
       const apiStore = useApiStore()
       const keys = Object.keys(update)
       for (const key of keys) {
         this[key] = update[key]
         await cache.updateUser(key, update[key])
-        this.broadcastUpdate({ [key]: update[key] })
       }
+      this.broadcastUpdateUser(update)
       await apiStore.addToQueue({ name: 'updateUser', body: update })
     },
 

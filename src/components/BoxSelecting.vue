@@ -49,7 +49,7 @@ onMounted(() => {
           if (!shouldSelect) { return }
           shouldSelect = false
           state.previousBoxStyles.push(currentUserStyles.value)
-          broadcast('updateRemotePreviousBoxSelectStyles')
+          broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemotePreviousBoxSelectStyles' })
         }
       } else if (name === 'currentUserBoxSelectStart') {
         updateSelectableItems()
@@ -60,8 +60,7 @@ onMounted(() => {
         const selection = boxSelection(start, end)
         selectItems(selection, relativePosition)
         selectconnections(selection, relativePosition)
-        // await nextTick()
-        broadcast('updateRemoteUserBoxSelectStyles')
+        broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemoteUserBoxSelectStyles' })
       }
     }
   )
@@ -110,9 +109,6 @@ const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDe
 const remoteUserBoxSelectStyles = computed(() => globalStore.remoteUserBoxSelectStyles)
 const remotePreviousUserBoxSelectStyles = computed(() => globalStore.remotePreviousUserBoxSelectStyles)
 
-const broadcast = (operation) => {
-  broadcastStore.update({ updates: currentUserStyles.value, type: operation, handler: operation })
-}
 const removePreviousBoxStyle = () => {
   state.previousBoxStyles.shift()
 }

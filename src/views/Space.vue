@@ -310,7 +310,7 @@ const stopTiltingCards = () => {
   const cards = cardIds.map(id => cardStore.getCard(id))
   historyStore.add({ cards, useSnapshot: true })
   globalStore.currentUserIsTiltingCard = false
-  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserTiltingCards' })
 }
 const resizeCards = (event) => {
   if (!prevCursor) { return }
@@ -327,7 +327,7 @@ const stopResizingCards = async () => {
   historyStore.add({ cards, useSnapshot: true })
   await cardStore.updateCardsDimensions(cardIds)
   globalStore.currentUserIsResizingCard = false
-  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
 }
 const afterResizeCards = () => {
   if (!globalStore.shouldSnapToGrid) { return }
@@ -396,7 +396,7 @@ const stopResizingBoxes = () => {
   // historyStore.add({ boxes, useSnapshot: true })
   globalStore.currentUserIsResizingBox = false
   globalStore.updateCurrentUserToolbar('card')
-  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
   // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
 const checkIfShouldSnapBoxes = (event) => {
@@ -470,7 +470,7 @@ const dragBoxes = (event) => {
       boxId: globalStore.currentDraggingBoxId,
       userId: userStore.id
     }
-    broadcastStore.updateStore({ updates, type: 'addToRemoteBoxesDragging' })
+    broadcastStore.update({ updates, action: 'addToRemoteBoxesDragging' })
     boxStore.selectItemsInSelectedBoxes()
   }
   if (event.altKey) { return } // should not select contained items if alt/option key

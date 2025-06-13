@@ -107,7 +107,7 @@ export const useUploadStore = defineStore('upload', {
             id: uploadId
           }
           this.updatePendingUpload(updates)
-          broadcastStore.updateStore({ updates, type: 'updateRemotePendingUploads' })
+          broadcastStore.update({ updates, name: 'updateRemotePendingUploads' })
           // end
           if (percentComplete >= 100) {
             const complete = {

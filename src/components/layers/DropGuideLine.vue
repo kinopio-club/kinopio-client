@@ -258,15 +258,15 @@ const broadcastCursorAndCurve = ({ startPoint, color }) => {
   updates.y = state.currentCursorInSpace.y
   updates.color = color
   updates.userId = userStore.id
-  broadcastStore.update({ updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
   updates.startPoint = startPoint
   updates.color = color
   updates.frameId = nanoid()
-  broadcastStore.update({ updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteDropGuideLine' })
 }
 const broadcastStopPaintingGuide = () => {
   const updates = { userId: userStore.id }
-  broadcastStore.update({ updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
+  broadcastStore.update({ updates, action: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 
 const isMobile = computed(() => utils.isMobile())

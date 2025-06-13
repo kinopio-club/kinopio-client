@@ -47,11 +47,11 @@ const start = (event, action) => {
   if (action === 'resize') {
     globalStore.currentUserIsResizingCard = true
     globalStore.currentUserIsResizingCardIds = cardIds
-    broadcastStore.updateStore({ updates, type: 'updateRemoteUserResizingCards' })
+    broadcastStore.update({ updates, action: 'updateRemoteUserResizingCards' })
   } else if (action === 'tilt') {
     globalStore.currentUserIsTiltingCard = true
     globalStore.currentUserIsTiltingCardIds = cardIds
-    broadcastStore.updateStore({ updates, type: 'updateRemoteUserTiltingCards' })
+    broadcastStore.update({ updates, action: 'updateRemoteUserTiltingCards' })
   }
 }
 const remove = (action) => {

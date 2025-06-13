@@ -5,7 +5,9 @@
 // ├── message
 // │   ├── name
 // │   ├── updates
+// │       └── isFromBroadcast
 // │   ├── store
+// │   ├── user
 // │   └── action
 // ├── spaceId
 // ├── user
@@ -228,13 +230,13 @@ export default function webSocketPlugin () {
     } else if (name === 'userJoinedRoom') {
       spaceStore.addUserToJoinedSpace(user)
     } else if (name === 'updateUserPresence') {
-      spaceStore.updateUserPresence(updates)
+      spaceStore.updateUserPresence(updates.user)
       globalStore.updateOtherUsers(updates.user)
     } else if (name === 'userLeftRoom') {
       spaceStore.removeIdleClientFromSpace(user || updates.user)
       globalStore.clearRemoteMultipleSelected(data)
     } else if (name === 'userLeftSpace') {
-      spaceStore.removeCollfaboratorFromSpace(updates.user)
+      spaceStore.removeCollaboratorFromSpace(updates.user, true)
       if (updates.user.id === userStore.id) {
         spaceStore.removeCurrentUserFromSpace()
       }
@@ -247,7 +249,7 @@ export default function webSocketPlugin () {
       checkIfShouldUpdateLinkToItem(pinia, { action, updates })
       checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
     } else {
-      console.warn('🌚 unhandled message', message, updates)
+      console.warn('🌚 unhandled message', data)
     }
   }
 
@@ -302,9 +304,9 @@ export default function webSocketPlugin () {
           sendMessage(pinia, message)
         }
         break
-      case 'updateUser':
-        sendMessage(pinia, message)
-        break
+      // case 'updateUser':
+      //   sendMessage(pinia, message)
+      //   break
       case 'close':
         closeWebsocket(pinia)
         break

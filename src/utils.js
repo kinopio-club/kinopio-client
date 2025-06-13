@@ -2511,27 +2511,6 @@ export default {
       showInExplore: space.showInExplore
     }
   },
-  normalizeBroadcastUpdates (updates) {
-    const message = updates.type
-    const handler = updates.handler
-    if (updates.body) {
-      const keys = Object.keys(updates.body)
-      keys.forEach(key => {
-        updates[key] = updates.body[key]
-      })
-      delete updates.body
-    }
-    if (updates.updates) {
-      const keys = Object.keys(updates.updates)
-      keys.forEach(key => {
-        updates[key] = updates.updates[key]
-      })
-      delete updates.updates
-    }
-    delete updates.message
-    delete updates.handler
-    return { message, handler, updates }
-  },
 
   // Upload
 

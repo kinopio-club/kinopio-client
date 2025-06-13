@@ -543,8 +543,7 @@ const broadcastCircle = (event, circle) => {
       iteration: circle.iteration,
       zoom: spaceZoomDecimal.value
     },
-    type: 'addRemotePaintingCircle',
-    handler: 'triggerAddRemotePaintingCircle'
+    action: 'triggerAddRemotePaintingCircle'
   })
 }
 

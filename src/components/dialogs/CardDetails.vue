@@ -312,7 +312,7 @@ const broadcastShowCardDetails = () => {
     cardId: card.value.id,
     userId: userStore.id
   }
-  broadcastStore.updateStore({ updates, type: 'updateRemoteCardDetailsVisible' })
+  broadcastStore.update({ updates, action: 'updateRemoteCardDetailsVisible' })
 }
 
 // card

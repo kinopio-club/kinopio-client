@@ -90,7 +90,7 @@ const drawCurrentConnection = (event) => {
     startItemId: props.startItemId,
     path
   }
-  broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
+  broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
 }
 
 // connect to item
@@ -112,7 +112,7 @@ const checkCurrentConnectionSuccess = (event) => {
   if (!cardElement && !boxElement) {
     globalStore.currentConnectionSuccess = {}
     updates.endItemId = null
-    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
   // connected to card
   } else if (isCurrentConnectionConnected && cardElement) {
     const card = cardStore.getCard(cardElement.dataset.cardId)
@@ -122,7 +122,7 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     globalStore.currentConnectionSuccess = card
     updates.endItemId = card.id
-    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
   // connected to box
   } else if (isCurrentConnectionConnected && boxElement) {
     const box = boxStore.getBox(boxElement.dataset.boxId)
@@ -132,7 +132,7 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     globalStore.currentConnectionSuccess = box
     updates.endItemId = box.id
-    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
   } else {
     globalStore.currentConnectionSuccess = {}
   }
@@ -188,7 +188,7 @@ const stopInteractions = (event) => {
   if (isCurrentConnection) {
     globalStore.currentConnectionStartItemIds = []
     const updates = { userId: userStore.id }
-    broadcastStore.updateStore({ updates, type: 'removeRemoteCurrentConnection' })
+    broadcastStore.update({ updates, action: 'removeRemoteCurrentConnection' })
   }
   globalStore.updateCurrentUserIsDrawingConnection(false)
   state.currentConnectionPath = undefined

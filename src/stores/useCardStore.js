@@ -249,6 +249,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      if (card.isFromBroadcast) { return card }
       const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
@@ -291,6 +292,7 @@ export const useCardStore = defineStore('cards', {
       }
       card = this.normailzeNewCard(card)
       this.addCardToState(card)
+      if (card.isFromBroadcast) { return }
       if (!skipCardDetailsIsVisible) {
         globalStore.updateCardDetailsIsVisibleForCardId(card.id)
       }
@@ -300,10 +302,7 @@ export const useCardStore = defineStore('cards', {
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
-      // server/disk/save tasks TODO dry
-      if (!card.isBroadcast) {
-        broadcastStore.update({ updates: card, storeName: 'cardStore', actionName: 'createCard' })
-      }
+      broadcastStore.update({ updates: card, store: 'cardStore', action: 'createCard' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
     },
     async createCards (cards, shouldOffsetPosition) {
@@ -342,13 +341,6 @@ export const useCardStore = defineStore('cards', {
           ...update
         }
       })
-      // server tasks
-      if (!updates.isBroadcast) {
-        broadcastStore.update({ updates, storeName: 'cardStore', actionName: 'updateCards' })
-      }
-      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
-      // TODO history? if unpaused
-      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
       // update connection paths
       const connectionStore = useConnectionStore()
       const isNameUpdated = updates.find(update => Boolean(update.name))
@@ -356,6 +348,12 @@ export const useCardStore = defineStore('cards', {
         const ids = updates.map(update => update.id)
         connectionStore.updateConnectionPaths(ids)
       }
+      // server tasks
+      if (updates.isFromBroadcast) { return }
+      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCards' })
+      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
+      // TODO history? if unpaused
+      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
     },
     updateCard (update) {
       this.updateCards([update])
@@ -706,7 +704,7 @@ export const useCardStore = defineStore('cards', {
     // resize
 
     resizeCards (ids, deltaX) {
-      // const broadcastStore = useBroadcastStore()
+      const broadcastStore = useBroadcastStore()
       const minImageWidth = 64
       const updates = []
       ids.forEach(id => {
@@ -716,8 +714,8 @@ export const useCardStore = defineStore('cards', {
         width = Math.max(minImageWidth, width)
         width = Math.round(width)
         updates.push({ id, resizeWidth: width })
-        // broadcastStore.update({ updates, type: 'resizeCard', handler: 'currentCards/update' })
       })
+      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCards' })
       const connectionStore = useConnectionStore()
       connectionStore.updateConnectionPaths(ids)
       this.updateCards(updates)

@@ -58,8 +58,8 @@ export const useItemStore = defineStore('items', {
       // const broadcastStore = useBroadcastStore()
       // normalize item
       this.addItemToState(item)
-      // if (!updates.isBroadcast) {
-      // broadcastStore.update({ updates: connection, type: 'addConnection', handler: 'currentConnections/create' })
+      // if (updates.isFromBroadcast) { return }
+      // broadcastStore.update({ updates: item, store: 'itemStore', action: 'createItem' })
       // historyStore.add({ connections: [connection] })
       await apiStore.addToQueue({ name: 'createItem', body: item })
     },

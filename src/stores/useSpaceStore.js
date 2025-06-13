@@ -875,7 +875,8 @@ export const useSpaceStore = defineStore('space', {
         this[key] = update[key]
       }
       update.id = this.id
-      broadcastStore.update({ update, type: 'updateSpace' })
+      if (update.isFromBroadcast) { return }
+      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
       await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
@@ -996,18 +997,20 @@ export const useSpaceStore = defineStore('space', {
         this.updateUserPresence(newUser)
       }
     },
-    async removeCollaboratorFromSpace (user) {
+    async removeCollaboratorFromSpace (user, isFromBroadcast) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const space = this.getSpaceAllState
-      broadcastStore.update({ user, type: 'userLeftSpace' })
-      apiStore.removeSpaceCollaborator({ space, user })
       this.collaborators = this.collaborators.filter(collaborator => {
         return collaborator.id !== user.id
       })
       await cache.updateSpace('collaborators', this.collaborators, this.id)
+      if (isFromBroadcast) {
+        broadcastStore.update({ updates: user, name: 'userLeftSpace' })
+        apiStore.removeSpaceCollaborator({ space, user })
+      }
       const isCurrentUser = userStore.getUserIsCurrentUser(user)
       if (isCurrentUser) {
         this.loadLastSpace()
