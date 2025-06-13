@@ -1108,8 +1108,6 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
-  // TODO estimatedCardHeightByCharacters (name) {
-  // }
 
   // boxes
 

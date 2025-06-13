@@ -56,8 +56,7 @@ export default function webSocketPlugin () {
       globalStore.isJoiningSpace = false
       return
     }
-    const spaceIsLoaded = Boolean(spaceStore.cards.length) // proxy for checking if user can view space
-    // TODO replace w globalStore.isLoadingSpace ?
+    const spaceIsLoaded = !globalStore.isLoadingSpace
     if (!spaceIsLoaded) {
       console.info('🌙 cannot join space room: space not loaded', space.id)
       globalStore.isJoiningSpace = false
