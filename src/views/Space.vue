@@ -139,9 +139,7 @@ onMounted(() => {
 
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
-      if (name === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace
-        dragItemsOnNextTick()
-      } else if (name === 'triggerAddBox') {
+      if (name === 'triggerAddBox') {
         const event = args[0]
         addBox(event)
       }

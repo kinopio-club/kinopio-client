@@ -474,7 +474,6 @@ export const useGlobalStore = defineStore('global', {
     triggerOfflineIsVisible () {},
     triggerAppsAndExtensionsIsVisible () {},
     triggerUpdateWindowTitle () {},
-    triggerRestoreSpaceRemoteComplete () {},
     triggerCheckIfShouldNotifySpaceOutOfSync () {},
     triggerNotifyOffscreenCardCreated (card) {},
     triggerNotifyCouldNotSave () {},
