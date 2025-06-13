@@ -495,18 +495,20 @@ export const useGlobalStore = defineStore('global', {
     triggerSelectedCardsContainInBox () {},
     triggerSelectedItemsAlignLeft () {},
     // drawing
+    triggerDrawingReset () {},
+    triggerDrawingInitialize () {},
     triggerStartDrawing (event) {},
     triggerDraw (event) {},
     triggerDrawingUndo () {},
     triggerDrawingRedo () {},
     triggerAddRemoteDrawingStroke (updates) {},
     triggerRemoveRemoteDrawingStroke (updates) {},
-    triggerDrawingRedraw () {},
     triggerEndDrawing () {},
 
     resetPageSizes () {
-      this.pageWidth = 0
-      this.pageHeight = 0
+      this.updateViewportSizes()
+      this.pageWidth = this.viewportWidth
+      this.pageHeight = this.viewportHeight
     },
     updatePageSizesFromRect (itemsRect) {
       if (!itemsRect) { return }

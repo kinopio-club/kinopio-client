@@ -2432,14 +2432,6 @@ export default {
     })
     return name
   },
-  drawingImageUrl (url) {
-    if (!url) { return '' }
-    const isDataUrl = url.startsWith('data:')
-    if (!isDataUrl) {
-      url = `${url}?q=${nanoid()}` // cache-busting
-    }
-    return url
-  },
 
   // Checkbox ✅
 

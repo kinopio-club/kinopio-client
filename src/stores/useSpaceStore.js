@@ -411,6 +411,7 @@ export const useSpaceStore = defineStore('space', {
       globalStore.clearSpaceFilters()
       globalStore.clearSearch()
       globalStore.shouldPreventNextEnterKey = false
+      globalStore.triggerDrawingReset()
     },
     restoreSpaceLocal (space) {
       const historyStore = useHistoryStore()
@@ -459,11 +460,7 @@ export const useSpaceStore = defineStore('space', {
         this.notifySpaceIsOpen()
         this.updateUserLastSpaceId()
         globalStore.isLoadingSpace = false
-        // drawing
-        this.drawingImage = utils.drawingImageUrl(remoteSpace.drawingImage)
-        globalStore.drawingImageUrl = this.drawingImage
-        globalStore.triggerDrawingRedraw()
-        await cache.updateSpaceByUpdates({ drawingImage: remoteSpace.drawingImage }, this.id)
+        globalStore.triggerDrawingInitialize()
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
@@ -895,7 +892,7 @@ export const useSpaceStore = defineStore('space', {
       const space = this.getSpaceAllState
       this.decrementCardsCreatedCountFromSpace(space)
       await cache.removeSpace(space)
-      globalStore.updatePrevSpaceIdInSession = ''
+      globalStore.prevSpaceIdInSession = ''
       await apiStore.addToQueue({
         name: 'removeSpace',
         body: { id: space.id }
@@ -905,7 +902,7 @@ export const useSpaceStore = defineStore('space', {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       await cache.deleteSpace(space)
-      globalStore.updatePrevSpaceIdInSession = ''
+      globalStore.prevSpaceIdInSession = ''
       await apiStore.addToQueue({
         name: 'deleteSpace',
         body: space

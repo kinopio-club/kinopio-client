@@ -41,7 +41,7 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   updatePrevScroll()
   clearCanvas()
-  clearStrokes()
+  clearDrawing()
 
   const globalStateUnsubscribe = globalStore.$subscribe(
     async (mutation, state) => {
@@ -79,8 +79,12 @@ onMounted(() => {
         undo()
       } else if (name === 'triggerDrawingRedo') {
         redo()
-      } else if (name === 'triggerDrawingRedraw') {
+      } else if (name === 'triggerDrawingInitialize') {
         redraw()
+        const strokes = currentStrokes.concat(remoteStrokes)
+        await updateDrawingImageBackground(strokes)
+      } else if (name === 'triggerDrawingReset') {
+        clearDrawing()
       }
     }
   )
@@ -88,7 +92,7 @@ onMounted(() => {
     ({ name, args }) => {
       const actions = ['loadSpace', 'changeSpace', 'createSpace']
       if (actions.includes(name)) {
-        clearStrokes()
+        clearDrawing()
       }
     }
   )
@@ -123,7 +127,10 @@ const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
 const clearCanvas = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
-const clearStrokes = () => {
+const clearDrawing = () => {
+  globalStore.drawingImageUrl = ''
+  globalStore.drawingStrokeColors = []
+  globalStore.drawingEraserIsActive = false
   redoStrokes = []
   currentStrokes = []
   remoteStrokes = []
@@ -230,7 +237,7 @@ const dataUrlFromOffscreenCanvas = (offscreenCanvas) => {
       .catch(reject)
   })
 }
-const updateDrawingBackgroundStatic = async (strokes) => {
+const updateDrawingImageBackground = async (strokes) => {
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
@@ -301,7 +308,7 @@ const redraw = async () => {
 
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)
-  await updateDrawingBackgroundStatic(strokes)
+  await updateDrawingImageBackground(strokes)
   globalStore.triggerEndDrawing()
   updatePageSizes(strokes)
   if (isRemovedStroke) {

@@ -251,7 +251,7 @@ const changeToPrevSpace = () => {
   globalStore.closeAllDialogs()
   const id = spaceStore.id
   spaceStore.loadPrevSpaceInSession()
-  globalStore.updatePrevSpaceIdInSession = id
+  globalStore.prevSpaceIdInSession = id
 }
 
 // search filters
