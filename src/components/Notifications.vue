@@ -147,13 +147,10 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (globalStore.isLoadingSpace) { return }
   try {
     if (!currentUserIsSignedIn.value) { return }
-    globalStore.isLoadingSpace = true
     if (!spaceStore.updatedAt) {
-      globalStore.isLoadingSpace = false
       return
     } // don't check unloaded spaces
     const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
-    globalStore.isLoadingSpace = false
     if (!remoteSpace) { return }
     const space = spaceStore.getSpaceAllState
     const spaceeditedAt = dayjs(space.editedAt)
@@ -172,7 +169,6 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   } catch (error) {
     console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
     state.notifySpaceOutOfSync = true
-    globalStore.isLoadingSpace = false
   }
 }
 
