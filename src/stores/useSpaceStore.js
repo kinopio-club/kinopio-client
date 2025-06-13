@@ -635,7 +635,42 @@ export const useSpaceStore = defineStore('space', {
         space.cards = []
         space.boxes = []
       } else {
-        space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+        space.cards = [
+          {
+            id: '1',
+            x: 94,
+            y: 296,
+            z: 0,
+            name: 'Get your thoughts, ideas and feelings out',
+            width: 200,
+            height: 51
+          },
+          {
+            id: 'wQ9-NzxQyWoIGGKEgHRMF',
+            x: 151,
+            y: 373,
+            name: 'Connect them together\n\n[Help and Tutorials](https://help.kinopio.club)',
+            z: 3,
+            width: 193,
+            height: 69
+          }
+        ]
+        space.connections = [
+          {
+            startItemId: '1',
+            endItemId: 'wQ9-NzxQyWoIGGKEgHRMF',
+            path: 'm255,323 q90,40 48,77',
+            id: 'gg7DEsxy0n3syEkxfKKS4',
+            connectionTypeId: 'TDbVDxv4cebeN_99XAz8T'
+          }
+        ]
+        space.connectionTypes = [
+          {
+            id: 'TDbVDxv4cebeN_99XAz8T',
+            name: 'Connection Type 1',
+            color: randomColor({ luminosity: 'light' })
+          }
+        ]
       }
       const shouldHideDateCards = userStore.shouldHideDateCards
       if (!shouldHideDateCards) {
