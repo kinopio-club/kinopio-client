@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useCardStore } from '@/stores/useCardStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
@@ -28,8 +29,7 @@ export const useGroupStore = defineStore('groups', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const groupId = spaceStore.groupId
-      if (!groupId) { return }
-      const group = this.getSpaceGroup
+      const group = this.groups[groupId]
       if (!group) { return }
       const user = group.users.find(user => user.id === userStore.id)
       return Boolean(user)
@@ -51,40 +51,23 @@ export const useGroupStore = defineStore('groups', {
       groupUserGroups = uniqBy(groupUserGroups, 'id')
       return groupUserGroups
     },
-
     getGroupUsersWhoAddedCards () {
-      // TODO get all cards, get users, uniq by id, filter by users in current group
-      return []
-      // userIds: (state, getters) => {
-      //   const cards = getters.all
-      //   let users = []
-      //   cards.forEach(card => {
-      //     users.push(card.userId)
-      //     users.push(card.nameUpdatedByUserId)
-      //   })
-      //   users = users.filter(user => Boolean(user))
-      //   users = uniq(users)
-      //   return users
-      // },
-      // users: (state, getters, rootState, rootGetters) => {
-      //   let users = getters.userIds.map(id => {
-      //     const user = rootGetters['currentSpace/userById'](id)
-      //     return user
-      //   })
-      //   users = users.filter(user => Boolean(user))
-      //   return users
-      // },
-      // groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      //   const spaceGroup = groupStore.getCurrentSpaceGroup
-      //   const groupUsers = spaceGroup?.users
-      //   if (!groupUsers) { return }
-      //   let users = getters.users
-      //   users = users.filter(user => {
-      //     const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
-      //     return isGroupUser
-      //   })
-      //   return users
-      // },
+      const spaceStore = useSpaceStore()
+      const cardStore = useCardStore()
+      const groupId = spaceStore.groupId
+      const group = this.groups[groupId]
+      if (!group) { return }
+      const groupUserIds = group.users.map(user => user.id)
+      let users = []
+      const cards = this.getAllCards
+      if (!cards) { return }
+      cards.forEach(card => {
+        users.push(card.userId)
+        users.push(card.nameUpdatedByUserId)
+      })
+      users = uniq(users)
+      users = users.filter(user => groupUserIds.includes(user.id))
+      return users
     }
   },
   actions: {
