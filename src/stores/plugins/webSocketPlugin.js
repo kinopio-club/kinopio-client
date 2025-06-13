@@ -304,9 +304,6 @@ export default function webSocketPlugin () {
           sendMessage(pinia, message)
         }
         break
-      // case 'updateUser':
-      //   sendMessage(pinia, message)
-      //   break
       case 'close':
         closeWebsocket(pinia)
         break

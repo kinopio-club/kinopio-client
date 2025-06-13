@@ -31,8 +31,6 @@ export const useBroadcastStore = defineStore('broadcast', {
     update (update) {
       console.log('🌻 broadcast update', update)
     },
-    updateUser () {},
-    updateStore () {},
     close () {}
   }
 })
