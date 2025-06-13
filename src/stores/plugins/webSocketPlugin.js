@@ -179,7 +179,6 @@ export default function webSocketPlugin () {
     } else if (storeName && actionName) {
       updates.isBroadcast = true
       const piniaStore = piniaStoreByName(storeName, pinia)
-      console.log('💃💃💃', actionName, storeName, piniaStore) // TODO pinia._s.get works?
       if (piniaStore) {
         piniaStore[actionName](updates)
       }
