@@ -38,8 +38,7 @@ export default {
     }
   },
   notifyCouldNotSave () {
-    // const element = document.getElementById('notify-cache-is-full') // TODO pass trigger to store
-    // element.classList.remove('hidden')
+    window.globalStore.triggerNotifyCouldNotSave()
   },
   async pruneLocal () {
     const user = await this.user()

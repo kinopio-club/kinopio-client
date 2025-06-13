@@ -477,6 +477,7 @@ export const useGlobalStore = defineStore('global', {
     triggerRestoreSpaceRemoteComplete () {},
     triggerCheckIfShouldNotifySpaceOutOfSync () {},
     triggerNotifyOffscreenCardCreated (card) {},
+    triggerNotifyCouldNotSave () {},
     triggerSonarPing (event) {},
     triggerUpdatePathWhileDragging (connections) {},
     triggerUpdateCardDimensionsAndPaths (cardId) {},

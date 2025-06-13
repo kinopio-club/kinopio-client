@@ -55,6 +55,8 @@ onMounted(() => {
         toggleNotifyCardsCreatedIsOverLimit(true)
       } else if (name === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
         checkIfShouldNotifySpaceOutOfSync()
+      } else if (name === 'triggerNotifyCouldNotSave') {
+        state.notifiyCouldNotSave = true
       }
     }
   )
@@ -87,7 +89,7 @@ const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
   notifySpaceOutOfSync: false,
-  notifyCacheIsFull: false
+  notifiyCouldNotSave: false
 })
 
 const closeAllDialogs = () => {
@@ -242,9 +244,6 @@ const removeNotifyThanks = () => {
   globalStore.notifyThanksForDonating = false
   globalStore.notifyThanksForUpgrading = false
 }
-const cacheErrorIsVisible = () => {
-  state.notifyCacheIsFull = !state.notifyCacheIsFull
-}
 const update = async () => {
   await nextTick()
   const notifications = globalStore.notifications
@@ -366,12 +365,6 @@ aside.notifications(@click.left="closeAllDialogs")
       button.small-button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.danger(v-if="state.notifyCacheIsFull")
-      .button-wrap
-        button(@click.left="refreshBrowser")
-          img.refresh.icon(src="@/assets/refresh.svg")
-          span Refresh
-
   .persistent-item.info(v-if="dragToResizeIsVisible")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Resize
@@ -487,9 +480,16 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 
+  .persistent-item.danger(v-if="state.notifiyCouldNotSave")
+    p Error saving changes locally
+    .row
+      .button-wrap
+        button(@click.left="refreshBrowser")
+          img.refresh.icon(src="@/assets/refresh.svg")
+          span Refresh
+
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
-    p
-      span Error saving changes to server
+    p Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
