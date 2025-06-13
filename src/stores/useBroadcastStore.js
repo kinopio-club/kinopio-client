@@ -22,13 +22,15 @@ export const useBroadcastStore = defineStore('broadcast', {
       }, Math.min(reconnectTime, maxTime))
     },
     connect () {
-      // console.info('🌻 broadcast connect')
+      // console.log('🌻 broadcast connect')
     },
     joinSpaceRoom () {
-      // console.info('🌻 broadcast joinSpaceRoom')
+      // console.log('🌻 broadcast joinSpaceRoom')
     },
     leaveSpaceRoom () {},
-    update () {},
+    update (update) {
+      console.log('🌻 broadcast update', update)
+    },
     updateUser () {},
     updateStore () {},
     close () {}
