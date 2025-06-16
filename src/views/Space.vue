@@ -669,10 +669,6 @@ const stopInteractions = async (event) => {
   await nextTick()
   globalStore.clearShouldExplicitlyRenderCardIds()
   globalStore.shouldSnapToGrid = false
-  await spaceStore.updateSpace({
-    editedAt: new Date(),
-    editedByUserId: userStore.id
-  })
 }
 </script>
 
