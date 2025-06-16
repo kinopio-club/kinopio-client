@@ -168,6 +168,7 @@ export const useConnectionStore = defineStore('connections', {
     // create
 
     addConnectionToState (connection) {
+      const globalStore = useGlobalStore()
       this.byId[connection.id] = connection
       this.allIds.push(connection.id)
       // init arrays for indexes
@@ -180,6 +181,7 @@ export const useConnectionStore = defineStore('connections', {
       // add to indexes
       this.byStartItemId[connection.startItemId].push(connection.id)
       this.byEndItemId[connection.endItemId].push(connection.id)
+      globalStore.removeRemoteCurrentConnection(connection)
     },
     addConnectionTypeToState (type) {
       this.typeById[type.id] = type
@@ -206,10 +208,7 @@ export const useConnectionStore = defineStore('connections', {
       connection.userId = userStore.id
       connection.connectionTypeId = type.id
       this.addConnectionToState(connection)
-      globalStore.triggerUpdateItemCurrentConnections(connection.endItemId)
-      globalStore.triggerUpdateItemCurrentConnections(connection.startItemId)
-      if (connection.isFromBroadcast) { return }
-      broadcastStore.update({ updates: connection, store: 'connectionStore', action: 'createConnection' })
+      broadcastStore.update({ updates: connection, store: 'connectionStore', action: 'addConnectionToState' })
       // historyStore.add({ connections: [connection] })
       await apiStore.addToQueue({ name: 'createConnection', body: connection })
     },
@@ -328,7 +327,7 @@ export const useConnectionStore = defineStore('connections', {
       }
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsRemote' })
       const connections = ids.map(id => this.getConnection(id))
-      historyStore.add({ connections, isRemoved: true })
+      // historyStore.add({ connections, isRemoved: true })
     },
     async removeConnection (id) {
       await this.removeConnections([id])

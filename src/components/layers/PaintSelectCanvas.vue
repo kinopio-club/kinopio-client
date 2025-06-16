@@ -375,7 +375,7 @@ const selectItems = (points) => {
   selectableConnectionsInViewport.forEach(svg => {
     if (svg.dataset.isVisibleInViewport === 'false') { return }
     const path = svg.querySelector('path.connection-path')
-    matches = collisionDetection.checkPointsInsidePath(points, svg, path)
+    matches = collisionDetection.checkPointsInsidePath(points, svg, path) || []
   })
   const connectionIds = matches.map(match => match.id)
   globalStore.addMultipleToMultipleConnectionsSelected(connectionIds)

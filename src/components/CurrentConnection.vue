@@ -77,7 +77,7 @@ const drawCurrentConnection = (event) => {
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
-  checkCurrentConnectionSuccess(event)
+  const endItemId = checkCurrentConnectionSuccess(event)
   state.currentConnectionPath = path
   const connectionType = connectionStore.getNewConnectionType
   prevType = connectionType
@@ -88,8 +88,10 @@ const drawCurrentConnection = (event) => {
     connectionTypeId: connectionType.id,
     color: connectionType.color,
     startItemId: props.startItemId,
+    endItemId,
     path
   }
+  console.log('drawCurrentConnection', updates.startItemId)
   broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
 }
 
@@ -112,7 +114,6 @@ const checkCurrentConnectionSuccess = (event) => {
   if (!cardElement && !boxElement) {
     globalStore.currentConnectionSuccess = {}
     updates.endItemId = null
-    broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
   // connected to card
   } else if (isCurrentConnectionConnected && cardElement) {
     const card = cardStore.getCard(cardElement.dataset.cardId)
@@ -122,7 +123,6 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     globalStore.currentConnectionSuccess = card
     updates.endItemId = card.id
-    broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
   // connected to box
   } else if (isCurrentConnectionConnected && boxElement) {
     const box = boxStore.getBox(boxElement.dataset.boxId)
@@ -132,10 +132,10 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     globalStore.currentConnectionSuccess = box
     updates.endItemId = box.id
-    broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
   } else {
     globalStore.currentConnectionSuccess = {}
   }
+  return updates.endItemId
 }
 const addConnections = async (event) => {
   const currentConnectionSuccess = globalStore.currentConnectionSuccess
