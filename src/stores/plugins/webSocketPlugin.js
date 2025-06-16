@@ -19,6 +19,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
+import throttle from 'lodash-es/throttle'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -213,7 +214,7 @@ export default function webSocketPlugin () {
         }
         receiveMessage(pinia, data)
       } catch (error) {
-        console.error('Error processing WebSocket message:', error)
+        console.error('Error processing WebSocket message:', error, data)
       }
     }
   }
@@ -257,7 +258,7 @@ export default function webSocketPlugin () {
 
   // 🌛 Send
 
-  const sendMessage = (pinia, message, type) => {
+  const sendMessage = throttle((pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
     const shouldBroadcast = spaceStore.getSpaceShouldBroadcast
     if (!websocket || !isConnected) {
@@ -273,7 +274,7 @@ export default function webSocketPlugin () {
       spaceId: spaceStore.id
       // user
     }))
-  }
+  }, 5)
   const broadcastHandler = (pinia, name, args) => {
     const globalStore = useGlobalStore(pinia)
     const broadcastStore = useBroadcastStore(pinia)

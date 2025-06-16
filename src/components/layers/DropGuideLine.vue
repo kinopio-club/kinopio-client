@@ -256,12 +256,11 @@ const broadcastCursorAndCurve = ({ startPoint, color }) => {
   const updates = {}
   updates.x = state.currentCursorInSpace.x
   updates.y = state.currentCursorInSpace.y
-  updates.color = color
   updates.userId = userStore.id
-  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
   updates.startPoint = startPoint
   updates.color = color
   updates.frameId = nanoid()
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
   broadcastStore.update({ updates, action: 'triggerUpdateRemoteDropGuideLine' })
 }
 const broadcastStopPaintingGuide = () => {

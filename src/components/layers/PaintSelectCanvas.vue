@@ -106,6 +106,7 @@ onMounted(() => {
         const position = updateRemotePosition(circle)
         circle.x = position.x
         circle.y = position.y
+        console.log('🅰️')
         createRemotePaintingCircle(circle)
       } else if (name === 'triggerNotifyOffscreenCardCreated') {
         const card = args[0]
@@ -499,6 +500,7 @@ const circlesAnimationFrame = (timestamp) => {
     return item
   })
   // remote paint
+
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
   remotePaintingCircles = remotePaintingCircles.map(item => {
     item.iteration++

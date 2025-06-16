@@ -1933,9 +1933,9 @@ export const useGlobalStore = defineStore('global', {
       let user = userStore.getUserAllState
       user = utils.userMeta(user, space)
       broadcastStore.update({ updates: user, name: 'updateUserPresence' })
-      broadcastStore.update({ updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
-      broadcastStore.update({ updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
-      broadcastStore.update({ updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteCardDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteConnectionDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteBoxDetailsVisible' })
       this.passwordResetIsVisible = false
       this.updateFocusOnCardId('')
       this.updateFocusOnBoxId('')
@@ -1991,7 +1991,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         cardId
       }
-      broadcastStore.update({ updates, type: 'addToRemoteCardsSelected' })
+      broadcastStore.update({ updates, action: 'addToRemoteCardsSelected' })
     },
     removeFromMultipleCardsSelected (cardId) {
       const userStore = useUserStore()
@@ -2005,7 +2005,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         cardId
       }
-      broadcastStore.update({ updates, type: 'removeFromRemoteCardsSelected' })
+      broadcastStore.update({ updates, action: 'removeFromRemoteCardsSelected' })
     },
     addMultipleToMultipleCardsSelected (cardIds) {
       const userStore = useUserStore()
@@ -2024,7 +2024,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         cardIds
       }
-      broadcastStore.update({ updates, type: 'updateRemoteCardsSelected' })
+      broadcastStore.update({ updates, action: 'updateRemoteCardsSelected' })
     },
     updateMultipleCardsSelectedIds (cardIds) {
       const userStore = useUserStore()
@@ -2035,7 +2035,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         cardIds
       }
-      broadcastStore.update({ updates, type: 'updateRemoteCardsSelected' })
+      broadcastStore.update({ updates, action: 'updateRemoteCardsSelected' })
     },
     updateMultipleBoxesSelectedIds (boxIds) {
       const userStore = useUserStore()
@@ -2046,7 +2046,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         boxIds
       }
-      broadcastStore.update({ updates, type: 'updateRemoteBoxesSelected' })
+      broadcastStore.update({ updates, action: 'updateRemoteBoxesSelected' })
     },
 
     clearMultipleSelected () {
@@ -2060,7 +2060,7 @@ export const useGlobalStore = defineStore('global', {
       }
       const space = spaceStore.getSpaceAllState
       const user = userStore.getUserAllState
-      broadcastStore.update({ user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' })
+      broadcastStore.update({ user: utils.userMeta(user, space), action: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected (connectionId) {
       utils.typeCheck({ value: connectionId, type: 'string' })
@@ -2083,7 +2083,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         connectionId
       }
-      broadcastStore.update({ updates, type: 'addToRemoteConnectionsSelected' })
+      broadcastStore.update({ updates, action: 'addToRemoteConnectionsSelected' })
     },
     removeFromMultipleConnectionsSelected (connectionId) {
       const userStore = useUserStore()
@@ -2097,7 +2097,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         connectionId
       }
-      broadcastStore.update({ updates, type: 'removeFromRemoteConnectionsSelected' })
+      broadcastStore.update({ updates, action: 'removeFromRemoteConnectionsSelected' })
     },
     updateMultipleConnectionsSelectedIds (connectionIds) {
       const userStore = useUserStore()
@@ -2108,7 +2108,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         connectionIds
       }
-      broadcastStore.update({ updates, type: 'updateRemoteConnectionsSelected' })
+      broadcastStore.update({ updates, action: 'updateRemoteConnectionsSelected' })
     },
     addMultipleToMultipleConnectionsSelected (connectionIds) {
       const userStore = useUserStore()
@@ -2126,7 +2126,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         connectionIds
       }
-      broadcastStore.update({ updates, type: 'updateRemoteConnectionsSelected' })
+      broadcastStore.update({ updates, action: 'updateRemoteConnectionsSelected' })
     },
     updateConnectionDetailsIsVisibleForConnectionId (connectionId) {
       const userStore = useUserStore()
@@ -2139,7 +2139,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         connectionId
       }
-      broadcastStore.update({ updates, type: 'addToRemoteConnectionDetailsVisible' })
+      broadcastStore.update({ updates, action: 'addToRemoteConnectionDetailsVisible' })
     },
     addToMultipleBoxesSelected (boxId) {
       const userStore = useUserStore()
@@ -2152,7 +2152,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         boxId
       }
-      broadcastStore.update({ updates, type: 'addToRemoteBoxesSelected' })
+      broadcastStore.update({ updates, action: 'addToRemoteBoxesSelected' })
     },
     addMultipleToMultipleBoxesSelected (boxIds) {
       const userStore = useUserStore()
@@ -2170,7 +2170,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         boxIds
       }
-      broadcastStore.update({ updates, type: 'updateRemoteBoxesSelected' })
+      broadcastStore.update({ updates, action: 'updateRemoteBoxesSelected' })
     },
     removeFromMultipleBoxesSelected (boxId) {
       const userStore = useUserStore()
@@ -2184,7 +2184,7 @@ export const useGlobalStore = defineStore('global', {
         userId: userStore.id,
         boxId
       }
-      broadcastStore.update({ updates, type: 'removeFromRemoteBoxesSelected' })
+      broadcastStore.update({ updates, action: 'removeFromRemoteBoxesSelected' })
     },
     normalizeTriggerSonarPing (event) {
       const userStore = useUserStore()
@@ -2192,7 +2192,7 @@ export const useGlobalStore = defineStore('global', {
       const ping = utils.cursorPositionInSpace(event)
       ping.color = userStore.color
       this.triggerSonarPing(ping)
-      broadcastStore.update({ updates: ping, type: 'triggerSonarPing' })
+      broadcastStore.update({ updates: ping, action: 'triggerSonarPing' })
     },
     updateCurrentUserIsPanning (value) {
       const prevValue = this.currentUserIsPanning
