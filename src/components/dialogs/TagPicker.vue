@@ -14,6 +14,7 @@ import utils from '@/utils.js'
 import fuzzy from '@/libs/fuzzy.js'
 import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
+import uniqBy from 'lodash-es/uniqBy'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -131,6 +132,7 @@ const updateRemoteTags = async () => {
   } else {
     state.loading = true
     remoteTags = await apiStore.getUserTags() || []
+    remoteTags = uniqBy(remoteTags, 'name')
     globalStore.remoteTags = remoteTags
     globalStore.remoteTagsIsFetched = true
     state.loading = false
