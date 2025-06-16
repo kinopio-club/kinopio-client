@@ -43,10 +43,10 @@ const id = computed(() => globalStore.boxDetailsIsVisibleForBoxId)
 const currentBox = computed(() => {
   return boxStore.getBox(id.value) || {}
 })
-watch(() => currentBox.value, async (value, prevValue) => {
+watch(() => id.value, async (value, prevValue) => {
   await nextTick()
   // open
-  if (visible.value) {
+  if (value) {
     historyStore.pause()
     prevBoxId = value.id
     closeDialogs()
