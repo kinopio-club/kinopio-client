@@ -245,6 +245,7 @@ const update = async () => {
   const notifications = globalStore.notifications
   notifications.forEach(item => {
     const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
+    if (!element) { return }
     if (element.dataset.isPersistentItem) { return }
     element.addEventListener('animationend', removePrevious, false)
   })
