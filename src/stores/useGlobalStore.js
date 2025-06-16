@@ -1411,17 +1411,17 @@ export const useGlobalStore = defineStore('global', {
     // removeFromMultipleConnectionsSelected (connectionId) {
     //   utils.typeCheck({ value: connectionId, type: 'string' })
     // },
-    addToRemoteConnectionsSelected (update) {
-      utils.typeCheck({ value: update, type: 'object' })
-      delete update.type
-      const isSelected = this.remoteConnectionsSelected.find(connection => {
-        const connectionIsSelected = connection.connectionId === update.connectionId
-        const selectedByUser = connection.userId === update.userId
-        return connectionIsSelected && selectedByUser
-      })
-      if (isSelected) { return }
-      this.remoteConnectionsSelected.push(update)
-    },
+    // addToRemoteConnectionsSelected (update) {
+    //   utils.typeCheck({ value: update, type: 'object' })
+    //   delete update.type
+    //   const isSelected = this.remoteConnectionsSelected.find(connection => {
+    //     const connectionIsSelected = connection.connectionId === update.connectionId
+    //     const selectedByUser = connection.userId === update.userId
+    //     return connectionIsSelected && selectedByUser
+    //   })
+    //   if (isSelected) { return }
+    //   this.remoteConnectionsSelected.push(update)
+    // },
     removeFromRemoteConnectionsSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1460,17 +1460,17 @@ export const useGlobalStore = defineStore('global', {
       utils.typeCheck({ value: boxIds, type: 'array' })
       this.previousMultipleBoxesSelectedIds = boxIds
     },
-    addToRemoteBoxesSelected (update) {
-      utils.typeCheck({ value: update, type: 'object' })
-      delete update.type
-      const isSelected = this.remoteBoxesSelected.find(box => {
-        const boxIsSelected = box.boxId === update.boxId
-        const selectedByUser = box.userId === update.userId
-        return boxIsSelected && selectedByUser
-      })
-      if (isSelected) { return }
-      this.remoteBoxesSelected.push(update)
-    },
+    // addToRemoteBoxesSelected (update) {
+    //   utils.typeCheck({ value: update, type: 'object' })
+    //   delete update.type
+    //   const isSelected = this.remoteBoxesSelected.find(box => {
+    //     const boxIsSelected = box.boxId === update.boxId
+    //     const selectedByUser = box.userId === update.userId
+    //     return boxIsSelected && selectedByUser
+    //   })
+    //   if (isSelected) { return }
+    //   this.remoteBoxesSelected.push(update)
+    // },
     removeFromRemoteBoxesSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1980,19 +1980,6 @@ export const useGlobalStore = defineStore('global', {
         this.addToMultipleCardsSelected(cardId)
       }
     },
-    addToMultipleCardsSelected (cardId) {
-      const userStore = useUserStore()
-      const broadcastStore = useBroadcastStore()
-      utils.typeCheck({ value: cardId, type: 'string' })
-      if (this.multipleCardsSelectedIds.includes(cardId)) { return }
-      postMessage.sendHaptics({ name: 'selection' })
-      this.multipleCardsSelectedIds.push(cardId)
-      const updates = {
-        userId: userStore.id,
-        cardId
-      }
-      broadcastStore.update({ updates, action: 'addToRemoteCardsSelected' })
-    },
     removeFromMultipleCardsSelected (cardId) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
@@ -2026,6 +2013,21 @@ export const useGlobalStore = defineStore('global', {
       }
       broadcastStore.update({ updates, action: 'updateRemoteCardsSelected' })
     },
+    addToMultipleCardsSelected (cardId) {
+      this.addMultipleToMultipleCardsSelected([cardId])
+      postMessage.sendHaptics({ name: 'selection' })
+      // const userStore = useUserStore()
+      // const broadcastStore = useBroadcastStore()
+      // utils.typeCheck({ value: cardId, type: 'string' })
+      // if (this.multipleCardsSelectedIds.includes(cardId)) { return }
+      // this.multipleCardsSelectedIds.push(cardId)
+      // const updates = {
+      //   userId: userStore.id,
+      //   cardId
+      // }
+      // broadcastStore.update({ updates, action: 'addToRemoteCardsSelected' })
+    },
+
     updateMultipleCardsSelectedIds (cardIds) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
@@ -2072,19 +2074,6 @@ export const useGlobalStore = defineStore('global', {
         this.addToMultipleConnectionsSelected(connectionId)
       }
     },
-    addToMultipleConnectionsSelected (connectionId) {
-      const userStore = useUserStore()
-      const broadcastStore = useBroadcastStore()
-      utils.typeCheck({ value: connectionId, type: 'string' })
-      if (this.multipleConnectionsSelectedIds.includes(connectionId)) { return }
-      postMessage.sendHaptics({ name: 'selection' })
-      this.multipleConnectionsSelectedIds.push(connectionId)
-      const updates = {
-        userId: userStore.id,
-        connectionId
-      }
-      broadcastStore.update({ updates, action: 'addToRemoteConnectionsSelected' })
-    },
     removeFromMultipleConnectionsSelected (connectionId) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
@@ -2128,6 +2117,21 @@ export const useGlobalStore = defineStore('global', {
       }
       broadcastStore.update({ updates, action: 'updateRemoteConnectionsSelected' })
     },
+    addToMultipleConnectionsSelected (connectionId) {
+      this.addMultipleToMultipleConnectionsSelected([connectionId])
+      postMessage.sendHaptics({ name: 'selection' })
+      // const userStore = useUserStore()
+      // const broadcastStore = useBroadcastStore()
+      // utils.typeCheck({ value: connectionId, type: 'string' })
+      // if (this.multipleConnectionsSelectedIds.includes(connectionId)) { return }
+      // this.multipleConnectionsSelectedIds.push(connectionId)
+      // const updates = {
+      //   userId: userStore.id,
+      //   connectionId
+      // }
+      // broadcastStore.update({ updates, action: 'addToRemoteConnectionsSelected' })
+    },
+
     updateConnectionDetailsIsVisibleForConnectionId (connectionId) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
@@ -2140,19 +2144,6 @@ export const useGlobalStore = defineStore('global', {
         connectionId
       }
       broadcastStore.update({ updates, action: 'addToRemoteConnectionDetailsVisible' })
-    },
-    addToMultipleBoxesSelected (boxId) {
-      const userStore = useUserStore()
-      const broadcastStore = useBroadcastStore()
-      utils.typeCheck({ value: boxId, type: 'string' })
-      if (this.multipleBoxesSelectedIds.includes(boxId)) { return }
-      postMessage.sendHaptics({ name: 'selection' })
-      this.multipleBoxesSelectedIds.push(boxId)
-      const updates = {
-        userId: userStore.id,
-        boxId
-      }
-      broadcastStore.update({ updates, action: 'addToRemoteBoxesSelected' })
     },
     addMultipleToMultipleBoxesSelected (boxIds) {
       const userStore = useUserStore()
@@ -2171,6 +2162,21 @@ export const useGlobalStore = defineStore('global', {
         boxIds
       }
       broadcastStore.update({ updates, action: 'updateRemoteBoxesSelected' })
+    },
+    addToMultipleBoxesSelected (boxId) {
+      this.addMultipleToMultipleBoxesSelected([boxId])
+      postMessage.sendHaptics({ name: 'selection' })
+      // const userStore = useUserStore()
+      // const broadcastStore = useBroadcastStore()
+      // utils.typeCheck({ value: boxId, type: 'string' })
+      // if (this.multipleBoxesSelectedIds.includes(boxId)) { return }
+      // postMessage.sendHaptics({ name: 'selection' })
+      // this.multipleBoxesSelectedIds.push(boxId)
+      // const updates = {
+      //   userId: userStore.id,
+      //   boxId
+      // }
+      // broadcastStore.update({ updates, action: 'addToRemoteBoxesSelected' })
     },
     removeFromMultipleBoxesSelected (boxId) {
       const userStore = useUserStore()
