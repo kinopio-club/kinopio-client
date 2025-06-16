@@ -294,20 +294,7 @@ export const useConnectionStore = defineStore('connections', {
 
     // remove
 
-    removeConnectionsRemote (ids) {
-      ids.forEach(id => {
-        const idIndex = this.allIds.indexOf(id)
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[id]
-      })
-    },
-    async removeConnections (ids) {
-      const apiStore = useApiStore()
-      const userStore = useUserStore()
-      const historyStore = useHistoryStore()
-      const broadcastStore = useBroadcastStore()
-      const canEditSpace = userStore.getUserCanEditSpace
-      if (!canEditSpace) { return }
+    removeConnectionsState (ids) {
       for (const id of ids) {
         // remove from indexes
         const connection = this.getConnection(id)
@@ -323,9 +310,18 @@ export const useConnectionStore = defineStore('connections', {
         const idIndex = this.allIds.indexOf(id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
-        await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
       }
-      broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsRemote' })
+    },
+    async removeConnections (ids) {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const historyStore = useHistoryStore()
+      const broadcastStore = useBroadcastStore()
+      const canEditSpace = userStore.getUserCanEditSpace
+      if (!canEditSpace) { return }
+      this.removeConnectionsState(ids)
+      await apiStore.addToQueue({ name: 'removeConnections', body: ids })
+      broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
       const connections = ids.map(id => this.getConnection(id))
       // historyStore.add({ connections, isRemoved: true })
     },
