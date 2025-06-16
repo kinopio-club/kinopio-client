@@ -1434,10 +1434,9 @@ export const useGlobalStore = defineStore('global', {
     },
     clearRemoteMultipleSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
-      const user = update.user
-      this.remoteCardsSelected = this.remoteCardsSelected.filter(card => card.userId !== user.id)
-      this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
-      this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== user.id)
+      this.remoteCardsSelected = this.remoteCardsSelected.filter(card => card.userId !== update.user.id)
+      this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== update.user.id)
+      this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== update.user.id)
     },
     previousMultipleConnectionsSelectedIds (connectionIds) {
       utils.typeCheck({ value: connectionIds, type: 'array' })
@@ -2055,14 +2054,10 @@ export const useGlobalStore = defineStore('global', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      if (this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length) {
-        this.multipleCardsSelectedIds = []
-        this.multipleConnectionsSelectedIds = []
-        this.multipleBoxesSelectedIds = []
-      }
-      const space = spaceStore.getSpaceAllState
-      const user = userStore.getUserAllState
-      broadcastStore.update({ user: utils.userMeta(user, space), action: 'clearRemoteMultipleSelected' })
+      this.multipleCardsSelectedIds = []
+      this.multipleConnectionsSelectedIds = []
+      this.multipleBoxesSelectedIds = []
+      broadcastStore.update({ action: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected (connectionId) {
       utils.typeCheck({ value: connectionId, type: 'string' })
