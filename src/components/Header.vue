@@ -873,7 +873,7 @@ header
       vertical-align 0
 
   .space-details-button
-    display flex
+    display flex !important
   .space-name-wrap
     display flex
   .space-name
