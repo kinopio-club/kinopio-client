@@ -256,10 +256,6 @@ export default function webSocketPlugin () {
         spaceStore.removeCurrentUserFromSpace()
       }
     } else if (isAction) {
-      if (action !== 'triggerUpdateRemoteUserCursor' && action !== 'triggerAddRemotePaintingCircle') {
-        console.log('♥️♥️♥️', message, user, updates, store, action)
-      }
-
       updates.isFromBroadcast = true
       const piniaStore = getPiniaStore(store, pinia)
       if (piniaStore) {
@@ -274,25 +270,47 @@ export default function webSocketPlugin () {
 
   // 🌛 Send
 
-  const sendMessage = throttle((pinia, message, type) => {
+  let sentActions, pendingMessages
+  const sendMessageThrottle = throttle(() => {
+    if (pendingMessages?.length > 0) {
+      pendingMessages.forEach(data => {
+        websocket.send(JSON.stringify(data))
+      })
+      pendingMessages = []
+      sentActions.clear()
+    }
+  }, 16) // 60fps
+  const sendMessage = (pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     const shouldBroadcast = spaceStore.getSpaceShouldBroadcast
-    if (!websocket || !isConnected) {
+    if (!websocket || !isConnected || !shouldBroadcast) {
       return
     }
-    if (!shouldBroadcast) {
-      return
+    if (!sentActions) {
+      sentActions = new Set()
+      sendMessageThrottle()
     }
-    // send message
     const data = {
       message,
       clientId,
       spaceId: spaceStore.id,
       user: userStore.getUserPublicMeta
     }
-    websocket.send(JSON.stringify(data))
-  }, 5)
+    if (message.action) {
+      // only send unique actions per frame
+      if (sentActions.has(message.action)) { return }
+      sentActions.add(message.action)
+      pendingMessages = pendingMessages || []
+      pendingMessages.push(data)
+      sendMessageThrottle()
+    } else {
+      websocket.send(JSON.stringify(data))
+    }
+  }
+
+  // watch broadcastStore
+
   const broadcastHandler = (pinia, name, args) => {
     const globalStore = useGlobalStore(pinia)
     const broadcastStore = useBroadcastStore(pinia)
