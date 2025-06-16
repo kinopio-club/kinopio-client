@@ -246,20 +246,23 @@ export const useConnectionStore = defineStore('connections', {
 
     // update
 
-    async updateConnections (updates) {
-      const apiStore = useApiStore()
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const broadcastStore = useBroadcastStore()
-      if (!userStore.getUserCanEditSpace) { return }
+    updateConnectionsState (updates) {
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
           ...update
         }
       })
+    },
+    async updateConnections (updates) {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      this.updateConnectionsState(updates)
       // server tasks
-      if (updates.isFromBroadcast) { return }
+      // if (updates.isFromBroadcast) { return }
       broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnections' })
       await apiStore.addToQueue({ name: 'updateMultipleConnections', body: { connections: updates } })
       // TODO history? if unpaused
@@ -367,6 +370,7 @@ export const useConnectionStore = defineStore('connections', {
 
     async updateConnectionPaths (itemIds) {
       const globalStore = useGlobalStore()
+      const userStore = useUserStore()
       const connections = this.getConnectionsByItemIds(itemIds)
       const updates = []
       connections.forEach(connection => {
@@ -384,7 +388,11 @@ export const useConnectionStore = defineStore('connections', {
         }
         updates.push(update)
       })
-      this.updateConnections(updates)
+      if (userStore.getUserCanEditSpace) {
+        this.updateConnections(updates)
+      } else {
+        this.updateConnectionsState(updates)
+      }
       globalStore.clearShouldExplicitlyRenderCardIds()
     },
     updateConnectionPath (itemId) {

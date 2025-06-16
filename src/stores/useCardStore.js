@@ -327,14 +327,8 @@ export const useCardStore = defineStore('cards', {
 
     // update
 
-    async updateCards (updates) {
-      const apiStore = useApiStore()
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const broadcastStore = useBroadcastStore()
-      const canEditSpace = userStore.getUserCanEditSpace
-      if (!canEditSpace) { return }
-      updates = updates.filter(update => userStore.getUserCanEditCard(update))
+    async updateCardsState (updates) {
+      const connectionStore = useConnectionStore()
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
@@ -342,15 +336,41 @@ export const useCardStore = defineStore('cards', {
         }
       })
       // update connection paths
-      const connectionStore = useConnectionStore()
-      const isNameUpdated = updates.find(update => Boolean(update.name))
-      if (isNameUpdated) {
-        const ids = updates.map(update => update.id)
-        connectionStore.updateConnectionPaths(ids)
-      }
+      // const shouldUpdateConnectionPaths = updates.find(update => Boolean(update.name || update.x || update.y))
+      // if (shouldUpdateConnectionPaths) {
+      const ids = updates.map(update => update.id)
+      console.log(ids)
+      connectionStore.updateConnectionPaths(ids)
+      // }
+    },
+    async updateCards (updates) {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      this.updateCardsState(updates)
+      // updates = updates.filter(update => userStore.getUserCanEditCard(update))
+      // updates.forEach(update => {
+      //   this.byId[update.id] = {
+      //     ...this.byId[update.id],
+      //     ...update
+      //   }
+      // })
+      // // update connection paths
+      // const connectionStore = useConnectionStore()
+      // const isNameUpdated = updates.find(update => Boolean(update.name))
+      // if (isNameUpdated) {
+      //   const ids = updates.map(update => update.id)
+      //   connectionStore.updateConnectionPaths(ids)
+      // }
       // server tasks
-      if (updates.isFromBroadcast) { return }
-      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCards' })
+      // console.log('cardStore updateCards')
+
+      // if (updates.isFromBroadcast) {
+      //   console.log('💦💦💦',updates)
+      //   return }
+      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
       // TODO history? if unpaused
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)

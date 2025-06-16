@@ -159,29 +159,32 @@ export const useBoxStore = defineStore('boxes', {
 
     // update
 
-    async updateBoxes (updates) {
-      const apiStore = useApiStore()
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const broadcastStore = useBroadcastStore()
+    async updateBoxesState (updates) {
+      const connectionStore = useConnectionStore()
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
           ...update
         }
       })
-      // server tasks
-      await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       // update connection paths
-      const connectionStore = useConnectionStore()
-      const isNameUpdated = updates.find(update => Boolean(update.name))
-      if (isNameUpdated) {
-        const ids = updates.map(update => update.id)
-        connectionStore.updateConnectionPaths(ids)
-      }
-      if (updates.isFromBroadcast) { return }
-      broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxes' })
+      // const isNameUpdated = updates.find(update => Boolean(update.name))
+      // if (isNameUpdated) {
+      const ids = updates.map(update => update.id)
+      connectionStore.updateConnectionPaths(ids)
+      // }
+    },
+    async updateBoxes (updates) {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      this.updateBoxesState(updates)
+      // if (updates.isFromBroadcast) { return }
+      broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
       await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
+      await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       // TODO history? if unpaused
     },
     async updateBox (update) {
