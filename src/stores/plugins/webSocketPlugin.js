@@ -16,6 +16,9 @@
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
@@ -34,12 +37,21 @@ export default function webSocketPlugin () {
     const globalStore = useGlobalStore(pinia)
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
+    const cardStore = useCardStore(pinia)
+    const boxStore = useBoxStore(pinia)
+    const connectionStore = useConnectionStore(pinia)
     if (store === 'globalStore') {
       return globalStore
     } else if (store === 'spaceStore') {
       return spaceStore
     } else if (store === 'userStore') {
       return userStore
+    } else if (store === 'cardStore') {
+      return cardStore
+    } else if (store === 'boxStore') {
+      return boxStore
+    } else if (store === 'connectionStore') {
+      return connectionStore
     } else {
       return globalStore
     }
@@ -224,10 +236,10 @@ export default function webSocketPlugin () {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     const { message, user } = data
-    const { name, updates, action } = message
+    const { name, updates = {}, action } = message
+    updates.user = user
     const store = message.store || 'globalStore'
     const isAction = Boolean(action)
-    console.log('♥️♥️♥️', message, user, updates, store, action)
     if (name === 'connected') {
       console.info('🌛 user connected', user)
     } else if (name === 'userJoinedRoom') {
@@ -237,13 +249,17 @@ export default function webSocketPlugin () {
       globalStore.updateOtherUsers(updates.user)
     } else if (name === 'userLeftRoom') {
       spaceStore.removeIdleClientFromSpace(user || updates.user)
-      globalStore.clearRemoteMultipleSelected(data)
+      globalStore.clearRemoteMultipleSelected(updates)
     } else if (name === 'userLeftSpace') {
       spaceStore.removeCollaboratorFromSpace(updates.user, true)
       if (updates.user.id === userStore.id) {
         spaceStore.removeCurrentUserFromSpace()
       }
     } else if (isAction) {
+      if (action !== 'triggerUpdateRemoteUserCursor' && action !== 'triggerAddRemotePaintingCircle') {
+        console.log('♥️♥️♥️', message, user, updates, store, action)
+      }
+
       updates.isFromBroadcast = true
       const piniaStore = getPiniaStore(store, pinia)
       if (piniaStore) {

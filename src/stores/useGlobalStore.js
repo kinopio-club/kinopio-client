@@ -1434,7 +1434,7 @@ export const useGlobalStore = defineStore('global', {
     },
     clearRemoteMultipleSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
-      const user = update.user || update.updates.user
+      const user = update.user
       this.remoteCardsSelected = this.remoteCardsSelected.filter(card => card.userId !== user.id)
       this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
       this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== user.id)
