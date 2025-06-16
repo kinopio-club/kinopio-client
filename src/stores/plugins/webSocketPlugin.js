@@ -141,7 +141,7 @@ export default function webSocketPlugin () {
   const checkIfShouldNotifyOffscreenCardCreated = (pinia, { action, updates }) => {
     const globalStore = useGlobalStore(pinia)
     if (action === 'createCard') {
-      globalStore.triggerNotifyOffscreenCardCreated(updates.card)
+      globalStore.triggerNotifyOffscreenCardCreated(updates)
     }
   }
   const checkIfShouldPreventBroadcast = (pinia) => {
