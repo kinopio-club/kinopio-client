@@ -339,7 +339,6 @@ export const useCardStore = defineStore('cards', {
       // const shouldUpdateConnectionPaths = updates.find(update => Boolean(update.name || update.x || update.y))
       // if (shouldUpdateConnectionPaths) {
       const ids = updates.map(update => update.id)
-      console.log(ids)
       connectionStore.updateConnectionPaths(ids)
       // }
     },

@@ -280,6 +280,7 @@ export const useBoxStore = defineStore('boxes', {
     updateBoxesInfoDimensions (ids) {
       for (const id of ids) {
         const box = this.getBox(id)
+        if (!box) { continue }
         const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(box.id)
         const update = {
           id: box.id,
