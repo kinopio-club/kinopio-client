@@ -273,7 +273,7 @@ export default function webSocketPlugin () {
   let sentActions, pendingMessages
   const sendMessageThrottle = throttle(() => {
     if (!websocket) { return }
-    if (pendingMessages?.length > 0) {
+    if (pendingMessages?.length) {
       pendingMessages.forEach(data => {
         websocket.send(JSON.stringify(data))
       })
