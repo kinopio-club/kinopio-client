@@ -298,6 +298,7 @@ export const useConnectionStore = defineStore('connections', {
       for (const id of ids) {
         // remove from indexes
         const connection = this.getConnection(id)
+        if (!connection) { return }
         if (this.byStartItemId[connection.startItemId]) {
           this.byStartItemId[connection.startItemId] = this.byStartItemId[connection.startItemId]
             .filter(id => id !== connection.id)
@@ -320,7 +321,7 @@ export const useConnectionStore = defineStore('connections', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       this.removeConnectionsState(ids)
-      await apiStore.addToQueue({ name: 'removeConnections', body: ids })
+      await apiStore.addToQueue({ name: 'removeConnections', body: { ids } })
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
       const connections = ids.map(id => this.getConnection(id))
       // historyStore.add({ connections, isRemoved: true })
