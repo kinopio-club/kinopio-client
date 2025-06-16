@@ -237,7 +237,7 @@ export default function webSocketPlugin () {
       globalStore.updateOtherUsers(updates.user)
     } else if (name === 'userLeftRoom') {
       spaceStore.removeIdleClientFromSpace(user || updates.user)
-      globalStore.clearRemoteMultipleSelected(data)
+      globalStore.clearRemoteMultipleSelected(updates)
     } else if (name === 'userLeftSpace') {
       spaceStore.removeCollaboratorFromSpace(updates.user, true)
       if (updates.user.id === userStore.id) {
