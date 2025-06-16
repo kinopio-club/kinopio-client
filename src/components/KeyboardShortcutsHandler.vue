@@ -906,17 +906,15 @@ const selectItemIds = ({ position, cardIds, boxIds }) => {
   const preventMultipleSelectedActionsIsVisible = globalStore.preventMultipleSelectedActionsIsVisible
   const isItemIds = Boolean(cardIds.length || boxIds.length)
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
-    globalStore.multipleCardsSelectedIds = cardIds
-    globalStore.multipleBoxesSelectedIds = boxIds
+    globalStore.updateMultipleCardsSelectedIds(cardIds)
+    globalStore.updateMultipleBoxesSelectedIds(boxIds)
   } else if (isItemIds) {
     globalStore.multipleSelectedActionsPosition = position
     globalStore.updateMultipleSelectedActionsIsVisible(true)
-    globalStore.multipleCardsSelectedIds = cardIds
-    globalStore.multipleBoxesSelectedIds = boxIds
+    globalStore.updateMultipleCardsSelectedIds(cardIds)
+    globalStore.updateMultipleBoxesSelectedIds(boxIds)
   } else {
     globalStore.updateMultipleSelectedActionsIsVisible(false)
-    globalStore.multipleCardsSelectedIds = []
-    globalStore.multipleBoxesSelectedIds = []
   }
 }
 const selectAllItems = () => {
