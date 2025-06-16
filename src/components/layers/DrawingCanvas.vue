@@ -80,9 +80,13 @@ onMounted(() => {
       } else if (name === 'triggerDrawingInitialize') {
         redraw()
         const strokes = currentStrokes.concat(remoteStrokes)
-        await updateDrawingImageBackground(strokes)
+        await updateDrawingDataUrl(strokes)
       } else if (name === 'triggerDrawingReset') {
         clearDrawing()
+      } else if (name === 'triggetUpdateDrawingDataUrl') {
+        const strokes = currentStrokes.concat(remoteStrokes)
+        await updateDrawingDataUrl(strokes)
+        globalStore.triggerEndDrawing()
       }
     }
   )
@@ -228,7 +232,7 @@ const dataUrlFromOffscreenCanvas = (offscreenCanvas) => {
       .catch(reject)
   })
 }
-const updateDrawingImageBackground = async (strokes) => {
+const updateDrawingDataUrl = async (strokes) => {
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
@@ -256,7 +260,9 @@ const updateDrawingImageBackground = async (strokes) => {
   })
   const dataUrl = await dataUrlFromOffscreenCanvas(offscreenCanvas)
   globalStore.drawingImageUrl = dataUrl
-  // TODO broadcast here for collabs to update their own globalStore.drawingImageUrl for minimap
+  broadcastStore.update({
+    action: 'triggetUpdateDrawingDataUrl'
+  })
 }
 
 // start
@@ -300,7 +306,7 @@ const redraw = async () => {
 
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)
-  await updateDrawingImageBackground(strokes)
+  await updateDrawingDataUrl(strokes)
   globalStore.triggerEndDrawing()
   updatePageSizes(strokes)
   if (isRemovedStroke) {

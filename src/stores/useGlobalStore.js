@@ -504,6 +504,7 @@ export const useGlobalStore = defineStore('global', {
     triggerAddRemoteDrawingStroke (updates) {},
     triggerRemoveRemoteDrawingStroke (updates) {},
     triggerEndDrawing () {},
+    triggetUpdateDrawingDataUrl () {},
 
     resetPageSizes () {
       this.updateViewportSizes()
