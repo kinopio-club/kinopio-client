@@ -65,7 +65,7 @@ onMounted(() => {
       } else if (name === 'triggerDraw') {
         draw(args[0])
       } else if (name === 'triggerAddRemoteDrawingStroke') {
-        const stroke = args[0].stroke
+        const stroke = args[0]
         remoteStrokes.push(stroke)
         renderStroke(stroke, true)
         globalStore.triggerUpdateDrawingBackground()
@@ -160,20 +160,15 @@ const createPoint = (event) => {
 const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   broadcastStore.update({
-    updates: {
-      userId: userStore.id,
-      stroke
-    },
+    updates: stroke,
     action: 'triggerAddRemoteDrawingStroke'
   })
+  console.log('🔮🔮triggerAddRemoteDrawingStroke')
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   broadcastStore.update({
-    updates: {
-      userId: userStore.id,
-      stroke
-    },
+    updates: stroke,
     action: 'triggerRemoveRemoteDrawingStroke'
   })
 }
