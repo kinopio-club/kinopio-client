@@ -2479,27 +2479,35 @@ export default {
   // Broadcast Websocket 🌝
 
   userMeta (user, space) {
-    const isUser = space.users.find(spaceUser => {
-      return spaceUser.id === user.id
-    })
-    const spaceCollaborators = space.collaborators || []
-    const isCollaborator = spaceCollaborators.find(collaborator => {
-      return collaborator.id === user.id
-    })
-    const isSpectator = !(isUser || isCollaborator)
-    const isSignedIn = Boolean(user.apiKey)
-    return {
-      id: user.id,
-      name: user.name,
-      color: user.color,
-      description: user.description,
-      website: user.website,
-      isSignedIn,
-      isSpectator,
-      isCollaborator,
-      isUpgraded: user.isUpgraded,
-      isModerator: user.isModerator,
-      isDonor: user.isDonor
+    if (space) {
+      const isUser = space.users.find(spaceUser => {
+        return spaceUser.id === user.id
+      })
+      const spaceCollaborators = space.collaborators || []
+      const isCollaborator = spaceCollaborators.find(collaborator => {
+        return collaborator.id === user.id
+      })
+      const isSpectator = !(isUser || isCollaborator)
+      const isSignedIn = Boolean(user.apiKey)
+      return {
+        id: user.id,
+        name: user.name,
+        color: user.color,
+        description: user.description,
+        website: user.website,
+        isSignedIn,
+        isSpectator,
+        isCollaborator,
+        isUpgraded: user.isUpgraded,
+        isModerator: user.isModerator,
+        isDonor: user.isDonor
+      }
+    } else {
+      return {
+        id: user.id,
+        name: user.name,
+        color: user.color
+      }
     }
   },
   spaceMeta (space) {

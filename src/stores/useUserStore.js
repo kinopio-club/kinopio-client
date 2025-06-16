@@ -105,6 +105,9 @@ export const useUserStore = defineStore('users', {
     getUserAllState () {
       return { ...this.$state }
     },
+    getUserPublicMeta () {
+      return utils.userMeta(this.getUserAllState)
+    },
     getUserIsSignedIn () {
       return Boolean(this.apiKey)
     },

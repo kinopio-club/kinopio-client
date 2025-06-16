@@ -162,7 +162,7 @@ export const useGroupStore = defineStore('groups', {
     // update
 
     update (group) {
-      if (!group.id) {
+      if (!group?.id) {
         console.warn('🚑 could not update group', group)
         return
       }

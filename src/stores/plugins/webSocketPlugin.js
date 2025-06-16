@@ -276,6 +276,7 @@ export default function webSocketPlugin () {
 
   const sendMessage = throttle((pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
+    const userStore = useUserStore(pinia)
     const shouldBroadcast = spaceStore.getSpaceShouldBroadcast
     if (!websocket || !isConnected) {
       return
@@ -284,12 +285,13 @@ export default function webSocketPlugin () {
       return
     }
     // send message
-    websocket.send(JSON.stringify({
+    const data = {
       message,
       clientId,
-      spaceId: spaceStore.id
-      // user
-    }))
+      spaceId: spaceStore.id,
+      user: userStore.getUserPublicMeta
+    }
+    websocket.send(JSON.stringify(data))
   }, 5)
   const broadcastHandler = (pinia, name, args) => {
     const globalStore = useGlobalStore(pinia)
