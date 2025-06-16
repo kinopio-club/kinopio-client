@@ -27,9 +27,7 @@ onMounted(() => {
       if (name === 'spaceZoomPercent') {
         updateCanvasSize()
       } else if (name === 'currentUserToolbar') {
-        if (globalStore.getToolbarIsDrawing) {
-          update()
-        }
+        update()
       }
     }
   )
@@ -61,7 +59,6 @@ const clear = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
 const update = () => {
-  if (!globalStore.getToolbarIsDrawing) { return }
   const sourceCanvas = document.getElementById('drawing-canvas')
   clear()
   context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height)
@@ -71,9 +68,6 @@ const styles = computed(() => {
   const value = {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
-  }
-  if (!globalStore.getToolbarIsDrawing) {
-    value.display = 'none'
   }
   return value
 })

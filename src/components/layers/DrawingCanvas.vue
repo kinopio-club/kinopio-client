@@ -51,10 +51,8 @@ onMounted(() => {
         await nextTick()
         scroll()
       } else if (name === 'currentUserToolbar') {
-        if (globalStore.getToolbarIsDrawing) {
-          updatePrevScroll()
-          redraw()
-        }
+        updatePrevScroll()
+        redraw()
       }
     }
   )
@@ -258,6 +256,7 @@ const updateDrawingImageBackground = async (strokes) => {
   })
   const dataUrl = await dataUrlFromOffscreenCanvas(offscreenCanvas)
   globalStore.drawingImageUrl = dataUrl
+  // TODO broadcast here for collabs to update their own globalStore.drawingImageUrl for minimap
 }
 
 // start
@@ -353,9 +352,6 @@ const updatePrevScroll = () => {
   }
 }
 const scroll = () => {
-  if (!globalStore.getToolbarIsDrawing) {
-    return
-  }
   updatePrevScroll()
   redraw()
 }
@@ -388,9 +384,6 @@ const styles = computed(() => {
   const value = {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
-  }
-  if (!globalStore.getToolbarIsDrawing) {
-    value.display = 'none'
   }
   return value
 })
