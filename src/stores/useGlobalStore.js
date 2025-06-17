@@ -512,6 +512,20 @@ export const useGlobalStore = defineStore('global', {
       this.pageWidth = this.viewportWidth
       this.pageHeight = this.viewportHeight
     },
+    resetStateMeta () {
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      const user = { id: userStore.id }
+      this.notifySpaceIsRemoved = false
+      this.spaceUrlToLoad = ''
+      this.userHasScrolled = false
+      broadcastStore.leaveSpaceRoom({ user, type: 'userLeftRoom' })
+      this.clearAllNotifications()
+      this.clearSpaceFilters()
+      this.clearSearch()
+      this.shouldPreventNextEnterKey = false
+      this.triggerDrawingReset()
+    },
     updatePageSizesFromRect (itemsRect) {
       if (!itemsRect) { return }
       const pageWidth = Math.max(this.viewportWidth, itemsRect.width, this.pageWidth)

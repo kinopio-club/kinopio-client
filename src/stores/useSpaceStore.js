@@ -397,22 +397,6 @@ export const useSpaceStore = defineStore('space', {
       if (remoteSpace.id !== this.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
-    clearStateMeta () {
-      const userStore = useUserStore()
-      const broadcastStore = useBroadcastStore()
-      const globalStore = useGlobalStore()
-      const user = { id: userStore.id }
-      isLoadingRemoteSpace = false
-      globalStore.notifySpaceIsRemoved = false
-      globalStore.spaceUrlToLoad = ''
-      globalStore.userHasScrolled = false
-      broadcastStore.leaveSpaceRoom({ user, type: 'userLeftRoom' })
-      globalStore.clearAllNotifications()
-      globalStore.clearSpaceFilters()
-      globalStore.clearSearch()
-      globalStore.shouldPreventNextEnterKey = false
-      globalStore.triggerDrawingReset()
-    },
     restoreSpaceLocal (space) {
       const historyStore = useHistoryStore()
       const emptySpace = utils.emptySpace(space.id)
@@ -433,13 +417,14 @@ export const useSpaceStore = defineStore('space', {
     async loadSpace (space) {
       const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
+      isLoadingRemoteSpace = false
       space.connections = utils.migrationConnections(space.connections)
       globalStore.spaceZoomPercent = 100
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
       space = utils.normalizeSpace(cachedSpace)
-      this.clearStateMeta()
+      globalStore.resetStateMeta()
       globalStore.resetPageSizes()
       // load local space while fetching remote space
       try {
