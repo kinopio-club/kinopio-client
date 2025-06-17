@@ -507,6 +507,7 @@ export const useGlobalStore = defineStore('global', {
     triggetUpdateDrawingDataUrl () {},
 
     resetPageSizes () {
+      this.triggerDrawingReset()
       this.updateViewportSizes()
       this.pageWidth = this.viewportWidth
       this.pageHeight = this.viewportHeight

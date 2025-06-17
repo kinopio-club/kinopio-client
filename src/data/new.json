@@ -24,6 +24,7 @@
   "visits": 0,
   "isRemoved": false,
   "groupId": null,
+  "group": null,
   "drawingStrokes": [],
-  "drawingImageUrl": ""
+  "drawingImage": ""
 }
