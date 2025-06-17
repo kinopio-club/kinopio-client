@@ -12,6 +12,7 @@ import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
@@ -44,6 +45,7 @@ const state = reactive({
 // dialog
 
 const visible = computed(() => Boolean(globalStore.connectionDetailsIsVisibleForConnectionId))
+const isDevelopment = computed(() => consts.isDevelopment())
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     updatePinchCounterZoomDecimal()
@@ -301,6 +303,13 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       //- Remove
       button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
+
+    //- DEV
+    .row(v-if="isDevelopment")
+      .badge.info
+        span CONNECTIONID:
+        br
+        span {{currentConnection.id}}
 
     //- label etc.
     ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
