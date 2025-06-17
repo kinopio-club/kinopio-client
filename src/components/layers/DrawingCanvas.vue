@@ -35,7 +35,7 @@ onMounted(() => {
   window.addEventListener('mouseup', endDrawing)
   window.addEventListener('touchend', endDrawing)
   window.addEventListener('scroll', scroll)
-  window.addEventListener('resize', redraw)
+  window.addEventListener('resize', resize)
   canvas = canvasElement.value
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -109,7 +109,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', endDrawing)
   window.removeEventListener('touchend', endDrawing)
   window.removeEventListener('scroll', scroll)
-  window.removeEventListener('resize', redraw)
+  window.removeEventListener('resize', resize)
   unsubscribes()
 })
 
@@ -361,6 +361,13 @@ const updatePrevScroll = () => {
 const scroll = () => {
   updatePrevScroll()
   redraw()
+}
+const resize = async () => {
+  await nextTick()
+  await nextTick()
+  setTimeout(() => {
+    scroll()
+  }, 10)
 }
 const updatePageSizes = (strokes) => {
   let x = 0
