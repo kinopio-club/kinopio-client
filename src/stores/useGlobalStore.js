@@ -202,7 +202,6 @@ export const useGlobalStore = defineStore('global', {
     currentSelectedTag: {},
     remoteTags: [],
     remoteTagsIsFetched: false,
-    tags: [],
 
     // other items (links)
     otherCardDetailsIsVisible: false,
@@ -1214,7 +1213,20 @@ export const useGlobalStore = defineStore('global', {
     //   this.userDetailsUser = user
     // },
 
-    // Tag Details
+    // Tag
+
+    async updateRemoteTags (removeUnusedTags) {
+      const userStore = useUserStore()
+      const apiStore = useApiStore()
+      if (!userStore.getUserIsSignedIn || this.remoteTagsIsFetched) {
+        return this.remoteTags
+      }
+      let tags = await apiStore.getUserTags(removeUnusedTags) || []
+      tags = uniqBy(tags, 'name')
+      this.remoteTags = tags
+      this.remoteTagsIsFetched = true
+      return tags
+    },
 
     // tagDetailsIsVisible (value) {
     //   utils.typeCheck({ value, type: 'boolean' })
@@ -1244,10 +1256,10 @@ export const useGlobalStore = defineStore('global', {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.remoteTagsIsFetched = value
     // },
-    tags (tags) {
-      utils.typeCheck({ value: tags, type: 'array' })
-      this.tags = tags
-    },
+    // tags (tags) {
+    //   utils.typeCheck({ value: tags, type: 'array' })
+    //   this.tags = tags
+    // },
 
     // Link Details
 

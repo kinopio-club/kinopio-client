@@ -10,9 +10,6 @@ import TagList from '@/components/TagList.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import uniqBy from 'lodash-es/uniqBy'
-import debounce from 'lodash-es/debounce'
-
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -69,7 +66,7 @@ const props = defineProps({
 const state = reactive({
   resultsSectionHeight: null,
   tags: [],
-  isLoadingRemoteTags: false
+  isLoading: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -82,7 +79,7 @@ const init = () => {
   updateResultsSectionHeight()
 }
 
-watch(() => state.isLoadingRemoteTags, (value, prevValue) => {
+watch(() => state.isLoading, (value, prevValue) => {
   updateResultsSectionHeight()
 })
 
@@ -92,7 +89,6 @@ const updateResultsSectionHeight = async () => {
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
-const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const filteredTags = computed(() => {
   let tags = state.tags
   if (shouldShowCurrentSpaceTags.value) {
@@ -139,24 +135,12 @@ const updateTags = async () => {
   const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
   state.tags = mergedTags
-  debouncedUpdateRemoteTags()
+  // remote tags
+  state.isLoading = true
+  const remoteTags = await globalStore.updateRemoteTags(true)
+  state.tags = remoteTags || []
+  state.isLoading = false
 }
-const debouncedUpdateRemoteTags = debounce(async () => {
-  if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = globalStore.remoteTagsIsFetched
-  let remoteTags
-  if (remoteTagsIsFetched) {
-    remoteTags = globalStore.remoteTags
-  } else {
-    state.isLoadingRemoteTags = true
-    remoteTags = await apiStore.getUserTags(true) || []
-    globalStore.remoteTags = remoteTags
-    globalStore.remoteTagsIsFetched = true
-    state.isLoadingRemoteTags = false
-  }
-  remoteTags = uniqBy(remoteTags, 'name')
-  state.tags = remoteTags
-}, 350, { leading: true })
 </script>
 
 <template lang="pug">
@@ -166,7 +150,7 @@ const debouncedUpdateRemoteTags = debounce(async () => {
       label(:class="{ active: shouldShowCurrentSpaceTags }")
         input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
         span In Current Space
-    TagList(:tags="filteredTags" :isLoading="state.isLoadingRemoteTags" :parentIsPinned="props.parentIsPinned" :positionTagsOnLeftSide="true")
+    TagList(:tags="filteredTags" :isLoading="state.isLoading" :parentIsPinned="props.parentIsPinned" :positionTagsOnLeftSide="true")
   section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
     p Type

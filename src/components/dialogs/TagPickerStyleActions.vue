@@ -70,20 +70,11 @@ const updateTags = async () => {
   scrollIntoView()
 }
 const updateRemoteTags = async () => {
-  if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = globalStore.remoteTagsIsFetched
-  let remoteTags
-  if (remoteTagsIsFetched) {
-    remoteTags = globalStore.remoteTags
-  } else {
-    state.loading = true
-    remoteTags = await apiStore.getUserTags() || []
-    globalStore.remoteTags = remoteTags
-    globalStore.remoteTagsIsFetched = true
-    state.loading = false
-  }
+  state.loading = true
+  const remoteTags = await globalStore.updateRemoteTags()
   const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
   state.tags = mergedTags
+  state.loading = false
 }
 
 // select tag

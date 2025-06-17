@@ -326,7 +326,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
       this.$patch(space)
-      console.log('🍍 space', this.getSpaceAllState)
+      console.log('🍍 restoreSpace', this.getSpaceAllState)
       globalStore.resetPageSizes()
       globalStore.updatePageSizes()
     },
