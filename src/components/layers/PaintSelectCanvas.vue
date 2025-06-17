@@ -15,6 +15,7 @@ import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { colord, extend } from 'colord'
+import uniqBy from 'lodash-es/uniqBy'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -94,7 +95,7 @@ onMounted(() => {
         const event = args[0]
         const position = utils.cursorPositionInSpace(event)
         createPaintingCircle(event)
-        selectItems(position)
+        selectItems([position])
       } else if (name === 'triggerUpdatePaintSelectCanvasPositionOffset') {
         updateCirclesWithScroll()
       } else if (name === 'triggerAddRemotePaintingCircle') {
@@ -363,6 +364,7 @@ const stopPainting = (event) => {
   startPostScroll()
 }
 const selectItems = (points) => {
+  points = uniqBy(points, item => `${item.x}_${item.y}`)
   // cards
   let matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
   const cardIds = matches.map(match => match.id)

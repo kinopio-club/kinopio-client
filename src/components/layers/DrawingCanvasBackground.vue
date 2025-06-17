@@ -21,12 +21,15 @@ onMounted(() => {
   updatePrevScroll()
 
   const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
+    async (mutation, state) => {
       const name = mutation.events.key
       const value = mutation.events.newValue
       if (name === 'spaceZoomPercent') {
         updateCanvasSize()
       } else if (name === 'currentUserToolbar') {
+        update()
+      } else if (name === 'spaceZoomPercent' || name === 'zoomOrigin') {
+        await nextTick()
         update()
       }
     }

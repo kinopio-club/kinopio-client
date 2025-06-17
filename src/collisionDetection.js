@@ -78,6 +78,7 @@ export default {
       return Array.from(matchingRects)
     } catch (error) {
       console.error('🚒 checkPointsInRects', error, points, rects, grid)
+      return []
     }
   },
   isPointInsideRect (point, rect) {

@@ -208,18 +208,21 @@ export default {
     // #space
     const space = document.getElementById('space')
     if (!space) { return }
-    let rect = space.getBoundingClientRect()
+    const spaceRect = space.getBoundingClientRect()
     position = {
-      x: position.x - rect.x,
-      y: position.y - rect.y
+      x: position.x - spaceRect.x,
+      y: position.y - spaceRect.y
     }
+    // console.log('space',position, spaceRect)
+
     // #app
     const app = document.getElementById('app')
-    rect = app.getBoundingClientRect()
+    const appRect = app.getBoundingClientRect()
     position = {
-      x: position.x + rect.x,
-      y: position.y + rect.y
+      x: position.x + appRect.x,
+      y: position.y + appRect.y
     }
+    // console.log('app',position, appRect)
     // zoom
     const zoom = this.spaceCounterZoomDecimal() || 1
     position = {
