@@ -69,7 +69,7 @@ const boxColorClasses = (box) => {
   return utils.colorClasses({ backgroundColor: box.color })
 }
 const scrollIntoView = (box) => {
-  globalStore.focusOnBoxId = box.id
+  globalStore.updateFocusOnBoxId(box.id)
 }
 </script>
 
@@ -91,17 +91,20 @@ dialog.narrow.minimap.is-pinnable(
           img.icon.pin.right-pin(src="@/assets/pin.svg")
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
-  section.boxes-section
-    .row
-      p Jump to Box
-    .row.boxes-row(v-if="boxes.length")
-      template(v-for="box in boxes" :key="box.id")
-        .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
-          span {{box.name}}
-    .row(v-else)
-      .badge.secondary
-        img.icon.box-icon(src="@/assets/box.svg")
-        span No boxes in this space yet
+  section.boxes-section.results-section
+    details
+      summary
+        //- .row
+        span Jump to Box
+      section.subsection
+        .row.boxes-row(v-if="boxes.length")
+          template(v-for="box in boxes" :key="box.id")
+            .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
+              span {{box.name}}
+        .row(v-else)
+          .badge.secondary
+            img.icon.box-icon(src="@/assets/box.svg")
+            span No boxes in this space yet
 </template>
 
 <style lang="stylus">
@@ -123,5 +126,6 @@ dialog.minimap
       flex-wrap wrap
       .badge
         margin-bottom 10px
-
+  summary
+    text-align left
 </style>
