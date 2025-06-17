@@ -11,6 +11,7 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -304,14 +305,10 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
 
-    //- DEV
-    .row(v-if="isDevelopment")
-      .badge.info
-        span CONNECTIONID:
-        br
-        span {{currentConnection.id}}
+    //- debug
+    ItemDetailsDebug(:item="currentConnection")
 
-    //- label etc.
+    //- h1, h2, label etc.
     ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
 
     p.edit-message.badge.info(v-if="!canEditConnection")
