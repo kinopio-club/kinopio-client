@@ -112,7 +112,7 @@ dialog.minimap
   top initial
   left initial
   &.is-pinned
-    right -32px
+    right 0
   .right-pin
     transform rotate(180deg)
   section.minimap-section
