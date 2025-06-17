@@ -34,7 +34,7 @@ let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 const loadSpaceIdsError = []
 
 export const useSpaceStore = defineStore('space', {
-  state: () => (newSpace),
+  state: () => (utils.clone(newSpace)),
 
   getters: {
     getSpaceAllState () {
@@ -325,13 +325,9 @@ export const useSpaceStore = defineStore('space', {
       boxStore.initializeBoxes(space?.boxes)
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
-      // remove unused attrs
-      delete space?.cards
-      delete space?.boxes
-      delete space?.connectionTypes
-      delete space?.connections
       this.$patch(space)
       console.log('🍍 space', this.getSpaceAllState)
+      globalStore.resetPageSizes()
       globalStore.updatePageSizes()
     },
     async getRemoteSpace (space) {
@@ -603,6 +599,7 @@ export const useSpaceStore = defineStore('space', {
       const user = userStore.getUserAllState
       globalStore.triggerSpaceZoomReset()
       let space = utils.clone(newSpace)
+      space = utils.resetSpaceMeta({ space, user })
       space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
@@ -681,7 +678,6 @@ export const useSpaceStore = defineStore('space', {
       const uniqueNewSpace = await cache.updateIdsInSpace(space, nullCardUsers)
       globalStore.clearSearch()
       isLoadingRemoteSpace = false
-      globalStore.resetPageSizes()
       await this.restoreSpace(uniqueNewSpace)
     },
     async createSpace () {

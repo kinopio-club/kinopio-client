@@ -136,6 +136,7 @@ const clearDrawing = () => {
   redoStrokes = []
   currentStrokes = []
   remoteStrokes = []
+  clearCanvas()
 }
 
 // points

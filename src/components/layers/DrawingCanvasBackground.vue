@@ -35,6 +35,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerUpdateDrawingBackground') {
         update()
+      } else if (name === 'triggerDrawingReset') {
+        clear()
       }
     }
   )

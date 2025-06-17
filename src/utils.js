@@ -1642,6 +1642,7 @@ export default {
     space.previewImage = null
     space.previewThumbnailImage = null
     space.groupId = null
+    space.group = null
     space.createdAt = new Date()
     space.editedAt = new Date()
     space.collaboratorKey = nanoid()
