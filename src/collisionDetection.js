@@ -117,8 +117,8 @@ export default {
     // Check if each point is inside the SVG path
     svgPoints.forEach(svgPoint => {
       if (path.isPointInStroke(svgPoint)) {
-        const pathData = path.dataset
-        pathsInsidePoints.push(pathData)
+        const pathId = path.dataset.id
+        pathsInsidePoints.push(pathId)
       }
     })
     return pathsInsidePoints

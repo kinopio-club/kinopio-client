@@ -2122,7 +2122,7 @@ export const useGlobalStore = defineStore('global', {
       }
       broadcastStore.update({ updates, action: 'updateRemoteConnectionsSelected' })
     },
-    addMultipleToMultipleConnectionsSelected (connectionIds) {
+    addMultipleToMultipleConnectionsSelected (connectionIds = []) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       utils.typeCheck({ value: connectionIds, type: 'array' })
