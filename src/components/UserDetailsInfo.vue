@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserBadges from '@/components/UserBadges.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import User from '@/components/User.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -137,10 +138,8 @@ const updateUserColor = (newValue) => {
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- badges
       UserBadges(:user="user" :isCurrentUser="isCurrentUser")
-  section(v-if="isDevelopment")
-    .badge.secondary
-      p USER ID: {{ props.user.id }}
-      p APIKEY: {{ props.user.apiKey }}
+
+  ItemDetailsDebug(:item="props.user" :keys="['apiKey']")
 </template>
 
 <style lang="stylus">

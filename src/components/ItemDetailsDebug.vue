@@ -31,4 +31,8 @@ const visible = computed(() => consts.isDevelopment())
 .item-details-debug
   table
     margin 0
+    max-width 100%
+    word-break break-word
+    td
+      min-width 25px
 </style>
