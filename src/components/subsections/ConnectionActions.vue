@@ -100,7 +100,7 @@ section.subsection.connection-actions(v-if="props.visible" :class="colorClasses"
             .current-color(:style="{ background: type.color }")
         span Type
       MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="props.connections" :selectedConnectionTypes="editableConnectionTypes")
-    //- Arrows or Label
+    //- Label, Direction, Reverse, Curved
     ConnectionDecorators(:connections="props.connections")
 </template>
 

@@ -26,7 +26,7 @@ export const useConnectionStore = defineStore('connections', {
     typeAllIds: [],
     prevConnectionTypeId: '',
     // indexes
-    byStartItemId: {}, // { startItemId: [ id1, id2 ] }
+    byStartItemId: {}, // { itemId: [ id1, id2 ] }
     byEndItemId: {}
   }),
 
@@ -167,6 +167,42 @@ export const useConnectionStore = defineStore('connections', {
       this.typeAllIds = allIds
     },
 
+    // indexes
+
+    removeFromIndexes (connection) {
+      const { startItemId, endItemId, id } = connection
+      const removeId = (array) => array.filter(prevId => prevId !== id)
+      // remove from byStartItemId
+      if (this.byStartItemId[startItemId]) {
+        this.byStartItemId[startItemId] = removeId(this.byStartItemId[startItemId])
+      }
+      if (this.byStartItemId[endItemId]) {
+        this.byStartItemId[endItemId] = removeId(this.byStartItemId[endItemId])
+      }
+      // remove from byEndItemId
+      if (this.byEndItemId[startItemId]) {
+        this.byEndItemId[startItemId] = removeId(this.byEndItemId[startItemId])
+      }
+      if (this.byEndItemId[endItemId]) {
+        this.byEndItemId[endItemId] = removeId(this.byEndItemId[endItemId])
+      }
+    },
+    addToIndexes (connection) {
+      // add startItemId
+      this.byStartItemId[connection.startItemId] = this.byStartItemId[connection.startItemId] || []
+      this.byStartItemId[connection.startItemId].push(connection.id)
+      // add endItemId
+      this.byEndItemId[connection.endItemId] = this.byEndItemId[connection.endItemId] || []
+      this.byEndItemId[connection.endItemId].push(connection.id)
+      // remove duplicates
+      this.byStartItemId[connection.startItemId] = uniq(this.byStartItemId[connection.startItemId])
+      this.byEndItemId[connection.byEndItemId] = uniq(this.byEndItemId[connection.byEndItemId])
+    },
+    updateIndexes (connection) {
+      this.removeFromIndexes(connection)
+      this.addToIndexes(connection)
+    },
+
     // create
 
     addConnectionToState (connection) {
@@ -180,9 +216,7 @@ export const useConnectionStore = defineStore('connections', {
       if (!this.byEndItemId[connection.endItemId]) {
         this.byEndItemId[connection.endItemId] = []
       }
-      // add to indexes
-      this.byStartItemId[connection.startItemId].push(connection.id)
-      this.byEndItemId[connection.endItemId].push(connection.id)
+      this.addToIndexes(connection)
       globalStore.removeRemoteCurrentConnection(connection)
     },
     addConnectionTypeToState (type) {
@@ -252,6 +286,10 @@ export const useConnectionStore = defineStore('connections', {
         this.byId[update.id] = {
           ...this.byId[update.id],
           ...update
+        }
+        const shouldUpdateIndexes = update.startItemId || update.endItemId
+        if (shouldUpdateIndexes) {
+          this.updateIndexes(update)
         }
       })
     },
