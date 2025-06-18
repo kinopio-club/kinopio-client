@@ -287,17 +287,17 @@ const items = computed(() => {
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
-          button.small-button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
+          button.small-button.remove-button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
             img.icon(src="@/assets/remove.svg")
 
-          .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
-            p Permanently delete?
+          .remove-button(v-if="isRemoveConfirmationVisible(item)")
             .segmented-buttons
-              button(@click.left.stop="hideRemoveConfirmation")
-                img.icon.cancel(src="@/assets/add.svg")
-              button.danger(@click.left.stop="deleteItem(item)")
+              button.small-button.danger(@click.left.stop="deleteItem(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Delete
+              button.small-button(@click.left.stop="hideRemoveConfirmation")
+                img.icon.cancel(src="@/assets/add.svg")
+
 </template>
 
 <style lang="stylus">
@@ -310,21 +310,19 @@ const items = computed(() => {
       margin-left 4px
       margin-top 4px
       margin-bottom 8px
-  li
-    justify-content space-between
-    button
-      margin-left auto
   .name
     white-space nowrap
     overflow hidden
     text-overflow ellipsis
     max-width calc(100% - 56px)
-  .remove-confirmation
-    margin-left 6px
-    min-width 130px
-    text-align right
-    .segmented-buttons
-      margin-top 5px
+  .remove-button
+    position absolute
+    right 6px
+    top 7px
+    button
+      margin 0
+      &:first-child
+        margin-right -1px
   .badge
     min-width 19px
   .results-actions
