@@ -217,7 +217,7 @@ const updateName = async (item, newName) => {
       id: item.id,
       name: newName
     }
-    boxStore.update(update)
+    boxStore.updateBox(update)
   }
 }
 
