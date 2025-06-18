@@ -29,10 +29,12 @@ const visible = computed(() => consts.isDevelopment())
 
 <style lang="stylus">
 .item-details-debug
+  margin-right 0
   table
     margin 0
+    overflow scroll
     max-width 100%
-    word-break break-word
+    display block
     td
-      min-width 25px
+      word-break keep-all
 </style>
