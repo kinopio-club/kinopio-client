@@ -267,7 +267,7 @@ export const useUserStore = defineStore('users', {
 
     // init
 
-    async updateUserState (user) {
+    async initializeUserState (user) {
       if (utils.userIsUpgraded(user)) {
         user.isUpgraded = true
       } else {
@@ -295,7 +295,7 @@ export const useUserStore = defineStore('users', {
       if (!user) { return }
       user.updatedAt = utils.unixTime(user.updatedAt)
       console.info('🌸 Initialize user from remote', user)
-      this.updateUserState(user)
+      this.initializeUserState(user)
     },
     async restoreUserAssociatedData () {
       const globalStore = useGlobalStore()
@@ -370,6 +370,12 @@ export const useUserStore = defineStore('users', {
 
     // update
 
+    async updateUserState (update) {
+      const keys = Object.keys(update)
+      for (const key of keys) {
+        this[key] = update[key]
+      }
+    },
     broadcastUpdateUser (update) {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
@@ -383,11 +389,8 @@ export const useUserStore = defineStore('users', {
     },
     async updateUser (update) {
       const apiStore = useApiStore()
-      const keys = Object.keys(update)
-      for (const key of keys) {
-        this[key] = update[key]
-        await cache.updateUser(key, update[key])
-      }
+      this.updateUserState(update)
+      await cache.updateUser(update)
       this.broadcastUpdateUser(update)
       await apiStore.addToQueue({ name: 'updateUser', body: update })
     },
@@ -445,18 +448,24 @@ export const useUserStore = defineStore('users', {
         }
         return space
       })
-      await cache.updateUser('favoriteSpaces', this.favoriteSpaces)
+      await cache.updateUser({
+        favoriteSpaces: this.favoriteSpaces
+      })
     },
 
     // keyboard shortcuts
 
-    addToDisabledKeyboardShortcuts (value) {
+    async addToDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts.push(value)
-      cache.updateUser('disabledKeyboardShortcuts', value)
+      await cache.updateUser({
+        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+      })
     },
-    removeFromDisabledKeyboardShortcuts (value) {
+    async removeFromDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts = this.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
-      cache.updateUser('disabledKeyboardShortcuts', value)
+      await cache.updateUser({
+        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+      })
     },
 
     // last space id

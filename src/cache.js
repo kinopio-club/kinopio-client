@@ -101,12 +101,11 @@ export default {
     const user = await this.getLocal('user')
     return user || {}
   },
-  async updateUser (key, value) {
+  async updateUser (update) {
     let user = await this.user()
     user = utils.normalizeToObject(user)
-    user[key] = value
-    user = utils.clone(user)
-    await this.storeLocal('user', user)
+    const updatedUser = { ...user, ...update }
+    await this.storeLocal('user', updatedUser)
   },
   async saveUser (user) {
     user = utils.clone(user)

@@ -420,18 +420,22 @@ const toggleMoveItemsIsVisible = () => {
 const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
 const shouldShowMultipleSelectedLineActions = computed(() => userStore.shouldShowMultipleSelectedLineActions)
 const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShowMultipleSelectedBoxActions)
-const toggleShouldShowMultipleSelectedLineActions = () => {
+const toggleShouldShowMultipleSelectedLineActions = async () => {
   closeDialogs()
-  const isVisible = !shouldShowMultipleSelectedLineActions.value
-  userStore.updateUser({ shouldShowMultipleSelectedLineActions, isVisible })
+  const value = !shouldShowMultipleSelectedLineActions.value
+  await userStore.updateUser({
+    shouldShowMultipleSelectedLineActions: value
+  })
   nextTick(() => {
     scrollIntoView()
   })
 }
-const toggleShouldShowMultipleSelectedBoxActions = () => {
+const toggleShouldShowMultipleSelectedBoxActions = async () => {
   closeDialogs()
-  const isVisible = !shouldShowMultipleSelectedBoxActions.value
-  userStore.updateUser({ shouldShowMultipleSelectedBoxActions, isVisible })
+  const value = !shouldShowMultipleSelectedBoxActions.value
+  await userStore.updateUser({
+    shouldShowMultipleSelectedBoxActions: value
+  })
   nextTick(() => {
     scrollIntoView()
   })
