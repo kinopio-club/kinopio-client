@@ -238,6 +238,9 @@ const currentBackgroundUrl = computed(() => {
 const backgroundImages = computed(() => {
   let images = backgroundImagesJSON
   images = images.filter(image => !image.isArchived)
+  if (!consts.isDevelopment) {
+    images = images.filter(image => !image.isDebug)
+  }
   return images
 })
 const updateCommunityBackgroundImages = async () => {
