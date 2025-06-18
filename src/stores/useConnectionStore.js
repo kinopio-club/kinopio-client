@@ -412,7 +412,8 @@ export const useConnectionStore = defineStore('connections', {
     async updateConnectionPaths (itemIds) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
-      const connections = this.getConnections(itemIds)
+      if (!itemIds.length) { return }
+      const connections = this.getConnectionsByItemIds(itemIds)
       const updates = []
       connections.forEach(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
