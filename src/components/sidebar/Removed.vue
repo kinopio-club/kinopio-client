@@ -242,9 +242,26 @@ const items = computed(() => {
 <template lang="pug">
 .removed(v-if="visible")
   section
-    p
-      span Restore Removed Items
-      Loader(:visible="isLoading" :isSmall="true")
+    .row.title-row
+      div
+        span Restore Removed Items
+        Loader(:visible="isLoading" :isSmall="true")
+      //- delete all
+      button.small-button(@click="toggleDeleteAllConfirmationIsVisible" :class="{ active: state.deleteAllConfirmationIsVisible }")
+        img.icon(src="@/assets/remove.svg")
+        span All
+    //- delete all confirmation
+    section.subsection(v-if="state.deleteAllConfirmationIsVisible")
+      p
+        span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
+      .segmented-buttons
+        button.danger(@click.left.stop="deleteAll")
+          img.icon(src="@/assets/remove.svg")
+          span Delete All
+        button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
+          img.icon.cancel(src="@/assets/add.svg")
+          span Cancel
+
     .segmented-buttons
       button(@click.left="showCards" :class="{active: state.cardsVisible}")
         img.icon(src="@/assets/remove.svg")
@@ -266,20 +283,6 @@ const items = computed(() => {
         p Removed spaces can be restored here
 
   section.results-section(v-if="items.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-    section.results-actions
-      button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!state.deleteAllConfirmationIsVisible")
-        img.icon(src="@/assets/remove.svg")
-        span Delete All
-      section.subsection(v-if="state.deleteAllConfirmationIsVisible")
-        p
-          span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
-        .segmented-buttons
-          button.danger(@click.left.stop="deleteAll")
-            img.icon(src="@/assets/remove.svg")
-            span Delete All
-          button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
-            img.icon.cancel(src="@/assets/add.svg")
-            span Cancel
 
     ul.results-list
       template(v-for="item in items" :key="item.id")
@@ -287,9 +290,10 @@ const items = computed(() => {
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
+          //- delete
           button.small-button.remove-button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
             img.icon(src="@/assets/remove.svg")
-
+          //- delete confirmation
           .remove-button(v-if="isRemoveConfirmationVisible(item)")
             .segmented-buttons
               button.small-button.danger(@click.left.stop="deleteItem(item)")
@@ -337,4 +341,6 @@ const items = computed(() => {
     border none
     section.subsection
       border-radius var(--entity-radius) !important
+  section.subsection
+    margin-bottom 10px
 </style>
