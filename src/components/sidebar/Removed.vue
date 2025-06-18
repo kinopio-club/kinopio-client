@@ -45,6 +45,7 @@ const state = reactive({
     cards: false,
     spaces: false
   },
+  isSuccess: false,
   resultsSectionHeight: null,
   deleteAllConfirmationIsVisible: false
 })
@@ -113,9 +114,11 @@ const deleteAll = () => {
     deleteAllSpaces()
   }
   state.deleteAllConfirmationIsVisible = false
+  state.isSuccess = true
 }
 const toggleDeleteAllConfirmationIsVisible = () => {
   state.deleteAllConfirmationIsVisible = !state.deleteAllConfirmationIsVisible
+  state.isSuccess = false
 }
 
 // Cards
@@ -126,6 +129,7 @@ const removedCardsWithName = computed(() => {
 const showCards = () => {
   state.cardsVisible = true
   state.deleteAllConfirmationIsVisible = false
+  state.isSuccess = false
   updateRemovedCards()
 }
 const updateLocalRemovedCards = () => {
@@ -178,6 +182,7 @@ const scrollIntoView = (card) => {
 const showSpaces = async () => {
   state.cardsVisible = false
   state.deleteAllConfirmationIsVisible = false
+  state.isSuccess = false
   await updateRemovedSpaces()
 }
 const updateLocalRemovedSpaces = async () => {
@@ -262,6 +267,9 @@ const items = computed(() => {
         button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
           img.icon.cancel(src="@/assets/add.svg")
           span Cancel
+    .row(v-if="state.isSuccess")
+      span.badge.success
+        span Deleted All
 
     .segmented-buttons
       button(@click.left="showCards" :class="{active: state.cardsVisible}")
