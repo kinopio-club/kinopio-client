@@ -254,17 +254,16 @@ dialog.share
     margin-top 10px
   .description
     margin-top 3px
-  dialog.privacy-picker,
   dialog.dialog-wrap
     left initial
     right 8px
   dialog.user-details
     left initial
     right calc(100% - 20px)
-  dialog.import-export
-    top calc(100% - 8px)
-    left initial
-    right 8px
+  dialog.import-export,
+  dialog.embed
+    top initial
+    bottom 25px
   .share-private
     margin-top 10px
   .privacy-button + input
@@ -281,16 +280,6 @@ dialog.share
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
-
-  @media(max-height 670px)
-    dialog.import-export,
-    dialog.embed
-      top -50px
-
-  @media(max-height 500px)
-    dialog.import-export,
-    dialog.embed
-      top -200px
 
   .segmented-buttons
     z-index 1
@@ -321,7 +310,4 @@ dialog.share
       margin-top 0
     label + label
       margin-left 6px
-
-  dialog.import-export
-    left 20px
 </style>
