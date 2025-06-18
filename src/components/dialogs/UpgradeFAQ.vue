@@ -25,7 +25,7 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
     details
       summary(@click="closeOtherDetails") What happens if I cancel my subscription?
       section.subsection
-        p You'll always be able to view the cards and spaces that you've created. But you won't be able to create new cards beyond the free limit.
+        p You'll always be able to view the cards and spaces that you've created. But you won't be able to create new cards beyond the free card limit.
 
     details
       summary(@click="closeOtherDetails") How do I cancel my subscription?
