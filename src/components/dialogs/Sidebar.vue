@@ -192,8 +192,7 @@ dialog#sidebar.sidebar.is-pinnable(
     align-items flex-start
   .right-pin
     transform rotate(180deg)
-  .tags,
-  .removed
+  .tags
     section
       &:first-child
         border-top-left-radius 0

@@ -270,16 +270,16 @@ const items = computed(() => {
       button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!state.deleteAllConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete All
-      template(v-if="state.deleteAllConfirmationIsVisible")
+      section.subsection(v-if="state.deleteAllConfirmationIsVisible")
         p
           span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
         .segmented-buttons
-          button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
-            img.icon.cancel(src="@/assets/add.svg")
-            span Cancel
           button.danger(@click.left.stop="deleteAll")
             img.icon(src="@/assets/remove.svg")
             span Delete All
+          button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
+            img.icon.cancel(src="@/assets/add.svg")
+            span Cancel
 
     ul.results-list
       template(v-for="item in items" :key="item.id")
