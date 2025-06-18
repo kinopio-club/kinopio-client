@@ -175,19 +175,20 @@ const removeCanvasSelectedClass = () => {
 
 // serve smaller images w imgproxy
 
-const imgproxyUrl = (imageURL, width, height) => {
+const imgproxyUrl = (imageUrl, width, height) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
   const containerBreakpoints = [400, 600, 800, 1200]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
   const maxDimensions = Math.max(width, height)
+  let url = utils.imgproxyUrl(imageUrl)
   for (const breakpoint of containerBreakpoints) {
     if (maxDimensions <= breakpoint) {
-      return utils.imgproxyUrl(imageURL, breakpoint * devicePixelRatio)
+      url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
     }
   }
-  return utils.imgproxyUrl(imageURL, containerBreakpoints[containerBreakpoints.length - 1] * devicePixelRatio)
+  return url
 }
 
 // events

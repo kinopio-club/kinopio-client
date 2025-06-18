@@ -16,6 +16,7 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
+import uniqBy from 'lodash-es/uniqBy'
 
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
@@ -80,13 +81,14 @@ export const useConnectionStore = defineStore('connections', {
       return ids.map(id => this.getConnection(id))
     },
     getConnectionsByItemIds (itemIds) {
-      const connections = []
+      let connections = []
       itemIds.forEach(itemId => {
         const startMatches = this.getConnectionByStartItemId(itemId)
         const endMatches = this.getConnectionByEndItemId(itemId)
         startMatches.forEach(match => connections.push(match))
         endMatches.forEach(match => connections.push(match))
       })
+      connections = uniqBy(connections, 'id')
       return connections
     },
     getConnectionsByItemId (itemId) {

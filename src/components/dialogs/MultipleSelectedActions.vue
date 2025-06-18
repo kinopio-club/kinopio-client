@@ -202,15 +202,8 @@ const editableCards = computed(() => {
 // connect cards
 
 const checkIsCardsConnected = () => {
-  const selectedCards = multipleCardsSelectedIds.value
-  const connections = selectedCards.filter((cardId, index) => {
-    const startItemId = selectedCards[index - 1]
-    const endItemId = cardId
-    const connectionExists = connectionAlreadyExists(startItemId, endItemId)
-    const connectionExistsReverse = connectionAlreadyExists(endItemId, startItemId)
-    if (connectionExists || connectionExistsReverse) { return true }
-  })
-  if (connections.length === selectedCards.length - 1) {
+  const connections = connectionStore.getConnectionsByItemIds(multipleCardsSelectedIds.value)
+  if (connections.length === multipleCardsSelectedIds.value.length - 1) {
     state.cardsIsConnected = true
   } else {
     state.cardsIsConnected = false
@@ -228,36 +221,23 @@ const toggleConnectCards = (event) => {
 }
 const connectCards = (event) => {
   const cardIds = multipleCardsSelectedIds.value
-  let connections = cardIds.map((cardId, index) => {
+  cardIds.forEach((cardId, index) => {
     if (index + 1 < cardIds.length) { // create connections for middle cards
       const startItemId = cardId
       const endItemId = cardIds[index + 1]
-      if (connectionAlreadyExists(startItemId, endItemId)) { return }
+      if (prevConnection(startItemId, endItemId).length) { return }
       const id = nanoid()
       const path = connectionStore.getConnectionPathBetweenItems({
         startItemId,
         endItemId,
         controlPoint: consts.straightLineConnectionPathControlPoint
       })
-      return {
-        id, startItemId, endItemId, path
-      }
+      connectionStore.createConnection({ id, startItemId, endItemId, path })
     }
-  })
-  connections = connections.filter(Boolean)
-  const type = connectionType(event)
-  connections.forEach(connection => {
-    connection.type = type
-    connectionStore.createConnection(connection)
-    globalStore.addToMultipleConnectionsSelected(connection.id)
   })
 }
 const disconnectCards = () => {
-  const cardIds = multipleCardsSelectedIds.value
-  const connections = connectionStore.getConnectionsByItemIds(cardIds)
-  const ids = connections.map(connection => connection.id)
-  connectionStore.removeConnections(ids)
-  connectionStore.removeAllUnusedConnectionTypes()
+  connectionStore.removeConnectionsFromItems(multipleCardsSelectedIds.value)
 }
 
 // connections
@@ -294,14 +274,12 @@ const connectionType = (event) => {
   type = connectionStore.getNewConnectionType
   return type
 }
-const connectionAlreadyExists = (startItemId, endItemId) => {
-  const connections = connectionStore.getAllConnections
-  const existingConnection = connections.find(connection => {
-    const isStart = connection.startItemId === startItemId
-    const isEnd = connection.endItemId === endItemId
-    return isStart && isEnd
-  })
-  return Boolean(existingConnection)
+const prevConnection = (startItemId, endItemId) => {
+  const startConnection = connectionStore.getConnectionByStartItemId(startItemId)
+  const endConnection = connectionStore.getConnectionByEndItemId(endItemId)
+  if (startConnection?.id === endConnection?.id) {
+    return startConnection
+  }
 }
 
 // boxes
