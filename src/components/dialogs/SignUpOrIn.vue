@@ -428,9 +428,10 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
         button(type="submit" :class="{active : state.loading.resetPassword || state.resetSuccess}")
           span Reset Password
           Loader(:visible="state.loading.resetPassword")
-      .badge.success(v-if="state.resetSuccess") Password Reset Email Sent
       .badge.danger(v-if="state.error.resetUserEmailNotFound") A user with that that email address wasn't found. Try another?
       .badge.danger(v-if="state.error.tooManyAttempts") Too many attempts, try again in 10 minutes
+      //- sucesss
+      .badge.success(v-if="state.resetSuccess") Password Reset Email Sent
       p.success-message(v-if="state.resetSuccess") If you don't see the email, please check your spam folder, or contact support
 </template>
 
@@ -439,9 +440,6 @@ dialog.sign-up-or-in
   left initial
   right 8px
   overflow auto
-  @media(max-height 750px)
-    // for ios keyboard input
-    top -50px !important
   .reset-form
     margin-top 10px
   p,
