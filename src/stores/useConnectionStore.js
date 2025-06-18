@@ -69,6 +69,11 @@ export const useConnectionStore = defineStore('connections', {
     getConnection (id) {
       return this.byId[id]
     },
+    getConnections (ids) {
+      let connections = ids.map(id => this.getConnection(id))
+      connections = connections.filter(connection => Boolean(connection))
+      return connections
+    },
     getConnectionType (id) {
       return this.typeById[id]
     },
@@ -407,7 +412,7 @@ export const useConnectionStore = defineStore('connections', {
     async updateConnectionPaths (itemIds) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
-      const connections = this.getConnectionsByItemIds(itemIds)
+      const connections = this.getConnections(itemIds)
       const updates = []
       connections.forEach(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
