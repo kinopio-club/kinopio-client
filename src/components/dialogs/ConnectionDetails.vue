@@ -306,7 +306,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         img.icon(src="@/assets/remove.svg")
 
     //- debug
-    ItemDetailsDebug(:item="currentConnection")
+    ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId']")
 
     //- h1, h2, label etc.
     ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")

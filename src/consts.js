@@ -41,6 +41,7 @@ export default {
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
+  itemDetailsDebugIsVisible: true,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

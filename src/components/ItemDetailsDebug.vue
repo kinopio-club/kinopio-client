@@ -11,7 +11,7 @@ const props = defineProps({
   }
 })
 
-const visible = computed(() => consts.isDevelopment())
+const visible = computed(() => consts.isDevelopment() && consts.itemDetailsDebugIsVisible)
 
 </script>
 
