@@ -1484,9 +1484,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
       .button-wrap(v-if="state.nameSplitIntoCardsCount && canEditCard")
-        button(:disabled="!canEditCard" @click.left.stop="splitCards")
+        button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split.svg")
-          span Split Card ({{state.nameSplitIntoCardsCount}})
+          span Split Card
+          span.badge.secondary.badge-in-button.small-button-text.badge-split-card-count {{state.nameSplitIntoCardsCount}}
 
     .row.badges-row(v-if="badgesRowIsVisible")
       //- Search result
@@ -1612,4 +1613,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   dialog.image-picker
     left -100px
 
+  .badge-split-card-count
+    margin-right 0
+    margin-left 5px
 </style>
