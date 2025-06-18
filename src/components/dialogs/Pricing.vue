@@ -165,5 +165,6 @@ dialog.pricing
     .button-wrap,
     .small-button
       margin-top 0
-
+  dialog.about-groups
+    max-height 150px !important
 </style>
