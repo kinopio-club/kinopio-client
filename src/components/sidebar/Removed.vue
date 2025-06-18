@@ -112,6 +112,7 @@ const deleteAll = () => {
   } else {
     deleteAllSpaces()
   }
+  state.deleteAllConfirmationIsVisible = false
 }
 const toggleDeleteAllConfirmationIsVisible = () => {
   state.deleteAllConfirmationIsVisible = !state.deleteAllConfirmationIsVisible
@@ -340,7 +341,7 @@ const items = computed(() => {
     padding-top 0
     border none
     section.subsection
-      border-radius var(--entity-radius) !important
+      margin-bottom 0
   section.subsection
     margin-bottom 10px
 </style>

@@ -396,6 +396,7 @@ export const useCardStore = defineStore('cards', {
       if (!canEditSpace) { return }
       for (const card of cards) {
         const idIndex = this.allIds.indexOf(card.id)
+        if (idIndex) { continue }
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
