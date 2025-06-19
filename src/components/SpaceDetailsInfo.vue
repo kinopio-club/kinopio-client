@@ -19,6 +19,7 @@ import SpaceOptions from '@/components/SpaceOptions.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -288,7 +289,7 @@ SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
 //- members
 template(v-if="isSpaceMember")
   .row.title-row
-    div
+    .info-buttons-wrap
       //- Privacy
       PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
         //- toggle space group | favorite
@@ -335,6 +336,7 @@ SpaceOptions(
   @updateLocalSpaces="updateLocalSpaces"
   @removeSpaceId="removeSpaceId"
 )
+ItemDetailsDebug(:item="currentSpace")
 </template>
 
 <style lang="stylus">
@@ -393,6 +395,9 @@ SpaceOptions(
 
   .background-preview-wrap
     margin-bottom 6px
+
+.info-buttons-wrap
+  display flex
 
 .group-button
   padding-right 6px
