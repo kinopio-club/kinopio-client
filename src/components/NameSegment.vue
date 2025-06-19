@@ -236,7 +236,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     word-break break-word
     white-space pre-wrap
     a
-      color var(--text-link) !important
+      color var(--text-link)
       text-decoration underline
       text-decoration-thickness 1px // for firefox
       -webkit-touch-callout none // for ios
@@ -274,7 +274,6 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       margin 0
     &.is-background-light
       span,
-      a,
       h1,
       h2,
       h3,
@@ -282,9 +281,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       em,
       strong
        color var(--primary-on-light-background)
+      a
+        color var(--text-link-on-light-background)
     &.is-background-dark
       span,
-      a,
       h1,
       h2,
       h3,
@@ -292,6 +292,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       em,
       strong
        color var(--primary-on-dark-background)
+      a
+        color var(--text-link-on-dark-background)
 
   .strikethrough
     text-decoration line-through

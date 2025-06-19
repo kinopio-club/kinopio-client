@@ -196,6 +196,8 @@ const updateMetaRSSFeed = () => {
   --primary-on-light-background black
   --primary-border-on-light-background rgba(0,0,0,0.3)
   --primary-border-on-dark-background rgba(255,255,255,0.3)
+  --text-link-on-light-background #143997
+  --text-link-on-dark-background #788cc9
   --dark-background-tint-on-light-background rgba(0,0,0,0.3)
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
