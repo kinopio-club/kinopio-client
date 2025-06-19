@@ -335,12 +335,8 @@ export const useCardStore = defineStore('cards', {
           ...update
         }
       })
-      // update connection paths
-      // const shouldUpdateConnectionPaths = updates.find(update => Boolean(update.name || update.x || update.y))
-      // if (shouldUpdateConnectionPaths) {
       const ids = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(ids)
-      // }
     },
     async updateCards (updates) {
       const apiStore = useApiStore()
@@ -349,26 +345,6 @@ export const useCardStore = defineStore('cards', {
       const broadcastStore = useBroadcastStore()
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
-      // updates = updates.filter(update => userStore.getUserCanEditCard(update))
-      // updates.forEach(update => {
-      //   this.byId[update.id] = {
-      //     ...this.byId[update.id],
-      //     ...update
-      //   }
-      // })
-      // // update connection paths
-      // const connectionStore = useConnectionStore()
-      // const isNameUpdated = updates.find(update => Boolean(update.name))
-      // if (isNameUpdated) {
-      //   const ids = updates.map(update => update.id)
-      //   connectionStore.updateConnectionPaths(ids)
-      // }
-      // server tasks
-      // console.log('cardStore updateCards')
-
-      // if (updates.isFromBroadcast) {
-      //   console.log('💦💦💦',updates)
-      //   return }
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
       // TODO history? if unpaused
