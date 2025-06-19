@@ -248,14 +248,23 @@ const items = computed(() => {
 <template lang="pug">
 .removed(v-if="visible")
   section
-    .row.title-row
-      div
-        span Restore Removed Items
-        Loader(:visible="isLoading" :isSmall="true")
+    .row
+      span Restore Removed Items
+      Loader(:visible="isLoading" :isSmall="true")
+
+    .segmented-buttons
+      button(@click.left="showCards" :class="{active: state.cardsVisible}")
+        img.icon(src="@/assets/remove.svg")
+        span Cards in Space
+      button(@click.left="showSpaces" :class="{active: !state.cardsVisible}")
+        img.icon(src="@/assets/remove.svg")
+        span Spaces
+
       //- delete all
+    .row.delete-all-button-row
       button.small-button(@click="toggleDeleteAllConfirmationIsVisible" :class="{ active: state.deleteAllConfirmationIsVisible }")
         img.icon(src="@/assets/remove.svg")
-        span All
+        span Delete All
     //- delete all confirmation
     section.subsection(v-if="state.deleteAllConfirmationIsVisible")
       p
@@ -270,14 +279,6 @@ const items = computed(() => {
     .row(v-if="state.isSuccess")
       span.badge.success
         span Deleted All
-
-    .segmented-buttons
-      button(@click.left="showCards" :class="{active: state.cardsVisible}")
-        img.icon(src="@/assets/remove.svg")
-        span Cards in Space
-      button(@click.left="showSpaces" :class="{active: !state.cardsVisible}")
-        img.icon(src="@/assets/remove.svg")
-        span Spaces
 
   section.tips-section(v-if="!items.length")
     template(v-if="state.cardsVisible")
@@ -350,6 +351,8 @@ const items = computed(() => {
     border none
     section.subsection
       margin-bottom 0
-  section.subsection
-    margin-bottom 10px
+  .delete-all-button-row
+    margin-top 10px
+    display flex
+    justify-content flex-end
 </style>
