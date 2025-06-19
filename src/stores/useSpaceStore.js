@@ -865,6 +865,13 @@ export const useSpaceStore = defineStore('space', {
       this.groupId = space.groupId
       this.addedToGroupByUserId = space.addedToGroupByUserId
     },
+    async updateSpaceEditedAt () {
+      const userStore = useUserStore()
+      await this.updateSpace({
+        editedAt: new Date(),
+        editedByUserId: userStore.id
+      })
+    },
 
     // remove
 
