@@ -61,7 +61,6 @@ watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
     globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-    checkIsCardsConnected()
     scrollIntoView()
     closeDialogs()
     historyStore.snapshots()
@@ -144,9 +143,16 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
     boxes: boxesCreatedByCurrentUser.length
   }
 })
-const multipleItemsSelected = computed(() => {
-  const total = multipleConnectionsSelectedIds.value.length + multipleCardsSelectedIds.value.length
-  return Boolean(total > 1)
+const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value))
+const multipleItemsIsSelected = computed(() => Boolean(multipleItemsSelectedIds.value.length))
+const itemsIsConnectedTogether = computed(() => {
+  const itemIds = multipleItemsSelectedIds.value
+  const connections = connectionStore.getConnectionsByItemIds(itemIds)
+  const startItemIds = connections.map(connection => connection.startItemId)
+  const endItemIds = connections.map(connection => connection.endItemId)
+  const connectedItemIds = startItemIds.concat(endItemIds)
+  const isConnected = itemIds.every(id => connectedItemIds.includes(id))
+  return isConnected
 })
 const styles = computed(() => {
   const position = globalStore.multipleSelectedActionsPosition
@@ -199,32 +205,23 @@ const editableCards = computed(() => {
   }
 })
 
-// connect cards
+// connect
 
-const checkIsCardsConnected = () => {
-  const connections = connectionStore.getConnectionsByItemIds(multipleCardsSelectedIds.value)
-  if (connections.length === multipleCardsSelectedIds.value.length - 1) {
-    state.cardsIsConnected = true
-  } else {
-    state.cardsIsConnected = false
-  }
-}
-const toggleConnectCards = (event) => {
+const toggleConnectItems = (event) => {
   historyStore.resume()
-  if (state.cardsIsConnected) {
-    disconnectCards()
+  if (itemsIsConnectedTogether.value) {
+    disconnectItems()
   } else {
-    connectCards(event)
+    connectItems(event)
   }
-  checkIsCardsConnected()
   historyStore.pause()
 }
-const connectCards = (event) => {
-  const cardIds = multipleCardsSelectedIds.value
-  cardIds.forEach((cardId, index) => {
-    if (index + 1 < cardIds.length) { // create connections for middle cards
-      const startItemId = cardId
-      const endItemId = cardIds[index + 1]
+const connectItems = (event) => {
+  const itemIds = multipleItemsSelectedIds.value
+  itemIds.forEach((itemId, index) => {
+    if (index + 1 < itemIds.length) { // create connections for middle items
+      const startItemId = itemId
+      const endItemId = itemIds[index + 1]
       if (prevConnection(startItemId, endItemId).length) { return }
       const id = nanoid()
       const path = connectionStore.getConnectionPathBetweenItems({
@@ -236,8 +233,16 @@ const connectCards = (event) => {
     }
   })
 }
-const disconnectCards = () => {
-  connectionStore.removeConnectionsFromItems(multipleCardsSelectedIds.value)
+const disconnectItems = () => {
+  const itemIds = multipleItemsSelectedIds.value
+  let connections = connectionStore.getConnectionsByItemIds(itemIds)
+  connections = connections.filter(connection => {
+    const isStart = itemIds.includes(connection.startItemId)
+    const isEnd = itemIds.includes(connection.endItemId)
+    return isStart && isEnd
+  })
+  const connectionIds = connections.map(connection => connection.id)
+  connectionStore.removeConnections(connectionIds)
 }
 
 // connections
@@ -478,7 +483,7 @@ dialog.narrow.multiple-selected-actions(
       //- [·]
       ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
       //- Connect
-      button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
+      button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
         img.connect-items.icon(src="@/assets/connect-items.svg")
       //- LINE Options
       .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
