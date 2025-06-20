@@ -178,9 +178,6 @@ dialog.upgrade-user
     z-index 1
   p
     color var(--primary)
-  @media(max-height 650px)
-    top -60px !important
-
   .title-row
     align-items flex-start
     .button-wrap,
