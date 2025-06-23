@@ -13,6 +13,7 @@ import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
@@ -310,6 +311,8 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundPickerIsVisible")
         BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundPickerIsVisible")
         BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
+    ItemDetailsDebug(:item="currentBox")
+
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
