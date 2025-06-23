@@ -1665,35 +1665,6 @@ export default {
     }
     return space
   },
-  updateSpaceUserId (space, userId) {
-    space.cards = space.cards?.map(card => {
-      if (card.userId === consts.rootUserId) {
-        card.userId = null
-        return card
-      }
-      if (card.userId === null) { return card }
-      if (card.nameUpdatedByUserId) {
-        card.nameUpdatedByUserId = userId
-      }
-      card.userId = userId
-      return card
-    })
-    space.boxes = space.boxes?.map(box => {
-      box.userId = userId
-      return box
-    })
-    space.connectionTypes = space.connectionTypes?.map(type => {
-      type.userId = userId
-      return type
-    })
-    space.connections = space.connections?.map(connection => {
-      connection.userId = userId
-      return connection
-    })
-    space.userId = userId
-    space.editedByUserId = userId
-    return space
-  },
   excludeCurrentUser (users, currentUserId) {
     users = users.filter(user => user.id !== currentUserId)
     return users
@@ -1817,27 +1788,31 @@ export default {
       return connection
     })
   },
-  updateSpacesUserId (userId, spaces) {
-    spaces = spaces.map(space => {
-      space = this.updateSpaceItemsUserId(space, userId)
-      space = this.updateSpaceUserId(space, userId)
-      delete space.users
-      return space
-    })
-    return spaces
-  },
   updateSpaceItemsUserId (space, userId) {
     const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {
-        item.userId = userId
-        item.nameUpdatedByUserId = null
-        item.nameUpdatedAt = new Date()
+        const shouldUpdate = item.userId !== null && item.userId !== consts.rootUserId // ensures corect free card count
+        if (shouldUpdate) {
+          item.userId = userId
+          item.nameUpdatedByUserId = null
+        }
         return item
       })
     })
     return space
+  },
+  updateSpacesUser (user, spaces) {
+    spaces = spaces.map(space => {
+      space = this.updateSpaceItemsUserId(space, user.id)
+      // space = this.updateSpaceUserId(space, userId)
+      space.userId = user.id
+      space.editedByUserId = user.id
+      space.users = [user]
+      return space
+    })
+    return spaces
   },
   newHelloSpace (user) {
     const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
@@ -2499,12 +2474,12 @@ export default {
         color: user.color,
         description: user.description,
         website: user.website,
-        isSignedIn,
-        isSpectator,
-        isCollaborator,
         isUpgraded: user.isUpgraded,
         isModerator: user.isModerator,
-        isDonor: user.isDonor
+        isDonor: user.isDonor,
+        isSignedIn,
+        isSpectator,
+        isCollaborator
       }
     } else {
       return {

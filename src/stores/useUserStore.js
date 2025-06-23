@@ -264,6 +264,11 @@ export const useUserStore = defineStore('users', {
     getItemIsCreatedByUser (connection) {
       return this.id === connection.userId
     },
+    getUserIsSpaceUserByUser (user) {
+      const spaceStore = useSpaceStore()
+      const isUser = spaceStore.users.find(spaceUser => spaceUser.id === user.id)
+      return isUser
+    },
 
     // init
 
@@ -276,11 +281,12 @@ export const useUserStore = defineStore('users', {
       if (user.apiKey) {
         postMessage.send({ name: 'setApiKey', value: user.apiKey })
       }
-      Object.keys(user).forEach(key => {
-        this[key] = user[key]
-      })
+      this.$state = user
       await cache.saveUser(user)
     },
+
+    // create
+
     async createNewUser () {
       console.info('🌸 Create new user')
       this.themeIsSystem = true

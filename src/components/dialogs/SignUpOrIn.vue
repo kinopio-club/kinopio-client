@@ -203,12 +203,13 @@ const signUp = async (event) => {
   const newUser = await response.json()
   if (isSuccess(response)) {
     globalStore.clearAllNotifications()
-    userStore.updateUserState(newUser)
-    // save spaces to remote
+    // update user
+    userStore.initializeUserState(newUser)
+    // update and save spaces
     await backupLocalSpaces()
     await migrationSpacesConnections()
-    await updateSpacesUserId()
-    updateCurrentSpaceWithNewUserId(currentUser, newUser)
+    await updateLocalSpacesUser()
+    updateCurrentSpaceWithNewUser(currentUser, newUser)
     await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
@@ -235,12 +236,12 @@ const signIn = async (event) => {
   if (isSuccess(response)) {
     globalStore.isLoadingSpace = true
     globalStore.addNotification({ message: 'Signing In…' })
-    userStore.updateUserState(result)
+    userStore.initializeUserState(result)
     // update edited local spaces to remote user
     await removeUneditedSpace('Hello Kinopio')
     await removeUneditedSpace('Inbox')
     await migrationSpacesConnections()
-    await updateSpacesUserId()
+    await updateLocalSpacesUser()
     await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
@@ -299,19 +300,20 @@ const migrationSpacesConnections = async () => {
     cache.saveSpace(space)
   })
 }
-const updateSpacesUserId = async () => {
-  const userId = userStore.id
+const updateLocalSpacesUser = async () => {
+  const user = userStore.getUserPublicMeta
   const spaces = await cache.getAllSpaces()
-  const newSpaces = utils.updateSpacesUserId(userId, spaces)
+  const newSpaces = utils.updateSpacesUser(user, spaces)
   for (const space of newSpaces) {
     await cache.saveSpace(space)
   }
 }
-const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
-  const userIsSpaceUser = userStore.getUserSpacePermission === 'user'
+const updateCurrentSpaceWithNewUser = (previousUser, newUser) => {
+  const userIsSpaceUser = userStore.getUserIsSpaceUserByUser(previousUser)
   if (!userIsSpaceUser) { return }
   spaceStore.removeUserFromSpace(previousUser)
   spaceStore.addUserToSpace(newUser)
+  spaceStore.spectators = []
 }
 const removeUneditedSpace = async (spaceName) => {
   const currentSpace = await cache.getSpaceByName(spaceName)

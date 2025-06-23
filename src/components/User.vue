@@ -57,10 +57,7 @@ const userColor = computed(() => {
   if (!props.user) { return }
   return props.user.color
 })
-const isCurrentUser = computed(() => {
-  if (!props.user) { return }
-  return props.user.id === userStore.id
-})
+const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
 const userDetailsIsVisible = computed(() => globalStore.userDetailsIsVisible)
 const userDetailsIsUser = computed(() => {
   const userDetailsUser = globalStore.userDetailsUser
