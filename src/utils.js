@@ -466,6 +466,13 @@ export default {
     }
     return object
   },
+  objectPickKeys (object, keys) {
+    const result = {}
+    keys.forEach(key => {
+      result[key] = object[key]
+    })
+    return result
+  },
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color', 'description', 'website']
     this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })

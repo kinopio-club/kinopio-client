@@ -77,6 +77,7 @@ let processQueueIntervalTimer, hourlyTasks
 // expose pinia stores to browser console for developers
 window.globalStore = useGlobalStore()
 window.cardStore = useCardStore()
+window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
 window.groupStore = useGroupStore()
@@ -98,6 +99,7 @@ const init = async () => {
   await groupStore.initializeGroups()
   await globalStore.updateTags()
   checkIfShouldShowExploreOnLoad()
+  historyStore.init()
 }
 init()
 

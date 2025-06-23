@@ -24,7 +24,7 @@
 //                    └──────────────────────┘░                ▼
 //                     ░░░░░░░░░░░░░░░░░░░░░░░░
 
-import { nextTick } from 'vue'
+import { nextTick, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -38,62 +38,149 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+import isEqual from 'lodash-es/isEqual'
+
 const showDebugMessages = true
 const showLogMessages = true // true
 
-let prevPatchTime = new Date() // unix timestamp ms
+const prevPatchTime = new Date() // unix timestamp ms
 
 const max = 30
-let patches = []
-let pointer = 0
-let isPaused = false
-let snapshots = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
+let patches = [] // todo state
+let pointer = 0 // todo state
+let isPaused = false // todo remove
+let snapshot = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} } // todo remove
 
-const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
-  console.log('🚘', item, itemType, previous, isRemoved)
-  // removed
-  if (isRemoved) {
-    const action = `${itemType}Removed`
-    return {
-      action,
-      new: item
-    }
-  }
-  // created
-  if (!previous) {
-    const action = `${itemType}Created`
-    return {
-      action,
-      new: item
-    }
-  // updated
-  } else {
-    const action = `${itemType}Updated`
-    const keys = Object.keys(item)
-    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
-    const updatedKeys = keys.filter(key => {
-      const isNewValue = item[key] !== previous[key]
-      const shouldIgnore = ignoreKeys.includes(key)
-      return isNewValue && !shouldIgnore
-    })
-    if (!updatedKeys.length) { return }
-    updatedKeys.unshift('id')
-    const prev = {}
-    const updates = {}
-    updatedKeys.forEach(key => {
-      prev[key] = previous[key]
-      updates[key] = item[key]
-    })
-    return {
-      action,
-      prev,
-      new: updates
-    }
-  }
-}
+// const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
+//   // console.log('🚘', item, itemType, previous, isRemoved)
+//   // removed
+//   if (isRemoved) {
+//     const action = `${itemType}Removed`
+//     return {
+//       action,
+//       new: item
+//     }
+//   }
+//   // created
+//   if (!previous) {
+//     const action = `${itemType}Created`
+//     return {
+//       action,
+//       new: item
+//     }
+//   // updated
+//   } else {
+//     const action = `${itemType}Updated`
+//     // const keys = Object.keys(item)
+//     // const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
+//     // const updatedKeys = keys.filter(key => {
+//     //   const isNewValue = item[key] !== previous[key]
+//     //   const shouldIgnore = ignoreKeys.includes(key)
+//     //   return isNewValue && !shouldIgnore
+//     // })
+//     // if (!updatedKeys.length) { return }
+//     // updatedKeys.unshift('id')
+//     // const prev = {}
+//     // const updates = {}
+//     // updatedKeys.forEach(key => {
+//     //   prev[key] = previous[key]
+//     //   updates[key] = item[key]
+//     // })
+//     return {
+//       action,
+//       prev,
+//       new: updates
+//     }
+//   }
+// }
+
+// let currentUpdate = null
 
 export const useHistoryStore = defineStore('history', {
+  state: () => ({
+    processingCards: new Map(),
+    processingPrevCards: new Map(),
+    processingCardKeys: new Set()
+
+  }),
+
   actions: {
+
+    // create update patches
+
+    processCardUpdates: debounce((store, updates) => {
+      const ignoreKeys = ['id', 'nameUpdatedAt', 'height', 'width', 'z', 'prevHeight', 'prevWidth', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
+      const cardStore = useCardStore()
+      const patch = []
+      updates.forEach(update => {
+        const keys = Array.from(store.processingCardKeys)
+        const shouldPreventUpdate = keys.every(key => ignoreKeys.includes(key))
+        if (shouldPreventUpdate) { return }
+        let prevCard = store.processingPrevCards.get(update.id)
+        prevCard = utils.objectPickKeys(prevCard, keys)
+        const newCard = store.processingCards.get(update.id)
+        patch.push({
+          action: 'cardUpdated',
+          prev: prevCard,
+          new: newCard
+        })
+      })
+      if (patch.length) {
+        console.log('💐patch', patch)
+        // TODO add updatecard patch
+      }
+      store.processingCards = new Map()
+      store.processingPrevCards = new Map()
+      store.processingCardKeys = new Set()
+    }, 500),
+
+    // init
+
+    init () {
+      this.initCardWatchers()
+    },
+    initCardWatchers () {
+      const cardStore = useCardStore()
+      cardStore.$onAction(({ name, args, after, onError }) => {
+        if (name === 'updateCardsState') {
+          const updates = args[0]
+          // console.log('🌺🌺💐$onAction',updates)
+          updates.forEach(update => {
+            const keys = Object.keys(update)
+            keys.forEach(key => this.processingCardKeys.add(key))
+            if (this.processingCards.has(update.id)) {
+              // Merge with existing object
+              this.processingCards.set(update.id, { ...this.processingCards.get(update.id), ...update })
+            } else {
+              // Add new object
+              this.processingCards.set(update.id, { ...update })
+            }
+            const prevCard = cardStore.getCard(update.id)
+            this.processingPrevCards.set(prevCard.id, prevCard)
+          })
+          this.processCardUpdates(this, updates)
+        }
+      })
+      cardStore.$subscribe(
+        (mutation, state) => {
+          if (mutation.type === 'direct' && mutation.events) {
+            let add, remove, update
+            const cardId = mutation.events.key
+            // add
+            if (!mutation.events.oldValue) {
+              add = mutation.events.newValue
+              // console.log('🍇add',add)
+            // remove
+            } else if (!mutation.events.newValue) {
+              // console.log('🚘🚘🚘deleted', )
+              remove = mutation.events.oldValue
+            }
+          }
+        }
+        // { detached: true } // Keep subscription active even when component unmounts
+      )
+    },
 
     addPatch (patch) {
       utils.typeCheck({ value: patch, type: 'array', origin: 'addPatch' })
@@ -123,7 +210,7 @@ export const useHistoryStore = defineStore('history', {
     clearHistory () {
       patches = []
       pointer = 0
-      snapshots = { cards: {}, connections: {}, connectionTypes: {} }
+      snapshot = { cards: {}, connections: {}, connectionTypes: {} }
       if (showLogMessages) {
         console.info('⏹ clear history')
       }
@@ -160,7 +247,14 @@ export const useHistoryStore = defineStore('history', {
       connections = utils.normalizeItems(connections)
       connectionTypes = utils.normalizeItems(connectionTypes)
       boxes = utils.normalizeItems(boxes)
-      snapshots = { cards, connections, connectionTypes, boxes }
+      cards = utils.clone(cards)
+      connections = utils.clone(connections)
+      connectionTypes = utils.clone(connectionTypes)
+      boxes = utils.clone(boxes)
+
+      // console.error('🍇🍇🍇🍇🍇🍇', connectionTypes)
+
+      snapshot = { cards, connections, connectionTypes, boxes }
     },
     pause () {
       if (isPaused) { return }
@@ -173,75 +267,76 @@ export const useHistoryStore = defineStore('history', {
 
     // Add Patch
 
-    add ({ cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) {
-      console.error('🛤️', cards, boxes, isPaused)
-      const cardStore = useCardStore()
-      const connectionStore = useConnectionStore()
-      const boxStore = useBoxStore()
-      if (isPaused) { return }
-      const groupTime = 1000
-      const time = new Date()
-      const timeDelta = time - prevPatchTime
-      const shouldAddToPreviousPatch = timeDelta < groupTime
-      let patch = []
-      // cards
-      if (cards) {
-        cards = cards.map(card => {
-          let previous = cardStore.getCard(card.id)
-          if (useSnapshot) {
-            previous = snapshots.cards[card.id]
-          }
-          return normalizeUpdates({ item: card, itemType: 'card', previous, isRemoved })
-        })
-        cards = cards.filter(card => Boolean(card))
-        patch = patch.concat(cards)
-        console.log(cards)
-      }
-      // connections
-      if (connections) {
-        connections = connections.map(connection => {
-          let previous = connectionStore.getConnection(connection.id)
-          if (useSnapshot) {
-            previous = snapshots.connections[connection.id]
-          }
-          return normalizeUpdates({ item: connection, itemType: 'connection', previous, isRemoved })
-        })
-        patch = patch.concat(connections)
-      }
-      // connection types
-      if (connectionTypes) {
-        connectionTypes = connectionTypes.map(type => {
-          let previous = connectionStore.getConnectionType(type.id)
-          if (useSnapshot) {
-            previous = snapshots.connectionTypes[type.id]
-          }
-          return normalizeUpdates({ item: type, itemType: 'connectionType', previous, isRemoved })
-        })
-        patch = patch.concat(connectionTypes)
-      }
-      // boxes
-      if (boxes) {
-        boxes = boxes.map(box => {
-          let previous = boxStore.getBox(box.id)
-          if (useSnapshot) {
-            previous = snapshots.boxes[box.id]
-          }
-          console.log('🅰️🅰️', previous, box)
-          return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
-        })
-        boxes = boxes.filter(box => Boolean(box))
-        patch = patch.concat(boxes)
-        console.log('🅰️box patches', boxes, snapshots)
-      }
-      patch = patch.filter(item => Boolean(item))
-      if (patches.length && shouldAddToPreviousPatch) {
-        this.addToPrevPatch(patch)
-      } else {
-        this.addPatch(patch)
-      }
-      this.trimPatches()
-      prevPatchTime = time
-    },
+    // add ({ cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) {
+    //   return
+    //   console.error('🛤️', cards, connections, connectionTypes, boxes, isPaused, useSnapshot)
+    //   const cardStore = useCardStore()
+    //   const connectionStore = useConnectionStore()
+    //   const boxStore = useBoxStore()
+    //   if (isPaused) { return }
+    //   const groupTime = 1000
+    //   const time = new Date()
+    //   const timeDelta = time - prevPatchTime
+    //   const shouldAddToPreviousPatch = timeDelta < groupTime
+    //   let patch = []
+    //   // cards
+    //   if (cards) {
+    //     cards = cards.map(card => {
+    //       let previous = cardStore.getCard(card.id)
+    //       if (useSnapshot) {
+    //         previous = snapshot.cards[card.id]
+    //       }
+    //       return normalizeUpdates({ item: card, itemType: 'card', previous, isRemoved })
+    //     })
+    //     cards = cards.filter(card => Boolean(card))
+    //     patch = patch.concat(cards)
+    //   }
+    //   // connections
+    //   if (connections) {
+    //     connections = connections.map(connection => {
+    //       let previous = connectionStore.getConnection(connection.id)
+    //       if (useSnapshot) {
+    //         previous = snapshot.connections[connection.id]
+    //       }
+    //       return normalizeUpdates({ item: connection, itemType: 'connection', previous, isRemoved })
+    //     })
+    //     patch = patch.concat(connections)
+    //   }
+    //   // connection types
+    //   if (connectionTypes) {
+    //     connectionTypes = connectionTypes.map(type => {
+    //       let previous = connectionStore.getConnectionType(type.id)
+    //       if (useSnapshot) {
+    //         previous = snapshot.connectionTypes[type.id]
+    //       }
+    //                 // console.log('🅰️🅰️', previous.color, type.color)
+
+    //       return normalizeUpdates({ item: type, itemType: 'connectionType', previous, isRemoved })
+    //     })
+    //     patch = patch.concat(connectionTypes)
+    //   }
+    //   // boxes
+    //   if (boxes) {
+    //     boxes = boxes.map(box => {
+    //       let previous = boxStore.getBox(box.id)
+    //       if (useSnapshot) {
+    //         previous = snapshot.boxes[box.id]
+    //       }
+    //       return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
+    //     })
+    //     boxes = boxes.filter(box => Boolean(box))
+    //     patch = patch.concat(boxes)
+    //     // console.log('🅰️box patches', boxes, snapshot)
+    //   }
+    //   patch = patch.filter(item => Boolean(item))
+    //   if (patches.length && shouldAddToPreviousPatch) {
+    //     this.addToPrevPatch(patch)
+    //   } else {
+    //     this.addPatch(patch)
+    //   }
+    //   this.trimPatches()
+    //   prevPatchTime = time
+    // },
 
     // Undo
 
