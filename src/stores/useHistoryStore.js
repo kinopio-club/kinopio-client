@@ -150,7 +150,11 @@ export const useHistoryStore = defineStore('history', {
     snapshots () {
       const spaceStore = useSpaceStore()
       const space = spaceStore.getSpaceAllItems
-      const { cards, connections, connectionTypes, boxes } = space
+      let { cards, connections, connectionTypes, boxes } = space
+      cards = utils.normalizeItems(cards)
+      connections = utils.normalizeItems(connections)
+      connectionTypes = utils.normalizeItems(connectionTypes)
+      boxes = utils.normalizeItems(boxes)
       snapshots = { cards, connections, connectionTypes, boxes }
     },
     pause () {

@@ -131,8 +131,20 @@ export const useCardStore = defineStore('cards', {
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    getDraggingCards () {
+      const globalStore = useGlobalStore()
+      const currentDraggingCardId = globalStore.currentDraggingCardId
+      const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
+      let cards
+      if (multipleCardsSelectedIds.length) {
+        cards = multipleCardsSelectedIds
+      } else {
+        cards = [currentDraggingCardId]
+      }
+      cards = cards.map(cardId => this.getCard(cardId))
+      return cards
     }
-
   },
 
   actions: {
@@ -343,12 +355,13 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
+      const historyStore = useHistoryStore()
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
-      // TODO history? if unpaused
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
+      historyStore.add({ cards: updates })
     },
     updateCard (update) {
       this.updateCards([update])
@@ -361,6 +374,13 @@ export const useCardStore = defineStore('cards', {
         id: card.id,
         name
       })
+    },
+    updateCardsHistory () {
+      const globalStore = useGlobalStore()
+      const historyStore = useHistoryStore()
+      historyStore.resume()
+      const cards = this.getDraggingCards
+      historyStore.add({ cards, useSnapshot: true })
     },
 
     // remove

@@ -635,7 +635,12 @@ const handleTouchEnd = (event) => {
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
-  const isCardsSelected = globalStore.currentDraggingCardId || globalStore.multipleCardsSelectedIds.length
+  if (globalStore.cardsWereDragged) {
+    cardStore.updateCardsHistory()
+  } else if (globalStore.boxesWereDragged) {
+    // store.dispatch('currentBoxes/afterMove')
+  }
+
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {
