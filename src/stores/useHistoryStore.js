@@ -70,15 +70,12 @@ const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   } else {
     const action = `${itemType}Updated`
     const keys = Object.keys(item)
-
     const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
     const updatedKeys = keys.filter(key => {
-      const isValue = item[key] !== previous[key]
+      const isNewValue = item[key] !== previous[key]
       const shouldIgnore = ignoreKeys.includes(key)
-      console.log('item[key]', item[key], isValue, shouldIgnore)
-      return isValue && !shouldIgnore
+      return isNewValue && !shouldIgnore
     })
-    console.log('🌺🌺', action, keys, updatedKeys.length)
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
     const prev = {}

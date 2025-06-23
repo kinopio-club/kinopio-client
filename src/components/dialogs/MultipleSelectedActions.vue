@@ -63,7 +63,7 @@ watch(() => visible.value, async (value, prevValue) => {
     globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
     scrollIntoView()
     closeDialogs()
-    historyStore.snapshots()
+    historyStore.updateSnapshot()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
     historyStore.resume()
