@@ -73,14 +73,11 @@ const members = computed(() => {
   let users = spaceStore.users
   users = users.concat(spaceStore.collaborators)
   // if (groupUsers) {
-
   users = users.concat(groupUsers)
   // }
   // users = appendCurrentUser(users)
   users = uniqBy(users, 'id')
-
-  console.log('🌻🌻🌻header spaceusers', users)
-
+  // console.log('🌻🌻🌻header spaceusers', users)
   return users
 })
 // const spectators = computed(() => spaceStore.spectators)

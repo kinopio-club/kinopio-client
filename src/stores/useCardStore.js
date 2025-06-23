@@ -355,13 +355,11 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      const historyStore = useHistoryStore()
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
-      historyStore.add({ cards: updates })
     },
     updateCard (update) {
       this.updateCards([update])
@@ -375,11 +373,12 @@ export const useCardStore = defineStore('cards', {
         name
       })
     },
-    updateCardsHistory () {
+    updateHistory () {
       const globalStore = useGlobalStore()
       const historyStore = useHistoryStore()
       historyStore.resume()
       const cards = this.getDraggingCards
+      if (!cards) { return }
       historyStore.add({ cards, useSnapshot: true })
     },
 

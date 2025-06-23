@@ -234,7 +234,7 @@ export const useHistoryStore = defineStore('history', {
 
     // Undo
 
-    undo () {
+    async undo () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
@@ -251,7 +251,7 @@ export const useHistoryStore = defineStore('history', {
       const index = pointer - 1
       const patch = patches[index]
       this.updateIsPaused(true)
-      patch.forEach(item => {
+      for (const item of patch) {
         console.info('⏪ undo', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type, box
@@ -259,10 +259,9 @@ export const useHistoryStore = defineStore('history', {
           case 'cardUpdated':
             card = item.prev
             cardStore.updateCard(card)
-            nextTick(() => {
-              cardStore.resetDimensions({ cardId: card.id })
-              connectionStore.updateConnectionPath(card.id)
-            })
+            await nextTick()
+            cardStore.resetDimensions({ cardId: card.id })
+            connectionStore.updateConnectionPath(card.id)
             break
           case 'cardCreated':
             card = item.new
@@ -305,19 +304,18 @@ export const useHistoryStore = defineStore('history', {
           case 'boxUpdated':
             box = item.prev
             boxStore.updateBox(box)
-            nextTick(() => {
-              connectionStore.updateConnectionPath(box.id)
-            })
+            await nextTick()
+            connectionStore.updateConnectionPath(box.id)
             break
         }
-      })
+      }
       this.resume()
       this.updatePointer({ decrement: true })
     },
 
     // Redo
 
-    redo (patch) {
+    async redo (patch) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
@@ -333,7 +331,7 @@ export const useHistoryStore = defineStore('history', {
         patch = patches[pointer]
       }
       this.updateIsPaused(true)
-      patch.forEach(item => {
+      for (const item of patch) {
         console.info('⏩ redo', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type, box
@@ -341,10 +339,9 @@ export const useHistoryStore = defineStore('history', {
           case 'cardUpdated':
             card = item.new
             cardStore.updateCard(card)
-            // nextTick(() => {
-            //   cardStore.resetDimensions({ cardId: card.id })
-            //   connectionStore.updateConnectionPath(card.id)
-            // })
+            await nextTick()
+            cardStore.resetDimensions({ cardId: card.id })
+            connectionStore.updateConnectionPath(card.id)
             break
           case 'cardCreated':
             card = item.new
@@ -381,9 +378,11 @@ export const useHistoryStore = defineStore('history', {
           case 'boxUpdated':
             box = item.new
             boxStore.updateBox(box)
+            await nextTick()
+            connectionStore.updateConnectionPath(box.id)
             break
         }
-      })
+      }
       this.resume()
       this.updatePointer({ increment: true })
     },

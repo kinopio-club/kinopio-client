@@ -636,7 +636,7 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   if (globalStore.cardsWereDragged) {
-    cardStore.updateCardsHistory()
+    cardStore.updateHistory()
   } else if (globalStore.boxesWereDragged) {
     // store.dispatch('currentBoxes/afterMove')
   }
