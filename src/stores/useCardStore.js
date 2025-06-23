@@ -132,7 +132,7 @@ export const useCardStore = defineStore('cards', {
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
     },
-    getDraggingCards () {
+    getCardsInteracting () {
       const globalStore = useGlobalStore()
       const currentDraggingCardId = globalStore.currentDraggingCardId
       const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
@@ -143,6 +143,7 @@ export const useCardStore = defineStore('cards', {
         cards = [currentDraggingCardId]
       }
       cards = cards.map(cardId => this.getCard(cardId))
+      cards = cards.filter(card => Boolean(card))
       return cards
     }
   },
@@ -372,14 +373,6 @@ export const useCardStore = defineStore('cards', {
         id: card.id,
         name
       })
-    },
-    updateHistory () {
-      const globalStore = useGlobalStore()
-      const historyStore = useHistoryStore()
-      historyStore.resume()
-      const cards = this.getDraggingCards
-      if (!cards) { return }
-      historyStore.add({ cards, useSnapshot: true })
     },
 
     // remove

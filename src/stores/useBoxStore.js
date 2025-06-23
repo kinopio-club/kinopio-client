@@ -75,8 +75,21 @@ export const useBoxStore = defineStore('boxes', {
       let colors = boxes.map(box => box.color)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    getBoxesInteracting () {
+      const globalStore = useGlobalStore()
+      const currentDraggingBoxId = globalStore.currentDraggingBoxId
+      const multipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds
+      let boxes
+      if (multipleBoxesSelectedIds.length) {
+        boxes = multipleBoxesSelectedIds
+      } else {
+        boxes = [currentDraggingBoxId]
+      }
+      boxes = boxes.map(boxId => this.getBox(boxId))
+      boxes = boxes.filter(box => Boolean(box))
+      return boxes
     }
-
   },
 
   actions: {
@@ -142,13 +155,12 @@ export const useBoxStore = defineStore('boxes', {
     async createBox (box, isResizing) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
-      const historyStore = useHistoryStore()
       const broadcastStore = useBroadcastStore()
+      const historyStore = useHistoryStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       if (box.isFromBroadcast) { return }
       broadcastStore.update({ updates: box, store: 'boxStore', action: 'createBox' })
-      // historyStore.add({ boxes: [box] })
       if (isResizing) {
         historyStore.pause()
         globalStore.currentUserIsResizingBox = true
@@ -181,11 +193,9 @@ export const useBoxStore = defineStore('boxes', {
       const broadcastStore = useBroadcastStore()
       if (!userStore.getUserCanEditSpace) { return }
       this.updateBoxesState(updates)
-      // if (updates.isFromBroadcast) { return }
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
       await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
-      // TODO history? if unpaused
     },
     async updateBox (update) {
       await this.updateBoxes([update])
@@ -370,7 +380,7 @@ export const useBoxStore = defineStore('boxes', {
         nameUpdatedAt: new Date()
       }
       this.updateBox(update)
-      this.updateBoxDimensions(id)
+      this.updateBoxInfoDimensions(id)
     },
 
     // contained items
@@ -401,7 +411,7 @@ export const useBoxStore = defineStore('boxes', {
         return isTopLeft && isTopRight && isBottomLeft && isBottomRight
       })
     },
-    itemsContainedInSelectedBoxes () {
+    getItemsContainedInSelectedBoxes () {
       const cards = []
       const boxes = []
       // cards
@@ -422,7 +432,7 @@ export const useBoxStore = defineStore('boxes', {
     },
     selectItemsInSelectedBoxes () {
       const globalStore = useGlobalStore()
-      const { boxes, cards } = this.itemsContainedInSelectedBoxes()
+      const { boxes, cards } = this.getItemsContainedInSelectedBoxes()
       // boxes
       const boxIds = boxes.map(box => box.id)
       globalStore.updateMultipleBoxesSelectedIds(boxIds)
