@@ -1193,21 +1193,6 @@ export const useGlobalStore = defineStore('global', {
 
     // Dragging Items
 
-    async updateItemHistory () {
-      const historyStore = useHistoryStore()
-      const cardStore = useCardStore()
-      const boxStore = useBoxStore()
-      historyStore.resume()
-      let cards = cardStore.getCardsInteracting || []
-      let boxes = boxStore.getBoxesInteracting || []
-      const containedItems = boxStore.getItemsContainedInSelectedBoxes()
-      cards = cards.concat(containedItems.cards)
-      boxes = boxes.concat(containedItems.boxes)
-      boxes = uniqBy(boxes, 'id')
-      cards = uniqBy(cards, 'id')
-      historyStore.add({ cards, boxes, useSnapshot: true })
-    },
-
     // shouldSnapToGrid (value) {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.shouldSnapToGrid = value

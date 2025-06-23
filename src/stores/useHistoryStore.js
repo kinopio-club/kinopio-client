@@ -138,10 +138,11 @@ export const useHistoryStore = defineStore('history', {
     // init
 
     init () {
-      this.initCardWatchers()
+      this.subscribeToCards()
     },
-    initCardWatchers () {
+    subscribeToCards () {
       const cardStore = useCardStore()
+      // update
       cardStore.$onAction(({ name, args, after, onError }) => {
         if (name === 'updateCardsState') {
           const updates = args[0]
@@ -156,6 +157,7 @@ export const useHistoryStore = defineStore('history', {
               // Add new object
               this.processingCards.set(update.id, { ...update })
             }
+            if (this.processingPrevCards.has(update.id)) { return }
             const prevCard = cardStore.getCard(update.id)
             this.processingPrevCards.set(prevCard.id, prevCard)
           })

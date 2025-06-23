@@ -637,7 +637,6 @@ const handleTouchEnd = (event) => {
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
-  globalStore.updateItemHistory()
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {
