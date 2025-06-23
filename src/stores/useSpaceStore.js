@@ -410,6 +410,7 @@ export const useSpaceStore = defineStore('space', {
       space.spectators = []
       historyStore.redoLocalUpdates()
       this.restoreSpace(space)
+      historyStore.reset()
     },
     async loadSpace (space) {
       const globalStore = useGlobalStore()

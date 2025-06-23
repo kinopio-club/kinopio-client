@@ -1193,7 +1193,7 @@ export const useGlobalStore = defineStore('global', {
 
     // Dragging Items
 
-    updateItemHistory () {
+    async updateItemHistory () {
       const historyStore = useHistoryStore()
       const cardStore = useCardStore()
       const boxStore = useBoxStore()

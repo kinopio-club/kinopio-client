@@ -38,7 +38,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
-const showDebugMessages = false
+const showDebugMessages = true
 const showLogMessages = true // true
 
 let prevPatchTime = new Date() // unix timestamp ms
@@ -50,6 +50,7 @@ let isPaused = false
 let snapshots = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} }
 
 const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
+  console.log('🚘', item, itemType, previous, isRemoved)
   // removed
   if (isRemoved) {
     const action = `${itemType}Removed`
@@ -69,8 +70,15 @@ const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   } else {
     const action = `${itemType}Updated`
     const keys = Object.keys(item)
-    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview']
-    const updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
+
+    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
+    const updatedKeys = keys.filter(key => {
+      const isValue = item[key] !== previous[key]
+      const shouldIgnore = ignoreKeys.includes(key)
+      console.log('item[key]', item[key], isValue, shouldIgnore)
+      return isValue && !shouldIgnore
+    })
+    console.log('🌺🌺', action, keys, updatedKeys.length)
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
     const prev = {}
@@ -126,7 +134,7 @@ export const useHistoryStore = defineStore('history', {
     updateIsPaused (value) {
       isPaused = value
       if (showDebugMessages && showLogMessages) {
-        console.info('⏸ history is paused', isPaused)
+        console.error('⏸ history is paused', isPaused)
       }
     },
     updatePointer ({ increment, decrement, value }) {
@@ -145,9 +153,9 @@ export const useHistoryStore = defineStore('history', {
 
     reset () {
       this.clearHistory()
-      this.snapshots()
+      this.updateSnapshot()
     },
-    snapshots () {
+    updateSnapshot () {
       const spaceStore = useSpaceStore()
       const space = spaceStore.getSpaceAllItems
       let { cards, connections, connectionTypes, boxes } = space
@@ -160,7 +168,7 @@ export const useHistoryStore = defineStore('history', {
     pause () {
       if (isPaused) { return }
       this.updateIsPaused(true)
-      this.snapshots()
+      this.updateSnapshot()
     },
     resume () {
       this.updateIsPaused(false)
@@ -169,6 +177,7 @@ export const useHistoryStore = defineStore('history', {
     // Add Patch
 
     add ({ cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) {
+      console.error('🛤️', cards, boxes, isPaused)
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
@@ -187,7 +196,9 @@ export const useHistoryStore = defineStore('history', {
           }
           return normalizeUpdates({ item: card, itemType: 'card', previous, isRemoved })
         })
+        cards = cards.filter(card => Boolean(card))
         patch = patch.concat(cards)
+        console.log(cards)
       }
       // connections
       if (connections) {
@@ -218,9 +229,12 @@ export const useHistoryStore = defineStore('history', {
           if (useSnapshot) {
             previous = snapshots.boxes[box.id]
           }
+          console.log('🅰️🅰️', previous, box)
           return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
         })
+        boxes = boxes.filter(box => Boolean(box))
         patch = patch.concat(boxes)
+        console.log('🅰️box patches', boxes, snapshots)
       }
       patch = patch.filter(item => Boolean(item))
       if (patches.length && shouldAddToPreviousPatch) {

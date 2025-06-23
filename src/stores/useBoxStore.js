@@ -354,6 +354,7 @@ export const useBoxStore = defineStore('boxes', {
     // checked
 
     toggleBoxChecked (id, value) {
+      const historyStore = useHistoryStore()
       const box = this.getBox(id)
       let { name } = box
       const checkbox = utils.checkboxFromString(name)
@@ -369,8 +370,11 @@ export const useBoxStore = defineStore('boxes', {
         nameUpdatedAt: new Date()
       }
       this.updateBox(update)
+      historyStore.resume()
+      historyStore.add({ boxes: [update], useSnapshot: true })
     },
     clearBoxChecked (id) {
+      const historyStore = useHistoryStore()
       const box = this.getBox(id)
       let name = box.name
       name = name.replace('[x]', '').trim()
@@ -381,6 +385,8 @@ export const useBoxStore = defineStore('boxes', {
       }
       this.updateBox(update)
       this.updateBoxInfoDimensions(id)
+      historyStore.resume()
+      historyStore.add({ boxes: [update], useSnapshot: true })
     },
 
     // contained items
