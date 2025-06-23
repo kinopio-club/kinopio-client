@@ -105,7 +105,7 @@ export const useConnectionStore = defineStore('connections', {
       const connectionTypes = typeIds.map(id => this.getConnectionType(id))
       return connectionTypes
     },
-    getConnectionConnectionType (connectionId) {
+    getConnectionTypeByConnectionId (connectionId) {
       const connection = this.getConnection(connectionId)
       const type = this.getConnectionType(connection.connectionTypeId)
       return type
@@ -328,7 +328,7 @@ export const useConnectionStore = defineStore('connections', {
       keys.forEach(key => {
         connectionType[key] = update[key]
       })
-      this.typeByIds[connectionType.id] = connectionType
+      this.typeById[connectionType.id] = connectionType
       await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
 
       if (update.isFromBroadcast) { return }

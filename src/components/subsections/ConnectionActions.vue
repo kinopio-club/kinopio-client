@@ -63,7 +63,7 @@ const canEditAllConnections = computed(() => {
 const connectionTypes = computed(() => {
   const ids = globalStore.multipleConnectionsSelectedIds
   let types = ids.forEach(id => {
-    return connectionStore.getConnectionConnectionType(id)
+    return connectionStore.getConnectionTypeByConnectionId(id)
   })
   types = uniqBy(types, 'id')
   types = uniqBy(types, 'color')

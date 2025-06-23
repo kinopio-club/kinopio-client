@@ -164,7 +164,7 @@ const convertToCanvas = (space) => {
       }
     })
     space.connections.forEach(connection => {
-      const type = connectionStore.getConnectionConnectionType(connection.id)
+      const type = connectionStore.getConnectionTypeByConnectionId(connection.id)
       // direction
       let toEnd = 'none'
       if (connection.directionIsVisible) {

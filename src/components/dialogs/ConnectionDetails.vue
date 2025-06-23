@@ -160,7 +160,7 @@ watch(() => currentConnection.value, async (value, prevValue) => {
   }
 })
 const currentConnectionType = computed(() => {
-  const connectionType = connectionStore.getConnectionConnectionType(currentConnection.value.id)
+  const connectionType = connectionStore.getConnectionTypeByConnectionId(currentConnection.value.id)
   prevConnectionType = connectionType
   return connectionType
 })
