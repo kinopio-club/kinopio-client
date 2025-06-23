@@ -340,9 +340,7 @@ export default function webSocketPlugin () {
         sendMessage(pinia, message)
         break
       case 'update':
-        if (userStore.getUserCanEditSpace) {
-          sendMessage(pinia, message)
-        }
+        sendMessage(pinia, message)
         break
       case 'close':
         closeWebsocket(pinia)
