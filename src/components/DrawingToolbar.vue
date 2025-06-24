@@ -126,7 +126,7 @@ const toggleEraser = () => {
     display flex
     justify-content center
     align-items center
-  .segmented-buttons
+  > .segmented-buttons
     button:first-child
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
