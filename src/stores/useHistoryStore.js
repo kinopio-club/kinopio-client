@@ -145,6 +145,17 @@ export const useHistoryStore = defineStore('history', {
       })
       this.addPatch(patch)
     },
+    processCardsRemoved (updates) {
+      const cardStore = useCardStore()
+      const patch = updates.map(id => {
+        const card = cardStore.getCard(id)
+        return {
+          action: 'cardRemoved',
+          new: card
+        }
+      })
+      this.addPatch(patch)
+    },
 
     subscribeToCards () {
       const cardStore = useCardStore()
@@ -174,6 +185,9 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'createCard':
             this.processCardsCreated([updates])
+            break
+          case 'removeCards':
+            this.processCardsRemoved(updates)
             break
         }
       })
