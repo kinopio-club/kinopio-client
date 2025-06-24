@@ -258,7 +258,6 @@ const scrollBy = (delta) => {
       x: delta.left * slowMultiplier,
       y: delta.top * slowMultiplier
     }
-    historyStore.pause()
     if (isDraggingCard || isDraggingBox) {
       cardStore.moveCards({ endCursor, prevCursor, delta: itemDelta })
       boxStore.moveBoxes({ endCursor, prevCursor, delta: itemDelta })

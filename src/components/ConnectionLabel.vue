@@ -19,7 +19,6 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
-const historyStore = useHistoryStore()
 
 let unsubscribes
 const labelElement = ref(null)
@@ -321,15 +320,6 @@ const stopDragging = () => {
   state.outOfBounds = {}
   cursorStart = {}
   broadcastStore.update({ updates: { userId: userStore.id }, action: 'removeRemoteUserDraggingConnectionLabel' })
-  if (!labelRelativePosition.value.x) { return }
-  historyStore.add({
-    connections: [{
-      id: props.connection.id,
-      labelRelativePositionX: labelRelativePosition.value.x,
-      labelRelativePositionY: labelRelativePosition.value.y
-    }],
-    useSnapshot: true
-  })
 }
 const drag = (event) => {
   if (!canEditSpace.value) { return }

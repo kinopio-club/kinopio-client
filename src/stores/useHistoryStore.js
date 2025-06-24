@@ -270,36 +270,61 @@ export const useHistoryStore = defineStore('history', {
 
     // connection events
 
+    processConnectionUpdated: debounce((store, updates) => {
+      const ignoreKeys = ['id', 'path']
+      const patch = []
+      updates.forEach(update => {
+        const keys = Array.from(store.connectionUpdateKeysProcessing)
+        const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
+        if (everyKeyIsIgnored) { return }
+        let prevConnection = store.prevConnectionUpdatesProcessing.get(update.id)
+        prevConnection = utils.objectPickKeys(prevConnection, keys)
+        const newConnection = store.connectionUpdatesProcessing.get(update.id)
+        patch.push({
+          action: 'connectionUpdated',
+          prev: prevConnection,
+          new: newConnection
+        })
+      })
+      if (patch.length) {
+        store.addPatch(patch)
+      }
+      store.connectionUpdatesProcessing = new Map()
+      store.prevConnectionUpdatesProcessing = new Map()
+      store.connectionUpdateKeysProcessing = new Set()
+    }, 100),
     subscribeToConnections () {
-      const connectionStore = useBoxStore()
+      const connectionStore = useConnectionStore()
       connectionStore.$onAction(({ name, args, after, onError }) => {
         if (this.shouldPreventPatchUpdates) { return }
         const updates = args[0]
-        // switch (name) {
-        //   case 'updateConnections':
-        //     updates.forEach(update => {
-        //       const keys = Object.keys(update)
-        //       keys.forEach(key => this.connectionUpdateKeysProcessing.add(key))
-        //       if (this.connectionUpdatesProcessing.has(update.id)) {
-        //         // Merge with existing object
-        //         this.connectionUpdatesProcessing.set(update.id, { ...this.connectionUpdatesProcessing.get(update.id), ...update })
-        //       } else {
-        //         // Add new object
-        //         this.connectionUpdatesProcessing.set(update.id, { ...update })
-        //       }
-        //       if (this.prevConnectionUpdatesProcessing.has(update.id)) { return }
-        //       const prevConnection = connectionStore.getConnection(update.id)
-        //       this.prevConnectionUpdatesProcessing.set(prevConnection.id, prevConnection)
-        //     })
-        //     this.processConnectionUpdated(this, updates)
-        //     break
+        switch (name) {
+          case 'updateConnections':
+            updates.forEach(update => {
+              const keys = Object.keys(update)
+              keys.forEach(key => this.connectionUpdateKeysProcessing.add(key))
+              if (this.connectionUpdatesProcessing.has(update.id)) {
+                // Merge with existing object
+                this.connectionUpdatesProcessing.set(update.id, { ...this.connectionUpdatesProcessing.get(update.id), ...update })
+              } else {
+                // Add new object
+                this.connectionUpdatesProcessing.set(update.id, { ...update })
+              }
+              if (this.prevConnectionUpdatesProcessing.has(update.id)) { return }
+              const prevConnection = connectionStore.getConnection(update.id)
+              this.prevConnectionUpdatesProcessing.set(prevConnection.id, prevConnection)
+            })
+            this.processConnectionUpdated(this, updates)
+            break
         //   case 'addConnectionToState':
         //     this.processConnectionCreated(updates)
         //     break
         //   case 'removeConnections':
         //     this.processConnectionRemoved(updates)
         //     break
-        // }
+
+            // connectionTypeUpdated
+        }
       })
     },
 

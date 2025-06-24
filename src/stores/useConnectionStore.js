@@ -305,11 +305,8 @@ export const useConnectionStore = defineStore('connections', {
       const broadcastStore = useBroadcastStore()
       if (!userStore.getUserCanEditSpace) { return }
       this.updateConnectionsState(updates)
-      // server tasks
-      // if (updates.isFromBroadcast) { return }
-      broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnections' })
+      broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnectionsState' })
       await apiStore.addToQueue({ name: 'updateMultipleConnections', body: { connections: updates } })
-      // TODO history? if unpaused
       await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },
     updateConnection (update) {
@@ -334,7 +331,7 @@ export const useConnectionStore = defineStore('connections', {
       if (update.isFromBroadcast) { return }
       broadcastStore.update({ updates: update, store: 'connectionStore', action: 'updateConnectionType' })
       await apiStore.addToQueue({ name: 'updateConnectionType', body: connectionType })
-      // historyStore.add({ connectionTypes: [type] })
+      // historyStore.add({ connectionTypes: [connectionType] })
     },
 
     // remove
@@ -368,8 +365,6 @@ export const useConnectionStore = defineStore('connections', {
       this.removeConnectionsState(ids)
       await apiStore.addToQueue({ name: 'removeConnections', body: { ids } })
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
-      const connections = ids.map(id => this.getConnection(id))
-      // historyStore.add({ connections, isRemoved: true })
     },
     async removeConnection (id) {
       await this.removeConnections([id])

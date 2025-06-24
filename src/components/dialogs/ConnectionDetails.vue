@@ -52,10 +52,8 @@ watch(() => visible.value, (value, prevValue) => {
     updatePinchCounterZoomDecimal()
     updateNextConnectionColor()
   } else {
-    historyStore.resume()
     state.resultsSectionMaxHeight = undefined
     if (state.inputIsFocused) {
-      historyStore.add({ connectionTypes: [prevConnectionType], useSnapshot: true })
       state.inputIsFocused = false
     }
   }
@@ -116,7 +114,6 @@ const triggerSignUpOrInIsVisible = () => {
 }
 const focus = () => {
   globalStore.pinchCounterZoomDecimal = 1
-  historyStore.pause()
   state.inputIsFocused = true
 }
 const updatePinchCounterZoomDecimal = () => {
@@ -124,9 +121,7 @@ const updatePinchCounterZoomDecimal = () => {
 }
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
-  historyStore.resume()
   const connectionType = utils.clone(currentConnectionType.value)
-  historyStore.add({ connectionTypes: [connectionType], useSnapshot: true })
   state.inputIsFocused = false
 }
 const closeAllDialogs = () => {
