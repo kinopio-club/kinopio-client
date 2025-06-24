@@ -1,12 +1,10 @@
 import { nextTick, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { useUserStore } from '@/stores/useUserStore'
-import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useApiStore } from '@/stores/useApiStore'
+// import { useUserStore } from '@/stores/useUserStore'
+// import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
-import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -54,7 +52,11 @@ export const useHistoryStore = defineStore('history', {
     // box
     boxUpdatesProcessing: new Map(),
     prevBoxUpdatesProcessing: new Map(),
-    boxUpdateKeysProcessing: new Set()
+    boxUpdateKeysProcessing: new Set(),
+    // connection
+    connectionUpdatesProcessing: new Map(),
+    prevConnectionUpdatesProcessing: new Map(),
+    connectionUpdateKeysProcessing: new Set()
   }),
   actions: {
     // subscribe to items → process updates → create patch
@@ -66,7 +68,7 @@ export const useHistoryStore = defineStore('history', {
     },
     addPatch (patch) {
       utils.typeCheck({ value: patch, type: 'array', origin: 'addPatch' })
-      console.log('🌺 addPatch', patch)
+      // console.log('🌺 addPatch', patch)
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
       // remove patches above pointer
@@ -89,7 +91,7 @@ export const useHistoryStore = defineStore('history', {
       this.patches = []
       this.pointer = 0
       if (showDebugMessages) {
-        console.info('⏹ reset history')
+        console.info('reset history')
       }
     },
     updatePointer ({ increment, decrement }) {
@@ -100,7 +102,9 @@ export const useHistoryStore = defineStore('history', {
       }
       this.pointer = Math.max(0, this.pointer)
       this.pointer = Math.min(this.patches.length, this.pointer)
-      console.error('🐸🐸🐸 updatePointer', this.pointer, increment, decrement)
+      if (showDebugMessages) {
+        console.info('☞ update history pointer', this.pointer, increment, decrement)
+      }
     },
 
     // init subscribers
@@ -108,6 +112,7 @@ export const useHistoryStore = defineStore('history', {
     init () {
       this.subscribeToCards()
       this.subscribeToBoxes()
+      this.subscribeToConnections()
     },
 
     // card events
@@ -178,9 +183,6 @@ export const useHistoryStore = defineStore('history', {
               this.prevCardUpdatesProcessing.set(prevCard.id, prevCard)
             })
             this.processCardUpdated(this, updates)
-            break
-          case 'createCards':
-            this.processCardsCreated(updates)
             break
           case 'createCard':
             this.processCardsCreated([updates])
@@ -256,13 +258,48 @@ export const useHistoryStore = defineStore('history', {
             })
             this.processBoxUpdated(this, updates)
             break
-          case 'addBoxToState':
+          case 'triggerCreateBox':
             this.processBoxCreated(updates)
             break
           case 'removeBoxes':
             this.processBoxRemoved(updates)
             break
         }
+      })
+    },
+
+    // connection events
+
+    subscribeToConnections () {
+      const connectionStore = useBoxStore()
+      connectionStore.$onAction(({ name, args, after, onError }) => {
+        if (this.shouldPreventPatchUpdates) { return }
+        const updates = args[0]
+        // switch (name) {
+        //   case 'updateConnections':
+        //     updates.forEach(update => {
+        //       const keys = Object.keys(update)
+        //       keys.forEach(key => this.connectionUpdateKeysProcessing.add(key))
+        //       if (this.connectionUpdatesProcessing.has(update.id)) {
+        //         // Merge with existing object
+        //         this.connectionUpdatesProcessing.set(update.id, { ...this.connectionUpdatesProcessing.get(update.id), ...update })
+        //       } else {
+        //         // Add new object
+        //         this.connectionUpdatesProcessing.set(update.id, { ...update })
+        //       }
+        //       if (this.prevConnectionUpdatesProcessing.has(update.id)) { return }
+        //       const prevConnection = connectionStore.getConnection(update.id)
+        //       this.prevConnectionUpdatesProcessing.set(prevConnection.id, prevConnection)
+        //     })
+        //     this.processConnectionUpdated(this, updates)
+        //     break
+        //   case 'addConnectionToState':
+        //     this.processConnectionCreated(updates)
+        //     break
+        //   case 'removeConnections':
+        //     this.processConnectionRemoved(updates)
+        //     break
+        // }
       })
     },
 
@@ -279,7 +316,7 @@ export const useHistoryStore = defineStore('history', {
       }
       this.shouldPreventPatchUpdates = true
       if (this.pointer === 0) {
-        console.log('⏩ undo cancelled, pointer is at start', this.pointer)
+        console.info('⏩ undo cancelled, pointer is at start', this.pointer)
         return
       }
       const index = this.pointer - 1
@@ -361,7 +398,7 @@ export const useHistoryStore = defineStore('history', {
       }
       if (!patch) {
         if (this.pointer === this.patches.length) {
-          console.log('⏩ redo cancelled, pointer is at end', this.pointer, this.patches.length)
+          console.info('⏩ redo cancelled, pointer is at end', this.pointer, this.patches.length)
           return
         }
         patch = this.patches[this.pointer]
@@ -376,7 +413,6 @@ export const useHistoryStore = defineStore('history', {
           case 'cardUpdated':
             card = item.new
             prevCard = cardStore.getCard(card.id)
-            console.log('☎️', prevCard, card)
             if (prevCard) {
               cardStore.updateCard(card)
             } else {

@@ -109,6 +109,10 @@ export const useBoxStore = defineStore('boxes', {
       return boxes
     },
 
+    // subscribe triggers
+
+    triggerCreateBox (updates) {},
+
     // init
 
     initializeBoxes (boxes = []) {
@@ -160,8 +164,8 @@ export const useBoxStore = defineStore('boxes', {
       const historyStore = useHistoryStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
-      if (box.isFromBroadcast) { return }
-      broadcastStore.update({ updates: box, store: 'boxStore', action: 'createBox' })
+      this.triggerCreateBox(box)
+      broadcastStore.update({ updates: box, store: 'boxStore', action: 'addBoxToState' })
       if (isResizing) {
         globalStore.currentUserIsResizingBox = true
         globalStore.currentUserIsResizingBoxIds = [box.id]

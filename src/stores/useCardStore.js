@@ -315,7 +315,7 @@ export const useCardStore = defineStore('cards', {
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
-      broadcastStore.update({ updates: card, store: 'cardStore', action: 'createCard' })
+      broadcastStore.update({ updates: card, store: 'cardStore', action: 'addCardToState' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
     },
     async createCards (cards, shouldOffsetPosition) {
@@ -425,8 +425,6 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
-      // historyStore.add({ cards, isRemoved: true })
-      // ?await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       const connectionStore = useConnectionStore()
       connectionStore.removeConnectionsFromItems(ids)
     },
