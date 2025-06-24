@@ -7,7 +7,6 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
@@ -27,7 +26,6 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const historyStore = useHistoryStore()
 
 const dialogElement = ref(null)
 
@@ -65,7 +63,6 @@ watch(() => visible.value, async (value, prevValue) => {
     closeDialogs()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
-    historyStore.add({ cards: prevCards, boxes: prevBoxes })
     globalStore.shouldExplicitlyHideFooter = false
   }
 })

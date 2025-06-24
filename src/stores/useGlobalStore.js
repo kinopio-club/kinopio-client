@@ -7,7 +7,6 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'

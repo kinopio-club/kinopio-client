@@ -4,14 +4,12 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const boxStore = useBoxStore()
-const historyStore = useHistoryStore()
 
 let unsubscribes
 const threshold = 50

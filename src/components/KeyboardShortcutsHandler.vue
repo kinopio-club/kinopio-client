@@ -619,7 +619,6 @@ const canEditConnectionById = (connectionId) => {
 }
 
 const remove = () => {
-  historyStore.resume()
   const selectedConnectionIds = globalStore.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
   const boxes = boxStore.getBoxesSelected
@@ -701,7 +700,6 @@ const normalizePasteData = (data) => {
 }
 
 const handlePastePlainText = async (data, position) => {
-  historyStore.pause()
   const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
   // add card(s)
   let cards = cardNames.map(name => {
@@ -721,8 +719,6 @@ const handlePastePlainText = async (data, position) => {
     globalStore.multipleCardsSelectedIds = cardIds
     // ⏺ history
     cards = cardIds.map(cardId => cardStore.getCard(cardId))
-    historyStore.resume()
-    historyStore.add({ cards, useSnapshot: true })
   }, 100)
 }
 

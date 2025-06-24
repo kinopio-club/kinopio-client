@@ -8,7 +8,6 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 

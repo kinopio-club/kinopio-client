@@ -8,7 +8,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -161,7 +160,6 @@ export const useBoxStore = defineStore('boxes', {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const broadcastStore = useBroadcastStore()
-      const historyStore = useHistoryStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       this.triggerCreateBox(box)
@@ -218,7 +216,6 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const historyStore = useHistoryStore()
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
@@ -231,7 +228,6 @@ export const useBoxStore = defineStore('boxes', {
         broadcastStore.update({ updates: ids, store: 'boxStore', action: 'removeBoxesRemote' })
       }
       const boxes = ids.map(id => this.getBox(id))
-      // historyStore.add({ boxes, isRemoved: true })
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       await nextTick()
       const connectionStore = useConnectionStore()
@@ -358,7 +354,6 @@ export const useBoxStore = defineStore('boxes', {
     // checked
 
     toggleBoxChecked (id, value) {
-      const historyStore = useHistoryStore()
       const box = this.getBox(id)
       let { name } = box
       const checkbox = utils.checkboxFromString(name)
@@ -374,10 +369,8 @@ export const useBoxStore = defineStore('boxes', {
         nameUpdatedAt: new Date()
       }
       this.updateBox(update)
-      historyStore.add({ boxes: [update] })
     },
     clearBoxChecked (id) {
-      const historyStore = useHistoryStore()
       const box = this.getBox(id)
       let name = box.name
       name = name.replace('[x]', '').trim()
@@ -388,7 +381,6 @@ export const useBoxStore = defineStore('boxes', {
       }
       this.updateBox(update)
       this.updateBoxInfoDimensions(id)
-      historyStore.add({ boxes: [update] })
     },
 
     // contained items

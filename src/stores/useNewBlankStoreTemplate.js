@@ -5,7 +5,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -54,13 +53,11 @@ export const useItemStore = defineStore('items', {
     },
     async createItem (item) {
       const apiStore = useApiStore()
-      const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
       // normalize item
       this.addItemToState(item)
       // if (updates.isFromBroadcast) { return }
       // broadcastStore.update({ updates: item, store: 'itemStore', action: 'createItem' })
-      // historyStore.add({ connections: [connection] })
       await apiStore.addToQueue({ name: 'createItem', body: item })
     },
 

@@ -7,7 +7,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -404,7 +403,6 @@ export const useCardStore = defineStore('cards', {
       await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } })
     },
     removeCards (ids) {
-      const historyStore = useHistoryStore()
       const cardsToRemove = []
       const updates = []
       const cardsToDelete = []

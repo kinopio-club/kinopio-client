@@ -305,7 +305,6 @@ const stopTiltingCards = () => {
   const cardIds = globalStore.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
-  historyStore.add({ cards })
   globalStore.currentUserIsTiltingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserTiltingCards' })
 }
@@ -320,7 +319,6 @@ const stopResizingCards = async () => {
   if (!globalStore.currentUserIsResizingCard) { return }
   const cardIds = globalStore.currentUserIsResizingCardIds
   const cards = cardIds.map(id => cardStore.getCard(id))
-  historyStore.add({ cards })
   await cardStore.updateCardsDimensions(cardIds)
   globalStore.currentUserIsResizingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
