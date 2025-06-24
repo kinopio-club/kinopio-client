@@ -9,7 +9,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -43,7 +42,6 @@ const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
 const broadcastStore = useBroadcastStore()
-const historyStore = useHistoryStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -347,7 +345,6 @@ const handleEnterKey = (event) => {
 }
 const removeCard = () => {
   if (!canEditCard.value) { return }
-  historyStore.resume()
   cardStore.removeCards([cardId.value])
   globalStore.updateCardDetailsIsVisibleForCardId('')
   triggerUpdateHeaderAndFooterPosition()
@@ -391,7 +388,6 @@ const showCard = async (cardId) => {
   const connections = connectionStore.getConnectionsByItemId(cardId)
   globalStore.updateCurrentCardConnections(connections)
   prevCardName = card.value.name
-  historyStore.pause()
   textareaSizes()
 }
 const closeCard = async () => {
@@ -414,10 +410,6 @@ const closeCard = async () => {
   globalStore.updatePageSizes()
   updateDimensionsAndPaths(cardId)
   globalStore.checkIfItemShouldIncreasePageSize(item)
-  historyStore.resume()
-  if (item.name || prevCardName) {
-    historyStore.add({ cards: [item], useSnapshot: true })
-  }
 }
 
 // share url
@@ -1168,9 +1160,6 @@ const splitCards = (event, isPreview) => {
   if (isPreview) { return newCards }
   state.pastedName = ''
   updateCardName(newCards[0].name)
-  historyStore.resume()
-  historyStore.add({ cards: newCards, useSnapshot: true })
-  historyStore.pause()
   newCards.shift()
   addSplitCards(newCards)
 }

@@ -197,7 +197,6 @@ const moveOrCopyToSpace = async () => {
     removeCards(items.cards)
     removeBoxes(items.boxes)
     items.isRemoved = true
-    historyStore.resume()
     historyStore.add(items)
   }
   userStore.updateUserCardsCreatedCount(items.cards)

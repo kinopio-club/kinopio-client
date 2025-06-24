@@ -209,12 +209,6 @@ watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
-// watch(() => globalStore.currentUserIsResizingBox, (value, prevValue) => {
-//   if (prevValue && !value) {
-//     afterResizeBoxes()
-//   }
-//   updatePageSizes(value)
-// })
 
 const updatePageSizes = async (value) => {
   if (!value) {
@@ -308,11 +302,10 @@ const tiltCards = (event) => {
 }
 const stopTiltingCards = () => {
   if (!globalStore.currentUserIsTiltingCard) { return }
-  historyStore.resume()
   const cardIds = globalStore.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
-  historyStore.add({ cards, useSnapshot: true })
+  historyStore.add({ cards })
   globalStore.currentUserIsTiltingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserTiltingCards' })
 }
@@ -325,10 +318,9 @@ const resizeCards = (event) => {
 }
 const stopResizingCards = async () => {
   if (!globalStore.currentUserIsResizingCard) { return }
-  historyStore.resume()
   const cardIds = globalStore.currentUserIsResizingCardIds
   const cards = cardIds.map(id => cardStore.getCard(id))
-  historyStore.add({ cards, useSnapshot: true })
+  historyStore.add({ cards })
   await cardStore.updateCardsDimensions(cardIds)
   globalStore.currentUserIsResizingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
@@ -391,13 +383,6 @@ const resizeBoxes = () => {
 }
 const stopResizingBoxes = () => {
   if (!globalStore.currentUserIsResizingBox) { return }
-  historyStore.resume()
-
-  // const boxes = boxStore.getBoxesResizing
-  // const ids = boxes.map(box => box.id)
-
-  // useConnectionStore.updateConnectionPaths(boxIds)
-  // historyStore.add({ boxes, useSnapshot: true })
   globalStore.currentUserIsResizingBox = false
   globalStore.updateCurrentUserToolbar('card')
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
@@ -457,7 +442,6 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
-  historyStore.pause()
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }

@@ -48,7 +48,6 @@ watch(() => id.value, async (value, prevValue) => {
   await nextTick()
   // open
   if (value) {
-    historyStore.pause()
     prevBoxId = value.id
     closeDialogs()
     broadcastShowBoxDetails()
@@ -56,13 +55,12 @@ watch(() => id.value, async (value, prevValue) => {
     textareaSizes()
   // close
   } else {
-    historyStore.resume()
     if (!state.isUpdated) { return }
     state.isUpdated = false
     const box = boxStore.getBox(prevBoxId)
     boxStore.updateBoxInfoDimensions(prevBoxId)
     if (!box) { return }
-    historyStore.add({ boxes: [box], useSnapshot: true })
+    historyStore.add({ boxes: [box] })
   }
 })
 
@@ -212,7 +210,6 @@ const toggleBackgroundPickerIsVisible = () => {
 // remove
 
 const removeBox = () => {
-  historyStore.resume()
   boxStore.removeBox(currentBox.value.id)
 }
 

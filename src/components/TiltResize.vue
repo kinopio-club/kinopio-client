@@ -29,7 +29,6 @@ const isPresentationMode = computed(() => globalStore.isPresentationMode)
 
 const start = (event, action) => {
   if (utils.isMultiTouch(event)) { return }
-  historyStore.pause()
   globalStore.closeAllDialogs()
   globalStore.preventDraggedCardFromShowingDetails = true
   cardStore.incrementCardZ(props.card.id)

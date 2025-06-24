@@ -108,6 +108,7 @@ export const useBoxStore = defineStore('boxes', {
       boxes = boxes.map(box => this.getBox(box.dataset.boxId))
       return boxes
     },
+
     // init
 
     initializeBoxes (boxes = []) {
@@ -162,7 +163,6 @@ export const useBoxStore = defineStore('boxes', {
       if (box.isFromBroadcast) { return }
       broadcastStore.update({ updates: box, store: 'boxStore', action: 'createBox' })
       if (isResizing) {
-        historyStore.pause()
         globalStore.currentUserIsResizingBox = true
         globalStore.currentUserIsResizingBoxIds = [box.id]
       }
@@ -370,8 +370,7 @@ export const useBoxStore = defineStore('boxes', {
         nameUpdatedAt: new Date()
       }
       this.updateBox(update)
-      historyStore.resume()
-      historyStore.add({ boxes: [update], useSnapshot: true })
+      historyStore.add({ boxes: [update] })
     },
     clearBoxChecked (id) {
       const historyStore = useHistoryStore()
@@ -385,8 +384,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       this.updateBox(update)
       this.updateBoxInfoDimensions(id)
-      historyStore.resume()
-      historyStore.add({ boxes: [update], useSnapshot: true })
+      historyStore.add({ boxes: [update] })
     },
 
     // contained items
@@ -577,7 +575,6 @@ export const useBoxStore = defineStore('boxes', {
       } else if (side === 'bottom') {
         update.y = target.y + target.resizeHeight - borderWidth
       }
-      // historyStore.resume()
       this.boxSnapGuides = []
       await nextTick()
       this.updateBox(update)
@@ -622,7 +619,6 @@ export const useBoxStore = defineStore('boxes', {
           update.resizeWidth = origin.width + delta.x + padding
         }
       }
-      // historyStore.resume()
       this.updateBox(update)
       // this.boxSnapGuides = []
     }

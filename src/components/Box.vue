@@ -278,7 +278,6 @@ const resizeIsVisible = computed(() => {
 const startResizing = (event) => {
   if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
-  historyStore.pause()
   globalStore.closeAllDialogs()
   globalStore.currentUserIsResizingBox = true
   globalStore.preventMultipleSelectedActionsIsVisible = true
