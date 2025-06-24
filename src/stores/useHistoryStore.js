@@ -46,19 +46,18 @@ export const useHistoryStore = defineStore('history', {
   state: () => ({
     patches: [],
     pointer: 0,
+    shouldPreventPatchUpdates: false,
+    // card
     cardUpdatesProcessing: new Map(),
     prevCardUpdatesProcessing: new Map(),
     cardUpdateKeysProcessing: new Set(),
-    shouldPreventPatchUpdates: false
+    // box
+    boxUpdatesProcessing: new Map(),
+    prevBoxUpdatesProcessing: new Map(),
+    boxUpdateKeysProcessing: new Set()
   }),
   actions: {
     // subscribe to items → process updates → create patch
-
-    // init
-
-    init () {
-      this.subscribeToCards()
-    },
 
     // patches and pointers
 
@@ -102,6 +101,13 @@ export const useHistoryStore = defineStore('history', {
       this.pointer = Math.max(0, this.pointer)
       this.pointer = Math.min(this.patches.length, this.pointer)
       console.error('🐸🐸🐸 updatePointer', this.pointer, increment, decrement)
+    },
+
+    // init subscribers
+
+    init () {
+      this.subscribeToCards()
+      this.subscribeToBoxes()
     },
 
     // cards
@@ -164,13 +170,68 @@ export const useHistoryStore = defineStore('history', {
             this.processCardUpdated(this, updates)
             break
           case 'createCards':
-            console.log('♥️♥️createCards', updates)
             this.processCardsCreated(updates)
             break
           case 'createCard':
-            console.log('♥️createCard', updates)
             this.processCardsCreated([updates])
             break
+        }
+      })
+    },
+
+    // boxes
+
+    processBoxUpdated: debounce((store, updates) => {
+      const patch = []
+      updates.forEach(update => {
+        const keys = Array.from(store.boxUpdateKeysProcessing)
+        let prevBox = store.prevBoxUpdatesProcessing.get(update.id)
+
+        prevBox = utils.objectPickKeys(prevBox, keys)
+        const newBox = store.boxUpdatesProcessing.get(update.id)
+        patch.push({
+          action: 'boxUpdated',
+          prev: prevBox,
+          new: newBox
+        })
+      })
+      if (patch.length) {
+        store.addPatch(patch)
+      }
+      store.boxUpdatesProcessing = new Map()
+      store.prevBoxUpdatesProcessing = new Map()
+      store.boxUpdateKeysProcessing = new Set()
+    }, 100),
+
+    subscribeToBoxes () {
+      const boxStore = useBoxStore()
+      boxStore.$onAction(({ name, args, after, onError }) => {
+        if (this.shouldPreventPatchUpdates) { return }
+        const updates = args[0]
+        switch (name) {
+          case 'updateBoxesState':
+            updates.forEach(update => {
+              const keys = Object.keys(update)
+              keys.forEach(key => this.boxUpdateKeysProcessing.add(key))
+              if (this.boxUpdatesProcessing.has(update.id)) {
+                // Merge with existing object
+                this.boxUpdatesProcessing.set(update.id, { ...this.boxUpdatesProcessing.get(update.id), ...update })
+              } else {
+                // Add new object
+                this.boxUpdatesProcessing.set(update.id, { ...update })
+              }
+              if (this.prevBoxUpdatesProcessing.has(update.id)) { return }
+              const prevBox = boxStore.getBox(update.id)
+              this.prevBoxUpdatesProcessing.set(prevBox.id, prevBox)
+            })
+            this.processBoxUpdated(this, updates)
+            break
+          // case 'createBoxes':
+          //   this.processBoxesCreated(updates)
+          //   break
+          // case 'createBox':
+          //   this.processBoxesCreated([updates])
+          //   break
         }
       })
     },
@@ -198,6 +259,7 @@ export const useHistoryStore = defineStore('history', {
         const { action } = item
         let card, connection, type, box
         switch (action) {
+          // cards
           case 'cardUpdated':
             card = item.prev
             cardStore.updateCard(card)
@@ -212,6 +274,22 @@ export const useHistoryStore = defineStore('history', {
             card = item.new
             cardStore.restoreRemovedCard(card)
             break
+          // boxes
+          case 'boxCreated':
+            box = item.new
+            boxStore.removeBox(box)
+            break
+          case 'boxRemoved':
+            box = item.new
+            boxStore.createBox(box)
+            break
+          case 'boxUpdated':
+            box = item.prev
+            boxStore.updateBox(box)
+            await nextTick()
+            connectionStore.updateConnectionPath(box.id)
+            break
+          // connections
           case 'connectionUpdated':
             connection = item.prev
             connectionStore.updateConnection(connection)
@@ -231,22 +309,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'connectionTypeUpdated':
             type = item.prev
-
             connectionStore.updateConnectionType(type)
-            break
-          case 'boxCreated':
-            box = item.new
-            boxStore.removeBox(box)
-            break
-          case 'boxRemoved':
-            box = item.new
-            boxStore.createBox(box)
-            break
-          case 'boxUpdated':
-            box = item.prev
-            boxStore.updateBox(box)
-            await nextTick()
-            connectionStore.updateConnectionPath(box.id)
             break
         }
       }
@@ -279,6 +342,7 @@ export const useHistoryStore = defineStore('history', {
         const { action } = item
         let card, connection, type, box, prevCard
         switch (action) {
+          // cards
           case 'cardUpdated':
             card = item.new
             prevCard = cardStore.getCard(card.id)
@@ -304,6 +368,22 @@ export const useHistoryStore = defineStore('history', {
             card = item.new
             cardStore.removeCard(card)
             break
+          // boxes
+          case 'boxCreated':
+            box = item.new
+            boxStore.createBox(box)
+            break
+          case 'boxRemoved':
+            box = item.new
+            boxStore.removeBox(box)
+            break
+          case 'boxUpdated':
+            box = item.new
+            boxStore.updateBox(box)
+            await nextTick()
+            connectionStore.updateConnectionPath(box.id)
+            break
+          // connections
           case 'connectionUpdated':
             connection = item.new
             connectionStore.updateConnection(connection)
@@ -319,20 +399,6 @@ export const useHistoryStore = defineStore('history', {
           case 'connectionTypeUpdated':
             type = item.new
             connectionStore.updateConnectionType(type)
-            break
-          case 'boxCreated':
-            box = item.new
-            boxStore.createBox(box)
-            break
-          case 'boxRemoved':
-            box = item.new
-            boxStore.removeBox(box)
-            break
-          case 'boxUpdated':
-            box = item.new
-            boxStore.updateBox(box)
-            await nextTick()
-            connectionStore.updateConnectionPath(box.id)
             break
         }
       }
