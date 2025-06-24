@@ -110,7 +110,7 @@ export const useHistoryStore = defineStore('history', {
       this.subscribeToBoxes()
     },
 
-    // cards
+    // card events
 
     processCardUpdated: debounce((store, updates) => {
       const ignoreKeys = ['id', 'nameUpdatedAt', 'height', 'width', 'z', 'prevHeight', 'prevWidth', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
@@ -156,7 +156,6 @@ export const useHistoryStore = defineStore('history', {
       })
       this.addPatch(patch)
     },
-
     subscribeToCards () {
       const cardStore = useCardStore()
       cardStore.$onAction(({ name, args, after, onError }) => {
@@ -193,7 +192,7 @@ export const useHistoryStore = defineStore('history', {
       })
     },
 
-    // boxes
+    // box events
 
     processBoxUpdated: debounce((store, updates) => {
       const patch = []
@@ -216,7 +215,13 @@ export const useHistoryStore = defineStore('history', {
       store.prevBoxUpdatesProcessing = new Map()
       store.boxUpdateKeysProcessing = new Set()
     }, 100),
-
+    processBoxCreated (updates) {
+      const patch = [{
+        action: 'boxCreated',
+        new: updates
+      }]
+      this.addPatch(patch)
+    },
     subscribeToBoxes () {
       const boxStore = useBoxStore()
       boxStore.$onAction(({ name, args, after, onError }) => {
@@ -240,12 +245,9 @@ export const useHistoryStore = defineStore('history', {
             })
             this.processBoxUpdated(this, updates)
             break
-          // case 'createBoxes':
-          //   this.processBoxesCreated(updates)
-          //   break
-          // case 'createBox':
-          //   this.processBoxesCreated([updates])
-          //   break
+          case 'addBoxToState':
+            this.processBoxCreated(updates)
+            break
         }
       })
     },
