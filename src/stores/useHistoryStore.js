@@ -147,8 +147,8 @@ export const useHistoryStore = defineStore('history', {
     },
     processCardsRemoved (updates) {
       const cardStore = useCardStore()
-      const patch = updates.map(id => {
-        const card = cardStore.getCard(id)
+      const cards = updates.map(id => cardStore.getCard(id))
+      const patch = cards.map(card => {
         return {
           action: 'cardRemoved',
           new: card
@@ -222,6 +222,17 @@ export const useHistoryStore = defineStore('history', {
       }]
       this.addPatch(patch)
     },
+    processBoxRemoved (updates) {
+      const boxStore = useBoxStore()
+      const boxes = updates.map(id => boxStore.getBox(id))
+      const patch = boxes.map(box => {
+        return {
+          action: 'boxRemoved',
+          new: box
+        }
+      })
+      this.addPatch(patch)
+    },
     subscribeToBoxes () {
       const boxStore = useBoxStore()
       boxStore.$onAction(({ name, args, after, onError }) => {
@@ -247,6 +258,9 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'addBoxToState':
             this.processBoxCreated(updates)
+            break
+          case 'removeBoxes':
+            this.processBoxRemoved(updates)
             break
         }
       })
