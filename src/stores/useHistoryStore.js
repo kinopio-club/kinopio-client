@@ -99,8 +99,8 @@ export const useHistoryStore = defineStore('history', {
     pointer: 0,
     processingCards: new Map(),
     processingPrevCards: new Map(),
-    processingCardKeys: new Set()
-    // updatesIsPaused: false
+    processingCardKeys: new Set(),
+    shouldPreventPatchUpdates: false
   }),
 
   actions: {
@@ -113,8 +113,8 @@ export const useHistoryStore = defineStore('history', {
       const patch = []
       updates.forEach(update => {
         const keys = Array.from(store.processingCardKeys)
-        const shouldPreventUpdate = keys.every(key => ignoreKeys.includes(key))
-        if (shouldPreventUpdate) { return }
+        const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
+        if (everyKeyIsIgnored) { return }
         let prevCard = store.processingPrevCards.get(update.id)
         prevCard = utils.objectPickKeys(prevCard, keys)
         const newCard = store.processingCards.get(update.id)
@@ -138,10 +138,17 @@ export const useHistoryStore = defineStore('history', {
     init () {
       this.subscribeToCards()
     },
+    // checkIsShouldPreventPatchUpdates () {
+    //   if (this.shouldPreventPatchUpdates) {
+    //     this.shouldPreventPatchUpdates = false
+    //     return true
+    //   }
+    // }
     subscribeToCards () {
       const cardStore = useCardStore()
       // update
       cardStore.$onAction(({ name, args, after, onError }) => {
+        if (this.shouldPreventPatchUpdates) { return }
         if (name === 'updateCardsState') {
           const updates = args[0]
           // console.log('🌺🌺💐$onAction',updates, name, args, after, onError)
@@ -169,10 +176,12 @@ export const useHistoryStore = defineStore('history', {
             const cardId = mutation.events.key
             // add
             if (!mutation.events.oldValue) {
+              if (this.shouldPreventPatchUpdates) { return }
               add = mutation.events.newValue
               // console.log('🍇add',add)
             // remove
             } else if (!mutation.events.newValue) {
+              if (this.shouldPreventPatchUpdates) { return }
               // console.log('🚘🚘🚘deleted', )
               remove = mutation.events.oldValue
             }
@@ -192,6 +201,7 @@ export const useHistoryStore = defineStore('history', {
       // add patch to pointer
       this.patches.splice(this.pointer, 0, patch)
       this.updatePointer({ increment: true })
+      this.trimPatches()
       if (showLogMessages) {
         console.info('⏺ add history patch', { newPatch: patch, pointer: this.pointer })
       }
@@ -223,18 +233,15 @@ export const useHistoryStore = defineStore('history', {
       //   console.error('⏸ history is paused', isPaused)
       // }
     },
-    updatePointer ({ increment, decrement, value }) {
-      console.log('🐸', increment, decrement, value)
+    updatePointer ({ increment, decrement }) {
       if (increment) {
         this.pointer = this.pointer + 1
-        this.pointer = Math.min(this.patches.length, this.pointer)
       } else if (decrement) {
         this.pointer = this.pointer - 1
-        this.pointer = Math.max(0, this.pointer)
-      } else {
-        this.pointer = value
       }
-      console.log('🐸🐸🐸🐸🐸', this.pointer)
+      this.pointer = Math.max(0, this.pointer)
+      this.pointer = Math.min(this.patches.length, this.pointer)
+      console.log('🐸🐸🐸🐸🐸', this.pointer, increment, decrement)
     },
 
     // History System State
@@ -353,16 +360,9 @@ export const useHistoryStore = defineStore('history', {
         globalStore.triggerDrawingUndo()
         return
       }
-      // if (isPaused) { return }
-      if (this.pointer <= 0) {
-        this.updatePointer({ value: 0 })
-        return
-      }
-      console.log('🍇1', this.pointer)
-
+      this.shouldPreventPatchUpdates = true
       const index = this.pointer - 1
       const patch = this.patches[index]
-      // this.updateIsPaused(true)
       for (const item of patch) {
         console.info('⏪ undo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
@@ -421,9 +421,8 @@ export const useHistoryStore = defineStore('history', {
             break
         }
       }
-      // this.resume()
       this.updatePointer({ decrement: true })
-      console.log('🍇2', this.pointer)
+      this.shouldPreventPatchUpdates = false
     },
 
     // Redo
@@ -439,16 +438,11 @@ export const useHistoryStore = defineStore('history', {
         return
       }
       if (!patch) {
-        // if (isPaused) { return }
-
         const pointerIsNewest = this.pointer === this.patches.length
-        console.log('🔮🔮', this.pointer, globalStore.getToolbarIsDrawing, patch)
-
         if (pointerIsNewest) { return }
         patch = this.patches[this.pointer]
       }
-
-      // this.updateIsPaused(true)
+      this.shouldPreventPatchUpdates = true
       for (const item of patch) {
         console.info('⏩ redo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
@@ -501,8 +495,8 @@ export const useHistoryStore = defineStore('history', {
             break
         }
       }
-      // this.resume()
       this.updatePointer({ increment: true })
+      this.shouldPreventPatchUpdates = false
     },
 
     // Restore local changes over remote space
