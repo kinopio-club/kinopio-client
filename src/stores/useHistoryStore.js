@@ -162,7 +162,7 @@ export const useHistoryStore = defineStore('history', {
         if (this.shouldPreventPatchUpdates) { return }
         const updates = args[0]
         switch (name) {
-          case 'updateCardsState':
+          case 'updateCards':
             updates.forEach(update => {
               const keys = Object.keys(update)
               keys.forEach(key => this.cardUpdateKeysProcessing.add(key))
@@ -239,7 +239,7 @@ export const useHistoryStore = defineStore('history', {
         if (this.shouldPreventPatchUpdates) { return }
         const updates = args[0]
         switch (name) {
-          case 'updateBoxesState':
+          case 'updateBoxes':
             updates.forEach(update => {
               const keys = Object.keys(update)
               keys.forEach(key => this.boxUpdateKeysProcessing.add(key))
