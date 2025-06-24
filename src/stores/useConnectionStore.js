@@ -4,7 +4,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -233,7 +232,6 @@ export const useConnectionStore = defineStore('connections', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const historyStore = useHistoryStore()
       const broadcastStore = useBroadcastStore()
       const connections = this.getAllConnections
       const isExistingConnection = connections.find(item => {
@@ -250,7 +248,6 @@ export const useConnectionStore = defineStore('connections', {
       connection.connectionTypeId = type.id
       this.addConnectionToState(connection)
       broadcastStore.update({ updates: connection, store: 'connectionStore', action: 'addConnectionToState' })
-      // historyStore.add({ connections: [connection] })
       await apiStore.addToQueue({ name: 'createConnection', body: connection })
     },
     async createConnectionType (type) {
@@ -319,7 +316,6 @@ export const useConnectionStore = defineStore('connections', {
       const apiStore = useApiStore()
       const spaceStore = useSpaceStore()
       const connectionType = this.getConnectionType(update.id)
-      const historyStore = useHistoryStore()
       const broadcastStore = useBroadcastStore()
       const keys = Object.keys(update)
       keys.forEach(key => {
@@ -331,7 +327,6 @@ export const useConnectionStore = defineStore('connections', {
       if (update.isFromBroadcast) { return }
       broadcastStore.update({ updates: update, store: 'connectionStore', action: 'updateConnectionType' })
       await apiStore.addToQueue({ name: 'updateConnectionType', body: connectionType })
-      // historyStore.add({ connectionTypes: [connectionType] })
     },
 
     // remove
@@ -358,7 +353,6 @@ export const useConnectionStore = defineStore('connections', {
     async removeConnections (ids) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
-      const historyStore = useHistoryStore()
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }

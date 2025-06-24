@@ -59,8 +59,6 @@ watch(() => id.value, async (value, prevValue) => {
     state.isUpdated = false
     const box = boxStore.getBox(prevBoxId)
     boxStore.updateBoxInfoDimensions(prevBoxId)
-    if (!box) { return }
-    historyStore.add({ boxes: [box] })
   }
 })
 

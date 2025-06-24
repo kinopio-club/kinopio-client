@@ -41,6 +41,9 @@ export const useHistoryStore = defineStore('history', {
   //   ░░░░░░░░░░░      │                      │░                │
   //                    └──────────────────────┘░                ▼
   //                     ░░░░░░░░░░░░░░░░░░░░░░░░
+  //
+  //  subscribe to items → process updates → create patch
+  //
   state: () => ({
     patches: [],
     pointer: 0,
@@ -59,13 +62,9 @@ export const useHistoryStore = defineStore('history', {
     connectionUpdateKeysProcessing: new Set()
   }),
   actions: {
-    // subscribe to items → process updates → create patch
 
     // patches and pointers
 
-    add (update) { // todo remove?
-      console.error('🔮🔮', update)
-    },
     addPatch (patch) {
       utils.typeCheck({ value: patch, type: 'array', origin: 'addPatch' })
       // console.log('🌺 addPatch', patch)
@@ -197,11 +196,13 @@ export const useHistoryStore = defineStore('history', {
     // box events
 
     processBoxUpdated: debounce((store, updates) => {
+      const ignoreKeys = ['id', 'z']
       const patch = []
       updates.forEach(update => {
         const keys = Array.from(store.boxUpdateKeysProcessing)
+        const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
+        if (everyKeyIsIgnored) { return }
         let prevBox = store.prevBoxUpdatesProcessing.get(update.id)
-
         prevBox = utils.objectPickKeys(prevBox, keys)
         const newBox = store.boxUpdatesProcessing.get(update.id)
         patch.push({

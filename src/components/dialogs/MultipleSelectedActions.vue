@@ -63,11 +63,9 @@ watch(() => visible.value, async (value, prevValue) => {
     globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
     scrollIntoView()
     closeDialogs()
-    historyStore.updateSnapshot()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
-    historyStore.resume()
-    historyStore.add({ cards: prevCards, boxes: prevBoxes, useSnapshot: true })
+    historyStore.add({ cards: prevCards, boxes: prevBoxes })
     globalStore.shouldExplicitlyHideFooter = false
   }
 })
@@ -208,13 +206,11 @@ const editableCards = computed(() => {
 // connect
 
 const toggleConnectItems = (event) => {
-  historyStore.resume()
   if (itemsIsConnectedTogether.value) {
     disconnectItems()
   } else {
     connectItems(event)
   }
-  historyStore.pause()
 }
 const connectItems = (event) => {
   const itemIds = multipleItemsSelectedIds.value
@@ -449,7 +445,6 @@ const toggleShouldShowMultipleSelectedBoxActions = async () => {
 // remove
 
 const remove = ({ shouldRemoveCardsOnly }) => {
-  historyStore.resume()
   const cardIds = editableCards.value.map(card => card.id)
   const connectionIds = editableConnections.value.map(connection => connection.id)
   cardStore.removeCards(cardIds)
