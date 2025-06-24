@@ -301,6 +301,17 @@ export const useHistoryStore = defineStore('history', {
       }]
       this.addPatch(patch)
     },
+    processConnectionRemoved (updates) {
+      const connectionStore = useConnectionStore()
+      const connections = updates.map(id => connectionStore.getConnection(id))
+      const patch = connections.map(connection => {
+        return {
+          action: 'connectionRemoved',
+          new: connection
+        }
+      })
+      this.addPatch(patch)
+    },
     subscribeToConnections () {
       const connectionStore = useConnectionStore()
       connectionStore.$onAction(({ name, args, after, onError }) => {
@@ -327,9 +338,9 @@ export const useHistoryStore = defineStore('history', {
           case 'createConnection':
             this.processConnectionCreated(updates)
             break
-        //   case 'removeConnections':
-        //     this.processConnectionRemoved(updates)
-        //     break
+          case 'removeConnections':
+            this.processConnectionRemoved(updates)
+            break
 
             // connectionTypeUpdated
         }
@@ -493,7 +504,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'connectionRemoved':
             connection = item.new
-            connectionStore.removeConnection(connection)
+            connectionStore.removeConnection(connection.id)
             break
           case 'connectionTypeUpdated':
             type = item.new
