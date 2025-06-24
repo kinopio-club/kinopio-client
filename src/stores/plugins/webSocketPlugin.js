@@ -158,7 +158,7 @@ export default function webSocketPlugin () {
     const broadcastStore = useBroadcastStore(pinia)
     // prevent duplicate connections
     if (websocket || globalStore.isConnectingToBroadcast) {
-      console.info('🌙 websocket connection already in progress or established')
+      // console.info('🌙 websocket connection already in progress or established')
       return
     }
     globalStore.isConnectingToBroadcast = true

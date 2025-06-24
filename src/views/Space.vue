@@ -83,6 +83,7 @@ window.spaceStore = useSpaceStore()
 window.groupStore = useGroupStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
+  window.historyStore = useHistoryStore()
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore, window.groupStore')
 

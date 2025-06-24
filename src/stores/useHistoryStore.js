@@ -21,8 +21,8 @@ const showLogMessages = true // true
 // const prevPatchTime = new Date() // unix timestamp ms
 
 const max = 30
-let isPaused = false // todo remove
-let snapshot = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} } // todo remove
+// let isPaused = false // todo remove
+// let snapshot = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} } // todo remove
 
 // const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
 //   // console.log('🚘', item, itemType, previous, isRemoved)
@@ -100,6 +100,7 @@ export const useHistoryStore = defineStore('history', {
     processingCards: new Map(),
     processingPrevCards: new Map(),
     processingCardKeys: new Set()
+    // updatesIsPaused: false
   }),
 
   actions: {
@@ -125,7 +126,7 @@ export const useHistoryStore = defineStore('history', {
       })
       if (patch.length) {
         console.log('💐patch', patch)
-        // TODO add updatecard patch
+        store.addPatch(patch)
       }
       store.processingCards = new Map()
       store.processingPrevCards = new Map()
@@ -143,7 +144,7 @@ export const useHistoryStore = defineStore('history', {
       cardStore.$onAction(({ name, args, after, onError }) => {
         if (name === 'updateCardsState') {
           const updates = args[0]
-          // console.log('🌺🌺💐$onAction',updates)
+          // console.log('🌺🌺💐$onAction',updates, name, args, after, onError)
           updates.forEach(update => {
             const keys = Object.keys(update)
             keys.forEach(key => this.processingCardKeys.add(key))
@@ -183,13 +184,14 @@ export const useHistoryStore = defineStore('history', {
 
     addPatch (patch) {
       utils.typeCheck({ value: patch, type: 'array', origin: 'addPatch' })
+      console.log(this)
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
       // remove patches above pointer
       this.patches = this.patches.slice(0, this.pointer)
       // add patch to pointer
       this.patches.splice(this.pointer, 0, patch)
-      this.pointer = this.pointer + 1
+      this.updatePointer({ increment: true })
       if (showLogMessages) {
         console.info('⏺ add history patch', { newPatch: patch, pointer: this.pointer })
       }
@@ -209,59 +211,62 @@ export const useHistoryStore = defineStore('history', {
     clearHistory () {
       this.patches = []
       this.pointer = 0
-      snapshot = { cards: {}, connections: {}, connectionTypes: {} }
+      // snapshot = { cards: {}, connections: {}, connectionTypes: {} }
       if (showLogMessages) {
         console.info('⏹ clear history')
       }
     },
     updateIsPaused (value) {
-      isPaused = value
-      if (showDebugMessages && showLogMessages) {
-        console.error('⏸ history is paused', isPaused)
-      }
+      // return
+      // isPaused = value
+      // if (showDebugMessages && showLogMessages) {
+      //   console.error('⏸ history is paused', isPaused)
+      // }
     },
     updatePointer ({ increment, decrement, value }) {
+      console.log('🐸', increment, decrement, value)
       if (increment) {
         this.pointer = this.pointer + 1
         this.pointer = Math.min(this.patches.length, this.pointer)
       } else if (decrement) {
         this.pointer = this.pointer - 1
         this.pointer = Math.max(0, this.pointer)
-      } else if (value) {
+      } else {
         this.pointer = value
       }
+      console.log('🐸🐸🐸🐸🐸', this.pointer)
     },
 
     // History System State
 
     reset () {
       this.clearHistory()
-      this.updateSnapshot()
+      // this.updateSnapshot()
     },
-    updateSnapshot () { // todo remove , and remove all references to snapshot
-      const spaceStore = useSpaceStore()
-      const space = spaceStore.getSpaceAllItems
-      let { cards, connections, connectionTypes, boxes } = space
-      cards = utils.normalizeItems(cards)
-      connections = utils.normalizeItems(connections)
-      connectionTypes = utils.normalizeItems(connectionTypes)
-      boxes = utils.normalizeItems(boxes)
-      cards = utils.clone(cards)
-      connections = utils.clone(connections)
-      connectionTypes = utils.clone(connectionTypes)
-      boxes = utils.clone(boxes)
+    // updateSnapshot () { // todo remove , and remove all references to snapshot
+    //   const spaceStore = useSpaceStore()
+    //   const space = spaceStore.getSpaceAllItems
+    //   let { cards, connections, connectionTypes, boxes } = space
+    //   cards = utils.normalizeItems(cards)
+    //   connections = utils.normalizeItems(connections)
+    //   connectionTypes = utils.normalizeItems(connectionTypes)
+    //   boxes = utils.normalizeItems(boxes)
+    //   cards = utils.clone(cards)
+    //   connections = utils.clone(connections)
+    //   connectionTypes = utils.clone(connectionTypes)
+    //   boxes = utils.clone(boxes)
 
-      // console.error('🍇🍇🍇🍇🍇🍇', connectionTypes)
+    //   // console.error('🍇🍇🍇🍇🍇🍇', connectionTypes)
 
-      snapshot = { cards, connections, connectionTypes, boxes }
-    },
+    //   snapshot = { cards, connections, connectionTypes, boxes }
+    // },
     pause () {
-      if (isPaused) { return }
-      this.updateIsPaused(true)
-      this.updateSnapshot()
+      // if (isPaused) { return }
+      // this.updateIsPaused(true)
+      // this.updateSnapshot()
     },
     resume () {
-      this.updateIsPaused(false)
+      // this.updateIsPaused(false)
     },
 
     // Add Patch
@@ -348,14 +353,16 @@ export const useHistoryStore = defineStore('history', {
         globalStore.triggerDrawingUndo()
         return
       }
-      if (isPaused) { return }
+      // if (isPaused) { return }
       if (this.pointer <= 0) {
         this.updatePointer({ value: 0 })
         return
       }
+      console.log('🍇1', this.pointer)
+
       const index = this.pointer - 1
       const patch = this.patches[index]
-      this.updateIsPaused(true)
+      // this.updateIsPaused(true)
       for (const item of patch) {
         console.info('⏪ undo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
@@ -414,8 +421,9 @@ export const useHistoryStore = defineStore('history', {
             break
         }
       }
-      this.resume()
+      // this.resume()
       this.updatePointer({ decrement: true })
+      console.log('🍇2', this.pointer)
     },
 
     // Redo
@@ -425,17 +433,22 @@ export const useHistoryStore = defineStore('history', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+
       if (globalStore.getToolbarIsDrawing) {
         globalStore.triggerDrawingRedo()
         return
       }
       if (!patch) {
-        if (isPaused) { return }
+        // if (isPaused) { return }
+
         const pointerIsNewest = this.pointer === this.patches.length
+        console.log('🔮🔮', this.pointer, globalStore.getToolbarIsDrawing, patch)
+
         if (pointerIsNewest) { return }
         patch = this.patches[this.pointer]
       }
-      this.updateIsPaused(true)
+
+      // this.updateIsPaused(true)
       for (const item of patch) {
         console.info('⏩ redo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
@@ -488,7 +501,7 @@ export const useHistoryStore = defineStore('history', {
             break
         }
       }
-      this.resume()
+      // this.resume()
       this.updatePointer({ increment: true })
     },
 
