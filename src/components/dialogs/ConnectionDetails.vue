@@ -303,7 +303,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     //- debug
     ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
 
-    //- h1, h2, label etc.
+    //- label, reverse etc.
     ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
 
     p.edit-message.badge.info(v-if="!canEditConnection")

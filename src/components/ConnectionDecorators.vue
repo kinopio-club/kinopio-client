@@ -69,15 +69,19 @@ const reverseConnections = () => {
   props.connections.forEach(connection => {
     const startItemId = connection.endItemId
     const endItemId = connection.startItemId
+    const path = connectionStore.getConnectionPathBetweenItems({
+      startItemId,
+      endItemId,
+      controlPoint: connection.controlPoint
+    })
     const update = {
       id: connection.id,
       startItemId,
-      endItemId
+      endItemId,
+      path
     }
     connectionStore.updateConnection(update)
   })
-  const ids = props.connections.map(connection => connection.id)
-  connectionStore.updateConnectionPaths(ids)
 }
 
 // curve or straight
@@ -111,14 +115,18 @@ const togglePathIsStraight = (isStraight) => {
   }
   const updates = []
   props.connections.forEach(connection => {
+    const path = connectionStore.getConnectionPathBetweenItems({
+      startItemId: connection.startItemId,
+      endItemId: connection.endItemId,
+      controlPoint
+    })
     updates.push({
       id: connection.id,
-      controlPoint
+      controlPoint,
+      path
     })
   })
   connectionStore.updateConnections(updates)
-  const ids = props.connections.map(connection => connection.id)
-  connectionStore.updateConnectionPaths(ids)
   userStore.updateUser({ defaultConnectionControlPoint: controlPoint })
 }
 </script>
