@@ -1,29 +1,3 @@
-// adapted from https://twitter.com/steveruizok/status/1487052071685734410
-
-// each `patch` contains `new` and `prev` updates
-// `pointer` is the current position in history
-//
-//                    ┌──────────────────────┐
-//                    │                      │
-//                    │ PREV                 │
-//                    │ Patch 0              │
-//                    │ [{action prev, new}] │
-//                    │                      │
-//                    ├──────────────────────┤
-//                    │                      │
-//                    │ PREV                 │
-//                    │ Patch 1              │
-//                    │ [{…}]                │       ▲
-//                    │                      │       │
-//                    ├──────────────────────┤       │
-//                    │                      │░  ┌ ─ ─ ─   ┌ ─ ─ ─
-//  ┌─────────┐       │ NEW                  │░    Undo │    Redo │
-//  │ Pointer │──────▶│ Patch 2              │░  └ ─ ─ ─   └ ─ ─ ─
-//  └─────────┘░      │ [{…}]                │░                │
-//   ░░░░░░░░░░░      │                      │░                │
-//                    └──────────────────────┘░                ▼
-//                     ░░░░░░░░░░░░░░░░░░░░░░░░
-
 import { nextTick, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
@@ -44,11 +18,9 @@ import isEqual from 'lodash-es/isEqual'
 const showDebugMessages = true
 const showLogMessages = true // true
 
-const prevPatchTime = new Date() // unix timestamp ms
+// const prevPatchTime = new Date() // unix timestamp ms
 
 const max = 30
-let patches = [] // todo state
-let pointer = 0 // todo state
 let isPaused = false // todo remove
 let snapshot = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} } // todo remove
 
@@ -98,11 +70,36 @@ let snapshot = { cards: {}, connections: {}, connectionTypes: {}, boxes: {} } //
 // let currentUpdate = null
 
 export const useHistoryStore = defineStore('history', {
+  // adapted from https://twitter.com/steveruizok/status/1487052071685734410
+  // each `patch` contains `new` and `prev` updates
+  // `pointer` is the current position in history
+  //
+  //                    ┌──────────────────────┐
+  //                    │                      │
+  //                    │ PREV                 │
+  //                    │ Patch 0              │
+  //                    │ [{action prev, new}] │
+  //                    │                      │
+  //                    ├──────────────────────┤
+  //                    │                      │
+  //                    │ PREV                 │
+  //                    │ Patch 1              │
+  //                    │ [{…}]                │       ▲
+  //                    │                      │       │
+  //                    ├──────────────────────┤       │
+  //                    │                      │░  ┌ ─ ─ ─   ┌ ─ ─ ─
+  //  ┌─────────┐       │ NEW                  │░    Undo │    Redo │
+  //  │ Pointer │──────▶│ Patch 2              │░  └ ─ ─ ─   └ ─ ─ ─
+  //  └─────────┘░      │ [{…}]                │░                │
+  //   ░░░░░░░░░░░      │                      │░                │
+  //                    └──────────────────────┘░                ▼
+  //                     ░░░░░░░░░░░░░░░░░░░░░░░░
   state: () => ({
+    patches: [],
+    pointer: 0,
     processingCards: new Map(),
     processingPrevCards: new Map(),
     processingCardKeys: new Set()
-
   }),
 
   actions: {
@@ -189,29 +186,29 @@ export const useHistoryStore = defineStore('history', {
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
       // remove patches above pointer
-      patches = patches.slice(0, pointer)
+      this.patches = this.patches.slice(0, this.pointer)
       // add patch to pointer
-      patches.splice(pointer, 0, patch)
-      pointer = pointer + 1
+      this.patches.splice(this.pointer, 0, patch)
+      this.pointer = this.pointer + 1
       if (showLogMessages) {
-        console.info('⏺ add history patch', { newPatch: patch, pointer })
+        console.info('⏺ add history patch', { newPatch: patch, pointer: this.pointer })
       }
     },
     addToPrevPatch (patch) {
-      const prevPatch = patches[patches.length - 1]
+      const prevPatch = this.patches[this.patches.length - 1]
       const updatedPatch = prevPatch.concat(patch)
-      patches[patches.length - 1] = updatedPatch
-      console.info('⏺ updated prev history patch', { updatedPatch, pointer })
+      this.patches[this.patches.length - 1] = updatedPatch
+      console.info('⏺ updated prev history patch', { updatedPatch, pointer: this.pointer })
     },
     trimPatches () {
-      if (patches.length > max) {
-        patches.shift()
-        pointer = pointer - 1
+      if (this.patches.length > max) {
+        this.patches.shift()
+        this.pointer = this.pointer - 1
       }
     },
     clearHistory () {
-      patches = []
-      pointer = 0
+      this.patches = []
+      this.pointer = 0
       snapshot = { cards: {}, connections: {}, connectionTypes: {} }
       if (showLogMessages) {
         console.info('⏹ clear history')
@@ -225,13 +222,13 @@ export const useHistoryStore = defineStore('history', {
     },
     updatePointer ({ increment, decrement, value }) {
       if (increment) {
-        pointer = pointer + 1
-        pointer = Math.min(patches.length, pointer)
+        this.pointer = this.pointer + 1
+        this.pointer = Math.min(this.patches.length, this.pointer)
       } else if (decrement) {
-        pointer = pointer - 1
-        pointer = Math.max(0, pointer)
+        this.pointer = this.pointer - 1
+        this.pointer = Math.max(0, this.pointer)
       } else if (value) {
-        pointer = value
+        this.pointer = value
       }
     },
 
@@ -241,7 +238,7 @@ export const useHistoryStore = defineStore('history', {
       this.clearHistory()
       this.updateSnapshot()
     },
-    updateSnapshot () {
+    updateSnapshot () { // todo remove , and remove all references to snapshot
       const spaceStore = useSpaceStore()
       const space = spaceStore.getSpaceAllItems
       let { cards, connections, connectionTypes, boxes } = space
@@ -352,15 +349,15 @@ export const useHistoryStore = defineStore('history', {
         return
       }
       if (isPaused) { return }
-      if (pointer <= 0) {
+      if (this.pointer <= 0) {
         this.updatePointer({ value: 0 })
         return
       }
-      const index = pointer - 1
-      const patch = patches[index]
+      const index = this.pointer - 1
+      const patch = this.patches[index]
       this.updateIsPaused(true)
       for (const item of patch) {
-        console.info('⏪ undo', item, { pointer, totalPatches: patches.length })
+        console.info('⏪ undo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
         let card, connection, type, box
         switch (action) {
@@ -434,13 +431,13 @@ export const useHistoryStore = defineStore('history', {
       }
       if (!patch) {
         if (isPaused) { return }
-        const pointerIsNewest = pointer === patches.length
+        const pointerIsNewest = this.pointer === this.patches.length
         if (pointerIsNewest) { return }
-        patch = patches[pointer]
+        patch = this.patches[this.pointer]
       }
       this.updateIsPaused(true)
       for (const item of patch) {
-        console.info('⏩ redo', item, { pointer, totalPatches: patches.length })
+        console.info('⏩ redo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
         let card, connection, type, box
         switch (action) {
@@ -499,7 +496,7 @@ export const useHistoryStore = defineStore('history', {
     // replays patches between the time local space is loaded to when remote space is loaded
 
     redoLocalUpdates () {
-      patches.forEach(patch => {
+      this.patches.forEach(patch => {
         const actions = ['cardUpdated', 'boxUpdated']
         const isUpdate = actions.includes(patch[0].action)
         this.redo(patch)
