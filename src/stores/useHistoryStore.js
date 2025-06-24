@@ -341,8 +341,6 @@ export const useHistoryStore = defineStore('history', {
           case 'removeConnections':
             this.processConnectionRemoved(updates)
             break
-
-            // connectionTypeUpdated
         }
       })
     },
@@ -417,10 +415,6 @@ export const useHistoryStore = defineStore('history', {
               connection.connectionTypeId = connectionStore.getNewConnectionType
             }
             connectionStore.createConnection(connection)
-            break
-          case 'connectionTypeUpdated':
-            type = item.prev
-            connectionStore.updateConnectionType(type)
             break
         }
       }
@@ -505,10 +499,6 @@ export const useHistoryStore = defineStore('history', {
           case 'connectionRemoved':
             connection = item.new
             connectionStore.removeConnection(connection.id)
-            break
-          case 'connectionTypeUpdated':
-            type = item.new
-            connectionStore.updateConnectionType(type)
             break
         }
       }

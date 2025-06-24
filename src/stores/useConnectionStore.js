@@ -312,21 +312,22 @@ export const useConnectionStore = defineStore('connections', {
     updatePrevConnectionTypeId (id) {
       this.prevConnectionTypeId = id
     },
-    async updateConnectionType (update) {
-      const apiStore = useApiStore()
-      const spaceStore = useSpaceStore()
+    updateConnectionTypeState (update) {
       const connectionType = this.getConnectionType(update.id)
-      const broadcastStore = useBroadcastStore()
       const keys = Object.keys(update)
       keys.forEach(key => {
         connectionType[key] = update[key]
       })
       this.typeById[connectionType.id] = connectionType
+    },
+    async updateConnectionType (update) {
+      const apiStore = useApiStore()
+      const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
+      this.updateConnectionTypeState(update)
+      broadcastStore.update({ updates: update, store: 'connectionStore', action: 'updateConnectionTypeState' })
+      await apiStore.addToQueue({ name: 'updateConnectionType', body: update })
       await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
-
-      if (update.isFromBroadcast) { return }
-      broadcastStore.update({ updates: update, store: 'connectionStore', action: 'updateConnectionType' })
-      await apiStore.addToQueue({ name: 'updateConnectionType', body: connectionType })
     },
 
     // remove
