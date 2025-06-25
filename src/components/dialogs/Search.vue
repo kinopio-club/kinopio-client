@@ -275,6 +275,12 @@ const triggerSignUpOrInIsVisible = () => {
 <template lang="pug">
 dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   SearchFilters
+  section
+    .segmented-buttons
+      button(@click="updateScopeIsCurrentSpace(true)" :class="{ active: state.scopeIsCurrentSpace }")
+        span Current Space
+      button(@click="updateScopeIsCurrentSpace(false)" :class="{ active: !state.scopeIsCurrentSpace }")
+        span All Spaces
   section.results-section(v-if="currentUserIsSignedIn" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
@@ -290,11 +296,6 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectCurrentFocusedItem"
     )
-    .segmented-buttons
-      button(@click="updateScopeIsCurrentSpace(true)" :class="{ active: state.scopeIsCurrentSpace }")
-        span Current Space
-      button(@click="updateScopeIsCurrentSpace(false)" :class="{ active: !state.scopeIsCurrentSpace }")
-        span All Spaces
 
     CardList(:cards="cards" :search="search" @selectCard="selectCard")
     p.description(v-if="noResults")
@@ -317,8 +318,6 @@ dialog.search
   @media(max-width 400px)
     left -40px
   .results-section
-    border-top 1px solid var(--primary-border)
-    padding-top 4px
     .segmented-buttons
       margin 4px
       button
