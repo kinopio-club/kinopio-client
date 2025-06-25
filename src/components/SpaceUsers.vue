@@ -68,23 +68,29 @@ const isAddPage = computed(() => globalStore.isAddPage)
 
 // users
 
-const shouldAppendCurrentUser = computed(() => {
-  const isSpectator = spectators.value.find(spectator => spectator.id === userStore.id)
-  const isMember = members.value.find(member => member.id === userStore.id)
-  console.log(spectators.value, isSpectator, isMember)
-  return !isSpectator && !isMember
-})
 const members = computed(() => {
   const groupUsers = groupStore.getGroupUsersWhoAddedCards || []
   let users = spaceStore.users
   users = users.concat(spaceStore.collaborators)
   users = users.concat(groupUsers)
   users = uniqBy(users, 'id')
+  return users || []
+})
+const membersDisplay = computed(() => {
+  const users = members.value
   if (shouldAppendCurrentUser.value) {
     users.push(userStore.getUserAllState)
   }
   return users
 })
+
+const shouldAppendCurrentUser = computed(() => {
+  const isSpectator = spectators.value.find(spectator => spectator.id === userStore.id)
+  const isMember = members.value.find(member => member.id === userStore.id)
+  console.log(spectators.value, isSpectator, isMember)
+  return !isSpectator && !isMember
+})
+
 // const spectators = computed(() => spaceStore.spectators)
 // watch(() => members.value, (value, prevValue) => {
 //   updateShouldShowUsersButton()
@@ -134,7 +140,7 @@ const spectators = computed(() => {
     users.push(userStore.getUserAllState)
   }
   users = uniqBy(users, 'id')
-  return users
+  return users || []
 //   return normalizeDisplayItems(spectators.value, state.shouldShowUsersButtonSpectators)
 })
 
@@ -189,7 +195,7 @@ const spectators = computed(() => {
 //- Embed
 .space-users.embed-users(v-if="isEmbedMode")
   .users
-    User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
+    User(v-for="user in members" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
     //- SpaceUsersButton(v-if="state.shouldShowUsersButtonMembers" :isParentSpaceUsers="currentUserIsSpaceMember" :users="members")
 //- Space
 .space-users(v-else)
@@ -199,7 +205,7 @@ const spectators = computed(() => {
     //- SpaceUsersButton(v-if="state.shouldShowUsersButtonSpectators" :isParentSpaceUsers="true" :isSpectators="true" :users="spectators")
   //- users
   .users
-    User(v-for="user in members" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
+    User(v-for="user in membersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
     //- SpaceUsersButton(v-if="state.shouldShowUsersButtonMembers" :isParentSpaceUsers="true" :users="members")
 </template>
 
