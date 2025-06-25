@@ -105,13 +105,13 @@ const updateSearch = async (search) => {
 const searchRemoteCards = async (search) => {
   state.isLoading = true
   const results = await apiStore.searchCards({ query: search })
-  globalStore.searchResultsCards = utils.normalizeItems(results)
+  globalStore.searchResultsCards = results
   state.isLoading = false
   state.hasSearched = true
 }
 const updateResultsFromResultsFilter = (cards) => {
   globalStore.previousResultItem = {}
-  globalStore.searchResultsCards = utils.normalizeItems(cards)
+  globalStore.searchResultsCards = cards
 }
 const clearSearch = async () => {
   await nextTick()
@@ -123,7 +123,7 @@ const previousResultItem = computed(() => globalStore.previousResultItem)
 const cards = computed(() => {
   let cards
   if (search.value) {
-    return utils.denormalizeItems(searchResultsCards.value)
+    return searchResultsCards.value
   } else {
     return cardsToSearch.value
   }
@@ -132,7 +132,7 @@ const cardsToSearch = computed(() => {
   if (state.scopeIsCurrentSpace) {
     return recentlyUpdatedCards.value
   } else {
-    return utils.denormalizeItems(searchResultsCards.value)
+    return searchResultsCards.value
   }
 })
 const recentlyUpdatedCards = computed(() => {

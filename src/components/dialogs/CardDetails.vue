@@ -268,7 +268,9 @@ const updatePaths = async (cardId) => {
 const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
 const isInSearchResultsCards = computed(() => {
-  return Boolean(globalStore.searchResultsCards[card.value.id])
+  const results = globalStore.searchResultsCards
+  if (!results.length) { return }
+  return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)

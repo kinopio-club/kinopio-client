@@ -256,7 +256,7 @@ const changeToPrevSpace = () => {
 
 // search filters
 
-const searchResultsCount = computed(() => Object.keys(globalStore.searchResultsCards).length)
+const searchResultsCount = computed(() => globalStore.searchResultsCards.length)
 const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const searchResultsOrFilters = computed(() => {
   if (searchResultsCount.value || totalFiltersActive.value) {
@@ -272,36 +272,30 @@ const focusOnCard = (card) => {
 const showNextSearchCard = () => {
   if (!globalStore.search) { return }
   const cards = globalStore.searchResultsCards
-  const ids = Object.keys(cards)
   if (!globalStore.previousResultItem.id) {
-    const firstId = ids[0]
-    focusOnCard(cards[firstId])
+    focusOnCard(cards[0])
     return
   }
-  const currentIndex = ids.findIndex(id => id === globalStore.previousResultItem.id)
+  const currentIndex = cards.findIndex(card => card.id === globalStore.previousResultItem.id)
   let index = currentIndex + 1
-  if (ids.length === index) {
+  if (cards.length === index) {
     index = 0
   }
-  const indexId = ids[index]
-  focusOnCard(cards[indexId])
+  focusOnCard(cards[index])
 }
 const showPreviousSearchCard = () => {
   if (!globalStore.search) { return }
   const cards = globalStore.searchResultsCards
-  const ids = Object.keys(cards)
   if (!globalStore.previousResultItem.id) {
-    const firstId = ids[0]
-    focusOnCard(cards[firstId])
+    focusOnCard(cards[0])
     return
   }
-  const currentIndex = ids.findIndex(id => id === globalStore.previousResultItem.id)
+  const currentIndex = cards.findIndex(card => card.id === globalStore.previousResultItem.id)
   let index = currentIndex - 1
   if (index < 0) {
     index = cards.length - 1
   }
-  const indexId = ids[index]
-  focusOnCard(cards[indexId])
+  focusOnCard(cards[index])
 }
 const clearSearchAndFilters = () => {
   globalStore.closeAllDialogs()
