@@ -50,7 +50,9 @@ export default {
     }
   },
   kinopioDomain () {
-    let domain = 'https://kinopio.club'
+    // temp to staging url
+    // let domain = 'https://kinopio.club'
+    let domain = 'https://deploy-preview-623--kinopio-client.netlify.app'
     if (this.isDevelopment()) {
       domain = 'https://kinopio.local:8080'
     }
