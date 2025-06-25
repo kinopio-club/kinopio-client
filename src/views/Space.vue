@@ -75,13 +75,13 @@ let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // expose pinia stores to browser console for developers
-window.globalStore = useGlobalStore()
-window.cardStore = useCardStore()
-window.connectionStore = useConnectionStore()
-window.boxStore = useBoxStore()
-window.spaceStore = useSpaceStore()
-window.groupStore = useGroupStore()
 if (consts.isDevelopment()) {
+  window.globalStore = useGlobalStore()
+  window.cardStore = useCardStore()
+  window.connectionStore = useConnectionStore()
+  window.boxStore = useBoxStore()
+  window.spaceStore = useSpaceStore()
+  window.groupStore = useGroupStore()
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
 }
