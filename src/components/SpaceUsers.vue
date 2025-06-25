@@ -87,7 +87,6 @@ const membersDisplay = computed(() => {
 const shouldAppendCurrentUser = computed(() => {
   const isSpectator = spectators.value.find(spectator => spectator.id === userStore.id)
   const isMember = members.value.find(member => member.id === userStore.id)
-  console.log(spectators.value, isSpectator, isMember)
   return !isSpectator && !isMember
 })
 
