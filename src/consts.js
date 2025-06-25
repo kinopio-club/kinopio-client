@@ -57,14 +57,18 @@ export default {
     return domain
   },
   apiHost () {
-    let host = 'https://api.kinopio.club'
+    // temp to new api
+    // let host = 'https://api.kinopio.club'
+    let host = 'https://pinia2-temp-production.up.railway.app'
     if (this.isDevelopment()) {
       host = 'https://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
-    let host = 'wss://api.kinopio.club'
+    // temp to new api
+    // let host = 'wss://api.kinopio.club'
+    let host = 'wss://pinia2-temp-production.up.railway.app'
     if (this.isDevelopment()) {
       host = 'wss://kinopio.local:3000'
     }
