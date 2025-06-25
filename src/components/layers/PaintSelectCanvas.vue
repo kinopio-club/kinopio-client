@@ -60,7 +60,7 @@ const postScrollDuration = 300 // ms
 let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 
 let selectableCardsInViewport = []
-let selectableBoxes = []
+let selectableBoxesInViewport = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
 
@@ -181,14 +181,28 @@ const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = cardStore.getCardsIsNotLocked
-  if (!selectableCards) { return }
-  selectableCardsInViewport = selectableCards
-  selectableCardsGrid = collisionDetection.createGrid(selectableCards)
+  const cards = cardStore.getCardsIsNotLocked
+  selectableCardsInViewport = []
+  cards.forEach(card => {
+    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    if (!element) { return }
+    if (element.dataset.isVisibleInViewport === 'false') { return }
+    const rect = element.getBoundingClientRect()
+    card = {
+      id: card.id,
+      name: card.name,
+      x: card.x,
+      y: card.y,
+      width: rect.width,
+      height: rect.height
+    }
+    selectableCardsInViewport.push(card)
+  })
+  selectableCardsGrid = collisionDetection.createGrid(selectableCardsInViewport)
 }
 const updateSelectableBoxesInViewport = () => {
   const boxes = boxStore.getBoxesIsNotLocked
-  const array = []
+  selectableBoxesInViewport = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
     if (!element) { return }
@@ -202,9 +216,8 @@ const updateSelectableBoxesInViewport = () => {
       width: rect.width,
       height: rect.height
     }
-    array.push(box)
+    selectableBoxesInViewport.push(box)
   })
-  selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
   const selectableConnections = connectionStore.getAllConnectionsInViewport
@@ -370,7 +383,7 @@ const selectItems = (points) => {
   const cardIds = matches.map(match => match.id)
   globalStore.addMultipleToMultipleCardsSelected(cardIds)
   // boxes
-  matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
+  matches = collisionDetection.checkPointsInRects(points, selectableBoxesInViewport)
   const boxIds = matches.map(match => match.id)
   globalStore.addMultipleToMultipleBoxesSelected(boxIds)
   // connections
