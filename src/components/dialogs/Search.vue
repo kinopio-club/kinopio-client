@@ -58,7 +58,8 @@ const state = reactive({
   resultsSectionHeight: null,
   isLoading: false,
   scopeIsCurrentSpace: true,
-  hasSearched: false
+  hasSearched: false,
+  searchResultsRemoteCards: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -106,6 +107,7 @@ const searchRemoteCards = async (search) => {
   state.isLoading = true
   const results = await apiStore.searchCards({ query: search })
   const ids = results.map(result => result.id)
+  state.searchResultsRemoteCards = results
   globalStore.searchResultsCardIds = ids
   state.isLoading = false
   state.hasSearched = true
@@ -121,7 +123,11 @@ const clearSearch = async () => {
   state.hasSearched = false
 }
 const searchResultsCards = computed(() => {
-  return globalStore.searchResultsCardIds.map(id => cardStore.getCard(id))
+  if (state.scopeIsCurrentSpace) {
+    return globalStore.searchResultsCardIds.map(id => cardStore.getCard(id))
+  } else {
+    return state.searchResultsRemoteCards
+  }
 })
 const previousResultItem = computed(() => globalStore.previousResultItem)
 const cards = computed(() => {

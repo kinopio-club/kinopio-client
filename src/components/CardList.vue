@@ -71,7 +71,6 @@ const state = reactive({
 })
 
 const normalizedCards = computed(() => {
-  // let items = utils.clone(props.cards)
   const items = props.cards.filter(card => !state.removedCardIds.includes(card.id))
   return items.map(card => {
     card = cardStore.cardWithNameSegments(card)
