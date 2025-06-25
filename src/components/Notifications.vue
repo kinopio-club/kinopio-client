@@ -79,8 +79,8 @@ onMounted(() => {
   }, 1000 * 60 * 60 * 1) // check every hour
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('visibilitychange', updatePageVisibilityChange)
-  window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
+  // window.removeEventListener('visibilitychange', updatePageVisibilityChange)
+  // window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   unsubscribes()
 })
