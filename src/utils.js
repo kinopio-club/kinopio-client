@@ -1850,7 +1850,7 @@ export default {
     if (!this.objectHasKeys(space)) { return space }
     if (!this.arrayHasItems(space.connections)) { return space }
     const connections = space.connections.filter(connection => {
-      const hasTypeId = Boolean(connection.connectionTypeId)
+      const hasTypeId = Boolean(connection?.connectionTypeId)
       return hasTypeId
     })
     space.connections = connections
