@@ -55,11 +55,14 @@ export const useGroupStore = defineStore('groups', {
       const spaceStore = useSpaceStore()
       const cardStore = useCardStore()
       const groupId = spaceStore.groupId
-      const group = this.groups[groupId]
+      const group = this.getGroup(groupId)
+      console.log('🍇🍇🍇🍇gruop', group)
+
       if (!group) { return }
       const groupUserIds = group.users.map(user => user.id)
       let users = []
       const cards = cardStore.getAllCards
+      console.log('🍇🍇🍇🍇cards', cards)
       if (!cards) { return }
       cards.forEach(card => {
         users.push(card.userId)
