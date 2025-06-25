@@ -444,6 +444,7 @@ export const useSpaceStore = defineStore('space', {
         this.updateUserLastSpaceId()
         globalStore.isLoadingSpace = false
         globalStore.triggerDrawingInitialize()
+        this.updateOtherUsers()
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }

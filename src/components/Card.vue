@@ -1520,7 +1520,7 @@ const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
-  let user = spaceStore.getSpaceUserById(userId)
+  let user = spaceStore.getSpaceUserById(userId) || globalStore.otherUsers[userId]
   if (!user) {
     user = {
       name: '',
