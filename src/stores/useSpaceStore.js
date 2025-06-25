@@ -791,15 +791,18 @@ export const useSpaceStore = defineStore('space', {
       userIds = userIds.concat(spaceCollaboratorIds)
       let otherUserIds = []
       cards.forEach(card => {
-        if (!card.nameUpdatedByUserId) { return }
-        if (!userIds.includes(card.nameUpdatedByUserId)) {
-          otherUserIds.push(card.nameUpdatedByUserId)
+        const userId = card.nameUpdatedByUserId || card.userId
+        const isOtherUser = userIds.includes(userId)
+        if (!isOtherUser) {
+          otherUserIds.push(userId)
         }
       })
       otherUserIds = uniq(otherUserIds)
+      console.log('otherUserIds', otherUserIds)
       if (!otherUserIds.length) { return }
       try {
         const users = await apiStore.getPublicUsers(otherUserIds)
+        console.log('☎️☎️☎️☎️', users)
         users.forEach(user => {
           globalStore.updateOtherUsers(user)
         })
