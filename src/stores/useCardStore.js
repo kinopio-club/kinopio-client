@@ -331,6 +331,7 @@ export const useCardStore = defineStore('cards', {
         card = this.normailzeNewCard(card)
         card.shouldUpdateUrlPreview = true
         card.urlPreviewIsVisible = true
+        return card
       })
       cards.forEach(card => {
         this.createCard(card)
