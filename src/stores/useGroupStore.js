@@ -59,7 +59,7 @@ export const useGroupStore = defineStore('groups', {
       if (!group) { return }
       const groupUserIds = group.users.map(user => user.id)
       let users = []
-      const cards = this.getAllCards
+      const cards = cardStore.getAllCards
       if (!cards) { return }
       cards.forEach(card => {
         users.push(card.userId)
