@@ -381,8 +381,7 @@ const otherSpaceIsVisible = computed(() => {
 
 const isInSearchResultsCards = computed(() => {
   const results = globalStore.searchResultsCards
-  if (!results.length) { return }
-  return Boolean(results.find(card => props.card.id === card.id))
+  return Boolean(results[props.card.id])
 })
 const filterShowUsers = computed(() => userStore.filterShowUsers)
 const filterShowDateUpdated = computed(() => userStore.filterShowDateUpdated)
@@ -521,10 +520,9 @@ const updateStylesWithWidth = (styles) => {
 }
 const updatePreviousResultItem = () => {
   const search = globalStore.search
-  const searchResultsCards = globalStore.searchResultsCards
   if (!search) { return }
-  if (!searchResultsCards.length) { return }
-  if (searchResultsCards.find(card => card.id === props.card.id)) {
+  const searchResultsCards = globalStore.searchResultsCards
+  if (searchResultsCards[props.card.id]) {
     globalStore.previousResultItem = props.card
   }
 }
