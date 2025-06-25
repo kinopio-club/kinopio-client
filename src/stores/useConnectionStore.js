@@ -200,7 +200,7 @@ export const useConnectionStore = defineStore('connections', {
       this.byEndItemId[connection.endItemId].push(connection.id)
       // remove duplicates
       this.byStartItemId[connection.startItemId] = uniq(this.byStartItemId[connection.startItemId])
-      this.byEndItemId[connection.byEndItemId] = uniq(this.byEndItemId[connection.byEndItemId])
+      this.byEndItemId[connection.endItemId] = uniq(this.byEndItemId[connection.endItemId])
     },
     updateIndexes (connection) {
       this.removeFromIndexes(connection)
