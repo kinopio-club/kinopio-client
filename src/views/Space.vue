@@ -202,7 +202,8 @@ watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
   updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
-  if (prevValue && !value) {
+  const isAfterResize = prevValue && !value
+  if (isAfterResize) {
     afterResizeCards()
   }
   updatePageSizes(value)
@@ -291,6 +292,18 @@ const addOrCloseCard = (event) => {
     globalStore.closeAllDialogs()
   }
 }
+const addCardFromOutsideAppContext = (event) => {
+  if (!consts.isSecureAppContext) { return }
+  const currentSpace = spaceStore.getSpaceAllState
+  const data = event.data
+  if (data.name !== 'addedCardFromAddPage') { return }
+  const card = data.value
+  if (card.spaceId !== currentSpace.id) { return }
+  cardStore.createCard(card)
+}
+
+// tilt cards
+
 const tiltCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
@@ -302,13 +315,15 @@ const tiltCards = (event) => {
   cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
-  if (!globalStore.currentUserIsTiltingCard) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
   globalStore.currentUserIsTiltingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserTiltingCards' })
 }
+
+// resize cards
+
 const resizeCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
@@ -317,31 +332,13 @@ const resizeCards = (event) => {
   cardStore.resizeCards(cardIds, deltaX)
 }
 const stopResizingCards = async () => {
-  if (!globalStore.currentUserIsResizingCard) { return }
-  const cardIds = globalStore.currentUserIsResizingCardIds
-  const cards = cardIds.map(id => cardStore.getCard(id))
-  await cardStore.updateCardsDimensions(cardIds)
   globalStore.currentUserIsResizingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
 }
-const afterResizeCards = () => {
-  if (!globalStore.shouldSnapToGrid) { return }
+const afterResizeCards = async () => {
   const cardIds = globalStore.currentUserIsResizingCardIds
-  const cards = cardIds.map(cardId => {
-    let { id, resizeWidth } = cardStore.getCard(cardId)
-    resizeWidth = utils.roundToNearest(resizeWidth)
-    return { id, resizeWidth }
-  })
-  cardStore.updateCards(cards)
-}
-const addCardFromOutsideAppContext = (event) => {
-  if (!consts.isSecureAppContext) { return }
-  const currentSpace = spaceStore.getSpaceAllState
-  const data = event.data
-  if (data.name !== 'addedCardFromAddPage') { return }
-  const card = data.value
-  if (card.spaceId !== currentSpace.id) { return }
-  cardStore.createCard(card)
+  await nextTick()
+  connectionStore.updateConnectionPaths(cardIds)
 }
 
 // boxes

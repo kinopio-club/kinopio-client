@@ -348,16 +348,17 @@ export const useCardStore = defineStore('cards', {
           ...update
         }
       })
-      const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
     },
     async updateCards (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
+      const connectionStore = useConnectionStore()
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
+      const ids = updates.map(update => update.id)
+      connectionStore.updateConnectionPaths(ids)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
@@ -489,8 +490,6 @@ export const useCardStore = defineStore('cards', {
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
-      const itemIds = cards.map(card => card.id)
-      connectionStore.updateConnectionPaths(itemIds)
       boxStore.updateBoxSnapGuides(cards, true)
     },
     clearAllCardsZ () {
@@ -676,7 +675,6 @@ export const useCardStore = defineStore('cards', {
         nameUpdatedAt: new Date()
       }
       this.updateCard(update)
-      this.updateCardDimensions(id)
     },
 
     // tilt
@@ -694,8 +692,6 @@ export const useCardStore = defineStore('cards', {
         updates.push({ id, tilt })
       })
       this.updateCards(updates)
-      const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPaths(ids)
     },
     clearTiltCards (ids) {
       ids.forEach(id => {
@@ -703,12 +699,12 @@ export const useCardStore = defineStore('cards', {
         this.updateCard(update)
         utils.clearAllCardDimensions({ id })
       })
-      this.updateCardsDimensions(ids)
     },
 
     // resize
 
     resizeCards (ids, deltaX) {
+      const connectionStore = useConnectionStore()
       const broadcastStore = useBroadcastStore()
       const minImageWidth = 64
       const updates = []
@@ -720,9 +716,6 @@ export const useCardStore = defineStore('cards', {
         width = Math.round(width)
         updates.push({ id, resizeWidth: width })
       })
-      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCards' })
-      const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPaths(ids)
       this.updateCards(updates)
     },
     async clearResizeCards (ids, shouldRemoveResizeWidth) {
