@@ -70,6 +70,7 @@ const isAddPage = computed(() => globalStore.isAddPage)
 
 const members = computed(() => {
   const groupUsers = groupStore.getGroupUsersWhoAddedCards || []
+  console.log('🌻🌻🌻', groupUsers)
   let users = spaceStore.users
   users = users.concat(spaceStore.collaborators)
   // if (groupUsers) {

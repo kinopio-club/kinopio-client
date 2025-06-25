@@ -68,7 +68,7 @@ export const useGlobalStore = defineStore('global', {
     // search
     searchIsVisible: false,
     search: '',
-    searchResultsCards: [],
+    searchResultsCardIds: [],
     previousResultItem: {},
 
     // update password
@@ -777,9 +777,9 @@ export const useGlobalStore = defineStore('global', {
     //   utils.typeCheck({ value, type: 'string' })
     //   this.search = value
     // },
-    // searchResultsCards (results) {
+    // searchResultsCardIds (results) {
     //   utils.typeCheck({ value: results, type: 'array' })
-    //   this.searchResultsCards = results
+    //   this.searchResultsCardIds = results
     // },
     // previousResultItem (value) {
     //   utils.typeCheck({ value, type: 'object' })
@@ -788,7 +788,7 @@ export const useGlobalStore = defineStore('global', {
     clearSearch () {
       if (this.searchIsVisible) { return }
       this.search = ''
-      this.searchResultsCards = []
+      this.searchResultsCardIds = []
       this.previousResultItem = {}
     },
     // updatePasswordApiKey (apiKey) {

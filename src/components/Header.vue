@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -50,6 +51,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
+const cardStore = useCardStore()
 
 let unsubscribes
 
@@ -256,7 +258,7 @@ const changeToPrevSpace = () => {
 
 // search filters
 
-const searchResultsCount = computed(() => globalStore.searchResultsCards.length)
+const searchResultsCount = computed(() => globalStore.searchResultsCardIds.length)
 const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const searchResultsOrFilters = computed(() => {
   if (searchResultsCount.value || totalFiltersActive.value) {
@@ -271,31 +273,35 @@ const focusOnCard = (card) => {
 }
 const showNextSearchCard = () => {
   if (!globalStore.search) { return }
-  const cards = globalStore.searchResultsCards
+  const ids = globalStore.searchResultsCardIds
   if (!globalStore.previousResultItem.id) {
-    focusOnCard(cards[0])
+    const card = cardStore.getCard(ids[0])
+    focusOnCard(card)
     return
   }
-  const currentIndex = cards.findIndex(card => card.id === globalStore.previousResultItem.id)
+  const currentIndex = ids.findIndex(id => id === globalStore.previousResultItem.id)
   let index = currentIndex + 1
-  if (cards.length === index) {
+  if (ids.length === index) {
     index = 0
   }
-  focusOnCard(cards[index])
+  const card = cardStore.getCard(ids[index])
+  focusOnCard(card)
 }
 const showPreviousSearchCard = () => {
   if (!globalStore.search) { return }
-  const cards = globalStore.searchResultsCards
+  const ids = globalStore.searchResultsCardIds
   if (!globalStore.previousResultItem.id) {
-    focusOnCard(cards[0])
+    const card = cardStore.getCard(ids[0])
+    focusOnCard(card)
     return
   }
-  const currentIndex = cards.findIndex(card => card.id === globalStore.previousResultItem.id)
+  const currentIndex = ids.findIndex(id => id === globalStore.previousResultItem.id)
   let index = currentIndex - 1
   if (index < 0) {
-    index = cards.length - 1
+    index = ids.length - 1
   }
-  focusOnCard(cards[index])
+  const card = cardStore.getCard(ids[index])
+  focusOnCard(card)
 }
 const clearSearchAndFilters = () => {
   globalStore.closeAllDialogs()
