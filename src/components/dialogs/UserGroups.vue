@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import GroupList from '@/components/GroupList.vue'
@@ -10,23 +14,37 @@ import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerCloseGroupDetailsDialog') {
-      state.groupDetailsIsVisibleForGroupId = ''
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseGroupDetailsDialog') {
+        state.groupDetailsIsVisibleForGroupId = ''
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+  unsubscribes()
 })
 
-const visible = computed(() => store.state.groupsIsVisible)
+const visible = computed(() => globalStore.groupsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     closeDialogs()
     state.groupDetailsIsVisibleForGroupId = ''
     updateDialogHeight()
@@ -49,12 +67,12 @@ const closeDialogs = () => {
   state.groupDetailsIsVisibleForGroupId = ''
 }
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const isLoadingGroups = computed(() => store.state.isLoadingGroups)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
+const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
 
 // groups
 
-const groups = computed(() => store.getters['groups/byUser']())
+const groups = computed(() => groupStore.getCurrentUserGroup)
 
 // add group
 

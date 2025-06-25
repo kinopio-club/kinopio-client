@@ -205,5 +205,9 @@
   },
   {
     "url": "https://bk.kinopio.club/scatter-classic-2x.png"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/debug-grid-2x.webp",
+    "isDebug": true
   }
 ]

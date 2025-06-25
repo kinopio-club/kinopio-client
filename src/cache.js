@@ -38,8 +38,7 @@ export default {
     }
   },
   notifyCouldNotSave () {
-    const element = document.getElementById('notify-cache-is-full')
-    element.classList.remove('hidden')
+    window.globalStore.triggerNotifyCouldNotSave()
   },
   async pruneLocal () {
     const user = await this.user()
@@ -102,12 +101,11 @@ export default {
     const user = await this.getLocal('user')
     return user || {}
   },
-  async updateUser (key, value) {
+  async updateUser (update) {
     let user = await this.user()
     user = utils.normalizeToObject(user)
-    user[key] = value
-    user = utils.clone(user)
-    await this.storeLocal('user', user)
+    const updatedUser = { ...user, ...update }
+    await this.storeLocal('user', updatedUser)
   },
   async saveUser (user) {
     user = utils.clone(user)
@@ -230,7 +228,25 @@ export default {
   },
   async saveSpace (space) {
     if (!space) { return }
-    space = utils.clone(space)
+    // removes functions and circular references from objects
+    const getCircularReplacer = () => {
+      const seen = new WeakSet()
+      return (key, value) => {
+      // Skip functions
+        if (typeof value === 'function') {
+          return undefined
+        }
+        // Handle circular references
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) {
+            return undefined // or return a placeholder like '[Circular]'
+          }
+          seen.add(value)
+        }
+        return value
+      }
+    }
+    space = JSON.parse(JSON.stringify(space, getCircularReplacer()))
     if (!space.id) {
       console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
       return

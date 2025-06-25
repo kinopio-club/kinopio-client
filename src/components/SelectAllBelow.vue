@@ -1,12 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
-import throttle from 'lodash-es/throttle'
-
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   window.addEventListener('mousedown', updateIsMetaKey)
@@ -25,25 +28,24 @@ const state = reactive({
   isMetaKey: false
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSelectingY = computed(() => store.state.isSelectingY)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const isSelectingY = computed(() => globalStore.isSelectingY)
 const updateIsSelectingY = (value) => {
-  if (store.state.isSelectingX) {
+  if (globalStore.isSelectingX) {
     value = false
   }
-  store.commit('isSelectingY', value)
+  globalStore.isSelectingY = value
 }
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
-  if (toolbarIsDrawing.value) { return }
-  if (store.state.isSelectingX) { return }
-  if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
+  if (globalStore.getToolbarIsDrawing) { return }
+  if (globalStore.isSelectingX) { return }
+  if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
   return state.isVisible
 })
 
 // style
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const iconClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: userColor.value })
   if (state.isMetaKey) {
@@ -60,13 +62,13 @@ const updateIsMetaKey = (event) => {
 const handleMouseMove = (event) => {
   if (!event.target.closest) { return }
   if (!canEditSpace.value) { return }
-  if (store.state.currentUserIsPainting) { return }
-  if (store.state.currentUserIsDraggingCard) { return }
-  if (store.state.currentUserIsDraggingBox) { return }
-  if (store.state.isEmbedMode) { return }
+  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.isEmbedMode) { return }
   updateIsMetaKey(event)
   const edgeThreshold = 30
-  const toolbar = document.querySelector('#toolbar').getBoundingClientRect()
+  const toolbar = document.querySelector('#toolbar')?.getBoundingClientRect()
   if (!toolbar) { return }
   let footer = document.querySelector('.footer-wrap footer')
   if (footer) {
@@ -92,7 +94,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingY.value) {
-    throttledSelectItems(event)
+    selectItems(event)
   }
 }
 
@@ -100,27 +102,24 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingY(true)
-  throttledSelectItems(event)
+  selectItems(event)
   updateIsMetaKey(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingY.value) { return }
   updateIsSelectingY(false)
-  throttledSelectItems(event)
+  selectItems(event)
   updateIsMetaKey(event)
   state.isVisible = false
 }
-const throttledSelectItems = throttle((event) => {
-  selectItems(event)
-}, 20)
 
 const selectItems = (event) => {
   const position = utils.cursorPositionInSpace(event)
-  store.commit('preventMultipleSelectedActionsIsVisible', true)
+  globalStore.preventMultipleSelectedActionsIsVisible = true
   if (state.isMetaKey) {
-    store.commit('triggerSelectAllItemsAboveCursor', position)
+    globalStore.triggerSelectAllItemsAboveCursor(position)
   } else {
-    store.commit('triggerSelectAllItemsBelowCursor', position)
+    globalStore.triggerSelectAllItemsBelowCursor(position)
   }
 }
 </script>

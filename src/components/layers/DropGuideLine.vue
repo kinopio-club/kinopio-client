@@ -1,11 +1,21 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUploadStore } from '@/stores/useUploadStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const uploadStore = useUploadStore()
+const broadcastStore = useBroadcastStore()
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
 
@@ -17,23 +27,9 @@ let controlPointOddY = lineMaxHeight / 2
 const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
-      const update = mutation.payload
-      update.startPoint = updateRemotePosition(update.startPoint)
-      update.curve = createCurve(update.startPoint)
-      addRemoteCurve(update)
-      remotePainting()
-    } else if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
-      removeRemoteFramesByUser(mutation.payload.userId)
-      remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
-    } else if (mutation.type === 'triggerUploadComplete') {
-      removeUploadIsDraggedOver()
-    }
-  })
   canvas = document.getElementById('drop-guide-line')
   remoteCanvas = document.getElementById('remote-drop-guide-line')
   context = canvas.getContext('2d')
@@ -44,14 +40,34 @@ onMounted(() => {
   window.addEventListener('dragleave', removeUploadIsDraggedOver)
   window.addEventListener('dragend', removeUploadIsDraggedOver)
   window.addEventListener('drop', addCardsAndUploadFiles)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateRemoteDropGuideLine') {
+        const update = args[0]
+        update.startPoint = updateRemotePosition(update.startPoint)
+        update.curve = createCurve(update.startPoint)
+        addRemoteCurve(update)
+        remotePainting()
+      } else if (name === 'triggerUpdateStopRemoteUserDropGuideLine') {
+        removeRemoteFramesByUser(args[0].userId)
+        remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
+      } else if (name === 'triggerUploadComplete') {
+        removeUploadIsDraggedOver()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('dragenter', checkIfUploadIsDraggedOver)
   window.removeEventListener('dragover', checkIfUploadIsDraggedOver)
   window.removeEventListener('dragleave', removeUploadIsDraggedOver)
   window.removeEventListener('dragend', removeUploadIsDraggedOver)
   window.removeEventListener('drop', addCardsAndUploadFiles)
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -64,7 +80,7 @@ const state = reactive({
   currentCursorInSpace: {}
 })
 
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 
 // Upload Files
 
@@ -86,7 +102,7 @@ const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
   removeUploadIsDraggedOver()
-  store.dispatch('upload/addCardsAndUploadFiles', {
+  uploadStore.addCardsAndUploadFiles({
     files,
     event
   })
@@ -143,7 +159,7 @@ const paintCurve = (context, curve) => {
 // Remote Painting
 
 const updateRemotePosition = (position) => {
-  const zoom = store.getters.spaceZoomDecimal
+  const zoom = globalStore.getSpaceZoomDecimal
   const space = document.getElementById('space')
   const rect = space.getBoundingClientRect()
   position = {
@@ -235,22 +251,21 @@ const stopPaintingGuides = () => {
   broadcastStopPaintingGuide()
 }
 const broadcastCursorAndCurve = ({ startPoint, color }) => {
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   const updates = {}
   updates.x = state.currentCursorInSpace.x
   updates.y = state.currentCursorInSpace.y
-  updates.color = color
-  updates.userId = store.state.currentUser.id
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  updates.userId = userStore.id
   updates.startPoint = startPoint
   updates.color = color
   updates.frameId = nanoid()
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteDropGuideLine' })
 }
 const broadcastStopPaintingGuide = () => {
-  const updates = { userId: store.state.currentUser.id }
-  store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
+  const updates = { userId: userStore.id }
+  broadcastStore.update({ updates, action: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 
 const isMobile = computed(() => utils.isMobile())

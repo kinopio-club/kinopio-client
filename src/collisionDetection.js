@@ -51,30 +51,35 @@ export default {
     return grid
   },
   checkPointsInRects (points, rects, grid) {
-    grid = grid || this.createGrid(rects, gridSize)
-    const matchingRects = new Set()
-    for (const point of points) {
-      const cell = this.getGridCell(point.x, point.y, gridSize)
-      const cellKey = `${cell.row},${cell.col}`
-      if (grid.has(cellKey)) {
-        for (const rect of grid.get(cellKey)) {
-          // rotated rect
-          if (rect.tilt) {
-            const angleRad = this.degreesToRadians(rect.tilt)
-            const rotatedPoint = this.rotatePoint(point, rect, -angleRad)
-            if (this.isPointInsideRect(rotatedPoint, rect)) {
-              matchingRects.add(rect)
-            }
-          // rect
-          } else {
-            if (this.isPointInsideRect(point, rect)) {
-              matchingRects.add(rect)
+    try {
+      grid = grid || this.createGrid(rects, gridSize)
+      const matchingRects = new Set()
+      for (const point of points) {
+        const cell = this.getGridCell(point.x, point.y, gridSize)
+        const cellKey = `${cell.row},${cell.col}`
+        if (grid.has(cellKey)) {
+          for (const rect of grid.get(cellKey)) {
+            // rotated rect
+            if (rect.tilt) {
+              const angleRad = this.degreesToRadians(rect.tilt)
+              const rotatedPoint = this.rotatePoint(point, rect, -angleRad)
+              if (this.isPointInsideRect(rotatedPoint, rect)) {
+                matchingRects.add(rect)
+              }
+            // rect
+            } else {
+              if (this.isPointInsideRect(point, rect)) {
+                matchingRects.add(rect)
+              }
             }
           }
         }
       }
+      return Array.from(matchingRects)
+    } catch (error) {
+      console.error('🚒 checkPointsInRects', error, points, rects, grid)
+      return []
     }
-    return Array.from(matchingRects)
   },
   isPointInsideRect (point, rect) {
     return (
@@ -113,8 +118,8 @@ export default {
     // Check if each point is inside the SVG path
     svgPoints.forEach(svgPoint => {
       if (path.isPointInStroke(svgPoint)) {
-        const pathData = path.dataset
-        pathsInsidePoints.push(pathData)
+        const pathId = path.dataset.id
+        pathsInsidePoints.push(pathId)
       }
     })
     return pathsInsidePoints

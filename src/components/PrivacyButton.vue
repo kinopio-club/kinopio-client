@@ -1,12 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const emit = defineEmits(['togglePrivacyPickerIsVisible', 'closeDialogs', 'updateLocalSpaces'])
 
@@ -16,13 +24,13 @@ const props = defineProps({
   showShortName: Boolean
 })
 
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // privacy state
 
-const spacePrivacy = computed(() => store.state.currentSpace.privacy)
+const spacePrivacy = computed(() => spaceStore.privacy)
 const privacyState = computed(() => {
   return privacy.states().find(state => {
     return state.name === spacePrivacy.value

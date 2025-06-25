@@ -1,10 +1,25 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
-const store = useStore()
 
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
+
+let unsubscribes
 const labelElement = ref(null)
 
 let cursorStart = {}
@@ -23,16 +38,6 @@ let touchPosition = {}
 let currentTouchPosition = {}
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdatePathWhileDragging') {
-      const connections = mutation.payload
-      if (!visible.value) { return }
-      connections.forEach(connection => {
-        if (connection.id !== props.connection.id) { return }
-        updateConnectionRect()
-      })
-    }
-  })
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('pointermove', drag)
   // wait for connection element to be in dom
@@ -40,6 +45,27 @@ onMounted(() => {
     state.connectionIsVisible = true
     updateConnectionRect()
   }, 50)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdatePathWhileDragging') {
+        const connections = args[0]
+        if (!visible.value) { return }
+        connections.forEach(connection => {
+          if (connection.id !== props.connection.id) { return }
+          updateConnectionRect()
+        })
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('mouseup', stopDragging)
+  window.removeEventListener('pointermove', drag)
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -50,7 +76,7 @@ watch(() => props.connection.labelIsVisible, (value, prevValue) => {
     updateConnectionRect()
     state.connectionIsVisible = true
   } else {
-    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+    connectionStore.clearConnectionLabelPosition(props.connection.id)
   }
 })
 
@@ -68,20 +94,20 @@ const state = reactive({
 })
 watch(() => state.hover, (value, prevValue) => {
   if (value) {
-    store.commit('currentUserIsHoveringOverConnectionId', id.value)
+    globalStore.currentUserIsHoveringOverConnectionId = id.value
   } else {
-    store.commit('currentUserIsHoveringOverConnectionId', '')
+    globalStore.currentUserIsHoveringOverConnectionId = ''
   }
 })
 watch(() => state.isDragging, (value, prevValue) => {
   if (value) {
-    store.commit('currentUserIsDraggingConnectionIdLabel', id.value)
+    globalStore.currentUserIsDraggingConnectionIdLabel = id.value
   } else {
-    store.commit('currentUserIsDraggingConnectionIdLabel', '')
+    globalStore.currentUserIsDraggingConnectionIdLabel = ''
   }
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isDark = computed(() => utils.colorIsDark(typeColor.value))
 const checkIsMultiTouch = (event) => {
   isMultiTouch = false
@@ -93,23 +119,20 @@ const checkIsMultiTouch = (event) => {
 // parent connection
 
 const id = computed(() => props.connection.id)
-const connectionDetailsIsVisible = computed(() => store.state.connectionDetailsIsVisibleForConnectionId === id.value)
+const connectionDetailsIsVisible = computed(() => globalStore.connectionDetailsIsVisibleForConnectionId === id.value)
 const toggleConnectionDetails = (event) => {
   if (isMultiTouch) { return }
-  const isVisible = store.state.connectionDetailsIsVisibleForConnectionId === id.value
+  const isVisible = globalStore.connectionDetailsIsVisibleForConnectionId === id.value
   if (isVisible || wasDragged) {
     wasDragged = false
-    store.commit('closeAllDialogs')
+    globalStore.closeAllDialogs()
   } else {
-    store.commit('triggerConnectionDetailsIsVisible', {
-      connectionId: id.value,
-      event
-    })
+    globalStore.triggerConnectionDetailsIsVisible(id.value)
   }
 }
 const items = computed(() => {
-  const cards = store.getters['currentCards/all']
-  const boxes = store.getters['currentBoxes/all']
+  const cards = cardStore.getAllCards
+  const boxes = boxStore.getAllBoxes
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)
   const endItem = items.find(item => item.id === props.connection.endItemId)
@@ -125,17 +148,17 @@ const visible = computed(() => {
 // filter
 
 const filtersIsActive = computed(() => {
-  const types = store.state.filteredConnectionTypeIds
-  const frames = store.state.filteredFrameIds
+  const types = globalStore.filteredConnectionTypeIds
+  const frames = globalStore.filteredFrameIds
   return Boolean(types.length + frames.length)
 })
 const isConnectionFilteredByType = computed(() => {
-  const typeIds = store.state.filteredConnectionTypeIds
+  const typeIds = globalStore.filteredConnectionTypeIds
   return typeIds.includes(connectionTypeId.value)
 })
 const isCardsFilteredByFrame = computed(() => {
-  const frameIds = store.state.filteredFrameIds
-  const cards = utils.clone(store.getters['currentCards/all'])
+  const frameIds = globalStore.filteredFrameIds
+  const cards = cardStore.getAllCards
   const startItemId = props.connection.startItemId
   const endItemId = props.connection.endItemId
   const startCard = cards.filter(card => card.id === startItemId)[0]
@@ -155,7 +178,7 @@ const isFiltered = computed(() => {
   } else { return false }
 })
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   const startItem = items.value.startItem
   const endItem = items.value.endItem
@@ -168,7 +191,7 @@ const isHiddenByCommentFilter = computed(() => {
 // parent connection type
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
+const connectionType = computed(() => connectionStore.getConnectionType(connectionTypeId.value))
 const typeName = computed(() => {
   if (connectionType.value) {
     return connectionType.value.name
@@ -243,7 +266,7 @@ const styles = computed(() => {
   return styles
 })
 const removeOffsets = () => {
-  store.dispatch('currentConnections/clearLabelPosition', props.connection)
+  connectionStore.clearConnectionLabelPosition(props.connection.id)
   stopDragging()
   wasDragged = false
 }
@@ -268,17 +291,17 @@ const normalizeRelativePosition = (positionRelative) => {
 
 const startDragging = (event) => {
   if (!canEditSpace.value) { return }
-  store.commit('closeAllDialogs')
-  store.dispatch('clearMultipleSelected')
+  globalStore.closeAllDialogs()
+  globalStore.clearMultipleSelected()
   updateTypeColorCSS()
   state.isDragging = true
   wasDragged = false
   const updates = {
-    userId: store.state.currentUser.id,
-    userColor: store.state.currentUser.color,
+    userId: userStore.id,
+    userColor: userStore.color,
     connectionId: props.connection.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
+  broadcastStore.update({ updates, action: 'updateRemoteUserDraggingConnectionLabel' })
   // save start positions
   if (!cursorStart.x) {
     cursorStart = utils.cursorPositionInSpace(event)
@@ -295,16 +318,7 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
-  if (!labelRelativePosition.value.x) { return }
-  store.dispatch('history/add', {
-    connections: [{
-      id: props.connection.id,
-      labelRelativePositionX: labelRelativePosition.value.x,
-      labelRelativePositionY: labelRelativePosition.value.y
-    }],
-    useSnapshot: true
-  })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'removeRemoteUserDraggingConnectionLabel' })
 }
 const drag = (event) => {
   if (!canEditSpace.value) { return }
@@ -325,14 +339,14 @@ const drag = (event) => {
     y: positionAbsolute.y / state.connectionRect.height
   }
   positionRelative = normalizeRelativePosition(positionRelative)
-  store.dispatch('currentConnections/updateLabelPosition', {
-    connection: props.connection,
+  connectionStore.updateConnectionLabelPosition({
+    id: props.connection.id,
     labelRelativePositionX: positionRelative.x,
     labelRelativePositionY: positionRelative.y
   })
 }
 const remoteUserDragging = computed(() => {
-  const remoteUserDraggingConnectionLabel = store.state.remoteUserDraggingConnectionLabel
+  const remoteUserDraggingConnectionLabel = globalStore.remoteUserDraggingConnectionLabel
   if (!remoteUserDraggingConnectionLabel.length) { return }
   const update = remoteUserDraggingConnectionLabel.find(update => update.connectionId.includes(props.connection.id))
   return update
@@ -352,7 +366,7 @@ const lockingFrameStyle = computed(() => {
     height: size,
     left: position,
     top: position,
-    background: store.state.currentUser.color,
+    background: userStore.color,
     opacity: state.lockingAlpha,
     borderRadius
   }
@@ -411,11 +425,11 @@ const lockingAnimationFrame = (timestamp) => {
   }
 }
 const notifyPressAndHoldToDrag = () => {
-  const hasNotified = store.state.hasNotifiedPressAndHoldToDrag
+  const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
   if (!hasNotified) {
-    store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
+    globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
   }
-  store.commit('hasNotifiedPressAndHoldToDrag', true)
+  globalStore.hasNotifiedPressAndHoldToDrag = true
 }
 const updateTouchPosition = (event) => {
   initialTouchEvent = event

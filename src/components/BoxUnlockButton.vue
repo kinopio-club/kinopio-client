@@ -1,9 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   box: Object
@@ -12,8 +22,8 @@ const state = reactive({
   position: null
 })
 
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
-const connectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.box.id))
+const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
+const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 
 // styles
 
@@ -37,7 +47,7 @@ const backgroundColorIsDark = computed(() => {
   const color = props.box.color
   return utils.colorIsDark(color)
 })
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => {
   if (props.box.fill === 'empty') {
     return isThemeDark.value
@@ -56,16 +66,16 @@ const isLightInDarkTheme = computed(() => {
 // unlock
 
 const unlockBox = (event) => {
-  if (store.state.currentUserIsDrawingConnection) { return }
+  if (globalStore.currentUserIsDrawingConnection) { return }
   event.stopPropagation()
   // notify read only if user cannot edit
   if (!canEditBox.value) {
     const position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
     return
   }
-  store.commit('currentUserIsDraggingBox', false)
-  store.dispatch('currentBoxes/update', {
+  globalStore.currentUserIsDraggingBox = false
+  boxStore.updateBox({
     id: props.box.id,
     isLocked: false
   })

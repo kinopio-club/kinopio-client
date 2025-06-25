@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -14,33 +19,54 @@ import SpaceOptions from '@/components/SpaceOptions.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
+const uploadStore = useUploadStore()
 
 const nameElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(async (mutation) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
-      await nextTick()
-      await nextTick()
-      const element = nameElement.value
-      if (!element) { return }
-      element.focus()
-      element.setSelectionRange(0, element.value.length)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      // reset and update textareaSize
-      if (!dialogIsPinned.value) { return }
-      const element = nameElement.value
-      if (!element) { return }
-      element.style.height = 0
-      await nextTick()
-      textareaSize()
-    }
-  })
   textareaSize()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      } else if (name === 'triggerFocusSpaceDetailsName') {
+        await nextTick()
+        await nextTick()
+        const element = nameElement.value
+        if (!element) { return }
+        element.focus()
+        element.setSelectionRange(0, element.value.length)
+      }
+    }
+  )
+  const spaceActionUnsubscribe = spaceStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        // reset and update textareaSize
+        if (!dialogIsPinned.value) { return }
+        const element = nameElement.value
+        if (!element) { return }
+        element.style.height = 0
+        await nextTick()
+        textareaSize()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
@@ -70,25 +96,22 @@ const removeSpaceId = (value) => {
 
 // user
 
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
-const currentUserIsSpaceCreator = computed(() => store.getters['currentUser/isSpaceCreator']())
-const isSpaceMember = computed(() => {
-  const currentSpace = store.state.currentSpace
-  return store.getters['currentUser/isSpaceMember'](currentSpace)
-})
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
+const currentUserIsSpaceCreator = computed(() => userStore.getUserIsSpaceCreator)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 
 // current space
 
 const updateLocalSpaces = () => {
   emit('updateLocalSpaces')
 }
-const currentSpace = computed(() => store.state.currentSpace)
-const isLoadingSpace = computed(() => store.state.isLoadingSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
+const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
 const currentSpaceIsUserTemplate = computed(() => currentSpace.value.isTemplate)
 const pendingUpload = computed(() => {
-  const currentSpace = store.state.currentSpace
-  const pendingUploads = store.state.upload.pendingUploads
+  const currentSpace = spaceStore.getSpaceAllState
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => {
     const isCurrentSpace = upload.spaceId === currentSpace.id
     const isInProgress = upload.percentComplete < 100
@@ -96,8 +119,8 @@ const pendingUpload = computed(() => {
   })
 })
 const remotePendingUpload = computed(() => {
-  const currentSpace = store.state.currentSpace
-  const remotePendingUploads = store.state.remotePendingUploads
+  const currentSpace = spaceStore.getSpaceAllState
+  const remotePendingUploads = globalStore.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const inProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === currentSpace.id
@@ -109,13 +132,13 @@ const remotePendingUpload = computed(() => {
 
 const spaceName = computed({
   get () {
-    return store.state.currentSpace.name
+    return spaceStore.name
   },
   set (newName) {
     textareaSize()
-    store.dispatch('currentSpace/updateSpace', { name: newName })
+    spaceStore.updateSpace({ name: newName })
     updateLocalSpaces()
-    store.commit('triggerUpdateWindowTitle')
+    globalStore.triggerUpdateWindowTitle()
   }
 })
 const textareaSize = () => {
@@ -128,19 +151,19 @@ const textareaSize = () => {
 
 const toggleCurrentSpaceIsUserTemplate = async () => {
   const value = !currentSpaceIsUserTemplate.value
-  await store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  await spaceStore.updateSpace({ isTemplate: value })
   updateLocalSpaces()
 }
 
 // dialog
 
-const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
+const dialogIsPinned = computed(() => globalStore.spaceDetailsIsPinned)
 const updateDialogHeight = () => {
   emit('updateDialogHeight')
 }
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  store.dispatch('spaceDetailsIsPinned', isPinned)
+  globalStore.spaceDetailsIsPinned = isPinned
 }
 const toggleBackgroundIsVisible = () => {
   const isVisible = state.backgroundIsVisible
@@ -180,16 +203,16 @@ const closeDialogsAndEmit = () => {
   emit('closeDialogs')
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // group
 
-const userGroups = computed(() => store.getters['groups/byUser']())
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const userGroups = computed(() => groupStore.getCurrentUserGroup)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const currentUserIsGroupAdmin = (group) => {
-  return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+  return groupStore.getGroupUserIsAdmin({
+    userId: userStore.id,
     groupId: group.id
   })
 }
@@ -206,7 +229,7 @@ const toggleSpaceGroup = async (group) => {
 const updateSpaceGroup = (group) => {
   const isSpaceCreator = currentUserIsSpaceCreator.value
   if (isSpaceCreator) {
-    store.dispatch('groups/addCurrentSpace', group)
+    groupStore.addSpaceToGroup(group)
     updateLocalSpaces()
   } else {
     state.error.updateSpaceGroup = true
@@ -216,7 +239,7 @@ const removeSpaceGroup = (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
   const isSpaceCreator = currentUserIsSpaceCreator.value
   if (isGroupAdmin || isSpaceCreator) {
-    store.dispatch('groups/removeCurrentSpace')
+    groupStore.removeSpaceFromGroup()
     updateLocalSpaces()
   } else {
     state.error.removeSpaceGroup = true
@@ -266,7 +289,7 @@ SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
 //- members
 template(v-if="isSpaceMember")
   .row.title-row
-    div
+    .info-buttons-wrap
       //- Privacy
       PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
         //- toggle space group | favorite
@@ -313,6 +336,7 @@ SpaceOptions(
   @updateLocalSpaces="updateLocalSpaces"
   @removeSpaceId="removeSpaceId"
 )
+ItemDetailsDebug(:item="currentSpace")
 </template>
 
 <style lang="stylus">
@@ -371,6 +395,9 @@ SpaceOptions(
 
   .background-preview-wrap
     margin-bottom 6px
+
+.info-buttons-wrap
+  display flex
 
 .group-button
   padding-right 6px

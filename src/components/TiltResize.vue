@@ -1,56 +1,66 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 const props = defineProps({
   visible: Boolean,
   card: Object
 })
 
-const isPresentationMode = computed(() => store.state.isPresentationMode)
+const isPresentationMode = computed(() => globalStore.isPresentationMode)
 
 // both
 
 const start = (event, action) => {
   if (utils.isMultiTouch(event)) { return }
-  store.dispatch('history/pause')
-  store.dispatch('closeAllDialogs')
-  store.commit('preventDraggedCardFromShowingDetails', true)
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  globalStore.closeAllDialogs()
+  globalStore.preventDraggedCardFromShowingDetails = true
+  cardStore.incrementCardZ(props.card.id)
   let cardIds = [props.card.id]
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
   if (multipleCardsSelectedIds.includes(props.card.id)) {
     cardIds = multipleCardsSelectedIds
   } else {
-    store.commit('clearMultipleSelected')
+    globalStore.clearMultipleSelected()
   }
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     cardIds
   }
   if (action === 'resize') {
-    store.commit('currentUserIsResizingCard', true)
-    store.commit('currentUserIsResizingCardIds', cardIds)
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    globalStore.currentUserIsResizingCard = true
+    globalStore.currentUserIsResizingCardIds = cardIds
+    broadcastStore.update({ updates, action: 'updateRemoteUserResizingCards' })
   } else if (action === 'tilt') {
-    store.commit('currentUserIsTiltingCard', true)
-    store.commit('currentUserIsTiltingCardIds', cardIds)
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserTiltingCards' })
+    globalStore.currentUserIsTiltingCard = true
+    globalStore.currentUserIsTiltingCardIds = cardIds
+    broadcastStore.update({ updates, action: 'updateRemoteUserTiltingCards' })
   }
 }
 const remove = (action) => {
   let cardIds = [props.card.id]
-  if (store.state.multipleCardsSelectedIds.length) {
-    cardIds = store.state.multipleCardsSelectedIds
+  if (globalStore.multipleCardsSelectedIds.length) {
+    cardIds = globalStore.multipleCardsSelectedIds
   }
   if (action === 'resize') {
-    store.dispatch('currentCards/removeResize', { cardIds, shouldRemoveResizeWidth: true })
+    const shouldRemoveResizeWidth = true
+    cardStore.clearResizeCards(cardIds, shouldRemoveResizeWidth)
   } else if (action === 'tilt') {
-    store.dispatch('currentCards/removeTilt', { cardIds })
+    cardStore.clearTiltCards(cardIds)
   }
 }
 const colorClass = computed(() => {
@@ -68,19 +78,19 @@ const tiltIsVisible = computed(() => {
   return props.visible && cardIsWideEnough
 })
 const isTilting = computed(() => {
-  const cardIds = store.state.currentUserIsTiltingCardIds
+  const cardIds = globalStore.currentUserIsTiltingCardIds
   if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })
 
 // resize
 
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const isComment = computed(() => cardStore.getIsCommentCard(props.card))
 const resizeIsVisible = computed(() => {
   return props.visible && !isComment.value
 })
 const isResizing = computed(() => {
-  const cardIds = store.state.currentUserIsResizingCardIds
+  const cardIds = globalStore.currentUserIsResizingCardIds
   if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })

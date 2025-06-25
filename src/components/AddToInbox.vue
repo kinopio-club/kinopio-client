@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -9,7 +12,9 @@ import Loader from '@/components/Loader.vue'
 
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const textareaElement = ref(null)
 
@@ -28,11 +33,11 @@ const state = reactive({
   success: false
 })
 
-const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
+const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const textareaPlaceholder = computed(() => 'Type here, or paste a URL')
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
+  if (state.newName.length >= consts.cardCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false
@@ -99,10 +104,10 @@ const addCard = async () => {
     card.shouldUpdateUrlPreview = true
   }
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     card.userId = user.id
     console.info('🛫 create card in inbox space', card)
-    await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+    await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
@@ -121,37 +126,33 @@ const addCardToSpaceLocal = async (card) => {
 
 <template lang="pug">
 section.add-to-inbox(v-if="props.visible")
-  .row.title-row
-    div
-      span Add to Inbox
-    .button-wrap
-      button.small-button(@click="loadInboxSpace")
-        img.icon(src="@/assets/inbox.svg")
-        span Inbox
-  .textarea-wrap
-    textarea.name(
-      name="cardName"
-      ref="textareaElement"
-      rows="1"
-      :placeholder="textareaPlaceholder"
-      v-model="name"
-      :maxlength="maxCardCharacterLimit"
-      @keydown.enter.exact.prevent="addCard"
-      @keyup.alt.enter.exact.stop
-      @keyup.ctrl.enter.exact.stop
-      @keydown.alt.enter.exact.stop="insertLineBreak"
-      @keydown.ctrl.enter.exact.stop="insertLineBreak"
-    )
-  .row
-    button(@click="addCard")
-      img.icon.add-icon(src="@/assets/add.svg")
-      span Add
-    .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
-      span Upgrade for more cards
-    .badge.error-badge.danger(v-if="state.error.maxLength")
-      span Max Length {{maxCardCharacterLimit}}
-    .badge.error-badge.danger(v-if="state.error.unknownServerError")
-      span (シ_ _)シ Something went wrong, Please try again or contact support
+  section.subsection
+    .row
+      p Add to Inbox
+    .textarea-wrap
+      textarea.name(
+        name="cardName"
+        ref="textareaElement"
+        rows="1"
+        :placeholder="textareaPlaceholder"
+        v-model="name"
+        :maxlength="maxCardCharacterLimit"
+        @keydown.enter.exact.prevent="addCard"
+        @keyup.alt.enter.exact.stop
+        @keyup.ctrl.enter.exact.stop
+        @keydown.alt.enter.exact.stop="insertLineBreak"
+        @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      )
+    .row
+      button(@click="addCard")
+        img.icon.add-icon(src="@/assets/add.svg")
+        span Add
+      .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
+        span Upgrade for more cards
+      .badge.error-badge.danger(v-if="state.error.maxLength")
+        span Max Length {{maxCardCharacterLimit}}
+      .badge.error-badge.danger(v-if="state.error.unknownServerError")
+        span (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">

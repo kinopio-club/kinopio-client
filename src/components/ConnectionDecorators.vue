@@ -1,22 +1,28 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
-const store = useStore()
+const connectionStore = useConnectionStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   connections: Array
 })
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
   if (!props.connections.length) { return }
   const connectionsCreatedByCurrentUser = props.connections.filter(connection => {
     if (!connection) { return }
-    return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+    return userStore.getItemIsCreatedByUser(connection)
   })
   return connectionsCreatedByCurrentUser.length === props.connections.length
 })
@@ -32,10 +38,11 @@ const isSomeDirectionsIsVisible = computed(() => {
 const showDirectionsIsVisible = () => {
   const value = !isSomeDirectionsIsVisible.value
   props.connections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
+    const update = {
       id: connection.id,
       directionIsVisible: value
-    })
+    }
+    connectionStore.updateConnection(update)
   })
 }
 
@@ -48,10 +55,11 @@ const isSomeLabelsVisible = computed(() => {
 const showLabelsIsVisible = () => {
   const value = !isSomeLabelsVisible.value
   props.connections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
+    const update = {
       id: connection.id,
       labelIsVisible: value
-    })
+    }
+    connectionStore.updateConnection(update)
   })
 }
 
@@ -61,13 +69,19 @@ const reverseConnections = () => {
   props.connections.forEach(connection => {
     const startItemId = connection.endItemId
     const endItemId = connection.startItemId
-    store.dispatch('currentConnections/update', {
+    const path = connectionStore.getConnectionPathBetweenItems({
+      startItemId,
+      endItemId,
+      controlPoint: connection.controlPoint
+    })
+    const update = {
       id: connection.id,
       startItemId,
-      endItemId
-    })
+      endItemId,
+      path
+    }
+    connectionStore.updateConnection(update)
   })
-  store.dispatch('currentConnections/updatePaths', { connections: props.connections })
 }
 
 // curve or straight
@@ -97,16 +111,23 @@ const allPathsIsStraight = computed(() => {
 const togglePathIsStraight = (isStraight) => {
   let controlPoint = null
   if (isStraight) {
-    controlPoint = 'q00,00'
+    controlPoint = consts.straightLineConnectionPathControlPoint
   }
+  const updates = []
   props.connections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
-      id: connection.id,
+    const path = connectionStore.getConnectionPathBetweenItems({
+      startItemId: connection.startItemId,
+      endItemId: connection.endItemId,
       controlPoint
     })
+    updates.push({
+      id: connection.id,
+      controlPoint,
+      path
+    })
   })
-  store.dispatch('currentConnections/updatePaths', { connections: props.connections })
-  store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
+  connectionStore.updateConnections(updates)
+  userStore.updateUser({ defaultConnectionControlPoint: controlPoint })
 }
 </script>
 

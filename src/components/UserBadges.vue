@@ -1,10 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import userBadges from '@/data/userBadges.json'
 import GroupLabel from '@/components/GroupLabel.vue'
-const store = useStore()
 
 const props = defineProps({
   user: Object,

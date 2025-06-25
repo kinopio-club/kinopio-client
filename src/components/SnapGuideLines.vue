@@ -1,17 +1,22 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
-const store = useStore()
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
-const isVisible = computed(() => store.state.shouldSnapToGrid)
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+const isVisible = computed(() => globalStore.shouldSnapToGrid)
 const origin = computed(() => {
   return {
-    x: store.state.snapGuideLinesOrigin.x + 'px',
-    y: store.state.snapGuideLinesOrigin.y + 'px'
+    x: globalStore.snapGuideLinesOrigin.x + 'px',
+    y: globalStore.snapGuideLinesOrigin.y + 'px'
   }
 })
-const color = computed(() => store.state.currentUser.color)
+const color = computed(() => userStore.color)
 </script>
 
 <template lang="pug">

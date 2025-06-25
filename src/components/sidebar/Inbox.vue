@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -12,7 +17,12 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let prevPosition
 
@@ -35,15 +45,15 @@ const state = reactive({
   noInboxCardsFound: false
 })
 
-const isOnline = computed(() => store.state.isOnline)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isOnline = computed(() => globalStore.isOnline)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
 
 const loadInboxSpace = () => {
-  store.dispatch('currentSpace/loadInboxSpace')
+  spaceStore.loadInboxSpace()
 }
 
 // list cards
@@ -56,8 +66,8 @@ const updateInboxCardsLocal = async () => {
   }
 }
 const updateInboxCardsRemote = async () => {
-  if (!store.state.isOnline) { return }
-  await store.dispatch('currentSpace/updateInboxCache')
+  if (!globalStore.isOnline) { return }
+  await spaceStore.updateInboxCache()
   updateInboxCardsLocal()
 }
 const sortCards = () => {
@@ -85,7 +95,7 @@ const removeFromCardList = (removedCard) => {
 }
 const removeCardFromInbox = async (card) => {
   removeFromCardList(card)
-  await store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+  await apiStore.addToQueue({ name: 'removeCard', body: card, spaceId: card.spaceId })
 }
 
 // update card
@@ -101,21 +111,21 @@ const updateCardIsLoading = (newCard) => {
 const selectCard = async (card) => {
   if (card.isLoading) { return }
   if (!canEditSpace.value) {
-    store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
     return
   }
   updateCardIsLoading(card)
-  const scroll = store.getters.windowScrollWithSpaceOffset()
+  const scroll = globalStore.getWindowScrollWithSpaceOffset()
   const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()
-  newCard.spaceId = store.state.currentSpace.id
+  newCard.spaceId = spaceStore.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
-  const spaceCards = store.getters['currentCards/all']
+  const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  store.dispatch('currentCards/add', { card: newCard, skipCardDetailsIsVisible })
-  store.dispatch('focusOnCardId', newCard.id)
+  cardStore.createCard(newCard, skipCardDetailsIsVisible)
+  globalStore.updateFocusOnCardId(newCard.id)
   removeCardFromInbox(card)
 }
 const removeCard = (card) => {
@@ -132,9 +142,14 @@ const addCard = (card) => {
 template(v-if="visible")
   AddToInbox(:visible="isOnline" @addCard="addCard")
   section.inbox
-    span Move from Inbox
-    Loader(:visible="state.isLoading" :isSmall="true")
-    OfflineBadge
+    .row.title-row
+      div
+        span Move from Inbox
+        Loader(:visible="state.isLoading" :isSmall="true")
+        OfflineBadge
+      button.small-button(@click="loadInboxSpace")
+        img.icon(src="@/assets/inbox.svg")
+        img.icon.visit(src="@/assets/visit.svg")
 
   section.results-section.inbox(v-if="isOnline")
     ul.results-list(v-if="state.cards.length")

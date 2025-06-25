@@ -1,11 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import Import from '@/components/Import.vue'
 import Export from '@/components/Export.vue'
 import utils from '@/utils.js'
-const store = useStore()
 
 const dialogElement = ref(null)
 
@@ -47,7 +45,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 // const closeChildDialogs = () => {
-//   store.commit('triggerCloseChildDialogs')
+//   globalStore.triggerCloseChildDialogs()
 // }
 const updateSpaces = () => {
   emit('updateSpaces')

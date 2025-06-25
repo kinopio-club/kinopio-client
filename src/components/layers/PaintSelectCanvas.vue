@@ -1,6 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
@@ -8,7 +15,15 @@ import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { colord, extend } from 'colord'
-const store = useStore()
+import uniqBy from 'lodash-es/uniqBy'
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20
@@ -45,45 +60,13 @@ const postScrollDuration = 300 // ms
 let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 
 let selectableCardsInViewport = []
-let selectableBoxes = []
+let selectableBoxesInViewport = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
-let highlightedItems
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerPaintFramePosition') {
-      const event = mutation.payload
-      const position = utils.cursorPositionInSpace(event)
-      createPaintingCircle(event)
-      highlightItems([position])
-      selectItems()
-    } else if (mutation.type === 'triggerUpdatePaintSelectCanvasPositionOffset') {
-      updateCirclesWithScroll()
-    } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
-      const circle = mutation.payload
-      delete circle.type
-      const position = updateRemotePosition(circle)
-      circle.x = position.x
-      circle.y = position.y
-      createRemotePaintingCircle(circle)
-    } else if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
-      const card = mutation.payload
-      const user = store.getters['currentSpace/userById'](card.userId)
-      const color = user.color
-      const position = updateRemotePosition(card)
-      const circle = {
-        x: position.x,
-        y: position.y,
-        color,
-        shouldDrawOffscreen: true
-      }
-      if (checkIsCircleVisible(circle)) { return }
-      createNotifyOffscreenCircle(circle)
-    }
-  })
   // init canvas
   canvas = document.getElementById('paint-select-canvas')
   context = canvas.getContext('2d')
@@ -105,7 +88,43 @@ onMounted(() => {
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
   window.addEventListener('visibilitychange', clearRect)
-  clearHightlightedItems()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPaintFramePosition') {
+        const event = args[0]
+        const position = utils.cursorPositionInSpace(event)
+        createPaintingCircle(event)
+        selectItems([position])
+      } else if (name === 'triggerUpdatePaintSelectCanvasPositionOffset') {
+        updateCirclesWithScroll()
+      } else if (name === 'triggerAddRemotePaintingCircle') {
+        const circle = args[0]
+        delete circle.type
+        const position = updateRemotePosition(circle)
+        circle.x = position.x
+        circle.y = position.y
+        console.log('🅰️')
+        createRemotePaintingCircle(circle)
+      } else if (name === 'triggerNotifyOffscreenCardCreated') {
+        const card = args[0]
+        const user = spaceStore.getSpaceUserById(card.userId)
+        const color = user.color
+        const position = updateRemotePosition(card)
+        const circle = {
+          x: position.x,
+          y: position.y,
+          color,
+          shouldDrawOffscreen: true
+        }
+        if (checkIsCircleVisible(circle)) { return }
+        createNotifyOffscreenCircle(circle)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopPainting)
@@ -118,7 +137,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchstart', startPainting)
   window.removeEventListener('mousemove', painting)
   window.removeEventListener('touchmove', painting)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -129,8 +148,8 @@ const clearRect = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 const triggerHideTouchInterface = () => {
-  if (!store.state.currentUserIsPaintingLocked) { return }
-  store.commit('triggerHideTouchInterface')
+  if (!globalStore.currentUserIsPaintingLocked) { return }
+  globalStore.triggerHideTouchInterface()
 }
 const isCanvasScope = (event) => {
   const fromDialog = event.target.closest('dialog')
@@ -141,39 +160,49 @@ const isCanvasScope = (event) => {
 
 // current user
 
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 const currentUserColorIsDark = computed(() => utils.colorIsDark(currentUserColor.value))
 const boxFillColor = computed(() => colord(currentUserColor.value).alpha(0.5).toRgbString())
-const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
-const isPanning = computed(() => store.state.currentUserIsPanningReady)
-const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
-const toolbarIsCard = computed(() => store.state.currentUserToolbar === 'card')
-const toolbarIsBox = computed(() => store.state.currentUserToolbar === 'box')
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+const userCannotEditSpace = computed(() => !userStore.getUserCanEditSpace)
+const isPanning = computed(() => globalStore.currentUserIsPanningReady)
+const isBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
+const toolbarIsCard = computed(() => globalStore.currentUserToolbar === 'card')
+const toolbarIsBox = computed(() => globalStore.getToolbarIsBox)
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
 
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const clearHightlightedItems = () => {
-  highlightedItems = { cardIds: {}, boxIds: {}, connectionIds: {} }
-}
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
+const viewportHeight = computed(() => globalStore.viewportHeight)
+const viewportWidth = computed(() => globalStore.viewportWidth)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = store.getters['currentCards/isSelectableInViewport']
-  if (!selectableCards) { return }
-  selectableCardsInViewport = selectableCards
-  selectableCardsGrid = collisionDetection.createGrid(selectableCards)
+  const cards = cardStore.getCardsIsNotLocked
+  selectableCardsInViewport = []
+  cards.forEach(card => {
+    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    if (!element) { return }
+    if (element.dataset.isVisibleInViewport === 'false') { return }
+    const rect = element.getBoundingClientRect()
+    card = {
+      id: card.id,
+      name: card.name,
+      x: card.x,
+      y: card.y,
+      width: rect.width,
+      height: rect.height
+    }
+    selectableCardsInViewport.push(card)
+  })
+  selectableCardsGrid = collisionDetection.createGrid(selectableCardsInViewport)
 }
 const updateSelectableBoxesInViewport = () => {
-  const boxes = store.getters['currentBoxes/isNotLocked']
-  const array = []
+  const boxes = boxStore.getBoxesIsNotLocked
+  selectableBoxesInViewport = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
     if (!element) { return }
@@ -187,12 +216,11 @@ const updateSelectableBoxesInViewport = () => {
       width: rect.width,
       height: rect.height
     }
-    array.push(box)
+    selectableBoxesInViewport.push(box)
   })
-  selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
-  const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
+  const selectableConnections = connectionStore.getAllConnectionsInViewport
   if (!selectableConnections) { return }
   selectableConnectionsInViewport = selectableConnections
 }
@@ -215,7 +243,7 @@ const userScroll = () => {
     shouldCancelPostScroll = true
   }
   // update selectable cards during paint autoscroll at edges
-  if (store.state.currentUserIsPainting) {
+  if (globalStore.currentUserIsPainting) {
     updateSelectableCardsInViewport()
     updateSelectableBoxesInViewport()
     updateSelectableConnectionsInViewport()
@@ -245,7 +273,7 @@ const updateCirclePositions = (circles, scrollDelta) => {
   })
 }
 const updateCirclesWithScroll = () => {
-  if (store.state.isPinchZooming) {
+  if (globalStore.isPinchZooming) {
     updatePrevScrollPosition()
     return
   }
@@ -329,35 +357,46 @@ const shouldCancel = (event) => {
   return fromDialog || fromHeader || fromFooter
 }
 const stopPainting = (event) => {
-  if (store.state.isAddPage) { return }
+  if (globalStore.isAddPage) { return }
   if (shouldCancel(event)) { return }
   startCursor = startCursor || {}
   const endCursor = utils.cursorPositionInViewport(event)
-  const shouldAddCard = store.state.shouldAddCard
+  const shouldAddCard = globalStore.shouldAddCard
   currentUserIsLocking = false
   shouldCancelLocking = false
-  store.commit('currentUserIsPaintingLocked', false)
-  store.commit('currentUserIsPainting', false)
+  globalStore.currentUserIsPaintingLocked = false
+  globalStore.currentUserIsPainting = false
   if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
-    store.commit('shouldAddCard', true)
+    globalStore.shouldAddCard = true
     event.preventDefault()
   } else {
-    store.commit('shouldAddCard', false)
+    globalStore.shouldAddCard = false
   }
-  selectItems()
   // prevent mouse events from firing after touch events on touch device
   if (event.cancelable) { event.preventDefault() }
   startPostScroll()
 }
-const selectItems = () => {
-  const cardIds = Object.keys(highlightedItems.cardIds)
-  const boxIds = Object.keys(highlightedItems.boxIds)
-  const connectionIds = Object.keys(highlightedItems.connectionIds)
-  store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
-  store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
-  store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
-  clearHighlightedStyles()
-  clearHightlightedItems()
+const selectItems = (points) => {
+  points = uniqBy(points, item => `${item.x}_${item.y}`)
+  // cards
+  let matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
+  const cardIds = matches.map(match => match.id)
+  globalStore.addMultipleToMultipleCardsSelected(cardIds)
+  // boxes
+  matches = collisionDetection.checkPointsInRects(points, selectableBoxesInViewport)
+  const boxIds = matches.map(match => match.id)
+  globalStore.addMultipleToMultipleBoxesSelected(boxIds)
+  // connections
+  let connectionIds
+  selectableConnectionsInViewport.forEach(svg => {
+    if (svg.dataset.isVisibleInViewport === 'false') { return }
+    const path = svg.querySelector('path.connection-path')
+    matches = collisionDetection.checkPointsInsidePath(points, svg, path) || []
+    if (matches.length) {
+      connectionIds = matches
+    }
+  })
+  globalStore.addMultipleToMultipleConnectionsSelected(connectionIds)
 }
 
 // Post Scrolling (for android)
@@ -394,14 +433,14 @@ const endPostScroll = () => {
 
 const createPaintingCircle = (event) => {
   const isTouch = Boolean(event.touches)
-  const isPaintingLocked = store.state.currentUserIsPaintingLocked
+  const isPaintingLocked = globalStore.currentUserIsPaintingLocked
   if (isTouch && !isPaintingLocked) { return }
   if (isBoxSelecting.value) { return }
   if (isTouch && !isPaintingLocked) { return }
   if (utils.isMultiTouch(event)) { return }
   createPaintingCircles(event)
   const position = utils.cursorPositionInSpace(event)
-  highlightItemsBetweenCurrentAndPrevPosition(position)
+  selectItemsBetweenCurrentAndPrevPosition(position)
 }
 const createPaintingCircles = (event) => {
   state.currentCursor = utils.cursorPositionInViewport(event)
@@ -409,7 +448,7 @@ const createPaintingCircles = (event) => {
     prevCursor = state.currentCursor
     return
   }
-  const color = store.state.currentUser.color
+  const color = userStore.color
   const points = utils.pointsBetweenTwoPoints(prevCursor, state.currentCursor)
   points.forEach(point => {
     const circle = { x: point.x, y: point.y, color, iteration: 0 }
@@ -420,11 +459,11 @@ const createPaintingCircles = (event) => {
   prevCursor = state.currentCursor
 }
 const startPainting = (event) => {
-  if (toolbarIsDrawing.value) { return }
+  if (globalStore.getToolbarIsDrawing) { return }
   if (!isCanvasScope(event)) { return }
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
-  if (store.state.isPinchZooming) { return }
+  if (globalStore.isPinchZooming) { return }
   if (utils.isMultiTouch(event)) { return }
   if (!utils.isEventTouchOrMouseLeftButton(event)) { return }
   updateSelectableCardsInViewport()
@@ -432,34 +471,33 @@ const startPainting = (event) => {
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
-  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
   if (utils.isMultiTouch(event)) { return }
   startLocking()
   if (event.touches) {
-    store.commit('currentUserIsPainting', false)
+    globalStore.currentUserIsPainting = false
   } else {
-    store.commit('currentUserIsPainting', true)
+    globalStore.currentUserIsPainting = true
     createInitialCircle()
   }
-  const multipleCardsIsSelected = Boolean(store.state.multipleCardsSelectedIds.length)
+  const multipleCardsIsSelected = Boolean(globalStore.multipleCardsSelectedIds.length)
   const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
   // add card
   if (shouldAdd && toolbarIsCard.value) {
-    store.commit('shouldAddCard', true)
+    globalStore.shouldAddCard = true
   // add box
   } else if (shouldAdd && toolbarIsBox.value) {
-    store.commit('triggerAddBox', event)
+    globalStore.triggerAddBox(event)
     return
   }
   // clear selected
   if (!event.shiftKey) {
-    store.dispatch('clearMultipleSelected')
+    globalStore.clearMultipleSelected()
   }
   prevPosition = null
   prevCursor = null
-  store.commit('previousMultipleCardsSelectedIds', store.state.multipleCardsSelectedIds)
-  store.commit('previousMultipleConnectionsSelectedIds', store.state.multipleConnectionsSelectedIds)
-  store.dispatch('closeAllDialogs')
+  globalStore.previousMultipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
+  globalStore.previousMultipleConnectionsSelectedIds = globalStore.multipleConnectionsSelectedIds
+  globalStore.closeAllDialogs()
 }
 
 const circlesAnimationFrame = (timestamp) => {
@@ -481,6 +519,7 @@ const circlesAnimationFrame = (timestamp) => {
     return item
   })
   // remote paint
+
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
   remotePaintingCircles = remotePaintingCircles.map(item => {
     item.iteration++
@@ -516,17 +555,16 @@ const circlesAnimationFrame = (timestamp) => {
 }
 const broadcastCircle = (event, circle) => {
   const position = utils.cursorPositionInSpace(event)
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       x: position.x,
       y: position.y,
       color: circle.color,
       iteration: circle.iteration,
       zoom: spaceZoomDecimal.value
     },
-    type: 'addRemotePaintingCircle',
-    handler: 'triggerAddRemotePaintingCircle'
+    action: 'triggerAddRemotePaintingCircle'
   })
 }
 
@@ -538,13 +576,13 @@ const startPaintingCirclesTimer = () => {
   }
 }
 const painting = (event) => {
-  const isPainting = store.state.currentUserIsPainting
+  const isPainting = globalStore.currentUserIsPainting
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
   if (!toolbarIsCard.value) { return }
   if (!isPainting) { return }
-  if (store.state.isPinchZooming) { return }
-  if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
+  if (globalStore.isPinchZooming) { return }
+  if (globalStore.getShouldScrollAtEdges(event) && event.cancelable) {
     event.preventDefault() // prevents touch swipe viewport scrolling
   }
   startPaintingCirclesTimer()
@@ -653,8 +691,8 @@ const lockingAnimationFrame = (timestamp) => {
     }
     drawCircle(circle, context)
   } else if (lockingPercentComplete >= 1) {
-    store.commit('currentUserIsPainting', true)
-    store.commit('currentUserIsPaintingLocked', true)
+    globalStore.currentUserIsPainting = true
+    globalStore.currentUserIsPaintingLocked = true
     console.info('🔒 lockingAnimationFrame locked')
     postMessage.sendHaptics({ name: 'softImpact' })
     cancelLocking()
@@ -666,113 +704,17 @@ const lockingAnimationFrame = (timestamp) => {
 
 const shouldPreventSelectionOnMobile = () => {
   const isMobile = utils.isMobile()
-  const isPaintingLocked = store.state.currentUserIsPaintingLocked
+  const isPaintingLocked = globalStore.currentUserIsPaintingLocked
   return isMobile && !isPaintingLocked
 }
-const highlightItemsBetweenCurrentAndPrevPosition = (position) => {
+const selectItemsBetweenCurrentAndPrevPosition = (position) => {
   if (!prevPosition) {
     prevPosition = position
     return
   }
   const points = utils.pointsBetweenTwoPoints(prevPosition, position)
-  highlightItems(points)
+  selectItems(points)
   prevPosition = position
-}
-const highlightItems = (points) => {
-  if (shouldPreventSelectionOnMobile()) { return }
-  if (userCannotEditSpace.value) { return }
-  highlightCards(points)
-  highlightBoxes(points)
-  highlightConnections(points)
-}
-const highlightCards = (points) => {
-  const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
-  const cardIds = matches.map(match => match.id)
-  cardIds.forEach(cardId => {
-    highlightedItems.cardIds[cardId] = true
-    // apply card styles
-    const cardWrapElement = utils.cardElementFromId(cardId)
-    if (!cardWrapElement) { return }
-    const cardElement = cardWrapElement.querySelector('.card')
-    const nameSegmentsElement = cardElement.querySelectorAll('.name-segments')
-    const imageElement = cardElement.querySelector('.image')
-    const urlPreviewElement = cardElement.querySelector('.url-preview-card')
-    const previewImageElement = cardElement.querySelector('.preview-image')
-    const connectorButtonElement = cardElement.querySelector('.connector-button')
-    const isMedia = cardElement.classList.contains('media-card')
-    const badgeCardButtons = cardElement.querySelectorAll('.badge-card-button')
-    let color = currentUserColor.value
-    if (imageElement) {
-      imageElement.classList.add('selected')
-    }
-    if (previewImageElement) {
-      previewImageElement.classList.add('selected')
-    }
-    if (urlPreviewElement) {
-      urlPreviewElement.style.backgroundColor = color
-    }
-    if (connectorButtonElement) {
-      connectorButtonElement.style.backgroundColor = color
-    }
-    nameSegmentsElement.forEach(element => {
-      element.style.backgroundColor = color
-    })
-    badgeCardButtons.forEach(element => {
-      element.style.backgroundColor = color
-    })
-    if (isMedia) {
-      color = utils.safeColor(color)
-    }
-    cardElement.style.backgroundColor = color
-  })
-}
-const highlightBoxes = (points) => {
-  const matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
-  const boxIds = matches.map(match => match.id)
-  boxIds.forEach(boxId => {
-    highlightedItems.boxIds[boxId] = true
-    // apply box styles
-    const boxElement = utils.boxElementFromId(boxId)
-    const boxInfoElement = boxElement.querySelector('.box-info')
-    const connectorButtonElement = boxElement.querySelector('.connector-button')
-    const color = currentUserColor.value
-    boxElement.style.borderColor = color
-    boxElement.style.backgroundColor = boxFillColor.value
-    boxInfoElement.style.backgroundColor = color
-    if (currentUserColorIsDark.value) {
-      boxInfoElement.classList.add('is-dark')
-    } else {
-      boxInfoElement.classList.remove('is-dark')
-    }
-  })
-}
-const highlightConnections = (points) => {
-  selectableConnectionsInViewport.forEach(svg => {
-    if (svg.dataset.isVisibleInViewport === 'false') { return }
-    const path = svg.querySelector('path.connection-path')
-    const matches = collisionDetection.checkPointsInsidePath(points, svg, path)
-    if (!matches) { return }
-    const connectionIds = matches.map(match => match.id)
-    connectionIds.forEach(connectionId => {
-      highlightedItems.connectionIds[connectionId] = true
-      const connectionElement = utils.connectionElementFromId(connectionId)
-      const pathElement = connectionElement.querySelector('path')
-      pathElement.classList.add('active')
-    })
-  })
-}
-const clearHighlightedStyles = () => {
-  const cardIds = Object.keys(highlightedItems.cardIds)
-  // const boxIds = Object.keys(highlightedItems.boxIds)
-  // const connectionIds = Object.keys(highlightedItems.connectionIds)
-  cardIds.forEach(cardId => {
-    if (!cardId) { return }
-    const cardWrapElement = utils.cardElementFromId(cardId)
-    const nameSegmentsElement = cardWrapElement.querySelectorAll('.name-segments')
-    nameSegmentsElement.forEach(element => {
-      element.style.backgroundColor = null
-    })
-  })
 }
 </script>
 

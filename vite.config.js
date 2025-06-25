@@ -38,6 +38,9 @@ export default defineConfig(async ({ command, mode }) => {
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
   // config
   return {
+    optimizeDeps: {
+      include: ['pinia']
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src')

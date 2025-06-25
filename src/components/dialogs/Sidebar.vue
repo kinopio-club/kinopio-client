@@ -1,32 +1,44 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
 import Links from '@/components/sidebar/Links.vue'
 import Tags from '@/components/sidebar/Tags.vue'
 import Removed from '@/components/sidebar/Removed.vue'
-import AIImages from '@/components/sidebar/AIImages.vue'
 import Stats from '@/components/sidebar/Stats.vue'
-import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRemovedIsVisible') {
-      toggleSection('removed')
-    } else if (mutation.type === 'triggerAIImagesIsVisible') {
-      toggleSection('AIImages')
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerRemovedIsVisible') {
+        toggleSection('removed')
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -36,9 +48,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     restoreUserLastSidebarSection()
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -47,10 +59,8 @@ const state = reactive({
   tagsIsVisible: false,
   linksIsVisible: false,
   removedIsVisible: false,
-  AIImagesIsVisible: false,
   inboxIsVisible: false,
   statsIsVisible: false,
-  textIsVisible: false,
   favoritesIsVisible: false,
   historyIsVisible: false
 })
@@ -59,10 +69,8 @@ const clearVisible = () => {
   state.linksIsVisible = false
   state.tagsIsVisible = false
   state.removedIsVisible = false
-  state.AIImagesIsVisible = false
   state.inboxIsVisible = false
   state.statsIsVisible = false
-  state.textIsVisible = false
   state.favoritesIsVisible = false
   state.historyIsVisible = false
 }
@@ -76,14 +84,14 @@ const updateDialogHeight = async () => {
 
 // pin dialog
 
-const dialogIsPinned = computed(() => store.state.sidebarIsPinned)
+const dialogIsPinned = computed(() => globalStore.sidebarIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  store.dispatch('sidebarIsPinned', isPinned)
+  globalStore.sidebarIsPinned = isPinned
 }
 const closeDialogs = () => {
-  store.commit('tagDetailsIsVisible', false)
-  store.commit('triggerCloseChildDialogs')
+  globalStore.tagDetailsIsVisible = false
+  globalStore.triggerCloseChildDialogs()
 }
 
 // current section
@@ -98,8 +106,8 @@ const toggleSection = (value) => {
 
 const restoreUserLastSidebarSection = () => {
   clearVisible()
-  const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
+  const section = userStore.lastSidebarSection
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -108,7 +116,7 @@ const restoreUserLastSidebarSection = () => {
   }
 }
 const updateUserLastSidebarSection = (name) => {
-  store.dispatch('currentUser/update', { lastSidebarSection: name })
+  userStore.updateUser({ lastSidebarSection: name })
 }
 
 </script>
@@ -131,9 +139,13 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Inbox
           button(@click.left="toggleSection('inbox')" :class="{ active: state.inboxIsVisible}" title="Move from Inbox")
             img.icon(src="@/assets/inbox.svg")
-          //- Text
-          button(@click.left="toggleSection('text')" :class="{active: state.textIsVisible}" title="Card Text Editor")
-            span Text
+          //- Favorites
+          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
+            img.icon(src="@/assets/heart-empty.svg")
+          //- Stats
+          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
+            img.icon.stats(src="@/assets/stats.svg")
+
           //- Tags
           button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
@@ -142,16 +154,6 @@ dialog#sidebar.sidebar.is-pinnable(
             span Links
         //- second row
         .segmented-buttons
-          //- Favorites
-          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
-            img.icon(src="@/assets/heart-empty.svg")
-          //- Stats
-          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
-            img.icon.stats(src="@/assets/stats.svg")
-          //- AI Images
-          button(@click.left="toggleSection('AIImages')" :class="{ active: state.AIImagesIsVisible}" title="AI Images")
-            img.icon.flower(src="@/assets/flower.svg")
-            span AI
           //- Removed
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
@@ -169,9 +171,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
   Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
   Removed(:visible="state.removedIsVisible")
-  AIImages(:visible="state.AIImagesIsVisible")
   Stats(:visible="state.statsIsVisible")
-  Text(:visible="state.textIsVisible")
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
@@ -186,13 +186,13 @@ dialog#sidebar.sidebar.is-pinnable(
   max-height calc(100vh - 25px)
   overflow auto
   &.is-pinned
-    top -13px
+    top -36px
+    right 0
   .title-row-flex
     align-items flex-start
   .right-pin
     transform rotate(180deg)
-  .tags,
-  .removed
+  .tags
     section
       &:first-child
         border-top-left-radius 0
@@ -208,11 +208,11 @@ dialog#sidebar.sidebar.is-pinnable(
 
   .segmented-buttons-wrap
     .segmented-buttons
-      &:first-child
-        button,
-        label
-          &:last-child
-            border-bottom-right-radius 0
+      // &:first-child
+      //   button,
+      //   label
+      //     &:last-child
+      //       border-bottom-right-radius 0
       // middle row
       // &:nth-child(2)
       //   margin-top -1px
@@ -230,6 +230,6 @@ dialog#sidebar.sidebar.is-pinnable(
           &:first-child
             border-top-left-radius 0
           &:last-child
-            border-top-right-radius var(--entity-radius)
+            border-top-right-radius 0
 
 </style>

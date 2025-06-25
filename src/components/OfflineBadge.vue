@@ -1,18 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+
+const globalStore = useGlobalStore()
 
 const props = defineProps({
   isInline: Boolean,
   isDanger: Boolean
 })
 
-const visible = computed(() => !store.state.isOnline)
-const offlineIsVisible = computed(() => store.state.offlineIsVisible)
+const visible = computed(() => !globalStore.isOnline)
+const offlineIsVisible = computed(() => globalStore.offlineIsVisible)
 const toggleOfflineIsVisible = () => {
-  const value = store.state.offlineIsVisible
-  store.commit('offlineIsVisible', !value)
+  const value = globalStore.offlineIsVisible
+  globalStore.offlineIsVisible = !value
 }
 
 const classes = computed(() => {

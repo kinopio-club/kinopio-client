@@ -1,18 +1,33 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'closeAllDialogs') {
-      closeAllDialogs()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        closeAllDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -23,7 +38,7 @@ const state = reactive({
   colorPickerIsVisible: false
 })
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const closeAllDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
@@ -35,15 +50,15 @@ const toggleColorPickerIsVisible = () => {
   const value = !state.colorPickerIsVisible
   closeAllDialogs()
   state.colorPickerIsVisible = value
-  store.commit('drawingEraserIsActive', false)
+  globalStore.drawingEraserIsActive = false
 }
 const drawingColor = computed(() => {
-  return store.getters['currentUser/drawingColor']
+  return userStore.drawingColor || userStore.color
 })
 const updateDrawingColor = (value) => {
-  store.commit('currentUser/drawingColor', value)
+  userStore.updateUser({ drawingColor: value })
 }
-const recentColors = computed(() => store.state.drawingStrokeColors)
+const recentColors = computed(() => globalStore.drawingStrokeColors)
 
 // size
 
@@ -53,17 +68,17 @@ const toggleBrushSizePickerIsVisible = () => {
   state.brushSizePickerIsVisible = value
 }
 const updateBrushSize = (value) => {
-  store.commit('currentUser/drawingBrushSize', value)
+  userStore.updateUser({ drawingBrushSize: value })
 }
-const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize)
+const currentBrushSize = computed(() => userStore.drawingBrushSize)
 
 // eraser
 
-const drawingEraserIsActive = computed(() => store.state.drawingEraserIsActive)
+const drawingEraserIsActive = computed(() => globalStore.drawingEraserIsActive)
 const toggleEraser = () => {
   const value = !drawingEraserIsActive.value
   closeAllDialogs()
-  store.commit('drawingEraserIsActive', value)
+  globalStore.drawingEraserIsActive = value
 }
 </script>
 
@@ -101,7 +116,7 @@ const toggleEraser = () => {
 .drawing-toolbar
   position absolute
   top 29px
-  left 36px
+  left 31px
   display block
   dialog
     top 23px
@@ -111,5 +126,8 @@ const toggleEraser = () => {
     display flex
     justify-content center
     align-items center
-
+  > .segmented-buttons
+    button:first-child
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
 </style>

@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -8,14 +13,29 @@ import GroupUserRolePicker from '@/components/dialogs/GroupUserRolePicker.vue'
 import Loader from '@/components/Loader.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const groupStore = useGroupStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['selectUser', 'childDialogIsVisible'])
@@ -41,14 +61,14 @@ const state = reactive({
 })
 
 const closeDialogs = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
   state.groupUserRolePickerUserId = ''
 }
 
 // users
 
 const users = computed(() => {
-  const onlineUsers = store.state.currentSpace.clients
+  const onlineUsers = spaceStore.clients
   let items = utils.clone(props.users)
   items = items.map(user => {
     const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)
@@ -75,9 +95,9 @@ const usersFiltered = computed(() => {
   return items
 })
 const isCurrentUser = (user) => {
-  return store.state.currentUser.id === user.id
+  return userStore.id === user.id
 }
-const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsMember = computed(() => userStore.getUserIsSpaceMember)
 const placeholder = computed(() => {
   return props.filterPlaceholder || 'Search'
 })
@@ -88,41 +108,41 @@ const selectUser = (event, user) => {
 }
 const userIsSelected = (user) => {
   if (!props.selectedUser) { return }
-  const userId = props.selectedUser.id || store.state.userDetailsUser.id
+  const userId = props.selectedUser.id || globalStore.userDetailsUser.id
   return userId === user.id
 }
 
 // space
 
 const removeCollaborator = async (user) => {
-  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+  spaceStore.removeCollaboratorFromSpace(user)
   if (isCurrentUser(user)) {
-    store.dispatch('closeAllDialogs')
+    globalStore.closeAllDialogs()
   }
   closeDialogs()
 }
 const userIsSpaceCreator = (user) => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   return user.id === space.userId
 }
 
 // group
 
 const group = computed(() => {
-  return props.group || store.getters['groups/spaceGroup']()
+  return props.group || groupStore.getCurrentSpaceGroup
 })
 const groupUser = (user) => {
   if (!group.value) { return }
   const groupId = group.value.id
-  return store.getters['groups/groupUser']({ userId: user.id, groupId })
+  return groupStore.getGroupUser({ userId: user.id, groupId })
 }
 const groupUserRole = (user) => {
   const role = groupUser(user).role
   return utils.capitalizeFirstLetter(role)
 }
 const currentUserIsGroupAdmin = computed(() => {
-  return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+  return groupStore.getGroupUserIsAdmin({
+    userId: userStore.id,
     groupId: group.value.id
   })
 })
@@ -171,7 +191,7 @@ const removeGroupUser = async (event, user) => {
   // check if should prevent
   if (shouldPreventRemoveGroupUser(user)) {
     const position = utils.cursorPositionInViewport(event)
-    store.commit('addNotificationWithPosition', { message: 'Cannot Remove', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Cannot Remove', position, type: 'danger', layer: 'app', icon: 'cancel' })
     return
   }
   // remove user
@@ -181,8 +201,8 @@ const removeGroupUser = async (event, user) => {
       groupId: group.value.id,
       userId: user.id
     }
-    const response = await store.dispatch('api/removeGroupUser', options, { root: true })
-    store.dispatch('groups/removeGroupUser', options)
+    const response = await apiStore.removeGroupUser(options)
+    groupStore.removeGroupUser(options)
   } catch (error) {
     console.error('🚒 removeGroupUser', user, error)
     state.error.removeGroupUserId = user.id

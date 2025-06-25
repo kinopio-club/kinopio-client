@@ -1,6 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -12,21 +19,37 @@ import consts from '@/consts.js'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const analyticsStore = useAnalyticsStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    const { type } = mutation
-    if (type === 'triggerCloseChildDialogs' && props.visible) {
-      const shouldPreventEmit = true
-      closeDialogs(shouldPreventEmit)
-    } else if (type === 'triggerSelectedCardsContainInBox') {
-      containItemsInNewBox()
-    } else if (type === 'triggerUpdateTheme') {
-      updateDefaultColor(utils.cssVariable('secondary-background'))
-    }
-  })
   updateDefaultColor(utils.cssVariable('secondary-background'))
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs' && props.visible) {
+        const shouldPreventEmit = true
+        closeDialogs(shouldPreventEmit)
+      } else if (name === 'triggerSelectedCardsContainInBox') {
+        containItemsInNewBox()
+      } else if (name === 'triggerUpdateTheme') {
+        updateDefaultColor(utils.cssVariable('secondary-background'))
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['closeDialogs'])
@@ -58,13 +81,13 @@ const state = reactive({
   defaultColor: '#e3e3e3'
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
-  const editableCards = props.cards.filter(card => store.getters['currentUser/canEditCard'](card))
+  const editableCards = props.cards.filter(card => userStore.getUserCanEditCard(card))
   const canEditCards = editableCards.length === props.cards.length
-  const editableBoxes = props.boxes.filter(box => store.getters['currentUser/canEditBox'](box))
+  const editableBoxes = props.boxes.filter(box => userStore.getUserCanEditBox(box))
   const canEditBoxes = editableBoxes.length === props.boxes.length
   return canEditCards && canEditBoxes
 })
@@ -76,7 +99,7 @@ const closeDialogs = (shouldPreventEmit) => {
   state.tagPickerIsVisible = false
   state.colorPickerIsVisible = false
   state.fontPickerIsVisible = false
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
   if (shouldPreventEmit === true) { return }
   emit('closeDialogs')
 }
@@ -120,9 +143,10 @@ const label = computed(() => {
   } else {
     label = cardLabel || boxLabel
   }
-  return label.toUpperCase()
+  return label?.toUpperCase()
 })
-const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
+const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBoxId))
+const cardIds = computed(() => props.cards.map(card => card.id))
 
 // update name
 
@@ -181,15 +205,19 @@ const prependToItemNames = (pattern) => {
 }
 const updateName = async (item, newName) => {
   if (item.isCard) {
-    const card = store.getters['currentCards/byId'](item.id)
-    store.dispatch('currentCards/updateName', { card, newName })
-    await nextTick()
-    await nextTick()
-    store.dispatch('currentConnections/updatePaths', { itemId: card.id })
+    const card = cardStore.getCard(item.id)
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   }
   if (item.isBox) {
-    const box = store.getters['currentBoxes/byId'](item.id)
-    store.dispatch('currentBoxes/updateName', { box, newName })
+    const update = {
+      id: item.id,
+      name: newName
+    }
+    boxStore.updateBox(update)
   }
 }
 
@@ -221,12 +249,12 @@ const containItemsInNewBox = async () => {
     resizeWidth: rect.width + (padding * 2),
     resizeHeight: rect.height + (padding + paddingTop)
   }
-  store.dispatch('currentBoxes/add', { box })
-  store.dispatch('closeAllDialogs')
+  boxStore.createBox(box)
+  globalStore.closeAllDialogs()
   await nextTick()
   await nextTick()
-  store.commit('boxDetailsIsVisibleForBoxId', box.id)
-  store.dispatch('analytics/event', 'containItemsInNewBox')
+  globalStore.updateBoxDetailsIsVisibleForBoxId(box.id)
+  analyticsStore.event('containItemsInNewBox')
 }
 
 // box fill
@@ -246,7 +274,7 @@ const updateBoxFill = (fill) => {
     updateBox(box, { fill })
   })
   if (fill === 'empty') {
-    store.dispatch('analytics/event', 'UpdateBoxFillToEmpty')
+    analyticsStore.event('UpdateBoxFillToEmpty')
   }
 }
 
@@ -266,7 +294,7 @@ const color = computed(() => {
 const background = computed(() => {
   return props.backgroundColor || color.value
 })
-const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const itemColors = computed(() => spaceStore.getSpaceItemColors)
 const updateColor = (color) => {
   items.value.forEach(item => {
     const currentColor = item.backgroundColor || item.color
@@ -365,9 +393,9 @@ const updateHeaderFont = async (font) => {
   props.boxes.forEach(box => {
     updateBox(box, { headerFontId: font.id })
   })
-  store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
+  userStore.updateUser({ prevHeaderFontId: font.id })
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 const udpateHeaderFontSize = async (size) => {
   props.cards.forEach(card => {
@@ -377,7 +405,7 @@ const udpateHeaderFontSize = async (size) => {
     updateBox(box, { headerFontSize: size })
   })
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 
 // lock
@@ -400,7 +428,7 @@ const toggleIsLocked = () => {
 
 // comment
 
-const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
+const canOnlyComment = computed(() => userStore.getUserIsCommentOnly)
 const isNotCollaborator = computed(() => {
   if (canOnlyComment.value) { return true }
   return !canEditAll.value
@@ -413,19 +441,19 @@ const toggleIsComment = async () => {
   if (isNotCollaborator.value) { return }
   const value = !isComment.value
   props.cards.forEach(card => {
-    card = {
+    const update = {
       id: card.id,
       name: utils.nameWithoutCommentPattern(card.name),
       isComment: value
     }
     if (!card.name) {
-      delete card.name
+      delete update.name
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
   await nextTick()
   await updateCardDimensions()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 
 // vote counter
@@ -440,12 +468,12 @@ const toggleCounterIsVisible = () => {
     counterIsVisible = false
   }
   props.cards.forEach(card => {
-    card = {
+    const update = {
       id: card.id,
       counterIsVisible,
       counterValue: card.counterValue || 1
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
 }
 
@@ -453,7 +481,8 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  const ids = props.cards.map(card => card.id)
+  cardStore.updateCardsDimensions(ids)
   await nextTick()
   await nextTick()
 }
@@ -463,9 +492,9 @@ const updateCard = async (card, updates) => {
   keys.forEach(key => {
     card[key] = updates[key]
   })
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(card)
   await updateCardDimensions()
-  store.dispatch('currentConnections/updatePaths', { itemId: card.id })
+  connectionStore.updateConnectionPath(card.id)
 }
 
 // box
@@ -476,7 +505,7 @@ const updateBox = (box, updates) => {
   keys.forEach(key => {
     box[key] = updates[key]
   })
-  store.dispatch('currentBoxes/update', box)
+  boxStore.updateBox(box)
 }
 </script>
 
@@ -494,7 +523,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
           span h2
       //- Fonts
       button.toggle-fonts-button.small-button(v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
-        span Fonts
+        span Aa
       FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
     .button-wrap(v-if="isCards")
@@ -587,4 +616,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
     border-top-right-radius 0
     width calc(100% - 4px)
     text-align center
+    span
+      font-size 15px
+      vertical-align initial
 </style>

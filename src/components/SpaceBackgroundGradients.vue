@@ -1,8 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
-const store = useStore()
+import { useGlobalStore } from '@/stores/useGlobalStore'
+
+const globalStore = useGlobalStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -19,7 +20,7 @@ const layer = (index) => {
   }
   return styles
 }
-const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
+const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
 </script>
 
 <template lang="pug">

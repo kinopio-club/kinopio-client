@@ -1,10 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import consts from '@/consts.js'
-
-const store = useStore()
 
 const emit = defineEmits(['updateBrushSize'])
 
