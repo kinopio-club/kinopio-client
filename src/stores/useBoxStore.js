@@ -287,11 +287,10 @@ export const useBoxStore = defineStore('boxes', {
       connectionStore.updateConnectionPaths(itemIds)
       this.updateBoxSnapGuides(updates)
     },
-    updateBoxInfoDimensions (id) {
-      const box = this.getBox(id)
-      const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(box.id)
-      const update = {
-        id: box.id,
+    updateBoxInfoDimensions (update) {
+      const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
+      update = {
+        id: update.id,
         infoWidth,
         infoHeight
       }
@@ -363,6 +362,7 @@ export const useBoxStore = defineStore('boxes', {
         nameUpdatedAt: new Date()
       }
       this.updateBox(update)
+      this.updateBoxInfoDimensions(update)
     },
     clearBoxChecked (id) {
       const box = this.getBox(id)
@@ -374,7 +374,7 @@ export const useBoxStore = defineStore('boxes', {
         nameUpdatedAt: new Date()
       }
       this.updateBox(update)
-      this.updateBoxInfoDimensions(id)
+      this.updateBoxInfoDimensions(update)
     },
 
     // contained items
