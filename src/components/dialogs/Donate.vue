@@ -67,6 +67,7 @@ const customAmount = computed({
 })
 const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
+const currentUserIsDonor = computed(() => userStore.isDonor)
 
 const triggerUpgradeUserIsVisible = () => {
   globalStore.closeAllDialogs()
@@ -121,14 +122,16 @@ const donate = async () => {
 <template lang="pug">
 dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Donate
+    .row.title-row
+      p Donate
+      .badge.secondary(v-if="currentUserIsDonor") Repeat Donor
   section
     p Donations help support my work on Kinopio. I'm grateful and flattered that you're even here.
     p
-      span You'll also get the coveted {{' '}}
+      span You'll get the coveted {{' '}}
       span.badge.success
         span Donor
-      span badge on your profile
+      span badge on your profile. And possibly other perks in the future.
 
     .segmented-buttons
       button(@click="updateAmount(5)" :class="{ active: state.currentAmount === 5 }")
