@@ -169,10 +169,10 @@ const deleteUserPermanent = async () => {
     .row
       button.danger(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
-        span Delete All Your Data
+        span Delete Account
       span(v-if="state.deleteAllConfirmationVisible")
         p.badge.danger
-          span(v-if="isSignedIn") Permanently Delete all your spaces and user data from this computer and Kinopio's servers?
+          span(v-if="isSignedIn") Permanently Delete your account and all your spaces from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
           br
           br
