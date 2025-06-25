@@ -68,17 +68,20 @@ const isAddPage = computed(() => globalStore.isAddPage)
 
 // users
 
+const shouldAppendCurrentUser = computed(() => {
+  const isSpectator = spectators.value.find(spectator => spectator.id === userStore.id)
+  const isMember = userStore.getUserIsSpaceMember
+  return !isSpectator && !isMember
+})
 const members = computed(() => {
   const groupUsers = groupStore.getGroupUsersWhoAddedCards || []
-  console.log('🌻🌻🌻', groupUsers)
   let users = spaceStore.users
   users = users.concat(spaceStore.collaborators)
-  // if (groupUsers) {
   users = users.concat(groupUsers)
-  // }
-  // users = appendCurrentUser(users)
   users = uniqBy(users, 'id')
-  // console.log('🌻🌻🌻header spaceusers', users)
+  if (shouldAppendCurrentUser.value) {
+    users.push(userStore.getUserAllState)
+  }
   return users
 })
 // const spectators = computed(() => spaceStore.spectators)

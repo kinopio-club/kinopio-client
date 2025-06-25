@@ -56,13 +56,10 @@ export const useGroupStore = defineStore('groups', {
       const cardStore = useCardStore()
       const groupId = spaceStore.groupId
       const group = this.getGroup(groupId)
-      console.log('🍇🍇🍇🍇gruop', group)
-
       if (!group) { return }
       const groupUserIds = group.users.map(user => user.id)
       let users = []
       const cards = cardStore.getAllCards
-      console.log('🍇🍇🍇🍇cards', cards)
       if (!cards) { return }
       cards.forEach(card => {
         users.push(card.userId)
@@ -70,9 +67,6 @@ export const useGroupStore = defineStore('groups', {
       })
       users = uniq(users)
       users = users.filter(user => Boolean(user))
-
-      console.log('🐸🐸🐸🐸🐸🐸temp', group, groupUserIds, users)
-
       users = users.filter(user => groupUserIds.includes(user.id))
       return users
     }
