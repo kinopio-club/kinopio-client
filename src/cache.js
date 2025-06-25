@@ -8,26 +8,6 @@ import utils from '@/utils.js'
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
 let showDebugMessages = false
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value
-const getCircularReplacer = () => {
-  const ancestors = []
-  return function (key, value) {
-    if (typeof value !== 'object' || value === null) {
-      return value
-    }
-    // `this` is the object that value is contained in,
-    // i.e., its direct parent.
-    while (ancestors.length > 0 && ancestors.at(-1) !== this) {
-      ancestors.pop()
-    }
-    if (ancestors.includes(value)) {
-      return '[Circular]'
-    }
-    ancestors.push(value)
-    return value
-  }
-}
-
 export default {
   async migrateFromLocalStorage () {
     const lsKeys = Object.keys(window.localStorage)
@@ -249,8 +229,30 @@ export default {
   async saveSpace (space) {
     if (!space) { return }
     // space = JSON.parse(JSON.stringify(space)) // removes functions from objects
-    space = JSON.stringify(space, getCircularReplacer())
-    space = JSON.parse(space)
+    // space = JSON.stringify(space, getCircularReplacer())
+    // space = JSON.parse(space)
+
+    // removes functions and circular references from objects
+    const getCircularReplacer = () => {
+      const seen = new WeakSet()
+      return (key, value) => {
+      // Skip functions
+        if (typeof value === 'function') {
+          return undefined
+        }
+        // Handle circular references
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) {
+            return undefined // or return a placeholder like '[Circular]'
+          }
+          seen.add(value)
+        }
+        return value
+      }
+    }
+
+    // Use the custom replacer with JSON
+    space = JSON.parse(JSON.stringify(space, getCircularReplacer()))
 
     console.log('🅰️🅰️🅰️🅰️🅰️🅰️', space)
     if (!space.id) {
