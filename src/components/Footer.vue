@@ -229,7 +229,7 @@ const updatePositionInVisualViewport = () => {
       //- TEMP move fav button into share?
       .footer-button-wrap
         FavoriteSpaceButton(:isSmall="true")
-      .button-wrap.input-button-wrap.footer-button-wrap
+      .footer-button-wrap
         button.small-button.translucent-button
           span C
           //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
