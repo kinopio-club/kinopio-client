@@ -799,11 +799,9 @@ export const useSpaceStore = defineStore('space', {
         }
       })
       otherUserIds = uniq(otherUserIds)
-      console.log('otherUserIds', otherUserIds)
       if (!otherUserIds.length) { return }
       try {
         const users = await apiStore.getPublicUsers(otherUserIds)
-        console.log('☎️☎️☎️☎️', users)
         users.forEach(user => {
           globalStore.updateOtherUsers(user)
         })
