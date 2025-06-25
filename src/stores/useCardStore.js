@@ -726,6 +726,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
     },
     async clearResizeCards (ids, shouldRemoveResizeWidth) {
+      const connectionStore = useConnectionStore()
       const updates = []
       ids.forEach(id => {
         const update = { id, width: null }
@@ -739,7 +740,6 @@ export const useCardStore = defineStore('cards', {
       this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
-      const connectionStore = useConnectionStore()
       connectionStore.updateConnectionPaths(ids)
     },
 
