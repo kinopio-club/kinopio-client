@@ -228,10 +228,6 @@ export default {
   },
   async saveSpace (space) {
     if (!space) { return }
-    // space = JSON.parse(JSON.stringify(space)) // removes functions from objects
-    // space = JSON.stringify(space, getCircularReplacer())
-    // space = JSON.parse(space)
-
     // removes functions and circular references from objects
     const getCircularReplacer = () => {
       const seen = new WeakSet()
@@ -250,11 +246,7 @@ export default {
         return value
       }
     }
-
-    // Use the custom replacer with JSON
     space = JSON.parse(JSON.stringify(space, getCircularReplacer()))
-
-    console.log('🅰️🅰️🅰️🅰️🅰️🅰️', space)
     if (!space.id) {
       console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
       return
