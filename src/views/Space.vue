@@ -172,7 +172,8 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  startCursor: {}
+  startCursor: {},
+  currentInteractingItem: null
 })
 
 const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
@@ -531,6 +532,22 @@ const updateIconsNotDraggable = () => {
 const handleTouchStart = (event) => {
   prevCursor = utils.cursorPositionInViewport(event)
 }
+const updateCurrentInteractingItem = () => {
+  let boxId = globalStore.currentDraggingBoxId
+  if (globalStore.currentUserIsResizingBox) {
+    boxId = globalStore.currentUserIsResizingBoxIds[0]
+  }
+  let cardId = globalStore.currentDraggingCardId
+  if (globalStore.currentUserIsResizingCard) {
+    cardId = globalStore.currentUserIsResizingCardIds[0]
+  }
+  if (boxId) {
+    state.currentInteractingItem = boxStore.getBox(boxId)
+  }
+  if (cardId) {
+    state.currentInteractingItem = cardStore.getCard(cardId)
+  }
+}
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
     shouldCancel = true
@@ -539,13 +556,14 @@ const initInteractions = (event) => {
   }
   if (spaceIsReadOnly.value) { return }
   state.startCursor = utils.cursorPositionInViewport(event)
+  updateCurrentInteractingItem()
 }
 const updateShouldSnapToGrid = (event) => {
   let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
   if (!globalStore.shouldSnapToGrid && shouldSnap) {
-    const item = globalStore.getCurrentInteractingItem
+    const item = state.currentInteractingItem
     globalStore.snapGuideLinesOrigin = {
       x: item.x,
       y: item.y

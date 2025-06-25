@@ -389,24 +389,6 @@ export const useGlobalStore = defineStore('global', {
         spaceId
       }
     },
-    getCurrentInteractingItem () {
-      const boxStore = useBoxStore()
-      const cardStore = useCardStore()
-      let boxId = this.currentDraggingBoxId
-      if (this.currentUserIsResizingBox) {
-        boxId = this.currentUserIsResizingBoxIds[0]
-      }
-      let cardId = this.currentDraggingCardId
-      if (this.currentUserIsResizingCard) {
-        cardId = this.currentUserIsResizingCardIds[0]
-      }
-      if (boxId) {
-        return boxStore.getBox(boxId)
-      }
-      if (cardId) {
-        return cardStore.getCard(cardId)
-      }
-    },
 
     // subscribe triggers
 
