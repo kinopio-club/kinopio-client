@@ -32,8 +32,8 @@ onMounted(() => {
 
   const globalStateUnsubscribe = globalStore.$subscribe(
     (mutation, state) => {
-      const name = mutation.events.key
-      const value = mutation.events.newValue
+      const name = mutation.events?.key
+      const value = mutation.events?.newValue
       if (name === 'isPresentationMode') {
         if (!value) {
           globalStore.shouldExplicitlyHideFooter = false
