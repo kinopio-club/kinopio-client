@@ -108,7 +108,6 @@ const userDetailsIsUser = (user) => {
 
 const toggleCardsSettingsIsVisible = () => {
   state.cardsSettingsIsVisible = !state.cardsSettingsIsVisible
-  // todo dialog contains user settings cards
 }
 </script>
 
