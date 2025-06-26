@@ -216,6 +216,7 @@ const updateItems = (items) => {
 const updateSelectableItems = () => {
   let cards = cardStore.getCardsSelectableInViewport()
   let boxes = boxStore.getBoxesSelectableInViewport()
+  console.log('🌺updateSelectableItems', cards, boxes)
   cards = cards.map(card => {
     card.isCard = true
     return card
@@ -241,6 +242,7 @@ const updateSelectableItems = () => {
   boxes = boxes.filter(box => Boolean(box))
   const items = cards.concat(boxes)
   selectableItems = updateItems(items)
+  console.log('🌺selectableItems', items, selectableItems)
 }
 const updateSelectableConnections = () => {
   const paths = document.querySelectorAll('svg .connection-path')
