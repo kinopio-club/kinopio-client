@@ -126,6 +126,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
       p Donate
       .badge.secondary(v-if="currentUserIsDonor") Repeat Donor
   section
+    img.placeholder(src="@/assets/piggy-bank.webp")
     p Donations help support my work on Kinopio. I'm grateful and flattered that you're even here.
     p
       span You'll get the coveted {{' '}}
@@ -187,4 +188,7 @@ dialog.donate
     display inline-block
   .user
     margin-right 6px
+  .placeholder
+    border-radius var(--small-entity-radius)
+
 </style>
