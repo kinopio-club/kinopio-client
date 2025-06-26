@@ -77,9 +77,6 @@ button.small-button.translucent-button.new-card-color-button(
     @selectedColor="updateCardColor"
     @removeColor="clearCardColor"
   )
-
-  //- remove from user settings
-
 </template>
 
 <style lang="stylus">

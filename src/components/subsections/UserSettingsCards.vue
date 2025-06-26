@@ -5,7 +5,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
@@ -13,41 +12,12 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribes
-
-onMounted(() => {
-  initDefaultColor()
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'triggerUpdateTheme') {
-        initDefaultColor()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  unsubscribes()
-})
-
 const props = defineProps({
   visible: Boolean
 })
-watch(() => props.visible, (value, prevValue) => {
-  closeChildDialogs()
-})
-
-const state = reactive({
-  colorPickerIsVisible: false,
-  defaultColor: '#e3e3e3'
-})
 
 const currentUser = computed(() => userStore.getUserAllState)
-const closeChildDialogs = () => {
-  state.colorPickerIsVisible = false
-}
+const closeChildDialogs = () => {}
 
 // shift-enter
 
@@ -68,50 +38,10 @@ const updateMaxCardWidthIsWide = (isWide) => {
   }
   userStore.updateUser({ cardSettingsMaxCardWidth: value })
 }
-
-// card color
-
-const updateDefaultCardColor = (color) => {
-  userStore.updateUser({ defaultCardBackgroundColor: color })
-}
-const removeDefaultCardColor = () => {
-  updateDefaultCardColor(null)
-  closeChildDialogs()
-}
-const toggleColorPicker = () => {
-  const value = !state.colorPickerIsVisible
-  closeChildDialogs()
-  state.colorPickerIsVisible = value
-}
-const defaultCardColor = computed(() => {
-  const userDefault = currentUser.value.defaultCardBackgroundColor
-  return userDefault || state.defaultColor
-})
-const userHasDefaultCardColor = computed(() => {
-  const systemDefaultColor = utils.cssVariable('secondary-background')
-  const userDefaultColor = currentUser.value.defaultCardBackgroundColor
-  const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
-  return userDefaultColor && defaultColorIsNotSystem
-})
-const initDefaultColor = () => {
-  state.defaultColor = utils.cssVariable('secondary-background')
-}
-
 </script>
 
 <template lang="pug">
-.cards-settings(v-if="visible" @click.left.stop="closeChildDialogs")
-  section
-    .row
-      p New Card Color
-    .row
-      .button-wrap
-        .segmented-buttons
-          button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
-            .current-color(:style="{ 'background-color': defaultCardColor }")
-          button(@click.left.stop="removeDefaultCardColor")
-            img.icon.cancel(src="@/assets/add.svg")
-        ColorPicker(:currentColor="defaultCardColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
+.cards-settings(v-if="visible")
   section
     p Shift-Enter
     .segmented-buttons
