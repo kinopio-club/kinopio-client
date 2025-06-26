@@ -28,6 +28,9 @@ let unsubscribes
 let shouldSelect, currentBoxSelectId
 let selectableItems = {}
 let selectableConnections = {}
+let previouslySelectedCardIds = []
+let previouslySelectedConnectionIds = []
+let previouslySelectedBoxesIds = []
 
 onMounted(() => {
   const globalStateUnsubscribe = globalStore.$subscribe(
@@ -40,6 +43,7 @@ onMounted(() => {
         if (isSelecting) {
           shouldSelect = true
           currentBoxSelectId = nanoid()
+          updatePreviouslySelectedItems()
         // end selection
         } else {
           if (!shouldSelect) { return }
@@ -48,11 +52,10 @@ onMounted(() => {
           broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemotePreviousBoxSelectStyles' })
         }
       } else if (name === 'currentUserBoxSelectStart') {
-        console.log('🐸🐸🐸 currentUserBoxSelectStart', value, state)
+        console.log('🐸🐸🐸 currentUserBoxSelectStart', value)
         updateSelectableItems()
         updateSelectableConnections()
       } else if (name === 'currentUserBoxSelectMove') {
-        console.log('🅰️🅰️ currentUserBoxSelectMove', shouldPreventBoxSelecting.value, globalStore.currentUserIsDraggingCard, globalStore.currentUserIsDraggingBox)
         if (shouldPreventBoxSelecting.value) { return }
         const { start, end, relativePosition } = orderedPoints(startPoint.value, endPoint.value)
         const selection = boxSelection(start, end)
@@ -115,6 +118,11 @@ const removePreviousRemoteBoxStyle = () => {
 }
 const positionInSpace = (point) => {
   return utils.cursorPositionInSpace(null, point)
+}
+const updatePreviouslySelectedItems = () => {
+  previouslySelectedCardIds = globalStore.multipleCardsSelectedIds
+  previouslySelectedConnectionIds = globalStore.multipleConnectionsSelectedIds
+  previouslySelectedBoxesIds = globalStore.multipleBoxesSelectedIds
 }
 const boxSelection = (start, end) => {
   return {
@@ -270,11 +278,11 @@ const points = (rect) => {
 const mergePreviouslySelected = (selectedIds, type) => {
   let previouslySelectedIds
   if (type === 'cards') {
-    previouslySelectedIds = globalStore.multipleCardsSelectedIds
+    previouslySelectedIds = previouslySelectedCardIds
   } else if (type === 'connections') {
-    previouslySelectedIds = globalStore.multipleConnectionsSelectedIds
+    previouslySelectedIds = previouslySelectedConnectionIds
   } else if (type === 'boxes') {
-    previouslySelectedIds = globalStore.multipleBoxesSelectedIds
+    previouslySelectedIds = previouslySelectedBoxesIds
   }
   previouslySelectedIds.forEach(id => {
     const index = selectedIds.indexOf(id)
