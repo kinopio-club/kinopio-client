@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -21,6 +22,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerUpdateTheme') {
         updateDefaultColor()
+      } else if (name === 'closeAllDialogs') {
+        state.colorPickerIsVisible = false
       }
     }
   )
@@ -45,12 +48,28 @@ const newCardColor = computed(() => {
   return userDefault || state.defaultColor
 })
 
-const toggleColorPicker = () => {}
+const toggleColorPicker = () => {
+  const value = !state.colorPickerIsVisible
+  globalStore.closeAllDialogs()
+  state.colorPickerIsVisible = value
+}
+const updateCardColor = (color) => {
+  userStore.updateUser({ defaultCardBackgroundColor: color })
+}
 </script>
 
 <template lang="pug">
-button.small-button.translucent-button.new-card-color-button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
+button.small-button.translucent-button.new-card-color-button(
+  @click.left.stop="toggleColorPicker"
+  :class="{active: state.colorPickerIsVisible}"
+  title="Set Color of New Cards"
+)
   .badge.small-badge(:style="{ 'background-color': newCardColor }")
+  ColorPicker(
+    :currentColor="newCardColor"
+    :visible="state.colorPickerIsVisible"
+    @selectedColor="updateCardColor"
+  )
 
   //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
   //- remove from user settings
@@ -67,4 +86,7 @@ button.small-button.translucent-button.new-card-color-button(@click.left.stop="t
     border-radius var(--small-entity-radius)
     width 15px
     min-width initial
+  .color-picker
+    top initial
+    bottom 16px
 </style>
