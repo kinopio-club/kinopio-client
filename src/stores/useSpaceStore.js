@@ -961,7 +961,7 @@ export const useSpaceStore = defineStore('space', {
         return user.id !== removeUser.id
       })
       this.clients = clients.filter(user => {
-        return user.id !== removeUser.id
+        return user?.id !== removeUser.id
       })
     },
     updateUserPresence (update) {
