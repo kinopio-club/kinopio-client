@@ -23,38 +23,12 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
-// let unsubscribes
-
 let shouldSelect, currentBoxSelectId
 let selectableItems = {}
 let selectableConnections = {}
 let previouslySelectedCardIds = []
 let previouslySelectedConnectionIds = []
 let previouslySelectedBoxesIds = []
-
-// onMounted(() => {
-//   const globalStateUnsubscribe = globalStore.$subscribe(
-//     (mutation, state) => {
-//       const name = mutation.events?.key
-//       const value = mutation.events?.newValue
-//       console.log('🍖🍖boxselecting subscribe', name, mutation)
-//       if (name === 'currentUserBoxSelectStart') {
-//         console.log('☎️☎️☎️☎️☎️☎️')
-//       }
-
-//       if (name === 'currentUserIsBoxSelecting') {
-//       } else if (name === 'currentUserBoxSelectStart') {
-//       } else if (name === '') {
-//       }
-//     }
-//   )
-//   unsubscribes = () => {
-//     globalStateUnsubscribe()
-//   }
-// })
-// onBeforeUnmount(() => {
-//   unsubscribes()
-// })
 
 const state = reactive({
   direction: 'to bottom right',
@@ -77,7 +51,6 @@ watch(() => globalStore.currentUserIsBoxSelecting, (value, prevValue) => {
   }
 })
 watch(() => globalStore.currentUserBoxSelectStart, (value, prevValue) => {
-  console.log('🐸🐸🐸 currentUserBoxSelectStart', value)
   updateSelectableItems()
   updateSelectableConnections()
 })
@@ -91,10 +64,7 @@ watch(() => globalStore.currentUserBoxSelectMove, (value, prevValue) => {
 })
 
 const currentUserIsBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
-const startPoint = computed(() => {
-  console.log('🍍', globalStore.currentUserBoxSelectStart)
-  return positionInSpace(globalStore.currentUserBoxSelectStart)
-})
+const startPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectMove))
 const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const shouldPreventBoxSelecting = computed(() => {
@@ -232,7 +202,6 @@ const updateItems = (items) => {
 const updateSelectableItems = () => {
   let cards = cardStore.getCardsSelectableInViewport()
   let boxes = boxStore.getBoxesSelectableInViewport()
-  console.log('🌺updateSelectableItems', cards, boxes)
   cards = cards.map(card => {
     card.isCard = true
     return card
@@ -258,7 +227,6 @@ const updateSelectableItems = () => {
   boxes = boxes.filter(box => Boolean(box))
   const items = cards.concat(boxes)
   selectableItems = updateItems(items)
-  console.log('🌺selectableItems', items, selectableItems)
 }
 const updateSelectableConnections = () => {
   const paths = document.querySelectorAll('svg .connection-path')
