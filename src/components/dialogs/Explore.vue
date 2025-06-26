@@ -46,9 +46,6 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateHeights()
     updateUserShowInExploreUpdatedAt()
-    globalStore.shouldExplicitlyHideFooter = true
-  } else {
-    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 

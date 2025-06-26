@@ -77,8 +77,10 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  unsubscribes()
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])

@@ -48,7 +48,9 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  unsubscribes()
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const emit = defineEmits([

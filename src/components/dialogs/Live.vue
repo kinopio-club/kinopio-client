@@ -35,9 +35,6 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     updateResultsSectionHeight()
-    globalStore.shouldExplicitlyHideFooter = true
-  } else {
-    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
