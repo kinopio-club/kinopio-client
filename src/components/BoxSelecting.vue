@@ -38,6 +38,10 @@ onMounted(() => {
       const name = mutation.events?.key
       const value = mutation.events?.newValue
       console.log('🍖🍖boxselecting subscribe', name)
+      if (name === 'currentUserBoxSelectStart') {
+        console.log('☎️☎️☎️☎️☎️☎️')
+      }
+
       if (name === 'currentUserIsBoxSelecting') {
         const isSelecting = value
         // before start selection
@@ -80,7 +84,10 @@ const state = reactive({
 })
 
 const currentUserIsBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
-const startPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectStart))
+const startPoint = computed(() => {
+  console.log('🍍', globalStore.currentUserBoxSelectStart)
+  return positionInSpace(globalStore.currentUserBoxSelectStart)
+})
 const endPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectMove))
 const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const shouldPreventBoxSelecting = computed(() => {
