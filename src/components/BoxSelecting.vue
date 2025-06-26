@@ -37,6 +37,7 @@ onMounted(() => {
     (mutation, state) => {
       const name = mutation.events?.key
       const value = mutation.events?.newValue
+      console.log('🍖🍖boxselecting subscribe', name)
       if (name === 'currentUserIsBoxSelecting') {
         const isSelecting = value
         // before start selection
