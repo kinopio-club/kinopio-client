@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import UserSettingsCards from '@/components/dialogs/UserSettingsCards.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -46,6 +47,10 @@ const props = defineProps({
   isComment: Boolean
 })
 
+const state = reactive({
+  cardsSettingsIsVisible: false
+})
+
 watch(() => props.visible, async (value, prevValue) => {
   await nextTick()
   if (value) {
@@ -59,6 +64,7 @@ const closeDialogsFromParent = () => {
 }
 const closeDialogs = () => {
   globalStore.userDetailsIsVisible = false
+  state.cardsSettingsIsVisible = false
   emit('closeDialogs')
 }
 const scrollParentIntoView = () => {
@@ -98,11 +104,11 @@ const userDetailsIsUser = (user) => {
   return user.id === userDetailsUser.id
 }
 
-// settings
+// card settings
 
-const showCardSettings = () => {
-  userStore.updateUser({ prevSettingsSection: 'cards' })
-  globalStore.userSettingsIsVisible = true
+const toggleCardsSettingsIsVisible = () => {
+  state.cardsSettingsIsVisible = !state.cardsSettingsIsVisible
+  // todo dialog contains user settings cards
 }
 </script>
 
@@ -110,8 +116,9 @@ const showCardSettings = () => {
 .row.card-collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
   //- settings
   .button-wrap
-    button.small-button.settings-button(@click="showCardSettings" title="Card Settings")
+    button.small-button.settings-button(@click.stop="toggleCardsSettingsIsVisible" title="Card Settings" :class="{active: state.cardsSettingsIsVisible}")
       img.settings.icon(src="@/assets/settings.svg")
+    UserSettingsCards(:visible="state.cardsSettingsIsVisible")
   //- comment
   .badge.info.is-comment-badge(v-if="isComment")
     img.icon.comment(src="@/assets/comment.svg")
