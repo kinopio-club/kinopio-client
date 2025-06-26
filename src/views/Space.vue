@@ -455,9 +455,11 @@ const dragBoxes = (event) => {
       userId: userStore.id
     }
     broadcastStore.update({ updates, action: 'addToRemoteBoxesDragging' })
-    boxStore.selectItemsInSelectedBoxes()
+    // alt-drag box to move without selecting items inside
+    if (!event.altKey) {
+      boxStore.selectItemsInSelectedBoxes()
+    }
   }
-  if (event.altKey) { return } // should not select contained items if alt/option key
   dragItems()
 }
 // footer
