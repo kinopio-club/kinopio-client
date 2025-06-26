@@ -559,8 +559,6 @@ export const useSpaceStore = defineStore('space', {
         name: 'createSpace',
         body: space
       })
-      // const cardStore = useCardStore()
-      // cardStore.updateCardsDimensions()
     },
     saveSpaceToCache () {
       const userStore = useUserStore()
@@ -693,6 +691,27 @@ export const useSpaceStore = defineStore('space', {
       await this.saveSpace()
       this.updateUserLastSpaceId()
       globalStore.notifySignUpToEditSpace = false
+    },
+    async saveImportSpace (space) {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      const apiStore = useApiStore()
+      const user = userStore.getUserAllState
+      broadcastStore.leaveSpaceRoom({ user: { id: user.id }, type: 'userLeftRoom' })
+      globalStore.clearSearch()
+      globalStore.resetPageSizes()
+      console.info('✨ saveImportSpace', space, user)
+      cache.saveSpace(space)
+      this.restoreSpace(space)
+      this.addUserToSpace(user)
+      this.incrementCardsCreatedCountFromSpace(space)
+      globalStore.isLoadingSpace = false
+      globalStore.triggerUpdateWindowHistory()
+      await apiStore.addToQueue({
+        name: 'createSpace',
+        body: space
+      })
     },
     async createNewHelloSpace () {
       const globalStore = useGlobalStore()

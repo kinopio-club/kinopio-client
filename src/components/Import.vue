@@ -138,8 +138,7 @@ const importSpace = async (space) => {
     space.connections = utils.migrationConnections(space.connections)
     const uniqueNewSpace = await cache.updateIdsInSpace(space)
     console.info('🧚 space to import', uniqueNewSpace)
-    await spaceStore.saveSpace(uniqueNewSpace)
-    await spaceStore.loadSpace(uniqueNewSpace)
+    await spaceStore.saveImportSpace(uniqueNewSpace)
     updateSpaces()
     globalStore.triggerFocusSpaceDetailsName()
   } catch (error) {
