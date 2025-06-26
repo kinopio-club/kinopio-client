@@ -204,8 +204,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       p 100% funded and made possible by people like you
       //- The best way to support Kinopio is by spreading the word
-    .row
-      AboutMe
     //- .row
     //-   .button-wrap
     //-     a(href="https://kinopio.club/blog")
@@ -216,6 +214,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
+    .row
+      AboutMe
   section
     .row
       .button-wrap
