@@ -61,6 +61,7 @@ watch(() => props.visible, async (value, prevValue) => {
 const shouldShowItemActions = computed(() => userStore.shouldShowItemActions)
 const closeDialogsFromParent = () => {
   globalStore.userDetailsIsVisible = false
+  state.cardsSettingsIsVisible = false
 }
 const closeDialogs = () => {
   globalStore.userDetailsIsVisible = false
