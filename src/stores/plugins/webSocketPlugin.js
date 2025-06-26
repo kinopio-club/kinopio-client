@@ -255,6 +255,8 @@ export default function webSocketPlugin () {
       if (updates.user.id === userStore.id) {
         spaceStore.removeCurrentUserFromSpace()
       }
+    // TODO
+    // } else if (name === 'updateSpaceClients') {
     } else if (isAction) {
       updates.isFromBroadcast = true
       const piniaStore = getPiniaStore(store, pinia)

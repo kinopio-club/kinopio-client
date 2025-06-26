@@ -352,6 +352,7 @@ const handleMouseDownEvents = (event) => {
     globalStore.currentUserIsBoxSelecting = true
     globalStore.currentUserBoxSelectMove = position
     globalStore.currentUserBoxSelectStart = position
+    console.log('🛤️🛤️ update globalStore.currentUserBoxSelectStart', globalStore.currentUserBoxSelectStart)
   } else if (shouldPan) {
     prevRightClickPosition = utils.cursorPositionInViewport(event)
     prevRightClickTime = utils.unixTime()
