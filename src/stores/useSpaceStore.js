@@ -952,6 +952,7 @@ export const useSpaceStore = defineStore('space', {
     },
     updateSpaceClients (updates) {
       this.clients = this.clients.concat(updates)
+      this.clients = uniqBy(this.clients, 'id')
     },
     removeIdleClientFromSpace (removeUser) {
       const spectators = this.spectators || []
