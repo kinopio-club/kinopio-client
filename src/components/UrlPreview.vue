@@ -154,7 +154,7 @@ const showNone = async () => {
         .row
           //- hide url
           .button-wrap(v-if="state.moreOptionsIsVisible")
-            button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
+            button.small-button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span Hide URL
