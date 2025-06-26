@@ -37,7 +37,7 @@ onMounted(() => {
     (mutation, state) => {
       const name = mutation.events?.key
       const value = mutation.events?.newValue
-      console.log('🍖🍖boxselecting subscribe', name)
+      console.log('🍖🍖boxselecting subscribe', name, mutation)
       if (name === 'currentUserBoxSelectStart') {
         console.log('☎️☎️☎️☎️☎️☎️')
       }
