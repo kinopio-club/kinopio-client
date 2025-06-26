@@ -10,6 +10,7 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
+import NewCardColorButton from '@/components/NewCardColorButton.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
 
@@ -220,14 +221,10 @@ const updatePositionInVisualViewport = () => {
       template(v-if="leftControlsIsVisible")
         .footer-button-wrap
           DiscoveryButtons
-        //- TEMP move fav button into share?
         .footer-button-wrap
           FavoriteSpaceButton(:isSmall="true")
         .footer-button-wrap
-          button.small-button.translucent-button
-            span C
-            //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
-            //- remove from user settings
+          NewCardColorButton
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
