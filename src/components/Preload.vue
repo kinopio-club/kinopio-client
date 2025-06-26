@@ -7,24 +7,8 @@ import { useCardStore } from '@/stores/useCardStore'
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 
-let unsubscribes
-
-onMounted(() => {
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'isLoadingSpace') {
-        updateImageUrls()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalStateUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  unsubscribes()
+watch(() => globalStore.isLoadingSpace, (value, prevValue) => {
+  updateImageUrls()
 })
 
 const state = reactive({

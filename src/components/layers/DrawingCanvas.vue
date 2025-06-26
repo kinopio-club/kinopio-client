@@ -42,20 +42,6 @@ onMounted(() => {
   updatePrevScroll()
   clearCanvas()
   clearDrawing()
-
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    async (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'spaceZoomPercent' || name === 'zoomOrigin') {
-        await nextTick()
-        scroll()
-      } else if (name === 'currentUserToolbar') {
-        updatePrevScroll()
-        redraw()
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (name === 'triggerStartDrawing') {
@@ -99,7 +85,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
     spaceActionUnsubscribe()
   }
@@ -111,6 +96,19 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', scroll)
   window.removeEventListener('resize', resize)
   unsubscribes()
+})
+
+watch(() => globalStore.spaceZoomPercent, async (value, prevValue) => {
+  await nextTick()
+  scroll()
+})
+watch(() => globalStore.zoomOrigin, async (value, prevValue) => {
+  await nextTick()
+  scroll()
+})
+watch(() => globalStore.currentUserToolbar, async (value, prevValue) => {
+  updatePrevScroll()
+  redraw()
 })
 
 const state = reactive({

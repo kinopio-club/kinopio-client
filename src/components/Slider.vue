@@ -16,33 +16,21 @@ const badgeElement = ref(null)
 const progressElement = ref(null)
 const buttonElement = ref(null)
 
-let unsubscribes
-
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
   window.addEventListener('mousemove', dragPlayhead)
   window.addEventListener('mouseup', endMovePlayhead)
   window.addEventListener('touchend', endMovePlayhead)
   updateButtonPosition()
-
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'spaceZoomPercent') {
-        updateButtonPosition()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalStateUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', dragPlayhead)
   window.removeEventListener('mouseup', endMovePlayhead)
   window.removeEventListener('touchend', endMovePlayhead)
-  unsubscribes()
+})
+
+watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
+  updateButtonPosition()
 })
 
 const emit = defineEmits(['updatePlayhead', 'resetPlayhead', 'removeAnimations'])

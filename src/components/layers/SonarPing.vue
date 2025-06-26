@@ -24,15 +24,6 @@ onMounted(() => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', updateScroll)
 
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'spaceZoomPercent') {
-        updateScroll()
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerSonarPing') {
@@ -42,7 +33,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -50,6 +40,10 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', updateScroll)
   unsubscribes()
+})
+
+watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
+  updateScroll()
 })
 
 const state = reactive({

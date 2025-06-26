@@ -19,21 +19,6 @@ onMounted(() => {
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   updatePrevScroll()
-
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    async (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'spaceZoomPercent') {
-        updateCanvasSize()
-      } else if (name === 'currentUserToolbar') {
-        update()
-      } else if (name === 'spaceZoomPercent' || name === 'zoomOrigin') {
-        await nextTick()
-        update()
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateDrawingBackground') {
@@ -44,7 +29,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -52,6 +36,23 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePrevScroll)
   unsubscribes()
 })
+
+watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
+  updateCanvasSize()
+})
+watch(() => globalStore.currentUserToolbar, (value, prevValue) => {
+  update()
+})
+watch(
+  [
+    () => globalStore.spaceZoomPercent,
+    () => globalStore.zoomOrigin
+  ],
+  async () => {
+    await nextTick()
+    update()
+  }
+)
 
 const state = reactive({
   prevScroll: { x: 0, y: 0 }

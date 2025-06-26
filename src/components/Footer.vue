@@ -30,17 +30,6 @@ onMounted(() => {
   window.addEventListener('resize', updatePosition)
   updatePosition()
 
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'isPresentationMode') {
-        if (!value) {
-          globalStore.shouldExplicitlyHideFooter = false
-        }
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateHeaderAndFooterPosition') {
@@ -57,7 +46,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -65,6 +53,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   window.removeEventListener('resize', updatePosition)
   unsubscribes()
+})
+
+watch(() => globalStore.isPresentationMode, (value, prevValue) => {
+  if (!value) {
+    globalStore.shouldExplicitlyHideFooter = false
+  }
 })
 
 const state = reactive({

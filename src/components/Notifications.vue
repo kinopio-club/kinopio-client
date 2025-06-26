@@ -34,17 +34,6 @@ const templateElement = ref(null)
 onMounted(() => {
   update()
 
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'currentUserIsPainting') {
-        if (value) {
-          addReadOnlyJiggle()
-        }
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'addNotification') {
@@ -68,7 +57,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
     spaceActionUnsubscribe()
   }
@@ -83,6 +71,12 @@ onBeforeUnmount(() => {
   // window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   unsubscribes()
+})
+
+watch(() => globalStore.currentUserIsPainting, (value, prevValue) => {
+  if (value) {
+    addReadOnlyJiggle()
+  }
 })
 
 const state = reactive({

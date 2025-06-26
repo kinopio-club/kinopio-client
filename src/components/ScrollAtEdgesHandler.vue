@@ -25,15 +25,6 @@ onMounted(() => {
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', stopInteractions)
 
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'currentUserIsPaintingLocked' && value) {
-        stopScrollTimer()
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggeredTouchCardDragPosition') {
@@ -48,7 +39,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -60,6 +50,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', stopInteractions)
   unsubscribes()
+})
+
+watch(() => globalStore.currentUserIsPaintingLocked, (value, prevValue) => {
+  if (value) {
+    stopScrollTimer()
+  }
 })
 
 // interacting
