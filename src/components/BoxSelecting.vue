@@ -52,6 +52,7 @@ onMounted(() => {
           broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemotePreviousBoxSelectStyles' })
         }
       } else if (name === 'currentUserBoxSelectStart') {
+        console.log('🐸🐸🐸 currentUserBoxSelectStart', value)
         updateSelectableItems()
         updateSelectableConnections()
       } else if (name === 'currentUserBoxSelectMove') {

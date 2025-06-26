@@ -346,6 +346,7 @@ const handleMouseDownEvents = (event) => {
     globalStore.shouldCancelNextMouseUpInteraction = true
     return
   }
+  console.log('shouldBoxSelect', shouldBoxSelect, '🚘🚘', event.shiftKey, isPanScope, !toolbarIsBox, isNotConnecting, !globalStore.currentUserIsResizingBox)
   if (shouldBoxSelect) {
     event.preventDefault()
     globalStore.currentUserIsBoxSelecting = true
