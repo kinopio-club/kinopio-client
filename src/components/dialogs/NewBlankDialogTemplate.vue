@@ -20,15 +20,6 @@ const dialogElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'spaceZoomPercent') {
-        console.log('spaceZoomPercent')
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
@@ -37,7 +28,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -61,6 +51,7 @@ watch(() => props.visible, (value, prevValue) => {
     updateDialogHeight()
   }
 })
+// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }

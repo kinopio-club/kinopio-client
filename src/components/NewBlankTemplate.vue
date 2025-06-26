@@ -17,16 +17,6 @@ let unsubscribes
 
 onMounted(() => {
   console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
-
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      if (name === 'spaceZoomPercent') {
-        console.log('spaceZoomPercent')
-      }
-    }
-  )
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
@@ -35,7 +25,6 @@ onMounted(() => {
     }
   )
   unsubscribes = () => {
-    globalStateUnsubscribe()
     globalActionUnsubscribe()
   }
 })
@@ -57,6 +46,7 @@ watch(() => props.visible, (value, prevValue) => {
     console.info('💁‍♀️', value)
   }
 })
+// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const themeName = computed(() => userStore.theme)
 const incrementBy = () => {
