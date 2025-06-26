@@ -82,6 +82,7 @@ export const useUserStore = defineStore('users', {
     cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
+    shouldShowMinimapJumpToList: true,
 
     // space filters
 

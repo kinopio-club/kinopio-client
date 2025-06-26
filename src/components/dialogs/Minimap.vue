@@ -3,15 +3,18 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const rowElement = ref(null)
+const detailsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -33,6 +36,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     updateSize()
+    updateDetailsOpen()
   }
 })
 
@@ -48,6 +52,16 @@ const updateSize = async () => {
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   state.size = rect.width
+}
+const updateDetailsOpen = async () => {
+  await nextTick()
+  const element = detailsElement.value
+  element.open = userStore.shouldShowMinimapJumpToList
+}
+const toggleShouldShowMinimapJumpToList = () => {
+  const element = detailsElement.value
+  const value = element.open
+  userStore.updateUser({ shouldShowMinimapJumpToList: value })
 }
 
 // pin dialog
@@ -92,7 +106,7 @@ dialog.narrow.minimap.is-pinnable(
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
   section.boxes-section.results-section
-    details
+    details(ref="detailsElement" @toggle="toggleShouldShowMinimapJumpToList")
       summary
         //- .row
         span Jump to Box
