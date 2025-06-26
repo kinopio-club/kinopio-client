@@ -288,7 +288,7 @@ const background = computed({
 const updateBackground = async (url) => {
   url = url.url || url
   if (url === background.value) {
-    url = ''
+    return
   }
   if (props.box) {
     const updates = {
