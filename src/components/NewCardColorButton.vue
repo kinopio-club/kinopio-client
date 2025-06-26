@@ -56,6 +56,9 @@ const toggleColorPicker = () => {
 const updateCardColor = (color) => {
   userStore.updateUser({ defaultCardBackgroundColor: color })
 }
+const clearCardColor = (color) => {
+  userStore.updateUser({ defaultCardBackgroundColor: state.defaultColor })
+}
 </script>
 
 <template lang="pug">
@@ -68,7 +71,9 @@ button.small-button.translucent-button.new-card-color-button(
   ColorPicker(
     :currentColor="newCardColor"
     :visible="state.colorPickerIsVisible"
+    :removeIsVisible="true"
     @selectedColor="updateCardColor"
+    @removeColor="clearCardColor"
   )
 
   //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color

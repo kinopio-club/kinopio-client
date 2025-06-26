@@ -48,7 +48,7 @@ watch(() => props.visible, (value, prevValue) => {
     updateButtonHues()
     scrollIntoView()
     updateOpacityFromCurrentColor()
-    // updateDialogHeight()
+    updateDialogHeight()
   }
 })
 
