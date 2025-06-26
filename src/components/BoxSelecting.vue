@@ -23,7 +23,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
-let unsubscribes
+// let unsubscribes
 
 let shouldSelect, currentBoxSelectId
 let selectableItems = {}
@@ -32,55 +32,62 @@ let previouslySelectedCardIds = []
 let previouslySelectedConnectionIds = []
 let previouslySelectedBoxesIds = []
 
-onMounted(() => {
-  const globalStateUnsubscribe = globalStore.$subscribe(
-    (mutation, state) => {
-      const name = mutation.events?.key
-      const value = mutation.events?.newValue
-      console.log('🍖🍖boxselecting subscribe', name, mutation)
-      if (name === 'currentUserBoxSelectStart') {
-        console.log('☎️☎️☎️☎️☎️☎️')
-      }
+// onMounted(() => {
+//   const globalStateUnsubscribe = globalStore.$subscribe(
+//     (mutation, state) => {
+//       const name = mutation.events?.key
+//       const value = mutation.events?.newValue
+//       console.log('🍖🍖boxselecting subscribe', name, mutation)
+//       if (name === 'currentUserBoxSelectStart') {
+//         console.log('☎️☎️☎️☎️☎️☎️')
+//       }
 
-      if (name === 'currentUserIsBoxSelecting') {
-        const isSelecting = value
-        // before start selection
-        if (isSelecting) {
-          shouldSelect = true
-          currentBoxSelectId = nanoid()
-          updatePreviouslySelectedItems()
-        // end selection
-        } else {
-          if (!shouldSelect) { return }
-          shouldSelect = false
-          state.previousBoxStyles.push(currentUserStyles.value)
-          broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemotePreviousBoxSelectStyles' })
-        }
-      } else if (name === 'currentUserBoxSelectStart') {
-        console.log('🐸🐸🐸 currentUserBoxSelectStart', value)
-        updateSelectableItems()
-        updateSelectableConnections()
-      } else if (name === 'currentUserBoxSelectMove') {
-        if (shouldPreventBoxSelecting.value) { return }
-        const { start, end, relativePosition } = orderedPoints(startPoint.value, endPoint.value)
-        const selection = boxSelection(start, end)
-        selectItems(selection, relativePosition)
-        selectconnections(selection, relativePosition)
-        broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemoteUserBoxSelectStyles' })
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalStateUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  unsubscribes()
-})
+//       if (name === 'currentUserIsBoxSelecting') {
+//       } else if (name === 'currentUserBoxSelectStart') {
+//       } else if (name === '') {
+//       }
+//     }
+//   )
+//   unsubscribes = () => {
+//     globalStateUnsubscribe()
+//   }
+// })
+// onBeforeUnmount(() => {
+//   unsubscribes()
+// })
 
 const state = reactive({
   direction: 'to bottom right',
   previousBoxStyles: []
+})
+
+watch(() => globalStore.currentUserIsBoxSelecting, (value, prevValue) => {
+  const isSelecting = value
+  // before start selection
+  if (isSelecting) {
+    shouldSelect = true
+    currentBoxSelectId = nanoid()
+    updatePreviouslySelectedItems()
+  // end selection
+  } else {
+    if (!shouldSelect) { return }
+    shouldSelect = false
+    state.previousBoxStyles.push(currentUserStyles.value)
+    broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemotePreviousBoxSelectStyles' })
+  }
+})
+watch(() => globalStore.currentUserBoxSelectStart, (value, prevValue) => {
+  console.log('🐸🐸🐸 currentUserBoxSelectStart', value)
+  updateSelectableItems()
+  updateSelectableConnections()
+})
+watch(() => globalStore.currentUserBoxSelectMove, (value, prevValue) => {
+  if (shouldPreventBoxSelecting.value) { return }
+  const { start, end, relativePosition } = orderedPoints(startPoint.value, endPoint.value)
+  const selection = boxSelection(start, end)
+  selectItems(selection, relativePosition)
+  selectconnections(selection, relativePosition)
+  broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemoteUserBoxSelectStyles' })
 })
 
 const currentUserIsBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
