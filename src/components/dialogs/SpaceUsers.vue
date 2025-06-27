@@ -1,19 +1,13 @@
 <script setup>
-
-// displayed in header
-
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
-import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 import UserList from '@/components/UserList.vue'
-import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -21,7 +15,6 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -34,8 +27,7 @@ const props = defineProps({
 })
 
 const state = reactive({
-  dialogHeight: null,
-  groupIsVisible: false
+  dialogHeight: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -51,55 +43,12 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => userStore.getUserAllState)
 const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
-const currentSpace = computed(() => spaceStore.getSpaceAllState)
-
-// list type
-
-const isSpectatorsList = computed(() => globalStore.spaceUserListIsSpectators)
-const isCollaboratorsList = computed(() => !isSpectatorsList.value)
-const label = computed(() => {
-  let string = 'Collaborators'
-  if (isSpectatorsList.value) {
-    string = 'Spectators'
-  }
-  return string
-})
-
-// group
-
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-const toggleGroupIsVisible = () => {
-  const value = !state.groupIsVisible
-  closeDialogs()
-  state.groupIsVisible = value
-}
+const spaceIsOpen = computed(() => spaceStore.getSpaceIsOpen)
 
 // users
 
-// based on SpaceUsersButton.spaceUsers
-const users = computed(() => {
-  let items
-  if (isSpectatorsList.value) {
-    items = currentSpace.value.spectators
-  } else {
-    const groupUsers = groupStore.getGroupUsersWhoAddedCards
-    items = utils.clone(currentSpace.value.users)
-    items = items.concat(currentSpace.value.collaborators)
-    items = items.concat(groupUsers)
-  }
-  items = items.filter(item => Boolean(item))
-  items = uniqBy(items, 'id')
-  return items
-})
-
-// commenters
-
-const commenters = computed(() => cardStore.getCommentCardUsers)
-
-// handle userlist events
-
+const users = computed(() => spaceStore.getSpaceMembers)
 const selectedUser = computed(() => {
   const userDetailsIsVisible = globalStore.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
@@ -137,40 +86,28 @@ dialog.narrow.space-users(
   @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
-  :class="{'child-is-visible': state.groupIsVisible }"
 )
   section
-    p {{ label }}
-    .button-wrap(v-if="spaceGroup")
-      button(@click.stop="toggleGroupIsVisible" :class="{ active: state.groupIsVisible }")
-        GroupLabel(:group="spaceGroup" :showName="true")
-      GroupDetails(:visible="state.groupIsVisible" :group="spaceGroup")
+    p Users Who Can Edit This Space
+    p.badge.success(v-if="spaceIsOpen")
+      img.icon.open(src="@/assets/open.svg")
+      span Space privacy is Open, so anyone can leave comments
   //- users
-  template(v-if="users.length")
+  section.results-section(v-if="users.length")
     UserList(
       :users="users"
       :selectedUser="selectedUser"
       @selectUser="toggleUserDetails"
       :showCollaboratorActions="currentUserCanEditSpace"
     )
-  //- commenters
-  section(v-if="isCollaboratorsList && commenters.length")
-    p Commenters
-    UserList(
-      :users="commenters"
-      :selectedUser="selectedUser"
-      @selectUser="toggleUserDetails"
-    )
 </template>
 
 <style lang="stylus">
 dialog.space-users
-  overflow auto
   left initial
   right 16px
-  top 20px
-  &.child-is-visible
-    overflow initial
-  dialog.group-details
-    left -45px
+  top 16px
+  .results-section
+    border-top 1px solid var(--primary-border)
+    padding-top 4px
 </style>

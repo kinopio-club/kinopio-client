@@ -78,6 +78,7 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 dialog.space-rss-feed
   left initial
   right 4px
+  top 16px
   .badge
     margin-right 0
 </style>

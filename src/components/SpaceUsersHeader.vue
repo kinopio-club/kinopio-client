@@ -1,7 +1,4 @@
 <script setup>
-
-// displayed in header in embed
-
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'

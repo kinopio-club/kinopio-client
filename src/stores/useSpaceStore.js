@@ -55,6 +55,9 @@ export const useSpaceStore = defineStore('space', {
     getSpaceIsPrivate () {
       return this.privacy === 'private'
     },
+    getSpaceIsOpen () {
+      return this.privacy === 'open'
+    },
     getSpaceUrl () {
       const domain = consts.kinopioDomain()
       const spaceUrl = utils.url({ name: this.name, id: this.id })
@@ -1049,8 +1052,7 @@ export const useSpaceStore = defineStore('space', {
       if (this.isRemoved) { return }
       const userStore = useUserStore()
       const isSpaceMember = userStore.getUserIsSpaceMember
-      const spaceIsOpen = this.privacy === 'open'
-      if (!isSpaceMember && spaceIsOpen) {
+      if (!isSpaceMember && this.getSpaceIsOpen) {
         globalStore.addNotification({ message: 'This space is open to comments', icon: 'comment', type: 'success' })
       }
     },
