@@ -194,7 +194,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         .button-wrap
           button.small-button
             img.icon.group(src="@/assets/group.svg")
-            span Group
+            span Groups
         //- users
         .button-wrap
           button.small-button(@click.stop="toggleSpaceUsersIsVisible" :class="{active: state.spaceUsersIsVisible}")
