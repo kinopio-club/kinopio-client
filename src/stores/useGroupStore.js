@@ -66,12 +66,9 @@ export const useGroupStore = defineStore('groups', {
         users.push(card.nameUpdatedByUserId)
       })
       users = uniqBy(users, 'id')
-      // users = users.filter(user => Boolean(user))
       users = users.filter(user => {
-        console.log('🌺🌺', groupUserIds, user?.id, groupUserIds.includes(user?.id))
         return groupUserIds.includes(user?.id)
       })
-      console.log('🔮🔮getGroupUsersWhoAddedCards', users, groupUserIds)
       return users
     }
   },

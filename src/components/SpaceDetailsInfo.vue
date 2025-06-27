@@ -187,7 +187,6 @@ const closeDialogs = () => {
   state.addToGroupIsVisible = false
 }
 const closeDialogsAndEmit = () => {
-  console.log('☎️')
   closeDialogs()
   emit('closeDialogs')
 }
