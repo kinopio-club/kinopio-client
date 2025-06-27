@@ -15,7 +15,6 @@ import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
-import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -170,6 +169,12 @@ const users = computed(() => {
 const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
 const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
+const usersLabel = computed(() => {
+  const condition = spaceStore.getSpaceMembers.length !== 1
+  const label = utils.pluralize('User', condition)
+  return `${users.value.length} ${label}`
+})
+
 </script>
 
 <template lang="pug">
@@ -178,6 +183,8 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
     .row.title-row
       p Share
       .row
+        .button-wrap
+          button.small-button {{usersLabel}}
         .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS
@@ -204,9 +211,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
 
-  //- collaborators
-  section
-    SpaceUsersButton(:showLabel="true")
   //- Invite
   InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
   InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
