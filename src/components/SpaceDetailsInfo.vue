@@ -277,9 +277,6 @@ const removeSpaceGroup = (group) => {
     .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
-
-SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
-
 //- members
 template(v-if="isSpaceMember")
   .row.title-row
@@ -306,7 +303,6 @@ template(v-if="isSpaceMember")
     .button-wrap
       button(@click="toggleOptionsIsVisible" :class="{active: state.optionsIsVisible}" title="Space Options")
         span ⋯
-
 //- read only users
 .row(v-if="!isSpaceMember")
   FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -322,6 +318,8 @@ SpaceOptions(
   @updateLocalSpaces="updateLocalSpaces"
   @removeSpaceId="removeSpaceId"
 )
+
+SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
 ItemDetailsDebug(:item="currentSpace")
 </template>
 
