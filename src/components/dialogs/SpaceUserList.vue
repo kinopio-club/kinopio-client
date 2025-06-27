@@ -103,7 +103,8 @@ const toggleUserDetails = (event, user) => {
   showUserDetails(event, user)
 }
 const showUserDetails = (event, user) => {
-  const shouldHideUserDetails = user.id === globalStore.userDetailsUser.id
+  console.log('🅰️🅰️', event, user)
+  const shouldHideUserDetails = user.id === globalStore.userDetailsUser?.id
   if (shouldHideUserDetails) {
     closeDialogs()
     globalStore.userDetailsUser = {}

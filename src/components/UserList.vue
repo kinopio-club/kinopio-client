@@ -107,7 +107,7 @@ const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
 const userIsSelected = (user) => {
-  if (!props.selectedUser) { return }
+  if (!utils.objectHasKeys(props.selectedUser)) { return }
   const userId = props.selectedUser.id || globalStore.userDetailsUser.id
   return userId === user.id
 }
