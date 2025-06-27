@@ -1008,6 +1008,8 @@ details
     margin-top 0 !important
     border-top-right-radius 0
     border-top-left-radius 0
+    img
+      border-radius var(--entity-radius)
 details[open]
   > summary
     box-shadow var(--button-active-inset-shadow)

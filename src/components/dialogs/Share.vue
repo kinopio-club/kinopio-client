@@ -235,7 +235,16 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
           span Embed
         Embed(:visible="state.embedIsVisible")
-
+    details(@toggle="updateDialogHeight")
+      summary 🌱 Spread the Word
+      section.subsection
+        p I don't have the resources of a VC backed company, so when you tell a friend about Kinopio, or share spaces at work, it really helps.
+        //- p Your voice is the water that grows this seedling.
+        p – Piri
+        p
+          img(src="https://cdn.kinopio.club/fqoJozHGrobicZe0XUG1e/my-garden.webp")
+        //- https://alternativeto.net/software/kinopio/about/
+        //- https://toolfinder.co/tools/kinopio
 </template>
 
 <style lang="stylus">
