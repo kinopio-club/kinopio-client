@@ -4,8 +4,7 @@ import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
 <template lang="pug">
 details.about-me
-  summary
-    span Who Makes Kinopio?
+  summary Who Makes Kinopio?
   section.subsection
     p Hi I'm{{' '}}
       a(href="https://pketh.org") Piri,
