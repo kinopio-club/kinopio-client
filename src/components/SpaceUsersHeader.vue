@@ -1,4 +1,7 @@
 <script setup>
+
+// displayed in header in embed
+
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -7,7 +10,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 
 import User from '@/components/User.vue'
-import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'

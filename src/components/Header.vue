@@ -31,13 +31,13 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SelectAllRight from '@/components/SelectAllRight.vue'
-import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
-import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
+import SpaceUsersHeader from '@/components/SpaceUsersHeader.vue'
+import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import AddSpaceButton from '@/components/AddSpaceButton.vue'
@@ -645,10 +645,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
 
       .right
         //- Users
-        SpaceUsers(:userDetailsIsInline="true")
+        SpaceUsersHeader(:userDetailsIsInline="true")
         UserSettings
         UpdatePassword
-        SpaceUserList
+        SpaceUsers
         UserGroups
         .button-wrap
           .segmented-buttons

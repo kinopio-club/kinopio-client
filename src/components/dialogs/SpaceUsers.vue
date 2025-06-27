@@ -1,4 +1,7 @@
 <script setup>
+
+// displayed in header
+
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -124,7 +127,7 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-user-list(
+dialog.narrow.space-users-list(
   v-if="visible"
   :open="visible"
   @click.left.stop="closeDialogs"
@@ -157,7 +160,7 @@ dialog.narrow.space-user-list(
 </template>
 
 <style lang="stylus">
-dialog.space-user-list
+dialog.space-users-list
   overflow auto
   left initial
   right 16px

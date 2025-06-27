@@ -68,10 +68,10 @@ const closeDialogs = () => {
 // users
 
 const users = computed(() => {
-  const onlineUsers = spaceStore.clients
+  const clients = spaceStore.clients
   let items = utils.clone(props.users)
   items = items.map(user => {
-    const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)
+    const isOnline = clients.find(client => client?.id === user.id)
     if (isOnline) {
       user.isOnline = true
     }

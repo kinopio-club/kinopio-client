@@ -62,13 +62,15 @@ export const useGroupStore = defineStore('groups', {
       const cards = cardStore.getAllCards
       if (!cards) { return }
       cards.forEach(card => {
-        console.log('🐸🐸', card, card.userId, card.nameUpdatedByUserId)
         users.push(card.userId)
         users.push(card.nameUpdatedByUserId)
       })
-      users = uniq(users)
-      users = users.filter(user => Boolean(user))
-      users = users.filter(user => groupUserIds.includes(user.id))
+      users = uniqBy(users, 'id')
+      // users = users.filter(user => Boolean(user))
+      users = users.filter(user => {
+        console.log('🌺🌺', groupUserIds, user?.id, groupUserIds.includes(user?.id))
+        return groupUserIds.includes(user?.id)
+      })
       console.log('🔮🔮getGroupUsersWhoAddedCards', users, groupUserIds)
       return users
     }
