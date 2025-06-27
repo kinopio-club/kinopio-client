@@ -80,11 +80,7 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   optionsIsVisible: false,
-  addToGroupIsVisible: false,
-  error: {
-    updateSpaceGroup: false,
-    removeSpaceGroup: false
-  }
+  addToGroupIsVisible: false
 })
 
 const addSpace = () => {
@@ -98,7 +94,6 @@ const removeSpaceId = (value) => {
 
 const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
-const currentUserIsSpaceCreator = computed(() => userStore.getUserIsSpaceCreator)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 
 // current space
@@ -183,19 +178,13 @@ const toggleOptionsIsVisible = () => {
 }
 const toggleAddToGroupIsVisible = () => {
   const isVisible = state.addToGroupIsVisible
-  clearErrors()
   closeDialogsAndEmit()
   state.addToGroupIsVisible = !isVisible
-}
-const clearErrors = () => {
-  state.error.updateSpaceGroup = false
-  state.error.removeSpaceGroup = false
 }
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.addToGroupIsVisible = false
-  clearErrors()
 }
 const closeDialogsAndEmit = () => {
   console.log('☎️')
@@ -217,7 +206,6 @@ const currentUserIsGroupAdmin = (group) => {
   })
 }
 const toggleSpaceGroup = async (group) => {
-  clearErrors()
   const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
   if (shouldRemoveSpaceGroup) {
     await removeSpaceGroup(group)
@@ -227,22 +215,28 @@ const toggleSpaceGroup = async (group) => {
   updateLocalSpaces()
 }
 const updateSpaceGroup = (group) => {
-  const isSpaceCreator = currentUserIsSpaceCreator.value
+  const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isSpaceCreator) {
     groupStore.addSpaceToGroup(group)
     updateLocalSpaces()
   } else {
-    state.error.updateSpaceGroup = true
+    globalStore.addNotification({
+      message: 'Only space creator can assign to group',
+      type: 'danger'
+    })
   }
 }
 const removeSpaceGroup = (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
-  const isSpaceCreator = currentUserIsSpaceCreator.value
+  const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isGroupAdmin || isSpaceCreator) {
     groupStore.removeSpaceFromGroup()
     updateLocalSpaces()
   } else {
-    state.error.removeSpaceGroup = true
+    globalStore.addNotification({
+      message: 'Only space creator, or group admin, can remove from group',
+      type: 'danger'
+    })
   }
 }
 </script>
@@ -312,14 +306,6 @@ template(v-if="isSpaceMember")
     .button-wrap
       button(@click="toggleOptionsIsVisible" :class="{active: state.optionsIsVisible}" title="Space Options")
         span ⋯
-  .row(v-if="state.error.updateSpaceGroup")
-    .badge.danger
-      img.icon.cancel(src="@/assets/add.svg")
-      span Only space creator can assign to group
-  .row(v-if="state.error.removeSpaceGroup")
-    .badge.danger
-      img.icon.cancel(src="@/assets/add.svg")
-      span Only space creator, or group admin, can remove from group
 
 //- read only users
 .row(v-if="!isSpaceMember")
