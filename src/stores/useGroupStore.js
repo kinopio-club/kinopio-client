@@ -62,6 +62,7 @@ export const useGroupStore = defineStore('groups', {
       const cards = cardStore.getAllCards
       if (!cards) { return }
       cards.forEach(card => {
+        console.log('🐸🐸', card, card.userId, card.nameUpdatedByUserId)
         users.push(card.userId)
         users.push(card.nameUpdatedByUserId)
       })
