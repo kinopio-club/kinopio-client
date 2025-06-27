@@ -194,12 +194,12 @@ const spectators = computed(() => {
 //- TODO how to handle too many users
 
 //- Embed
-.space-users.embed-users(v-if="isEmbedMode")
+.space-users-header.embed-users(v-if="isEmbedMode")
   .users
     User(v-for="user in members" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
     //- SpaceUsersButton(v-if="state.shouldShowUsersButtonMembers" :isParentSpaceUsers="currentUserIsSpaceMember" :users="members")
 //- Space
-.space-users(v-else)
+.space-users-header(v-else)
   //- spectators
   .users.spectators(v-if="spectators.length")
     User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
@@ -211,7 +211,7 @@ const spectators = computed(() => {
 </template>
 
 <style lang="stylus">
-.space-users
+.space-users-header
   display flex
   width 100%
   flex-shrink 1

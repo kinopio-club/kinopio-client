@@ -28,20 +28,24 @@ const dialogElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
+
+const props = defineProps({
+  visible: Boolean
+})
+
 const state = reactive({
   dialogHeight: null,
   groupIsVisible: false
 })
 
-const visible = computed(() => globalStore.spaceUserListIsVisible)
-watch(() => visible.value, (value, prevValue) => {
-  state.groupIsVisible = false
+watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
   }
 })
+
 const updateDialogHeight = async () => {
-  if (!visible.value) { return }
+  if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
@@ -127,9 +131,9 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-users-list(
-  v-if="visible"
-  :open="visible"
+dialog.narrow.space-users(
+  v-if="props.visible"
+  :open="props.visible"
   @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
@@ -160,7 +164,7 @@ dialog.narrow.space-users-list(
 </template>
 
 <style lang="stylus">
-dialog.space-users-list
+dialog.space-users
   overflow auto
   left initial
   right 16px

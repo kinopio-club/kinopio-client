@@ -9,6 +9,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
 import InviteToGroup from '@/components/InviteToGroup.vue'
+import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
@@ -52,7 +53,8 @@ const state = reactive({
   embedIsVisible: false,
   isShareInPresentationMode: false,
   emailInvitesIsVisible: false,
-  childDialogIsVisible: false
+  childDialogIsVisible: false,
+  spaceUsersIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -112,7 +114,7 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
@@ -120,6 +122,7 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.emailInvitesIsVisible = false
   state.childDialogIsVisible = false
+  state.spaceUsersIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
@@ -163,6 +166,11 @@ const users = computed(() => {
   items = items.concat(spaceStore.collaborators)
   return items
 })
+const toggleSpaceUsersIsVisible = () => {
+  const value = !state.spaceUsersIsVisible
+  closeDialogs()
+  state.spaceUsersIsVisible = value
+}
 
 // groups
 
@@ -183,8 +191,12 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
     .row.title-row
       p Share
       .row
+        //- users
         .button-wrap
-          button.small-button {{usersLabel}}
+          button.small-button(@click.stop="toggleSpaceUsersIsVisible" :class="{active: state.spaceUsersIsVisible}")
+            span {{usersLabel}}
+          SpaceUsers(:visible="state.spaceUsersIsVisible")
+        //- rss
         .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS

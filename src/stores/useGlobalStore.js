@@ -48,8 +48,6 @@ export const useGlobalStore = defineStore('global', {
     pricingIsVisible: false,
     userSettingsIsVisible: false,
     offlineIsVisible: false,
-    spaceUserListIsVisible: false,
-    spaceUserListIsSpectators: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
@@ -1974,7 +1972,6 @@ export const useGlobalStore = defineStore('global', {
       this.pricingIsVisible = false
       this.codeLanguagePickerIsVisible = false
       this.offlineIsVisible = false
-      this.spaceUserListIsVisible = false
       this.importArenaChannelIsVisible = false
       this.groupsIsVisible = false
       this.shouldSnapToGrid = false
