@@ -60,6 +60,7 @@ const clearCardColor = (color) => {
   userStore.updateUser({ defaultCardBackgroundColor: state.defaultColor })
 }
 const dialogTitle = computed(() => 'New Card Color')
+const itemColors = computed(() => spaceStore.getSpaceItemColors)
 </script>
 
 <template lang="pug">
@@ -74,6 +75,7 @@ button.small-button.translucent-button.new-card-color-button(
     :visible="state.colorPickerIsVisible"
     :removeIsVisible="true"
     :dialogTitle="dialogTitle"
+    :recentColors="itemColors"
     @selectedColor="updateCardColor"
     @removeColor="clearCardColor"
   )
