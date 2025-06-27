@@ -91,9 +91,6 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       let users = this.getSpaceMembers
       users = users.concat(this.spectators)
-      // if (excludeCurrentUser) {
-      //   users = users.filter(user => user.id !== userStore.id)
-      // }
       return users
     },
     getSpaceMembers () {
@@ -101,9 +98,17 @@ export const useSpaceStore = defineStore('space', {
       let users = this.users
       const collaborators = this.collaborators || []
       users = users.concat(collaborators)
-      // if (excludeCurrentUser) {
-      //   users = users.filter(user => user.id !== userStore.id)
-      // }
+      return users
+    },
+    getSpaceGroupUsers () {
+      const groupStore = useGroupStore()
+      const group = groupStore.getCurrentSpaceGroup
+      return group?.users || []
+    },
+    getSpaceAndGroupMembers () {
+      let users = this.getSpaceMembers
+      users = users.concat(this.getSpaceGroupUsers)
+      users = uniqBy(users, 'id')
       return users
     },
     getSpaceIsHidden () {

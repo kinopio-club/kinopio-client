@@ -48,7 +48,7 @@ const spaceIsOpen = computed(() => spaceStore.getSpaceIsOpen)
 
 // users
 
-const users = computed(() => spaceStore.getSpaceMembers)
+const users = computed(() => spaceStore.getSpaceAndGroupMembers)
 const selectedUser = computed(() => {
   const userDetailsIsVisible = globalStore.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
@@ -59,7 +59,6 @@ const toggleUserDetails = (event, user) => {
   showUserDetails(event, user)
 }
 const showUserDetails = (event, user) => {
-  console.log('🅰️🅰️', event, user)
   const shouldHideUserDetails = user.id === globalStore.userDetailsUser?.id
   if (shouldHideUserDetails) {
     closeDialogs()

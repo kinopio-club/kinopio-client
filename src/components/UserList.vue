@@ -224,19 +224,20 @@ const removeGroupUser = async (event, user) => {
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
         .user-info
           UserLabelInline(:user="user")
-        //- collaborator actions
-        .row.actions-row(v-if="props.showCollaboratorActions")
-          //- group user
+          //- group
           template(v-if="groupUser(user)")
             GroupLabel(:group="group")
+
+        //- collaborator actions
+        .row.actions-row(v-if="props.showCollaboratorActions")
           //- space creator
-          template(v-else-if="userIsSpaceCreator(user)")
-            span Space Creator
+          template(v-if="userIsSpaceCreator(user)")
+            span.badge.secondary Space Creator
           //- space collaborator
           template(v-else-if="currentUserIsMember")
             button.small-button(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
-              span Remove
+              //- span Remove
 
         //- group user actions
         .row.actions-row(v-if="props.showGroupUserActions")
