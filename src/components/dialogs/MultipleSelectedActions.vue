@@ -286,7 +286,7 @@ const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSele
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
   let boxes = multipleBoxesSelectedIds.value.map(boxId => {
-    boxStore.getBox(boxId)
+    return boxStore.getBox(boxId)
   })
   boxes = boxes.filter(box => Boolean(box))
   prevBoxes = boxes
