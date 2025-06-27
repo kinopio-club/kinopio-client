@@ -68,6 +68,7 @@ export const useGroupStore = defineStore('groups', {
       users = uniq(users)
       users = users.filter(user => Boolean(user))
       users = users.filter(user => groupUserIds.includes(user.id))
+      console.log('🔮🔮getGroupUsersWhoAddedCards', users, groupUserIds)
       return users
     }
   },
