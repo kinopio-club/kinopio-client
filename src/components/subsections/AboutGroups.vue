@@ -5,7 +5,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 <template lang="pug">
 section.about-groups
-  p Group spaces together and collaborate with Group members
+  p Group spaces to organize them, and to make it easier to colllaborate with the same people
   p
     a(href="https://help.kinopio.club/posts/groups")
       button

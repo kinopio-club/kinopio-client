@@ -110,16 +110,13 @@ dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap
         button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
-          span Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
 
   //- groups
-  template(v-if="groups.length")
-    section.results-section
-      GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
+  section.results-section(v-if="groups.length")
+    GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
   //- groups info
-  template(v-else)
-    AboutGroups
+  AboutGroups(v-else)
 </template>
 
 <style lang="stylus">

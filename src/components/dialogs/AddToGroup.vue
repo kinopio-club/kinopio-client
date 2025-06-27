@@ -77,15 +77,14 @@ dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="clos
     .row.title-row
       div
         Loader(:visible="isLoadingGroups" :isSmall="true")
-        span Add to Group
+        span Assign to Group
       div
         .button-wrap
           button.small-button(@click.stop="toggleGroupsIsVisible")
-            span Edit
+            span Groups
         .button-wrap
           button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
             img.icon.add(src="@/assets/add.svg")
-            span Group
           AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   //- groups list
   section.results-section(v-if="props.groups.length")

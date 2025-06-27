@@ -105,6 +105,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   //- stripe lifetime
   section(v-else-if="stripePlanIsPurchased")
     p You've purchased a lifetime plan. If you need a new receipt please contact support.
+    p
+      a(href="mailto:support@kinopio.club") support@kinopio.club
 
   //- apple
   section(v-else-if="subscriptionIsApple")

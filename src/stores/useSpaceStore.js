@@ -64,7 +64,7 @@ export const useSpaceStore = defineStore('space', {
       return `${domain}/${spaceUrl}`
     },
     getSpaceCreator () {
-      return this.getSpaceMemberById(this.userId)
+      return this.getSpaceMemberById(this.userId) || this.users[0]
     },
     getSpaceCreatorIsUpgraded () {
       const creatorUser = this.getSpaceCreator

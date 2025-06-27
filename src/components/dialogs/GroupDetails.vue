@@ -169,7 +169,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
   )
   section(v-if="currentUserIsGroupAdmin")
     .row(v-if="!state.removeGroupConfirmationIsVisible")
-      button.danger(@click="toggleRemoveGroupConfirmationIsVisible")
+      button.danger.small-button(@click="toggleRemoveGroupConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
         span Remove Group
     template(v-if="state.removeGroupConfirmationIsVisible")

@@ -167,7 +167,7 @@ const deleteUserPermanent = async () => {
   //- Delete Account
   section.delete-account
     .row
-      button.danger(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
+      button.danger.small-button(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete Account
       span(v-if="state.deleteAllConfirmationVisible")
