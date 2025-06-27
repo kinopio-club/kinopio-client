@@ -183,7 +183,7 @@ const toggleGroupsIsVisible = () => {
       .button-wrap
         button(@click.stop="toggleGroupsIsVisible")
           img.icon.group(src="@/assets/group.svg")
-          span Groups
+          span My Groups
   section(v-if="isCurrentUser")
     //- settings, sign out
     .row
