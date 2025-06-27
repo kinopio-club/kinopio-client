@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "serve": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.vue",
