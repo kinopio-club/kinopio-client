@@ -43,7 +43,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
   inviteType: 'edit' // 'edit', 'readOnly'
@@ -58,9 +57,6 @@ const randomUser = computed(() => {
   return { color }
 })
 const collaboratorKey = computed(() => spaceStore.collaboratorKey)
-const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
-}
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 const closeDialogs = () => {
@@ -153,8 +149,6 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
       span Invite New Collaborators
-    button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-      span ?
 
   .row.invite-url-segmented-buttons
     .segmented-buttons
@@ -182,12 +176,14 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           img.icon.mail(src="@/assets/mail.svg")
           span Email Invites
     //- Tips
-    template(v-if="state.tipsIsVisible")
-      .row
-        p No account is needed to read public spaces, but editing requires an account
-      .row(v-if="currentUserIsUpgraded")
-        p.badge.success
-          span Because your account is upgraded, others can create cards here for free
+    p.badge Anyone with an invite can view
+    p(v-if="currentUserIsUpgraded")
+      details
+        summary
+          span Collaborators edit for free
+        section.subsection
+          span Because your account is upgraded, collaborators can create cards in this space without increasing their free card count
+
 EmailInvites(:visible="state.emailInvitesIsVisible")
 
 </template>
