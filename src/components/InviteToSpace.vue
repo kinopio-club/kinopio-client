@@ -177,8 +177,9 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           span Email Invites
         EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
-    p.badge Anyone with an invite can view
-    p(v-if="currentUserIsUpgraded")
+    .row
+      .badge Anyone with an invite can view
+    .row(v-if="currentUserIsUpgraded")
       details
         summary
           span Collaborators edit for free
