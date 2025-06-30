@@ -219,7 +219,7 @@ const updateMetaRSSFeed = () => {
 
 @font-face
   font-family 'GoodGlyphs'
-  src url("https://bk.kinopio.club/fonts/GoodGlyphs-No1.woff2") format("woff2")
+  src url("/fonts/GoodGlyphs-No1.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -228,12 +228,14 @@ const updateMetaRSSFeed = () => {
   --header-font-0 recoleta, var(--serif-font)
 @font-face
   font-family 'recoleta'
-  src url("https://bk.kinopio.club/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+  src url("/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+        // background-image url('assets/checkmark.svg')
+
   font-weight bold
   font-style normal
 @font-face
   font-family 'recoleta'
-  src url("https://bk.kinopio.club/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
+  src url("/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-1
@@ -241,12 +243,12 @@ const updateMetaRSSFeed = () => {
   --header-font-1 apris, var(--mono-font)
 @font-face
   font-family 'apris'
-  src url("https://bk.kinopio.club/fonts/apris/Apris-BoldItalic.woff2") format("woff2")
+  src url("/fonts/apris/Apris-BoldItalic.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'apris'
-  src url("https://bk.kinopio.club/fonts/apris/Apris-Regular.woff2") format("woff2")
+  src url("/fonts/apris/Apris-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-2
@@ -254,12 +256,12 @@ const updateMetaRSSFeed = () => {
   --header-font-2 gaya, var(--serif-font)
 @font-face
   font-family 'gaya'
-  src url("https://bk.kinopio.club/fonts/gaya/Gaya.woff2") format("woff2")
+  src url("/fonts/gaya/Gaya.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'gaya'
-  src url("https://bk.kinopio.club/fonts/gaya/Gaya-Italic.woff2") format("woff2")
+  src url("/fonts/gaya/Gaya-Italic.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-3
@@ -267,12 +269,12 @@ const updateMetaRSSFeed = () => {
   --header-font-3 gt-america, var(--sans-serif-font)
 @font-face
   font-family 'gt-america'
-  src url("https://bk.kinopio.club/fonts/gt-america/GT-America-Standard-Bold.woff2") format("woff2")
+  src url("/fonts/gt-america/GT-America-Standard-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'gt-america'
-  src url("https://bk.kinopio.club/fonts/gt-america/GT-America-Standard-Regular.woff2") format("woff2")
+  src url("/fonts/gt-america/GT-America-Standard-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-4
@@ -280,12 +282,12 @@ const updateMetaRSSFeed = () => {
   --header-font-4 shinka-mono, var(--sans-serif-font)
 @font-face
   font-family 'shinka-mono'
-  src url("https://bk.kinopio.club/fonts/shinka-mono/ShinkaMono-Bold.woff2") format("woff2")
+  src url("/fonts/shinka-mono/ShinkaMono-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'shinka-mono'
-  src url("https://bk.kinopio.club/fonts/shinka-mono/ShinkaMono-Regular.woff2") format("woff2")
+  src url("/fonts/shinka-mono/ShinkaMono-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-5
@@ -293,12 +295,12 @@ const updateMetaRSSFeed = () => {
   --header-font-5 microgramma, var(--sans-serif-font)
 @font-face
   font-family 'microgramma'
-  src url("https://bk.kinopio.club/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
+  src url("/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'microgramma'
-  src url("https://bk.kinopio.club/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
+  src url("/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-6
@@ -306,12 +308,12 @@ const updateMetaRSSFeed = () => {
   --header-font-6 grotesk-remix, var(--sans-serif-font)
 @font-face
   font-family 'grotesk-remix'
-  src url("https://bk.kinopio.club/fonts/grotesk-remix/GroteskRemix-bold.woff2") format("woff2")
+  src url("/fonts/grotesk-remix/GroteskRemix-bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'grotesk-remix'
-  src url("https://bk.kinopio.club/fonts/grotesk-remix/GroteskRemix-regular.woff2") format("woff2")
+  src url("/fonts/grotesk-remix/GroteskRemix-regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-7
@@ -319,12 +321,12 @@ const updateMetaRSSFeed = () => {
   --header-font-7 migra, var(--sans-serif-font)
 @font-face
   font-family 'migra'
-  src url("https://bk.kinopio.club/fonts/migra/PPMigra-Bold.woff2") format("woff2")
+  src url("/fonts/migra/PPMigra-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'migra'
-  src url("https://bk.kinopio.club/fonts/migra/PPMigra-Regular.woff2") format("woff2")
+  src url("/fonts/migra/PPMigra-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-8
@@ -332,12 +334,12 @@ const updateMetaRSSFeed = () => {
   --header-font-8 eiko, var(--sans-serif-font)
 @font-face
   font-family 'eiko'
-  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
+  src url("/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'eiko'
-  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
+  src url("/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
   font-weight normal
   font-style normal
 
