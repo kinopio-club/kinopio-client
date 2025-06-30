@@ -234,7 +234,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                 span.user-wrap
                   UserLabelInline(:user="notification.user")
                 //- message
-                span {{notification.message}}
+                span {{notification.message}}&nbsp;
                 //- group
                 template(v-if="notification.type === 'addSpaceToGroup'")
                   GroupLabel(:group="notification.group")
@@ -336,7 +336,6 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
   .user-label-inline
     margin-right 3px
   .space-name-wrap
-    margin-left 3px
     display inline
   .new-unread-badge
     position absolute
