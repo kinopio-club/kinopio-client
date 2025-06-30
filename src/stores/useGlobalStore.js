@@ -2002,6 +2002,7 @@ export const useGlobalStore = defineStore('global', {
     addMultipleToMultipleCardsSelected (cardIds) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
       utils.typeCheck({ value: cardIds, type: 'array' })
       if (!cardIds.length) { return }
       const set1 = new Set(cardIds)
@@ -2103,6 +2104,7 @@ export const useGlobalStore = defineStore('global', {
     addMultipleToMultipleConnectionsSelected (connectionIds = []) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
       utils.typeCheck({ value: connectionIds, type: 'array' })
       if (!connectionIds.length) { return }
       const set1 = new Set(connectionIds)
@@ -2149,6 +2151,7 @@ export const useGlobalStore = defineStore('global', {
     addMultipleToMultipleBoxesSelected (boxIds) {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
       utils.typeCheck({ value: boxIds, type: 'array' })
       if (!boxIds.length) { return }
       const set1 = new Set(boxIds)
