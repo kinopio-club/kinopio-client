@@ -17,30 +17,35 @@ export const useUserNotificationStore = defineStore('userNotifications', {
 
   getters: {
     recipientUserIds () {
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const groupStore = useGroupStore()
-      const currentUserId = userStore.id
-      const spaceIsOpen = spaceStore.privacy === 'open'
-      // space members
-      let members = spaceStore.getSpaceMembers
-      members = utils.excludeCurrentUser(members, userStore.id)
-      members = members.map(member => member.id)
-      let recipients = members
-      if (spaceIsOpen) {
-        let contributors = []
-        contributors = spaceStore.cards.map(card => card.userId)
-        recipients = members.concat(contributors)
+      try {
+        const userStore = useUserStore()
+        const spaceStore = useSpaceStore()
+        const groupStore = useGroupStore()
+        const currentUserId = userStore.id
+        const spaceIsOpen = spaceStore.privacy === 'open'
+        // space members
+        let members = spaceStore.getSpaceMembers
+        members = utils.excludeCurrentUser(members, userStore.id)
+        members = members.map(member => member.id)
+        let recipients = members
+        if (spaceIsOpen) {
+          let contributors = []
+          contributors = spaceStore.cards.map(card => card.userId)
+          recipients = members.concat(contributors)
+        }
+        // group users who added cards
+        let groupUsers = groupStore.getGroupUsersWhoAddedCards
+        console.log(groupUsers)
+        groupUsers = groupUsers.map(user => user.id)
+        recipients = recipients.concat(groupUsers)
+        recipients = uniq(recipients)
+        // exclude currently connected recipients
+        recipients = recipients.filter(userId => userId !== currentUserId)
+        recipients = recipients.filter(userId => Boolean(userId))
+        return recipients
+      } catch (error) {
+        console.error('🚑 recipientUserIds', error)
       }
-      // group users who added cards
-      let groupUsers = groupStore.getGroupUsersWhoAddedCards
-      groupUsers = groupUsers.map(user => user.id)
-      recipients = recipients.concat(groupUsers)
-      recipients = uniq(recipients)
-      // exclude currently connected recipients
-      recipients = recipients.filter(userId => userId !== currentUserId)
-      recipients = recipients.filter(userId => Boolean(userId))
-      return recipients
     },
     recipientMemberIds () {
       const userStore = useUserStore()

@@ -56,7 +56,7 @@ export const useGroupStore = defineStore('groups', {
       const cardStore = useCardStore()
       const groupId = spaceStore.groupId
       const group = this.getGroup(groupId)
-      if (!group) { return }
+      if (!group) { return [] }
       const groupUserIds = group.users.map(user => user.id)
       const cards = cardStore.getAllCards
       if (!cards) { return }
@@ -73,7 +73,7 @@ export const useGroupStore = defineStore('groups', {
         if (!user) { return }
         users.push(user)
       })
-      return users
+      return users || []
     }
   },
   actions: {
