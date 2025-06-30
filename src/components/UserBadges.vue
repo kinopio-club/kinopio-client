@@ -1,8 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useUserStore } from '@/stores/useUserStore'
+
 import userBadges from '@/data/userBadges.json'
 import GroupLabel from '@/components/GroupLabel.vue'
+
+const userStore = useUserStore()
 
 const props = defineProps({
   user: Object,
@@ -32,7 +36,7 @@ const toggleDescription = (name) => {
 const cardsCreatedCount = computed(() => {
   let count
   if (props.isCurrentUser) {
-    count = props.user.cardsCreatedCount
+    count = userStore.cardsCreatedCount
   } else {
     count = props.user.cardsCreatedCountRaw
   }

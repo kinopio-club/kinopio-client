@@ -1,4 +1,5 @@
 <script setup>
+// todo replace with CardEmojis
 
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
