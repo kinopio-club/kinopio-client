@@ -14,8 +14,6 @@ import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -63,14 +61,6 @@ const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceIsRemote = computed(() => spaceStore.getSpaceIsRemote)
 const spaceIsPublic = computed(() => spaceStore.privacy !== 'private')
 const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
-
-// add to explore
-
-const exploreSectionIsVisible = computed(() => {
-  const showInExplore = spaceStore.showInExplore
-  const shouldShowAskToAddToExplore = !isSpaceMember.value && !showInExplore
-  return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
-})
 
 // copy url
 
@@ -237,14 +227,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-
-  //- Explore
-  section(v-if="exploreSectionIsVisible")
-    .row
-      p Share with the Community
-    .row
-      AddToExplore
-      AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section
