@@ -68,7 +68,7 @@ const isAddPage = computed(() => globalStore.isAddPage)
 // users
 
 const members = computed(() => {
-  const groupUsers = groupStore.getGroupUsersWhoAddedCards || []
+  const groupUsers = groupStore.getGroupUsersWhoAddedCards
   let users = spaceStore.users
   users = users.concat(spaceStore.collaborators)
   users = users.concat(groupUsers)

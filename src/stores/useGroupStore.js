@@ -58,16 +58,20 @@ export const useGroupStore = defineStore('groups', {
       const group = this.getGroup(groupId)
       if (!group) { return }
       const groupUserIds = group.users.map(user => user.id)
-      let users = []
       const cards = cardStore.getAllCards
       if (!cards) { return }
+      let userIds = []
+      const users = []
       cards.forEach(card => {
-        users.push(card.userId)
-        users.push(card.nameUpdatedByUserId)
+        userIds.push(card.userId)
+        userIds.push(card.nameUpdatedByUserId)
       })
-      users = uniqBy(users, 'id')
-      users = users.filter(user => {
-        return groupUserIds.includes(user?.id)
+      userIds = uniq(userIds)
+      userIds = userIds.filter(id => Boolean(id))
+      userIds.forEach(id => {
+        const user = group.users.find(user => user.id === id)
+        if (!user) { return }
+        users.push(user)
       })
       return users
     }
