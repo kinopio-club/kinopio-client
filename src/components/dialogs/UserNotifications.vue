@@ -223,24 +223,25 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
           li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id" :data-notification-icon-class="notification.iconClass")
-            div
+            .row
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
-              //- icon
-              img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
-              img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
-              //- user
-              span.user-wrap
-                UserLabelInline(:user="notification.user")
-              //- message
-              span {{notification.message}}
-              //- group
-              template(v-if="notification.type === 'addSpaceToGroup'")
-                GroupLabel(:group="notification.group")
-              //- space
-              span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-                img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
-                span.space-name {{notification.space.name}}
+              div
+                //- icon
+                img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
+                img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
+                //- user
+                span.user-wrap
+                  UserLabelInline(:user="notification.user")
+                //- message
+                span {{notification.message}}
+                //- group
+                template(v-if="notification.type === 'addSpaceToGroup'")
+                  GroupLabel(:group="notification.group")
+                //- space
+                span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
+                  img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
+                  span.space-name {{notification.space.name}}
             //- add to explore button
             .row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
@@ -296,7 +297,6 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       height 14px
       border-radius var(--small-entity-radius)
   .row
-    margin-top 10px
     &.title-row
       margin-top 0
   .card-details
@@ -337,10 +337,11 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     margin-right 3px
   .space-name-wrap
     margin-left 3px
+    display inline
   .new-unread-badge
     position absolute
-    top 4px
-    right 4px
+    top 0
+    right 0
     left initial
     margin 0
   .icon-wrap
