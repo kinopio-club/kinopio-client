@@ -433,7 +433,7 @@ export const useBoxStore = defineStore('boxes', {
       // cards
       const isMultipleBoxesSelected = Boolean(globalStore.multipleBoxesSelectedIds.length)
       const cardIds = cards.map(card => card.id)
-      globalStore.updateMultipleCardsSelectedIds(cardIds)
+      globalStore.addMultipleToMultipleCardsSelected(cardIds)
       if (!isMultipleBoxesSelected) {
         globalStore.preventMultipleSelectedActionsIsVisible = true
       }
