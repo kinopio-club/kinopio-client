@@ -595,7 +595,7 @@ const removeCardById = (cardId) => {
 const clearAllSelectedCards = () => {
   globalStore.clearMultipleSelected()
   globalStore.updateCardDetailsIsVisibleForCardId('')
-  globalStore.UpdateHeaderAndFooterPosition()
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 
 const canEditCardById = (cardId) => {
@@ -633,7 +633,7 @@ const remove = () => {
     }
   })
   boxes.forEach(box => {
-    const canEditBox = cardStore.getUserCanEditBox(box)
+    const canEditBox = userStore.getUserCanEditBox(box)
     if (canEditBox) {
       boxStore.removeBox(box.id)
     }
