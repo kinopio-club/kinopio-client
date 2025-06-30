@@ -612,12 +612,13 @@ export const useUserStore = defineStore('users', {
     // filters
 
     clearUserFilters () {
-      this.filterShowUsers = false
-      this.filterShowDateUpdated = false
-      this.filterShowAbsoluteDates = false
-      this.filterUnchecked = false
-      this.filterComments = false
+      this.updateUser({
+        filterShowUsers: false,
+        filterShowDateUpdated: false,
+        filterShowAbsoluteDates: false,
+        filterUnchecked: false,
+        filterComments: false
+      })
     }
-
   }
 })
