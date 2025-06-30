@@ -143,7 +143,7 @@ export const useUserStore = defineStore('users', {
     },
     getUserIsSpaceCreator () {
       const spaceStore = useSpaceStore()
-      return spaceStore.getSpaceCreator.id === this.id
+      return spaceStore.getSpaceCreator?.id === this.id
     },
     getUserIsSpaceUser () {
       const spaceStore = useSpaceStore()
