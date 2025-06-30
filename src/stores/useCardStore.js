@@ -405,11 +405,13 @@ export const useCardStore = defineStore('cards', {
       await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } })
     },
     removeCards (ids) {
+      const connectionStore = useConnectionStore()
+      const userStore = useUserStore()
       const cardsToRemove = []
       const updates = []
       const cardsToDelete = []
-      ids.forEach(id => {
-        const card = this.getCard(id)
+      const cards = ids.map(id => this.getCard(id))
+      cards.forEach(card => {
         if (!card) { return }
         if (card.name) {
           cardsToRemove.push(card)
@@ -425,8 +427,8 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
-      const connectionStore = useConnectionStore()
       connectionStore.removeConnectionsFromItems(ids)
+      userStore.updateUserCardsCreatedCount(cardsToRemove, true)
     },
     removeCard (id) {
       this.removeCards([id])
