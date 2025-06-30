@@ -175,6 +175,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
           span Email Invites
+        EmailInvites(:visible="state.emailInvitesIsVisible")
     //- Tips
     p.badge Anyone with an invite can view
     p(v-if="currentUserIsUpgraded")
@@ -183,9 +184,6 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           span Collaborators edit for free
         section.subsection
           span Because your account is upgraded, collaborators can create cards in this space without increasing their free card count
-
-EmailInvites(:visible="state.emailInvitesIsVisible")
-
 </template>
 
 <style lang="stylus">

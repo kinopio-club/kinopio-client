@@ -145,7 +145,7 @@ const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
 }
-const emailInvitesIsVisible = (value) => {
+const updateEmailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
 }
 
@@ -219,7 +219,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Invite
   InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
-  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
