@@ -73,6 +73,7 @@ const members = computed(() => {
   users = users.concat(spaceStore.collaborators)
   users = users.concat(groupUsers)
   users = uniqBy(users, 'id')
+  users = users.filter(user => Boolean(user))
   return users || []
 })
 const membersDisplay = computed(() => {
@@ -80,12 +81,12 @@ const membersDisplay = computed(() => {
   if (shouldAppendCurrentUser.value) {
     users.push(userStore.getUserAllState)
   }
-  return users
+  return users || []
 })
 
 const shouldAppendCurrentUser = computed(() => {
   const isSpectator = spectators.value.find(spectator => spectator.id === userStore.id)
-  const isMember = members.value.find(member => member.id === userStore.id)
+  const isMember = members.value.find(member => member?.id === userStore.id)
   return !isSpectator && !isMember
 })
 
