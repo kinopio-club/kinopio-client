@@ -23,6 +23,7 @@ import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
 import throttle from 'lodash-es/throttle'
+import debounce from 'lodash-es/debounce'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -103,6 +104,11 @@ export default function webSocketPlugin () {
     console.info('🌜 joined space room', spaceId)
     globalStore.isJoiningSpace = false
   }
+  // Delay reconnect to prevent rapid cycles
+  const reconnectDebounce = debounce((pinia) => {
+    const broadcastStore = useBroadcastStore(pinia)
+    broadcastStore.reconnect()
+  }, 1000)
 
   // leave
 
@@ -190,25 +196,21 @@ export default function webSocketPlugin () {
       broadcastStore.joinSpaceRoom()
     }
     websocket.onclose = (event) => {
-      console.warn('🌚 websocket connection closed', event.code)
+      console.warn('🌚 websocket connection closed', event.code, globalStore.isConnectingToBroadcast)
       isConnected = false
       globalStore.isJoiningSpace = true
       websocket = null
       // Only reconnect on unexpected closures
-      if (event.code !== 1000 && !globalStore.isConnectingToBroadcast) {
-        setTimeout(() => {
-          broadcastStore.reconnect()
-        }, 1000) // Delay reconnect to prevent rapid cycles
-      }
+      if (event.code === 1000) { return }
+      reconnectDebounce(pinia)
     }
     websocket.onerror = (event) => {
       const shouldPrevent = checkIfShouldPreventBroadcast(pinia)
       console.warn('🌌 websocket error', event, shouldPrevent)
-      if (shouldPrevent) {
-        globalStore.isConnectingToBroadcast = false
-        return
-      }
-      globalStore.isConnectingToBroadcast = true
+      // reconnect on error
+      globalStore.isConnectingToBroadcast = false
+      if (shouldPrevent) { return }
+      reconnectDebounce(pinia)
     }
 
     // 🌜 Receive
