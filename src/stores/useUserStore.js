@@ -246,7 +246,7 @@ export const useUserStore = defineStore('users', {
       return false
     },
     getUserTotalFiltersActive () {
-      let userFilters = this.totalItemFadingFiltersActive
+      let userFilters = this.getUserTotalItemFadingFiltersActive
       if (this.filterShowUsers) {
         userFilters += 1
       }
