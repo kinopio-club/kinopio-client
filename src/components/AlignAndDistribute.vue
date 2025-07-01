@@ -78,6 +78,13 @@ const toggleMoreOptionsIsVisible = () => {
   const value = !moreOptionsIsVisible.value
   userStore.updateUser({ shouldShowMoreAlignOptions: value })
 }
+const ySpaceBetweenCards = (card) => {
+  let value = consts.spaceBetweenCards
+  if (card?.counterIsVisible) {
+    value += 10
+  }
+  return value
+}
 
 // verify positioning
 
@@ -458,7 +465,7 @@ const alignLeftItems = (items, type) => {
         const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
         const previousItemHeight = rect.height
         const previousBottomSide = previousItem.y + previousItemHeight
-        item.y = previousBottomSide + consts.spaceBetweenCards
+        item.y = previousBottomSide + ySpaceBetweenCards(previousItem)
       }
       updateItem(item, type)
     }
