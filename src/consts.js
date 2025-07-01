@@ -50,27 +50,21 @@ export default {
     }
   },
   kinopioDomain () {
-    // temp to staging url
-    // let domain = 'https://kinopio.club'
-    let domain = 'https://deploy-preview-623--kinopio-client.netlify.app'
+    let domain = 'https://kinopio.club'
     if (this.isDevelopment()) {
       domain = 'https://kinopio.local:8080'
     }
     return domain
   },
   apiHost () {
-    // temp to new api
-    // let host = 'https://api.kinopio.club'
-    let host = 'https://pinia2-temp-production.up.railway.app'
+    let host = 'https://api.kinopio.club'
     if (this.isDevelopment()) {
       host = 'https://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
-    // temp to new api
-    // let host = 'wss://api.kinopio.club'
-    let host = 'wss://pinia2-temp-production.up.railway.app'
+    let host = 'wss://api.kinopio.club'
     if (this.isDevelopment()) {
       host = 'wss://kinopio.local:3000'
     }
