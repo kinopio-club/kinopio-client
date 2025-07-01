@@ -79,6 +79,7 @@ const subscribe = async () => {
 <template lang="pug">
 .upgrade-user-stripe(v-if="visible")
   p Tax included.
+    span {{' '}}
     template(v-if="isLifetimePlan")
       span This is a one-time perpetual license purchase.
     template(v-else)
