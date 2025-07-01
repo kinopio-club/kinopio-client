@@ -912,21 +912,15 @@ export default {
   // normalize items
 
   normalizeItems (items) {
-    if (!this.arrayHasItems(items)) { return items }
-    items = items.filter(item => Boolean(item))
-    const normalizedItems = {}
-    items.forEach(item => {
-      normalizedItems[item.id] = item
-    })
-    return normalizedItems
+    if (!items?.length) return items
+    return Object.fromEntries(
+      items
+        .filter(Boolean)
+        .map(item => [item.id, item])
+    )
   },
   denormalizeItems (normalizedItems) {
-    const items = []
-    const ids = Object.keys(normalizedItems)
-    ids.forEach(id => {
-      items.push(normalizedItems[id])
-    })
-    return items
+    return Object.values(normalizedItems)
   },
 
   // items (cards or boxes)
