@@ -120,11 +120,10 @@ const name = computed({
 const focusName = async () => {
   await nextTick()
   const element = nameElement.value
-  if (!element) { return }
-  setTimeout(() => { // use setTimeout focus to prevent 1password lag
-    element.focus()
-  }, 1)
+  const length = name.value.length
+  utils.focusTextarea(element)
   selectName()
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const selectName = () => {
   // select all in new boxes, else put cursor at end (like cards)

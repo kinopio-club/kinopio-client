@@ -561,6 +561,13 @@ export default {
       return event.touches.length > 1
     }
   },
+  focusTextarea (element) {
+    if (!element) { return }
+    element.focus()
+    setTimeout(() => { // use setTimeout focus to prevent 1password lag
+      element.focus()
+    }, 1)
+  },
   isEventTouchOrMouseLeftButton (event) {
     const isMouseEvent = event.type.includes('mouse')
     if (!isMouseEvent) {

@@ -463,10 +463,7 @@ const focusName = async (position) => {
   await nextTick()
   const element = nameElement.value
   const length = name.value.length
-  if (!element) { return }
-  setTimeout(() => { // use setTimeout focus to prevent 1password lag
-    element.focus()
-  }, 1)
+  utils.focusTextarea(element)
   if (position) {
     element.setSelectionRange(position, position)
   }
