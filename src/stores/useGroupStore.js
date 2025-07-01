@@ -212,6 +212,20 @@ export const useGroupStore = defineStore('groups', {
       group = await apiStore.getGroup(otherGroup.id)
       this.createGroup(group)
     },
+    async upateGroupsFromRemote () {
+      const globalStore = useGlobalStore()
+      const apiStore = useApiStore()
+      try {
+        globalStore.isLoadingGroups = true
+        const groups = await apiStore.getUserGroups()
+        if (groups) {
+          this.restoreGroup(groups)
+        }
+      } catch (error) {
+        console.error('🚒 updateWithRemote', error)
+      }
+      globalStore.isLoadingGroups = false
+    },
 
     // user
 
@@ -239,6 +253,7 @@ export const useGroupStore = defineStore('groups', {
         globalStore.triggerSpaceDetailsVisible()
         this.update(response.group)
         console.info('👫 joined group', response.group)
+        await this.upateGroupsFromRemote()
       } catch (error) {
         console.error('🚒 joinGroup', error)
         globalStore.addNotification({

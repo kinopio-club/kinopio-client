@@ -50,7 +50,7 @@ watch(() => visible.value, (value, prevValue) => {
     closeDialogs()
     state.groupDetailsIsVisibleForGroupId = ''
     updateDialogHeight()
-    updateCurrentUserGroups()
+    groupStore.upateGroupsFromRemote()
   }
 })
 const updateDialogHeight = async () => {
@@ -77,18 +77,6 @@ const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
 
 const groups = computed(() => groupStore.getCurrentUserGroups)
 const isGroups = computed(() => groups.value.length)
-const updateCurrentUserGroups = async () => {
-  try {
-    globalStore.isLoadingGroups = true
-    const groups = await apiStore.getUserGroups()
-    if (groups) {
-      groupStore.restoreGroup(groups)
-    }
-  } catch (error) {
-    console.error('🚒 updateWithRemote', error)
-  }
-  globalStore.isLoadingGroups = false
-}
 
 // add group
 
