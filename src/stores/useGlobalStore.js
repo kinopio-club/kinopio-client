@@ -55,6 +55,7 @@ export const useGlobalStore = defineStore('global', {
     groupsIsVisible: false,
     dateImageUrl: null,
     currentSpaceIsUnavailableOffline: false,
+    cardVotes: new Map(),
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -2301,6 +2302,31 @@ export const useGlobalStore = defineStore('global', {
     toggleDrawingEraserIsActive () {
       const value = !this.drawingEraserIsActive
       this.drawingEraserIsActive = value
+    },
+
+    // card votes
+
+    updateCardVote ({ cardId, shouldIncrement, shouldDecrement }) {
+      const prevVote = this.cardVotes.get(cardId)
+      if (!prevVote) {
+        this.cardVotes.set(cardId, { shouldIncrement, shouldDecrement })
+        return
+      }
+      const isUndoDecrementVote = prevVote.shouldIncrement && shouldDecrement
+      const isUndoIncrementVote = prevVote.shouldDecrement && shouldIncrement
+      if (isUndoDecrementVote) {
+        this.cardVotes.set(cardId, { shouldDecrement: null })
+      } else if (isUndoIncrementVote) {
+        this.cardVotes.set(cardId, { shouldIncrement: null })
+      } else {
+        this.cardVotes.set(cardId, { shouldIncrement, shouldDecrement })
+      }
+    },
+    getShouldPreventCardVote ({ cardId, shouldIncrement, shouldDecrement }) {
+      const prevVote = this.cardVotes.get(cardId)
+      if (!prevVote) { return }
+      if (prevVote.shouldIncrement && shouldIncrement) { return true }
+      if (prevVote.shouldDecrement && shouldDecrement) { return true }
     }
   }
 })

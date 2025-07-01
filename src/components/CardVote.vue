@@ -3,15 +3,32 @@
 
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 
 const cardStore = useCardStore()
+const globalStore = useGlobalStore()
 
 const props = defineProps({
   card: Object
 })
 
 const counterValue = computed(() => props.card.counterValue || 0)
+
+const isDecrementDisabled = computed(() => {
+  if (props.card.isLocked) { return true }
+  return globalStore.getShouldPreventCardVote({
+    cardId: props.card.id,
+    shouldDecrement: true
+  })
+})
+const isIncrementDisabled = computed(() => {
+  if (props.card.isLocked) { return true }
+  return globalStore.getShouldPreventCardVote({
+    cardId: props.card.id,
+    shouldIncrement: true
+  })
+})
 
 const increment = () => {
   const count = counterValue.value + 1
@@ -36,10 +53,10 @@ const decrement = () => {
 .card-counter(v-if="props.card.counterIsVisible")
   .segmented-buttons.counter-buttons
     //- -
-    button.small-button(@click="decrement" @touchend="decrement" :disabled="props.card.isLocked")
+    button.small-button(@click="decrement" @touchend="decrement" :disabled="isDecrementDisabled")
       img.icon.minus(src="@/assets/minus.svg")
     //- +
-    button.small-button(@click="increment" @touchend="increment" :disabled="props.card.isLocked")
+    button.small-button(@click="increment" @touchend="increment" :disabled="isIncrementDisabled")
       img.icon.plus(src="@/assets/add.svg")
   //- count
   .badge.info.counter {{counterValue}}

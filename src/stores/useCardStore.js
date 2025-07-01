@@ -741,14 +741,17 @@ export const useCardStore = defineStore('cards', {
     // vote
 
     updateCardVote ({ card, shouldIncrement, shouldDecrement }) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const broadcastStore = useBroadcastStore()
-      this.updateCardsState([card])
       const update = {
         cardId: card.id,
         shouldIncrement,
         shouldDecrement
       }
+      if (globalStore.getShouldPreventCardVote(update)) { return }
+      this.updateCardsState([card])
+      globalStore.updateCardVote(update)
       apiStore.updateCardCounter(update)
       broadcastStore.update({ updates: [card], store: 'cardStore', action: 'updateCardsState' })
     },
