@@ -17,12 +17,13 @@ const commandIsTemplates = computed(() => props.command === 'templates')
 const commandIsNewSpace = computed(() => props.command === 'newSpace')
 const commandIsApps = computed(() => props.command === 'apps')
 
-const clickCommand = () => {
+const clickCommand = async () => {
   const explore = commandIsExplore.value
   const templates = commandIsTemplates.value
   const newSpace = commandIsNewSpace.value
   const apps = commandIsApps.value
   globalStore.closeAllDialogs()
+  await nextTick()
   if (explore) {
     globalStore.triggerExploreIsVisible()
   } else if (templates) {
