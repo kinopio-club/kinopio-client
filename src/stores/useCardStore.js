@@ -742,18 +742,15 @@ export const useCardStore = defineStore('cards', {
 
     updateCardVote ({ card, shouldIncrement, shouldDecrement }) {
       const apiStore = useApiStore()
-      const userStore = useUserStore()
-      const isSignedIn = userStore.getUserIsSignedIn
+      const broadcastStore = useBroadcastStore()
+      this.updateCardsState([card])
       const update = {
-        id: card.id,
         cardId: card.id,
         shouldIncrement,
         shouldDecrement
       }
-      this.updateCard(update)
-      if (!isSignedIn) {
-        apiStore.updateCardVote(update)
-      }
+      apiStore.updateCardCounter(update)
+      broadcastStore.update({ updates: [card], store: 'cardStore', action: 'updateCardsState' })
     },
 
     // paste
