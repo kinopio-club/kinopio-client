@@ -986,13 +986,17 @@ export default {
   },
   sortByUpdatedAt (items) {
     items = items.map(space => {
-      space.editedAt = space.editedAt || space.createdAt
+      space.updatedAt = space.editedAt || space.updatedAt || space.createdAt
+      if (!space.updatedAt) {
+        space.updatedAt = dayjs().subtract(100, 'year')
+      }
       return space
     })
+    items = items.filter(item => Boolean(item))
     const sortedItems = items.sort((a, b) => {
-      const bEditedAt = dayjs(b.editedAt).unix()
-      const aEditedAt = dayjs(a.editedAt).unix()
-      return bEditedAt - aEditedAt
+      const bUpdatedAt = dayjs(b.updatedAt).unix()
+      const aUpdatedAt = dayjs(a.updatedAt).unix()
+      return bUpdatedAt - aUpdatedAt
     })
     return sortedItems
   },
