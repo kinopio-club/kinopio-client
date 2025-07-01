@@ -407,8 +407,8 @@ export const useCardStore = defineStore('cards', {
     removeCards (ids) {
       const connectionStore = useConnectionStore()
       const userStore = useUserStore()
-      const cardsToRemove = []
       const updates = []
+      const cardsToRemove = []
       const cardsToDelete = []
       const cards = ids.map(id => this.getCard(id))
       cards.forEach(card => {

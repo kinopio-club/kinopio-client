@@ -62,7 +62,8 @@ const isOnline = computed(() => state.isOnline)
 
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const updateSpaces = async () => {
-  const spaces = await cache.getAllSpaces()
+  let spaces = await cache.getAllSpaces()
+  spaces = utils.sortByUpdatedAt(spaces)
   state.spaces = spaces.filter(space => {
     const spaceIsNotCurrent = space.id !== currentSpace.value.id
     const spaceHasId = Boolean(space.id)
@@ -72,8 +73,7 @@ const updateSpaces = async () => {
   state.selectedSpace = state.spaces[0]
 }
 const recentSpaces = computed(() => {
-  let spaces = utils.sortByUpdatedAt(state.spaces)
-  spaces = spaces.slice(0, 4) // 4 most recent spaces
+  const spaces = state.spaces.slice(0, 3) // 3 most recent spaces
   return spaces
 })
 const updateSelectedSpace = (space) => {
@@ -96,7 +96,7 @@ const multipleCardsIsSelected = computed(() => {
   return Boolean(numberOfCards > 1)
 })
 const itemsCount = computed(() => multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length)
-const selectedItems = computed(() => spaceStore.selectedItems)
+const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const sortedByY = (items) => {
   items = items.sort((a, b) => {
@@ -285,7 +285,7 @@ dialog.more-or-copy-cards
     .badge
       margin-bottom 10px
   dialog.space-picker
-    top -100px
+    // top -100px
     .results-section
       max-height 250px
 </style>

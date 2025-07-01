@@ -209,6 +209,7 @@ export const useSpaceStore = defineStore('space', {
     },
     async getNewItems (items, spaceId) {
       items = items || this.getSpaceSelectedItems
+      items = utils.clone(items)
       spaceId = spaceId || this.id
       let newItems = await utils.uniqueSpaceItems(items)
       newItems = await utils.updateSpaceItemsSpaceId(newItems, spaceId)
