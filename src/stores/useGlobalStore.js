@@ -315,8 +315,7 @@ export const useGlobalStore = defineStore('global', {
     },
     getSpaceShouldHaveBorderRadius () {
       const isNativeApp = consts.isSecureAppContext
-      const isZoomedOut = this.spaceZoomPercent !== 100
-      if (isNativeApp || isZoomedOut) { return true }
+      if (isNativeApp || utils.isMobile()) { return true }
     },
     getDateImageUrl () {
       if (this.dateImageUrl) {
