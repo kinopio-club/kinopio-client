@@ -34,7 +34,6 @@ const state = reactive({
   backgroundPickerIsVisible: false
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(currentBox.value))
 const id = computed(() => globalStore.boxDetailsIsVisibleForBoxId)
 // box state
@@ -89,10 +88,14 @@ const update = (updates) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = spaceCounterZoomDecimal.value
-  if (globalStore.isTouchDevice) {
-    zoom = utils.pinchCounterZoomDecimal()
+  let zoom = globalStore.getSpaceCounterZoomDecimal
+  if (utils.isAndroid()) {
+    zoom = utils.visualViewport().scale
+  } else if (globalStore.isTouchDevice) {
+    // on iOS, keyboard focus zooms
+    zoom = 1
   }
+
   const backgroundColor = colord(currentBox.value.color).alpha(1).toRgbString()
   const styles = {
     transform: `scale(${zoom})`,
@@ -118,7 +121,10 @@ const focusName = async () => {
   await nextTick()
   const element = nameElement.value
   if (!element) { return }
-  element.focus()
+  setTimeout(() => { // use setTimeout focus to prevent 1password lag
+    element.focus()
+  }, 1)
+  selectName()
 }
 const selectName = () => {
   // select all in new boxes, else put cursor at end (like cards)
@@ -226,11 +232,13 @@ const scrollIntoView = async () => {
   globalStore.scrollElementIntoView({ element })
 }
 const scrollIntoViewAndFocus = async () => {
-  scrollIntoView()
-  if (utils.isMobile()) { return }
+  let behavior
+  if (utils.isIPhone()) {
+    behavior = 'auto'
+  }
   await nextTick()
+  scrollIntoView(behavior)
   focusName()
-  selectName()
 }
 
 // filter
