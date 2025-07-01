@@ -9,12 +9,12 @@
 
 # help and about are currently the same site
 
-/help             https://help.kinopio.club   301
-/about            https://about.kinopio.club   301
-/blog             https://blog.kinopio.club   301
+/help             https://help.kinopio.club
+/about            https://about.kinopio.club
+/blog             https://blog.kinopio.club
 
-/api              https://help.kinopio.club/api   301
-/forum            https://forum.kinopio.club   301
+/api              https://help.kinopio.club/api
+/forum            https://forum.kinopio.club
 /discord          https://discord.gg/h2sR45Nby8   301
 /survey           https://tally.so/r/w2RjDL   301
 /changelog        https://kinopio.club/changelog-6lsytK8ZfOtMl2oqG05Rj   301

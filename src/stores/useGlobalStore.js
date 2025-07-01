@@ -33,7 +33,6 @@ export const useGlobalStore = defineStore('global', {
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
-    // cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     currentSpacePath: '/',
     webfontIsLoaded: false,
@@ -565,38 +564,6 @@ export const useGlobalStore = defineStore('global', {
       })
     },
 
-    // isOnline (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isOnline = value
-    // },
-    // isConnectingToBroadcast (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isConnectingToBroadcast = value
-    // },
-    // isBeta (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isBeta = value
-    // },
-    // loadNewSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.loadNewSpace = value
-    // },
-    // loadInboxSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.loadInboxSpace = value
-    // },
-    // shouldResetDimensionsOnLoad (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldResetDimensionsOnLoad = value
-    // },
-    // shouldShowExploreOnLoad (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldShowExploreOnLoad = value
-    // },
-    // isLoadingGroups (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isLoadingGroups = value
-    // },
     addUrlPreviewLoadingForCardIds (cardId) {
       utils.typeCheck({ value: cardId, type: 'string' })
       this.urlPreviewLoadingForCardIds.push(cardId)
@@ -607,118 +574,6 @@ export const useGlobalStore = defineStore('global', {
       cardIds = cardIds.filter(id => cardId !== id) || []
       this.urlPreviewLoadingForCardIds = cardIds
     },
-    // shouldHideConnectionOutline (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldHideConnectionOutline = value
-    // },
-    // changelogIsUpdated (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.changelogIsUpdated = value
-    // },
-    // changelog (value) {
-    //   utils.typeCheck({ value, type: 'array' })
-    //   this.changelog = value
-    // },
-    // stripeIsLoaded (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.stripeIsLoaded = value
-    // },
-    // shouldHideFooter (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldHideFooter = value
-    // },
-    // shouldExplicitlyHideFooter (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldExplicitlyHideFooter = value
-    // },
-    // isTouchDevice (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isTouchDevice = value
-    // },
-    // prevCursorPosition (cursor) {
-    //   this.prevCursorPosition = cursor
-    // },
-    // spaceZoomPercent (value) {
-    //   utils.typeCheck({ value, type: 'number' })
-    //   this.spaceZoomPercent = value
-    // },
-    // pinchCounterZoomDecimal (value) {
-    //   utils.typeCheck({ value, type: 'number' })
-    //   this.pinchCounterZoomDecimal = value
-    // },
-    // zoomOrigin (value) {
-    //   this.zoomOrigin = value
-    // },
-    // isPinchZooming (value) {
-    //   this.isPinchZooming = value
-    // },
-    // isTouchScrolling (value) {
-    //   this.isTouchScrolling = value
-    // },
-    // currentSpacePath (value) {
-    //   utils.typeCheck({ value, type: 'string' })
-    //   this.currentSpacePath = value
-    // },
-    // webfontIsLoaded (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.webfontIsLoaded = value
-    // },
-    // userHasScrolled (value) {
-    //     utils.typeCheck({ value, type: 'boolean' })
-    //     this.userHasScrolled = value
-    //   },
-    // shouldPreventNextEnterKey (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldPreventNextEnterKey = value
-    // },
-    // shouldPreventNextFocusOnName (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldPreventNextFocusOnName = value
-    // },
-    // isEmbedMode (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isEmbedMode = value
-    // },
-    // isAddPage (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isAddPage = value
-    // },
-    // isPresentationMode (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isPresentationMode = value
-    // },
-    // isCommentMode (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isCommentMode = value
-    // },
-    // pricingIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.pricingIsVisible = value
-    // },
-    // userSettingsIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.userSettingsIsVisible = value
-    // },
-    // disableViewportOptimizations (value) {
-    //   utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
-    //   this.disableViewportOptimizations = value
-    // },
-    // offlineIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.offlineIsVisible = value
-    // },
-    // spaceUserListIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.spaceUserListIsVisible = value
-    // },
-    // spaceUserListIsSpectators (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.spaceUserListIsSpectators = value
-    // },
-    // isFadingOutDuringTouch (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isFadingOutDuringTouch = value
-    // },
     updatePrevSpaceIdInSession (value) {
       if (value === this.prevSpaceIdInSession) {
         this.prevSpaceIdInSession = ''
@@ -733,60 +588,12 @@ export const useGlobalStore = defineStore('global', {
       }
       const prevSpaceIdInSessionPagePosition = position
     },
-    // outsideSpaceBackgroundColor (value) {
-    //   utils.typeCheck({ value, type: 'string' })
-    //   this.outsideSpaceBackgroundColor = value
-    // },
-    // groupsIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.groupsIsVisible = value
-    // },
-    // dateImageUrl (value) {
-    //   utils.typeCheck({ value, type: 'string' })
-    //   this.dateImageUrl = value
-    // },
-    // currentSpaceIsUnavailableOffline (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentSpaceIsUnavailableOffline = value
-    // },
-    // searchIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.searchIsVisible = value
-    // },
-    // search (value) {
-    //   utils.typeCheck({ value, type: 'string' })
-    //   this.search = value
-    // },
-    // searchResultsCardIds (results) {
-    //   utils.typeCheck({ value: results, type: 'array' })
-    //   this.searchResultsCardIds = results
-    // },
-    // previousResultItem (value) {
-    //   utils.typeCheck({ value, type: 'object' })
-    //   this.previousResultItem = value
-    // },
     clearSearch () {
       if (this.searchIsVisible) { return }
       this.search = ''
       this.searchResultsCardIds = []
       this.previousResultItem = {}
     },
-    // updatePasswordApiKey (apiKey) {
-    //   utils.typeCheck({ value: apiKey, type: 'string' })
-    //   this.updatePasswordApiKey = apiKey
-    // },
-    // passwordResetIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.passwordResetIsVisible = value
-    // },
-    // importArenaChannelIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.importArenaChannelIsVisible = value
-    // },
-    // isAuthenticatingWithArena (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isAuthenticatingWithArena = value
-    // },
 
     // Cards
 
@@ -801,22 +608,6 @@ export const useGlobalStore = defineStore('global', {
     clearShouldExplicitlyRenderCardIds () {
       this.shouldExplicitlyRenderCardIds = {}
     },
-    // shouldAddCard (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldAddCard = value
-    // },
-    // currentUserIsHoveringOverCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.currentUserIsHoveringOverCardId = cardId
-    // },
-    // currentUserIsHoveringOverCheckboxCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.currentUserIsHoveringOverCheckboxCardId = cardId
-    // },
-    // currentUserIsHoveringOverUrlButtonCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.currentUserIsHoveringOverUrlButtonCardId = cardId
-    // },
     updateCardDetailsIsVisibleForCardId (cardId) {
       utils.typeCheck({ value: cardId, type: 'string' })
       this.cardDetailsIsVisibleForCardId = cardId
@@ -824,14 +615,6 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
-    // parentCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.parentCardId = cardId
-    // },
-    // childCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.childCardId = cardId
-    // },
     updateRemoteCardDetailsVisible (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -844,29 +627,9 @@ export const useGlobalStore = defineStore('global', {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteCardDetailsVisible = this.remoteCardDetailsVisible.filter(card => card.userId !== update.userId) || []
     },
-    // preventCardDetailsOpeningAnimation (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.preventCardDetailsOpeningAnimation = value
-    // },
-    // iframeIsVisibleForCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.iframeIsVisibleForCardId = cardId
-    // },
-    // focusOnCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.focusOnCardId = cardId
-    // },
 
     // Connections
 
-    // currentUserIsHoveringOverConnectorItemId (itemId) {
-    //   utils.typeCheck({ value: itemId, type: 'string' })
-    //   this.currentUserIsHoveringOverConnectorItemId = itemId
-    // },
-    // currentUserIsHoveringOverConnectionId (connectionId) {
-    //   utils.typeCheck({ value: connectionId, type: 'string' })
-    //   this.currentUserIsHoveringOverConnectionId = connectionId
-    // },
     updateCurrentUserIsDrawingConnection (value) {
       utils.typeCheck({ value, type: 'boolean' })
       this.currentUserIsDrawingConnection = value
@@ -874,18 +637,6 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'mediumImpact' })
       }
     },
-    // currentConnectionSuccess (object) {
-    //   utils.typeCheck({ value: object, type: 'object', allowUndefined: true })
-    //   this.currentConnectionSuccess = object
-    // },
-    // currentConnectionCursorStart (object) {
-    //   utils.typeCheck({ value: object, type: 'object' })
-    //   this.currentConnectionCursorStart = object
-    // },
-    // currentConnectionStartItemIds (cardIds) {
-    //   utils.typeCheck({ value: cardIds, type: 'array' })
-    //   this.currentConnectionStartItemIds = cardIds
-    // },
     updateRemoteCurrentConnection (updates) {
       utils.typeCheck({ value: updates, type: 'object' })
       const index = this.remoteCurrentConnections.findIndex(remoteConnection => {
@@ -923,35 +674,8 @@ export const useGlobalStore = defineStore('global', {
       this.remoteUserDraggingConnectionLabel = this.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
     },
 
-    // Painting
-
-    // currentUserIsPainting (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsPainting = value
-    // },
-    // currentUserIsPaintingLocked (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsPaintingLocked = value
-    // },
-
     // box selecting
 
-    // currentBoxIsNew (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentBoxIsNew = value
-    // },
-    // currentUserIsBoxSelecting (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsBoxSelecting = value
-    // },
-    // currentUserBoxSelectStart (object) {
-    //   utils.typeCheck({ value: object, type: 'object' })
-    //   this.currentUserBoxSelectStart = object
-    // },
-    // currentUserBoxSelectMove (object) {
-    //   utils.typeCheck({ value: object, type: 'object' })
-    //   this.currentUserBoxSelectMove = object
-    // },
     updateRemoteUserBoxSelectStyles (object) {
       utils.typeCheck({ value: object, type: 'object' })
       this.remoteUserBoxSelectStyles = this.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
@@ -969,14 +693,6 @@ export const useGlobalStore = defineStore('global', {
 
     // Resizing Cards
 
-    // currentUserIsResizingCard (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsResizingCard = value
-    // },
-    // currentUserIsResizingCardIds (cardIds) {
-    //   utils.typeCheck({ value: cardIds, type: 'array' })
-    //   this.currentUserIsResizingCardIds = cardIds
-    // },
     removeRemoteUserResizingCards (update) {
       this.remoteUserResizingCards = this.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
     },
@@ -987,14 +703,6 @@ export const useGlobalStore = defineStore('global', {
 
     // Tilting Cards
 
-    // currentUserIsTiltingCard (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsTiltingCard = value
-    // },
-    // currentUserIsTiltingCardIds (cardIds) {
-    //   utils.typeCheck({ value: cardIds, type: 'array' })
-    //   this.currentUserIsTiltingCardIds = cardIds
-    // },
     removeRemoteUserTiltingCards (update) {
       this.remoteUserTiltingCards = this.remoteUserTiltingCards.filter(remoteUser => remoteUser.userId !== update.userId)
     },
@@ -1005,14 +713,6 @@ export const useGlobalStore = defineStore('global', {
 
     // Boxes
 
-    // currentUserIsHoveringOverBoxId (boxId) {
-    //   utils.typeCheck({ value: boxId, type: 'string' })
-    //   this.currentUserIsHoveringOverBoxId = boxId
-    // },
-    // focusOnBoxId (boxId) {
-    //   utils.typeCheck({ value: boxId, type: 'string' })
-    //   this.focusOnBoxId = boxId
-    // },
     updateBoxDetailsIsVisibleForBoxId (value) {
       utils.typeCheck({ value, type: 'string' })
       this.boxDetailsIsVisibleForBoxId = value
@@ -1020,18 +720,6 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
-    // currentUserIsResizingBox (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsResizingBox = value
-    // },
-    // currentUserIsResizingBoxIds (cardIds) {
-    //   utils.typeCheck({ value: cardIds, type: 'array' })
-    //   this.currentUserIsResizingBoxIds = cardIds
-    // },
-    // currentUserIsDraggingBox (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsDraggingBox = value
-    // },
     updateRemoteBoxDetailsVisible (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1052,72 +740,15 @@ export const useGlobalStore = defineStore('global', {
       this.remoteUserResizingBoxes = this.remoteUserResizingBoxes.concat(update)
     },
 
-    // Toolbar Mode
-
-    // updateCurrentUserToolbar (value) {
-    //   utils.typeCheck({ value, type: 'string' })
-    //   this.currentUserToolbar = value
-    //   this.drawingEraserIsActive = false
-    // },
-
     // drawing
 
-    // drawingEraserIsActive (value) {
-    //   this.drawingEraserIsActive = value
-    // },
     addToDrawingStrokeColors (color) {
       if (this.drawingStrokeColors.includes(color)) { return }
       this.drawingStrokeColors.push(color)
     },
 
-    // Dragging
-
-    // currentUserIsPanningReady (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsPanningReady = value
-    // },
-    // currentUserIsPanning (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsPanning = value
-    // },
-    // currentUserIsDraggingConnectionIdLabel (value) {
-    //   utils.typeCheck({ value, type: 'string' })
-    //   this.currentUserIsDraggingConnectionIdLabel = value
-    // },
-    // // clipboardData (data) {
-    //   utils.typeCheck({ value: data, type: 'object' })
-    //   this.clipboardData = data
-    // },
-    // shouldCancelNextMouseUpInteraction (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldCancelNextMouseUpInteraction = value
-    // },
-    // currentUserIsDrawing (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsDrawing = value
-    // },
-
     // Dragging Cards
 
-    // currentUserIsDraggingCard (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.currentUserIsDraggingCard = value
-    // },
-    // preventDraggedCardFromShowingDetails (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.preventDraggedCardFromShowingDetails = value
-    // },
-    // triggeredTouchCardDragPosition (cursor) {
-    //   this.triggeredTouchCardDragPosition = cursor
-    // },
-    // cardsWereDragged (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.cardsWereDragged = value
-    // },
-    // currentDraggingCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.currentDraggingCardId = cardId
-    // },
     addToRemoteCardsDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1145,14 +776,6 @@ export const useGlobalStore = defineStore('global', {
 
     // Dragging Boxes
 
-    // currentDraggingBoxId (boxId) {
-    //   utils.typeCheck({ value: boxId, type: 'string' })
-    //   this.currentDraggingBoxId = boxId
-    // },
-    // boxesWereDragged (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.boxesWereDragged = value
-    // },
     addToRemoteBoxesDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1165,32 +788,6 @@ export const useGlobalStore = defineStore('global', {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteBoxesDragging = this.remoteBoxesDragging.filter(box => box.userId !== update.userId)
     },
-    // preventDraggedBoxFromShowingDetails (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.preventDraggedBoxFromShowingDetails = value
-    // },
-
-    // Dragging Items
-
-    // shouldSnapToGrid (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldSnapToGrid = value
-    // },
-
-    // User Details
-
-    // userDetailsIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.userDetailsIsVisible = value
-    // },
-    // userDetailsPosition (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.userDetailsPosition = position
-    // },
-    // userDetailsUser (user) {
-    //   utils.typeCheck({ value: user, type: 'object' })
-    //   this.userDetailsUser = user
-    // },
 
     // Tag
 
@@ -1207,90 +804,8 @@ export const useGlobalStore = defineStore('global', {
       return tags
     },
 
-    // tagDetailsIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.tagDetailsIsVisible = value
-    // },
-    // tagDetailsIsVisibleFromTagList (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.tagDetailsIsVisibleFromTagList = value
-    // },
-    // tagDetailsPosition (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.tagDetailsPosition = position
-    // },
-    // tagDetailsPositionShouldUpdate (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.tagDetailsPositionShouldUpdate = value
-    // },
-    // currentSelectedTag (tag) {
-    //   utils.typeCheck({ value: tag, type: 'object' })
-    //   this.currentSelectedTag = tag
-    // },
-    // remoteTags (tags) {
-    //   utils.typeCheck({ value: tags, type: 'array' })
-    //   this.remoteTags = tags
-    // },
-    // remoteTagsIsFetched (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.remoteTagsIsFetched = value
-    // },
-    // tags (tags) {
-    //   utils.typeCheck({ value: tags, type: 'array' })
-    //   this.tags = tags
-    // },
-
-    // Link Details
-
-    // otherCardDetailsIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.otherCardDetailsIsVisible = value
-    // },
-    // otherItemDetailsPosition (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.otherItemDetailsPosition = position
-    // },
-    // currentSelectedOtherItem (link) {
-    //   utils.typeCheck({ value: link, type: 'object' })
-    //   this.currentSelectedOtherItem = link
-    // },
-
-    // Pinned Dialogs
-
-    // sidebarIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.sidebarIsPinned = value
-    // },
-    // minimapIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.minimapIsPinned = value
-    // },
-    // spaceDetailsIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.spaceDetailsIsPinned = value
-    // },
-    // searchIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.searchIsPinned = value
-    // },
-    // userSettingsIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.userSettingsIsPinned = value
-    // },
-
     // Connection Details
 
-    // connectionDetailsIsVisibleForConnectionId (connectionId) {
-    //   utils.typeCheck({ value: connectionId, type: 'string' })
-    // },
-    // currentConnectionColor (color) {
-    //   utils.typeCheck({ value: color, type: 'string' })
-    //   this.currentConnectionColor = color
-    // },
-    // connectionDetailsPosition (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.connectionDetailsPosition = position
-    // },
     addToRemoteConnectionDetailsVisible (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1312,16 +827,6 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'lightImpact' })
       }
     },
-    // preventMultipleSelectedActionsIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.preventMultipleSelectedActionsIsVisible = value
-    // },
-    // multipleSelectedActionsPosition (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.multipleSelectedActionsPosition = position
-    // },
-    // clearMultipleSelected () {
-    // },
     clearDraggingItems () {
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''
@@ -1346,20 +851,6 @@ export const useGlobalStore = defineStore('global', {
 
     // multiple cards
 
-    // multipleCardsSelectedIds (cardIds) {
-    //   utils.typeCheck({ value: cardIds, type: 'array' })
-    //   this.multipleCardsSelectedIds = cardIds
-    // },
-    // addToMultipleCardsSelected (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    // },
-    // addMultipleToMultipleCardsSelected (cardIds) {
-    //   postMessage.sendHaptics({ name: 'selection' })
-    //   this.multipleCardsSelectedIds = cardIds
-    // },
-    // removeFromMultipleCardsSelected (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    // },
     addToRemoteCardsSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1391,17 +882,9 @@ export const useGlobalStore = defineStore('global', {
       })
       this.remoteCardsSelected = this.remoteCardsSelected.concat(updates)
     },
-    // previousMultipleCardsSelectedIds (cardIds) {
-    //   utils.typeCheck({ value: cardIds, type: 'array' })
-    //   this.previousMultipleCardsSelectedIds = cardIds
-    // },
 
     // muiltiple connections
 
-    // multipleConnectionsSelectedIds (connectionIds) {
-    //   utils.typeCheck({ value: connectionIds, type: 'array' })
-    //   this.multipleConnectionsSelectedIds = connectionIds
-    // },
     updateRemoteConnectionsSelected (update) {
       this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== update.userId)
       const updates = update.connectionIds.map(connectionId => {
@@ -1412,23 +895,6 @@ export const useGlobalStore = defineStore('global', {
       })
       this.remoteConnectionsSelected = this.remoteConnectionsSelected.concat(updates)
     },
-    // addToMultipleConnectionsSelected (connectionId) {
-    //   utils.typeCheck({ value: connectionId, type: 'string' })
-    // },
-    // removeFromMultipleConnectionsSelected (connectionId) {
-    //   utils.typeCheck({ value: connectionId, type: 'string' })
-    // },
-    // addToRemoteConnectionsSelected (update) {
-    //   utils.typeCheck({ value: update, type: 'object' })
-    //   delete update.type
-    //   const isSelected = this.remoteConnectionsSelected.find(connection => {
-    //     const connectionIsSelected = connection.connectionId === update.connectionId
-    //     const selectedByUser = connection.userId === update.userId
-    //     return connectionIsSelected && selectedByUser
-    //   })
-    //   if (isSelected) { return }
-    //   this.remoteConnectionsSelected.push(update)
-    // },
     removeFromRemoteConnectionsSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1452,31 +918,10 @@ export const useGlobalStore = defineStore('global', {
 
     // multiple boxes
 
-    // multipleBoxesSelectedIds (boxIds) {
-    //   utils.typeCheck({ value: boxIds, type: 'array' })
-    //   this.multipleBoxesSelectedIds = boxIds
-    // },
-    // addToMultipleBoxesSelected (boxId) {
-    //   utils.typeCheck({ value: boxId, type: 'string' })
-    // },
-    // removeFromMultipleBoxesSelected (boxId) {
-    //   utils.typeCheck({ value: boxId, type: 'string' })
-    // },
     previousMultipleBoxesSelectedIds (boxIds) {
       utils.typeCheck({ value: boxIds, type: 'array' })
       this.previousMultipleBoxesSelectedIds = boxIds
     },
-    // addToRemoteBoxesSelected (update) {
-    //   utils.typeCheck({ value: update, type: 'object' })
-    //   delete update.type
-    //   const isSelected = this.remoteBoxesSelected.find(box => {
-    //     const boxIsSelected = box.boxId === update.boxId
-    //     const selectedByUser = box.userId === update.userId
-    //     return boxIsSelected && selectedByUser
-    //   })
-    //   if (isSelected) { return }
-    //   this.remoteBoxesSelected.push(update)
-    // },
     removeFromRemoteBoxesSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1498,31 +943,8 @@ export const useGlobalStore = defineStore('global', {
       this.remoteBoxesSelected = this.remoteBoxesSelected.concat(updates)
     },
 
-    // selecting
-
-    // isSelectingX (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isSelectingX = value
-    // },
-    // isSelectingY (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isSelectingY = value
-    // },
-
     // Loading
 
-    // isLoadingSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isLoadingSpace = value
-    // },
-    // isJoiningSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isJoiningSpace = value
-    // },
-    // isLoadingOtherItems (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isLoadingOtherItems = value
-    // },
     clearSpaceCollaboratorKeys () {
       this.spaceCollaboratorKeys = []
     },
@@ -1551,26 +973,6 @@ export const useGlobalStore = defineStore('global', {
       }
       this.remotePendingUploads = this.remotePendingUploads.filter(item => item.percentComplete !== 100)
     },
-    // isLoadingFavorites (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.isLoadingFavorites = value
-    // },
-    // loadSpaceFocusOnCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.loadSpaceFocusOnCardId = cardId
-    // },
-    // spaceUrlToLoad (spaceUrl) {
-    //   utils.typeCheck({ value: spaceUrl, type: 'string' })
-    //   this.spaceUrlToLoad = spaceUrl
-    // },
-    // spaceReadOnlyKey (value) {
-    //   utils.typeCheck({ value, type: 'object' })
-    //   this.spaceReadOnlyKey = value
-    // },
-    // groupToJoinOnLoad (value) {
-    //   utils.typeCheck({ value, type: 'object' })
-    //   this.groupToJoinOnLoad = value
-    // },
 
     // Notifications
 
@@ -1639,26 +1041,6 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'error' })
       }
     },
-    // notifySpaceIsRemoved (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifySpaceIsRemoved = value
-    // },
-    // notifyCurrentSpaceIsNowRemoved (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyCurrentSpaceIsNowRemoved = value
-    // },
-    // notifySignUpToEditSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifySignUpToEditSpace = value
-    // },
-    // notifySignUpToJoinGroup (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifySignUpToJoinGroup = value
-    // },
-    // notifyCardsCreatedIsNearLimit (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyCardsCreatedIsNearLimit = value
-    // },
     updateNotifyCardsCreatedIsOverLimit (value) {
       utils.typeCheck({ value, type: 'boolean' })
       this.notifyCardsCreatedIsOverLimit = value
@@ -1666,34 +1048,6 @@ export const useGlobalStore = defineStore('global', {
         this.notifyCardsCreatedIsNearLimit = false
       }
     },
-    // notifyMoveOrCopyToSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyMoveOrCopyToSpace = value
-    // },
-    // notifyMoveOrCopyToSpaceDetails (value) {
-    //   utils.typeCheck({ value, type: 'object' })
-    //   this.notifyMoveOrCopyToSpaceDetails = value
-    // },
-    // hasNotifiedPressAndHoldToDrag (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.hasNotifiedPressAndHoldToDrag = value
-    // },
-    // notifySpaceIsHidden (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifySpaceIsHidden = value
-    // },
-    // notifyThanksForDonating (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyThanksForDonating = value
-    // },
-    // notifyThanksForUpgrading (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyThanksForUpgrading = value
-    // },
-    // shouldNotifyIsJoiningGroup (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.shouldNotifyIsJoiningGroup = value
-    // },
     updateNotifyIsJoiningGroup (value) {
       utils.typeCheck({ value, type: 'boolean' })
       this.notifyIsJoiningGroup = value
@@ -1701,14 +1055,6 @@ export const useGlobalStore = defineStore('global', {
         this.shouldNotifyIsJoiningGroup = false
       }
     },
-    // notifyIsDuplicatingSpace (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyIsDuplicatingSpace = value
-    // },
-    // notifyBoxSnappingIsReady (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.notifyBoxSnappingIsReady = value
-    // },
 
     // Notifications with Position
 
@@ -1759,10 +1105,6 @@ export const useGlobalStore = defineStore('global', {
       utils.typeCheck({ value: name, type: 'string' })
       this.filteredTagNames = this.filteredTagNames.filter(tagName => tagName !== name)
     },
-    // spaceListFilterInfo (value) {
-    //   utils.typeCheck({ value, type: 'object' })
-    //   this.spaceListFilterInfo = value
-    // },
     addToFilteredBoxId (id) {
       utils.typeCheck({ value: id, type: 'string' })
       this.filteredBoxIds.push(id)
@@ -1801,67 +1143,18 @@ export const useGlobalStore = defineStore('global', {
         card.name = name
       }
     },
-    // currentUserIsInvitedButCannotEditCurrentSpace (value) {
-    //   this.currentUserIsInvitedButCannotEditCurrentSpace = value
-    // },
+    async updateTags () {
+      const tags = await cache.allTags()
+      this.tags = tags
+    },
 
     // Sync Session Data
 
-    // sendingQueue (value) {
-    //   utils.typeCheck({ value, type: 'array' })
-    //   this.sendingQueue = value
-    //   // cache.saveSendingQueue(value)
-    // },
     clearSendingQueue () {
       this.sendingQueue = []
       // cache.clearSendingQueue()
     },
 
-    // Code Blocks
-
-    // codeLanguagePickerIsVisible (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   this.codeLanguagePickerIsVisible = value
-    // },
-    // codeLanguagePickerPosition (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.codeLanguagePickerPosition = position
-    // },
-    // codeLanguagePickerCardId (cardId) {
-    //   utils.typeCheck({ value: cardId, type: 'string' })
-    //   this.codeLanguagePickerCardId = cardId
-    // },
-
-    // Snap Guide Lines
-
-    // snapGuideLinesOrigin (position) {
-    //   utils.typeCheck({ value: position, type: 'object' })
-    //   this.snapGuideLinesOrigin = position
-    // }
-
-    async updateTags () {
-      const tags = await cache.allTags()
-      this.tags = tags
-    },
-    // async moveFailedSendingQueueOperationBackIntoQueue (operation) {
-    //   // save to queue
-    //   let queue = await cache.queue()
-    //   queue.unshift(operation)
-    //   cache.saveQueue(queue)
-    //   // remove from sending queue
-    //   let sendingQueue = this.sendingQueue
-    //   sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
-    //   context.commit('sendingQueue', sendingQueue)
-    // },
-    // updatePrevSpaceIdInSession (id) {
-    //   utils.typeCheck({ value: id, type: 'string' })
-    //   const position = {
-    //     x: window.scrollX,
-    //     y: window.scrollY
-    //   }
-    //   this.prevSpaceIdInSession = id
-    //   this.prevSpaceIdInSessionPagePosition = position
-    // },
     updateIsOnline (isOnline) {
       utils.typeCheck({ value: isOnline, type: 'boolean' })
       const prevIsOnline = this.isOnline
@@ -2022,16 +1315,6 @@ export const useGlobalStore = defineStore('global', {
     addToMultipleCardsSelected (cardId) {
       this.addMultipleToMultipleCardsSelected([cardId])
       postMessage.sendHaptics({ name: 'selection' })
-      // const userStore = useUserStore()
-      // const broadcastStore = useBroadcastStore()
-      // utils.typeCheck({ value: cardId, type: 'string' })
-      // if (this.multipleCardsSelectedIds.includes(cardId)) { return }
-      // this.multipleCardsSelectedIds.push(cardId)
-      // const updates = {
-      //   userId: userStore.id,
-      //   cardId
-      // }
-      // broadcastStore.update({ updates, action: 'addToRemoteCardsSelected' })
     },
 
     updateMultipleCardsSelectedIds (cardIds) {
@@ -2123,16 +1406,6 @@ export const useGlobalStore = defineStore('global', {
     addToMultipleConnectionsSelected (connectionId) {
       this.addMultipleToMultipleConnectionsSelected([connectionId])
       postMessage.sendHaptics({ name: 'selection' })
-      // const userStore = useUserStore()
-      // const broadcastStore = useBroadcastStore()
-      // utils.typeCheck({ value: connectionId, type: 'string' })
-      // if (this.multipleConnectionsSelectedIds.includes(connectionId)) { return }
-      // this.multipleConnectionsSelectedIds.push(connectionId)
-      // const updates = {
-      //   userId: userStore.id,
-      //   connectionId
-      // }
-      // broadcastStore.update({ updates, action: 'addToRemoteConnectionsSelected' })
     },
 
     updateConnectionDetailsIsVisibleForConnectionId (connectionId) {
@@ -2170,17 +1443,6 @@ export const useGlobalStore = defineStore('global', {
     addToMultipleBoxesSelected (boxId) {
       this.addMultipleToMultipleBoxesSelected([boxId])
       postMessage.sendHaptics({ name: 'selection' })
-      // const userStore = useUserStore()
-      // const broadcastStore = useBroadcastStore()
-      // utils.typeCheck({ value: boxId, type: 'string' })
-      // if (this.multipleBoxesSelectedIds.includes(boxId)) { return }
-      // postMessage.sendHaptics({ name: 'selection' })
-      // this.multipleBoxesSelectedIds.push(boxId)
-      // const updates = {
-      //   userId: userStore.id,
-      //   boxId
-      // }
-      // broadcastStore.update({ updates, action: 'addToRemoteBoxesSelected' })
     },
     removeFromMultipleBoxesSelected (boxId) {
       const userStore = useUserStore()
@@ -2225,29 +1487,6 @@ export const useGlobalStore = defineStore('global', {
       const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
       this.currentUserIsInvitedButCannotEditCurrentSpace = value
     },
-
-    // Pinned Dialogs
-
-    // sidebarIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   context.commit('sidebarIsPinned', value)
-    // },
-    // minimapIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   context.commit('minimapIsPinned', value)
-    // },
-    // spaceDetailsIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   context.commit('spaceDetailsIsPinned', value)
-    // },
-    // searchIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   context.commit('searchIsPinned', value)
-    // },
-    // userSettingsIsPinned (value) {
-    //   utils.typeCheck({ value, type: 'boolean' })
-    //   context.commit('userSettingsIsPinned', value)
-    // },
 
     // scrolling and zoom
 

@@ -33,6 +33,11 @@ const templateElement = ref(null)
 
 onMounted(() => {
   update()
+  window.addEventListener('visibilitychange', updatePageVisibilityChange)
+  window.addEventListener('focus', updatePageVisibilityChangeOnFocus)
+  checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
+    checkIfShouldNotifySpaceOutOfSync()
+  }, 1000 * 60 * 60 * 1) // check every hour
 
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -60,15 +65,10 @@ onMounted(() => {
     globalActionUnsubscribe()
     spaceActionUnsubscribe()
   }
-  window.addEventListener('visibilitychange', updatePageVisibilityChange)
-  window.addEventListener('focus', updatePageVisibilityChangeOnFocus)
-  checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
-    checkIfShouldNotifySpaceOutOfSync()
-  }, 1000 * 60 * 60 * 1) // check every hour
 })
 onBeforeUnmount(() => {
-  // window.removeEventListener('visibilitychange', updatePageVisibilityChange)
-  // window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
+  window.removeEventListener('visibilitychange', updatePageVisibilityChange)
+  window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   unsubscribes()
 })
