@@ -273,6 +273,7 @@ export const useSpaceStore = defineStore('space', {
       const broadcastStore = useBroadcastStore()
       globalStore.isLoadingSpace = true
       const spaceUrl = globalStore.spaceUrlToLoad
+      const cachedSpaces = await cache.getAllSpaces()
       // restore from url
       if (spaceUrl) {
         console.info('🚃 Restore space from url', spaceUrl)
@@ -292,6 +293,11 @@ export const useSpaceStore = defineStore('space', {
       } else if (userStore.lastSpaceId) {
         console.info('🚃 Restore last space', userStore.lastSpaceId)
         await this.loadLastSpace()
+      // restore cached space
+      } else if (cachedSpaces.length) {
+        const space = cachedSpaces[0]
+        console.log('🚃 Restore space from cache', space)
+        await this.loadSpace(space)
       // hello kinopio
       } else {
         console.info('🚃 Create and restore hello space')
