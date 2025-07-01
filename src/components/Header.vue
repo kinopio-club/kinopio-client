@@ -593,9 +593,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
-        //- embed badge
-        .label-badge.space-name-badge-wrap
-          span Scroll horizontally and vertically
     .right
       SpaceUsers(:userDetailsIsInline="true")
 

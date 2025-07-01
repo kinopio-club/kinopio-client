@@ -65,7 +65,8 @@ watch(() => globalStore.isPresentationMode, (value, prevValue) => {
 const state = reactive({
   position: {},
   isHiddenOnTouch: false,
-  minimapIsVisible: false
+  minimapIsVisible: false,
+  isScrolled: false
 })
 
 const isPinchZooming = computed(() => globalStore.isPinchZooming)
@@ -128,6 +129,9 @@ const rightControlsIsVisible = computed(() => {
   if (shouldHideFooter.value) { return }
   return true
 })
+const embedLabelIsVisible = computed(() => {
+  return globalStore.isEmbedMode && !state.isScrolled
+})
 
 // presentation mode
 
@@ -171,7 +175,10 @@ const cancelHidden = () => {
 
 // position
 
-const updatePosition = async () => {
+const updatePosition = async (event) => {
+  if (event) {
+    state.isScrolled = true
+  }
   if (!globalStore.isTouchScrolling) {
     updatePositionFrame()
     return
@@ -215,6 +222,9 @@ const updatePositionInVisualViewport = () => {
 
 <template lang="pug">
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
+  .label-badge.embed-label(v-if="embedLabelIsVisible")
+    img.icon(src="@/assets/constrain-axis.svg")
+    span Scroll horizontally and vertically
   .left(v-if="leftIsVisble")
     footer
       Notifications
@@ -300,6 +310,11 @@ const updatePositionInVisualViewport = () => {
   .icon.minimap
     width 13px
     vertical-align -1px
+
+  .embed-label
+    left 8px
+    img.icon
+      filter invert(1)
 
 footer
   .is-mobile-icon
