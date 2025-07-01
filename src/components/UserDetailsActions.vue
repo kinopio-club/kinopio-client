@@ -207,7 +207,7 @@ const toggleGroupsIsVisible = () => {
     .button-wrap
       button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
         span(v-if="!isFavoriteUser") Follow
-        span(v-if="isFavoriteUser") Unfollow
+        span(v-if="isFavoriteUser") Following
         Loader(:visible="isLoadingFavorites")
     .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
   //- Explore Spaces
