@@ -1039,6 +1039,8 @@ li
   padding-top 0
   border-top 0
   overflow auto
+.results-section-border-top
+  border-top 1px solid var(--primary-border)
 
 ul.results-list
   margin 0

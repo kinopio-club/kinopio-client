@@ -109,15 +109,16 @@ dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="close
     .row.title-row
       div
         Loader(:visible="isLoadingGroups" :isSmall="true")
-        span Groups
+        span My Groups
       //- add group
       .button-wrap
         button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
+          span New
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
 
   //- groups
-  section.results-section(v-if="isGroups")
+  section.results-section.results-section-border-top(v-if="isGroups")
     GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
   //- groups info
   AboutGroups(v-else)

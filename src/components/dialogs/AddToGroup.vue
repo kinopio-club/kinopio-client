@@ -74,20 +74,21 @@ const toggleGroupsIsVisible = () => {
 <template lang="pug">
 dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'overflow-auto': !childDialogIsVisible}")
   section
-    .row.title-row
-      div
-        Loader(:visible="isLoadingGroups" :isSmall="true")
-        span Assign to Group
-      div
-        .button-wrap
-          button.small-button(@click.stop="toggleGroupsIsVisible")
-            span Groups
-        .button-wrap
-          button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
-            img.icon.add(src="@/assets/add.svg")
-          AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
+    .row
+      Loader(:visible="isLoadingGroups" :isSmall="true")
+      span Add to Group
+    .row
+      .button-wrap
+        button.small-button(@click.stop="toggleGroupsIsVisible")
+          img.icon.group(src="@/assets/group.svg")
+          span My Groups
+      .button-wrap
+        button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
+          img.icon.add(src="@/assets/add.svg")
+          span New
+        AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   //- groups list
-  section.results-section(v-if="props.groups.length")
+  section.results-section.results-section-border-top(v-if="props.groups.length")
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
