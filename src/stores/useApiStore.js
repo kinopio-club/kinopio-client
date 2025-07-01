@@ -492,7 +492,7 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const groupStore = useGroupStore()
-      const groups = groupStore.getCurrentUserGroup
+      const groups = groupStore.getCurrentUserGroups
       if (!groups.length) { return }
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline

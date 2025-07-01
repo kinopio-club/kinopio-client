@@ -248,9 +248,10 @@ const removeGroupUser = async (event, user) => {
             GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
           //- remove user
           .button-wrap(v-if="currentUserIsGroupAdmin || isCurrentUser(user)")
-            button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
+            button.small-button.danger(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
               img.icon.cancel(src="@/assets/add.svg")
-              span Remove
+              span(v-if="isCurrentUser(user)") Leave
+              span(v-else) Remove
               Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
 
         //- error

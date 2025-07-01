@@ -51,7 +51,6 @@ const state = reactive({
   spacePickerIsVisible: false,
   exploreSpaces: [],
   userSpaces: [],
-  groupsIsVisible: false,
   loading: {
     exploreSpaces: false,
     userSpaces: false

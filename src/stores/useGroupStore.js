@@ -38,7 +38,7 @@ export const useGroupStore = defineStore('groups', {
       const spaceStore = useSpaceStore()
       return this.groups[spaceStore.groupId]
     },
-    getCurrentUserGroup () {
+    getCurrentUserGroups () {
       const userStore = useUserStore()
       const groups = this.getAllGroups
       let groupUserGroups = groups.filter(group => {

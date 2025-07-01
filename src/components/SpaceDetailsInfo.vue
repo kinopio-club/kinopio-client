@@ -196,7 +196,7 @@ const closeAllDialogs = () => {
 
 // group
 
-const userGroups = computed(() => groupStore.getCurrentUserGroup)
+const userGroups = computed(() => groupStore.getCurrentUserGroups)
 const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const currentUserIsGroupAdmin = (group) => {
   return groupStore.getGroupUserIsAdmin({

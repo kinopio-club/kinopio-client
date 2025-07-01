@@ -155,7 +155,7 @@ const isGroups = computed(() => {
   if (!groups.value) { return }
   return groups.value.length
 })
-const groups = computed(() => groupStore.getCurrentUserGroup)
+const groups = computed(() => groupStore.getCurrentUserGroups)
 const filterByGroup = (event, group) => {
   if (group.id === dialogSpaceFilterByGroup.value.id) {
     updateGroupFilter({})

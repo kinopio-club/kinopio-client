@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import GroupList from '@/components/GroupList.vue'
@@ -18,6 +19,7 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 let unsubscribes
@@ -48,6 +50,7 @@ watch(() => visible.value, (value, prevValue) => {
     closeDialogs()
     state.groupDetailsIsVisibleForGroupId = ''
     updateDialogHeight()
+    updateCurrentUserGroups()
   }
 })
 const updateDialogHeight = async () => {
@@ -72,7 +75,20 @@ const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
 
 // groups
 
-const groups = computed(() => groupStore.getCurrentUserGroup)
+const groups = computed(() => groupStore.getCurrentUserGroups)
+const isGroups = computed(() => groups.value.length)
+const updateCurrentUserGroups = async () => {
+  try {
+    globalStore.isLoadingGroups = true
+    const groups = await apiStore.getUserGroups()
+    if (groups) {
+      groupStore.restoreGroup(groups)
+    }
+  } catch (error) {
+    console.error('🚒 updateWithRemote', error)
+  }
+  globalStore.isLoadingGroups = false
+}
 
 // add group
 
@@ -113,7 +129,7 @@ dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="close
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
 
   //- groups
-  section.results-section(v-if="groups.length")
+  section.results-section(v-if="isGroups")
     GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
   //- groups info
   AboutGroups(v-else)

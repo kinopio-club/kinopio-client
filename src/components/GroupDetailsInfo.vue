@@ -73,6 +73,7 @@ const updateGroupEmoji = (newValue) => {
   } else {
     updateGroup({ emoji: newValue })
   }
+  state.emojiPickerIsVisible = false
 }
 const toggleEmojiPicker = () => {
   const isVisible = state.emojiPickerIsVisible
