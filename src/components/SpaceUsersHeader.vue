@@ -135,6 +135,8 @@ const shouldAppendCurrentUser = computed(() => {
 // })
 const spectators = computed(() => {
   let users = spaceStore.spectators
+  const memberIds = members.value.map(user => user.id)
+  users = users.filter(user => !memberIds.includes(user.id))
   if (!userStore.getUserIsSpaceMember) {
     users.push(userStore.getUserAllState)
   }
