@@ -26,7 +26,7 @@ import postMessage from '@/postMessage.js'
 
 // Card only child components
 import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
-import CardCounter from '@/components/CardCounter.vue'
+import CardVote from '@/components/CardVote.vue'
 import TiltResize from '@/components/TiltResize.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
@@ -2158,8 +2158,8 @@ const focusColor = computed(() => {
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
-    //- Counter
-    CardCounter(:card="card")
+    //- Vote Counter
+    CardVote(:card="card")
     //- Created Through API
     .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")

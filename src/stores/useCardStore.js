@@ -740,7 +740,7 @@ export const useCardStore = defineStore('cards', {
 
     // vote
 
-    updateCardCounter ({ card, shouldIncrement, shouldDecrement }) {
+    updateCardVote ({ card, shouldIncrement, shouldDecrement }) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
@@ -752,7 +752,7 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
       if (!isSignedIn) {
-        apiStore.updateCardCounter(update)
+        apiStore.updateCardVote(update)
       }
     },
 

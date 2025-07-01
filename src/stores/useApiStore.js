@@ -1104,7 +1104,7 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'search', error })
       }
     },
-    async updateCardCounter (body) {
+    async updateCardVote (body) {
       try {
         const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/update-counter`, options)
