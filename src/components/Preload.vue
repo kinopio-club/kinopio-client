@@ -126,6 +126,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/remove.svg")
     img.icon(src="@/assets/resize-corner.svg")
     img.icon(src="@/assets/resize.svg")
+    img.icon(src="@/assets/right-arrow.svg")
     img.icon(src="@/assets/rss.svg")
     img.icon(src="@/assets/search.svg")
     img.icon(src="@/assets/settings.svg")

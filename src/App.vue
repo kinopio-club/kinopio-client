@@ -996,9 +996,13 @@ li
 
 details
   summary
+    background url('assets/right-arrow.svg') left top no-repeat
+    background-position 10px 11px
+    list-style-type none
     cursor pointer
     border-radius var(--entity-radius)
     padding 5px 9px
+    padding-left 22px
     &:hover
       box-shadow var(--button-hover-shadow)
       background-color var(--secondary-hover-background)
@@ -1014,6 +1018,8 @@ details
       border-radius var(--entity-radius)
 details[open]
   > summary
+    background url('assets/down-arrow.svg') left top no-repeat
+    background-position 10px 11px
     box-shadow var(--button-active-inset-shadow)
     background-color var(--secondary-active-background)
     border-bottom-right-radius 0
