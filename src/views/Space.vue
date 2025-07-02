@@ -80,12 +80,12 @@ window.cardStore = useCardStore()
 window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
-window.groupStore = useGroupStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
+  window.groupStore = useGroupStore()
 }
-console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore, window.groupStore')
+console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
 // init user and space app state
 const init = async () => {
