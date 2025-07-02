@@ -260,9 +260,6 @@ dialog.share
     margin-top 10px
   .description
     margin-top 3px
-  dialog.dialog-wrap
-    left initial
-    right 8px
   dialog.user-details
     left initial
     right calc(100% - 20px)
