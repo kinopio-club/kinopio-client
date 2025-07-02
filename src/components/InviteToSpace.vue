@@ -184,7 +184,9 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
         summary
           span Collaborators edit for free
         section.subsection
-          span Because your account is upgraded, collaborators can create cards in this space without increasing their free card count
+          p Because your account is upgraded, collaborators can create cards in this space without increasing their free card count
+          p
+            img(src="https://cdn.kinopio.club/EoczbIBOicBBBh-GNuZOE/original-3a3d20bd4be668e1dffd7a97742a501d.gif")
 </template>
 
 <style lang="stylus">
