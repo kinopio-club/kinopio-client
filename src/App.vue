@@ -495,6 +495,10 @@ label // used for checkbox buttons
     span.small-button-text
       font-size 12px
       vertical-align 1px
+    span.options-button-text
+      font-size 12px
+      vertical-align 4px
+
   &.fixed-height
     height var(--button-fixed-height)
 .unselectable
@@ -1041,6 +1045,7 @@ li
   overflow auto
 .results-section-border-top
   border-top 1px solid var(--primary-border)
+  padding-top 4px
 
 ul.results-list
   margin 0

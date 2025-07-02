@@ -57,7 +57,8 @@ const state = reactive({
   },
   error: {
     removeGroupUserId: ''
-  }
+  },
+  optionsIsVisibleForUserId: ''
 })
 
 const closeDialogs = () => {
@@ -101,6 +102,21 @@ const currentUserIsMember = computed(() => userStore.getUserIsSpaceMember)
 const placeholder = computed(() => {
   return props.filterPlaceholder || 'Search'
 })
+
+// options
+
+const optionsButtonIsVisible = computed(() => props.showCollaboratorActions || props.showGroupUserActions)
+const toggleOptionsIsVisibleForUser = (user) => {
+  if (user.id === state.optionsIsVisibleForUserId) {
+    state.optionsIsVisibleForUserId = ''
+  } else {
+    state.optionsIsVisibleForUserId = user.id
+  }
+}
+const isOptionsIsVisibleForUser = (user) => {
+  return state.optionsIsVisibleForUserId === user.id
+}
+
 // handle events
 
 const selectUser = (event, user) => {
@@ -222,25 +238,30 @@ const removeGroupUser = async (event, user) => {
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
+        //- options button
+        .button-wrap.options-button-wrap
+          button.small-button(@click.stop="toggleOptionsIsVisibleForUser(user)" :class="{active: isOptionsIsVisibleForUser(user)}")
+            span.options-button-text …
+
         .user-info
+          //- user
           UserLabelInline(:user="user")
-          //- group
-          template(v-if="groupUser(user)")
-            GroupLabel(:group="group")
 
         //- collaborator actions
-        .row.actions-row(v-if="props.showCollaboratorActions")
+        .row.actions-row(v-if="props.showCollaboratorActions && isOptionsIsVisibleForUser(user)")
+          GroupLabel(v-if="groupUser(user)" :group="group")
           //- space creator
           template(v-if="userIsSpaceCreator(user)")
             span.badge.secondary Space Creator
           //- space collaborator
           template(v-else-if="currentUserIsMember")
-            button.small-button(@click.stop="removeCollaborator(user)")
+            button.small-button.danger(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
-              //- span Remove
+              span Remove
 
         //- group user actions
-        .row.actions-row(v-if="props.showGroupUserActions")
+        .row.actions-row(v-if="props.showGroupUserActions && isOptionsIsVisibleForUser(user)")
+          GroupLabel(v-if="groupUser(user)" :group="group")
           //- role
           .button-wrap
             button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin")
@@ -282,4 +303,9 @@ const removeGroupUser = async (event, user) => {
     border-top-left-radius 0
   .row.actions-row
     margin-top 5px
+  .options-button-wrap
+    position absolute
+    right 7px
+    top 7px
+    z-index 1
 </style>
