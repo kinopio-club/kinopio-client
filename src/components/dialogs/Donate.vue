@@ -130,7 +130,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
     p Donations help support my work on Kinopio. I'm grateful and flattered that you're even here.
     p
       span You'll get the coveted {{' '}}
-      span.badge.success
+      span.badge.success.badge-donor
         span Donor
       span badge on your profile. And possibly other perks in the future.
 
