@@ -9,9 +9,9 @@
 
 # help and about are currently the same site
 
-/help             https://help.kinopio.club
-/about            https://about.kinopio.club
-/blog             https://blog.kinopio.club
+/help             https://help.kinopio.club   301
+/about            https://about.kinopio.club   301
+/blog             https://blog.kinopio.club   301
 
 /api              https://help.kinopio.club/api
 /forum            https://forum.kinopio.club
