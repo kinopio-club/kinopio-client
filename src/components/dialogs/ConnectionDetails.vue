@@ -1,19 +1,28 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const connectionStore = useConnectionStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let prevConnectionType
 const dialogElement = ref(null)
@@ -34,28 +43,27 @@ const state = reactive({
 
 // dialog
 
-const visible = computed(() => Boolean(store.state.connectionDetailsIsVisibleForConnectionId))
+const visible = computed(() => Boolean(globalStore.connectionDetailsIsVisibleForConnectionId))
+const isDevelopment = computed(() => consts.isDevelopment())
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     updatePinchCounterZoomDecimal()
     updateNextConnectionColor()
   } else {
-    store.dispatch('history/resume')
     state.resultsSectionMaxHeight = undefined
     if (state.inputIsFocused) {
-      store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true })
       state.inputIsFocused = false
     }
   }
 })
 
 const isThemeDarkAndTypeColorLight = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   const typeColorIsLight = !utils.colorIsDark(typeColor.value)
   return isThemeDark && typeColorIsLight
 })
 const styles = computed(() => {
-  const position = store.state.connectionDetailsPosition
+  const position = globalStore.connectionDetailsPosition
   let zoom
   if (utils.isSignificantlyPinchZoomed()) {
     zoom = pinchCounterZoomDecimal.value
@@ -70,12 +78,12 @@ const styles = computed(() => {
 })
 const updateResultsSectionMaxHeight = () => {
   const pinchZoom = utils.visualViewport().scale
-  const position = store.state.connectionDetailsPosition
+  const position = globalStore.connectionDetailsPosition
   if (!infoSectionElement.value) { return }
   const infoSection = infoSectionElement.value.getBoundingClientRect()
   const resultsActions = resultsActionsElement.value?.getBoundingClientRect()
   const dialogInfoHeight = infoSection.height + (resultsActions?.height || 0)
-  const maxHeight = (store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
+  const maxHeight = (globalStore.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
   const minHeight = 300
   let height = Math.max(minHeight, maxHeight)
   height = Math.round(height)
@@ -86,7 +94,7 @@ const scrollIntoView = async () => {
   const element = dialogElement.value
   updateResultsSectionMaxHeight()
   await nextTick()
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const scrollIntoViewAndFocus = async () => {
   scrollIntoView()
@@ -100,62 +108,59 @@ const scrollIntoViewAndFocus = async () => {
   }
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const focus = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
-  store.dispatch('history/pause')
+  globalStore.pinchCounterZoomDecimal = 1
   state.inputIsFocused = true
 }
 const updatePinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
 }
 const blur = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
-  store.dispatch('history/resume')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
   const connectionType = utils.clone(currentConnectionType.value)
-  store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })
   state.inputIsFocused = false
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // space
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
-const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy === 'closed')
-const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
+const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
+const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
+const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 
 // current connection
 
 const currentConnection = computed(() => {
-  const id = store.state.connectionDetailsIsVisibleForConnectionId
-  return store.getters['currentConnections/byId'](id)
+  const id = globalStore.connectionDetailsIsVisibleForConnectionId
+  return connectionStore.getConnection(id)
 })
 watch(() => currentConnection.value, async (value, prevValue) => {
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
   await nextTick()
   if (visible.value) {
     state.colorPickerIsVisible = false
     scrollIntoViewAndFocus()
-    store.commit('currentConnections/lastTypeId', currentConnectionType.value.id)
+    connectionStore.updatePrevConnectionTypeId(currentConnectionType.value.id)
   } else {
-    store.commit('shouldHideConnectionOutline', false)
+    globalStore.shouldHideConnectionOutline = false
   }
 })
 const currentConnectionType = computed(() => {
-  const connectionType = store.getters['currentConnections/typeByConnection'](currentConnection.value)
+  const connectionType = connectionStore.getConnectionTypeByConnectionId(currentConnection.value.id)
   prevConnectionType = connectionType
   return connectionType
 })
 
 // type
 
-const connectionTypes = computed(() => store.getters['currentConnections/allTypes'])
+const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const connectionTypesByUpdatedAt = computed(() => {
   let types = connectionTypes.value
   types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
@@ -163,9 +168,9 @@ const connectionTypesByUpdatedAt = computed(() => {
   return types
 })
 const canEditConnection = computed(() => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](currentConnection.value)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const isSpaceMember = userStore.getUserIsSpaceMember
+  const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(currentConnection.value)
+  const canEditSpace = userStore.getUserCanEditSpace
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false
@@ -174,30 +179,30 @@ const typeColorisDark = computed(() => {
   return utils.colorIsDark(typeColor.value)
 })
 const addConnectionType = () => {
-  store.dispatch('currentConnections/addType', { color: state.nextConnectionTypeColor })
+  connectionStore.createConnectionType({ color: state.nextConnectionTypeColor })
   const types = utils.clone(connectionTypes.value)
   const newType = last(types)
   changeConnectionType(newType)
   updateNextConnectionColor()
 }
 const removeConnection = () => {
-  store.dispatch('currentConnections/remove', currentConnection.value)
-  store.dispatch('closeAllDialogs')
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeConnection(currentConnection.value.id)
+  globalStore.closeAllDialogs()
+  connectionStore.removeAllUnusedConnectionTypes()
 }
 const changeConnectionType = (type) => {
-  store.dispatch('currentConnections/update', {
+  connectionStore.updateConnection({
     id: currentConnection.value.id,
     connectionTypeId: type.id
   })
-  store.commit('currentConnections/lastTypeId', type.id)
+  connectionStore.updatePrevConnectionTypeId(type.id)
 }
 
 // filters
 
 const isFilteredInSpace = computed({
   get () {
-    const types = store.state.filteredConnectionTypeIds
+    const types = globalStore.filteredConnectionTypeIds
     return types.includes(currentConnectionType.value.id)
   },
   set () {
@@ -205,47 +210,47 @@ const isFilteredInSpace = computed({
   }
 })
 const toggleFilteredInSpace = () => {
-  const filtered = store.state.filteredConnectionTypeIds
+  const filtered = globalStore.filteredConnectionTypeIds
   const typeId = currentConnectionType.value.id
   if (filtered.includes(typeId)) {
-    store.commit('removeFromFilteredConnectionTypeId', typeId)
+    globalStore.removeFromFilteredConnectionTypeId(typeId)
   } else {
-    store.commit('addToFilteredConnectionTypeId', typeId)
+    globalStore.addToFilteredConnectionTypeId(typeId)
   }
 }
 
 // use last type
 
 const lastTypeColor = computed(() => {
-  const lastType = store.getters['currentConnections/lastType']
+  const lastType = connectionStore.prevConnectionTypeId
   return lastType?.color
 })
-const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
+const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
 const toggleShouldUseLastConnectionType = () => {
   const value = !shouldUseLastConnectionType.value
-  store.dispatch('currentUser/shouldUseLastConnectionType', value)
+  userStore.updateUser({ shouldUseLastConnectionType: value })
 }
 
 // color
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const typeColor = computed(() => currentConnectionType.value.color)
 const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
 const closeColorPicker = () => {
   state.colorPickerIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 const updateTypeColor = (newColor) => {
-  const connectionType = {
+  const update = {
     id: currentConnectionType.value.id,
     color: newColor
   }
-  store.dispatch('currentConnections/updateType', connectionType)
+  connectionStore.updateConnectionType(update)
 }
 const updateNextConnectionColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -260,12 +265,12 @@ const typeName = computed({
     return currentConnectionType.value.name
   },
   set (newName) {
-    const connectionType = {
+    const update = {
       id: currentConnectionType.value.id,
       name: newName,
       updatedAt: new Date()
     }
-    store.dispatch('currentConnections/updateType', connectionType)
+    connectionStore.updateConnectionType(update)
   }
 })
 const focusName = async () => {
@@ -293,7 +298,10 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
 
-    //- label etc.
+    //- debug
+    ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
+
+    //- label, reverse etc.
     ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
 
     p.edit-message.badge.info(v-if="!canEditConnection")

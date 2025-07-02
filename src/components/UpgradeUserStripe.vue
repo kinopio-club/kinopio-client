@@ -1,11 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -21,7 +27,7 @@ const state = reactive({
   }
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 const clearState = () => {
   state.loading.subscribe = false
@@ -32,18 +38,18 @@ const isLifetimePlan = computed(() => props.price.period === 'life')
 // subscribe
 
 const subscribeUrl = async () => {
-  const result = await store.dispatch('api/subscriptionUrl', {
+  const result = await apiStore.subscriptionUrl({
     priceId: props.price.stripePriceId,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     period: props.price.period
   })
   return result
 }
 
 const checkoutUrl = async () => {
-  const result = await store.dispatch('api/checkoutUrl', {
+  const result = await apiStore.checkoutUrl({
     priceId: props.price.stripePriceId,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     period: props.price.period
   })
   return result
@@ -73,6 +79,7 @@ const subscribe = async () => {
 <template lang="pug">
 .upgrade-user-stripe(v-if="visible")
   p Tax included.
+    span {{' '}}
     template(v-if="isLifetimePlan")
       span This is a one-time perpetual license purchase.
     template(v-else)

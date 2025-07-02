@@ -1,27 +1,33 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
-// import utils from '@/utils.js'
+import { useGlobalStore } from '@/stores/useGlobalStore'
+
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import EmojiPicker from '@/components/dialogs/EmojiPicker.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const nameInputElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   focusNameInput()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateGroup', 'childDialogIsVisible'])
@@ -67,6 +73,7 @@ const updateGroupEmoji = (newValue) => {
   } else {
     updateGroup({ emoji: newValue })
   }
+  state.emojiPickerIsVisible = false
 }
 const toggleEmojiPicker = () => {
   const isVisible = state.emojiPickerIsVisible

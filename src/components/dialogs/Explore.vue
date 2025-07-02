@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
@@ -13,7 +17,10 @@ import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -34,14 +41,11 @@ const props = defineProps({
   errorIsLoading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   state.tipsIsVisible = false
   if (value) {
     updateHeights()
     updateUserShowInExploreUpdatedAt()
-    store.commit('shouldExplicitlyHideFooter', true)
-  } else {
-    store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 
@@ -57,10 +61,10 @@ const state = reactive({
   tipsIsVisible: false
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const changeSpace = (space) => {
   closeDialogs()
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   state.readSpaceIds.push(space.id)
 }
 const closeDialogs = () => {
@@ -82,13 +86,13 @@ const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
+  state.dialogHeight = utils.elementHeightFromHeader(element)
 }
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
+  state.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
 }
 
 // unread sections
@@ -140,10 +144,10 @@ const currentSpaces = computed(() => {
 
 const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
 const updateUserShowInExploreUpdatedAt = async () => {
-  state.userShowInExploreDate = store.state.currentUser.showInExploreUpdatedAt
-  let serverDate = await store.dispatch('api/getDate')
+  state.userShowInExploreDate = userStore.showInExploreUpdatedAt
+  let serverDate = await apiStore.getDate()
   serverDate = serverDate.date
-  store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
+  userStore.updateUser({ showInExploreUpdatedAt: serverDate })
 }
 
 // search explore spaces
@@ -163,7 +167,7 @@ const updateFilter = async (value) => {
   }
   try {
     state.isLoadingExploreSearchResults = true
-    const results = await store.dispatch('api/searchExploreSpaces', { query: value })
+    const results = await apiStore.searchExploreSpaces({ query: value })
     state.exploreSearchResults = results
   } catch (error) {
     console.error('🚒 updateFilter', error, value)
@@ -171,10 +175,10 @@ const updateFilter = async (value) => {
   state.isLoadingExploreSearchResults = false
 }
 const focusPreviousItem = () => {
-  store.commit('triggerPickerNavigationKey', 'ArrowUp')
+  globalStore.triggerPickerNavigationKey('ArrowUp')
 }
 const focusNextItem = () => {
-  store.commit('triggerPickerNavigationKey', 'ArrowDown')
+  globalStore.triggerPickerNavigationKey('ArrowDown')
 }
 const selectItem = () => {
   const liElement = resultsElement.value.querySelector('li.hover')
@@ -186,11 +190,11 @@ const selectItem = () => {
 // blank slate info
 
 const followInfoIsVisible = computed(() => {
-  const isFavorites = Boolean(store.state.currentUser.favoriteUsers.length || props.followingSpaces?.length)
+  const isFavorites = Boolean(userStore.favoriteUsers.length || props.followingSpaces?.length)
   return !props.loading && !isFavorites && currentSectionIsFollowing.value
 })
 const randomUser = computed(() => {
-  const luminosity = store.state.currentUser.theme
+  const luminosity = userStore.theme
   const color = randomColor({ luminosity })
   return { color, id: '123' }
 })
@@ -281,9 +285,10 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
 
 <style lang="stylus">
 dialog.explore
-  left initial
-  right -35px
+  top initial
+  bottom 18px
   overflow auto
+  position absolute
   &.wide
     width 320px
   .loader

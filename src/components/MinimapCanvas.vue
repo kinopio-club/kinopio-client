@@ -1,18 +1,29 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let canvas, context
 let startPanningPosition
 const itemRadius = 1
 const canvasElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 onMounted(async () => {
   init()
@@ -20,42 +31,86 @@ onMounted(async () => {
   window.addEventListener('resize', init)
   window.addEventListener('pointerup', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
-  unsubscribe = store.subscribe(async mutation => {
-    const type = mutation.type
-    const mutations = [
-      'isLoadingSpace',
-      'currentSpace/loadSpace',
-      'currentCards/update',
-      'currentCards/updateMultiple',
-      'currentCards/remove',
-      'currentCards/removeResize',
-      'currentCards/move',
-      'currentCards/resize',
-      'currentCards/paste',
-      'currentCards/add',
-      'currentBoxes/add',
-      'currentBoxes/update',
-      'currentBoxes/resize',
-      'currentBoxes/move',
-      'currentConnections/add',
-      'currentConnections/update',
-      'currentConnections/updatePaths',
-      'currentConnections/updateMultiplePaths',
-      'currentConnections/remove',
-      'triggerEndDrawing'
-    ]
-    if (mutations.includes(mutation.type)) {
-      await nextTick()
-      init()
+
+  const globalStoreActions = [
+    'triggerEndDrawing'
+  ]
+  const boxStoreActions = [
+    'updateBoxes',
+    'createBox'
+  ]
+  const cardStoreActions = [
+    'updateCards',
+    'removeCards',
+    'clearResizeCards',
+    'moveCards',
+    'createCard',
+    'resizeCards',
+    'pasteCards'
+  ]
+  const connectionStoreActions = [
+    'createConnection',
+    'updateConnections',
+    'removeConnections'
+  ]
+  const spaceStoreActions = [
+    'loadSpace'
+  ]
+  const globalActionUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (globalStoreActions.includes(name)) {
+        await nextTick()
+        init()
+      }
     }
-  })
+  )
+  const cardActionUnsubscribe = cardStore.$onAction(
+    ({ name, args }) => {
+      if (cardStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  const connectionActionUnsubscribe = connectionStore.$onAction(
+    ({ name, args }) => {
+      if (connectionStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  const boxActionUnsubscribe = boxStore.$onAction(
+    ({ name, args }) => {
+      if (boxStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  const spaceActionUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (spaceStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+    cardActionUnsubscribe()
+    connectionActionUnsubscribe()
+    boxActionUnsubscribe()
+    spaceActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', init)
   window.removeEventListener('pointerup', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
+  unsubscribes()
+})
+
+watch(() => globalStore.isLoadingSpace, async (value, prevValue) => {
+  await nextTick()
+  init()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -88,10 +143,10 @@ watch(() => props.space, (value, prevValue) => {
 })
 
 const pageHeight = computed(() => {
-  return props.pageHeight || store.state.pageHeight
+  return props.pageHeight || globalStore.pageHeight
 })
 const pageWidth = computed(() => {
-  return props.pageWidth || store.state.pageWidth
+  return props.pageWidth || globalStore.pageWidth
 })
 const ratio = computed(() => {
   if (pageWidth.value > pageHeight.value) {
@@ -102,13 +157,14 @@ const ratio = computed(() => {
 })
 
 const styles = computed(() => {
-  const color = props.backgroundColor || store.state.outsideSpaceBackgroundColor
+  const color = props.backgroundColor || globalStore.outsideSpaceBackgroundColor
   return { backgroundColor: color }
 })
 
 // canvas
 
 const init = async () => {
+  await nextTick()
   if (!props.visible) { return }
   await initCanvas()
   if (!canvas) { return }
@@ -136,24 +192,23 @@ const initCanvas = async () => {
 // drawing
 
 const drawDrawing = async () => {
-  const space = await cache.space(store.state.currentSpace.id)
-  if (!space.drawingImage) { return }
+  if (!globalStore.drawingImageUrl) { return }
   const image = new Image()
   image.onload = () => {
     const width = image.width * ratio.value
     const height = image.height * ratio.value
     context.drawImage(image, 0, 0, width, height)
   }
-  image.src = space.drawingImage
+  image.src = globalStore.drawingImageUrl
 }
 
 // connections
 
 const mapConnections = computed(() => {
-  return props.space?.connections || store.getters['currentConnections/all']
+  return props.space?.connections || connectionStore.getAllConnections
 })
 const mapConnectionTypes = computed(() => {
-  return props.space?.connectionTypes || store.getters['currentConnections/allTypes']
+  return props.space?.connectionTypes || connectionStore.getAllConnectionTypes
 })
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
@@ -187,7 +242,7 @@ const drawConnections = () => {
 // boxes
 
 const mapBoxes = computed(() => {
-  return props.space?.boxes || store.getters['currentBoxes/all']
+  return props.space?.boxes || boxStore.getAllBoxes
 })
 const drawBoxes = () => {
   let boxes = mapBoxes.value
@@ -217,7 +272,7 @@ const drawBoxes = () => {
 // cards
 
 const mapCards = computed(() => {
-  return props.space?.cards || store.getters['currentCards/all']
+  return props.space?.cards || cardStore.getAllCards
 })
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
@@ -247,11 +302,11 @@ const updateScroll = () => {
   state.scrollY = window.scrollY
 }
 const viewportStyle = computed(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
-  const color = store.state.currentUser.color
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  const color = userStore.color
   // viewport box
-  let width = (store.state.viewportWidth * zoom) * ratio.value
-  let height = (store.state.viewportHeight * zoom) * ratio.value
+  let width = (globalStore.viewportWidth * zoom) * ratio.value
+  let height = (globalStore.viewportHeight * zoom) * ratio.value
   let left = (state.scrollX * zoom) * ratio.value
   let top = (state.scrollY * zoom) * ratio.value
   // constraints
@@ -289,8 +344,8 @@ const positionInSpace = (event) => {
   return { x, y }
 }
 const positionInViewportCenter = (position) => {
-  let x = position.x - (store.state.viewportWidth / 2)
-  let y = position.y - (store.state.viewportHeight / 2)
+  let x = position.x - (globalStore.viewportWidth / 2)
+  let y = position.y - (globalStore.viewportHeight / 2)
   x = Math.max(0, x)
   y = Math.max(0, y)
   return { x, y }

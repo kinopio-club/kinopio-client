@@ -1,15 +1,181 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
+
+import ResultsFilter from '@/components/ResultsFilter.vue'
+import Tag from '@/components/Tag.vue'
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+const emit = defineEmits(['addTag', 'selectTag', 'closeDialogs'])
+
+const props = defineProps({
+  tags: Array,
+  isLoading: Boolean,
+  parentIsPinned: Boolean,
+  shouldEmitSelectTag: Boolean,
+  currentTags: Array,
+  positionTagsOnLeftSide: Boolean,
+  canAddTag: Boolean
+})
+const state = reactive({
+  filter: '',
+  filteredTags: [],
+  prevTagName: null,
+  tagDetailsTag: {},
+  focusOnId: ''
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    closeDialogs()
+  }
+})
+watch(() => props.tags, (value, prevValue) => {
+  if (!value) { return }
+  const updatedTag = value.find(tag => tag.name === state.tagDetailsTag.name)
+  if (updatedTag) {
+    updateTagDetailsTag(updatedTag)
+  }
+})
+const currentSelectedTag = computed(() => globalStore.currentSelectedTag)
+const tagsFiltered = computed(() => {
+  if (state.filter) {
+    return state.filteredTags
+  } else {
+    return props.tags
+  }
+})
+const firstResultName = computed(() => {
+  if (!tagsFiltered.value.length) { return }
+  return tagsFiltered.value[0].name
+})
+const addTagIsVisible = computed(() => {
+  if (!props.canAddTag) { return }
+  if (state.filter === firstResultName.value) { return }
+  return Boolean(state.filter)
+})
+const addTag = () => {
+  emit('addTag', state.filter)
+  updateFilter('')
+}
+const tagIsActive = (tag) => {
+  const isTagDetails = state.tagDetailsTag.name === tag.name
+  let isCurrentTag
+  if (props.currentTags) {
+    isCurrentTag = props.currentTags.includes(tag.name)
+  }
+  return isTagDetails || isCurrentTag
+}
+const tagIsFocused = (tag) => {
+  return state.focusOnId === tag.id
+}
+const updatePosition = (event, tag) => {
+  let rect
+  if (event) {
+    rect = event.target.getBoundingClientRect()
+  } else {
+    const element = document.querySelector(`li[data-tag-id="${tag.id}"]`)
+    rect = element.getBoundingClientRect()
+  }
+  const position = {
+    x: rect.x + (rect.width / 2) + window.scrollX,
+    y: rect.y + 8 + window.scrollY,
+    pageX: window.scrollX,
+    pageY: window.scrollY
+  }
+  if (props.positionTagsOnLeftSide) {
+    const tagDetailsWidth = 250
+    position.x = rect.x + window.scrollX - tagDetailsWidth
+  }
+  globalStore.tagDetailsPosition = position
+  globalStore.tagDetailsPositionShouldUpdate = true
+}
+const updateTagDetailsTag = (tag) => {
+  state.tagDetailsTag = tag
+  globalStore.currentSelectedTag = tag
+}
+const updateTagDetailsIsVisible = (value) => {
+  globalStore.tagDetailsIsVisible = value
+  globalStore.tagDetailsIsVisibleFromTagList = value
+}
+const selectTag = async (event, tag) => {
+  if (props.shouldEmitSelectTag) {
+    emit('selectTag', tag)
+    return
+  }
+  closeDialogs()
+  await nextTick()
+  updatePosition(event, tag)
+  updateTagDetailsTag(tag)
+  if (state.prevTagName === tag.name) {
+    const value = !globalStore.tagDetailsIsVisible
+    updateTagDetailsIsVisible(value)
+  } else {
+    updateTagDetailsIsVisible(true)
+  }
+  state.prevTagName = tag.name
+}
+const closeDialogs = () => {
+  emit('closeDialogs')
+}
+const updateFilteredTags = (tags) => {
+  state.filteredTags = tags
+}
+const updateFilter = async (filter) => {
+  state.filter = filter
+  await nextTick()
+  const tags = tagsFiltered.value || props.tags
+  if (!tags.length) { return }
+  state.focusOnId = tags[0].id
+}
+const focusNextItem = () => {
+  const tags = tagsFiltered.value
+  const currentIndex = tags.findIndex(tags => tags.id === state.focusOnId)
+  let index = currentIndex + 1
+  if (tags.length === index) {
+    index = 0
+  }
+  focusItem(tags[index])
+}
+const focusPreviousItem = () => {
+  const tags = tagsFiltered.value
+  const currentIndex = tags.findIndex(tags => tags.id === state.focusOnId)
+  let index = currentIndex - 1
+  if (index < 0) {
+    index = 0
+  }
+  focusItem(tags[index])
+}
+const selectItem = () => {
+  const tags = tagsFiltered.value
+  const index = tags.findIndex(tags => tags.id === state.focusOnId)
+  selectTag(null, tags[index])
+}
+const focusItem = (tag) => {
+  state.focusOnId = tag.id
+}
+</script>
+
 <template lang="pug">
 span.tag-list(@click.left="closeDialogs")
-  template(v-if="tags")
+  template(v-if="props.tags")
     ResultsFilter(
-      :items="tags"
-      :parentIsPinned="parentIsPinned"
+      :items="props.tags"
+      :parentIsPinned="props.parentIsPinned"
       @updateFilter="updateFilter"
       @updateFilteredItems="updateFilteredTags"
       @focusNextItem="focusNextItem"
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
-      :isLoading="isLoading"
+      :isLoading="props.isLoading"
     )
     .row(v-if="addTagIsVisible")
       button.small-button(tabindex="0" @click.stop="addTag" @touchend.stop="addTag" @keyup.enter="addTag")
@@ -33,181 +199,6 @@ span.tag-list(@click.left="closeDialogs")
     span.badge.secondary [[
       span when editing a card to create tags
 </template>
-
-<script>
-import ResultsFilter from '@/components/ResultsFilter.vue'
-import Tag from '@/components/Tag.vue'
-
-export default {
-  name: 'TagList',
-  components: {
-    ResultsFilter,
-    Tag
-  },
-  props: {
-    tags: Array,
-    isLoading: Boolean,
-    parentIsPinned: Boolean,
-    shouldEmitSelectTag: Boolean,
-    currentTags: Array,
-    positionTagsOnLeftSide: Boolean,
-    canAddTag: Boolean
-  },
-  emits: [
-    'addTag',
-    'selectTag',
-    'closeDialogs'
-  ],
-  data () {
-    return {
-      filter: '',
-      filteredTags: [],
-      prevTagName: null,
-      tagDetailsTag: {},
-      focusOnId: ''
-    }
-  },
-  computed: {
-    currentSelectedTag () { return this.$store.state.currentSelectedTag },
-    tagsFiltered () {
-      if (this.filter) {
-        return this.filteredTags
-      } else {
-        return this.tags
-      }
-    },
-    firstResultName () {
-      if (!this.tagsFiltered.length) { return }
-      return this.tagsFiltered[0].name
-    },
-    addTagIsVisible () {
-      if (!this.canAddTag) { return }
-      if (this.filter === this.firstResultName) { return }
-      return Boolean(this.filter)
-    }
-  },
-  watch: {
-    tags: {
-      handler (tags) {
-        const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
-        if (updatedTag) {
-          this.updateTagDetailsTag(updatedTag)
-        }
-      },
-      deep: true
-    },
-    visible (visible) {
-      if (visible) {
-        this.closeDialogs()
-      }
-    }
-  },
-  methods: {
-    addTag () {
-      this.$emit('addTag', this.filter)
-      this.updateFilter('')
-    },
-    tagIsActive (tag) {
-      const isTagDetails = this.tagDetailsTag.name === tag.name
-      let isCurrentTag
-      if (this.currentTags) {
-        isCurrentTag = this.currentTags.includes(tag.name)
-      }
-      return isTagDetails || isCurrentTag
-    },
-    tagIsFocused (tag) {
-      return this.focusOnId === tag.id
-    },
-    updatePosition (event, tag) {
-      let rect
-      if (event) {
-        rect = event.target.getBoundingClientRect()
-      } else {
-        const element = document.querySelector(`li[data-tag-id="${tag.id}"]`)
-        rect = element.getBoundingClientRect()
-      }
-      const position = {
-        x: rect.x + (rect.width / 2) + window.scrollX,
-        y: rect.y + 8 + window.scrollY,
-        pageX: window.scrollX,
-        pageY: window.scrollY
-      }
-      if (this.positionTagsOnLeftSide) {
-        const tagDetailsWidth = 250
-        position.x = rect.x + window.scrollX - tagDetailsWidth
-      }
-      this.$store.commit('tagDetailsPosition', position)
-      this.$store.commit('tagDetailsPositionShouldUpdate', true)
-    },
-    updateTagDetailsTag (tag) {
-      this.tagDetailsTag = tag
-      this.$store.commit('currentSelectedTag', tag)
-    },
-    updateTagDetailsIsVisible (value) {
-      this.$store.commit('tagDetailsIsVisible', value)
-      this.$store.commit('tagDetailsIsVisibleFromTagList', value)
-    },
-    selectTag (event, tag) {
-      if (this.shouldEmitSelectTag) {
-        this.$emit('selectTag', tag)
-        return
-      }
-      this.closeDialogs()
-      this.$nextTick(() => {
-        this.updatePosition(event, tag)
-        this.updateTagDetailsTag(tag)
-        if (this.prevTagName === tag.name) {
-          const value = !this.$store.state.tagDetailsIsVisible
-          this.updateTagDetailsIsVisible(value)
-        } else {
-          this.updateTagDetailsIsVisible(true)
-        }
-        this.prevTagName = tag.name
-      })
-    },
-    closeDialogs () {
-      this.$emit('closeDialogs')
-    },
-    updateFilteredTags (tags) {
-      this.filteredTags = tags
-    },
-    updateFilter (filter) {
-      this.filter = filter
-      this.$nextTick(() => {
-        const tags = this.tagsFiltered || this.tags
-        if (!tags.length) { return }
-        this.focusOnId = tags[0].id
-      })
-    },
-    focusNextItem () {
-      const tags = this.tagsFiltered
-      const currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
-      let index = currentIndex + 1
-      if (tags.length === index) {
-        index = 0
-      }
-      this.focusItem(tags[index])
-    },
-    focusPreviousItem () {
-      const tags = this.tagsFiltered
-      const currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
-      let index = currentIndex - 1
-      if (index < 0) {
-        index = 0
-      }
-      this.focusItem(tags[index])
-    },
-    selectItem () {
-      const tags = this.tagsFiltered
-      const index = tags.findIndex(tags => tags.id === this.focusOnId)
-      this.selectTag(null, tags[index])
-    },
-    focusItem (tag) {
-      this.focusOnId = tag.id
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .tag-list

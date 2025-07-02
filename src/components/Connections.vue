@@ -1,15 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import Connection from '@/components/Connection.vue'
 import CurrentConnection from '@/components/CurrentConnection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
-const store = useStore()
 
-const currentConnectionStartItemIds = computed(() => store.state.currentConnectionStartItemIds)
-const remoteCurrentConnections = computed(() => store.state.remoteCurrentConnections)
-const connections = computed(() => store.getters['currentConnections/all'])
+const globalStore = useGlobalStore()
+const connectionStore = useConnectionStore()
+
+const currentConnectionStartItemIds = computed(() => globalStore.currentConnectionStartItemIds)
+const remoteCurrentConnections = computed(() => globalStore.remoteCurrentConnections)
+const connections = computed(() => connectionStore.getAllConnections)
 </script>
 
 <template lang="pug">

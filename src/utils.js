@@ -18,6 +18,7 @@ import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
 import cloneDeep from 'lodash-es/cloneDeep'
+// import merge from 'lodash-es/merge'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
@@ -207,18 +208,21 @@ export default {
     // #space
     const space = document.getElementById('space')
     if (!space) { return }
-    let rect = space.getBoundingClientRect()
+    const spaceRect = space.getBoundingClientRect()
     position = {
-      x: position.x - rect.x,
-      y: position.y - rect.y
+      x: position.x - spaceRect.x,
+      y: position.y - spaceRect.y
     }
+    // console.log('space',position, spaceRect)
+
     // #app
     const app = document.getElementById('app')
-    rect = app.getBoundingClientRect()
+    const appRect = app.getBoundingClientRect()
     position = {
-      x: position.x + rect.x,
-      y: position.y + rect.y
+      x: position.x + appRect.x,
+      y: position.y + appRect.y
     }
+    // console.log('app',position, appRect)
     // zoom
     const zoom = this.spaceCounterZoomDecimal() || 1
     position = {
@@ -462,6 +466,13 @@ export default {
     }
     return object
   },
+  objectPickKeys (object, keys) {
+    const result = {}
+    keys.forEach(key => {
+      result[key] = object[key]
+    })
+    return result
+  },
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color', 'description', 'website']
     this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })
@@ -550,6 +561,13 @@ export default {
       return event.touches.length > 1
     }
   },
+  focusTextarea (element) {
+    if (!element) { return }
+    element.focus()
+    setTimeout(() => { // use setTimeout focus to prevent 1password lag
+      element.focus()
+    }, 1)
+  },
   isEventTouchOrMouseLeftButton (event) {
     const isMouseEvent = event.type.includes('mouse')
     if (!isMouseEvent) {
@@ -576,7 +594,7 @@ export default {
     }
   },
   splitCardNameByParagraphAndSentence (prevName) {
-    const maxCardCharacterLimit = consts.defaultCharacterLimit
+    const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
     let cardNames = paragraphs.map(paragraph => {
       let sentences
@@ -638,7 +656,7 @@ export default {
     // https://regexr.com/5784j
     return string.replace(/\.$/g, '')
   },
-  removeTrailingSlash (string) {
+  clearTrailingSlash (string) {
     if (!string) { return }
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
@@ -894,21 +912,15 @@ export default {
   // normalize items
 
   normalizeItems (items) {
-    if (!this.arrayHasItems(items)) { return items }
-    items = items.filter(item => Boolean(item))
-    const normalizedItems = {}
-    items.forEach(item => {
-      normalizedItems[item.id] = item
-    })
-    return normalizedItems
+    if (!items?.length) return items
+    return Object.fromEntries(
+      items
+        .filter(Boolean)
+        .map(item => [item.id, item])
+    )
   },
   denormalizeItems (normalizedItems) {
-    const items = []
-    const ids = Object.keys(normalizedItems)
-    ids.forEach(id => {
-      items.push(normalizedItems[id])
-    })
-    return items
+    return Object.values(normalizedItems)
   },
 
   // items (cards or boxes)
@@ -975,13 +987,17 @@ export default {
   },
   sortByUpdatedAt (items) {
     items = items.map(space => {
-      space.editedAt = space.editedAt || space.createdAt
+      space.updatedAt = space.editedAt || space.updatedAt || space.createdAt
+      if (!space.updatedAt) {
+        space.updatedAt = dayjs().subtract(100, 'year')
+      }
       return space
     })
+    items = items.filter(item => Boolean(item))
     const sortedItems = items.sort((a, b) => {
-      const bEditedAt = dayjs(b.editedAt).unix()
-      const aEditedAt = dayjs(a.editedAt).unix()
-      return bEditedAt - aEditedAt
+      const bUpdatedAt = dayjs(b.updatedAt).unix()
+      const aUpdatedAt = dayjs(a.updatedAt).unix()
+      return bUpdatedAt - aUpdatedAt
     })
     return sortedItems
   },
@@ -1015,10 +1031,13 @@ export default {
 
   // Cards
 
+  cardElement (card) {
+    return document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+  },
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
-    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    const element = this.cardElement(card)
     if (!element) { return }
     const cardId = card.id
     card.shouldRender = element.dataset.shouldRender
@@ -1046,16 +1065,7 @@ export default {
     box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
-  updateCardDimensionsDataWhileDragging (card) {
-    if (!card) { return }
-    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
-    if (!element) { return }
-    element.dataset.x = card.x
-    element.dataset.y = card.y
-    element.dataset.width = card.width
-    element.dataset.height = card.height
-  },
-  removeAllCardDimensions (card) {
+  clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = cardWrapElement.querySelector('.card-content-wrap')
@@ -1113,8 +1123,6 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
-  // TODO estimatedCardHeightByCharacters (name) {
-  // }
 
   // boxes
 
@@ -1525,69 +1533,79 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
-  spaceIsUnchanged (prevSpace, newSpace) {
-    if (!prevSpace.cards || !prevSpace.connections) { return false }
-    const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
-    const boxesCountIsUnchanged = prevSpace.boxes?.length === newSpace.boxes.length
-    const metaKeys = ['name', 'editedAt', 'collaboratorKey', 'background', 'backgroundGradient', 'backgroundIsGradient', 'backgroundTint']
-    let metaIsUpdated
-    metaKeys.forEach(key => {
-      if (prevSpace[key] !== newSpace[key]) {
-        metaIsUpdated = true
-      }
-    })
-    if (metaIsUpdated) {
-      return false
-    }
-    return cardsCountIsUnchanged && boxesCountIsUnchanged // && editedAtIsUnchanged
-  },
-  mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
-    prevItems = prevItems.filter(item => Boolean(item))
-    newItems = newItems.filter(item => Boolean(item))
-    selectedItemIds = selectedItemIds || []
-    const prevIds = prevItems.map(item => item.id)
-    const newIds = newItems.map(item => item.id)
-    newItems = this.normalizeItems(newItems)
-    prevItems = this.normalizeItems(prevItems)
-    const addItems = []
-    const updateItems = []
-    const removeItems = []
-    newIds.forEach(id => {
-      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
-      const itemExists = prevIds.includes(id)
-      if (selectedItem) {
-        const prevItem = prevItems[id]
-        const newItem = newItems[id]
-        // use prevItem position to avoid ppsition item jumping while selected items dragging
-        newItem.x = prevItem.x
-        newItem.y = prevItem.y
-        updateItems.push(newItem)
-      } else if (itemExists) {
-        updateItems.push(newItems[id])
-      } else {
-        addItems.push(newItems[id])
-      }
-    })
-    prevIds.forEach(id => {
-      const prevItemNotFoundInNewItems = !newIds.includes(id)
-      const threshold = 30 * 1000 // 30 seconds
-      const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
-      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
-      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession && !selectedItem
-      if (itemIsRemoved) {
-        removeItems.push(prevItems[id])
-      }
-    })
-    return { addItems, updateItems, removeItems }
-  },
-  newSpaceBackground (space, currentUser) {
-    if (currentUser.defaultSpaceBackgroundGradient) {
-      space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient
+  // mergeSpaceItems({ prevItems, newItems, selectedItemIds = [] }) {
+  //   const filteredPrevItems = prevItems.filter(Boolean)
+  //   const filteredNewItems = newItems.filter(Boolean)
+  //   const prevIds = filteredPrevItems.map(({ id }) => id)
+  //   const newIds = filteredNewItems.map(({ id }) => id)
+  //   const normalizedNew = this.normalizeItems(filteredNewItems)
+  //   const normalizedPrev = this.normalizeItems(filteredPrevItems)
+  //   const items = normalizedNew // [ id: {object } ]
+  //   const threshold = 30 * 1000 // 30 seconds
+  //   const now = Date.now()
+
+  //   // const addItems = []
+  //   // const updateItems = []
+  //   // const removeItems = []
+
+  //   newIds.forEach(id => {
+  //     const isSelected = selectedItemIds.includes(id)
+  //     const isUpdated = prevIds.includes(id)
+  //     const prevItem = normalizedPrev[id]
+  //     const newItem = normalizedNew[id]
+  //     const threshold = 30 * 1000 // 30 seconds
+  //     const now = Date.now()
+  //     // const isNewUpdate = dayjs(now).diff(prevItem.updatedAt) >= threshold
+
+  //     // add prev to new
+
+  //     // merge prev updates
+
+  //     // use selected prev positions to avoid ppsition jumping while dragging
+  //     if (isSelected) {
+  //       const { x, y } = prevItem
+  //       items[id].x = x
+  //       items[id].y = y
+  //     }
+
+  //     prevIds.filter(prevId => {
+  //       // .filter(id => {
+  //       // const isNew = !newIds.includes(prevId)
+  //         const isNotInNewItems = !newIds.includes(id)
+  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
+  //         return isNotInNewItems && isOldUpdate
+  //       // })
+  //     })
+
+  //     if (isUpdated) {
+  //       items[id] = { ...prevItem, ...newItem}
+  //     } else {
+  //       items.push()
+  //       addItems.push(normalizedNew[id])
+  //     }
+  //   })
+  //   // Handle removals
+  //   removeItems.push(
+  //     ...prevIds
+  //       .filter(id => {
+  //         const isNotInNewItems = !newIds.includes(id)
+  //         const isNotSelected = !selectedItemIds.includes(id)
+  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
+  //         return isNotInNewItems && isNotSelected && isOldUpdate
+  //       })
+  //       .map(id => normalizedPrev[id])
+  //   )
+  //   // return items , denomarlized
+  //   return { addItems, updateItems, removeItems }
+  // },
+  newSpaceBackground (space, user) {
+    if (user.defaultSpaceBackgroundGradient) {
+      space.backgroundGradient = user.defaultSpaceBackgroundGradient
       space.backgroundIsGradient = true
     } else {
-      space.background = currentUser.defaultSpaceBackground
+      space.background = user.defaultSpaceBackground
     }
-    space.backgroundTint = currentUser.defaultSpaceBackgroundTint
+    space.backgroundTint = user.defaultSpaceBackgroundTint
     return space
   },
   updateSpaceCardsCreatedThroughPublicApi (space) {
@@ -1639,6 +1657,7 @@ export default {
     space.previewImage = null
     space.previewThumbnailImage = null
     space.groupId = null
+    space.group = null
     space.createdAt = new Date()
     space.editedAt = new Date()
     space.collaboratorKey = nanoid()
@@ -1658,34 +1677,9 @@ export default {
     }
     return space
   },
-  updateSpaceUserId (space, userId) {
-    space.cards = space.cards?.map(card => {
-      if (card.userId === consts.rootUserId) {
-        card.userId = null
-        return card
-      }
-      if (card.userId === null) { return card }
-      if (card.nameUpdatedByUserId) {
-        card.nameUpdatedByUserId = userId
-      }
-      card.userId = userId
-      return card
-    })
-    space.boxes = space.boxes?.map(box => {
-      box.userId = userId
-      return box
-    })
-    space.connectionTypes = space.connectionTypes?.map(type => {
-      type.userId = userId
-      return type
-    })
-    space.connections = space.connections?.map(connection => {
-      connection.userId = userId
-      return connection
-    })
-    space.userId = userId
-    space.editedByUserId = userId
-    return space
+  excludeCurrentUser (users, currentUserId) {
+    users = users.filter(user => user.id !== currentUserId)
+    return users
   },
   itemUserId (user, item, nullItemUsers) {
     let userId
@@ -1806,27 +1800,31 @@ export default {
       return connection
     })
   },
-  updateSpacesUserId (userId, spaces) {
-    spaces = spaces.map(space => {
-      space = this.updateSpaceItemsUserId(space, userId)
-      space = this.updateSpaceUserId(space, userId)
-      delete space.users
-      return space
-    })
-    return spaces
-  },
   updateSpaceItemsUserId (space, userId) {
     const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {
-        item.userId = userId
-        item.nameUpdatedByUserId = null
-        item.nameUpdatedAt = new Date()
+        const shouldUpdate = item.userId !== null && item.userId !== consts.rootUserId // ensures corect free card count
+        if (shouldUpdate) {
+          item.userId = userId
+          item.nameUpdatedByUserId = null
+        }
         return item
       })
     })
     return space
+  },
+  updateSpacesUser (user, spaces) {
+    spaces = spaces.map(space => {
+      space = this.updateSpaceItemsUserId(space, user.id)
+      // space = this.updateSpaceUserId(space, userId)
+      space.userId = user.id
+      space.editedByUserId = user.id
+      space.users = [user]
+      return space
+    })
+    return spaces
   },
   newHelloSpace (user) {
     const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
@@ -1857,11 +1855,11 @@ export default {
     if (!this.objectHasKeys(space)) { return space }
     if (!this.arrayHasItems(space.connections)) { return space }
     const connections = space.connections.filter(connection => {
-      const hasTypeId = Boolean(connection.connectionTypeId)
+      const hasTypeId = Boolean(connection?.connectionTypeId)
       return hasTypeId
     })
     space.connections = connections
-    space.cards = space.cards.filter(card => card.name)
+    space.cards = space.cards.filter(card => card?.name) || []
     space.cards = space.cards.map(card => {
       if (card.resizeWidth) {
         card.resizeWidth = Math.round(card.resizeWidth)
@@ -2365,14 +2363,14 @@ export default {
       return 'link'
     }
   },
-  removeTrackingQueryStringsFromURLs (name) {
+  clearTrackingQueryStringsFromUrls (name) {
     const urls = this.urlsFromString(name)
     // https://www.bleepingcomputer.com/PoC/qs.html
     // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
     const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
     urls.forEach(url => {
       url = url.trim()
-      url = this.removeTrailingSlash(url)
+      url = this.clearTrailingSlash(url)
       const queryString = this.queryString(url)
       const domain = this.urlWithoutQueryString(url)
       if (!queryString) { return }
@@ -2399,7 +2397,7 @@ export default {
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
       url = url.trim()
-      url = this.removeTrailingSlash(url)
+      url = this.clearTrailingSlash(url)
       if (!this.urlIsWebsite(url)) { return }
       const queryString = this.queryString(url) || ''
       const domain = this.urlWithoutQueryString(url)
@@ -2472,27 +2470,35 @@ export default {
   // Broadcast Websocket 🌝
 
   userMeta (user, space) {
-    const isUser = space.users.find(spaceUser => {
-      return spaceUser.id === user.id
-    })
-    const spaceCollaborators = space.collaborators || []
-    const isCollaborator = spaceCollaborators.find(collaborator => {
-      return collaborator.id === user.id
-    })
-    const isSpectator = !(isUser || isCollaborator)
-    const isSignedIn = Boolean(user.apiKey)
-    return {
-      id: user.id,
-      name: user.name,
-      color: user.color,
-      description: user.description,
-      website: user.website,
-      isSignedIn,
-      isSpectator,
-      isCollaborator,
-      isUpgraded: user.isUpgraded,
-      isModerator: user.isModerator,
-      isDonor: user.isDonor
+    if (space) {
+      const isUser = space.users.find(spaceUser => {
+        return spaceUser.id === user.id
+      })
+      const spaceCollaborators = space.collaborators || []
+      const isCollaborator = spaceCollaborators.find(collaborator => {
+        return collaborator.id === user.id
+      })
+      const isSpectator = !(isUser || isCollaborator)
+      const isSignedIn = Boolean(user.apiKey)
+      return {
+        id: user.id,
+        name: user.name,
+        color: user.color,
+        description: user.description,
+        website: user.website,
+        isUpgraded: user.isUpgraded,
+        isModerator: user.isModerator,
+        isDonor: user.isDonor,
+        isSignedIn,
+        isSpectator,
+        isCollaborator
+      }
+    } else {
+      return {
+        id: user.id,
+        name: user.name,
+        color: user.color
+      }
     }
   },
   spaceMeta (space) {
@@ -2503,27 +2509,6 @@ export default {
       previewThumbnailImage: space.previewThumbnailImage,
       showInExplore: space.showInExplore
     }
-  },
-  normalizeBroadcastUpdates (updates) {
-    const message = updates.type
-    const handler = updates.handler
-    if (updates.body) {
-      const keys = Object.keys(updates.body)
-      keys.forEach(key => {
-        updates[key] = updates.body[key]
-      })
-      delete updates.body
-    }
-    if (updates.updates) {
-      const keys = Object.keys(updates.updates)
-      keys.forEach(key => {
-        updates[key] = updates.updates[key]
-      })
-      delete updates.updates
-    }
-    delete updates.message
-    delete updates.handler
-    return { message, handler, updates }
   },
 
   // Upload
@@ -3035,7 +3020,7 @@ export default {
           id: edge.id,
           startItemId: edge.fromNode,
           endItemId: edge.toNode,
-          controlPoint: 'q00,00', // straight line
+          controlPoint: consts.straightLineConnectionPathControlPoint,
           directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
           connectionTypeId: typeId,
           labelIsVisible: Boolean(edge.label)

@@ -1,19 +1,25 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
 import InviteToGroup from '@/components/InviteToGroup.vue'
+import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
-import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialog = ref(null)
 
@@ -26,14 +32,14 @@ const props = defineProps({
 })
 
 watch(() => props.visible, (value, prevValue) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   closeDialogs()
   if (value) {
     updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/updateSpacePreviewImage')
+    globalStore.shouldExplicitlyHideFooter = true
+    spaceStore.updateSpacePreviewImage()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -45,28 +51,21 @@ const state = reactive({
   embedIsVisible: false,
   isShareInPresentationMode: false,
   emailInvitesIsVisible: false,
-  childDialogIsVisible: false
+  childDialogIsVisible: false,
+  spaceUsersIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
-const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-
-// add to explore
-
-const exploreSectionIsVisible = computed(() => {
-  const showInExplore = store.state.currentSpace.showInExplore
-  const shouldShowAskToAddToExplore = !isSpaceMember.value && !showInExplore
-  return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
-})
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const spaceIsRemote = computed(() => spaceStore.getSpaceIsRemote)
+const spaceIsPublic = computed(() => spaceStore.privacy !== 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 // copy url
 
 const spaceUrl = computed(() => {
-  let url = store.getters['currentSpace/url']
+  let url = spaceStore.getSpaceUrl
   url = new URL(url)
   if (state.isShareInPresentationMode) {
     url.searchParams.set('present', true)
@@ -74,19 +73,19 @@ const spaceUrl = computed(() => {
   return url.href
 })
 const copySpaceUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(spaceUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 const webShareIsSupported = computed(() => navigator.share)
 const webShare = () => {
-  const spaceName = store.state.currentSpace.name
+  const spaceName = spaceStore.name
   const data = {
     title: 'Kinopio Space',
     text: spaceName,
@@ -105,7 +104,7 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
@@ -113,7 +112,8 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.emailInvitesIsVisible = false
   state.childDialogIsVisible = false
-  store.commit('triggerCloseChildDialogs')
+  state.spaceUsersIsVisible = false
+  globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
@@ -123,8 +123,8 @@ const childDialogIsVisible = (value) => {
 // toggles
 
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const togglePrivacyPickerIsVisible = () => {
   const isVisible = state.privacyPickerIsVisible
@@ -145,22 +145,33 @@ const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
 }
-const emailInvitesIsVisible = (value) => {
+const updateEmailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
 }
 
 // users
 
 const users = computed(() => {
-  let items = utils.clone(store.state.currentSpace.users)
-  items = items.concat(store.state.currentSpace.collaborators)
+  let items = utils.clone(spaceStore.users)
+  items = items.concat(spaceStore.collaborators)
   return items
 })
+const toggleSpaceUsersIsVisible = () => {
+  const value = !state.spaceUsersIsVisible
+  closeDialogs()
+  state.spaceUsersIsVisible = value
+}
 
 // groups
 
-const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+
+const usersLabel = computed(() => {
+  const condition = spaceStore.getSpaceMembers.length !== 1
+  const label = utils.pluralize('User', condition)
+  return `${users.value.length} ${label}`
+})
 
 </script>
 
@@ -170,6 +181,16 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
     .row.title-row
       p Share
       .row
+        //- .button-wrap
+        //-   button.small-button
+        //-     img.icon.group(src="@/assets/group.svg")
+        //-     span Groups
+        //- users
+        .button-wrap
+          button.small-button(@click.stop="toggleSpaceUsersIsVisible" :class="{active: state.spaceUsersIsVisible}")
+            span {{usersLabel}}
+          SpaceUsers(:visible="state.spaceUsersIsVisible")
+        //- rss
         .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS
@@ -196,12 +217,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
 
-  //- collaborators
-  section
-    SpaceUsersButton(:showLabel="true")
   //- Invite
   InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
-  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
@@ -209,14 +227,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-
-  //- Explore
-  section(v-if="exploreSectionIsVisible")
-    .row
-      p Share with the Community
-    .row
-      AddToExplore
-      AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section
@@ -227,7 +237,16 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
           span Embed
         Embed(:visible="state.embedIsVisible")
-
+    details(@toggle="updateDialogHeight")
+      summary 🌱 Spread the Word
+      section.subsection
+        p I don't have the resources of a VC backed company, so when you tell a friend about Kinopio, or share spaces at work, it really helps.
+        //- p Your voice is the water that grows this seedling.
+        p – Piri
+        p
+          img(src="https://cdn.kinopio.club/fqoJozHGrobicZe0XUG1e/my-garden.webp")
+        //- https://alternativeto.net/software/kinopio/about/
+        //- https://toolfinder.co/tools/kinopio
 </template>
 
 <style lang="stylus">
@@ -246,17 +265,16 @@ dialog.share
     margin-top 10px
   .description
     margin-top 3px
-  dialog.privacy-picker,
   dialog.dialog-wrap
     left initial
     right 8px
   dialog.user-details
     left initial
     right calc(100% - 20px)
-  dialog.import-export
-    top calc(100% - 8px)
-    left initial
-    right 8px
+  dialog.import-export,
+  dialog.embed
+    top initial
+    bottom 25px
   .share-private
     margin-top 10px
   .privacy-button + input
@@ -273,16 +291,6 @@ dialog.share
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
-
-  @media(max-height 670px)
-    dialog.import-export,
-    dialog.embed
-      top -50px
-
-  @media(max-height 500px)
-    dialog.import-export,
-    dialog.embed
-      top -200px
 
   .segmented-buttons
     z-index 1
@@ -313,7 +321,4 @@ dialog.share
       margin-top 0
     label + label
       margin-left 6px
-
-  dialog.import-export
-    left 20px
 </style>

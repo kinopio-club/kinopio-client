@@ -6,12 +6,9 @@ import isYesterday from 'dayjs/plugin/isYesterday'
 import isToday from 'dayjs/plugin/isToday'
 
 import { reactive, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
 
 dayjs.extend(isYesterday)
 dayjs.extend(isToday)
-
-const store = useStore()
 
 const props = defineProps({
   space: Object

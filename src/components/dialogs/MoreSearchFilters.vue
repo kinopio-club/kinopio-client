@@ -1,6 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/data/frames.js'
@@ -9,7 +15,12 @@ import FrameBadge from '@/components/FrameBadge.vue'
 
 import uniq from 'lodash-es/uniq'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -56,16 +67,16 @@ const updateResultsSectionHeight = async () => {
 
 // items
 
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
-const connectionTypes = computed(() => utils.clone(store.getters['currentConnections/allTypes']))
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
+const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const spaceFrames = computed(() => {
-  const cards = utils.clone(store.getters['currentCards/all'])
+  const cards = cardStore.getAllCards
   let framesInUse = cards.map(card => card.frameId)
   framesInUse = uniq(framesInUse.filter(frame => frame))
   return framesInUse.map(frame => frames[frame])
 })
-const tags = computed(() => utils.clone(store.getters['currentSpace/spaceTags']))
-const boxes = computed(() => utils.clone(store.getters['currentBoxes/all']))
+const tags = computed(() => spaceStore.getSpaceTags)
+const boxes = computed(() => boxStore.getAllBoxes)
 
 // all items
 
@@ -122,7 +133,7 @@ const items = computed(() => {
   }
 })
 const currentFilteredItemsIds = computed(() => {
-  return store.state.filteredConnectionTypeIds.concat(store.state.filteredFrameIds, store.state.filteredTagNames, store.state.filteredBoxIds)
+  return globalStore.filteredConnectionTypeIds.concat(globalStore.filteredFrameIds, globalStore.filteredTagNames, globalStore.filteredBoxIds)
 })
 const boxBadgeStyles = (box) => {
   return {
@@ -148,42 +159,42 @@ const clearResultsFilter = () => {
   }
 }
 const clearAllFilters = () => {
-  store.dispatch('clearAllFilters')
+  globalStore.clearAllFilters()
   clearResultsFilter()
 }
 
 // Toggle filters
 
 const toggleFilteredBox = (box) => {
-  const filtered = store.state.filteredBoxIds
+  const filtered = globalStore.filteredBoxIds
   if (filtered.includes(box.id)) {
-    store.commit('removeFromFilteredBoxId', box.id)
+    globalStore.removeFromFilteredBoxId(box.id)
   } else {
-    store.commit('addToFilteredBoxId', box.id)
+    globalStore.addToFilteredBoxId(box.id)
   }
 }
 const toggleFilteredTag = (tag) => {
-  const tags = store.state.filteredTagNames
+  const tags = globalStore.filteredTagNames
   if (tags.includes(tag.name)) {
-    store.commit('removeFromFilteredTagNames', tag.name)
+    globalStore.removeFromFilteredTagNames(tag.name)
   } else {
-    store.commit('addToFilteredTagNames', tag.name)
+    globalStore.addToFilteredTagNames(tag.name)
   }
 }
 const toggleFilteredConnectionType = (type) => {
-  const filtered = store.state.filteredConnectionTypeIds
+  const filtered = globalStore.filteredConnectionTypeIds
   if (filtered.includes(type.id)) {
-    store.commit('removeFromFilteredConnectionTypeId', type.id)
+    globalStore.removeFromFilteredConnectionTypeId(type.id)
   } else {
-    store.commit('addToFilteredConnectionTypeId', type.id)
+    globalStore.addToFilteredConnectionTypeId(type.id)
   }
 }
 const toggleFilteredCardFrame = (frame) => {
-  const filtered = store.state.filteredFrameIds
+  const filtered = globalStore.filteredFrameIds
   if (filtered.includes(frame.id)) {
-    store.commit('removeFromFilteredFrameIds', frame.id)
+    globalStore.removeFromFilteredFrameIds(frame.id)
   } else {
-    store.commit('addToFilteredFrameIds', frame.id)
+    globalStore.addToFilteredFrameIds(frame.id)
   }
 }
 
@@ -193,19 +204,19 @@ const isSelected = (item) => {
   return currentFilteredItemsIds.value.includes(item.id)
 }
 const boxIsActive = (box) => {
-  const boxes = store.state.filteredBoxIds
+  const boxes = globalStore.filteredBoxIds
   return boxes.includes(box.id)
 }
 const tagIsActive = (tag) => {
-  const tags = store.state.filteredTagNames
+  const tags = globalStore.filteredTagNames
   return tags.includes(tag.name)
 }
 const connectionTypeIsActive = (type) => {
-  const types = store.state.filteredConnectionTypeIds
+  const types = globalStore.filteredConnectionTypeIds
   return types.includes(type.id)
 }
 const frameIsActive = (frame) => {
-  const frames = store.state.filteredFrameIds
+  const frames = globalStore.filteredFrameIds
   return frames.includes(frame.id)
 }
 </script>

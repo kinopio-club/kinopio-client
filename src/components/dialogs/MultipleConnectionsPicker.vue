@@ -1,13 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const connectionStore = useConnectionStore()
 
 const dialogElement = ref(null)
 
@@ -32,20 +35,21 @@ watch(() => props.visible, async (value, prevValue) => {
 })
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // types
 
-const connectionTypes = computed(() => store.getters['currentConnections/allTypes'])
+const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const changeConnectionTypes = (type) => {
   props.selectedConnections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
+    const update = {
       id: connection.id,
       connectionTypeId: type.id
-    })
+    }
+    connectionStore.updateConnection(update)
   })
-  store.commit('currentConnections/lastTypeId', type.id)
+  connectionStore.updatePrevConnectionTypeId(type.id)
 }
 const connectionTypeIsActive = (type) => {
   return props.selectedConnections.find(connection => {
@@ -53,7 +57,7 @@ const connectionTypeIsActive = (type) => {
   })
 }
 const addConnectionType = () => {
-  store.dispatch('currentConnections/addType', { color: state.nextConnectionTypeColor })
+  connectionStore.createConnectionType({ color: state.nextConnectionTypeColor })
   const types = utils.clone(connectionTypes.value)
   const newType = last(types)
   changeConnectionTypes(newType)

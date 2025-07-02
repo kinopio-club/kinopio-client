@@ -1,17 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const badgeElement = ref(null)
 const progressElement = ref(null)
 const buttonElement = ref(null)
-
-let unsubscribe
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
@@ -19,17 +22,15 @@ onMounted(() => {
   window.addEventListener('mouseup', endMovePlayhead)
   window.addEventListener('touchend', endMovePlayhead)
   updateButtonPosition()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'spaceZoomPercent') {
-      updateButtonPosition()
-    }
-  })
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('mousemove', dragPlayhead)
   window.removeEventListener('mouseup', endMovePlayhead)
   window.removeEventListener('touchend', endMovePlayhead)
+})
+
+watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
+  updateButtonPosition()
 })
 
 const emit = defineEmits(['updatePlayhead', 'resetPlayhead', 'removeAnimations'])
@@ -121,7 +122,7 @@ const dragPlayheadWheel = (event) => {
   let shouldZoomIn = deltaY < 0
   let shouldZoomOut = deltaY > 0
   let invertZoom = event.webkitDirectionInvertedFromDevice
-  if (store.state.currentUser.shouldInvertZoom) {
+  if (userStore.shouldInvertZoom) {
     invertZoom = !invertZoom
   }
   if (invertZoom) {

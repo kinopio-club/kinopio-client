@@ -1,12 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import codeLanguages from '@/data/codeLanguages.json'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
 
 const dialog = ref(null)
 const placeholder = 'Search Languages'
@@ -21,17 +24,17 @@ const state = reactive({
   filteredCodeLanguages: codeLanguages,
   focusOnId: null
 })
-const visible = computed(() => store.state.codeLanguagePickerIsVisible)
+const visible = computed(() => globalStore.codeLanguagePickerIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) { scrollIntoView() }
 })
-const position = computed(() => store.state.codeLanguagePickerPosition)
-const cardId = computed(() => store.state.codeLanguagePickerCardId)
+const position = computed(() => globalStore.codeLanguagePickerPosition)
+const cardId = computed(() => globalStore.codeLanguagePickerCardId)
 
 // languages
 
 const languageIsActive = (language) => {
-  const card = store.getters['currentCards/byId'](cardId.value)
+  const card = cardStore.getCard(cardId.value)
   const cardLanguage = card.codeBlockLanguage || 'txt'
   return language.name === cardLanguage
 }
@@ -40,12 +43,12 @@ const languageIsFocused = (language) => {
 }
 const selectLanguage = (language) => {
   if (!language) { return }
-  const card = {
+  const update = {
     id: cardId.value,
     codeBlockLanguage: language.name
   }
-  store.dispatch('currentCards/update', { card })
-  store.dispatch('closeAllDialogs')
+  cardStore.updateCard(update)
+  globalStore.closeAllDialogs()
 }
 
 // results list input
@@ -99,10 +102,10 @@ const languageColorStyle = (language) => {
 
 const styles = computed(() => {
   // adapted from card details
-  let zoom = store.getters.spaceCounterZoomDecimal
+  let zoom = globalStore.getSpaceCounterZoomDecimal
   if (utils.isAndroid()) {
     zoom = utils.visualViewport().scale
-  } else if (store.state.isTouchDevice) {
+  } else if (globalStore.isTouchDevice) {
     zoom = 1
   }
   const transform = `scale(${zoom})`
@@ -125,7 +128,7 @@ const scrollIntoView = async () => {
   await nextTick()
   await nextTick()
   const element = dialog.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 </script>
 

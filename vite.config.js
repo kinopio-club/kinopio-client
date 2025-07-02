@@ -34,10 +34,16 @@ export default defineConfig(async ({ command, mode }) => {
     '/roadmap',
     '/survey'
   ]
+  // TODO
+  // pascal sitemap rec: get all public spaces with content, mark each as user generated
+  // update once a day (maybe not at the build stage, but in netlify functions)
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
   // config
   return {
+    optimizeDeps: {
+      include: ['pinia']
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src')

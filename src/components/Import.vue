@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -11,7 +14,9 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const inputElement = ref(null)
 
@@ -32,12 +37,12 @@ const isLoadingJson = computed(() => state.loading && state.format === 'json')
 const isLoadingCanvas = computed(() => state.loading && state.format === 'canvas')
 
 const toggleImportArenaChannelIsVisible = () => {
-  store.commit('closeAllDialogs')
-  store.commit('importArenaChannelIsVisible', true)
+  globalStore.closeAllDialogs()
+  globalStore.importArenaChannelIsVisible = true
 }
 
 const newTypeColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -122,8 +127,8 @@ const validateSchema = (space, schema) => {
 
 const importSpace = async (space) => {
   try {
-    const user = store.state.currentUser
-    store.commit('isLoadingSpace', true)
+    const user = userStore.getUserAllState
+    globalStore.isLoadingSpace = true
     validate(space)
     if (state.format === 'canvas') {
       const typeColor = newTypeColor()
@@ -133,10 +138,9 @@ const importSpace = async (space) => {
     space.connections = utils.migrationConnections(space.connections)
     const uniqueNewSpace = await cache.updateIdsInSpace(space)
     console.info('🧚 space to import', uniqueNewSpace)
-    await store.dispatch('currentSpace/saveSpace', uniqueNewSpace)
-    await store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace })
+    await spaceStore.saveImportSpace(uniqueNewSpace)
     updateSpaces()
-    store.commit('triggerFocusSpaceDetailsName')
+    globalStore.triggerFocusSpaceDetailsName()
   } catch (error) {
     console.error('🚒', error)
     if (!state.errors.length) {

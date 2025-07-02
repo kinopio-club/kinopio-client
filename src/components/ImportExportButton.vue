@@ -1,18 +1,30 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import ImportExport from '@/components/dialogs/ImportExport.vue'
-const store = useStore()
+
+const globalStore = useGlobalStore()
 
 const emit = defineEmits(['childDialogIsVisible'])
 
+let unsubscribes
+
 onMounted(() => {
-  store.subscribe(async (mutation) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({

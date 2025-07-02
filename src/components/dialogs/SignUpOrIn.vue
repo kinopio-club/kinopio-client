@@ -1,6 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -11,8 +17,14 @@ import inboxSpace from '@/data/inbox.json'
 import helloSpace from '@/data/hello.json'
 
 import { nanoid } from 'nanoid'
+import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop suppor
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
 
 let shouldLoadLastSpace
 let sessionToken
@@ -28,10 +40,10 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     clearErrors()
     createSessionToken()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     focusEmail()
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -75,7 +87,7 @@ const hideSignUpVisible = () => {
 }
 const createSessionToken = () => {
   sessionToken = nanoid()
-  store.dispatch('api/createSessionToken', sessionToken)
+  apiStore.createSessionToken(sessionToken)
 }
 const focusEmail = async () => {
   await nextTick()
@@ -83,7 +95,7 @@ const focusEmail = async () => {
   if (!element) { return }
   element.focus()
 }
-const groupToJoinOnLoad = computed(() => store.state.groupToJoinOnLoad)
+const groupToJoinOnLoad = computed(() => globalStore.groupToJoinOnLoad)
 
 // errors
 
@@ -143,7 +155,7 @@ const resetPassword = async (event) => {
   if (state.loading.resetPassword || state.resetSuccess) { return }
   const email = event.target[0].value.toLowerCase()
   state.loading.resetPassword = true
-  const response = await store.dispatch('api/resetPassword', email)
+  const response = await apiStore.resetPassword(email)
   state.loading.resetPassword = false
   if (response.status === 404) {
     state.error.resetUserEmailNotFound = true
@@ -171,9 +183,9 @@ const isSignUpPasswordTooShort = (password) => {
   }
 }
 const migrationAppleAppAccountToken = () => {
-  const appleToken = store.state.currentUser.appleAppAccountToken
+  const appleToken = userStore.appleAppAccountToken
   if (!appleToken) {
-    store.commit('currentUser/updateAppleAppAccountToken')
+    userStore.appleAppAccountToken = uuidv4()
   }
 }
 const signUp = async (event) => {
@@ -182,31 +194,29 @@ const signUp = async (event) => {
   const password = event.target[1].value
   const confirmPassword = event.target[2].value
   migrationAppleAppAccountToken()
-  const currentUser = utils.clone(store.state.currentUser)
+  const currentUser = userStore.getUserAllState
   if (!isPasswordMatchesEmail(email, password)) { return }
   if (!isSignUpPasswordTooShort(password)) { return }
   if (!isSignUpPasswordsMatch(password, confirmPassword)) { return }
   state.loading.signUpOrIn = true
-  const response = await store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
+  const response = await apiStore.signUp({ email, password, currentUser, sessionToken })
   const newUser = await response.json()
   if (isSuccess(response)) {
-    store.commit('clearAllNotifications')
-    // update user to remove user
-    await cache.saveUser(newUser)
-    store.commit('currentUser/updateUser', newUser)
-    postMessage.send({ name: 'setApiKey', value: newUser.apiKey })
-    // save spaces to remote
+    globalStore.clearAllNotifications()
+    // update user
+    userStore.initializeUserState(newUser)
+    // update and save spaces
     await backupLocalSpaces()
     await migrationSpacesConnections()
-    await updateSpacesUserId()
-    updateCurrentSpaceWithNewUserId(currentUser, newUser)
-    await store.dispatch('api/createSpaces')
+    await updateLocalSpacesUser()
+    updateCurrentSpaceWithNewUser(currentUser, newUser)
+    await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
-    store.dispatch('currentUser/checkIfShouldJoinGroup')
+    userStore.checkIfShouldJoinGroup()
     await addCollaboratorToInvitedSpaces()
-    store.commit('triggerUpdateWindowHistory')
-    store.dispatch('themes/restore')
+    globalStore.triggerUpdateWindowHistory()
+    themeStore.restoreTheme()
   } else {
     await handleErrors(newUser)
   }
@@ -216,43 +226,41 @@ const signUp = async (event) => {
 
 const signIn = async (event) => {
   if (state.loading.signUpOrIn) { return }
-  const previousUser = utils.clone(store.state.currentUser)
+  const previousUser = userStore.getUserAllState
   const email = event.target[0].value.toLowerCase()
   const password = event.target[1].value
   state.loading.signUpOrIn = true
-  const response = await store.dispatch('api/signIn', { email, password })
+  const response = await apiStore.signIn({ email, password })
   const result = await response.json()
   state.loading.signUpOrIn = false
   if (isSuccess(response)) {
-    store.commit('isLoadingSpace', true)
-    store.commit('addNotification', { message: 'Signing In…' })
-    // update user to remote user
-    await cache.saveUser(result)
-    store.commit('currentUser/updateUser', result)
+    globalStore.isLoadingSpace = true
+    globalStore.addNotification({ message: 'Signing In…' })
+    userStore.initializeUserState(result)
     // update edited local spaces to remote user
     await removeUneditedSpace('Hello Kinopio')
     await removeUneditedSpace('Inbox')
     await migrationSpacesConnections()
-    await updateSpacesUserId()
-    await store.dispatch('api/createSpaces')
+    await updateLocalSpacesUser()
+    await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
-    store.dispatch('currentUser/checkIfShouldJoinGroup')
+    userStore.checkIfShouldJoinGroup()
     // add remote spaces
-    const spaces = await store.dispatch('api/getUserSpaces')
+    const spaces = await apiStore.getUserSpaces()
     await cache.addSpaces(spaces)
-    store.commit('clearAllNotifications')
+    globalStore.clearAllNotifications()
     await addCollaboratorToInvitedSpaces()
-    store.commit('triggerSpaceDetailsVisible')
-    store.commit('isLoadingFavorites', true)
-    store.dispatch('currentUser/restoreUserAssociatedData')
-    store.commit('triggerUpdateNotifications')
-    store.dispatch('themes/restore')
+    globalStore.triggerSpaceDetailsVisible()
+    globalStore.isLoadingFavorites = true
+    userStore.restoreUserAssociatedData()
+    globalStore.triggerUpdateNotifications()
+    themeStore.restoreTheme()
     if (shouldLoadLastSpace) {
-      await store.dispatch('currentSpace/loadLastSpace')
-      store.commit('triggerUpdateWindowHistory')
+      await spaceStore.loadLastSpace()
+      globalStore.triggerUpdateWindowHistory()
     }
-    store.commit('isLoadingSpace', false)
+    globalStore.isLoadingSpace = false
   } else {
     await handleErrors(result)
   }
@@ -266,14 +274,14 @@ const isSuccess = (response) => {
 }
 const notifySignedIn = () => {
   state.loading.signUpOrIn = false
-  store.dispatch('closeAllDialogs')
-  store.commit('removeNotificationByMessage', 'Signing In…')
-  store.commit('addNotification', { message: 'Signed In', type: 'success' })
-  store.commit('currentUserIsInvitedButCannotEditCurrentSpace', false)
+  globalStore.closeAllDialogs()
+  globalStore.removeNotificationByMessage('Signing In…')
+  globalStore.addNotification({ message: 'Signed In', type: 'success' })
+  globalStore.currentUserIsInvitedButCannotEditCurrentSpace = false
 }
 const notifyIsJoiningGroup = () => {
-  if (!store.state.shouldNotifyIsJoiningGroup) { return }
-  store.commit('notifyIsJoiningGroup', true)
+  if (!globalStore.shouldNotifyIsJoiningGroup) { return }
+  globalStore.updateNotifyIsJoiningGroup(true)
 }
 
 // update spaces on success
@@ -292,20 +300,20 @@ const migrationSpacesConnections = async () => {
     cache.saveSpace(space)
   })
 }
-const updateSpacesUserId = async () => {
-  const userId = store.state.currentUser.id
+const updateLocalSpacesUser = async () => {
+  const user = userStore.getUserPublicMeta
   const spaces = await cache.getAllSpaces()
-  const newSpaces = utils.updateSpacesUserId(userId, spaces)
+  const newSpaces = utils.updateSpacesUser(user, spaces)
   for (const space of newSpaces) {
     await cache.saveSpace(space)
   }
 }
-const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
-  const currentSpace = store.state.currentSpace
-  const userIsSpaceUser = store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+const updateCurrentSpaceWithNewUser = (previousUser, newUser) => {
+  const userIsSpaceUser = userStore.getUserIsSpaceUserByUser(previousUser)
   if (!userIsSpaceUser) { return }
-  store.commit('currentSpace/removeUserFromSpace', previousUser)
-  store.commit('currentSpace/addUserToSpace', newUser)
+  spaceStore.removeUserFromSpace(previousUser)
+  spaceStore.addUserToSpace(newUser)
+  spaceStore.spectators = []
 }
 const removeUneditedSpace = async (spaceName) => {
   const currentSpace = await cache.getSpaceByName(spaceName)
@@ -344,22 +352,22 @@ const removeUneditedSpace = async (spaceName) => {
 const addCollaboratorToCurrentSpace = async () => {
   const invitedSpaces = await cache.invitedSpaces()
   const invitedSpaceIds = invitedSpaces.map(space => space?.id)
-  const currentSpace = store.state.currentSpace
-  const currentUser = store.state.currentUser
+  const currentSpace = spaceStore.getSpaceAllState
+  const currentUser = userStore.getUserAllState
   if (invitedSpaceIds.includes(currentSpace?.id)) {
-    store.commit('currentSpace/addCollaboratorToSpace', currentUser)
-    store.commit('broadcast/close')
-    store.commit('broadcast/joinSpaceRoom')
+    spaceStore.addCollaboratorToSpace(currentUser)
+    broadcastStore.close()
+    broadcastStore.joinSpaceRoom()
   }
 }
 const addCollaboratorToInvitedSpaces = async () => {
   let invitedSpaces = await cache.invitedSpaces()
   invitedSpaces = invitedSpaces.map(space => {
-    space.userId = store.state.currentUser.id
+    space.userId = userStore.id
     return space
   })
   await addCollaboratorToCurrentSpace()
-  await store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
+  await apiStore.addToQueue({ name: 'addCollaboratorToSpaces', body: invitedSpaces })
 }
 </script>
 
@@ -422,9 +430,10 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
         button(type="submit" :class="{active : state.loading.resetPassword || state.resetSuccess}")
           span Reset Password
           Loader(:visible="state.loading.resetPassword")
-      .badge.success(v-if="state.resetSuccess") Password Reset Email Sent
       .badge.danger(v-if="state.error.resetUserEmailNotFound") A user with that that email address wasn't found. Try another?
       .badge.danger(v-if="state.error.tooManyAttempts") Too many attempts, try again in 10 minutes
+      //- sucesss
+      .badge.success(v-if="state.resetSuccess") Password Reset Email Sent
       p.success-message(v-if="state.resetSuccess") If you don't see the email, please check your spam folder, or contact support
 </template>
 
@@ -433,9 +442,6 @@ dialog.sign-up-or-in
   left initial
   right 8px
   overflow auto
-  @media(max-height 750px)
-    // for ios keyboard input
-    top -50px !important
   .reset-form
     margin-top 10px
   p,

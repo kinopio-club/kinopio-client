@@ -1,36 +1,49 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const themeStore = useThemeStore()
 
 // adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
 let canvas, context
 let ripples = [] // { x, y, color, radius, shadowRadius, speed, decay, lineWidth, shouldDestroy, opacity }
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerSonarPing') {
-      const ping = mutation.payload
-      createRipples(ping)
-    } else if (mutation.type === 'spaceZoomPercent') {
-      updateScroll()
-    }
-  })
   updateScroll()
   canvas = document.getElementById('sonar')
   context = canvas.getContext('2d')
   window.requestAnimationFrame(rippleFrame)
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', updateScroll)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerSonarPing') {
+        const ping = args[0]
+        createRipples(ping)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', updateScroll)
+  unsubscribes()
+})
+
+watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
+  updateScroll()
 })
 
 const state = reactive({
@@ -38,14 +51,14 @@ const state = reactive({
 })
 
 const updateScroll = () => {
-  state.scroll = store.getters.windowScrollWithSpaceOffset()
+  state.scroll = globalStore.getWindowScrollWithSpaceOffset
 }
 
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
+const viewportHeight = computed(() => globalStore.viewportHeight)
+const viewportWidth = computed(() => globalStore.viewportWidth)
+const isDarkTheme = computed(() => themeStore.getIsThemeDark)
 const styles = computed(() => {
   return {
     left: state.scroll.x + 'px',

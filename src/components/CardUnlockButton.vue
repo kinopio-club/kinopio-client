@@ -1,18 +1,38 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(async (mutation, state) => {
-    const { type, payload } = mutation
-    if (type === 'triggerUpdateTheme') {
-      updateDefaultColor()
-    }
-  })
   updateDefaultColor()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateTheme') {
+        updateDefaultColor()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -24,9 +44,9 @@ const state = reactive({
   position: null
 })
 
-const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const connectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.card.id))
+const canEditCard = computed(() => userStore.getUserCanEditCard(props.card))
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
 
 // theme
 
@@ -37,7 +57,7 @@ const backgroundColorIsDark = computed(() => {
   const color = props.card.backgroundColor || state.defaultColor
   return utils.colorIsDark(color)
 })
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
 const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
 
@@ -60,21 +80,21 @@ const backgroundStyles = computed(() => {
 // unlock
 
 const unlockCard = (event) => {
-  if (store.state.currentUserIsDrawingConnection) {
+  if (globalStore.currentUserIsDrawingConnection) {
     return
   }
   event.stopPropagation()
   if (!canEditCard.value || !canEditSpace.value) {
     const position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
     return
   }
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.currentUserIsDraggingCard = false
   const update = {
     id: props.card.id,
     isLocked: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 </script>

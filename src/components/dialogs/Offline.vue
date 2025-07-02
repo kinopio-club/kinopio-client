@@ -1,10 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-const store = useStore()
+
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -26,7 +30,7 @@ const updateQueue = async () => {
 }
 
 const currentUserIsSignedIn = computed(() => {
-  return Boolean(store.getters['currentUser/isSignedIn'])
+  return Boolean(userStore.getUserIsSignedIn)
 })
 const pluralChanges = computed(() => {
   const condition = state.queue.length !== 1

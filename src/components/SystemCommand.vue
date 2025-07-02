@@ -1,7 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
+const globalStore = useGlobalStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   command: String,
@@ -13,22 +17,23 @@ const commandIsTemplates = computed(() => props.command === 'templates')
 const commandIsNewSpace = computed(() => props.command === 'newSpace')
 const commandIsApps = computed(() => props.command === 'apps')
 
-const clickCommand = () => {
+const clickCommand = async () => {
   const explore = commandIsExplore.value
   const templates = commandIsTemplates.value
   const newSpace = commandIsNewSpace.value
   const apps = commandIsApps.value
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
+  await nextTick()
   if (explore) {
-    store.commit('triggerExploreIsVisible')
+    globalStore.triggerExploreIsVisible()
   } else if (templates) {
-    store.commit('triggerTemplatesIsVisible')
+    globalStore.triggerTemplatesIsVisible()
   } else if (newSpace) {
-    store.dispatch('currentSpace/addSpace')
-    store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
-    store.commit('triggerSpaceDetailsInfoIsVisible')
+    spaceStore.createSpace()
+    globalStore.addNotification({ message: 'New space created (N)', icon: 'add', type: 'success' })
+    globalStore.triggerSpaceDetailsInfoIsVisible()
   } else if (apps) {
-    store.commit('triggerAppsAndExtensionsIsVisible')
+    globalStore.triggerAppsAndExtensionsIsVisible()
   }
 }
 

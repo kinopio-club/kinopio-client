@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
 
 import frames from '@/data/frames.js'
 import FrameBadge from '@/components/FrameBadge.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 
@@ -40,7 +44,7 @@ const updateDialogHeight = async () => {
 }
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // frames
@@ -59,12 +63,12 @@ const changeCardFrame = (frame) => {
     }
   }
   props.cards.forEach(card => {
-    card = {
+    const update = {
       frameId: frame.id,
       frameName: frame.name,
       id: card.id
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
 }
 const frameIsSelected = (frame) => {

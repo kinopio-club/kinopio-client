@@ -1,11 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import GroupLabel from '@/components/GroupLabel.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const emit = defineEmits(['closeDialogs'])
 
@@ -30,15 +31,15 @@ const inviteUrl = computed(() => {
   return url
 })
 const copyInviteUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   console.info('🍇 group invite url', inviteUrl.value)
   try {
     await navigator.clipboard.writeText(inviteUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyInviteUrl', error, inviteUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 </script>

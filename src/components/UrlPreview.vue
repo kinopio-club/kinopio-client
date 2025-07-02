@@ -1,12 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let position
 
@@ -26,9 +34,9 @@ const state = reactive({
   previewImageIsHover: false
 })
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const cardIsCreatedByCurrentUser = computed(() => userStore.getUserIsCardCreator(props.card))
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
@@ -67,7 +75,7 @@ const updateImageCanLoad = () => {
   state.imageCanLoad = true
 }
 const updateDimensions = () => {
-  store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+  cardStore.updateCardDimensions(props.card.id)
 }
 const previewImageHover = (value) => {
   state.previewImageIsHover = value
@@ -98,41 +106,41 @@ const isShowInfo = computed(() => {
 })
 const isShowNone = computed(() => !props.card.urlPreviewIsVisible)
 const showAll = () => {
-  const card = {
+  const update = {
     id: props.card.id,
     urlPreviewIsVisible: true,
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(update)
 }
 const showImage = () => {
-  const card = {
+  const update = {
     id: props.card.id,
     urlPreviewIsVisible: true,
     shouldHideUrlPreviewInfo: true,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(update)
 }
 const showInfo = () => {
-  const card = {
+  const update = {
     id: props.card.id,
     urlPreviewIsVisible: true,
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: true
   }
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(update)
 }
 const showNone = async () => {
-  const card = {
+  const update = {
     id: props.card.id,
     urlPreviewIsVisible: false,
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', { card })
-  store.commit('removeUrlPreviewLoadingForCardIds', props.card.id)
+  cardStore.updateCard(update)
+  globalStore.removeUrlPreviewLoadingForCardIds(props.card.id)
 }
 </script>
 
@@ -146,7 +154,7 @@ const showNone = async () => {
         .row
           //- hide url
           .button-wrap(v-if="state.moreOptionsIsVisible")
-            button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
+            button.small-button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
               img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
               img.icon(v-else src="@/assets/view.svg")
               span Hide URL

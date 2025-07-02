@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -8,39 +10,47 @@ import utils from '@/utils.js'
 import createFuzzySearch from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const spaceStore = useSpaceStore()
 
 const resultsFilterElement = ref(null)
 const filterInputElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   if (props.initialValue) {
     state.filter = props.initialValue
   }
-  unsubscribe = store.subscribe(async (mutation, state) => {
-    if (mutation.type === 'closeAllDialogs') {
-      const element = resultsFilterElement.value
-      if (!element) { return }
-      if (props.filterIsPersistent) { return }
-      if (props.parentIsPinned) { return }
-      clearFilter()
-    }
-    if (mutation.type === 'triggerSelectTemplateCategory') {
-      clearFilter()
-    }
-    if (mutation.type === 'triggerFocusResultsFilter') {
-      forceShowFilterState()
-      await nextTick()
-      focusFilterInput()
-    }
-  })
   clearExpiredFilter()
   autoFocus()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        const element = resultsFilterElement.value
+        if (!element) { return }
+        if (props.filterIsPersistent) { return }
+        if (props.parentIsPinned) { return }
+        clearFilter()
+      }
+      if (name === 'triggerSelectTemplateCategory') {
+        clearFilter()
+      }
+      if (name === 'triggerFocusResultsFilter') {
+        forceShowFilterState()
+        await nextTick()
+        focusFilterInput()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const emit = defineEmits([
@@ -86,12 +96,12 @@ const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && s
 const addSpace = async () => {
   const name = state.filter
   window.scrollTo(0, 0)
-  await store.dispatch('currentSpace/addSpace', { name })
+  await spaceStore.createNewSpace(name)
   await nextTick()
   const shouldClearFilterInfo = true
   clearFilter(shouldClearFilterInfo)
-  store.commit('triggerSpaceDetailsUpdateLocalSpaces')
-  store.commit('triggerFocusSpaceDetailsName')
+  globalStore.triggerSpaceDetailsUpdateLocalSpaces()
+  globalStore.triggerFocusSpaceDetailsName()
 }
 
 // input
@@ -99,7 +109,7 @@ const addSpace = async () => {
 const clearExpiredFilter = () => {
   if (!props.isInitialValueFromSpaceListFilterInfo) { return }
   const time = 60
-  const info = store.state.spaceListFilterInfo
+  const info = globalStore.spaceListFilterInfo
   if (!info.filter) { return }
   let isExpired = dayjs().diff(info.updatedAt, 'seconds')
   isExpired = isExpired > time
@@ -126,7 +136,7 @@ const filterItems = computed({
   }
 })
 const autoFocus = async () => {
-  if (store.state.isTouchDevice) { return }
+  if (globalStore.isTouchDevice) { return }
   await nextTick()
   focusFilterInput()
 }
@@ -164,10 +174,10 @@ const clearFilter = (shouldClearFilterInfo) => {
   emit('updateFilteredItems', [])
   emit('clearFilter')
   if (shouldClearFilterInfo) {
-    store.commit('spaceListFilterInfo', {
+    globalStore.spaceListFilterInfo = {
       filter: '',
       updatedAt: new Date().getTime()
-    })
+    }
   }
 }
 
@@ -178,14 +188,14 @@ const focus = () => {
   resetPinchCounterZoomDecimal()
 }
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 const blur = () => {
   emit('onBlur')
   triggerUpdateHeaderAndFooterPosition()
 }
 const triggerUpdateHeaderAndFooterPosition = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const focusNextItem = () => {
   emit('focusNextItem')

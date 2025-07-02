@@ -1,31 +1,38 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
-
-let unsubscribe
+const globalStore = useGlobalStore()
 
 const audioElement = ref(null)
 const progressElement = ref(null)
 
+let unsubscribes
+
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerPauseAllAudio' && state.isPlaying) {
-      pauseAudio()
-    }
-  })
   const audio = audioElement.value
   audio.addEventListener('loadedmetadata', getTotalTime)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPauseAllAudio' && state.isPlaying) {
+        pauseAudio()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
   const audio = audioElement.value
   audio.removeEventListener('loadedmetadata', getTotalTime)
   pauseAudio()
+  unsubscribes()
 })
 
 const emit = defineEmits(['isPlaying'])
@@ -55,11 +62,11 @@ watch(() => state.progressPercent, (value, prevValue) => {
 })
 
 const cancelClick = (event) => {
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.currentUserIsDraggingCard = false
   if (props.parentIsCardDetails) { return }
-  const isConnectingTo = store.state.currentConnectionSuccess.id
+  const isConnectingTo = globalStore.currentConnectionSuccess.id
   if (isConnectingTo) { return }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   event.stopPropagation()
 }
 const handleErrors = (event) => {
@@ -119,7 +126,7 @@ const duration = (seconds) => {
 
 const togglePlayPause = (event) => {
   const isPlaying = state.isPlaying
-  store.commit('triggerPauseAllAudio')
+  globalStore.triggerPauseAllAudio()
   if (isPlaying) {
     pauseAudio()
   } else {

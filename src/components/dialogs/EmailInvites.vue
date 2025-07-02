@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Textarea from '@/components/Textarea.vue'
@@ -8,7 +13,12 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
@@ -48,8 +58,8 @@ const state = reactive({
   isSuccess: false
 })
 
-const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
-const currentUser = computed(() => store.state.currentUser)
+const isDarkTheme = computed(() => themeStore.getIsThemeDark)
+const currentUser = computed(() => userStore.getUserAllState)
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
@@ -57,7 +67,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 const hideUserDetails = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
 }
 
 // session token
@@ -65,22 +75,22 @@ const hideUserDetails = () => {
 const createSessionToken = () => {
   if (!currentUserIsUpgraded.value) { return }
   sessionToken = nanoid()
-  store.dispatch('api/createSessionToken', sessionToken)
+  apiStore.createSessionToken(sessionToken)
 }
 
 // requires upgraded user (temp)
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 
 // emails
 
 const restorePrevInviteEmails = () => {
-  if (store.state.currentUser.prevInviteEmails) {
-    state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
+  if (userStore.prevInviteEmails) {
+    state.defaultEmailsValue = userStore.prevInviteEmails
     updateEmailsWithMatches(state.defaultEmailsValue)
   }
 }
@@ -92,7 +102,7 @@ const updateEmailsWithMatches = (value) => {
   state.emailsList.forEach(email => {
     state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
   })
-  store.dispatch('currentUser/update', { prevInviteEmails: value })
+  userStore.updateUser({ prevInviteEmails: value })
   updateDialogHeight()
 }
 const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
@@ -132,9 +142,9 @@ const sendInvites = async () => {
   clearErrors()
   try {
     state.isLoading = true
-    await store.dispatch('api/sendSpaceInviteEmails', {
+    await apiStore.sendSpaceInviteEmails({
       emailsList: state.emailsList,
-      spaceId: store.state.currentSpace.id,
+      spaceId: spaceStore.id,
       sessionToken
     })
     state.isSuccess = true
@@ -148,8 +158,8 @@ const sendInvites = async () => {
 
 const notifySuccessAndClose = () => {
   const message = `Sent ${emailsLength.value} Invite ${emailPlural.value}`
-  store.commit('addNotification', { message, type: 'success', icon: 'mail' })
-  store.commit('triggerCloseChildDialogs')
+  globalStore.addNotification({ message, type: 'success', icon: 'mail' })
+  globalStore.triggerCloseChildDialogs()
 }
 </script>
 
@@ -201,7 +211,6 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
 <style lang="stylus">
 dialog.email-invites
   overflow auto
-  top 20px !important
   .title-row
     margin-bottom 0
   section.subsection

@@ -1,13 +1,30 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUploadStore } from '@/stores/useUploadStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const uploadStore = useUploadStore()
+const themeStore = useThemeStore()
+const historyStore = useHistoryStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -15,29 +32,9 @@ let disableContextMenu = false
 let spaceKeyIsDown = false
 
 let prevCursorPosition, currentCursorPosition, prevRightClickPosition, prevRightClickTime
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerAddCard') {
-      const options = mutation.payload
-      addCard(options)
-    } else if (mutation.type === 'triggerAddChildCard') {
-      const options = mutation.payload
-      addChildCard(options)
-    } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
-      const position = mutation.payload
-      selectAllItemsBelowCursor(position)
-    } else if (mutation.type === 'triggerSelectAllItemsAboveCursor') {
-      const position = mutation.payload
-      selectAllItemsAboveCursor(position)
-    } else if (mutation.type === 'triggerSelectAllItemsRightOfCursor') {
-      const position = mutation.payload
-      selectAllItemsRightOfCursor(position)
-    } else if (mutation.type === 'triggerSelectAllItemsLeftOfCursor') {
-      const position = mutation.payload
-      selectAllItemsLeftOfCursor(position)
-    }
-  })
   window.addEventListener('keyup', handleShortcuts)
   // event.metaKey only works on keydown
   window.addEventListener('keydown', handleMetaKeyShortcuts)
@@ -49,6 +46,32 @@ onMounted(() => {
   window.addEventListener('copy', handleCopyCutEvent)
   window.addEventListener('cut', handleCopyCutEvent)
   window.addEventListener('paste', handlePasteEvent)
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerAddCard') {
+        const options = args[0]
+        addCard(options)
+      } else if (name === 'triggerAddChildCard') {
+        const options = args[0]
+        addChildCard(options)
+      } else if (name === 'triggerSelectAllItemsBelowCursor') {
+        const position = args[0]
+        selectAllItemsBelowCursor(position)
+      } else if (name === 'triggerSelectAllItemsAboveCursor') {
+        const position = args[0]
+        selectAllItemsAboveCursor(position)
+      } else if (name === 'triggerSelectAllItemsRightOfCursor') {
+        const position = args[0]
+        selectAllItemsRightOfCursor(position)
+      } else if (name === 'triggerSelectAllItemsLeftOfCursor') {
+        const position = args[0]
+        selectAllItemsLeftOfCursor(position)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keyup', handleShortcuts)
@@ -60,10 +83,11 @@ onBeforeUnmount(() => {
   window.removeEventListener('copy', handleCopyCutEvent)
   window.removeEventListener('cut', handleCopyCutEvent)
   window.removeEventListener('paste', handlePasteEvent)
+  unsubscribes()
 })
 
 const isDisabledKeyboardShortcut = (value) => {
-  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const disabledKeyboardShortcuts = userStore.disabledKeyboardShortcuts
   const isDisabled = disabledKeyboardShortcuts.includes(value)
   return isDisabled
 }
@@ -117,87 +141,87 @@ const handleShortcuts = (event) => {
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
-  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const toolbarIsDrawing = globalStore.getToolbarIsDrawing
+  const canEditSpace = userStore.getUserCanEditSpace
   // ?
   if (key === '?' && isSpaceScope) {
-    store.commit('triggerKeyboardShortcutsIsVisible')
+    globalStore.triggerKeyboardShortcutsIsVisible()
   // n
   } else if (keyN && isSpaceScope) {
-    if (store.state.isAddPage) { return }
+    if (globalStore.isAddPage) { return }
     if (isDisabledKeyboardShortcut('newSpace')) { return }
-    store.dispatch('currentSpace/addSpace')
-    store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
-    store.commit('triggerSpaceDetailsInfoIsVisible')
+    spaceStore.createSpace()
+    globalStore.addNotification({ message: 'New space created (N)', icon: 'add', type: 'success' })
+    globalStore.triggerSpaceDetailsInfoIsVisible()
   // m
   } else if (keyM && (isSpaceScope || isMinimapDialogScope)) {
-    store.commit('triggerMinimapIsVisible')
+    globalStore.triggerMinimapIsVisible()
   // t
   } else if (keyT && isSpaceScope) {
-    store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
-    store.dispatch('themes/toggle')
-    store.dispatch('themes/isSystem', false)
+    globalStore.addNotification({ message: 'Theme toggled (T)', type: 'info' })
+    themeStore.toggleTheme()
+    themeStore.updateThemeIsSystem(false)
   // Backspace, Clear, Delete
   } else if ((key === 'backspace' || key === 'clear' || key === 'delete') && isSpaceScope) {
     remove()
   // Escape
   } else if (key === 'escape') {
-    store.dispatch('closeAllDialogs')
-    store.dispatch('currentUserToolbar', 'card')
+    globalStore.closeAllDialogs()
+    globalStore.updateCurrentUserToolbar('card')
   } else if (key === '1' && isSpaceScope) {
-    let value = store.state.currentUser.filterShowUsers
+    let value = userStore.filterShowUsers
     value = !value
-    store.dispatch('currentUser/toggleFilterShowUsers', value)
+    userStore.updateUser({ filterShowUsers: value })
   // 2
   } else if (key === '2' && isSpaceScope) {
-    let value = store.state.currentUser.filterShowDateUpdated
+    let value = userStore.filterShowDateUpdated
     value = !value
-    store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+    userStore.updateUser({ filterShowDateUpdated: value })
   // 3
   } else if (key === '3' && isSpaceScope) {
-    let value = store.state.currentUser.filterUnchecked
+    let value = userStore.filterUnchecked
     value = !value
-    store.dispatch('currentUser/toggleFilterUnchecked', value)
+    userStore.updateUser({ filterUnchecked: value })
   // 4
   } else if (key === '4' && isSpaceScope) {
-    let value = store.state.currentUser.filterComments
+    let value = userStore.filterComments
     value = !value
-    store.dispatch('currentUser/toggleFilterComments', value)
+    userStore.updateUser({ filterComments: value })
   // ' '
   } else if (key === ' ' && isSpaceScope) {
-    store.dispatch('currentUserIsPanning', false)
-    store.commit('currentUserIsPanningReady', false)
+    globalStore.updateCurrentUserIsPanning(false)
+    globalStore.currentUserIsPanningReady = false
     spaceKeyIsDown = false
   // b
   } else if (keyB && isSpaceScope) {
     let cards
-    const multipleCardIds = store.state.multipleCardsSelectedIds
-    const cardId = store.state.cardDetailsIsVisibleForCardId
+    const multipleCardIds = globalStore.multipleCardsSelectedIds
+    const cardId = globalStore.cardDetailsIsVisibleForCardId
     // Surround Selected Cards with Box
     if (cardId) {
-      cards = [store.getters['currentCards/byId'](cardId)]
+      cards = [cardStore.getCard(cardId)]
       containItemsInNewBox(cards)
     } else if (multipleCardIds.length) {
-      cards = multipleCardIds.map(id => store.getters['currentCards/byId'](id))
+      cards = multipleCardIds.map(id => cardStore.getCard(id))
       containItemsInNewBox(cards)
     // Toolbar Box Mode
     } else {
-      store.dispatch('toggleCurrentUserToolbar', 'box')
+      globalStore.toggleCurrentUserToolbar('box')
     }
   // d
   } else if (key === 'd' && isSpaceScope) {
     if (!canEditSpace) { return }
-    if (toolbarIsDrawing && store.state.drawingEraserIsActive) {
-      store.commit('drawingEraserIsActive', false)
+    if (toolbarIsDrawing && globalStore.drawingEraserIsActive) {
+      globalStore.drawingEraserIsActive = false
       return
     }
-    store.dispatch('toggleCurrentUserToolbar', 'drawing')
+    globalStore.toggleCurrentUserToolbar('drawing')
   // e
   } else if (key === 'e' && isSpaceScope && toolbarIsDrawing) {
-    store.dispatch('toggleDrawingEraserIsActive')
+    globalStore.toggleDrawingEraserIsActive()
   // s
   } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
-    store.dispatch('currentUser/cycleDrawingBrushSize')
+    userStore.cycleDrawingBrushSize()
   }
 }
 // on key down
@@ -215,10 +239,10 @@ const handleMetaKeyShortcuts = (event) => {
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
-  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
+  const toolbarIsDrawing = globalStore.getToolbarIsDrawing
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
-    const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+    const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
     if (!shouldAddChildCard) { return }
     addChildCard()
   // Add Card
@@ -227,11 +251,11 @@ const handleMetaKeyShortcuts = (event) => {
   // Redo
   } else if (event.shiftKey && isMeta && keyZ && !isFromInput) {
     event.preventDefault()
-    store.dispatch('history/redo')
+    historyStore.redo()
   // Undo
   } else if (isMeta && keyZ && !isFromInput) {
     event.preventDefault()
-    store.dispatch('history/undo')
+    historyStore.undo()
   // Select All Cards Below Cursor
   } else if (isMeta && event.shiftKey && keyA && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
@@ -251,46 +275,46 @@ const handleMetaKeyShortcuts = (event) => {
   // Show previous search card
   } else if (isMeta && event.shiftKey && keyG) {
     event.preventDefault()
-    store.commit('triggerShowPreviousSearchCard')
+    globalStore.triggerShowPreviousSearchCard()
   // Show next search card
   } else if (isMeta && keyG) {
     event.preventDefault()
-    store.commit('triggerShowNextSearchCard')
+    globalStore.triggerShowNextSearchCard()
   // Zoom Reset
   } else if (isMeta && key === '0') {
     browserZoomLevel = 0
-    store.commit('triggerSpaceZoomReset')
+    globalStore.triggerSpaceZoomReset()
   // Zoom Out
   } else if (isMeta && key === '-') {
     const shouldNativeZoom = browserZoomLevel > 0
     browserZoomLevel = Math.max(0, browserZoomLevel - 1)
     if (shouldNativeZoom) { return }
     event.preventDefault()
-    store.commit('triggerCenterZoomOrigin')
-    store.dispatch('zoomSpace', { shouldZoomOut: true, speed: 10 })
+    globalStore.triggerCenterZoomOrigin()
+    globalStore.zoomSpace({ shouldZoomOut: true, speed: 10 })
   // Zoom In
   } else if (isMeta && key === '=') {
-    const zoom = store.state.spaceZoomPercent
+    const zoom = globalStore.spaceZoomPercent
     if (zoom === 100) {
       browserZoomLevel += 1
       return
     }
     event.preventDefault()
-    store.commit('triggerCenterZoomOrigin')
-    store.dispatch('zoomSpace', { shouldZoomIn: true, speed: 10 })
+    globalStore.CenterZoomOrigin()
+    globalStore.zoomSpace({ shouldZoomIn: true, speed: 10 })
     // Toggle Zoom Out
   } else if (keyZ && isSpaceScope) {
     event.preventDefault()
-    store.commit('triggerSpaceZoomOutMax')
+    globalStore.triggerSpaceZoomOutMax()
   } else if (keyP && isSpaceScope && !isMeta) {
-    const value = !store.state.isPresentationMode
-    store.commit('isPresentationMode', value)
+    const value = !globalStore.isPresentationMode
+    globalStore.isPresentationMode = value
     event.preventDefault()
   // Pan
   } else if (key === ' ' && isSpaceScope) {
     event.preventDefault()
     spaceKeyIsDown = true
-    store.commit('currentUserIsPanningReady', true)
+    globalStore.currentUserIsPanningReady = true
   // Lock Cards
   } else if (event.shiftKey && isMeta && keyL) {
     event.preventDefault()
@@ -309,41 +333,41 @@ const handleMouseDownEvents = (event) => {
   const isMiddleClick = middleMouseButton === event.button
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
-  const toolbarIsBox = store.state.currentUserToolbar === 'box'
-  const isNotConnecting = !store.state.currentUserIsDrawingConnection
-  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !store.state.currentUserIsResizingBox
-  const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
+  const toolbarIsBox = globalStore.getToolbarIsBox
+  const isNotConnecting = !globalStore.currentUserIsDrawingConnection
+  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !globalStore.currentUserIsResizingBox
+  const userDisablePan = userStore.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
   const isButtonScope = checkIsButtonScope(event)
   const isMinimap = checkIsOnMinimap(event)
   if (isButtonScope) { return }
   if (isRightAndLeftClick && isMinimap) {
-    store.commit('shouldCancelNextMouseUpInteraction', true)
+    globalStore.shouldCancelNextMouseUpInteraction = true
     return
   }
   if (shouldBoxSelect) {
     event.preventDefault()
-    store.commit('currentUserIsBoxSelecting', true)
-    store.commit('currentUserBoxSelectMove', position)
-    store.commit('currentUserBoxSelectStart', position)
+    globalStore.currentUserIsBoxSelecting = true
+    globalStore.currentUserBoxSelectMove = position
+    globalStore.currentUserBoxSelectStart = position
   } else if (shouldPan) {
     prevRightClickPosition = utils.cursorPositionInViewport(event)
     prevRightClickTime = utils.unixTime()
     event.preventDefault()
     if (!isMinimap) {
-      store.dispatch('currentUserIsPanning', true)
+      globalStore.updateCurrentUserIsPanning(true)
     }
     disableContextMenu = true
-  } else if (store.state.currentUserIsPanningReady) {
+  } else if (globalStore.currentUserIsPanningReady) {
     event.preventDefault()
     if (!isMinimap) {
-      store.dispatch('currentUserIsPanning', true)
+      globalStore.updateCurrentUserIsPanning(true)
     }
   }
   if (isRightClick && userDisablePan) {
     if (!isCanvasScope(event)) { return }
-    store.dispatch('triggerSonarPing', event)
+    globalStore.normalizeTriggerSonarPing(event)
   }
 }
 // on mouse move
@@ -351,15 +375,15 @@ const handleMouseMoveEvents = (event) => {
   const position = utils.cursorPositionInPage(event)
   currentCursorPosition = position
   // box selection
-  if (store.state.currentUserIsBoxSelecting) {
-    store.commit('currentUserBoxSelectMove', position)
+  if (globalStore.currentUserIsBoxSelecting) {
+    globalStore.currentUserBoxSelectMove = position
   }
 }
 // on mouse up
 // right clicks don't trigger mouse up
 const handleMouseUpEvents = async (event) => {
-  if (store.state.shouldCancelNextMouseUpInteraction) { return }
-  const shouldPan = store.state.currentUserIsPanning
+  if (globalStore.shouldCancelNextMouseUpInteraction) { return }
+  const shouldPan = globalStore.currentUserIsPanning
   // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
@@ -369,8 +393,8 @@ const handleMouseUpEvents = async (event) => {
   // end panning
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
-  store.dispatch('currentUserIsPanning', false)
-  store.commit('currentUserIsBoxSelecting', false)
+  globalStore.updateCurrentUserIsPanning(false)
+  globalStore.currentUserIsBoxSelecting = false
 
   // sonar ping
   await nextTick()
@@ -379,8 +403,8 @@ const handleMouseUpEvents = async (event) => {
   const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, currentPosition)
   const timeDelta = currentTime - prevRightClickTime
   const timesAreClose = timeDelta < 400 // ms
-  if (shouldPan && cursorsAreClose && timesAreClose && !store.state.multipleSelectedActionsIsVisible) {
-    store.dispatch('triggerSonarPing', event)
+  if (shouldPan && cursorsAreClose && timesAreClose && !globalStore.multipleSelectedActionsIsVisible) {
+    globalStore.normalizeTriggerSonarPing(event)
   }
 }
 // on scroll
@@ -389,7 +413,7 @@ const handleScrollEvents = (event) => {
 }
 // on native right-click context menu
 const handleContextMenuEvents = (event) => {
-  if (disableContextMenu || store.state.currentUserIsPaintingLocked) {
+  if (disableContextMenu || globalStore.currentUserIsPaintingLocked) {
     disableContextMenu = false
     event.preventDefault()
   }
@@ -397,24 +421,24 @@ const handleContextMenuEvents = (event) => {
 
 const scrollIntoView = (card) => {
   const element = document.querySelector(`.card-wrap [data-card-id="${card.id}"]`)
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // Add Parent and Child Cards
 
 const addCard = async (options) => {
   options = options || {}
-  if (store.state.shouldPreventNextEnterKey) {
-    store.commit('shouldPreventNextEnterKey', false)
+  if (globalStore.shouldPreventNextEnterKey) {
+    globalStore.shouldPreventNextEnterKey = false
     return
   }
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
-  const parentCardId = store.state.parentCardId
+  const parentCardId = globalStore.parentCardId
   let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-  const childCardId = store.state.childCardId
+  const childCardId = globalStore.childCardId
   let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
-  const childCardData = store.getters['currentCards/byId'](childCardId)
+  const childCardData = cardStore.getCard(childCardId)
   const shouldOutdentChildToParent = childCard && !childCardData
   const spaceBetweenCards = consts.spaceBetweenCards
   let position = {}
@@ -447,16 +471,16 @@ const addCard = async (options) => {
     }
   }
   position = nonOverlappingCardPosition(position)
-  parentCard = store.getters['currentCards/byId'](parentCardId)
+  parentCard = cardStore.getCard(parentCardId)
   let backgroundColor
   if (parentCard) {
     backgroundColor = parentCard.backgroundColor
   }
-  store.commit('shouldPreventNextEnterKey', true)
+  globalStore.shouldPreventNextEnterKey = true
   const newCard = { position, isParentCard, backgroundColor, id: options.id }
-  store.dispatch('currentCards/add', { card: newCard })
+  cardStore.createCard(newCard)
   if (childCard) {
-    store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
+    globalStore.childCardId = globalStore.cardDetailsIsVisibleForCardId
     await nextTick()
     addConnection()
   }
@@ -467,8 +491,8 @@ const addChildCard = async (options) => {
   useSiblingConnectionType = false
   const spaceBetweenCards = consts.spaceBetweenCards
 
-  const parentCardId = store.state.parentCardId
-  const childCardId = store.state.childCardId
+  const parentCardId = globalStore.parentCardId
+  const childCardId = globalStore.childCardId
   const parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
   const childCardElement = document.querySelector(`.card[data-card-id="${childCardId}"]`)
   let baseCardElement, baseCardId
@@ -488,11 +512,11 @@ const addChildCard = async (options) => {
     y: rect.y + rect.height + spaceBetweenCards
   }
   const position = nonOverlappingCardPosition(initialPosition)
-  const parentCard = store.getters['currentCards/byId'](parentCardId)
+  const parentCard = cardStore.getCard(parentCardId)
   const newChildCardId = options.id || nanoid()
   const newCard = { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId }
-  store.dispatch('currentCards/add', { card: newCard })
-  store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
+  cardStore.createCard(newCard)
+  globalStore.childCardId = globalStore.cardDetailsIsVisibleForCardId
   await nextTick()
   addConnection(baseCardId, position)
 }
@@ -500,7 +524,7 @@ const addChildCard = async (options) => {
 // recursive
 const nonOverlappingCardPosition = (position) => {
   const spaceBetweenCards = consts.spaceBetweenCards
-  const cards = store.getters['currentCards/isSelectable'](position)
+  const cards = cardStore.getCardsSelectableInViewport()
   if (!utils.arrayHasItems(cards)) { return position }
   const overlappingCard = cards.find(card => {
     const isBetweenX = utils.isBetween({
@@ -524,86 +548,83 @@ const nonOverlappingCardPosition = (position) => {
 }
 
 const addConnectionType = () => {
-  const hasConnectionType = Boolean(store.getters['currentConnections/typeForNewConnections'])
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const hasConnectionType = connectionStore.getNewConnectionType
+  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
   if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
-  store.dispatch('currentConnections/addType')
+  connectionStore.createConnectionType()
   useSiblingConnectionType = true
 }
 
 const addConnection = (baseCardId, position) => {
-  const endCurrentCardId = store.state.cardDetailsIsVisibleForCardId
+  const endCurrentCardId = globalStore.cardDetailsIsVisibleForCardId
   if (baseCardId) {
-    store.commit('parentCardId', baseCardId) // update the parent for sibling children
+    globalStore.parentCardId = baseCardId // update the parent for sibling children
   } else {
-    baseCardId = store.state.parentCardId
+    baseCardId = globalStore.parentCardId
   }
   const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
   if (!baseCard) { return }
-  const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+  const controlPoint = userStore.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
+  const path = connectionStore.getConnectionPathBetweenItems({
+    startItemId: baseCardId,
+    endItemId: endCurrentCardId,
+    controlPoint,
+    estimatedEndItemConnectorPosition
+  })
   const connection = {
     startItemId: baseCardId,
     endItemId: endCurrentCardId,
-    path: store.getters['currentConnections/connectionPathBetweenItems']({
-      startItemId: baseCardId,
-      endItemId: endCurrentCardId,
-      controlPoint,
-      estimatedEndItemConnectorPosition
-    }),
+    path,
     controlPoint
   }
   addConnectionType()
-  const type = store.getters['currentConnections/typeForNewConnections']
-  store.dispatch('currentConnections/add', { connection, type })
+  connectionStore.createConnection(connection)
 }
 
 const selectedCardIds = () => {
-  return store.state.multipleCardsSelectedIds || []
+  return globalStore.multipleCardsSelectedIds || []
 }
 
 // Remove
 
 const removeCardById = (cardId) => {
-  const card = store.getters['currentCards/byId'](cardId)
-  store.dispatch('currentCards/remove', card)
+  cardStore.removeCard(cardId)
 }
 
 const clearAllSelectedCards = () => {
-  store.dispatch('clearMultipleSelected')
-  store.commit('cardDetailsIsVisibleForCardId', '')
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.clearMultipleSelected()
+  globalStore.updateCardDetailsIsVisibleForCardId('')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 
 const canEditCardById = (cardId) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const card = store.getters['currentCards/byId'](cardId)
-  const cardIsCreatedByCurrentUser = store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const isSpaceMember = userStore.getUserIsSpaceMember
+  const card = cardStore.getCard(cardId)
+  const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(card)
+  const canEditSpace = userStore.getUserCanEditSpace
   if (isSpaceMember) { return true }
   if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
   return false
 }
 
 const canEditConnectionById = (connectionId) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const connection = store.getters['currentConnections/byId'](connectionId)
-  const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const isSpaceMember = userStore.getUserIsSpaceMember
+  const connection = connectionStore.getConnection(connectionId)
+  const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(connection)
+  const canEditSpace = userStore.getUserCanEditSpace
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false
 }
 
 const remove = () => {
-  store.dispatch('history/resume')
-  const selectedConnectionIds = store.state.multipleConnectionsSelectedIds
+  const selectedConnectionIds = globalStore.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
-  const boxes = store.getters['currentBoxes/isSelected']
+  const boxes = boxStore.getBoxesSelected
   selectedConnectionIds.forEach(connectionId => {
     if (canEditConnectionById(connectionId)) {
-      const connection = store.getters['currentConnections/byId'](connectionId)
-      store.dispatch('currentConnections/remove', connection)
+      connectionStore.removeConnection(connectionId)
     }
   })
   cardIds.forEach(cardId => {
@@ -612,27 +633,27 @@ const remove = () => {
     }
   })
   boxes.forEach(box => {
-    const canEditBox = store.getters['currentUser/canEditBox'](box)
+    const canEditBox = userStore.getUserCanEditBox(box)
     if (canEditBox) {
-      store.dispatch('currentBoxes/remove', box)
+      boxStore.removeBox(box.id)
     }
   })
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
   clearAllSelectedCards()
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // Copy, Cut
 
 const writeSelectedToClipboard = async (position) => {
-  const selectedItems = store.getters['currentSpace/selectedItems']
+  const selectedItems = spaceStore.selectedItems
   let { cards, connectionTypes, connections, boxes } = selectedItems
   // data
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
   let data = { cards, connections, connectionTypes, boxes }
   data = utils.updateSpaceItemsRelativeToOrigin(data, position)
-  store.commit('clipboardData', data)
+  globalStore.clipboardData = data
   // text
   let items = cards.concat(boxes)
   items = utils.sortByY(items)
@@ -650,17 +671,17 @@ const writeSelectedToClipboard = async (position) => {
 const handleCopyCutEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = currentCursorPosition || prevCursorPosition
   event.preventDefault()
   try {
     await writeSelectedToClipboard(position)
     if (event.type === 'cut') { remove() }
-    store.commit('addNotificationWithPosition', { message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
+    globalStore.addNotificationWithPosition({ message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
   } catch (error) {
     console.warn('🚑 handleCopyCutEvent', error)
     const message = error.message || `Could not ${event.type}`
-    store.commit('addNotificationWithPosition', { message, position, type: 'danger', layer: 'app', icon: 'cut' })
+    globalStore.addNotificationWithPosition({ message, position, type: 'danger', layer: 'app', icon: 'cut' })
   }
 }
 
@@ -679,7 +700,6 @@ const normalizePasteData = (data) => {
 }
 
 const handlePastePlainText = async (data, position) => {
-  store.dispatch('history/pause')
   const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
   // add card(s)
   let cards = cardNames.map(name => {
@@ -690,27 +710,25 @@ const handlePastePlainText = async (data, position) => {
       y: position.y
     }
   })
-  store.dispatch('currentCards/addMultiple', { cards })
+  cardStore.createCards(cards)
   setTimeout(async () => {
-    store.dispatch('currentCards/distributeVertically', cards)
+    cardStore.distributeCardsVertically(cards)
     await nextTick()
     // select
     const cardIds = cards.map(card => card.id)
-    store.commit('multipleCardsSelectedIds', cardIds)
+    globalStore.multipleCardsSelectedIds = cardIds
     // ⏺ history
-    cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
-    store.dispatch('history/resume')
-    store.dispatch('history/add', { cards, useSnapshot: true })
+    cards = cardIds.map(cardId => cardStore.getCard(cardId))
   }, 100)
 }
 
 const afterPaste = ({ cards, boxes }) => {
   cards.forEach(card => {
-    store.dispatch('checkIfItemShouldIncreasePageSize', card)
-    store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.id })
+    globalStore.checkIfItemShouldIncreasePageSize(card)
+    cardStore.normalizeCardUrls(card.id)
   })
   boxes.forEach(box => {
-    store.dispatch('checkIfItemShouldIncreasePageSize', box)
+    globalStore.checkIfItemShouldIncreasePageSize(box)
   })
 }
 const kinopioClipboardDataFromData = (data) => {
@@ -720,28 +738,28 @@ const kinopioClipboardDataFromData = (data) => {
   let isKinopioClipboardData
   const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
   names.forEach(name => {
-    const card = store.state.clipboardData?.cards?.find(card => card.name === name)
-    const box = store.state.clipboardData?.boxes?.find(box => box.name === name)
+    const card = globalStore.clipboardData?.cards?.find(card => card.name === name)
+    const box = globalStore.clipboardData?.boxes?.find(box => box.name === name)
     if (card || box) {
       isKinopioClipboardData = true
     }
   })
   if (!isKinopioClipboardData) { return }
-  return utils.clone(store.state.clipboardData)
+  return utils.clone(globalStore.clipboardData)
 }
 const getClipboardData = async () => {
-  store.commit('clearNotificationsWithPosition')
+  globalStore.clearNotificationsWithPosition()
   const position = currentCursorPosition || prevCursorPosition
   try {
     const data = await utils.dataFromClipboard()
     data.kinopio = kinopioClipboardDataFromData(data, position)
     if (data.text || data.file || data.kinopio) {
-      store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
+      globalStore.addNotificationWithPosition({ message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       return data
     }
   } catch (error) {
     console.error('🚑 getClipboardData', error)
-    store.commit('addNotificationWithPosition', { message: 'Could not paste', position, type: 'danger', layer: 'app', icon: 'cut' })
+    globalStore.addNotificationWithPosition({ message: 'Could not paste', position, type: 'danger', layer: 'app', icon: 'cut' })
   }
 }
 
@@ -753,37 +771,38 @@ const handlePasteEvent = async (event) => {
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
   // check card limits
-  if (store.getters['currentSpace/shouldPreventAddCard']) {
-    store.commit('notifyCardsCreatedIsOverLimit', true)
+  if (spaceStore.getShouldPreventAddCard) {
+    globalStore.updateNotifyCardsCreatedIsOverLimit(true)
     return
   }
   // check read only
-  store.dispatch('currentUser/notifyReadOnly', position)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  userStore.notifyReadOnly(position)
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   // get clipboard data
   const data = await getClipboardData()
   console.info('🎊 pasteData', data, position)
   if (!data) { return }
-  store.commit('closeAllDialogs')
-  store.commit('clearMultipleSelected')
+  globalStore.closeAllDialogs()
+  globalStore.clearMultipleSelected()
   // add data items
   if (data.file) {
-    store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
+    uploadStore.addCardsAndUploadFiles({ files: [data.file], position })
   // add kinopio items
   } else if (data.kinopio) {
     items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
-    items = await store.dispatch('currentSpace/newItems', { items })
-    store.dispatch('currentSpace/addItems', items)
+    items = await spaceStore.getNewItems(items)
+    spaceStore.createSpaceItems(items)
     // select new items
     await nextTick()
-    store.dispatch('closeAllDialogs')
+    globalStore.closeAllDialogs()
     const cardIds = items.cards.map(card => card.id)
     const boxIds = items.boxes.map(box => box.id)
-    store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
-    store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+    globalStore.addMultipleToMultipleCardsSelected(cardIds)
+    globalStore.addMultipleToMultipleBoxesSelected(boxIds)
     await nextTick()
-    store.dispatch('currentConnections/updatePaths', { connections: items.connections })
+    const connectionIds = items.connections.map(connection => connection.map)
+    connectionStore.updateConnectionPaths(connectionIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
@@ -803,13 +822,14 @@ const selectAllItemsBelowCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = store.getters.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isBelowY'](position.y, zoom)
+  let cards = cardStore.getAllCardsSortedByY
+  cards = cardStore.getCardsBelowY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
   selectItemIds({ position, cardIds, boxIds })
@@ -821,13 +841,14 @@ const selectAllItemsAboveCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = store.getters.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isAboveY'](position.y, zoom)
+  let cards = cardStore.getAllCardsSortedByY
+  cards = cardStore.getCardsAboveY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) < position.y)
   const boxIds = boxes.map(box => box.id)
   selectItemIds({ position, cardIds, boxIds })
@@ -839,13 +860,14 @@ const selectAllItemsRightOfCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = store.getters.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isRightOfX'](position.x, zoom)
+  let cards = cardStore.getAllCardsSortedByX
+  cards = cardStore.getCardsRightOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     return (box.x * zoom) >= position.x
   })
@@ -859,13 +881,14 @@ const selectAllItemsLeftOfCursor = (position) => {
   } else {
     // is from keyboard shortcut
     position = currentCursorPosition
-    zoom = store.getters.spaceZoomDecimal
+    zoom = globalStore.getSpaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isLeftOfX'](position.x, zoom)
+  let cards = cardStore.getAllCardsSortedByX
+  cards = cardStore.getCardsLeftOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     return (box.x * zoom) <= position.x
   })
@@ -876,77 +899,75 @@ const selectAllItemsLeftOfCursor = (position) => {
 // Select All Cards, Connections, and Boxes
 
 const selectItemIds = ({ position, cardIds, boxIds }) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
+  const preventMultipleSelectedActionsIsVisible = globalStore.preventMultipleSelectedActionsIsVisible
   const isItemIds = Boolean(cardIds.length || boxIds.length)
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
+    globalStore.updateMultipleCardsSelectedIds(cardIds)
+    globalStore.updateMultipleBoxesSelectedIds(boxIds)
   } else if (isItemIds) {
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
+    globalStore.multipleSelectedActionsPosition = position
+    globalStore.updateMultipleSelectedActionsIsVisible(true)
+    globalStore.updateMultipleCardsSelectedIds(cardIds)
+    globalStore.updateMultipleBoxesSelectedIds(boxIds)
   } else {
-    store.commit('multipleSelectedActionsIsVisible', false)
-    store.commit('multipleCardsSelectedIds', [])
-    store.commit('multipleBoxesSelectedIds', [])
+    globalStore.updateMultipleSelectedActionsIsVisible(false)
   }
 }
 const selectAllItems = () => {
-  const cardIds = utils.clone(store.state.currentCards.ids)
-  const connectionIds = utils.clone(store.state.currentConnections.ids)
-  const boxIds = utils.clone(store.state.currentBoxes.ids)
+  const cardIds = cardStore.allIds
+  const connectionIds = connectionStore.allIds
+  const boxIds = boxStore.allIds
   const dialogOffset = {
     width: 200 / 2,
     height: 150 / 2
   }
   const viewportCenter = {
-    x: (store.state.viewportWidth / 2) + window.scrollX - dialogOffset.width,
-    y: (store.state.viewportHeight / 2) + window.scrollY - dialogOffset.height
+    x: (globalStore.viewportWidth / 2) + window.scrollX - dialogOffset.width,
+    y: (globalStore.viewportHeight / 2) + window.scrollY - dialogOffset.height
   }
-  store.commit('multipleSelectedActionsPosition', viewportCenter)
-  store.commit('multipleSelectedActionsIsVisible', true)
-  store.commit('multipleConnectionsSelectedIds', connectionIds)
-  store.commit('multipleCardsSelectedIds', cardIds)
-  store.commit('multipleBoxesSelectedIds', boxIds)
+  globalStore.multipleSelectedActionsPosition = viewportCenter
+  globalStore.updateMultipleSelectedActionsIsVisible(true)
+  globalStore.multipleConnectionsSelectedIds = connectionIds
+  globalStore.multipleCardsSelectedIds = cardIds
+  globalStore.multipleBoxesSelectedIds = boxIds
 }
 
 // Search/Jump-to
 
 const focusOnSpaceDetailsFilter = async () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSpaceDetailsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.SpaceDetailsVisible()
   await nextTick()
   await nextTick()
   await nextTick()
-  store.commit('triggerFocusResultsFilter')
+  globalStore.FocusResultsFilter()
 }
 const focusOnSearchCardFilter = async (event) => {
-  store.dispatch('closeAllDialogs')
-  store.commit('searchIsVisible', true)
+  globalStore.closeAllDialogs()
+  globalStore.searchIsVisible = true
   if (event.shiftKey) {
-    store.commit('triggerSearchScopeIsRemote')
+    globalStore.triggerSearchScopeIsRemote()
   } else {
-    store.commit('triggerSearchScopeIsLocal')
+    globalStore.triggerSearchScopeIsLocal()
   }
   await nextTick()
   await nextTick()
   await nextTick()
-  store.commit('triggerFocusResultsFilter')
+  globalStore.triggerFocusResultsFilter()
 }
 
 // Lock Cards
 
 const toggleLockCards = () => {
-  const multipleCardIds = store.state.multipleCardsSelectedIds
-  const cardId = store.state.cardDetailsIsVisibleForCardId
+  const multipleCardIds = globalStore.multipleCardsSelectedIds
+  const cardId = globalStore.cardDetailsIsVisibleForCardId
   let cards
   if (multipleCardIds.length) {
-    cards = multipleCardIds.map(id => store.getters['currentCards/byId'](id))
+    cards = multipleCardIds.map(id => cardStore.getCard(id))
   } else if (cardId) {
-    cards = [store.getters['currentCards/byId'](cardId)]
+    cards = [cardStore.getCard(cardId)]
   } else {
-    cards = store.getters['currentCards/all']
+    cards = cardStore.getAllCards
     cards = cards.filter(card => utils.isPointInsideRect(currentCursorPosition, card))
   }
   cards = cards.filter(card => Boolean(card))
@@ -956,14 +977,14 @@ const toggleLockCards = () => {
   const shouldLock = cards.length !== lockedCards.length
   cards.forEach(card => {
     const update = { id: card.id, isLocked: shouldLock }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
   })
 }
 
 // Create Boxes
 
 const containItemsInNewBox = async (cards) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  const isSpaceMember = userStore.getUserIsSpaceMember
   if (!isSpaceMember) { return }
   const rect = utils.boundaryRectFromItems(cards)
   // box size
@@ -977,12 +998,12 @@ const containItemsInNewBox = async (cards) => {
     resizeWidth: rect.width + (padding * 2),
     resizeHeight: rect.height + (padding + paddingTop)
   }
-  store.dispatch('currentBoxes/add', { box })
-  store.dispatch('closeAllDialogs')
+  boxStore.createBox(box)
+  globalStore.closeAllDialogs()
   await nextTick()
   await nextTick()
-  store.commit('boxDetailsIsVisibleForBoxId', box.id)
-  store.commit('clearMultipleSelected')
+  globalStore.updateBoxDetailsIsVisibleForBoxId(box.id)
+  globalStore.clearMultipleSelected()
 }
 </script>
 

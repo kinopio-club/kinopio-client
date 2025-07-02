@@ -1,11 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
 
 const videoElement = ref(null)
 const imageElement = ref(null)
@@ -64,12 +65,12 @@ const state = reactive({
   imageProxySrcSet: null
 })
 
-const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
+const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
 const isInteracting = computed(() => {
-  const isInteractingWithItem = store.getters.isInteractingWithItem
-  const isPainting = store.state.currentUserIsPainting
-  const isPanning = store.state.currentUserIsPanningReady
-  const isDrawing = store.state.currentUserIsDrawing
+  const isInteractingWithItem = globalStore.getIsInteractingWithItem
+  const isPainting = globalStore.currentUserIsPainting
+  const isPanning = globalStore.currentUserIsPanningReady
+  const isDrawing = globalStore.currentUserIsDrawing
   return isInteractingWithItem || isPainting || isPanning || isDrawing
 })
 watch(() => isInteracting.value, (value) => {
@@ -95,7 +96,7 @@ const play = () => {
   playGif()
 }
 
-watch(() => store.state.multipleSelectedActionsIsVisible, (value) => {
+watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
   if (value) { return }
   removeCanvasSelectedClass()
 })
@@ -158,10 +159,10 @@ const playGif = () => {
   imageElement.value.style.opacity = 1
 }
 const updateCanvasSelectedClass = () => {
-  if (!store.state.currentUserIsPainting) { return }
+  if (!globalStore.currentUserIsPainting) { return }
   const canvas = canvasElement()
   if (!canvas) { return }
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
   const isSelected = multipleCardsSelectedIds.includes(props.cardId)
   if (!isSelected) { return }
   canvas.classList.add('selected')
@@ -174,19 +175,20 @@ const removeCanvasSelectedClass = () => {
 
 // serve smaller images w imgproxy
 
-const imgproxyUrl = (imageURL, width, height) => {
+const imgproxyUrl = (imageUrl, width, height) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
   const containerBreakpoints = [400, 600, 800, 1200]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
   const maxDimensions = Math.max(width, height)
+  let url = utils.imgproxyUrl(imageUrl)
   for (const breakpoint of containerBreakpoints) {
     if (maxDimensions <= breakpoint) {
-      return utils.imgproxyUrl(imageURL, breakpoint * devicePixelRatio)
+      url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
     }
   }
-  return utils.imgproxyUrl(imageURL, containerBreakpoints[containerBreakpoints.length - 1] * devicePixelRatio)
+  return url
 }
 
 // events

@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -8,10 +12,13 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import User from '@/components/User.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
-  store.dispatch('currentUser/restoreUserAssociatedData')
+  userStore.restoreUserAssociatedData()
 })
 
 const props = defineProps({
@@ -29,10 +36,10 @@ const state = reactive({
   currentUserSpacesIsVisible: true
 })
 
-const currentUser = computed(() => store.state.currentUser)
-const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
-const favoriteSpaces = computed(() => store.state.currentUser.favoriteSpaces)
-const loading = computed(() => store.state.isLoadingFavorites)
+const currentUser = computed(() => userStore.getUserAllState)
+const favoriteUsers = computed(() => userStore.favoriteUsers)
+const favoriteSpaces = computed(() => userStore.favoriteSpaces)
+const loading = computed(() => globalStore.isLoadingFavorites)
 const isEmpty = computed(() => {
   const noSpaces = state.spacesIsVisible && !favoriteSpaces.value.length
   const noPeople = !state.spacesIsVisible && !favoriteUsers.value.length
@@ -85,26 +92,26 @@ const currentUserSpacesFilterIsVisible = computed(() => {
   return state.spacesIsVisible && spacesIncludeCurrentUserSpace
 })
 const checkIfShouldShowCurrentUserSpaces = (space) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember'](space)
+  const isSpaceMember = userStore.getUserIsSpaceMember
   if (isSpaceMember) {
     state.currentUserSpacesIsVisible = true
   }
 }
-const isSpaceMemberOfCurrentSpace = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMemberOfCurrentSpace = computed(() => userStore.getUserIsSpaceMember)
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const parentDialog = computed(() => 'favorites')
 
 // user
 
-const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const userDetailsIsVisible = computed(() => globalStore.userDetailsIsVisible)
 const userDetailsSelectedUser = computed(() => {
   if (!userDetailsIsVisible.value) { return }
-  return store.state.userDetailsUser
+  return globalStore.userDetailsUser
 })
 const toggleUserDetails = (event, user) => {
-  const shouldShow = !store.state.userDetailsIsVisible
+  const shouldShow = !globalStore.userDetailsIsVisible
   closeDialogs()
   if (shouldShow) {
     showUserDetails(event, user)
@@ -114,20 +121,20 @@ const showUserDetails = async (event, user) => {
   const element = event.target
   const options = { element, shouldIgnoreZoom: true }
   const position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsUser', user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
+  globalStore.userDetailsUser = user
+  globalStore.userDetailsPosition = position
+  globalStore.userDetailsIsVisible = true
 }
 const closeDialogs = () => {
-  store.commit('userDetailsIsVisible', false)
+  globalStore.userDetailsIsVisible = false
 }
 const updateFavoriteSpaceIsEdited = async () => {
   const spaces = favoriteSpaces.value.filter(space => space.isEdited)
   if (!spaces.length) { return }
   spaces.forEach(space => {
-    store.commit('currentUser/updateFavoriteSpaceIsEdited', space.id)
+    userStore.updateUserFavoriteSpaceIsEdited(space)
   })
-  await store.dispatch('api/addToQueue', {
+  await apiStore.addToQueue({
     name: 'updateUserVisitSpaces',
     body: spaces
   })

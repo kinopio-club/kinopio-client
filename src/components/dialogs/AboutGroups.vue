@@ -1,11 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
 import AboutGroups from '@/components/subsections/AboutGroups.vue'
 import utils from '@/utils.js'
-
-const store = useStore()
 
 const dialogElement = ref(null)
 
@@ -43,4 +40,5 @@ dialog.about-groups
   left initial
   bottom 25px
   top initial !important
+  overflow auto
 </style>

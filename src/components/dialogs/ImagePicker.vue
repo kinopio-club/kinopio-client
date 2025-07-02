@@ -1,6 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -9,7 +15,13 @@ import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const uploadStore = useUploadStore()
 
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
@@ -59,17 +71,17 @@ const state = reactive({
   }
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 const closeImagePicker = () => {
-  store.dispatch('currentCards/updateNameRemovePlaceholders', props.cardId)
+  cardStore.clearCardNameUploadPlaceholder(props.cardId)
 }
 
 // input
@@ -99,7 +111,7 @@ const focusSearchInput = () => {
   const length = searchInputElement.value.length
   element.focus()
   element.setSelectionRange(length, length)
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const clearSearch = () => {
   state.search = ''
@@ -120,7 +132,7 @@ const provider = computed(() => {
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsStickers = computed(() => state.service === 'stickers')
 const serviceIsGifs = computed(() => state.service === 'gifs')
-const lastUsedImagePickerService = computed(() => store.state.currentUser.lastUsedImagePickerService)
+const lastUsedImagePickerService = computed(() => userStore.lastUsedImagePickerService)
 const toggleServiceIsPexels = () => {
   state.service = 'pexels'
   searchAgain()
@@ -137,7 +149,7 @@ const toggleServiceIsGifs = () => {
   updateLastUsedImagePickerService()
 }
 const updateLastUsedImagePickerService = () => {
-  store.dispatch('currentUser/update', { lastUsedImagePickerService: state.service })
+  userStore.updateUser({ lastUsedImagePickerService: state.service })
 }
 const updateServiceFromLastUsedService = () => {
   if (!lastUsedImagePickerService.value) { return }
@@ -164,7 +176,7 @@ const searchPexels = async () => {
   const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
   const defaultSearch = sample(defaultSearches)
   const search = state.search || defaultSearch
-  const data = await store.dispatch('api/imageSearch', search)
+  const data = await apiStore.imageSearch(search)
   normalizeResults(data, 'pexels')
 }
 const searchGiphy = async (isStickers) => {
@@ -182,13 +194,13 @@ const searchGiphy = async (isStickers) => {
   } else {
     body.rating = 'g'
   }
-  const data = await store.dispatch('api/gifImageSearch', body)
+  const data = await apiStore.gifImageSearch(body)
   normalizeResults(data, 'giphy')
 }
 const searchService = debounce(async () => {
   clearErrors()
   state.loading = true
-  const isOffline = !store.state.isOnline
+  const isOffline = !globalStore.isOnline
   if (isOffline) {
     state.loading = false
     state.error.userIsOffline = true
@@ -259,7 +271,7 @@ const clearErrors = () => {
 // image
 
 const cardPendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => upload.cardId === props.cardId)
 })
 const removeImage = () => {
@@ -287,13 +299,13 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
   if (!otherSelectedFiles.length) { return }
   try {
     const cardId = props.cardId
-    const card = store.getters['currentCards/byId'](cardId)
+    const card = cardStore.getCard(cardId)
     const positionOffset = 20
     const position = {
       x: card.x + positionOffset,
       y: card.y + positionOffset
     }
-    store.dispatch('upload/addCardsAndUploadFiles', {
+    uploadStore.addCardsAndUploadFiles({
       files: otherSelectedFiles,
       position
     })
@@ -304,7 +316,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
 const uploadSelectedFile = async (selectedFile) => {
   const cardId = props.cardId
   try {
-    await store.dispatch('upload/uploadFile', { file: selectedFile, cardId })
+    await uploadStore.uploadFile({ file: selectedFile, cardId })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
@@ -323,13 +335,13 @@ const uploadFiles = async (event) => {
 }
 const addPlaceholderToCardName = (event) => {
   // prevents empty cards from being removed on blur by the @change event on iOS
-  const card = store.getters['currentCards/byId'](props.cardId)
+  const card = cardStore.getCard(props.cardId)
   if (!card.name) {
     const update = {
       id: card.id,
       name: consts.uploadPlaceholder
     }
-    store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
+    cardStore.updateCard(update)
   }
 }
 
@@ -343,8 +355,8 @@ const scrollIntoView = () => {
   if (!props.visible) { return }
   const element = dialogElement.value
   if (!element) { return }
-  store.commit('scrollElementIntoView', { element })
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.scrollElementIntoView({ element })
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -360,7 +372,7 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 </script>
 

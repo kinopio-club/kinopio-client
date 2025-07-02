@@ -1,58 +1,34 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
-const store = useStore()
-
-onMounted(() => {
-  initDefaultColor()
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateTheme') {
-      initDefaultColor()
-    }
-  })
-})
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
 })
-watch(() => props.visible, (value, prevValue) => {
-  closeChildDialogs()
-})
 
-const state = reactive({
-  colorPickerIsVisible: false,
-  defaultColor: '#e3e3e3'
-})
-
-const currentUser = computed(() => store.state.currentUser)
-const closeChildDialogs = () => {
-  state.colorPickerIsVisible = false
-}
-
-// character limit
-
-const defaultCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit)
-const limitIsDefault = computed(() => !defaultCharacterLimit.value || defaultCharacterLimit.value === consts.defaultCharacterLimit)
-const limitIsMax = computed(() => defaultCharacterLimit.value === consts.highCharacterLimit)
-const updateLimit = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsDefaultCharacterLimit: value })
-}
+const currentUser = computed(() => userStore.getUserAllState)
+const closeChildDialogs = () => {}
 
 // shift-enter
 
-const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const updateShiftEnter = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsShiftEnterShouldAddChildCard: value })
+  userStore.updateUser({ cardSettingsShiftEnterShouldAddChildCard: value })
 }
 
 //  max card width
 
-const maxCardWidth = computed(() => store.state.currentUser.cardSettingsMaxCardWidth)
+const maxCardWidth = computed(() => userStore.cardSettingsMaxCardWidth)
 const maxCardWidthIsNormal = computed(() => maxCardWidth.value === consts.normalCardMaxWidth)
 const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
 const updateMaxCardWidthIsWide = (isWide) => {
@@ -60,52 +36,12 @@ const updateMaxCardWidthIsWide = (isWide) => {
   if (isWide) {
     value = consts.wideCardMaxWidth
   }
-  store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
+  userStore.updateUser({ cardSettingsMaxCardWidth: value })
 }
-
-// card color
-
-const updateDefaultCardColor = (color) => {
-  store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
-}
-const removeDefaultCardColor = () => {
-  updateDefaultCardColor(null)
-  closeChildDialogs()
-}
-const toggleColorPicker = () => {
-  const value = !state.colorPickerIsVisible
-  closeChildDialogs()
-  state.colorPickerIsVisible = value
-}
-const defaultCardColor = computed(() => {
-  const userDefault = currentUser.value.defaultCardBackgroundColor
-  return userDefault || state.defaultColor
-})
-const userHasDefaultCardColor = computed(() => {
-  const systemDefaultColor = utils.cssVariable('secondary-background')
-  const userDefaultColor = currentUser.value.defaultCardBackgroundColor
-  const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
-  return userDefaultColor && defaultColorIsNotSystem
-})
-const initDefaultColor = () => {
-  state.defaultColor = utils.cssVariable('secondary-background')
-}
-
 </script>
 
 <template lang="pug">
-.cards-settings(v-if="visible" @click.left.stop="closeChildDialogs")
-  section
-    .row
-      p New Card Color
-    .row
-      .button-wrap
-        .segmented-buttons
-          button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
-            .current-color(:style="{ 'background-color': defaultCardColor }")
-          button(@click.left.stop="removeDefaultCardColor")
-            img.icon.cancel(src="@/assets/add.svg")
-        ColorPicker(:currentColor="defaultCardColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
+.cards-settings(v-if="visible")
   section
     p Shift-Enter
     .segmented-buttons
@@ -113,17 +49,6 @@ const initDefaultColor = () => {
         span Child Card
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
-  section
-    p Character Limit
-    .segmented-buttons
-      button(@click="updateLimit(consts.defaultCharacterLimit)" :class="{ active: limitIsDefault }")
-        span {{consts.defaultCharacterLimit}}
-      button(@click="updateLimit(consts.highCharacterLimit)" :class="{ active: limitIsMax }")
-        span {{consts.highCharacterLimit}}
-    p.badge.secondary
-      span(v-if="limitIsDefault") Best for ideas and thoughts
-      span(v-if="!limitIsDefault") Best for long-form writing and documenting
-
   section
     p Max Card Width
     .segmented-buttons

@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import GroupLabel from '@/components/GroupLabel.vue'
@@ -10,7 +13,9 @@ import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 
 import randomColor from 'randomcolor'
 
-const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -52,7 +57,7 @@ const updateDialogHeight = async () => {
 }
 
 const closeDialogs = () => {
-  // store.commit('triggerCloseChildDialogs')
+  // globalStore.triggerCloseChildDialogs()
 }
 const clearErrors = () => {
   state.error.missingName = false
@@ -61,7 +66,7 @@ const clearErrors = () => {
 
 // upgrade user required
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const upgradeMessage = computed(() => 'to create and manage Groups')
 
 // group
@@ -82,7 +87,7 @@ const createGroup = async () => {
   }
   try {
     state.loading.createGroup = true
-    await store.dispatch('groups/createGroup', state.group)
+    groupStore.createGroup(state.group)
     emit('closeDialogs')
   } catch (error) {
     console.error('🚒 createGroup', error)

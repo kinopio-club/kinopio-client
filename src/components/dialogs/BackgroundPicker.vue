@@ -1,6 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -17,13 +23,19 @@ import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 import times from 'lodash-es/times'
 import { nanoid } from 'nanoid'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const uploadStore = useUploadStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
 const dialogElement = ref(null)
 
-let unsubscribe
+let unsubscribes
 
 const props = defineProps({
   visible: Boolean,
@@ -36,20 +48,26 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   refreshGradients()
   updateDefaultColor()
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUploadComplete') {
-      const { spaceId, url, cardId } = mutation.payload
-      if (cardId) { return }
-      if (spaceId !== props.space?.id) { return }
-      updateBackground(url)
-    } else if (mutation.type === 'triggerUpdateTheme') {
-      updateDefaultColor()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUploadComplete') {
+        const { spaceId, url, cardId } = args[0]
+        if (cardId) { return }
+        if (spaceId !== props.space?.id) { return }
+        updateBackground(url)
+      } else if (name === 'triggerUpdateTheme') {
+        updateDefaultColor()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-  unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
@@ -93,7 +111,7 @@ watch(() => props.visible, (value, prevValue) => {
     if (state.error.isNotImageUrl) {
       removeBackground()
     }
-    store.commit('clearNotificationsWithPosition')
+    globalStore.clearNotificationsWithPosition()
   }
 })
 
@@ -104,9 +122,9 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsMember = computed(() => userStore.getUserIsSpaceMember)
 const itemTypeString = computed(() => {
   if (props.space) {
     return 'Space'
@@ -125,8 +143,8 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !isVisible
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 const closeDialogs = async () => {
   state.colorPickerIsVisible = false
@@ -134,7 +152,7 @@ const closeDialogs = async () => {
 const updatePreviewImage = async () => {
   if (props.box) { return }
   await nextTick()
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  spaceStore.updateSpacePreviewImage()
 }
 const clearErrors = () => {
   state.error.isNotImageUrl = false
@@ -173,7 +191,7 @@ const focusAndSelectSearchInput = async () => {
   element.setSelectionRange(0, length)
 }
 const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+  globalStore.pinchCounterZoomDecimal = 1
 }
 const toggleUrlInputIsVisible = () => {
   state.urlInputIsVisible = !state.urlInputIsVisible
@@ -200,7 +218,7 @@ const selectGradient = async (index) => {
     backgroundIsGradient: true,
     backgroundGradient: gradient
   }
-  await store.dispatch('currentSpace/updateSpace', updates)
+  await spaceStore.updateSpace(updates)
   updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
@@ -220,6 +238,9 @@ const currentBackgroundUrl = computed(() => {
 const backgroundImages = computed(() => {
   let images = backgroundImagesJSON
   images = images.filter(image => !image.isArchived)
+  if (!consts.isDevelopment) {
+    images = images.filter(image => !image.isDebug)
+  }
   return images
 })
 const updateCommunityBackgroundImages = async () => {
@@ -228,7 +249,7 @@ const updateCommunityBackgroundImages = async () => {
     state.communityBackgroundsIsLoading = false
     return
   }
-  let images = await store.dispatch('api/communityBackgrounds')
+  let images = await apiStore.communityBackgrounds()
   images = images.map(image => {
     return {
       url: image.original,
@@ -267,20 +288,20 @@ const background = computed({
 const updateBackground = async (url) => {
   url = url.url || url
   if (url === background.value) {
-    url = ''
+    return
   }
   if (props.box) {
     const updates = {
       id: props.box.id,
       background: url
     }
-    await store.dispatch('currentBoxes/update', updates)
+    await boxStore.updateBox(updates)
   } else {
     const updates = {
       backgroundIsGradient: false,
       background: url
     }
-    await store.dispatch('currentSpace/updateSpace', updates)
+    await spaceStore.updateSpace(updates)
   }
   updatePreviewImage()
   checkIfImageIsUrl()
@@ -311,7 +332,7 @@ const uploadFile = async () => {
   const spaceId = props.space?.id
   const input = inputElement.value
   const file = input.files[0]
-  const userIsUpgraded = store.state.currentUser.isUpgraded
+  const userIsUpgraded = userStore.isUpgraded
   const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
   if (isFileTooBig) {
     state.error.sizeLimit = true
@@ -319,9 +340,9 @@ const uploadFile = async () => {
   }
   try {
     if (props.box) {
-      await store.dispatch('upload/uploadFile', { file, boxId: props.box.id })
+      await uploadStore.uploadFile({ file, boxId: props.box.id })
     } else {
-      await store.dispatch('upload/uploadFile', { file, spaceId })
+      await uploadStore.uploadFile({ file, spaceId })
     }
   } catch (error) {
     console.warn('🚒', error)
@@ -333,7 +354,7 @@ const uploadFile = async () => {
   }
 }
 const pendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => {
     const isCurrentSpace = upload.spaceId === props.space?.id
     const isInProgress = upload.percentComplete < 100
@@ -341,7 +362,7 @@ const pendingUpload = computed(() => {
   })
 })
 const remotePendingUpload = computed(() => {
-  const remotePendingUploads = store.state.remotePendingUploads
+  const remotePendingUploads = globalStore.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const isInProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === props.space?.id
@@ -364,7 +385,7 @@ const backgroundTintBadgeColor = computed(() => {
 const updateBackgroundTint = async (value) => {
   state.backgroundTint = value
   if (props.space) {
-    await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+    await spaceStore.updateSpace({ backgroundTint: value })
     emit('updateSpaces')
     updatePreviewImage()
   }
@@ -427,7 +448,7 @@ const searchPexels = async () => {
     const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
     const defaultSearch = sample(defaultSearches)
     const search = state.search || defaultSearch
-    const data = await store.dispatch('api/imageSearch', search)
+    const data = await apiStore.imageSearch(search)
     state.images = data.photos.map(image => {
       return {
         id: image.id,
@@ -455,7 +476,7 @@ const toggleBackgroundIsStretch = () => {
     id: props.box.id,
     backgroundIsStretch: value
   }
-  store.dispatch('currentBoxes/update', update)
+  boxStore.updateBox(update)
 }
 
 </script>

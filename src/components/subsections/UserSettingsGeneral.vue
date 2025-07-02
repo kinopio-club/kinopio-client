@@ -1,6 +1,10 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
@@ -13,23 +17,36 @@ import cache from '@/cache.js'
 import User from '@/components/User.vue'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
   visible: Boolean
 })
 
-const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const currentUser = computed(() => store.state.currentUser)
+const isSignedIn = computed(() => userStore.getUserIsSignedIn)
+const isUpgraded = computed(() => userStore.isUpgraded)
+const currentUser = computed(() => userStore.getUserAllState)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const state = reactive({
@@ -97,7 +114,7 @@ const toggleUserDeveloperInfoIsVisible = () => {
 
 const deleteUserPermanent = async () => {
   state.loading.deleteUserPermanent = true
-  await store.dispatch('api/deleteUserPermanent')
+  await apiStore.deleteUserPermanent()
   await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')
@@ -150,12 +167,12 @@ const deleteUserPermanent = async () => {
   //- Delete Account
   section.delete-account
     .row
-      button.danger(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
+      button.danger.small-button(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
-        span Delete All Your Data
+        span Delete Account
       span(v-if="state.deleteAllConfirmationVisible")
         p.badge.danger
-          span(v-if="isSignedIn") Permanently Delete all your spaces and user data from this computer and Kinopio's servers?
+          span(v-if="isSignedIn") Permanently Delete your account and all your spaces from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
           br
           br

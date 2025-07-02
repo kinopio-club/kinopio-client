@@ -1,43 +1,60 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-
 import utils from '@/utils.js'
-const store = useStore()
 
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+
+let unsubscribes
 let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerExploreIsVisible') {
-      toggleExploreIsVisible()
-    } else if (mutation.type === 'closeAllDialogs') {
-      closeDialogs()
-    } else if (mutation.type === 'triggerUserIsLoaded') {
-      updateSpaces()
-    }
-  })
   // update spaces
   window.addEventListener('online', updateLiveSpaces)
   window.addEventListener('online', updateSpaces)
   updateLiveSpaces()
+  updateSpaces()
   updateLiveSpacesIntervalTimer = setInterval(() => {
     updateLiveSpaces()
   }, 1000 * 60 * 5) // 5 minutes
   updateSpacesIntervalTimer = setInterval(() => {
     updateSpaces()
   }, 1000 * 60 * 10) // 10 minutes
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerExploreIsVisible') {
+        toggleExploreIsVisible()
+      } else if (name === 'closeAllDialogs') {
+        closeDialogs()
+      } else if (name === 'triggerUserIsLoaded') {
+        updateSpaces()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('online', updateLiveSpaces)
+  window.removeEventListener('online', updateSpaces)
   clearInterval(updateLiveSpacesIntervalTimer)
   clearInterval(updateSpacesIntervalTimer)
+  unsubscribes()
 })
 
 const state = reactive({
@@ -70,8 +87,8 @@ const closeDialogs = () => {
   state.liveIsVisible = false
   state.favoritesIsVisible = false
 }
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
-const isOnline = computed(() => store.state.isOnline)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
+const isOnline = computed(() => globalStore.isOnline)
 
 const normalizeCount = (count) => {
   if (count > 9) {
@@ -84,11 +101,11 @@ const normalizeCount = (count) => {
 // Unread Counts
 
 const spaceIsCurrentSpace = (space) => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   return space.id === currentSpace.id
 }
 const unreadSpaces = (spaces, type) => {
-  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  let readDate = userStore.showInExploreUpdatedAt
   readDate = dayjs(readDate)
   const unreadSpaces = spaces?.filter(space => {
     if (spaceIsCurrentSpace(space)) { return }
@@ -99,7 +116,7 @@ const unreadSpaces = (spaces, type) => {
   return unreadSpaces || []
 }
 const updateUnreadSpacesCounts = () => {
-  const readDate = store.state.currentUser.showInExploreUpdatedAt
+  const readDate = userStore.showInExploreUpdatedAt
   if (!readDate) { return maxUnreadCountCharacter }
   state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
   state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
@@ -118,16 +135,16 @@ const clearUnreadSpacesCounts = () => {
 
 const toggleExploreIsVisible = () => {
   const isVisible = state.exploreIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.exploreIsVisible = !isVisible
 }
 const updateSpaces = async () => {
   try {
     state.isLoadingSpaces = true
     const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
-      store.dispatch('api/getExploreSpaces'),
-      store.dispatch('api/getFollowingUsersSpaces'),
-      store.dispatch('api/getEveryoneSpaces')
+      apiStore.getExploreSpaces(),
+      apiStore.getFollowingUsersSpaces(),
+      apiStore.getEveryoneSpaces()
     ])
     state.exploreSpaces = exploreSpaces
     state.followingSpaces = followingSpaces
@@ -144,7 +161,7 @@ const updateSpaces = async () => {
 
 const toggleLiveIsVisible = () => {
   const isVisible = state.liveIsVisible
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.liveIsVisible = !isVisible
   if (state.liveIsVisible) {
     updateLiveSpaces()
@@ -152,12 +169,12 @@ const toggleLiveIsVisible = () => {
 }
 const updateLiveSpaces = async () => {
   state.isLoadingLiveSpaces = true
-  let spaces = await store.dispatch('api/getLiveSpaces')
+  let spaces = await apiStore.getLiveSpaces()
   if (!spaces || !spaces.length) {
     state.isLoadingLiveSpaces = false
     return
   }
-  spaces = spaces.filter(space => space.user.id !== store.state.currentUser.id)
+  spaces = spaces.filter(space => space.user.id !== userStore.id)
   spaces = normalizeLiveSpaces(spaces)
   state.liveSpaces = spaces
   state.isLoadingLiveSpaces = false
@@ -192,11 +209,11 @@ const liveSpacesCount = computed(() => {
 </script>
 
 <template lang="pug">
-.button-wrap(v-if="isOnline")
+.button-wrap.discovery-buttons(v-if="isOnline")
   .segmented-buttons.space-functions-row
     //- Explore
     .button-wrap
-      button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible" title="Explore Spaces")
+      button.small-button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible" title="Explore Spaces")
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
         span(v-if="state.unreadSpacesCount") {{state.unreadSpacesCount}}
       Explore(
@@ -212,7 +229,7 @@ const liveSpacesCount = computed(() => {
       )
     //- Live
     .button-wrap
-      button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Live Spaces")
+      button.small-button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Live Spaces")
         img.icon.camera(src="@/assets/camera.svg")
         span(v-if="liveSpacesCount") {{ liveSpacesCount }}
       Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")

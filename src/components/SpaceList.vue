@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -18,9 +22,12 @@ import cache from '@/cache.js'
 import dayjs from 'dayjs'
 import last from 'lodash-es/last'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
-let unsubscribe
+let unsubscribes
 
 let shouldPreventSelectSpace
 
@@ -29,37 +36,51 @@ const itemsPerPage = 60
 const spaceListElement = ref(null)
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation) => {
-    if (mutation.type === 'triggerPickerNavigationKey') {
-      const key = mutation.payload
-      const spaces = props.spaces
-      const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
-      if (!utils.arrayHasItems(spaces)) {
-        closeDialog()
-      } else if (key === 'ArrowUp') {
-        focusPreviousItem(currentIndex)
-      } else if (key === 'ArrowDown') {
-        focusNextItem(currentIndex)
-      }
-    } else if (mutation.type === 'triggerPickerSelect') {
-      const spaces = props.spaces
-      const currentSpace = spaces.find(space => space.id === state.focusOnId)
-      selectSpace(null, currentSpace)
-      store.commit('shouldPreventNextEnterKey', true)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      state.focusOnId = store.state.currentSpace.id
-    }
-  })
   updateScroll()
   spaceListElement.value.closest('section').addEventListener('scroll', updateScroll)
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
   }
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPickerNavigationKey') {
+        const key = args[0]
+        const spaces = props.spaces
+        const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+        if (!utils.arrayHasItems(spaces)) {
+          closeDialog()
+        } else if (key === 'ArrowUp') {
+          focusPreviousItem(currentIndex)
+        } else if (key === 'ArrowDown') {
+          focusNextItem(currentIndex)
+        }
+      } else if (name === 'triggerPickerSelect') {
+        const spaces = props.spaces
+        const currentSpace = spaces.find(space => space.id === state.focusOnId)
+        selectSpace(null, currentSpace)
+        globalStore.shouldPreventNextEnterKey = true
+      }
+    }
+  )
+  const spaceActionUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        state.focusOnId = spaceStore.id
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+    spaceActionUnsubscribe()
+  }
 })
 
 onBeforeUnmount(() => {
-  unsubscribe()
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])
@@ -101,14 +122,14 @@ const state = reactive({
   prevScrollAreaHeight: 0
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 const isOffline = computed(() => !isOnline.value)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // spaces
 
 watch(() => props.spaces, (spaces) => {
-  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
+  const cardDetailsIsVisible = globalStore.cardDetailsIsVisibleForCardId
   if (spaces && cardDetailsIsVisible) {
     state.focusOnId = props.spaces[0].id
   }
@@ -123,7 +144,7 @@ const spacesFiltered = computed(() => {
   return spaces
 })
 const isNotCached = (spaceId) => {
-  return store.dispatch('currentSpace/spaceIsNotCached', spaceId)
+  return spaceStore.getSpaceIsNotCached(spaceId)
 }
 const isNew = (space) => {
   if (props.readSpaceIds?.includes(space.id)) { return }
@@ -153,15 +174,15 @@ const spaceIsActive = (space) => {
   }
 }
 const spaceIsHidden = (space) => {
-  const isHidden = store.getters['currentSpace/isHidden'](space.id)
+  const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
   return isHidden
 }
 const isLoadingSpace = (space) => {
-  const isLoadingSpace = store.state.isLoadingSpace
+  const isLoadingSpace = globalStore.isLoadingSpace
   return isLoadingSpace && spaceIsCurrentSpace(space)
 }
 const spaceIsCurrentSpace = (space) => {
-  const currentSpace = store.state.currentSpace.id
+  const currentSpace = spaceStore.id
   return Boolean(currentSpace === space.id)
 }
 const spaceIsTemplate = (space) => {
@@ -212,14 +233,14 @@ const selectSpace = (event, space) => {
     return
   }
   if (!space) { return }
-  store.commit('notifySpaceNotFound', false)
+  globalStore.updateNotifySpaceNotFound(false)
   emit('selectSpace', space)
 }
 
 // favorites
 
 const isFavorite = (space) => {
-  return store.getters['currentSpace/isFavorite'](space.id)
+  return spaceStore.getSpaceIsFavorite(space.id)
 }
 
 // scroll
@@ -287,7 +308,7 @@ const updateFilteredSpaces = (spaces) => {
   state.filteredSpaces = spaces
 }
 const parentDialog = computed(() => {
-  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
+  const cardDetailsIsVisible = globalStore.cardDetailsIsVisibleForCardId
   let parentDialog = props.parentDialog
   if (cardDetailsIsVisible) {
     parentDialog = 'cardDetails'
@@ -295,17 +316,17 @@ const parentDialog = computed(() => {
   return parentDialog
 })
 const updateFilter = async (filter, isClearFilter) => {
-  const parentIsNew = parentDialog.value !== store.state.spaceListFilterInfo.parentDialog
+  const parentIsNew = parentDialog.value !== globalStore.spaceListFilterInfo.parentDialog
   if (parentIsNew) {
     filter = ''
   }
   state.filter = filter
   if (!isClearFilter) {
-    store.commit('spaceListFilterInfo', {
+    globalStore.spaceListFilterInfo = {
       filter,
       parentDialog: parentDialog.value,
       updatedAt: new Date().getTime()
-    })
+    }
   }
   const spaces = spacesFiltered.value || props.spaces
   if (!spaces.length) { return }
@@ -369,7 +390,7 @@ const selectItemFromFilter = () => {
   }
   const spaces = spacesFiltered.value
   const space = spaces.find(space => space.id === state.focusOnId)
-  store.commit('shouldPreventNextEnterKey', true)
+  globalStore.shouldPreventNextEnterKey = true
   selectSpace(null, space)
 }
 
@@ -377,7 +398,7 @@ const selectItemFromFilter = () => {
 
 const group = (groupId) => {
   if (!groupId) { return }
-  return store.getters['groups/byId'](groupId)
+  return groupStore.getGroup(groupId)
 }
 </script>
 

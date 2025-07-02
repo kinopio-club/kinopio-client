@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
@@ -9,17 +13,31 @@ import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerClearAllSpaceFilters') {
-      clearAllFilters()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerClearAllSpaceFilters') {
+        clearAllFilters()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -46,11 +64,11 @@ const updateDialogHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
-const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
-const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
+const dialogSpaceFilterSortBy = computed(() => userStore.dialogSpaceFilterSortBy)
+const dialogSpaceFilterByUser = computed(() => userStore.dialogSpaceFilterByUser)
+const dialogSpaceFilterShowHidden = computed(() => userStore.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterByGroup = computed(() => userStore.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => userStore.dialogSpaceFilterByTemplates)
 
 // clear all
 
@@ -58,7 +76,7 @@ const clearAllFilters = () => {
   updateGroupFilter({})
   updateUserFilter({})
   updateSortBy(null)
-  store.dispatch('currentUser/update', {
+  userStore.updateUser({
     dialogSpaceFilterShowHidden: false,
     dialogSpaceFilterByTemplates: false
   })
@@ -87,7 +105,7 @@ const totalFiltersActive = computed(() => {
 
 const showHiddenSpace = computed({
   get () {
-    return store.state.currentUser.dialogSpaceFilterShowHidden
+    return userStore.dialogSpaceFilterShowHidden
   },
   set () {
     toggleShowHiddenSpace()
@@ -95,7 +113,7 @@ const showHiddenSpace = computed({
 })
 const toggleShowHiddenSpace = () => {
   const value = !dialogSpaceFilterShowHidden.value
-  store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
+  userStore.updateUser({ dialogSpaceFilterShowHidden: value })
 }
 
 // sort by
@@ -117,7 +135,7 @@ const isSortByGroups = computed(() => {
   return value === 'groups'
 })
 const updateSortBy = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
+  userStore.updateUser({ dialogSpaceFilterSortBy: value })
 }
 
 // templates
@@ -128,7 +146,7 @@ const isTemplates = computed(() => {
 })
 const toggleFilterByTemplates = () => {
   const value = !dialogSpaceFilterByTemplates.value
-  store.dispatch('currentUser/update', { dialogSpaceFilterByTemplates: value })
+  userStore.updateUser({ dialogSpaceFilterByTemplates: value })
 }
 
 // groups
@@ -137,7 +155,7 @@ const isGroups = computed(() => {
   if (!groups.value) { return }
   return groups.value.length
 })
-const groups = computed(() => store.getters['groups/byUser']())
+const groups = computed(() => groupStore.getCurrentUserGroups)
 const filterByGroup = (event, group) => {
   if (group.id === dialogSpaceFilterByGroup.value.id) {
     updateGroupFilter({})
@@ -146,13 +164,13 @@ const filterByGroup = (event, group) => {
   }
 }
 const updateGroupFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByGroup: value })
+  userStore.updateUser({ dialogSpaceFilterByGroup: value })
 }
 
 // collaborators
 
 const spaceUsers = computed(() => {
-  const currentUserId = store.state.currentUser.id
+  const currentUserId = userStore.id
   const spaces = props.spaces.filter(space => space.userId !== currentUserId)
   let users = spaces.map(space => space.users[0])
   users = users.filter(user => Boolean(user))
@@ -160,7 +178,7 @@ const spaceUsers = computed(() => {
   return users
 })
 const updateUserFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByUser: value })
+  userStore.updateUser({ dialogSpaceFilterByUser: value })
 }
 const filterByUser = (event, user) => {
   if (user.id === dialogSpaceFilterByUser.value.id) {

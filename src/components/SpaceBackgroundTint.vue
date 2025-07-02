@@ -1,17 +1,22 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
-const visible = computed(() => store.getters.isSpacePage)
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
-const currentSpace = computed(() => store.state.currentSpace)
+const visible = computed(() => globalStore.getIsSpacePage)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 // tint
 
@@ -33,10 +38,10 @@ const backgroundTint = computed(() => {
 
 // styles
 
-const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
+const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
   return {

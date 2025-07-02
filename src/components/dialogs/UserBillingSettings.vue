@@ -1,13 +1,21 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialog = ref(null)
 
@@ -34,14 +42,17 @@ const state = reactive({
 })
 
 const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerUpgradeUserIsVisible()
 }
 
-const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
-const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
-const stripePlanIsPurchased = computed(() => store.state.currentUser.stripePlanIsPurchased)
-const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
+const subscriptionIsApple = computed(() => userStore.appleSubscriptionIsActive)
+const subscriptionIsStripe = computed(() => subscriptionIsFree.value || userStore.stripeSubscriptionId)
+const stripePlanIsPurchased = computed(() => userStore.stripePlanIsPurchased)
+const subscriptionIsFree = computed(() => {
+  const strings = ['🌷free', '🌷 free', '🫧free']
+  return strings.includes(userStore.stripeSubscriptionId)
+})
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const updateDialogHeight = async () => {
@@ -61,8 +72,8 @@ const customerPortal = async () => {
   try {
     clearState()
     state.loading = true
-    const result = await store.dispatch('api/customerPortalUrl', {
-      userId: store.state.currentUser.id
+    const result = await apiStore.customerPortalUrl({
+      userId: userStore.id
     })
     window.location = result.url
   } catch (error) {
@@ -94,6 +105,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   //- stripe lifetime
   section(v-else-if="stripePlanIsPurchased")
     p You've purchased a lifetime plan. If you need a new receipt please contact support.
+    p
+      a(href="mailto:support@kinopio.club") support@kinopio.club
 
   //- apple
   section(v-else-if="subscriptionIsApple")

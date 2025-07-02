@@ -1,8 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 
-import Card from '@/components/Card.vue'
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
+
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
@@ -21,7 +31,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
 import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
-import DrawingBackground from '@/components/layers/DrawingBackground.vue'
+import DrawingCanvasBackground from '@/components/layers/DrawingCanvasBackground.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
@@ -47,26 +57,50 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const groupStore = useGroupStore()
+const analyticsStore = useAnalyticsStore()
+const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
-let unsubscribe
+let unsubscribes
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
+// expose pinia stores to browser console for developers
+window.globalStore = useGlobalStore()
+window.cardStore = useCardStore()
+window.connectionStore = useConnectionStore()
+window.boxStore = useBoxStore()
+window.spaceStore = useSpaceStore()
+window.groupStore = useGroupStore()
+if (consts.isDevelopment()) {
+  window.userStore = useUserStore()
+  window.historyStore = useHistoryStore()
+}
+console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore, window.groupStore')
+
 // init user and space app state
 const init = async () => {
-  if (store.state.shouldNotifyIsJoiningGroup) {
-    store.commit('notifyIsJoiningGroup', true)
+  if (globalStore.shouldNotifyIsJoiningGroup) {
+    globalStore.updateNotifyIsJoiningGroup(true)
   }
-  store.dispatch('api/updateDateImage')
-  store.dispatch('analytics/event', 'pageview')
-  await cache.migrateFromLocalStorage()
-  await store.dispatch('currentUser/init')
-  await store.dispatch('currentSpace/init')
-  await store.commit('broadcast/connect')
-  await store.dispatch('groups/init')
-  await store.dispatch('updateTags')
+  apiStore.updateDateImage()
+  analyticsStore.event('pageview')
+  await cache.migrateFromLocalStorage() // legacy
+  await spaceStore.initializeSpace()
+  // broadcastStore.connect()
+  await groupStore.initializeGroups()
+  await globalStore.updateTags()
+  checkIfShouldShowExploreOnLoad()
+  historyStore.init()
 }
 init()
 
@@ -89,36 +123,38 @@ onMounted(() => {
   window.addEventListener('beforeunload', unloadPage)
   window.addEventListener('popstate', loadSpaceOnBackOrForward)
   document.fonts.ready.then(event => {
-    store.commit('webfontIsLoaded', true)
-  })
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
-      dragItemsOnNextTick()
-    } else if (mutation.type === 'triggerAddBox') {
-      const event = mutation.payload
-      addBox(event)
-    }
+    globalStore.webfontIsLoaded = true
   })
   updateIconsNotDraggable()
-
   setTimeout(() => {
-    store.dispatch('currentSpace/updateInboxCache')
+    spaceStore.updateInboxCache()
   }, 15000) // 15 seconds after mounted
 
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
-    store.dispatch('api/sendQueue')
+    apiStore.sendQueue()
   }, 5000) // every 5 seconds
   // update inbox space in local storage, one time
   hourlyTasks = setInterval(() => {
-    store.dispatch('currentSpace/updateInboxCache')
-    store.dispatch('api/updateDateImage')
+    spaceStore.updateInboxCache()
+    apiStore.updateDateImage()
   }, 1000 * 60 * 60 * 1) // every 1 hour
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerAddBox') {
+        const event = args[0]
+        addBox(event)
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 
 onBeforeUnmount(() => {
-  unsubscribe()
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
@@ -132,74 +168,80 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(hourlyTasks)
+  unsubscribes()
 })
 
 const state = reactive({
-  startCursor: {}
+  startCursor: {},
+  currentInteractingItem: null
 })
 
-const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
-const isPainting = computed(() => store.state.currentUserIsPainting)
-const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
-const isPanning = computed(() => store.state.currentUserIsPanning)
-const spaceIsReadOnly = computed(() => !store.getters['currentUser/canEditSpace']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
-const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
-const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
-const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
-const isResizingBox = computed(() => store.state.currentUserIsResizingBox)
-const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
+const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
+const isPainting = computed(() => globalStore.currentUserIsPainting)
+const isPanningReady = computed(() => globalStore.currentUserIsPanningReady)
+const isPanning = computed(() => globalStore.currentUserIsPanning)
+const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
+const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
+const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
+const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
+const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
+const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
+const checkIfShouldShowExploreOnLoad = () => {
+  const shouldShow = globalStore.shouldShowExploreOnLoad
+  if (shouldShow) {
+    globalStore.triggerExploreIsVisible()
+  }
+  globalStore.shouldShowExploreOnLoad = false
+}
 
 // page size
 
-watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
+  updatePageSizes(value)
 })
-watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
-  if (prevValue && !value) {
+watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
+  const isAfterResize = prevValue && !value
+  if (isAfterResize) {
     afterResizeCards()
   }
-  updatePageSizeFromMutation(value)
+  updatePageSizes(value)
 })
-watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
+  updatePageSizes(value)
 })
-watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
-  if (prevValue && !value) {
-    afterResizeBoxes()
-  }
-  updatePageSizeFromMutation(value)
-})
-const updatePageSizeFromMutation = async (value) => {
+
+const updatePageSizes = async (value) => {
   if (!value) {
     await nextTick()
-    store.dispatch('updatePageSizes')
+    globalStore.updatePageSizes()
   }
 }
 const updateViewportSizes = () => {
-  store.dispatch('updateViewportSizes')
+  globalStore.updateViewportSizes()
 }
 
 // user
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
+  let users = spaceStore.getSpaceAllUsers
+  users = utils.excludeCurrentUser(users, userStore.id)
+  return users
 })
 
 // styles
 
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   return {
     width: `${pageWidth.value * zoom}px`,
     height: `${pageHeight.value * zoom}px`,
-    transform: store.getters.zoomTransform
+    transform: globalStore.getZoomTransform
   }
 })
 
@@ -210,12 +252,12 @@ const loadSpaceOnBackOrForward = (event) => {
   if (!utils.urlIsSpace(url)) { return }
   const spaceId = utils.spaceIdFromUrl(url)
   const space = { id: spaceId }
-  store.dispatch('currentSpace/loadSpace', { space })
+  spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
-  store.commit('broadcast/close')
-  store.dispatch('currentSpace/removeEmptyCards')
-  store.commit('triggerUnloadPage')
+  broadcastStore.close()
+  spaceStore.removeEmptyCards()
+  globalStore.triggerUnloadPage()
 }
 
 // cards
@@ -227,84 +269,76 @@ const addCard = (event) => {
     x: position.x,
     y: position.y
   }
-  store.dispatch('currentUser/notifyReadOnly', position)
+  userStore.notifyReadOnly(position)
   if (spaceIsReadOnly.value) { return }
   const newCard = { position, isParentCard }
-  store.dispatch('currentCards/add', { card: newCard })
-  store.commit('childCardId', '')
+  cardStore.createCard(newCard)
+  globalStore.childCardId = ''
 }
 const addOrCloseCard = (event) => {
   const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
-  if (store.state.shouldAddCard) {
+  if (globalStore.shouldAddCard) {
     let position = utils.cursorPositionInSpace(event)
     // prevent addCard if position is outside space
     if (utils.isPositionOutsideOfSpace(position)) {
       position = utils.cursorPositionInPage(event)
-      store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+      globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
       return
     }
     // add card
     addCard(event)
   // close item details
-  } else if ((store.state.cardDetailsIsVisibleForCardId || store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
-    store.dispatch('closeAllDialogs')
+  } else if ((globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
+    globalStore.closeAllDialogs()
   }
-}
-const tiltCards = (event) => {
-  if (!prevCursor) { return }
-  if (utils.isMultiTouch(event)) { return }
-  const cardIds = store.state.currentUserIsTiltingCardIds
-  let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
-  if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
-    delta = -delta
-  }
-  store.dispatch('currentCards/tilt', { cardIds, delta })
-}
-const stopTiltingCards = () => {
-  if (!store.state.currentUserIsTiltingCard) { return }
-  store.dispatch('history/resume')
-  const cardIds = store.state.currentUserIsTiltingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('currentCards/updateDimensions', { cards })
-  store.dispatch('history/add', { cards, useSnapshot: true })
-  store.commit('currentUserIsTiltingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
-}
-const resizeCards = (event) => {
-  if (!prevCursor) { return }
-  if (utils.isMultiTouch(event)) { return }
-  const cardIds = store.state.currentUserIsResizingCardIds
-  const deltaX = endCursor.x - prevCursor.x
-  store.dispatch('currentCards/resize', { cardIds, deltaX })
-}
-const stopResizingCards = async () => {
-  if (!store.state.currentUserIsResizingCard) { return }
-  store.dispatch('history/resume')
-  const cardIds = store.state.currentUserIsResizingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('history/add', { cards, useSnapshot: true })
-  await store.dispatch('currentCards/updateDimensions', { cards })
-  store.commit('currentUserIsResizingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
-}
-const afterResizeCards = () => {
-  if (!store.state.shouldSnapToGrid) { return }
-  const cardIds = store.state.currentUserIsResizingCardIds
-  const cards = cardIds.map(cardId => {
-    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
-    resizeWidth = utils.roundToNearest(resizeWidth)
-    return { id, resizeWidth }
-  })
-  store.dispatch('currentCards/updateMultiple', cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const data = event.data
   if (data.name !== 'addedCardFromAddPage') { return }
   const card = data.value
   if (card.spaceId !== currentSpace.id) { return }
-  store.commit('currentCards/create', { card, shouldPreventCache: true })
+  cardStore.createCard(card)
+}
+
+// tilt cards
+
+const tiltCards = (event) => {
+  if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
+  const cardIds = globalStore.currentUserIsTiltingCardIds
+  let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
+  if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
+    delta = -delta
+  }
+  cardStore.tiltCards(cardIds, delta)
+}
+const stopTiltingCards = () => {
+  const cardIds = globalStore.currentUserIsTiltingCardIds
+  cardStore.updateCardsDimensions(cardIds)
+  const cards = cardIds.map(id => cardStore.getCard(id))
+  globalStore.currentUserIsTiltingCard = false
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserTiltingCards' })
+}
+
+// resize cards
+
+const resizeCards = (event) => {
+  if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
+  const cardIds = globalStore.currentUserIsResizingCardIds
+  const deltaX = endCursor.x - prevCursor.x
+  cardStore.resizeCards(cardIds, deltaX)
+}
+const stopResizingCards = async () => {
+  globalStore.currentUserIsResizingCard = false
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
+}
+const afterResizeCards = async () => {
+  const cardIds = globalStore.currentUserIsResizingCardIds
+  await nextTick()
+  connectionStore.updateConnectionPaths(cardIds)
 }
 
 // boxes
@@ -313,23 +347,26 @@ const addBox = (event) => {
   let position = utils.cursorPositionInSpace(event)
   if (utils.isPositionOutsideOfSpace(position)) {
     position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
-  store.dispatch('currentUser/notifyReadOnly', position)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  userStore.notifyReadOnly(position)
+  const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) {
-    store.dispatch('currentUserToolbar', 'card')
+    globalStore.updateCurrentUserToolbar('card')
     return
   }
-  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
-  store.commit('currentBoxIsNew', true)
+  const isResizing = true
+  boxStore.createBox(position, isResizing)
+  globalStore.currentBoxIsNew = true
   event.preventDefault() // allows dragging boxes without scrolling on touch
 }
 const resizeBoxes = () => {
   if (!prevCursor) { return }
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const boxes = boxStore.getBoxesResizing
+  const ids = boxes.map(box => box.id)
+
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
     y: endCursor.y - prevCursor.y
@@ -338,80 +375,60 @@ const resizeBoxes = () => {
     x: Math.round(delta.x * zoom),
     y: Math.round(delta.y * zoom)
   }
-  store.dispatch('currentBoxes/resize', { boxIds, delta })
+  boxStore.resizeBoxes(ids, delta)
 }
 const stopResizingBoxes = () => {
-  if (!store.state.currentUserIsResizingBox) { return }
-  store.dispatch('history/resume')
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
-  store.dispatch('currentConnections/updateMultiplePaths', boxes)
-  store.dispatch('history/add', { boxes, useSnapshot: true })
-  store.commit('currentUserIsResizingBox', false)
-  store.dispatch('currentUserToolbar', 'card')
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
-  store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
-}
-const afterResizeBoxes = () => {
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const boxes = boxIds.map(boxId => {
-    let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
-    if (store.state.shouldSnapToGrid) {
-      resizeWidth = utils.roundToNearest(resizeWidth)
-      resizeHeight = utils.roundToNearest(resizeHeight)
-    }
-    return { id: boxId, resizeWidth, resizeHeight }
-  })
-  store.dispatch('currentBoxes/updateMultiple', boxes)
+  if (!globalStore.currentUserIsResizingBox) { return }
+  globalStore.currentUserIsResizingBox = false
+  globalStore.updateCurrentUserToolbar('card')
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
+  // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
 const checkIfShouldSnapBoxes = (event) => {
-  if (!store.state.boxesWereDragged) { return }
+  if (!globalStore.boxesWereDragged) { return }
   if (event.shiftKey) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
+  const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    const elapsedTime = Date.now() - snapGuide.time
-    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
-    if (!shouldSnap) { return }
-    store.dispatch('currentBoxes/snap', snapGuide)
+    if (!globalStore.notifyBoxSnappingIsReady) { return }
+    boxStore.updateBoxSnapToPosition(snapGuide)
   })
 }
 const checkIfShouldExpandBoxes = (event) => {
-  if (!store.state.cardsWereDragged) { return }
+  if (!globalStore.cardsWereDragged) { return }
   if (event.shiftKey) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
+  const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    const elapsedTime = Date.now() - snapGuide.time
-    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
-    if (!shouldSnap) { return }
-    store.dispatch('currentBoxes/expand', snapGuide)
+    if (!globalStore.notifyBoxSnappingIsReady) { return }
+    console.log(snapGuide)
+    boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
 const unselectCardsInDraggedBox = () => {
-  if (!store.state.currentDraggingBoxId) { return }
-  if (store.state.multipleBoxesSelectedIds.length) { return }
-  store.dispatch('clearMultipleSelected')
+  if (!globalStore.currentDraggingBoxId) { return }
+  if (globalStore.multipleBoxesSelectedIds.length) { return }
+  globalStore.clearMultipleSelected()
 }
 const showBoxDetails = async (event) => {
-  if (!store.state.currentBoxIsNew) { return }
+  if (!globalStore.currentBoxIsNew) { return }
   if (utils.isMobile()) { return }
-  const boxId = store.state.currentUserIsResizingBoxIds[0]
+  const boxId = globalStore.currentUserIsResizingBoxIds[0]
   await nextTick()
   await nextTick()
   updateSizeForNewBox(boxId)
-  store.commit('boxDetailsIsVisibleForBoxId', boxId)
+  globalStore.updateBoxDetailsIsVisibleForBoxId(boxId)
 }
 const updateSizeForNewBox = (boxId) => {
-  const box = store.getters['currentBoxes/byId'](boxId)
+  const box = boxStore.getBox(boxId)
   const isMinSize = box.resizeWidth === consts.minBoxSize && box.resizeHeight === consts.minBoxSize
   if (!isMinSize) { return }
-  const newBox = {
+  const update = {
     id: box.id,
     resizeWidth: consts.defaultBoxWidth,
     resizeHeight: consts.defaultBoxHeight
   }
-  store.dispatch('currentBoxes/update', newBox)
+  boxStore.updateBox(update)
 }
 
 // drag items
@@ -421,22 +438,30 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
-  store.dispatch('history/pause')
-  const prevCursor = cursor()
-  store.dispatch('currentUser/notifyReadOnly', prevCursor)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  userStore.notifyReadOnly(prevCursor)
+  const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
-  store.dispatch('currentCards/move', {
-    endCursor,
-    prevCursor
-  })
+  // cards
+  cardStore.moveCards({ endCursor, prevCursor })
+  // boxes
   checkShouldShowDetails()
-  store.dispatch('currentBoxes/move', {
-    endCursor,
-    prevCursor
-  })
+  boxStore.moveBoxes({ endCursor, prevCursor })
 }
-
+const dragBoxes = (event) => {
+  const isInitialDrag = !globalStore.boxesWereDragged
+  if (isInitialDrag) {
+    const updates = {
+      boxId: globalStore.currentDraggingBoxId,
+      userId: userStore.id
+    }
+    broadcastStore.update({ updates, action: 'addToRemoteBoxesDragging' })
+    // alt-drag box to move without selecting items inside
+    if (!event.altKey) {
+      boxStore.selectItemsInSelectedBoxes()
+    }
+  }
+  dragItems()
+}
 // footer
 
 const footerDialogIsVisible = () => {
@@ -445,17 +470,17 @@ const footerDialogIsVisible = () => {
 }
 const checkIfShouldHideFooter = (event) => {
   if (event.target.nodeType !== 1) { return } // firefox check
-  const isTouchDevice = store.state.isTouchDevice
+  const isTouchDevice = globalStore.isTouchDevice
   if (!isTouchDevice) { return }
   const node = event.target.nodeName
   const isTextarea = node === 'TEXTAREA'
   const isInput = node === 'INPUT'
   if (footerDialogIsVisible()) {
-    store.commit('shouldHideFooter', false)
+    globalStore.shouldHideFooter = false
   } else if (isTextarea || isInput) {
-    store.commit('shouldHideFooter', true)
+    globalStore.shouldHideFooter = true
   } else {
-    store.commit('shouldHideFooter', false)
+    globalStore.shouldHideFooter = false
   }
 }
 
@@ -463,12 +488,12 @@ const checkIfShouldHideFooter = (event) => {
 
 const showMultipleSelectedActions = (event) => {
   if (spaceIsReadOnly.value) { return }
-  if (store.state.preventMultipleSelectedActionsIsVisible) { return }
-  const isMultipleSelected = store.state.multipleCardsSelectedIds.length || store.state.multipleConnectionsSelectedIds.length || store.state.multipleBoxesSelectedIds.length
+  if (globalStore.preventMultipleSelectedActionsIsVisible) { return }
+  const isMultipleSelected = globalStore.multipleCardsSelectedIds.length || globalStore.multipleConnectionsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length
   if (isMultipleSelected) {
     const position = utils.cursorPositionInSpace(event)
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
+    globalStore.multipleSelectedActionsPosition = position
+    globalStore.updateMultipleSelectedActionsIsVisible(true)
   }
 }
 
@@ -479,10 +504,12 @@ const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 // interactions
 
 const isInteracting = computed(() => {
-  if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
-    store.commit('preventMultipleSelectedActionsIsVisible', true)
-    return true
-  } else { return false }
+  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value
+})
+watch(() => isInteracting.value, (value, prevValue) => {
+  if (value) {
+    globalStore.preventMultipleSelectedActionsIsVisible = true
+  }
 })
 const blurButtonClick = (event) => {
   const isMouseOrTouchEvent = event.type.includes('mouse') || event.type.includes('touch')
@@ -504,6 +531,22 @@ const updateIconsNotDraggable = () => {
 const handleTouchStart = (event) => {
   prevCursor = utils.cursorPositionInViewport(event)
 }
+const updateCurrentInteractingItem = () => {
+  let boxId = globalStore.currentDraggingBoxId
+  if (globalStore.currentUserIsResizingBox) {
+    boxId = globalStore.currentUserIsResizingBoxIds[0]
+  }
+  let cardId = globalStore.currentDraggingCardId
+  if (globalStore.currentUserIsResizingCard) {
+    cardId = globalStore.currentUserIsResizingCardIds[0]
+  }
+  if (boxId) {
+    state.currentInteractingItem = boxStore.getBox(boxId)
+  }
+  if (cardId) {
+    state.currentInteractingItem = cardStore.getCard(cardId)
+  }
+}
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
     shouldCancel = true
@@ -512,20 +555,21 @@ const initInteractions = (event) => {
   }
   if (spaceIsReadOnly.value) { return }
   state.startCursor = utils.cursorPositionInViewport(event)
+  updateCurrentInteractingItem()
 }
 const updateShouldSnapToGrid = (event) => {
   let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
-  if (!store.state.shouldSnapToGrid && shouldSnap) {
-    const item = store.getters.currentInteractingItem
-    store.commit('snapGuideLinesOrigin', {
+  if (!globalStore.shouldSnapToGrid && shouldSnap) {
+    const item = state.currentInteractingItem
+    globalStore.snapGuideLinesOrigin = {
       x: item.x,
       y: item.y
-    })
+    }
   }
   // should snap to grid
-  store.commit('shouldSnapToGrid', shouldSnap)
+  globalStore.shouldSnapToGrid = shouldSnap
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
@@ -533,8 +577,8 @@ const interact = (event) => {
   if (isDraggingCard.value) {
     dragItems()
   } else if (isDraggingBox.value) {
-    store.commit('currentDraggingCardId', '')
-    dragItems()
+    globalStore.currentDraggingCardId = ''
+    dragBoxes(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
   } else if (isTiltingCard.value) {
@@ -542,31 +586,16 @@ const interact = (event) => {
   } else if (isResizingBox.value) {
     resizeBoxes()
   }
-  prevCursor = utils.cursorPositionInViewport(event)
+  prevCursor = endCursor
 }
 const checkShouldShowDetails = () => {
   const shouldShow = !utils.cursorsAreClose(state.startCursor, endCursor)
   if (!shouldShow) { return }
-  if (store.state.currentUserIsDraggingCard) {
-    store.commit('preventDraggedCardFromShowingDetails', true)
-  } else if (store.state.currentUserIsDraggingBox) {
-    store.commit('preventDraggedBoxFromShowingDetails', true)
+  if (globalStore.currentUserIsDraggingCard) {
+    globalStore.preventDraggedCardFromShowingDetails = true
+  } else if (globalStore.currentUserIsDraggingBox) {
+    globalStore.preventDraggedBoxFromShowingDetails = true
   }
-}
-const cursor = () => {
-  const zoom = store.getters.spaceCounterZoomDecimal
-  let cursor
-  if (utils.objectHasKeys(prevCursor)) {
-    cursor = prevCursor
-  } else {
-    cursor = state.startCursor
-  }
-  cursor = {
-    x: cursor.x * zoom,
-    y: cursor.y * zoom
-  }
-  // if shift key held down
-  return cursor
 }
 const eventIsFromTextarea = (event) => {
   if (event.target.nodeType !== 1) { return } // firefox check
@@ -584,8 +613,8 @@ const shouldCancelInteraction = (event) => {
     return true
   }
   if (eventIsFromTextarea(event)) { return true }
-  if (store.state.shouldCancelNextMouseUpInteraction) {
-    store.commit('shouldCancelNextMouseUpInteraction', false)
+  if (globalStore.shouldCancelNextMouseUpInteraction) {
+    globalStore.shouldCancelNextMouseUpInteraction = false
     return true
   }
   if (!event.target.closest) { return } // event is outside window
@@ -598,27 +627,20 @@ const shouldCancelInteraction = (event) => {
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
 const isDevelpmentBadgeVisible = computed(() => {
-  if (store.state.isPresentationMode) { return }
+  if (globalStore.isPresentationMode) { return }
   return consts.isDevelopment()
 })
 const handleTouchEnd = (event) => {
-  store.commit('isPinchZooming', false)
-  store.commit('isTouchScrolling', false)
+  globalStore.isPinchZooming = false
+  globalStore.isTouchScrolling = false
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
-  const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  if (isCardsSelected && store.state.cardsWereDragged) {
-    store.dispatch('currentCards/afterMove')
-  }
-  if (store.state.boxesWereDragged) {
-    store.dispatch('currentBoxes/afterMove')
-  }
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {
-    store.commit('triggerUpdateHeaderAndFooterPosition')
+    globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
@@ -628,27 +650,28 @@ const stopInteractions = async (event) => {
   unselectCardsInDraggedBox()
   showMultipleSelectedActions(event)
   showBoxDetails(event)
-  store.commit('preventMultipleSelectedActionsIsVisible', false)
-  store.commit('importArenaChannelIsVisible', false)
-  store.commit('shouldAddCard', false)
-  store.commit('preventDraggedCardFromShowingDetails', false)
-  store.commit('preventDraggedBoxFromShowingDetails', false)
+  globalStore.preventMultipleSelectedActionsIsVisible = false
+  globalStore.importArenaChannelIsVisible = false
+  globalStore.shouldAddCard = false
+  globalStore.preventDraggedCardFromShowingDetails = false
+  globalStore.preventDraggedBoxFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
-  store.commit('currentUserIsPainting', false)
-  store.commit('currentUserIsPaintingLocked', false)
-  store.commit('currentUserIsDraggingCard', false)
-  store.commit('currentUserIsDraggingBox', false)
-  store.commit('boxesWereDragged', false)
-  store.commit('cardsWereDragged', false)
-  store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
+  globalStore.currentUserIsPainting = false
+  globalStore.currentUserIsPaintingLocked = false
+  globalStore.currentUserIsDraggingCard = false
+  globalStore.currentUserIsDraggingBox = false
+  globalStore.boxesWereDragged = false
+  globalStore.cardsWereDragged = false
+  globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   prevCursor = undefined
-  store.commit('clearDraggingItems')
+  globalStore.clearDraggingItems()
   await nextTick()
   await nextTick()
-  store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
-  store.commit('shouldSnapToGrid', false)
+  globalStore.clearShouldExplicitlyRenderCardIds()
+  globalStore.shouldSnapToGrid = false
+  spaceStore.updateSpaceEditedAt()
 }
 </script>
 
@@ -668,7 +691,7 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
-  DrawingBackground
+  DrawingCanvasBackground
   ItemsLocked
   #box-backgrounds
   Connections
@@ -716,13 +739,6 @@ Preload
   position relative // used by svg connections
   transform-origin top left
   z-index 0
-  .card-overlap-indicator
-    position absolute
-    z-index calc(var(--max-z) - 70)
-    pointer-events all
-    cursor pointer
-    span
-      line-height 1.5
 
 .is-interacting
   pointer-events all

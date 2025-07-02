@@ -1,12 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
@@ -16,69 +22,69 @@ const state = reactive({
   outsideSpaceColorTipsIsVisible: false
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isMobile = computed(() => utils.isMobile())
 const deviceSupportsHapticFeedback = computed(() => consts.isSecureAppContext && isMobile.value)
 
 // haptic feedback
 
-const shouldDisableHapticFeedback = computed(() => { return store.state.currentUser.shouldDisableHapticFeedback })
+const shouldDisableHapticFeedback = computed(() => { return userStore.shouldDisableHapticFeedback })
 const toggleShouldDisableHapticFeedback = () => {
   const value = !shouldDisableHapticFeedback.value
-  store.commit('currentUser/shouldDisableHapticFeedback', value)
+  userStore.updateUser({ shouldDisableHapticFeedback: value })
 }
 
 // panning
 
-const shouldDisableRightClickToPan = computed(() => store.state.currentUser.shouldDisableRightClickToPan)
+const shouldDisableRightClickToPan = computed(() => userStore.shouldDisableRightClickToPan)
 const toggleShouldDisableRightClickToPan = () => {
   const value = !shouldDisableRightClickToPan.value
-  store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
+  userStore.updateUser({ shouldDisableRightClickToPan: value })
 }
 
 // zoom
 
-const shouldInvertZoom = computed(() => store.state.currentUser.shouldInvertZoom)
+const shouldInvertZoom = computed(() => userStore.shouldInvertZoom)
 const toggleShouldInvertZoom = () => {
   const value = !shouldInvertZoom.value
-  store.commit('currentUser/shouldInvertZoom', value)
+  userStore.updateUser({ shouldInvertZoom: value })
 }
 
 // disable sticky cards
 
-const shouldDisableStickyCards = computed(() => !store.state.currentUser.shouldUseStickyCards)
+const shouldDisableStickyCards = computed(() => !userStore.shouldUseStickyCards)
 const toggleShouldUseStickyCards = () => {
-  let value = store.state.currentUser.shouldUseStickyCards
+  let value = userStore.shouldUseStickyCards
   value = !value
-  store.dispatch('currentUser/update', { shouldUseStickyCards: value })
+  userStore.updateUser({ shouldUseStickyCards: value })
 }
 
 // pause connection directions
 
-const shouldPauseConnectionDirections = computed(() => store.state.currentUser.shouldPauseConnectionDirections)
+const shouldPauseConnectionDirections = computed(() => userStore.shouldPauseConnectionDirections)
 const toggleShouldPauseConnectionDirections = () => {
   const value = !shouldPauseConnectionDirections.value
-  store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
-  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+  userStore.updateUser({ shouldPauseConnectionDirections: value })
+  spaceStore.checkIfShouldPauseConnectionDirections()
 }
 
 // increase UI Contrast
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const toggleShouldIncreaseUIContrast = () => {
   const value = !shouldIncreaseUIContrast.value
-  store.dispatch('currentUser/update', { shouldIncreaseUIContrast: value })
+  userStore.updateUser({ shouldIncreaseUIContrast: value })
 }
 
 // outside space background
 
 const updateOutsideSpaceBackgroundIsStatic = (value) => {
-  store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
+  userStore.updateUser({ outsideSpaceBackgroundIsStatic: value })
 }
-const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
+const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const outsideSpaceStyles = computed(() => {
   return {
-    backgroundColor: store.state.outsideSpaceBackgroundColor
+    backgroundColor: globalStore.outsideSpaceBackgroundColor
   }
 })
 const toggleOutsideSpaceColorTipsIsVisible = () => {

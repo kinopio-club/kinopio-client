@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import GroupList from '@/components/GroupList.vue'
@@ -10,26 +15,42 @@ import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerCloseGroupDetailsDialog') {
-      state.groupDetailsIsVisibleForGroupId = ''
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseGroupDetailsDialog') {
+        state.groupDetailsIsVisibleForGroupId = ''
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+  unsubscribes()
 })
 
-const visible = computed(() => store.state.groupsIsVisible)
+const visible = computed(() => globalStore.groupsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
     closeDialogs()
     state.groupDetailsIsVisibleForGroupId = ''
     updateDialogHeight()
+    groupStore.upateGroupsFromRemote()
   }
 })
 const updateDialogHeight = async () => {
@@ -49,12 +70,13 @@ const closeDialogs = () => {
   state.groupDetailsIsVisibleForGroupId = ''
 }
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const isLoadingGroups = computed(() => store.state.isLoadingGroups)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
+const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
 
 // groups
 
-const groups = computed(() => store.getters['groups/byUser']())
+const groups = computed(() => groupStore.getCurrentUserGroups)
+const isGroups = computed(() => groups.value.length)
 
 // add group
 
@@ -87,21 +109,19 @@ dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="close
     .row.title-row
       div
         Loader(:visible="isLoadingGroups" :isSmall="true")
-        span Groups
+        span My Groups
       //- add group
       .button-wrap
         button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
-          span Group
+          span New
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
 
   //- groups
-  template(v-if="groups.length")
-    section.results-section
-      GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
+  section.results-section.results-section-border-top(v-if="isGroups")
+    GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
   //- groups info
-  template(v-else)
-    AboutGroups
+  AboutGroups(v-else)
 </template>
 
 <style lang="stylus">

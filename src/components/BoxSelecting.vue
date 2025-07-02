@@ -1,6 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
@@ -10,9 +16,12 @@ import quadratic from 'adaptive-quadratic-curve'
 import { nanoid } from 'nanoid'
 import { colord } from 'colord'
 
-const store = useStore()
-
-let unsubscribe
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 let shouldSelect, currentBoxSelectId
 let selectableItems = {}
@@ -21,62 +30,53 @@ let previouslySelectedCardIds = []
 let previouslySelectedConnectionIds = []
 let previouslySelectedBoxesIds = []
 
-onMounted(() => {
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'currentUserIsBoxSelecting') {
-      const isSelecting = mutation.payload
-      // before start selection
-      if (isSelecting) {
-        shouldSelect = true
-        currentBoxSelectId = nanoid()
-        updatePreviouslySelectedItems()
-      // end selection
-      } else {
-        if (!shouldSelect) { return }
-        shouldSelect = false
-        state.previousBoxStyles.push(currentUserStyles.value)
-        broadcast('updateRemotePreviousBoxSelectStyles')
-      }
-    // start selection
-    } else if (mutation.type === 'currentUserBoxSelectStart') {
-      updateSelectableItems()
-      updateSelectableConnections()
-    // on move
-    } else if (mutation.type === 'currentUserBoxSelectMove') {
-      if (shouldPreventBoxSelecting.value) { return }
-      const { start, end, relativePosition } = orderedPoints(startPoint.value, endPoint.value)
-      const selection = boxSelection(start, end)
-      selectItems(selection, relativePosition)
-      selectconnections(selection, relativePosition)
-      // await nextTick()
-      broadcast('updateRemoteUserBoxSelectStyles')
-    }
-  })
-})
-onBeforeUnmount(() => {
-  unsubscribe()
-})
-
 const state = reactive({
   direction: 'to bottom right',
   previousBoxStyles: []
 })
 
-const currentUserIsBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
-const startPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectStart))
-const endPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectMove))
-const userCantEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+watch(() => globalStore.currentUserIsBoxSelecting, (value, prevValue) => {
+  const isSelecting = value
+  // before start selection
+  if (isSelecting) {
+    shouldSelect = true
+    currentBoxSelectId = nanoid()
+    updatePreviouslySelectedItems()
+  // end selection
+  } else {
+    if (!shouldSelect) { return }
+    shouldSelect = false
+    state.previousBoxStyles.push(currentUserStyles.value)
+    broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemotePreviousBoxSelectStyles' })
+  }
+})
+watch(() => globalStore.currentUserBoxSelectStart, (value, prevValue) => {
+  updateSelectableItems()
+  updateSelectableConnections()
+})
+watch(() => globalStore.currentUserBoxSelectMove, (value, prevValue) => {
+  if (shouldPreventBoxSelecting.value) { return }
+  const { start, end, relativePosition } = orderedPoints(startPoint.value, endPoint.value)
+  const selection = boxSelection(start, end)
+  selectItems(selection, relativePosition)
+  selectconnections(selection, relativePosition)
+  broadcastStore.update({ updates: currentUserStyles.value, action: 'updateRemoteUserBoxSelectStyles' })
+})
+
+const currentUserIsBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
+const startPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectStart))
+const endPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelectMove))
+const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const shouldPreventBoxSelecting = computed(() => {
-  if (toolbarIsDrawing.value) { return true }
-  const isDraggingItem = store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox
+  if (globalStore.getToolbarIsDrawing) { return true }
+  const isDraggingItem = globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox
   return isDraggingItem
 })
 const currentUserStyles = computed(() => {
   if (shouldPreventBoxSelecting.value) { return }
   const { start, end } = orderedPoints(startPoint.value, endPoint.value)
   const { left, top, width, height } = boxSelection(start, end)
-  const color = store.state.currentUser.color
+  const color = userStore.color
   const color1 = colord(color).alpha(0.5).toRgbString()
   const color2 = colord(color).alpha(1).toRgbString()
   const gradient = `radial-gradient(farthest-corner at ${state.direction}, ${color1}, ${color2})`
@@ -86,31 +86,28 @@ const currentUserStyles = computed(() => {
     width: width + 'px',
     height: height + 'px',
     background: gradient,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     currentBoxSelectId
   }
   return styles
 })
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const remoteUserBoxSelectStyles = computed(() => store.state.remoteUserBoxSelectStyles)
-const remotePreviousUserBoxSelectStyles = computed(() => store.state.remotePreviousUserBoxSelectStyles)
+const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
+const remoteUserBoxSelectStyles = computed(() => globalStore.remoteUserBoxSelectStyles)
+const remotePreviousUserBoxSelectStyles = computed(() => globalStore.remotePreviousUserBoxSelectStyles)
 
-const broadcast = (operation) => {
-  store.commit('broadcast/update', { updates: currentUserStyles.value, type: operation, handler: operation })
-}
 const removePreviousBoxStyle = () => {
   state.previousBoxStyles.shift()
 }
 const removePreviousRemoteBoxStyle = () => {
-  store.commit('removeRemotePreviousBoxSelectStyle')
+  globalStore.removeRemotePreviousBoxSelectStyle()
 }
 const positionInSpace = (point) => {
   return utils.cursorPositionInSpace(null, point)
 }
 const updatePreviouslySelectedItems = () => {
-  previouslySelectedCardIds = store.state.multipleCardsSelectedIds
-  previouslySelectedConnectionIds = store.state.multipleConnectionsSelectedIds
-  previouslySelectedBoxesIds = store.state.multipleBoxesSelectedIds
+  previouslySelectedCardIds = globalStore.multipleCardsSelectedIds
+  previouslySelectedConnectionIds = globalStore.multipleConnectionsSelectedIds
+  previouslySelectedBoxesIds = globalStore.multipleBoxesSelectedIds
 }
 const boxSelection = (start, end) => {
   return {
@@ -203,8 +200,8 @@ const updateItems = (items) => {
   return selectable
 }
 const updateSelectableItems = () => {
-  let cards = utils.clone(store.getters['currentCards/isSelectableInViewport'])
-  let boxes = utils.clone(store.getters['currentBoxes/isSelectableInViewport'])
+  let cards = cardStore.getCardsSelectableInViewport()
+  let boxes = boxStore.getBoxesSelectableInViewport()
   cards = cards.map(card => {
     card.isCard = true
     return card
@@ -299,9 +296,9 @@ const selectItemsByType = (items, type) => {
   let selectedItemIds = items.map(item => item.id)
   selectedItemIds = mergePreviouslySelected(selectedItemIds, type)
   if (type === 'cards') {
-    store.dispatch('multipleCardsSelectedIds', selectedItemIds)
+    globalStore.updateMultipleCardsSelectedIds(selectedItemIds)
   } else if (type === 'boxes') {
-    store.dispatch('multipleBoxesSelectedIds', selectedItemIds)
+    globalStore.updateMultipleBoxesSelectedIds(selectedItemIds)
   }
 }
 const pointsAlongPath = (connection) => {
@@ -344,7 +341,7 @@ const selectconnections = (selection, relativePosition) => {
   selectedConnections = uniqBy(selectedConnections, 'id')
   let selectedIds = selectedConnections.map(connection => connection.id)
   selectedIds = mergePreviouslySelected(selectedIds, 'connections')
-  store.dispatch('multipleConnectionsSelectedIds', selectedIds)
+  globalStore.updateMultipleConnectionsSelectedIds(selectedIds)
 }
 
 </script>

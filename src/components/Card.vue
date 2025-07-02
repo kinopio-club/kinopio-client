@@ -1,6 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore, mapState, mapGetters } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useUploadStore } from '@/stores/useUploadStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -16,7 +26,7 @@ import postMessage from '@/postMessage.js'
 
 // Card only child components
 import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
-import CardCounter from '@/components/CardCounter.vue'
+import CardVote from '@/components/CardVote.vue'
 import TiltResize from '@/components/TiltResize.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
@@ -26,10 +36,19 @@ import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
+const uploadStore = useUploadStore()
 
 dayjs.extend(isToday)
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const groupStore = useGroupStore()
+const broadcastStore = useBroadcastStore()
 
 const cardElement = ref(null)
 
@@ -56,51 +75,50 @@ let prevIsLoadingUrlPreview
 
 let observer
 
-let unsubscribe
+let unsubscribes
 
 onMounted(async () => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    const { type, payload } = mutation
-    if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
-      updateRemoteConnections()
-    } else if (type === 'triggerScrollCardIntoView') {
-      if (payload === props.card.id) {
-        const element = cardElement.value
-        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
-      }
-    } else if (type === 'triggerUploadComplete') {
-      const { cardId, url } = payload
-      if (cardId !== props.card.id) { return }
-      addFile({ url })
-    } else if (type === 'triggerUpdateUrlPreview') {
-      if (payload === props.card.id) {
-        updateMediaUrls()
-        updateUrlPreview()
-      }
-    } else if (type === 'triggerUpdateTheme') {
-      updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-    } else if (type === 'triggerCancelLocking') {
-      cancelLocking()
-    } else if (type === 'triggerUpdateItemCurrentConnections') {
-      const itemId = payload
-      if (itemId !== props.card.id) { return }
-      updateCurrentConnections()
-    }
-  })
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-  const shouldFocus = store.state.loadSpaceFocusOnCardId === props.card.id
+  const shouldFocus = globalStore.loadSpaceFocusOnCardId === props.card.id
   if (shouldFocus) {
-    store.dispatch('focusOnCardId', props.card.id)
+    globalStore.updateFocusOnCardId(props.card.id)
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
   initViewportObserver()
-  updateCurrentConnections()
-})
 
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
+        updateRemoteConnections()
+      } else if (name === 'triggerScrollCardIntoView') {
+        if (args[0] === props.card.id) {
+          const element = cardElement.value
+          globalStore.scrollElementIntoView({ element, positionIsCenter: true })
+        }
+      } else if (name === 'triggerUploadComplete') {
+        const { cardId, url } = args[0]
+        if (cardId !== props.card.id) { return }
+        addFile({ url })
+      } else if (name === 'triggerUpdateUrlPreview') {
+        if (args[0] === props.card.id) {
+          updateMediaUrls()
+          updateUrlPreview()
+        }
+      } else if (name === 'triggerUpdateTheme') {
+        updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
+      } else if (name === 'triggerCancelLocking') {
+        cancelLocking()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -139,7 +157,6 @@ const state = reactive({
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
   isVisibleInViewport: false,
-  currentConnections: [],
   shouldRenderParent: false,
   safeColors: {}
 })
@@ -151,43 +168,52 @@ const updateUrlData = () => {
   updateUrlPreview()
 }
 
-const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
+const canEditCard = computed(() => userStore.getUserCanEditCard(props.card))
 const isSelectedOrDragging = computed(() => {
-  return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
+  return Boolean(
+    isSelected.value ||
+    isRemoteSelected.value ||
+    isRemoteCardDetailsVisible.value ||
+    isRemoteCardDragging.value ||
+    state.uploadIsDraggedOver ||
+    remoteUploadDraggedOverCardColor.value ||
+    remoteUserResizingCardsColor.value ||
+    remoteUserTiltingCardsColor.value
+  )
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserColor = computed(() => userStore.color)
 
 // current space
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const changeSpace = async (url) => {
   const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
   if (cardId) {
     changeSpaceAndCard(spaceId, cardId)
   } else {
     const space = { id: spaceId }
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   }
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 const changeSpaceAndCard = async (spaceId, cardId) => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   // space and card
   if (currentSpaceId !== spaceId) {
-    store.commit('loadSpaceFocusOnCardId', cardId)
+    globalStore.loadSpaceFocusOnCardId = cardId
     const space = { id: spaceId }
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   // card in current space
   } else {
     await nextTick()
-    store.dispatch('currentCards/showCardDetails', cardId)
+    cardStore.showCardDetails(cardId)
   }
 }
 
 // user theme
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
 const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
 
@@ -221,7 +247,8 @@ const currentBackgroundColorIsDark = computed(() => {
 
 // comment
 
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const isComment = computed(() => cardStore.getIsCommentCard(props.card))
+
 const removeCommentBrackets = (name) => {
   if (!isComment.value) { return name }
   if (props.card.isComment) { return name }
@@ -246,17 +273,17 @@ const checkboxState = computed({
   }
 })
 const toggleCardChecked = () => {
-  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
   if (!canEditCard.value) { return }
   const value = !isChecked.value
-  store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
+  globalStore.closeAllDialogs()
+  cardStore.toggleCardChecked(props.card.id, value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
-  store.commit('currentUserIsDraggingCard', false)
-  const userId = store.state.currentUser.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  globalStore.currentUserIsDraggingCard = false
+  const userId = userStore.id
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
   event.stopPropagation()
 }
 
@@ -265,7 +292,7 @@ const toggleCardChecked = () => {
 const isImageCard = computed(() => Boolean(state.formats.image || state.formats.video))
 const iframeIsVisible = computed(() => {
   // youtube, spotify etc.
-  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
+  const iframeIsVisibleForCardId = globalStore.iframeIsVisibleForCardId
   return props.card.id === iframeIsVisibleForCardId
 })
 const isVisualCard = computed(() => {
@@ -318,7 +345,7 @@ const groupInviteUrl = computed(() => {
 
 const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
 const otherCard = computed(() => {
-  const card = store.getters.otherCardById(props.card.linkToCardId)
+  const card = globalStore.otherCardById(props.card.linkToCardId)
   return card
 })
 const otherCardIsVisible = computed(() => {
@@ -362,12 +389,12 @@ const otherSpaceIsVisible = computed(() => {
 // space search
 
 const isInSearchResultsCards = computed(() => {
-  const results = store.state.searchResultsCards
-  if (!results.length) { return }
-  return Boolean(results.find(card => props.card.id === card.id))
+  const ids = globalStore.searchResultsCardIds
+  if (!ids.length) { return }
+  return Boolean(ids.find(id => props.card.id === id))
 })
-const filterShowUsers = computed(() => store.state.currentUser.filterShowUsers)
-const filterShowDateUpdated = computed(() => store.state.currentUser.filterShowDateUpdated)
+const filterShowUsers = computed(() => userStore.filterShowUsers)
+const filterShowDateUpdated = computed(() => userStore.filterShowDateUpdated)
 const safeColor = (color) => {
   let newColor = state.safeColors[color]
   if (newColor) {
@@ -398,7 +425,7 @@ const cardWrapStyle = computed(() => {
   if (props.card.isLocked) {
     delete styles.zIndex
   }
-  if (!store.state.currentUserIsDraggingCard) {
+  if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
   styles = updateStylesWithWidth(styles)
@@ -452,8 +479,8 @@ const addSizeClasses = (classes) => {
 }
 const cardWrapClasses = computed(() => {
   let classes = {
-    'is-resizing': store.state.currentUserIsResizingCard,
-    'is-tilting': store.state.currentUserIsTiltingCard,
+    'is-resizing': globalStore.currentUserIsResizingCard,
+    'is-tilting': globalStore.currentUserIsTiltingCard,
     'is-hidden-by-opacity': isHiddenByCommentFilter.value,
     jiggle: shouldJiggle.value
   }
@@ -482,18 +509,17 @@ const shouldJiggle = computed(() => {
   const max = 500
   const cardIsTooBig = width.value > max || props.card.height > max
   if (cardIsTooBig) { return }
-  const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
-  const isShiftKeyDown = store.state.currentUserIsBoxSelecting
+  const isMultipleItemsSelected = globalStore.getIsMultipleItemsSelected
+  const isShiftKeyDown = globalStore.currentUserIsBoxSelecting
   if (isMultipleItemsSelected || isShiftKeyDown) { return }
-  const isDragging = currentCardIsBeingDragged.value && store.state.cardsWereDragged
-  return isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || isDragging || isRemoteCardDragging.value
+  return isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || isRemoteCardDragging.value
 })
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
   let cardWidth = resizeWidth.value
-  if (store.state.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
+  if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
@@ -503,12 +529,12 @@ const updateStylesWithWidth = (styles) => {
   return styles
 }
 const updatePreviousResultItem = () => {
-  const search = store.state.search
-  const searchResultsCards = store.state.searchResultsCards
+  const search = globalStore.search
+  const ids = globalStore.searchResultsCardIds
   if (!search) { return }
-  if (!searchResultsCards.length) { return }
-  if (searchResultsCards.find(card => card.id === props.card.id)) {
-    store.commit('previousResultItem', props.card)
+  if (!ids.length) { return }
+  if (ids.find(id => id === props.card.id)) {
+    globalStore.previousResultItem = props.card
   }
 }
 const nameSegmentsStyles = computed(() => {
@@ -519,12 +545,12 @@ const nameSegmentsStyles = computed(() => {
 // position and dimensions
 
 const updateDimensionsAndPaths = () => {
-  if (store.state.isLoadingSpace) { return }
-  store.commit('triggerUpdateCardDimensionsAndPaths', props.card.id)
+  if (globalStore.isLoadingSpace) { return }
+  globalStore.triggerUpdateCardDimensionsAndPaths(props.card.id)
 }
 const checkIfShouldUpdateDimensions = () => {
   if (utils.isMissingDimensions(props.card)) {
-    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+    cardStore.updateCardsDimensions([props.card.id])
   }
 }
 const width = computed(() => {
@@ -556,7 +582,7 @@ const tiltResizeIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
   if (!canEditCard.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
-  if (store.state.spaceZoomPercent < 50 || store.state.pinchCounterZoomDecimal < 0.5) { return }
+  if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
   return true
 })
 const x = computed(() => {
@@ -576,20 +602,20 @@ const y = computed(() => {
   }
 })
 const remoteUserResizingCardsColor = computed(() => {
-  if (!store.state.remoteUserResizingCards.length) { return }
-  let user = store.state.remoteUserResizingCards.find(user => user.cardIds.includes(props.card.id))
+  if (!globalStore.remoteUserResizingCards.length) { return }
+  let user = globalStore.remoteUserResizingCards.find(user => user.cardIds.includes(props.card.id))
   if (user) {
-    user = store.getters['currentSpace/userById'](user.userId)
+    user = spaceStore.getSpaceUserById(user.userId)
     return user.color
   } else {
     return undefined
   }
 })
 const remoteUserTiltingCardsColor = computed(() => {
-  if (!store.state.remoteUserTiltingCards.length) { return }
-  let user = store.state.remoteUserTiltingCards.find(user => user.cardIds.includes(props.card.id))
+  if (!globalStore.remoteUserTiltingCards.length) { return }
+  let user = globalStore.remoteUserTiltingCards.find(user => user.cardIds.includes(props.card.id))
   if (user) {
-    user = store.getters['currentSpace/userById'](user.userId)
+    user = spaceStore.getSpaceUserById(user.userId)
     return user.color
   } else {
     return undefined
@@ -599,24 +625,24 @@ const remoteUserTiltingCardsColor = computed(() => {
 // connections
 
 const isConnectingTo = computed(() => {
-  const connectingToId = store.state.currentConnectionSuccess.id
+  const connectingToId = globalStore.currentConnectionSuccess.id
   if (connectingToId) {
     postMessage.sendHaptics({ name: 'softImpact' })
   }
   return connectingToId === props.card.id
 })
 const isConnectingFrom = computed(() => {
-  return store.state.currentConnectionStartItemIds.includes(props.card.id)
+  return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.card.id))
+const connectedConnectionTypes = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
 
 // card buttons
 
 const currentUserIsHoveringOverUrlButton = computed(() => {
-  return store.state.currentUserIsHoveringOverUrlButtonCardId === props.card.id
+  return globalStore.currentUserIsHoveringOverUrlButtonCardId === props.card.id
 })
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
+  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
@@ -627,9 +653,9 @@ const connectorIsVisible = computed(() => {
 })
 const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
-  const isPresentationMode = store.state.isPresentationMode
-  const isNotHovering = store.state.currentUserIsHoveringOverCardId !== props.card.id
-  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
+  const isPresentationMode = globalStore.isPresentationMode
+  const isNotHovering = globalStore.currentUserIsHoveringOverCardId !== props.card.id
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
   return isPresentationMode && isNotHovering && isNotConnected
 })
 const isCardButtonsVisible = computed(() => {
@@ -673,15 +699,15 @@ const openUrl = async (event, url) => {
   if (event) {
     if (event.metaKey || event.ctrlKey) {
       await nextTick()
-      store.dispatch('closeAllDialogs')
+      globalStore.closeAllDialogs()
       return
     } else {
       event.preventDefault()
       event.stopPropagation()
     }
   }
-  store.dispatch('closeAllDialogs')
-  if (store.state.cardsWereDragged) {
+  globalStore.closeAllDialogs()
+  if (globalStore.cardsWereDragged) {
     return
   }
   const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsSpaceInvite(url)
@@ -699,7 +725,7 @@ const openUrl = async (event, url) => {
 const updatedAt = computed(() => props.card.nameUpdatedAt || props.card.createdAt)
 const dateUpdatedAt = computed(() => {
   const date = updatedAt.value
-  const showAbsoluteDate = store.state.currentUser.filterShowAbsoluteDates
+  const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
       return new Date(date).toLocaleString()
@@ -716,13 +742,13 @@ const dateIsToday = computed(() => {
   return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
-  store.dispatch('currentCards/incrementZ', props.card.id)
-  store.dispatch('closeAllDialogs')
-  const value = !store.state.currentUser.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  cardStore.incrementCardZ(props.card.id)
+  globalStore.closeAllDialogs()
+  const value = !userStore.filterShowAbsoluteDates
+  userStore.updateUser({ filterShowAbsoluteDates: value })
 }
 const updateRemoteConnections = () => {
-  const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
+  const connection = globalStore.remoteCurrentConnections.find(remoteConnection => {
     const isConnectedToStart = remoteConnection.startItemId === props.card.id
     const isConnectedToEnd = remoteConnection.endItemId === props.card.id
     return isConnectedToStart || isConnectedToEnd
@@ -738,11 +764,11 @@ const updateRemoteConnections = () => {
 // upload
 
 const cardPendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => upload.cardId === props.card.id)
 })
 const remoteCardPendingUpload = computed(() => {
-  return store.state.remotePendingUploads.find(upload => {
+  return globalStore.remotePendingUploads.find(upload => {
     const inProgress = upload.percentComplete < 100
     const isCard = upload.cardId === props.card.id
     return inProgress && isCard
@@ -761,9 +787,9 @@ const selectedColorUpload = computed(() => {
   }
 })
 const remoteUploadDraggedOverCardColor = computed(() => {
-  const draggedOverCard = store.state.remoteUploadDraggedOverCards.find(card => card.cardId === props.card.id)
+  const draggedOverCard = globalStore.remoteUploadDraggedOverCards.find(card => card.cardId === props.card.id)
   if (draggedOverCard) {
-    const user = store.getters['currentSpace/userById'](draggedOverCard.userId)
+    const user = spaceStore.getSpaceUserById(draggedOverCard.userId)
     return user.color
   } else {
     return undefined
@@ -797,8 +823,8 @@ const addFile = (file) => {
     id: props.card.id,
     name: utils.trim(name)
   }
-  store.dispatch('currentCards/update', { card: update })
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  cardStore.updateCard(update)
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
@@ -812,35 +838,35 @@ const checkIfUploadIsDraggedOver = (event) => {
     state.uploadIsDraggedOver = true
     const updates = {
       cardId: props.card.id,
-      userId: store.state.currentUser.id
+      userId: userStore.id
     }
-    store.commit('broadcast/updateStore', { updates, type: 'addToRemoteUploadDraggedOverCards' })
+    broadcastStore.update({ updates, action: 'addToRemoteUploadDraggedOverCards' })
   }
 }
 const removeUploadIsDraggedOver = () => {
   state.uploadIsDraggedOver = false
-  const userId = store.state.currentUser.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
+  const userId = userStore.id
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteUploadDraggedOverCards' })
 }
 const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   // pre-upload errors
   if (!currentUserIsSignedIn.value) {
     state.error.signUpToUpload = true
-    store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
+    globalStore.addNotification({ message: 'To upload files, you need to Sign Up or In', type: 'info' })
     return
   }
   if (!canEditSpace.value) {
     state.error.spaceIsReadOnly = true
-    store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' })
+    globalStore.addNotification({ message: 'You can only upload files on spaces you can edit', type: 'info' })
     return
   }
   const file = event.dataTransfer.files[0]
   const cardId = props.card.id
   // upload
   try {
-    await store.dispatch('upload/uploadFile', { file, cardId })
+    await uploadStore.uploadFile({ file, cardId })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
@@ -848,7 +874,7 @@ const uploadFile = async (event) => {
     } else {
       state.error.unknownUploadError = true
     }
-    store.commit('addNotification', { message: error.message, type: 'danger' })
+    globalStore.addNotification({ message: error.message, type: 'danger' })
   }
 }
 
@@ -903,29 +929,29 @@ const nameSegments = computed(() => {
     segment.isDark = backgroundColorIsDark.value
     // tags
     if (segment.isTag) {
-      let tag = store.getters['currentSpace/tagByName'](segment.name)
+      let tag = spaceStore.getSpaceTagByName(segment.name)
       if (!tag) {
         tag = {
           id: nanoid(),
           name: segment.name,
           color: newTagColor(),
           cardId: props.card.id,
-          spaceId: store.state.currentSpace.id
+          spaceId: spaceStore.id
         }
         console.warn('🦋 create missing tag', segment.name, tag, props.card)
-        store.dispatch('currentSpace/addTag', tag)
+        spaceStore.addTag(tag)
       }
       segment.color = tag.color
       segment.id = tag.id
     // invite
     } else if (segment.isInviteLink) {
       const { spaceId, collaboratorKey } = segment
-      segment.otherSpace = store.getters.otherSpaceById(spaceId)
+      segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
     // space or card
     } else if (segment.isLink) {
       const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
-      segment.otherSpace = store.getters.otherSpaceById(spaceId)
-      segment.otherCard = store.getters.otherCardById(cardId)
+      segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
+      segment.otherCard = globalStore.otherCardById(cardId)
     // text
     } else if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)
@@ -938,7 +964,7 @@ const nameSegments = computed(() => {
 // tags
 
 const newTagColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -961,23 +987,23 @@ const dataTags = computed(() => {
 })
 const showTagDetailsIsVisible = ({ event, tag }) => {
   if (isMultiTouch) { return }
-  if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
+  if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
-  store.dispatch('currentCards/incrementZ', props.card.id)
-  store.dispatch('closeAllDialogs')
-  store.commit('currentUserIsDraggingCard', false)
+  cardStore.incrementCardZ(props.card.id)
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsDraggingCard = false
   const tagRect = event.target.getBoundingClientRect()
-  store.commit('tagDetailsPosition', {
+  globalStore.tagDetailsPosition = {
     x: window.scrollX + tagRect.x + 2,
     y: window.scrollY + tagRect.y + tagRect.height - 2,
     pageX: window.scrollX,
     pageY: window.scrollY
-  })
+  }
   tag.cardId = props.card.id
-  store.commit('currentSelectedTag', tag)
-  store.commit('tagDetailsIsVisible', true)
+  globalStore.currentSelectedTag = tag
+  globalStore.tagDetailsIsVisible = true
   cancelLocking()
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.currentUserIsDraggingCard = false
 }
 
 // all previews
@@ -1015,19 +1041,19 @@ const cardUrlPreviewIsVisible = computed(() => {
   // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   let url = props.card.urlPreviewUrl
-  url = utils.removeTrailingSlash(url)
+  url = utils.clearTrailingSlash(url)
   cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
   const nameHasUrl = props.card.name?.includes(url)
   return (props.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !isComment.value
   // return Boolean(props.card.urlPreviewIsVisible && props.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
 })
 const isLoadingUrlPreview = computed(() => {
-  let isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
+  let isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
   isLoading = Boolean(isLoading)
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    store.dispatch('currentConnections/updatePaths', { itemId: props.card.id })
+    // connectionStore.updateConnectionPath(props.card.id)
   }
   return isLoading
   // if (!isLoading) { return }
@@ -1042,9 +1068,9 @@ const updateUrlPreviewOnload = async () => {
     id: props.card.id,
     shouldUpdateUrlPreview: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   if (isUpdatedSuccess) {
-    store.commit('triggerUpdateUrlPreviewComplete', props.card.id)
+    globalStore.triggerUpdateUrlPreviewComplete(props.card.id)
   }
 }
 const preventUpdatePrevPreview = computed(() => {
@@ -1053,37 +1079,36 @@ const preventUpdatePrevPreview = computed(() => {
   return updateDelta < 0
 })
 const updateUrlPreview = () => {
-  if (store.state.isLoadingUrlPreview) { return }
-  const isOffline = !store.state.isOnline
+  if (globalStore.isLoadingUrlPreview) { return }
+  const isOffline = !globalStore.isOnline
   if (preventUpdatePrevPreview.value) { return }
   if (isOffline) {
     const update = {
       id: props.card.id,
       shouldUpdateUrlPreview: true
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
   } else {
     updateUrlPreviewOnline()
   }
 }
 const updateUrlPreviewOnline = async () => {
-  store.commit('addUrlPreviewLoadingForCardIds', props.card.id)
+  globalStore.addUrlPreviewLoadingForCardIds(props.card.id)
   const cardId = props.card.id
   let url = webUrl.value
   if (!url) {
-    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
   const shouldUpdate = shouldUpdateUrlPreview(url)
   if (!shouldUpdate) {
-    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
   try {
     url = utils.removeHiddenQueryStringFromURLs(url)
-    const response = await store.dispatch('api/urlPreview', { url, card: props.card })
-    if (!response) { throw 'api/urlPreview request failed' }
-
+    const response = await apiStore.urlPreview({ url, card: props.card })
+    if (!response) { throw 'urlPreview request failed' }
     const { data, host } = response
     console.info('🚗 link preview', url, data)
     updateUrlPreviewSuccess(url, data)
@@ -1097,13 +1122,13 @@ const updateUrlPreviewSuccess = async (url, data) => {
   const cardId = data.id || props.card.id
   if (!cardId) {
     console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
-    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
-  store.dispatch('currentCards/update', { card: data })
-  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
+  cardStore.updateCard(data)
+  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
+  await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025
 const retryUrlPreview = () => {
@@ -1112,7 +1137,7 @@ const retryUrlPreview = () => {
     id: props.card.id,
     shouldUpdateUrlPreview: true
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   updateUrlPreview()
 }
 const shouldUpdateUrlPreview = (url) => {
@@ -1126,7 +1151,7 @@ const shouldUpdateUrlPreview = (url) => {
 }
 const nameIncludesUrl = (url) => {
   const name = props.card.name
-  const normalizedUrl = utils.removeTrailingSlash(url)
+  const normalizedUrl = utils.clearTrailingSlash(url)
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
 const updateUrlPreviewImage = (update) => {
@@ -1134,41 +1159,41 @@ const updateUrlPreviewImage = (update) => {
   if (!update.urlPreviewImage) { return }
   if (!canEditSpace.value) { return }
   update.cardId = update.id
-  update.spaceId = store.state.currentSpace.id
+  update.spaceId = spaceStore.id
   delete update.id
-  store.dispatch('api/updateUrlPreviewImage', update)
+  apiStore.updateUrlPreviewImage(update)
 }
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id
-  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   const update = {
     id: cardId,
     urlPreviewErrorUrl: url,
     urlPreviewUrl: url,
     name: props.card.name
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 // drag cards
 
 const currentCardIsBeingDragged = computed(() => {
   let isCardId
-  const currentDraggingCard = store.state.currentDraggingCardId
-  const isDraggingCard = store.state.currentUserIsDraggingCard
+  const currentDraggingCard = globalStore.currentDraggingCardId
+  const isDraggingCard = globalStore.currentUserIsDraggingCard
   if (isSelected.value || currentDraggingCard === props.card.id) {
     isCardId = true
   }
   return Boolean(isDraggingCard && isCardId)
 })
 const isRemoteCardDragging = computed(() => {
-  const isDragging = store.state.remoteCardsDragging.find(card => card.cardId === props.card.id)
+  const isDragging = globalStore.remoteCardsDragging.find(card => card.cardId === props.card.id)
   return Boolean(isDragging)
 })
 const remoteCardDraggingColor = computed(() => {
-  const draggingCard = store.state.remoteCardsDragging.find(card => card.cardId === props.card.id)
+  const draggingCard = globalStore.remoteCardsDragging.find(card => card.cardId === props.card.id)
   if (draggingCard) {
-    const user = store.getters['currentSpace/userById'](draggingCard.userId)
+    const user = spaceStore.getSpaceUserById(draggingCard.userId)
     return user.color
   } else {
     return undefined
@@ -1177,52 +1202,53 @@ const remoteCardDraggingColor = computed(() => {
 const checkIfShouldDragMultipleCards = (event) => {
   if (event.shiftKey) { return }
   // if the current dragging card is not already selected then clear selection
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
   if (!multipleCardsSelectedIds.includes(props.card.id)) {
-    store.dispatch('clearMultipleSelected')
+    globalStore.clearMultipleSelected()
   }
 }
 const startDraggingCard = (event) => {
   isMultiTouch = false
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
-  if (store.state.currentUserIsPanningReady) { return }
+  if (globalStore.currentUserIsPanningReady) { return }
   if (!canEditCard.value) { return }
   if (utils.isMultiTouch(event)) {
     isMultiTouch = true
     return
   }
   event.preventDefault()
-  if (store.state.currentUserIsDrawingConnection) { return }
-  store.dispatch('closeAllDialogs')
-  store.commit('clearDraggingItems')
-  store.commit('currentUserIsDraggingCard', true)
-  store.commit('currentDraggingCardId', props.card.id)
+  if (globalStore.currentUserIsDrawingConnection) { return }
+  globalStore.closeAllDialogs()
+  globalStore.clearDraggingItems()
+  globalStore.currentUserIsDraggingCard = true
+  globalStore.currentDraggingCardId = props.card.id
   postMessage.sendHaptics({ name: 'softImpact' })
   const updates = {
     cardId: props.card.id,
-    userId: store.state.currentUser.id
+    userId: userStore.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
-  store.commit('parentCardId', props.card.id)
-  store.commit('childCardId', '')
+  broadcastStore.update({ updates, action: 'addToRemoteCardsDragging' })
+  globalStore.parentCardId = props.card.id
+  globalStore.childCardId = ''
   checkIfShouldDragMultipleCards(event)
+  cardStore.incrementCardZ(props.card.id)
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
-  const isDrawingConnection = store.state.currentUserIsDrawingConnection
+  const isDrawingConnection = globalStore.currentUserIsDrawingConnection
   if (isDrawingConnection) { return }
-  const hasNotified = store.state.hasNotifiedPressAndHoldToDrag
+  const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
   if (!hasNotified) {
-    store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
+    globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
   }
-  store.commit('hasNotifiedPressAndHoldToDrag', true)
+  globalStore.hasNotifiedPressAndHoldToDrag = true
 }
 
 // resize cards
 
 const currentCardIsBeingResized = computed(() => {
-  const cardIds = store.state.currentUserIsResizingCardIds
+  const cardIds = globalStore.currentUserIsResizingCardIds
   return cardIds.includes(props.card.id)
 })
 
@@ -1280,7 +1306,7 @@ const lockingAnimationFrame = (timestamp) => {
     lockingStartTime = undefined
     state.isLocking = false
     startDraggingCard(initialTouchEvent)
-    store.commit('triggeredTouchCardDragPosition', touchPosition)
+    globalStore.triggeredTouchCardDragPosition = touchPosition
   } else {
     window.cancelAnimationFrame(lockingAnimationTimer)
     lockingAnimationTimer = undefined
@@ -1290,7 +1316,7 @@ const lockingAnimationFrame = (timestamp) => {
 }
 const updateCurrentTouchPosition = (event) => {
   currentTouchPosition = utils.cursorPositionInViewport(event)
-  if (currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard) {
+  if (currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard) {
     event.preventDefault() // allows dragging cards without scrolling
   }
 }
@@ -1302,7 +1328,7 @@ const updateTouchPosition = (event) => {
     return
   }
   touchPosition = utils.cursorPositionInViewport(event)
-  const isDrawingConnection = store.state.currentUserIsDrawingConnection
+  const isDrawingConnection = globalStore.currentUserIsDrawingConnection
   if (isDrawingConnection) {
     event.preventDefault() // allows swipe to scroll, before card locked
   }
@@ -1311,7 +1337,7 @@ const updateTouchPosition = (event) => {
 // select cards
 
 const isSelected = computed(() => {
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
   return multipleCardsSelectedIds.includes(props.card.id)
 })
 const selectedColor = computed(() => {
@@ -1323,13 +1349,13 @@ const selectedColor = computed(() => {
   }
 })
 const isRemoteSelected = computed(() => {
-  const selectedCard = store.state.remoteCardsSelected.find(card => card.cardId === props.card.id)
+  const selectedCard = globalStore.remoteCardsSelected.find(card => card.cardId === props.card.id)
   return Boolean(selectedCard)
 })
 const remoteSelectedColor = computed(() => {
-  const selectedCard = store.state.remoteCardsSelected.find(card => card.cardId === props.card.id)
+  const selectedCard = globalStore.remoteCardsSelected.find(card => card.cardId === props.card.id)
   if (selectedCard) {
-    const user = store.getters['currentSpace/userById'](selectedCard.userId)
+    const user = spaceStore.getSpaceUserById(selectedCard.userId)
     return user.color
   } else {
     return undefined
@@ -1339,8 +1365,8 @@ const selectAllConnectedCards = (event) => {
   const isMeta = event.metaKey || event.ctrlKey
   if (!isMeta) { return }
   if (!canEditSpace.value) { return }
-  store.dispatch('closeAllDialogs')
-  const connections = store.getters['currentConnections/all']
+  globalStore.closeAllDialogs()
+  const connections = connectionStore.getAllConnections
   const selectedCards = [props.card.id]
   let shouldSearch = true
   while (shouldSearch) {
@@ -1363,62 +1389,62 @@ const selectAllConnectedCards = (event) => {
       shouldSearch = false
     }
   }
-  store.commit('multipleSelectedActionsIsVisible', false)
-  store.commit('multipleCardsSelectedIds', selectedCards)
+  globalStore.updateMultipleSelectedActionsIsVisible(false)
+  globalStore.multipleCardsSelectedIds = selectedCards
 }
 
 // card details
 
 const currentCardDetailsIsVisible = computed(() => {
-  return props.card.id === store.state.cardDetailsIsVisibleForCardId
+  return props.card.id === globalStore.cardDetailsIsVisibleForCardId
 })
 const isRemoteCardDetailsVisible = computed(() => {
-  const visibleCard = store.state.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
+  const visibleCard = globalStore.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
   return Boolean(visibleCard)
 })
 const remoteCardDetailsVisibleColor = computed(() => {
-  const visibleCard = store.state.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
+  const visibleCard = globalStore.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
   if (visibleCard) {
-    const user = store.getters['currentSpace/userById'](visibleCard.userId)
+    const user = spaceStore.getSpaceUserById(visibleCard.userId)
     return user.color
   } else {
     return undefined
   }
 })
 const showCardDetails = (event) => {
-  if (store.state.cardDetailsIsVisibleForCardId) { return }
+  if (globalStore.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
-  if (store.state.currentUserIsPainting) { return }
-  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (isMultiTouch) { return }
-  if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
-  if (store.state.currentUserIsResizingBox || store.state.currentUserIsDraggingBox) { return }
-  if (store.state.shouldSnapToGrid) { return }
-  if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
-  const shouldToggleSelected = event.shiftKey && !store.state.cardsWereDragged && !isConnectingTo.value
+  if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.shouldSnapToGrid) { return }
+  if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
+  const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {
-    store.dispatch('toggleCardSelected', props.card.id)
+    globalStore.toggleCardSelected(props.card.id)
     event.stopPropagation()
-    store.commit('currentUserIsDraggingCard', false)
+    globalStore.currentUserIsDraggingCard = false
     return
   }
-  const userId = store.state.currentUser.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
-  state.preventDraggedButtonBadgeFromShowingDetails = store.state.preventDraggedCardFromShowingDetails
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
-  store.dispatch('closeAllDialogs')
-  store.dispatch('clearMultipleSelected')
+  const userId = userStore.id
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
+  state.preventDraggedButtonBadgeFromShowingDetails = globalStore.preventDraggedCardFromShowingDetails
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
+  globalStore.closeAllDialogs()
+  globalStore.clearMultipleSelected()
   const nodeName = event.target.nodeName
   if (nodeName === 'LABEL') { return } // checkbox
   if (nodeName === 'A' && event.touches) {
     window.location = event.target.href
     return
   }
-  store.commit('cardDetailsIsVisibleForCardId', props.card.id)
-  store.commit('preventCardDetailsOpeningAnimation', true)
-  store.commit('parentCardId', props.card.id)
+  globalStore.updateCardDetailsIsVisibleForCardId(props.card.id)
+  globalStore.currentDraggingCardId = true
+  globalStore.parentCardId = props.card.id
   event.stopPropagation() // only stop propagation if cardDetailsIsVisible
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.currentUserIsDraggingCard = false
   updatePreviousResultItem()
   clearStickyPositionOffsets()
 }
@@ -1427,8 +1453,8 @@ const showCardDetailsTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     showCardDetails(event)
   }
-  const userId = store.state.currentUser.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  const userId = userStore.id
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
 }
 const touchIsNearTouchPosition = (event) => {
   const currentPosition = utils.cursorPositionInViewport(event)
@@ -1450,11 +1476,9 @@ const touchIsNearTouchPosition = (event) => {
 
 // space filters
 
-const filtersIsActive = computed(() => {
-  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
-})
+const filtersIsActive = computed(() => Boolean(userStore.getUserTotalItemFadingFiltersActive))
 const isFilteredByTags = computed(() => {
-  const tagNames = store.state.filteredTagNames
+  const tagNames = globalStore.filteredTagNames
   if (!tagNames.length) { return }
   const hasTag = tags.value.find(tag => {
     if (tagNames.includes(tag.name)) {
@@ -1464,7 +1488,7 @@ const isFilteredByTags = computed(() => {
   return hasTag
 })
 const isFilteredByConnectionType = computed(() => {
-  const typeIds = store.state.filteredConnectionTypeIds
+  const typeIds = globalStore.filteredConnectionTypeIds
   if (!typeIds) { return }
   const filteredTypes = connectedConnectionTypes.value.filter(type => {
     return typeIds.includes(type.id)
@@ -1472,23 +1496,23 @@ const isFilteredByConnectionType = computed(() => {
   return Boolean(filteredTypes.length)
 })
 const isFilteredByFrame = computed(() => {
-  const frameIds = store.state.filteredFrameIds
+  const frameIds = globalStore.filteredFrameIds
   if (!frameIds.length) { return }
   const hasFrame = frameIds.includes(props.card.frameId)
   return hasFrame
 })
 const isFilteredByUnchecked = computed(() => {
-  const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
+  const filterUncheckedIsActive = userStore.filterUnchecked
   if (!filterUncheckedIsActive) { return }
   return !isChecked.value && hasCheckbox.value
 })
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   return isComment.value
 })
 const isFilteredByBox = computed(() => {
-  const boxIds = store.state.filteredBoxIds
+  const boxIds = globalStore.filteredBoxIds
   const boxes = containingBoxes.value || []
   const isInBox = boxes.find(box => boxIds.includes(box.id))
   return isInBox
@@ -1505,7 +1529,7 @@ const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
-  let user = store.getters['currentSpace/userById'](userId)
+  let user = spaceStore.getSpaceUserById(userId) || globalStore.otherUsers[userId]
   if (!user) {
     user = {
       name: '',
@@ -1515,9 +1539,9 @@ const cardCreatedByUser = computed(() => {
   return user
 })
 const userDetailsIsUser = computed(() => {
-  if (!store.state.userDetailsIsVisible) { return }
+  if (!globalStore.userDetailsIsVisible) { return }
   const user = cardCreatedByUser.value
-  return user.id === store.state.userDetailsUser.id
+  return user.id === globalStore.userDetailsUser.id
 })
 
 // is visible in viewport, perf, should render
@@ -1548,11 +1572,11 @@ const removeViewportObserver = () => {
   observer.unobserve(target)
 }
 const shouldRender = computed(() => {
-  const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds[props.card.id]
+  const shouldExplitlyRender = globalStore.shouldExplicitlyRenderCardIds[props.card.id]
   if (isConnectingFrom.value) { return true }
   if (shouldExplitlyRender) { return true }
   if (state.shouldRenderParent) { return true }
-  if (store.state.disableViewportOptimizations) { return true }
+  if (globalStore.disableViewportOptimizations) { return true }
   if (state.isVisibleInViewport) {
     updateLockedItemButtonPosition()
   }
@@ -1564,7 +1588,7 @@ const updateShouldRenderParent = (value) => {
 const updateLockedItemButtonPosition = async () => {
   if (!props.card.isLocked) { return }
   await nextTick()
-  store.commit('triggerUpdateLockedItemButtonPositionCardId', props.card.id)
+  globalStore.triggerUpdateLockedItemButtonPositionCardId(props.card.id)
 }
 
 // mouse hover handlers
@@ -1572,40 +1596,36 @@ const updateLockedItemButtonPosition = async () => {
 const handleMouseEnter = () => {
   if (currentCardIsBeingDragged.value) { return }
   initStickToCursor()
-  store.commit('currentUserIsHoveringOverCardId', props.card.id)
-  updateCurrentConnections()
+  globalStore.currentUserIsHoveringOverCardId = props.card.id
 }
 const handleMouseLeave = () => {
   unstickToCursor()
-  store.commit('currentUserIsHoveringOverCardId', '')
+  globalStore.currentUserIsHoveringOverCardId = ''
 }
 const handleMouseEnterCheckbox = () => {
-  store.commit('currentUserIsHoveringOverCheckboxCardId', props.card.id)
+  globalStore.currentUserIsHoveringOverCheckboxCardId = props.card.id
 }
 const handleMouseLeaveCheckbox = () => {
-  store.commit('currentUserIsHoveringOverCheckboxCardId', '')
-}
-const updateCurrentConnections = () => {
-  state.currentConnections = store.getters['currentConnections/byItemId'](props.card.id)
+  globalStore.currentUserIsHoveringOverCheckboxCardId = ''
 }
 const handleMouseEnterUrlButton = () => {
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
 
 // sticky
 
 const shouldNotStick = computed(() => {
-  if (!store.state.currentUser.shouldUseStickyCards) { return true }
+  if (!userStore.shouldUseStickyCards) { return true }
   if (iframeIsVisible.value) { return true }
-  if (store.state.codeLanguagePickerIsVisible) { return true }
-  if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
+  if (globalStore.codeLanguagePickerIsVisible) { return true }
+  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return true }
   if (currentUserIsHoveringOverUrlButton.value) { return true }
-  const userIsConnecting = store.state.currentConnectionStartItemIds.length
-  const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
-  return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
+  const userIsConnecting = globalStore.currentConnectionStartItemIds.length
+  const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
+  return userIsConnecting || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard || isLocked.value
 })
 const updateShouldNotStickMap = () => {
   stickyMap = []
@@ -1658,7 +1678,7 @@ const isValidStickySize = (width, height, min) => {
   return isWidth || isHeight
 }
 const updateStickyStretchResistance = () => {
-  const zoom = store.getters.spaceZoomDecimal
+  const zoom = globalStore.getSpaceZoomDecimal
   let { height, width } = props.card
   height = height * zoom
   width = width * zoom
@@ -1772,21 +1792,21 @@ const clearStickyPositionOffsets = () => {
 // lock card position
 
 const unlockCard = (event) => {
-  if (store.state.currentUserIsDrawingConnection) {
+  if (globalStore.currentUserIsDrawingConnection) {
     return
   }
   event.stopPropagation()
   if (!canEditCard.value) {
     const position = utils.cursorPositionInSpace(event)
-    store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+    globalStore.addNotificationWithPosition({ message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
     return
   }
-  store.commit('currentUserIsDraggingCard', false)
+  globalStore.currentUserIsDraggingCard = false
   const update = {
     id: props.card.id,
     isLocked: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
@@ -1818,7 +1838,7 @@ const updateOtherItems = () => {
       linkToSpaceId: null,
       linkToCardId: null
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
     return
   }
   if (!url) { return }
@@ -1842,8 +1862,8 @@ const updateOtherSpaceOrCardItems = (url) => {
     linkToCardId: cardId,
     linkToSpaceCollaboratorKey: null
   }
-  store.dispatch('currentCards/update', { card: update })
-  store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
+  cardStore.updateCard(update)
+  spaceStore.updateOtherItems({ spaceId, cardId })
 }
 const updateOtherInviteItems = (url) => {
   const { spaceId, collaboratorKey } = qs.decode(url.search)
@@ -1855,13 +1875,13 @@ const updateOtherInviteItems = (url) => {
       linkToCardId: null,
       linkToSpaceCollaboratorKey: collaboratorKey
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
   }
-  store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
+  spaceStore.updateOtherItems({ spaceId, collaboratorKey })
 }
 const updateOtherGroupItems = (url) => {
   const groupFromUrl = utils.groupFromGroupInviteUrl(url)
-  store.dispatch('groups/updateOtherGroups', groupFromUrl)
+  groupStore.updateOtherGroups(groupFromUrl)
 }
 
 // utils
@@ -1869,11 +1889,11 @@ const updateOtherGroupItems = (url) => {
 const removeCard = () => {
   if (isLocked.value) { return }
   if (canEditCard.value) {
-    store.dispatch('currentCards/remove', props.card)
+    cardStore.removeCards([props.card.id])
   }
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 
 // migration added July 2024
@@ -1889,9 +1909,9 @@ const checkIfShouldUpdateIframeUrl = () => {
 const containingBoxes = computed(() => {
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
-  if (store.state.boxDetailsIsVisibleForBoxId) { return }
+  if (globalStore.boxDetailsIsVisibleForBoxId) { return }
   // check boxes
-  let boxes = store.getters['currentBoxes/all']
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     const boxRect = {
       x: box.x,
@@ -1916,7 +1936,7 @@ const isInCheckedBox = computed(() => {
 
 // card focus
 
-const isFocusing = computed(() => props.card.id === store.state.focusOnCardId)
+const isFocusing = computed(() => props.card.id === globalStore.focusOnCardId)
 const focusColor = computed(() => {
   if (isFocusing.value) {
     return currentUserColor.value
@@ -2059,7 +2079,6 @@ const focusColor = computed(() => {
             :visible="connectorIsVisible"
             :isHiddenByOpacity="connectorIsHiddenByOpacity"
             :card="card"
-            :itemConnections="state.currentConnections"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
             :isVisibleInViewport="state.isVisibleInViewport"
@@ -2139,8 +2158,8 @@ const focusColor = computed(() => {
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
-    //- Counter
-    CardCounter(:card="card")
+    //- Vote Counter
+    CardVote(:card="card")
     //- Created Through API
     .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")

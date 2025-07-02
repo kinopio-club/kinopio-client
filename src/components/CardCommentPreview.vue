@@ -1,12 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -17,7 +24,7 @@ const backgroundColor = computed(() => {
   return props.card.backgroundColor
 })
 const styles = computed(() => {
-  const zoom = store.getters.spaceCounterZoomDecimal
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   const offset = 6
   return {
     left: `${props.card.x + offset}px`,
@@ -30,7 +37,7 @@ const styles = computed(() => {
 const createdByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
-  let user = store.getters['currentSpace/userById'](userId)
+  let user = spaceStore.getSpaceUserById(userId) || globalStore.otherUsers[userId]
   if (!user) {
     user = {
       name: '',
@@ -44,15 +51,14 @@ const backgroundColorIsDark = computed(() => {
   if (backgroundColor.value) {
     return utils.colorIsDark(backgroundColor.value)
   } else {
-    return store.getters['themes/isThemeDark']
+    return themeStore.getIsThemeDark
   }
 })
 
 // name
 
 const normalizedCard = computed(() => {
-  let card = utils.clone(props.card)
-  card = store.getters['currentCards/nameSegments'](card)
+  const card = cardStore.cardWithNameSegments(props.card)
   card.nameSegments = card.nameSegments.map(segment => {
     if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)

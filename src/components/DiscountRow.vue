@@ -1,18 +1,30 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import consts from '@/consts.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
+let unsubscribes
+
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({
@@ -24,7 +36,7 @@ const closeChildDialogs = () => {
 }
 const toggleStudentInfoIsVisible = () => {
   const value = !state.studentInfoIsVisible
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
   state.studentInfoIsVisible = value
 }
 </script>

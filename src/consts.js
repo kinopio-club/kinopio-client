@@ -8,14 +8,14 @@ export default {
     min: 20
   },
   spaceBetweenCards: 12,
-  defaultCharacterLimit: 300,
-  highCharacterLimit: 4000,
+  cardCharacterLimit: 4000,
   defaultCardWidth: 58,
   defaultCardHeight: 70,
   minItemXY: 70,
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
   minCardIframeWidth: 260,
+  cardsCreatedLimit: 100,
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },
@@ -26,9 +26,8 @@ export default {
   boxSnapGuideWaitingDuration: 200,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
+  straightLineConnectionPathControlPoint: 'q00,00',
   defaultTimeout: 40000,
-  AIImageLimitUpgradedUser: 50,
-  AIImageLimitFreeUser: 10,
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
@@ -42,6 +41,7 @@ export default {
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
+  itemDetailsDebugIsVisible: true,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

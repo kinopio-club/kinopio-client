@@ -1,17 +1,23 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
   window.addEventListener('touchend', disableIsActive)
   window.addEventListener('mouseup', disableIsActive)
 })
-watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+watch(() => globalStore.preventDraggedCardFromShowingDetails, (value, prevValue) => {
   disableIsActive()
 })
 
@@ -34,7 +40,7 @@ const otherSpaceIsPrivate = computed(() => {
   if (!props.otherSpace.privacy) { return }
   return props.otherSpace.privacy === 'private'
 })
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 const otherSpaceName = computed(() => {
   const name = props.otherSpace.name
   return name
@@ -48,7 +54,7 @@ const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const background = computed(() => {
   const color = props.selectedColor || props.card.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
@@ -86,30 +92,30 @@ const enableIsActive = () => {
   state.isActive = true
 }
 const handleMouseEnterUrlButton = () => {
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
-  if (store.state.currentUserIsDraggingCard) { return }
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+  if (globalStore.currentUserIsDraggingCard) { return }
+  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
 const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: props.otherSpace?.url || props.otherSpace?.id }))
 const openUrl = async (event) => {
   const prevIsActive = state.isActive
   state.isActive = false
-  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
-  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
   if (event) {
     if (event.metaKey || event.ctrlKey) {
       window.open(url.value) // opens url in new tab
-      store.commit('preventDraggedCardFromShowingDetails', true)
+      globalStore.preventDraggedCardFromShowingDetails = true
       return
     } else {
       event.preventDefault()
       event.stopPropagation()
     }
   }
-  store.dispatch('currentSpace/changeSpace', props.otherSpace)
-  store.dispatch('closeAllDialogs')
+  spaceStore.changeSpace(props.otherSpace)
+  globalStore.closeAllDialogs()
 }
 </script>
 
@@ -120,7 +126,7 @@ const openUrl = async (event) => {
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
   a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
-    :class="{ 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :class="{ 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': globalStore.preventDraggedCardFromShowingDetails }"
     :style="{ background: background }"
     target="_blank"
     :href="url"

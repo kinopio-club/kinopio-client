@@ -1,45 +1,52 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import consts from '@/consts.js'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    // update otherCard if dialog is visible before otherCard is loaded
-    if (mutation.type === 'updateOtherItems') {
-      if (!visible.value) { return }
-      const parentCard = store.getters['currentCards/byId'](parentCardId.value)
-      let otherCard = store.getters.otherCardById(parentCard.linkToCardId)
-      otherCard = utils.clone(otherCard)
-      store.commit('currentSelectedOtherItem', otherCard)
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      // update otherCard if dialog is visible before otherCard is loaded
+      if (name === 'updateOtherItems') {
+        if (!visible.value) { return }
+        const parentCard = cardStore.getCard(parentCardId.value)
+        let otherCard = globalStore.otherCardById(parentCard.linkToCardId)
+        otherCard = utils.clone(otherCard)
+        globalStore.currentSelectedOtherItem = otherCard
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
-// state
 const state = reactive({
   errorMaxCharacterLimit: false
 })
-const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
-const canEditOtherCard = computed(() => {
-  const canEditCard = store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value)
-  if (canEditCard) { return true }
-  const isMemberOfOtherSpace = store.getters['currentUser/isSpaceMember'](otherSpace.value)
-  return isMemberOfOtherSpace
-})
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
-
-// visible
 
 const visible = computed(() => {
-  const isVisible = store.state.otherCardDetailsIsVisible
+  const isVisible = globalStore.otherCardDetailsIsVisible
   if (isVisible) {
     textareaStyles()
     focusTextarea()
@@ -48,13 +55,23 @@ const visible = computed(() => {
   }
   return isVisible
 })
+const otherSpace = computed(() => globalStore.getOtherSpaceById(otherCard.value.spaceId))
+const otherCard = computed(() => globalStore.currentSelectedOtherItem)
+const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
+const canEditOtherCard = computed(() => {
+  const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
+  if (canEditCard) { return true }
+  const isMemberOfOtherSpace = userStore.getUserIsOtherSpaceMember(otherSpace.value)
+  return isMemberOfOtherSpace
+})
+const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 
 // dialog styles
 
 const styles = computed(() => {
-  const position = store.state.otherItemDetailsPosition
-  let zoom = store.getters.spaceCounterZoomDecimal
-  if (store.state.isTouchDevice) {
+  const position = globalStore.otherItemDetailsPosition
+  let zoom = globalStore.getSpaceCounterZoomDecimal
+  if (globalStore.isTouchDevice) {
     zoom = 1 / utils.visualViewport().scale
   }
   const left = `${position.x + 8}px`
@@ -64,7 +81,7 @@ const styles = computed(() => {
 const scrollIntoView = async () => {
   await nextTick()
   const dialog = document.querySelector('dialog.other-card-details')
-  store.commit('scrollElementIntoView', { element: dialog })
+  globalStore.scrollElementIntoView({ element: dialog })
 }
 
 // textarea styles
@@ -83,34 +100,34 @@ const focusTextarea = async () => {
 
 // edit parent card
 
-const parentCardId = computed(() => store.state.currentSelectedOtherItem.parentCardId)
-const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
+const parentCardId = computed(() => globalStore.currentSelectedOtherItem.parentCardId)
+const cardDetailsIsVisibleForCardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
 const showCardDetails = () => {
-  store.commit('otherCardDetailsIsVisible', false)
-  store.dispatch('currentCards/showCardDetails', parentCardId.value)
+  globalStore.otherCardDetailsIsVisible = false
+  cardStore.showCardDetails(parentCardId.value)
 }
 
 // edit card
 
-const maxCardCharacterLimit = () => { return consts.defaultCharacterLimit }
+const maxCardCharacterLimit = () => { return consts.cardCharacterLimit }
 const updateName = async (newName) => {
   const spaceId = otherCard.value.spaceId
   const card = { id: otherCard.value.id, name: newName }
   // update local
-  store.commit('updateCardNameInOtherItems', card)
-  store.commit('triggerUpdateOtherCard', card.id)
+  globalStore.updateCardNameInOtherItems(card)
+  globalStore.triggerUpdateOtherCard(card.id)
   updateOtherNameInCurrentSpace({ card, spaceId })
   // update input
   textareaStyles()
   updateErrorMaxCharacterLimit(newName)
-  store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  cardStore.updateCardDimensions(card)
   // update remote
-  await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
+  await apiStore.addToQueue({ name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   if (currentSpaceId !== spaceId) { return }
-  store.commit('currentCards/update', card)
+  cardStore.updateCard(card)
 }
 const updateErrorMaxCharacterLimit = (newName) => {
   const name = newName || otherCard.value.name
@@ -121,21 +138,21 @@ const updateErrorMaxCharacterLimit = (newName) => {
 // select card
 
 const selectCard = (card) => {
-  store.dispatch('closeAllDialogs')
-  store.dispatch('focusOnCardId', card.id)
+  globalStore.closeAllDialogs()
+  globalStore.updateFocusOnCardId(card.id)
 }
 const changeSpace = (spaceId) => {
-  if (store.state.currentSpace.id === spaceId) { return }
+  if (spaceStore.id === spaceId) { return }
   const space = { id: spaceId }
-  store.dispatch('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', space)
+  globalStore.closeAllDialogs()
+  spaceStore.changeSpace(space)
 }
 const selectSpaceCard = () => {
-  const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
+  const isCardInCurrentSpace = otherCard.value.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
     selectCard(otherCard.value)
   } else {
-    store.commit('loadSpaceFocusOnCardId', otherCard.value.id)
+    globalStore.loadSpaceFocusOnCardId = otherCard.value.id
     changeSpace(otherCard.value.spaceId)
   }
 }

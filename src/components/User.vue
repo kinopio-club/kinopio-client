@@ -1,20 +1,36 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserDetailsInline from '@/components/dialogs/UserDetailsInline.vue'
 import utils from '@/utils.js'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const userElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   state.userDetailsInlineIsVisible = false
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'closeAllDialogs') {
-      closeChildDialogs()
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -41,13 +57,10 @@ const userColor = computed(() => {
   if (!props.user) { return }
   return props.user.color
 })
-const isCurrentUser = computed(() => {
-  if (!props.user) { return }
-  return props.user.id === store.state.currentUser.id
-})
-const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
+const userDetailsIsVisible = computed(() => globalStore.userDetailsIsVisible)
 const userDetailsIsUser = computed(() => {
-  const userDetailsUser = store.state.userDetailsUser
+  const userDetailsUser = globalStore.userDetailsUser
   return props.user.id === userDetailsUser.id
 })
 const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value && userDetailsIsUser.value)
@@ -62,16 +75,16 @@ const toggleUserDetailsIsVisible = () => {
 }
 const toggleUserDetailsInlineIsVisible = () => {
   const value = !state.userDetailsInlineIsVisible
-  store.commit('closeAllDialogs')
+  globalStore.closeAllDialogs()
   state.userDetailsInlineIsVisible = value
 }
 const toggleUserDetailsGlobalIsVisible = () => {
   const isVisible = userDetailsIsVisibleForUser.value
   if (props.shouldCloseAllDialogs) {
-    store.dispatch('closeAllDialogs')
+    globalStore.closeAllDialogs()
   }
   if (isVisible) {
-    store.commit('userDetailsIsVisible', false)
+    globalStore.userDetailsIsVisible = false
     return
   }
   showUserDetails()
@@ -84,9 +97,9 @@ const showUserDetails = () => {
     options.transformOriginIsTopRight = true
   }
   const position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsUser', props.user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
+  globalStore.userDetailsUser = props.user
+  globalStore.userDetailsPosition = position
+  globalStore.userDetailsIsVisible = true
 }
 const closeChildDialogs = () => {
   state.userDetailsInlineIsVisible = false

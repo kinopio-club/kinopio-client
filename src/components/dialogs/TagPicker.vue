@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
@@ -10,25 +14,39 @@ import utils from '@/utils.js'
 import fuzzy from '@/libs/fuzzy.js'
 import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
+import uniqBy from 'lodash-es/uniqBy'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
 
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerPickerNavigationKey') {
-      if (!props.visible) { return }
-      const key = mutation.payload
-      triggerPickerNavigationKey(key)
-    } else if (mutation.type === 'triggerPickerSelect') {
-      if (!props.visible) { return }
-      triggerPickerSelect()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPickerNavigationKey') {
+        if (!props.visible) { return }
+        const key = args[0]
+        triggerPickerNavigationKey(key)
+      } else if (name === 'triggerPickerSelect') {
+        if (!props.visible) { return }
+        triggerPickerSelect()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateHeights)
+  unsubscribes()
 })
 
 const emit = defineEmits(['selectTag', 'closeDialog', 'currentTag', 'newTagColor'])
@@ -68,13 +86,13 @@ watch(() => state.randomColor, (value, prevValue) => {
   }
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const closeDialog = () => {
   emit('closeDialog')
 }
 const scrollIntoView = () => {
   const element = dialogElement.value
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 
 // tags list
@@ -96,7 +114,7 @@ const filteredTags = computed(() => {
   return tags.slice(0, 5)
 })
 const updateTags = async () => {
-  const spaceTags = store.getters['currentSpace/spaceTags']
+  const spaceTags = spaceStore.getSpaceTags
   state.tags = spaceTags || []
   const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
@@ -106,20 +124,11 @@ const updateTags = async () => {
   scrollIntoView()
 }
 const updateRemoteTags = async () => {
-  if (!currentUserIsSignedIn.value) { return }
-  const remoteTagsIsFetched = store.state.remoteTagsIsFetched
-  let remoteTags
-  if (remoteTagsIsFetched) {
-    remoteTags = store.state.remoteTags
-  } else {
-    state.loading = true
-    remoteTags = await store.dispatch('api/getUserTags') || []
-    store.commit('remoteTags', remoteTags)
-    store.commit('remoteTagsIsFetched', true)
-    state.loading = false
-  }
+  state.loading = true
+  const remoteTags = await globalStore.updateRemoteTags()
   const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
   state.tags = mergedTags
+  state.loading = false
 }
 
 // search tags matching
@@ -152,7 +161,7 @@ const searchTag = computed(() => {
 // select tag
 
 const color = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let newColor = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     newColor = randomColor({ luminosity: 'dark' })

@@ -1,48 +1,60 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
 const router = useRouter()
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerUpdateWindowHistory') {
-      update(mutation.payload)
-    } else if (mutation.type === 'triggerUpdateWindowTitle') {
-      updateWindowTitle()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateWindowHistory') {
+        update()
+      } else if (name === 'triggerUpdateWindowTitle') {
+        updateWindowTitle()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
-const update = async (space) => {
-  await updateWindowHistory(space)
+const update = async () => {
+  await updateWindowHistory()
   updateWindowTitle()
 }
-const updateWindowHistory = async (space) => {
-  const isEmbedMode = store.state.isEmbedMode
-  space = space || store.state.currentSpace
+const updateWindowHistory = async () => {
+  const isEmbedMode = globalStore.isEmbedMode
+  const space = spaceStore.getSpaceAllState
   const spaceUrl = utils.url(space)
   const preventUpdate = window.location.pathname.includes(spaceUrl) || spaceUrl.startsWith('loading--')
   if (preventUpdate) { return }
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
-  store.commit('currentSpacePath', spaceUrl, { root: true })
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
+  globalStore.currentSpacePath = spaceUrl
   if (navigator.standalone || isEmbedMode) { return }
   await router.push('/' + spaceUrl)
-  const state = utils.clone(store.state)
+  let state = globalStore.getGlobalAllState
+  state = JSON.parse(JSON.stringify(state))
   history.replaceState({ ...history.state, ...state }, '')
 }
 const updateWindowTitle = () => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   let title
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'

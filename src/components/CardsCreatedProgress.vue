@@ -1,39 +1,55 @@
 <script setup>
-// import utils from '@/utils.js'
+import { reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 
-import { reactive, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
-const store = useStore()
+import consts from '@/consts.js'
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+let unsubscribes
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeChildDialogs()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const state = reactive({
   freeLimitFAQIsVisible: false
 })
 
-const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
-const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
+const cardsCreatedCount = computed(() => userStore.cardsCreatedCount || 0)
+const cardsCreatedLimit = computed(() => consts.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
-  store.dispatch('closeAllDialogs')
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
+  globalStore.closeAllDialogs()
   if (currentUserIsSignedIn) {
-    store.commit('triggerUpgradeUserIsVisible')
+    globalStore.triggerUpgradeUserIsVisible()
   } else {
-    store.commit('triggerSignUpOrInIsVisible')
+    globalStore.triggerSignUpOrInIsVisible()
   }
 }
 
 const toggleFreeLimitFAQIsVisible = () => {
   const value = !state.freeLimitFAQIsVisible
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
   state.freeLimitFAQIsVisible = value
 }
 const closeChildDialogs = () => {

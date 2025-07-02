@@ -1,20 +1,27 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import BoxUnlockButton from '@/components/BoxUnlockButton.vue'
 import CardUnlockButton from '@/components/CardUnlockButton.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
 })
 
-const lockedBoxes = computed(() => store.getters['currentBoxes/isLocked'])
-const lockedCards = computed(() => store.getters['currentCards/isLocked'])
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const lockedBoxes = computed(() => boxStore.getBoxesIsLocked)
+const lockedCards = computed(() => cardStore.getCardsIsLocked)
+const isThemeDark = computed(() => userStore.theme === 'dark')
 </script>
 
 <template lang="pug">

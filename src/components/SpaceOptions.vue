@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import templates from '@/data/templates.js'
@@ -8,7 +11,9 @@ import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const emit = defineEmits(['closeDialogsAndEmit', 'updateLocalSpaces', 'removeSpaceId', 'addSpace'])
 
@@ -18,8 +23,8 @@ const props = defineProps({
   currentSpaceIsHidden: Boolean
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
+const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
 const currentSpaceIsTemplate = computed(() => {
   const id = currentSpace.value.id
   const templateSpaceIds = templates.spaces().map(space => space.id)
@@ -31,19 +36,19 @@ const closeDialogsAndEmit = computed(() => emit('closeDialogsAndEmit'))
 // duplicate
 
 const duplicateSpace = async () => {
-  await store.dispatch('currentSpace/duplicateSpace')
+  await spaceStore.duplicateSpace()
   emit('updateLocalSpaces')
 }
 
 // remove
 
 const removeCurrentSpace = async () => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   if (currentUserIsSpaceCollaborator.value) {
-    store.dispatch('currentSpace/removeCollaboratorFromSpace', store.state.currentUser)
+    spaceStore.removeCollaboratorFromSpace(userStore.getUserAllState)
   } else {
-    store.dispatch('currentSpace/removeCurrentSpace')
-    store.commit('notifyCurrentSpaceIsNowRemoved', true)
+    spaceStore.removeSpace()
+    globalStore.notifyCurrentSpaceIsNowRemoved = true
   }
   emit('removeSpaceId', currentSpaceId)
   await changeToPrevSpace()
@@ -51,17 +56,14 @@ const removeCurrentSpace = async () => {
   emit('updateLocalSpaces')
 }
 const changeToPrevSpace = async () => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   const cachedSpaces = await cache.getAllSpaces()
-  let spaces = cachedSpaces.filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
-  spaces = spaces.filter(space => space.id !== currentSpaceId)
+  const spaces = cachedSpaces.filter(space => space.id !== currentSpaceId)
   const recentSpace = spaces[0]
-  if (store.state.prevSpaceIdInSession) {
-    store.dispatch('currentSpace/loadPrevSpaceInSession')
+  if (globalStore.prevSpaceIdInSession) {
+    spaceStore.loadPrevSpaceInSession()
   } else if (recentSpace) {
-    store.dispatch('currentSpace/changeSpace', recentSpace)
+    spaceStore.changeSpace(recentSpace)
   } else {
     emit('addSpace')
   }
@@ -71,9 +73,9 @@ const changeToPrevSpace = async () => {
 
 const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  const currentSpaceId = store.state.currentSpace.id
-  await store.dispatch('currentUser/updateHiddenSpace', { spaceId: currentSpaceId, isHidden: value })
-  store.commit('notifySpaceIsHidden', value)
+  const currentSpaceId = spaceStore.id
+  await userStore.updateUserHiddenSpace(currentSpaceId, value)
+  globalStore.notifySpaceIsHidden = value
   emit('updateLocalSpaces')
 }
 

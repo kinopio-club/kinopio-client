@@ -1,12 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
-const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -30,13 +33,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentSpaceIsInGroup = computed(() => store.state.currentSpace.groupId)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentSpaceIsInGroup = computed(() => spaceStore.groupId)
 
 // privacy states
 
 const privacyStates = computed(() => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const privacyStates = privacy.states()
   if (currentUserIsSignedIn) {
     return privacyStates
@@ -56,14 +59,14 @@ const privacyStateDescription = (privacyState) => {
   return utils.capitalizeFirstLetter(description)
 }
 const privacyStateIsActive = (privacyState) => {
-  const currentPrivacy = store.state.currentSpace.privacy
+  const currentPrivacy = spaceStore.privacy
   return privacyState.name === currentPrivacy
 }
 
 // update
 
 const select = async (privacyState) => {
-  await store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
+  await spaceStore.updateSpace({ privacy: privacyState.name })
   updateLocalSpaces()
   emit('closeDialogs')
 }

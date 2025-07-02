@@ -1,13 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import templates from '@/data/templates.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
-const store = useStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const resultsSectionElement = ref(null)
@@ -33,7 +34,7 @@ const state = reactive({
 
 const parentDialog = computed(() => 'templates')
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 
 // templates

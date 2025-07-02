@@ -1,73 +1,79 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
-const store = useStore()
+
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
 })
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
-const currentUserToolbar = computed(() => store.state.currentUserToolbar)
+const currentUserToolbar = computed(() => globalStore.currentUserToolbar)
 watch(() => currentUserToolbar.value, (value, prevValue) => {
   if (value) {
-    store.dispatch('closeAllDialogs')
-    store.dispatch('clearMultipleSelected')
+    globalStore.closeAllDialogs()
+    globalStore.clearMultipleSelected()
   }
 })
 
-const currentUserToolbarIsBox = computed(() => {
-  if (store.state.currentUserIsResizingBox) { return }
-  return currentUserToolbar.value === 'box'
+const toolbarIsBox = computed(() => {
+  if (globalStore.currentUserIsResizingBox) { return }
+  return globalStore.getToolbarIsBox
 })
-const currentUserToolbarIsDrawing = computed(() => {
-  return currentUserToolbar.value === 'drawing'
+const toolbarIsDrawing = computed(() => {
+  return globalStore.getToolbarIsDrawing
 })
 
 const toggleToolbar = (value) => {
   if (value === currentUserToolbar.value) {
-    store.dispatch('currentUserToolbar', 'card')
+    globalStore.updateCurrentUserToolbar('card')
   } else {
-    store.dispatch('currentUserToolbar', value)
+    globalStore.updateCurrentUserToolbar(value)
   }
 }
 </script>
 
 <template lang="pug">
 nav#toolbar.toolbar(v-if="visible")
-  DrawingToolbar(:visible="currentUserToolbarIsDrawing")
+  DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
     //- Box
     .segmented-buttons
       .button-wrap
         button(
           title="Draw Box (B)"
-          :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+          :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('box')"
         )
           img.icon.box-icon(src="@/assets/box.svg")
-        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="currentUserToolbarIsBox")
+        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
           span Draw Box (B)
 
       //- Drawing
       .button-wrap
         button.drawing-button(
           title="Drawing (D)"
-          :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
+          :class="{ active: toolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('drawing')"
         )
           img.icon.pencil-icon(src="@/assets/pencil.svg")
-        .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
+        .label-badge.toolbar-badge-wrap.jiggle(v-if="toolbarIsDrawing")
           span Drawing (D)
 </template>
 
 <style lang="stylus">
 nav.toolbar
   position absolute
-  top 55px
+  top 44px
   .toolbar-badge-wrap
     pointer-events none
     position absolute

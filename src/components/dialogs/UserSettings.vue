@@ -1,13 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserSettingsGeneral from '@/components/subsections/UserSettingsGeneral.vue'
 import UserSettingsControls from '@/components/subsections/UserSettingsControls.vue'
 import UserSettingsCards from '@/components/subsections/UserSettingsCards.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -15,19 +20,19 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
 
-const visible = computed(() => store.state.userSettingsIsVisible)
+const visible = computed(() => globalStore.userSettingsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
     updateDialogHeight()
     restoreUserPrevSettingsSection()
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 const closeChildDialogs = () => {
-  store.commit('triggerCloseChildDialogs')
+  globalStore.triggerCloseChildDialogs()
 }
 
 const state = reactive({
@@ -50,10 +55,10 @@ const updateCurrentSettings = async (value) => {
   state.currentSettings = value
   await nextTick()
   updateDialogHeight()
-  store.dispatch('currentUser/update', { prevSettingsSection: value })
+  userStore.updateUser({ prevSettingsSection: value })
 }
 const restoreUserPrevSettingsSection = () => {
-  const section = store.state.currentUser.prevSettingsSection
+  const section = userStore.prevSettingsSection
   const values = ['general', 'controls', 'cards'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
@@ -65,11 +70,11 @@ const restoreUserPrevSettingsSection = () => {
 
 // pin
 
-const userSettingsIsPinned = computed(() => { return store.state.userSettingsIsPinned })
+const userSettingsIsPinned = computed(() => { return globalStore.userSettingsIsPinned })
 const toggleUserSettingsIsPinned = () => {
   closeChildDialogs()
   const value = !userSettingsIsPinned.value
-  store.dispatch('userSettingsIsPinned', value)
+  globalStore.userSettingsIsPinned = value
 }
 
 </script>

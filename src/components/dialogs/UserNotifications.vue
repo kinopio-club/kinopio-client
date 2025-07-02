@@ -1,6 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -12,7 +18,12 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 
@@ -31,9 +42,9 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     state.filteredNotifications = props.notifications
-    store.commit('shouldExplicitlyHideFooter', true)
+    globalStore.shouldExplicitlyHideFooter = true
   } else {
-    store.commit('shouldExplicitlyHideFooter', false)
+    globalStore.shouldExplicitlyHideFooter = false
     markAllAsRead()
     state.filteredNotifications = null
   }
@@ -58,11 +69,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // space
 
-const currentSpaceId = computed(() => store.state.currentSpace.id)
+const currentSpaceId = computed(() => spaceStore.id)
 const isCurrentSpace = (spaceId) => {
   return spaceId === currentSpaceId.value
 }
@@ -78,22 +89,22 @@ const cardUrl = (notification) => {
   return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
 }
 const cardDetailsIsVisible = (cardId) => {
-  return store.state.cardDetailsIsVisibleForCardId === cardId
+  return globalStore.cardDetailsIsVisibleForCardId === cardId
 }
 const showCardDetails = (notification) => {
   const space = utils.clone(notification.space)
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
-    store.commit('loadSpaceFocusOnCardId', card.id)
-    store.dispatch('currentSpace/changeSpace', space)
+    globalStore.loadSpaceFocusOnCardId = card.id
+    spaceStore.changeSpace(space)
   } else {
-    store.dispatch('currentCards/showCardDetails', card.id)
+    cardStore.showCardDetails(card.id)
   }
   emit('markAsRead', notification.id)
 }
 const segmentTagColor = (segment) => {
-  const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const userTag = store.getters['currentUser/tagByName'](segment.name)
+  const spaceTag = spaceStore.getSpaceTagByName(segment.name)
+  const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
   } else if (userTag) {
@@ -125,7 +136,7 @@ const cardNameSegments = (name) => {
 const markAllAsRead = () => {
   emit('markAllAsRead')
 }
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const cardBackgroundIsDark = (card) => {
   if (card.backgroundColor) {
     return utils.colorIsDark(card.backgroundColor)
@@ -147,8 +158,8 @@ const userName = (notification) => {
   }
 }
 const deleteUserNotifications = async () => {
-  store.commit('triggerClearUserNotifications')
-  await store.dispatch('api/deleteAllNotifications')
+  globalStore.triggerClearUserNotifications()
+  await apiStore.deleteAllNotifications()
 }
 
 // actions
@@ -159,10 +170,10 @@ const primaryAction = (notification) => {
   }
 }
 const changeSpace = (spaceId) => {
-  store.commit('cardDetailsIsVisibleForCardId', null)
+  globalStore.updateCardDetailsIsVisibleForCardId(null)
   if (isCurrentSpace(spaceId)) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 
 // explore
@@ -171,7 +182,7 @@ const isAskToAddToExplore = (notification) => {
   return notification.type === 'askToAddToExplore'
 }
 const updateAddToExplore = async (space) => {
-  const isCurrentSpace = space.id === store.state.currentSpace.id
+  const isCurrentSpace = space.id === spaceStore.id
   state.filteredNotifications = state.filteredNotifications.map(notification => {
     if (!notification.space) {
       return notification
@@ -182,10 +193,10 @@ const updateAddToExplore = async (space) => {
     return notification
   })
   if (isCurrentSpace) {
-    await store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+    await spaceStore.updateSpace({ showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
-    store.dispatch('api/updateSpace', space)
+    apiStore.updateSpace(space)
   }
 }
 
@@ -212,24 +223,25 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
           li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id" :data-notification-icon-class="notification.iconClass")
-            div
+            .row
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
-              //- icon
-              img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
-              img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
-              //- user
-              span.user-wrap
-                UserLabelInline(:user="notification.user")
-              //- message
-              span {{notification.message}}
-              //- group
-              template(v-if="notification.type === 'addSpaceToGroup'")
-                GroupLabel(:group="notification.group")
-              //- space
-              span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-                img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
-                span.space-name {{notification.space.name}}
+              div
+                //- icon
+                img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
+                img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
+                //- user
+                span.user-wrap
+                  UserLabelInline(:user="notification.user")
+                //- message
+                span {{notification.message}}&nbsp;
+                //- group
+                template(v-if="notification.type === 'addSpaceToGroup'")
+                  GroupLabel(:group="notification.group")
+                //- space
+                span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
+                  img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
+                  span.space-name {{notification.space.name}}
             //- add to explore button
             .row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
@@ -285,7 +297,6 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       height 14px
       border-radius var(--small-entity-radius)
   .row
-    margin-top 10px
     &.title-row
       margin-top 0
   .card-details
@@ -325,11 +336,11 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
   .user-label-inline
     margin-right 3px
   .space-name-wrap
-    margin-left 3px
+    display inline
   .new-unread-badge
     position absolute
-    top 4px
-    right 4px
+    top 0
+    right 0
     left initial
     margin 0
   .icon-wrap

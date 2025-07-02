@@ -1,52 +1,83 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-const store = useStore()
+
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
+const globalStore = useGlobalStore()
 
 let statusRetryCount = 0
+
+let unsubscribes
 
 onMounted(() => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'broadcast/joinSpaceRoom') {
-      updateMetaRSSFeed()
-    } else if (mutation.type === 'triggerUserIsLoaded') {
-      updateThemeFromSystem()
-    }
-  })
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logMatchMediaChange)
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeFromSystem)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
+    }
+  )
+  const broadcastActionUnsubscribe = broadcastStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'joinSpaceRoom') {
+        updateMetaRSSFeed()
+      }
+    }
+  )
+  unsubscribes = () => {
+    broadcastActionUnsubscribe()
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateSystemTheme)
+  window.removeEventListener('online', updateIsOnline)
+  window.removeEventListener('offline', updateIsOnline)
+  unsubscribes()
 })
 
-const spaceName = computed(() => store.state.currentSpace.name)
-const isSpacePage = computed(() => store.getters.isSpacePage)
+const spaceName = computed(() => spaceStore.name)
+const isSpacePage = computed(() => globalStore.getIsSpacePage)
 
 // styles and position
 
 const pageWidth = computed(() => {
   if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
+  const size = Math.max(globalStore.pageWidth, globalStore.viewportWidth)
   return size + 'px'
 })
 const pageHeight = computed(() => {
   if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageHeight, store.state.viewportHeight)
+  const size = Math.max(globalStore.pageHeight, globalStore.viewportHeight)
   return size + 'px'
 })
 const pageCursor = computed(() => {
-  const isPanning = store.state.currentUserIsPanning
-  const isPanningReady = store.state.currentUserIsPanningReady
-  const toolbarIsBox = store.state.currentUserToolbar === 'box'
+  const isPanning = globalStore.currentUserIsPanning
+  const isPanningReady = globalStore.currentUserIsPanningReady
+  const toolbarIsBox = globalStore.getToolbarIsBox
   if (isPanning) {
     return 'grabbing'
   } else if (isPanningReady) {
@@ -56,18 +87,18 @@ const pageCursor = computed(() => {
   }
   return undefined
 })
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 // users
 
-const currentUserId = computed(() => store.state.currentUser.id)
+const currentUserId = computed(() => userStore.id)
 
 // online
 
 const updateIsOnline = () => {
   const clientStatus = window.navigator.onLine
   if (!clientStatus) {
-    store.dispatch('isOnline', false)
+    globalStore.updateIsOnline(false)
     return
   }
   updateServerIsOnline()
@@ -75,13 +106,13 @@ const updateIsOnline = () => {
 const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
-  const serverStatus = await store.dispatch('api/getStatus')
-  console.info('server online status', serverStatus)
+  const serverStatus = await apiStore.getStatus()
   if (serverStatus) {
-    store.dispatch('isOnline', true)
+    globalStore.updateIsOnline(true)
   // error offline
   } else {
-    store.dispatch('isOnline', false)
+    console.info('server online status', serverStatus)
+    globalStore.updateIsOnline(false)
   }
   // retry
   let delay // delay increases up to ~15 minutes
@@ -95,41 +126,27 @@ const updateServerIsOnline = async () => {
 
 // theme
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
-const themeFromSystem = () => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
-  if (!themeIsSystem) { return }
-  const theme = window.matchMedia('(prefers-color-scheme: dark)')
-  let themeName
-  if (theme.matches) {
-    themeName = 'dark'
-  } else {
-    themeName = 'light'
-  }
-  return themeName
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const logSystemThemeChange = (event) => {
+  const themeIsSystem = userStore.themeIsSystem
+  console.warn('🌓 logSystemThemeChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
 }
-const logMatchMediaChange = (event) => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
-  console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
-}
-const updateThemeFromSystem = () => {
-  const themeName = themeFromSystem()
-  if (!themeName) { return }
-  store.dispatch('themes/update', themeName)
+const updateSystemTheme = () => {
+  themeStore.updateSystemTheme()
 }
 
 // remote
 
 const broadcastUserLabelCursor = (event) => {
-  if (!store.getters.isSpacePage) { return }
+  if (!globalStore.getIsSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
-  updates.userId = store.state.currentUser.id
+  updates.userId = userStore.id
   updates.zoom = spaceZoomDecimal.value
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
 }
 const isTouchDevice = () => {
-  store.commit('isTouchDevice', true)
+  globalStore.isTouchDevice = true
 }
 
 // rss
@@ -141,13 +158,13 @@ const clearMetaRSSFeed = () => {
   }
 }
 const updateMetaRSSFeed = () => {
-  const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
-  const spaceIsRemote = store.getters['currentSpace/isRemote']
+  const spaceIsPrivate = spaceStore.privacy === 'private'
+  const spaceIsRemote = spaceStore.getSpaceIsRemote
   clearMetaRSSFeed()
   if (!spaceIsRemote) { return }
   if (spaceIsPrivate) { return }
   const head = document.querySelector('head')
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
   const link = document.createElement('link')
   link.rel = 'alternative'
@@ -179,6 +196,8 @@ const updateMetaRSSFeed = () => {
   --primary-on-light-background black
   --primary-border-on-light-background rgba(0,0,0,0.3)
   --primary-border-on-dark-background rgba(255,255,255,0.3)
+  --text-link-on-light-background #143997
+  --text-link-on-dark-background #788cc9
   --dark-background-tint-on-light-background rgba(0,0,0,0.3)
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
@@ -200,7 +219,7 @@ const updateMetaRSSFeed = () => {
 
 @font-face
   font-family 'GoodGlyphs'
-  src url("https://bk.kinopio.club/fonts/GoodGlyphs-No1.woff2") format("woff2")
+  src url("/fonts/GoodGlyphs-No1.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -209,12 +228,14 @@ const updateMetaRSSFeed = () => {
   --header-font-0 recoleta, var(--serif-font)
 @font-face
   font-family 'recoleta'
-  src url("https://bk.kinopio.club/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+  src url("/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+        // background-image url('assets/checkmark.svg')
+
   font-weight bold
   font-style normal
 @font-face
   font-family 'recoleta'
-  src url("https://bk.kinopio.club/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
+  src url("/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-1
@@ -222,12 +243,12 @@ const updateMetaRSSFeed = () => {
   --header-font-1 apris, var(--mono-font)
 @font-face
   font-family 'apris'
-  src url("https://bk.kinopio.club/fonts/apris/Apris-BoldItalic.woff2") format("woff2")
+  src url("/fonts/apris/Apris-BoldItalic.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'apris'
-  src url("https://bk.kinopio.club/fonts/apris/Apris-Regular.woff2") format("woff2")
+  src url("/fonts/apris/Apris-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-2
@@ -235,12 +256,12 @@ const updateMetaRSSFeed = () => {
   --header-font-2 gaya, var(--serif-font)
 @font-face
   font-family 'gaya'
-  src url("https://bk.kinopio.club/fonts/gaya/Gaya.woff2") format("woff2")
+  src url("/fonts/gaya/Gaya.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'gaya'
-  src url("https://bk.kinopio.club/fonts/gaya/Gaya-Italic.woff2") format("woff2")
+  src url("/fonts/gaya/Gaya-Italic.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-3
@@ -248,12 +269,12 @@ const updateMetaRSSFeed = () => {
   --header-font-3 gt-america, var(--sans-serif-font)
 @font-face
   font-family 'gt-america'
-  src url("https://bk.kinopio.club/fonts/gt-america/GT-America-Standard-Bold.woff2") format("woff2")
+  src url("/fonts/gt-america/GT-America-Standard-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'gt-america'
-  src url("https://bk.kinopio.club/fonts/gt-america/GT-America-Standard-Regular.woff2") format("woff2")
+  src url("/fonts/gt-america/GT-America-Standard-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-4
@@ -261,12 +282,12 @@ const updateMetaRSSFeed = () => {
   --header-font-4 shinka-mono, var(--sans-serif-font)
 @font-face
   font-family 'shinka-mono'
-  src url("https://bk.kinopio.club/fonts/shinka-mono/ShinkaMono-Bold.woff2") format("woff2")
+  src url("/fonts/shinka-mono/ShinkaMono-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'shinka-mono'
-  src url("https://bk.kinopio.club/fonts/shinka-mono/ShinkaMono-Regular.woff2") format("woff2")
+  src url("/fonts/shinka-mono/ShinkaMono-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-5
@@ -274,12 +295,12 @@ const updateMetaRSSFeed = () => {
   --header-font-5 microgramma, var(--sans-serif-font)
 @font-face
   font-family 'microgramma'
-  src url("https://bk.kinopio.club/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
+  src url("/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'microgramma'
-  src url("https://bk.kinopio.club/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
+  src url("/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-6
@@ -287,12 +308,12 @@ const updateMetaRSSFeed = () => {
   --header-font-6 grotesk-remix, var(--sans-serif-font)
 @font-face
   font-family 'grotesk-remix'
-  src url("https://bk.kinopio.club/fonts/grotesk-remix/GroteskRemix-bold.woff2") format("woff2")
+  src url("/fonts/grotesk-remix/GroteskRemix-bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'grotesk-remix'
-  src url("https://bk.kinopio.club/fonts/grotesk-remix/GroteskRemix-regular.woff2") format("woff2")
+  src url("/fonts/grotesk-remix/GroteskRemix-regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-7
@@ -300,12 +321,12 @@ const updateMetaRSSFeed = () => {
   --header-font-7 migra, var(--sans-serif-font)
 @font-face
   font-family 'migra'
-  src url("https://bk.kinopio.club/fonts/migra/PPMigra-Bold.woff2") format("woff2")
+  src url("/fonts/migra/PPMigra-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'migra'
-  src url("https://bk.kinopio.club/fonts/migra/PPMigra-Regular.woff2") format("woff2")
+  src url("/fonts/migra/PPMigra-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-8
@@ -313,12 +334,12 @@ const updateMetaRSSFeed = () => {
   --header-font-8 eiko, var(--sans-serif-font)
 @font-face
   font-family 'eiko'
-  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
+  src url("/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'eiko'
-  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
+  src url("/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -471,6 +492,9 @@ label // used for checkbox buttons
       width 10px
       height 10px
       vertical-align 0
+    span.small-button-text
+      font-size 12px
+      vertical-align 1px
   &.fixed-height
     height var(--button-fixed-height)
 .unselectable
@@ -930,9 +954,8 @@ button
 .icon.duplicate
   vertical-align 1px
 
-.icon.openai
-  width 16px
-  vertical-align -3px
+.icon.settings
+  vertical-align -1px
 
 label,
 li
@@ -958,12 +981,28 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+    // &.add
+    //   background-image url('assets/add.svg')
+    //   background-repeat no-repeat
+    //   background-position center
+    //   background-size 60%
+.is-dark-theme
+  label
+    input[type="checkbox"]
+      &:checked
+        background-image url('assets/checkmark-invert.svg')
+      // &.add
+      //   background-image url('assets/add-invert.svg')
 
 details
   summary
+    background url('assets/right-arrow.svg') left top no-repeat
+    background-position 10px 11px
+    list-style-type none
     cursor pointer
     border-radius var(--entity-radius)
     padding 5px 9px
+    padding-left 22px
     &:hover
       box-shadow var(--button-hover-shadow)
       background-color var(--secondary-hover-background)
@@ -975,22 +1014,18 @@ details
     margin-top 0 !important
     border-top-right-radius 0
     border-top-left-radius 0
+    img
+      border-radius var(--entity-radius)
 details[open]
   > summary
+    background url('assets/down-arrow.svg') left top no-repeat
+    background-position 10px 11px
     box-shadow var(--button-active-inset-shadow)
     background-color var(--secondary-active-background)
     border-bottom-right-radius 0
     border-bottom-left-radius 0
 details + details
   margin-top 2px
-
-.is-dark-theme
-  label
-    input[type="checkbox"]
-      &:checked
-        background-image url('assets/checkmark-invert.svg')
-      &.add
-        background-image url('assets/add-invert.svg')
 
 li
   input[type="checkbox"]
@@ -1004,6 +1039,8 @@ li
   padding-top 0
   border-top 0
   overflow auto
+.results-section-border-top
+  border-top 1px solid var(--primary-border)
 
 ul.results-list
   margin 0
@@ -1290,8 +1327,9 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 36px
-    height 33px
+    margin-top 1px
+    width 33px
+    height 28px
     background-repeat no-repeat
     background-size contain
     display inline-block

@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -13,7 +18,11 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import sample from 'lodash-es/sample'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const connectionStore = useConnectionStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const rowElement = ref(null)
 const textareaElement = ref(null)
@@ -31,7 +40,7 @@ const state = reactive({
   background: ''
 })
 
-const isOnline = computed(() => store.state.isOnline)
+const isOnline = computed(() => globalStore.isOnline)
 
 const promptInput = computed({
   get () {
@@ -85,7 +94,7 @@ const validateSchema = (space, schema) => {
 }
 
 const newTypeColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -114,10 +123,10 @@ const updateSize = (space) => {
 
 // background color
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const updateBackground = () => {
   let images = backgroundImagesJSON
-  images = images.filter(image => !image.isArchived || !image.shouldSkipInGenerateSpace)
+  images = images.filter(image => !image.isArchived || !image.shouldSkipInGenerateSpace || !image.isDebug)
   const image = sample(images)
   let url = image.url
   if (isThemeDark.value) {
@@ -142,7 +151,7 @@ const connectionPaths = (space) => {
     startItem.y += heightOffset
     endItem.y += heightOffset
     // calc path
-    connection.path = store.getters['currentConnections/connectionPathBetweenCoords'](startItem, endItem, controlPoint)
+    connection.path = connectionStore.getConnectionPathBetweenCoords(startItem, endItem, controlPoint)
     return connection
   })
   return space
@@ -155,7 +164,7 @@ const generatePreview = async () => {
   try {
     clear()
     state.isGeneratingPreview = true
-    const { data, name } = await store.dispatch('api/generateSpace', state.prompt)
+    const { data, name } = await apiStore.generateSpace(state.prompt)
     isValidCanvas(data)
     const typeColor = newTypeColor()
     let space = utils.convertFromJsonCanvas(data, typeColor)
@@ -190,12 +199,12 @@ const importSpace = async () => {
   try {
     state.isLoadingSpace = true
     let space = utils.clone(state.newSpace)
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     space = utils.resetSpaceMeta({ space, user })
     console.info('🧚 space to import', space)
-    await store.dispatch('currentSpace/saveSpace', space)
-    await store.dispatch('currentSpace/loadSpace', { space })
-    store.dispatch('closeAllDialogs')
+    await spaceStore.saveSpace(space)
+    await spaceStore.loadSpace(space)
+    globalStore.closeAllDialogs()
   } catch (error) {
     console.error('🚒 importSpace', error, state.newSpace)
   }

@@ -1,13 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import GroupList from '@/components/GroupList.vue'
 import utils from '@/utils.js'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -40,28 +47,28 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const shouldEmailNotifications = computed(() => store.state.currentUser.shouldEmailNotifications)
-const shouldEmailBulletin = computed(() => store.state.currentUser.shouldEmailBulletin)
-const shouldEmailWeeklyReview = computed(() => store.state.currentUser.shouldEmailWeeklyReview)
+const isSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const shouldEmailNotifications = computed(() => userStore.shouldEmailNotifications)
+const shouldEmailBulletin = computed(() => userStore.shouldEmailBulletin)
+const shouldEmailWeeklyReview = computed(() => userStore.shouldEmailWeeklyReview)
 const parentDialog = computed(() => 'notificationSettings')
 
 const toggleShouldEmailNotifications = () => {
   const value = !shouldEmailNotifications.value
-  store.dispatch('currentUser/shouldEmailNotifications', value)
+  userStore.updateUser({ shouldEmailNotifications: value })
 }
 const toggleShouldEmailBulletin = () => {
   const value = !shouldEmailBulletin.value
-  store.dispatch('currentUser/shouldEmailBulletin', value)
+  userStore.updateUser({ shouldEmailBulletin: value })
 }
 const toggleShouldEmailWeeklyReview = () => {
   const value = !shouldEmailWeeklyReview.value
-  store.dispatch('currentUser/shouldEmailWeeklyReview', value)
+  userStore.updateUser({ shouldEmailWeeklyReview: value })
 }
 const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
 }
 
 // items
@@ -69,8 +76,8 @@ const triggerSignUpOrInIsVisible = () => {
 const updateUnsubscribed = async () => {
   try {
     state.isLoading = true
-    state.unsubscribedSpaces = await store.dispatch('api/getSpacesNotificationUnsubscribed')
-    state.unsubscribedGroups = await store.dispatch('api/getGroupsNotificationUnsubscribed')
+    state.unsubscribedSpaces = await apiStore.getSpacesNotificationUnsubscribed()
+    state.unsubscribedGroups = await apiStore.getGroupsNotificationUnsubscribed()
     console.info(state.unsubscribedGroups)
   } catch (error) {
     console.error('🚒 updateUnsubscribed', error)
@@ -79,13 +86,13 @@ const updateUnsubscribed = async () => {
 }
 const resubscribeToSpace = (space) => {
   state.unsubscribedSpaces = state.unsubscribedSpaces.filter(item => item.id !== space.id)
-  store.dispatch('api/spaceNotificationResubscribe', space)
-  store.commit('addNotification', { message: `Resubscribed to notifications from ${space.name}`, type: 'success' })
+  apiStore.spaceNotificationResubscribe(space)
+  globalStore.addNotification({ message: `Resubscribed to notifications from ${space.name}`, type: 'success' })
 }
 const resubscribeToGroup = (event, group) => {
   state.unsubscribedGroups = state.unsubscribedGroups.filter(item => item.id !== group.id)
-  store.dispatch('api/groupNotificationResubscribe', group)
-  store.commit('addNotification', { message: `Resubscribed to notifications from ${group.name}`, type: 'success' })
+  apiStore.groupNotificationResubscribe(group)
+  globalStore.addNotification({ message: `Resubscribed to notifications from ${group.name}`, type: 'success' })
 }
 </script>
 

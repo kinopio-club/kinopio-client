@@ -1,17 +1,27 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
 
-const store = useStore()
+const globalStore = useGlobalStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
@@ -24,20 +34,17 @@ const state = reactive({
   backgroundPickerIsVisible: false
 })
 
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
-
+const canEditBox = computed(() => userStore.getUserCanEditBox(currentBox.value))
+const id = computed(() => globalStore.boxDetailsIsVisibleForBoxId)
 // box state
 
 const currentBox = computed(() => {
-  const id = store.state.boxDetailsIsVisibleForBoxId
-  return store.getters['currentBoxes/byId'](id) || {}
+  return boxStore.getBox(id.value) || {}
 })
-watch(() => currentBox.value, async (value, prevValue) => {
+watch(() => id.value, async (value, prevValue) => {
   await nextTick()
   // open
-  if (visible.value) {
-    store.dispatch('history/pause')
+  if (value) {
     prevBoxId = value.id
     closeDialogs()
     broadcastShowBoxDetails()
@@ -45,13 +52,8 @@ watch(() => currentBox.value, async (value, prevValue) => {
     textareaSizes()
   // close
   } else {
-    store.dispatch('history/resume')
     if (!state.isUpdated) { return }
     state.isUpdated = false
-    const box = store.getters['currentBoxes/byId'](prevBoxId)
-    store.dispatch('currentBoxes/updateInfoDimensions', { boxes: [box] })
-    if (!box) { return }
-    store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
 })
 
@@ -59,37 +61,41 @@ const visible = computed(() => utils.objectHasKeys(currentBox.value))
 watch(() => visible.value, async (value, prevValue) => {
   await nextTick()
   if (!value) {
-    store.commit('currentDraggingBoxId', '')
-    store.dispatch('multipleBoxesSelectedIds', [])
-    store.commit('preventMultipleSelectedActionsIsVisible', false)
-    store.dispatch('currentBoxes/updateInfoDimensions', { boxes: [{ id: prevBoxId }] })
+    globalStore.currentDraggingBoxId = ''
+    globalStore.updateMultipleBoxesSelectedIds([])
+    globalStore.preventMultipleSelectedActionsIsVisible = false
   }
 })
 
 const broadcastShowBoxDetails = () => {
   const updates = {
     boxId: currentBox.value.id,
-    userId: store.state.currentUser.id
+    userId: userStore.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
+  broadcastStore.update({ updates, action: 'updateRemoteBoxDetailsVisible' })
 }
 const update = (updates) => {
   const keys = Object.keys(updates)
-  const box = { id: currentBox.value.id }
+  const update = { id: currentBox.value.id }
   keys.forEach(key => {
-    box[key] = updates[key]
+    update[key] = updates[key]
   })
-  store.dispatch('currentBoxes/update', box)
+  boxStore.updateBox(update)
+  boxStore.updateBoxInfoDimensions(update)
   state.isUpdated = true
 }
 
 // styles
 
 const styles = computed(() => {
-  let zoom = spaceCounterZoomDecimal.value
-  if (store.state.isTouchDevice) {
-    zoom = utils.pinchCounterZoomDecimal()
+  let zoom = globalStore.getSpaceCounterZoomDecimal
+  if (utils.isAndroid()) {
+    zoom = utils.visualViewport().scale
+  } else if (globalStore.isTouchDevice) {
+    // on iOS, keyboard focus zooms
+    zoom = 1
   }
+
   const backgroundColor = colord(currentBox.value.color).alpha(1).toRgbString()
   const styles = {
     transform: `scale(${zoom})`,
@@ -114,18 +120,20 @@ const name = computed({
 const focusName = async () => {
   await nextTick()
   const element = nameElement.value
-  if (!element) { return }
-  element.focus()
+  const length = name.value.length
+  utils.focusTextarea(element)
+  selectName()
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const selectName = () => {
   // select all in new boxes, else put cursor at end (like cards)
-  const currentBoxIsNew = store.state.currentBoxIsNew
+  const currentBoxIsNew = globalStore.currentBoxIsNew
   const element = nameElement.value
   const length = name.value.length
   if (length && element) {
     element.setSelectionRange(0, length)
   }
-  store.commit('currentBoxIsNew', false)
+  globalStore.currentBoxIsNew = false
 }
 const textareaSizes = () => {
   const element = dialogElement.value
@@ -172,7 +180,7 @@ const toggleTextEditAction = async (action) => {
 
 // colors
 
-const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const itemColors = computed(() => spaceStore.getSpaceItemColors)
 const colorisDark = computed(() => {
   const color = currentBox.value.color
   return utils.colorIsDark(color)
@@ -186,7 +194,7 @@ const updateColor = (color) => {
   update({ color })
 }
 const isThemeDarkAndUserColorLight = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   return isThemeDark && !colorisDark.value
 })
 
@@ -201,8 +209,7 @@ const toggleBackgroundPickerIsVisible = () => {
 // remove
 
 const removeBox = () => {
-  store.dispatch('history/resume')
-  store.dispatch('currentBoxes/remove', currentBox.value)
+  boxStore.removeBox(currentBox.value.id)
 }
 
 // dialog state
@@ -212,30 +219,32 @@ const closeDialogs = () => {
   state.backgroundPickerIsVisible = false
 }
 const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
+  globalStore.closeAllDialogs()
 }
 const blur = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
   await nextTick()
-  store.commit('scrollElementIntoView', { element })
+  globalStore.scrollElementIntoView({ element })
 }
 const scrollIntoViewAndFocus = async () => {
-  scrollIntoView()
-  if (utils.isMobile()) { return }
+  let behavior
+  if (utils.isIPhone()) {
+    behavior = 'auto'
+  }
   await nextTick()
+  scrollIntoView(behavior)
   focusName()
-  selectName()
 }
 
 // filter
 
 const isFilteredInSpace = computed({
   get () {
-    const boxIds = store.state.filteredBoxIds
+    const boxIds = globalStore.filteredBoxIds
     return boxIds.includes(currentBox.value.id)
   },
   set () {
@@ -243,12 +252,12 @@ const isFilteredInSpace = computed({
   }
 })
 const toggleFilteredInSpace = () => {
-  const filtered = store.state.filteredBoxIds
+  const filtered = globalStore.filteredBoxIds
   const boxId = currentBox.value.id
   if (filtered.includes(boxId)) {
-    store.commit('removeFromFilteredBoxId', boxId)
+    globalStore.removeFromFilteredBoxId(boxId)
   } else {
-    store.commit('addToFilteredBoxId', boxId)
+    globalStore.addToFilteredBoxId(boxId)
   }
 }
 </script>
@@ -300,6 +309,8 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundPickerIsVisible")
         BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundPickerIsVisible")
         BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
+    ItemDetailsDebug(:item="currentBox" :keys="['infoWidth']")
+
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
