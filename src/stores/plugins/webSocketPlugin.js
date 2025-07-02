@@ -65,7 +65,7 @@ export default function webSocketPlugin () {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     const spaceId = spaceStore.id
-    const user = utils.userMeta(userStore.getUserAllState, spaceStore.getSpaceAllState)
+    const user = userStore.getUserPublicMeta
     // check if should join
     if (!websocket) {
       console.info('🌙 cannot join space room: no websocket connection', websocket)

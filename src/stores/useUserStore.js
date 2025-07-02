@@ -107,7 +107,8 @@ export const useUserStore = defineStore('users', {
       return { ...this.$state }
     },
     getUserPublicMeta () {
-      return utils.userMeta(this.getUserAllState)
+      const spaceStore = useSpaceStore()
+      return utils.userMeta(this.getUserAllState, spaceStore.getSpaceAllState)
     },
     getUserIsSignedIn () {
       return Boolean(this.apiKey)

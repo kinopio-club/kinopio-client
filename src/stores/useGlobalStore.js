@@ -1226,11 +1226,8 @@ export const useGlobalStore = defineStore('global', {
     },
     closeAllDialogs (origin = 'closeAllDialogs') {
       const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      const space = spaceStore.getSpaceAllState
-      let user = userStore.getUserAllState
-      user = utils.userMeta(user, space)
+      const user = userStore.getUserPublicMeta
       broadcastStore.update({ updates: user, name: 'updateUserPresence' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteCardDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteConnectionDetailsVisible' })
