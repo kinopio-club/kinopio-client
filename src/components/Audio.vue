@@ -16,7 +16,9 @@ let unsubscribes
 onMounted(() => {
   const audio = audioElement.value
   audio.addEventListener('loadedmetadata', getTotalTime)
-
+  audio.addEventListener('timeupdate', getCurrentTime)
+  audio.addEventListener('ended', pauseAudio)
+  audio.addEventListener('error', handleErrors)
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerPauseAllAudio' && state.isPlaying) {
@@ -29,9 +31,12 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  pauseAudio()
   const audio = audioElement.value
   audio.removeEventListener('loadedmetadata', getTotalTime)
-  pauseAudio()
+  audio.removeEventListener('timeupdate', getCurrentTime)
+  audio.removeEventListener('ended', pauseAudio)
+  audio.removeEventListener('error', handleErrors)
   unsubscribes()
 })
 
@@ -144,18 +149,12 @@ const playAudio = () => {
   state.isPlaying = true
   updateCurrentTime()
   getTotalTime()
-  audio.addEventListener('timeupdate', getCurrentTime.value)
-  audio.addEventListener('ended', pauseAudio.value)
-  audio.addEventListener('error', handleErrors.value)
   emit('isPlaying', true)
 }
 const pauseAudio = () => {
   const audio = audioElement.value
   audio.pause()
   state.isPlaying = false
-  audio.removeEventListener('timeupdate', getCurrentTime.value)
-  audio.removeEventListener('ended', pauseAudio.value)
-  audio.removeEventListener('error', handleErrors.value)
   emit('isPlaying', false)
 }
 const getTotalTime = () => {
