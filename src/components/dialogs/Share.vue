@@ -149,26 +149,21 @@ const updateEmailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
 }
 
+// invites
+
+const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+
 // users
 
-const users = computed(() => {
-  let items = utils.clone(spaceStore.users)
-  items = items.concat(spaceStore.collaborators)
-  return items
-})
+const users = computed(() => spaceStore.getSpaceAndGroupMembers)
 const toggleSpaceUsersIsVisible = () => {
   const value = !state.spaceUsersIsVisible
   closeDialogs()
   state.spaceUsersIsVisible = value
 }
-
-// groups
-
-const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-
 const usersLabel = computed(() => {
-  const condition = spaceStore.getSpaceMembers.length !== 1
+  const condition = users.value.length !== 1
   const label = utils.pluralize('User', condition)
   return `${users.value.length} ${label}`
 })
