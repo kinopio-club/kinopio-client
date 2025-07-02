@@ -152,15 +152,6 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceTags () {
       return uniqBy(this.tags, 'name')
-    },
-    getSpaceShouldBroadcast () {
-      const users = this.users.length
-      const collaborators = this.collaborators.length
-      const spectators = this.spectators.length
-      const clients = this.clients.length
-      const total = users + collaborators + spectators + clients
-      const shouldBroadcast = Boolean(total > 2) // currentUser and currentClient
-      return shouldBroadcast
     }
   },
 

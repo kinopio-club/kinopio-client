@@ -288,8 +288,7 @@ export default function webSocketPlugin () {
   const sendMessage = (pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
-    const shouldBroadcast = spaceStore.getSpaceShouldBroadcast
-    if (!websocket || !isConnected || !shouldBroadcast) {
+    if (!websocket || !isConnected) {
       return
     }
     if (!sentActions) {
