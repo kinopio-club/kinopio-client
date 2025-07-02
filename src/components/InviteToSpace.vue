@@ -2,12 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -16,10 +18,12 @@ import randomColor from 'randomcolor'
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 let unsubscribes
 
 onMounted(() => {
+  updateDefaultInviteType()
   globalStore.clearNotificationsWithPosition()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -39,13 +43,15 @@ onBeforeUnmount(() => {
 const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  group: Object
 })
 
 const state = reactive({
+  tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
-  inviteType: 'edit' // 'edit', 'readOnly'
+  inviteType: 'edit' // 'group', 'edit', 'readOnly'
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
@@ -64,11 +70,18 @@ const closeDialogs = () => {
 }
 // invite types
 
+const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsReadOnly = computed(() => state.inviteType === 'readOnly')
 const inviteTypeIsCommentOnly = computed(() => state.inviteType === 'commentOnly')
+const updateDefaultInviteType = () => {
+  if (props.group) {
+    state.inviteType = 'group'
+  }
+}
 const toggleInviteType = (type) => {
   state.inviteType = type
+  state.tipsIsVisible = false
 }
 
 // urls
@@ -100,7 +113,10 @@ const commentOnlyUrl = computed(() => {
 
 const copyInviteUrl = async (event) => {
   let url
-  if (inviteTypeIsEdit.value) {
+  if (inviteTypeIsGroup.value) {
+    url = groupStore.getGroupInviteUrl(props.group)
+    console.info('🍇 group invite url', url)
+  } else if (inviteTypeIsEdit.value) {
     url = editUrl.value
   } else if (inviteTypeIsReadOnly.value) {
     url = readOnlyUrl.value
@@ -118,12 +134,14 @@ const copyInviteUrl = async (event) => {
   }
 }
 const inviteButtonLabel = computed(() => {
-  if (inviteTypeIsEdit.value) {
-    return 'Copy Invite to Edit URL'
+  if (inviteTypeIsGroup.value) {
+    return 'Copy Group Invite Link'
+  } else if (inviteTypeIsEdit.value) {
+    return 'Copy Invite to Edit Link'
   } else if (inviteTypeIsReadOnly.value) {
-    return 'Copy Invite to Read URL'
+    return 'Copy Invite to Read Link'
   } else {
-    return 'Copy Invite to Comment URL'
+    return 'Copy Invite to Comment Link'
   }
 })
 
@@ -139,6 +157,13 @@ const toggleEmailInvitesIsVisible = () => {
 watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
   emit('emailInvitesIsVisible', value)
 })
+
+// tips
+
+const toggleTipsIsVisible = () => {
+  state.tipsIsVisible = !state.tipsIsVisible
+}
+
 </script>
 
 <template lang="pug">
@@ -148,17 +173,18 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
       .users
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-      span Invite New Collaborators
+      span Invite Collaborators
 
   .row.invite-url-segmented-buttons
     .segmented-buttons
+      button(@click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
+        GroupLabel(:group="props.group")
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
         span Can Edit
       button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
-        span Read Only
+        span Read
       button(@click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
         img.icon.comment(src="@/assets/comment.svg")
-        span Only
 
   section.subsection.invite-url-subsection
     //- comment only warning
@@ -176,17 +202,24 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           img.icon.mail(src="@/assets/mail.svg")
           span Email Invites
         EmailInvites(:visible="state.emailInvitesIsVisible")
+
     //- Tips
-    .row
-      .badge Anyone with an invite can view
-    .row(v-if="currentUserIsUpgraded")
-      details
-        summary
-          span Collaborators edit for free
-        section.subsection
-          p Because your account is upgraded, collaborators can create cards in this space without increasing their free card count
-          p
-            img(src="https://cdn.kinopio.club/EoczbIBOicBBBh-GNuZOE/original-3a3d20bd4be668e1dffd7a97742a501d.gif")
+    template(v-if="!inviteTypeIsGroup")
+      .row.title-row
+        .badge Anyone with the link can view
+        button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+          span ?
+      .row(v-if="state.tipsIsVisible")
+        .badge.info
+          p If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
+      //- .row(v-if="currentUserIsUpgraded")
+      //-   details
+      //-     summary
+      //-       span Collaborators edit for free
+      //-     section.subsection
+      //-       p If your account is upgraded, collaborators can create cards in this space without increasing their free card count
+            //- p
+            //-   img(src="https://cdn.kinopio.club/EoczbIBOicBBBh-GNuZOE/original-3a3d20bd4be668e1dffd7a97742a501d.gif")
 </template>
 
 <style lang="stylus">
@@ -215,4 +248,5 @@ section.invite-to-space
       border-bottom-right-radius 0
     + .invite-url-subsection
       border-top-left-radius 0
+      // border-top-right-radius 0
 </style>

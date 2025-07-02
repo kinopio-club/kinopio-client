@@ -32,8 +32,8 @@ span.group-label(v-if="isVisible" :title="props.group.name" :data-group-id="prop
 .group-label
   flex-shrink 0
   .group-badge
-    padding 2px 8px
-    border-radius 100px
+    padding 0 8px
+    border-radius var(--entity-radius)
     min-width initial
     min-height initial
     display inline

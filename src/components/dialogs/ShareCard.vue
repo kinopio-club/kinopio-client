@@ -54,7 +54,7 @@ const copyUrl = async (event) => {
   const url = cardUrl()
   try {
     await navigator.clipboard.writeText(url)
-    globalStore.addNotificationWithPosition({ message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
@@ -84,7 +84,7 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
         .segmented-buttons
           button(@click.left="copyUrl")
             img.icon.copy(src="@/assets/copy.svg")
-            span Copy Card URL
+            span Copy Card Link
           //- button(v-if="webShareIsSupported" @click="webShare")
           //-   img.icon.share(src="@/assets/share.svg")
       .row(v-if="canShare && spaceIsPrivate")

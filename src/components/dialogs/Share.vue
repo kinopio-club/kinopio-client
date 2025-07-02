@@ -202,7 +202,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon.copy(src="@/assets/copy.svg")
             .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
-            span Copy URL
+            span Copy Link
           //- button(v-if="webShareIsSupported" @click="webShare")
           //-   img.icon.share(src="@/assets/share.svg")
 
@@ -213,8 +213,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon(src="@/assets/presentation.svg")
 
   //- Invite
-  InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
-  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible" :group="spaceGroup")
 
   section(v-if="!spaceIsRemote")
     p

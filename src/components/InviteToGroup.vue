@@ -2,11 +2,17 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
-import GroupLabel from '@/components/GroupLabel.vue'
+import User from '@/components/User.vue'
+
+import randomColor from 'randomcolor'
 
 const globalStore = useGlobalStore()
+const groupStore = useGroupStore()
+const userStore = useUserStore()
 
 const emit = defineEmits(['closeDialogs'])
 
@@ -19,17 +25,16 @@ const closeDialogs = () => {
   emit('closeDialogs')
 }
 
+const currentUser = computed(() => userStore.getUserAllState)
+const randomUser = computed(() => {
+  const luminosity = userStore.theme
+  const color = randomColor({ luminosity })
+  return { color }
+})
+
 // invite
 
-const inviteUrl = computed(() => {
-  if (!props.group.collaboratorKey) { return }
-  const url = utils.groupInviteUrl({
-    groupId: props.group.id,
-    groupName: props.group.name,
-    collaboratorKey: props.group.collaboratorKey
-  })
-  return url
-})
+const inviteUrl = computed(() => groupStore.getGroupInviteUrl(props.group))
 const copyInviteUrl = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
@@ -47,7 +52,10 @@ const copyInviteUrl = async (event) => {
 <template lang="pug">
 section.invite-to-group(v-if="props.visible" @click.stop="closeDialogs" :data-group-collaboratorKey="props.group.collaboratorKey")
   .row
-    GroupLabel(:group="props.group")
+    span
+      .users
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
     span Invite to Group
   section.subsection
     button(@click.left="copyInviteUrl")
@@ -56,5 +64,19 @@ section.invite-to-group(v-if="props.visible" @click.stop="closeDialogs" :data-gr
 </template>
 
 <style lang="stylus">
-// section.invite-to-group
+section.invite-to-group
+  // same as InviteToSpace
+  .users
+    margin-right 5px
+    .user
+      vertical-align -3px
+      &:first-child
+        .user-avatar
+          border-top-right-radius 0
+          border-bottom-right-radius 0
+      &:last-child
+        .user-avatar
+          border-top-left-radius 0
+          border-bottom-left-radius 0
+
 </style>

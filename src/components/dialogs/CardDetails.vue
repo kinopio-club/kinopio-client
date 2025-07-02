@@ -429,7 +429,7 @@ const copyCardUrl = async (event) => {
   const url = cardUrl()
   try {
     await navigator.clipboard.writeText(url)
-    globalStore.addNotificationWithPosition({ message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    globalStore.addNotificationWithPosition({ message: 'Copied Link', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })

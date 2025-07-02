@@ -276,6 +276,15 @@ export const useGroupStore = defineStore('groups', {
       }
       this.update(updatedGroup)
     },
+    getGroupInviteUrl (group) {
+      if (!group.collaboratorKey) { return }
+      const url = utils.groupInviteUrl({
+        groupId: group.id,
+        groupName: group.name,
+        collaboratorKey: group.collaboratorKey
+      })
+      return url
+    },
 
     // space
 
