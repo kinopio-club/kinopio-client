@@ -91,7 +91,6 @@ const drawCurrentConnection = (event) => {
     endItemId,
     path
   }
-  console.log('drawCurrentConnection', updates.startItemId)
   broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
 }
 
