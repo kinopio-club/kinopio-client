@@ -177,7 +177,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
 
   .row.invite-url-segmented-buttons
     .segmented-buttons
-      button(@click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
+      button(v-if="props.group" @click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
         GroupLabel(:group="props.group")
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
         span Can Edit
