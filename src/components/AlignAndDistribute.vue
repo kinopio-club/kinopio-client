@@ -328,23 +328,9 @@ const updateCardDimensions = async () => {
   await nextTick()
 }
 const updateConnectionPaths = async () => {
-  setTimeout(async () => {
-    await updateCardDimensions()
-    let connections = []
-    const cardIds = utils.clone(multipleCardsSelectedIds.value)
-    const connectionIds = utils.clone(multipleConnectionsSelectedIds.value)
-    // globalStore.clearMultipleSelected()
-    if (!cardIds.length) { return }
-    cardIds.forEach(cardId => {
-      const cardConnections = connectionStore.getConnectionsByItemId(cardId)
-      connections = connections.concat(cardConnections)
-    })
-    globalStore.multipleCardsSelectedIds = cardIds
-    globalStore.multipleConnectionsSelectedIds = connectionIds
-    // updates
-    connections = uniqBy(connections, 'id')
-    connectionStore.updateConnectionPaths(connectionIds)
-  }, 10)
+  await updateCardDimensions()
+  const itemIds = globalStore.getMultipleItemsSelected
+  connectionStore.updateConnectionPaths(itemIds)
 }
 
 // update positions

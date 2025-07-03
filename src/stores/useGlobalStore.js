@@ -312,6 +312,9 @@ export const useGlobalStore = defineStore('global', {
     getIsMultipleItemsSelected () {
       return this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length
     },
+    getMultipleItemsSelected () {
+      return this.multipleCardsSelectedIds.concat(this.multipleBoxesSelectedIds)
+    },
     getSpaceShouldHaveBorderRadius () {
       const isNativeApp = consts.isSecureAppContext
       if (isNativeApp || utils.isMobile()) { return true }
