@@ -41,13 +41,6 @@ onMounted(() => {
           if (connectionId !== props.connection.id) { return }
           const isFromStore = true
           showConnectionDetails(args[0].event, isFromStore)
-        } else if (name === 'triggerUpdatePathWhileDragging') {
-          const connections = args[0]
-          if (!visible.value) { return }
-          connections.forEach(connection => {
-            if (connection.id !== props.connection.id) { return }
-            updatePathWhileDragging(connection.path)
-          })
         } else if (name === 'closeAllDialogs') {
           updatePathWhileDragging(null)
         }

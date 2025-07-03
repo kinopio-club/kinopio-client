@@ -458,7 +458,6 @@ export const useGlobalStore = defineStore('global', {
     triggerNotifyOffscreenCardCreated (card) {},
     triggerNotifyCouldNotSave () {},
     triggerSonarPing (event) {},
-    triggerUpdatePathWhileDragging (connections) {},
     triggerUpdateCardDimensionsAndPaths (cardId) {},
     triggerCloseGroupDetailsDialog () {},
     triggerPanningStart () {},

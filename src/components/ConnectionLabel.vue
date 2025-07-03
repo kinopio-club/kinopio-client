@@ -19,7 +19,6 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
-let unsubscribes
 const labelElement = ref(null)
 
 let cursorStart = {}
@@ -45,27 +44,10 @@ onMounted(() => {
     state.connectionIsVisible = true
     updateConnectionRect()
   }, 50)
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'triggerUpdatePathWhileDragging') {
-        const connections = args[0]
-        if (!visible.value) { return }
-        connections.forEach(connection => {
-          if (connection.id !== props.connection.id) { return }
-          updateConnectionRect()
-        })
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopDragging)
   window.removeEventListener('pointermove', drag)
-  unsubscribes()
 })
 
 const props = defineProps({
