@@ -117,6 +117,7 @@ const cardsCreatedCountFromLimit = computed(() => {
 })
 const currentSpaceIsTemplate = computed(() => {
   if (globalStore.isLoadingSpace) { return }
+  if (globalStore.isPresentationMode) { return }
   const currentSpace = spaceStore.getSpaceAllState
   if (currentSpace.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
