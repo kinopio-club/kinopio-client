@@ -415,16 +415,5 @@ const viewportIsVisible = computed(() => {
     box-shadow var(--hover-shadow)
     max-width 100%
     max-height 100%
-  .blink
-    animation-duration 0.2s
-    animation-name blink
-    animation-iteration-count infinite
-    animation-direction alternate
-    animation-timing-function ease-out
-  @keyframes blink
-    0%
-      opacity 1
-    100%
-      opacity 0.6
 
 </style>

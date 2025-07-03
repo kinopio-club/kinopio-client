@@ -61,10 +61,10 @@ const changeSpace = (space) => {
 dialog.live(v-if="props.visible" :open="props.visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p
-      img.icon.camera(src="@/assets/camera.svg")
+      img.icon.camera.blink(src="@/assets/camera.svg")
       span Live Public Spaces
       Loader(:visible="props.loading")
-  section.results-section(v-if="props.spaces.length" ref="results" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section.results-section-border-top(v-if="props.spaces.length" ref="results" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="props.spaces"
       :showOtherUsers="true"

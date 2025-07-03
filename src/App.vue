@@ -1423,4 +1423,17 @@ progress::-moz-progress-bar
     width calc(100% + var(--focus-padding))
     height: calc(100% + var(--focus-padding))
     border-radius calc(2 * var(--entity-radius))
+
+.blink
+  animation-duration 0.2s
+  animation-name blink
+  animation-iteration-count infinite
+  animation-direction alternate
+  animation-timing-function ease-out
+@keyframes blink
+  0%
+    opacity 1
+  100%
+    opacity 0.6
+
 </style>
