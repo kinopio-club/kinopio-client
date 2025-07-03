@@ -72,7 +72,7 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceCreatorIsCurrentUser () {
       const userStore = useUserStore()
-      const creatorUser = this.creator
+      const creatorUser = this.getSpaceCreator
       return userStore.getUserIsCurrentUser(creatorUser)
     },
     getShouldPreventAddCard () {

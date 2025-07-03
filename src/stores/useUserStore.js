@@ -120,9 +120,9 @@ export const useUserStore = defineStore('users', {
     },
     getShouldPreventCardsCreatedCountUpdate () {
       const spaceStore = useSpaceStore()
-      const isUpgraded = spaceStore.getSpaceCreatorIsUpgraded
-      const isCreator = spaceStore.getSpaceCreatorIsCurrentUser
-      return (isUpgraded && !isCreator)
+      const spaceCreatorIsUpgraded = spaceStore.getSpaceCreatorIsUpgraded
+      const userIsCreator = spaceStore.getSpaceCreatorIsCurrentUser
+      return (spaceCreatorIsUpgraded && !userIsCreator)
     },
     getUserTotalItemFadingFiltersActive () {
       const globalStore = useGlobalStore()
