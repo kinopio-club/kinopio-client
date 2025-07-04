@@ -129,7 +129,12 @@ export const useConnectionStore = defineStore('connections', {
       if (!startItem || !endItem) { return }
       const start = utils.estimatedItemConnectorPosition(startItem)
       const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
-      const path = this.getshortestConnectionPathBetweenItems(startItem, endItem, controlPoint)
+      let path
+      if (controlPoint === consts.straightLineConnectionPathControlPoint) {
+        path = this.getshortestConnectionPathBetweenItems(startItem, endItem, controlPoint)
+      } else {
+        path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
+      }
       return path
     },
     getConnectionTypeByName (name) {
