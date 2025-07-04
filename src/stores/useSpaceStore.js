@@ -184,7 +184,9 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const card = cardStore.getCard(itemId)
       const box = boxStore.getBox(itemId)
-      return card || box
+      let item = card || box
+      item = this.updateItemWithItemType(item)
+      return item
     },
     getSpaceIsFavorite (spaceId) {
       const userStore = useUserStore()
@@ -216,6 +218,19 @@ export const useSpaceStore = defineStore('space', {
     getSpaceIsInbox (spaceName) {
       spaceName = spaceName || this.name
       return spaceName === 'Inbox'
+    },
+    updateItemWithItemType (item) {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const card = cardStore.getCard(item.id)
+      if (card) {
+        item.itemType = 'card'
+      }
+      const box = boxStore.getBox(item.id)
+      if (box) {
+        item.itemType = 'box'
+      }
+      return item
     },
 
     // user getters

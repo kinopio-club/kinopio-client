@@ -4,12 +4,12 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
+import closestPoints from '@/closestPoints.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -118,6 +118,10 @@ export const useConnectionStore = defineStore('connections', {
       const curve = controlPoint || consts.defaultConnectionPathCurveControlPoint
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
+    getshortestConnectionPathBetweenItems (startItem, endItem, controlPoint) {
+      const points = closestPoints.findClosestPoints(startItem, endItem)
+      return this.getConnectionPathBetweenCoords(points.point1, points.point2, controlPoint)
+    },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
       const spaceStore = useSpaceStore()
       startItem = startItem || spaceStore.getSpaceItemById(startItemId)
@@ -125,7 +129,7 @@ export const useConnectionStore = defineStore('connections', {
       if (!startItem || !endItem) { return }
       const start = utils.estimatedItemConnectorPosition(startItem)
       const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
-      const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
+      const path = this.getshortestConnectionPathBetweenItems(startItem, endItem, controlPoint)
       return path
     },
     getConnectionTypeByName (name) {
@@ -402,12 +406,15 @@ export const useConnectionStore = defineStore('connections', {
     async updateConnectionPaths (itemIds) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       if (!itemIds.length) { return }
       const connections = this.getConnectionsByItemIds(itemIds)
       const updates = []
       connections.forEach(connection => {
-        const startItem = utils.itemElementDimensions({ id: connection.startItemId })
-        const endItem = utils.itemElementDimensions({ id: connection.endItemId })
+        let startItem = utils.itemElementDimensions({ id: connection.startItemId })
+        let endItem = utils.itemElementDimensions({ id: connection.endItemId })
+        startItem = spaceStore.updateItemWithItemType(startItem)
+        endItem = spaceStore.updateItemWithItemType(endItem)
         const path = this.getConnectionPathBetweenItems({
           startItem,
           endItem,
