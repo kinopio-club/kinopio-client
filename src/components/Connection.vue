@@ -401,6 +401,14 @@ const relativePath = computed(() => {
   const relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
   return relativePath
 })
+const strokeLinecap = computed(() => {
+  const isConnected = props.connection.startItemId && props.connection.endItemId
+  if (isConnected) {
+    return 'butt'
+  } else {
+    return 'round'
+  }
+})
 
 // utils
 
@@ -499,7 +507,7 @@ svg.connection(
     v-if="visible"
     fill="none"
     :stroke="typeColor"
-    stroke-linecap="round"
+    :stroke-linecap="strokeLinecap"
     stroke-width="5"
     ref="connectionPathElement"
     tabindex="0"
