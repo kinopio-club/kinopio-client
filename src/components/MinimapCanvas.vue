@@ -167,7 +167,7 @@ const styles = computed(() => {
 
 const initThrottle = throttle((color) => {
   init()
-}, 16) // 60fps
+}, 100) // 10fps
 
 const init = async () => {
   await nextTick()
