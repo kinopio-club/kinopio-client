@@ -492,6 +492,7 @@ export const useCardStore = defineStore('cards', {
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
+      cards = cards.map(card => this.getCard(card.id))
       boxStore.updateBoxSnapGuides(cards, true)
     },
     clearAllCardsZ () {
