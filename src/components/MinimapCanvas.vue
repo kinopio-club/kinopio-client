@@ -11,6 +11,8 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
+import throttle from 'lodash-es/throttle'
+
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
@@ -60,35 +62,35 @@ onMounted(async () => {
     async ({ name, args }) => {
       if (globalStoreActions.includes(name)) {
         await nextTick()
-        init()
+        initThrottle()
       }
     }
   )
   const cardActionUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
-        init()
+        initThrottle()
       }
     }
   )
   const connectionActionUnsubscribe = connectionStore.$onAction(
     ({ name, args }) => {
       if (connectionStoreActions.includes(name)) {
-        init()
+        initThrottle()
       }
     }
   )
   const boxActionUnsubscribe = boxStore.$onAction(
     ({ name, args }) => {
       if (boxStoreActions.includes(name)) {
-        init()
+        initThrottle()
       }
     }
   )
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
-        init()
+        initThrottle()
       }
     }
   )
@@ -162,6 +164,10 @@ const styles = computed(() => {
 })
 
 // canvas
+
+const initThrottle = throttle((color) => {
+  init()
+}, 16) // 60fps
 
 const init = async () => {
   await nextTick()
