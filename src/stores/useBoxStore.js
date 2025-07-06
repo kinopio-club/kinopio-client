@@ -514,8 +514,8 @@ export const useBoxStore = defineStore('boxes', {
             snapGuides.push(snapGuide)
           }
           // snap top
-          const isSnapTopFromItemBottom = Math.abs(itemTop - targetBoxTop) <= snapThreshold && cursorDirection.downDrag
-          const isSnapTopFromItemTop = Math.abs(itemBottom - targetBoxTop) <= snapThreshold && cursorDirection.upDrag
+          const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold && cursorDirection.upDrag
+          const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold && cursorDirection.downDrag
           if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
             snapGuides.push(snapGuide)
