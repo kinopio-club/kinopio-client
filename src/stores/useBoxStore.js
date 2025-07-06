@@ -285,7 +285,7 @@ export const useBoxStore = defineStore('boxes', {
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
-      this.updateBoxSnapGuides(updates)
+      this.updateBoxSnapGuides({ items: updates })
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
@@ -449,7 +449,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, origin: item, target: targetBox, time }
     },
-    updateBoxSnapGuides (items, isCards) {
+    updateBoxSnapGuides ({ items, isCards }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
