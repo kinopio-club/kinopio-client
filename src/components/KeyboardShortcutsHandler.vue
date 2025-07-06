@@ -722,15 +722,6 @@ const handlePastePlainText = async (data, position) => {
   }, 100)
 }
 
-const afterPaste = ({ cards, boxes }) => {
-  cards.forEach(card => {
-    globalStore.checkIfItemShouldIncreasePageSize(card)
-    cardStore.normalizeCardUrls(card.id)
-  })
-  boxes.forEach(box => {
-    globalStore.checkIfItemShouldIncreasePageSize(box)
-  })
-}
 const kinopioClipboardDataFromData = (data) => {
   if (!data.text) { return }
   if (data.file) { return }
@@ -810,7 +801,7 @@ const handlePasteEvent = async (event) => {
   }
   // update page size
   await nextTick()
-  afterPaste(items)
+  globalStore.updatePageSizes()
 }
 
 // Select Items Relative to cursor
