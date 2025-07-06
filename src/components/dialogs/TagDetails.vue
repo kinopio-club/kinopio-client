@@ -198,6 +198,11 @@ const focusOnCard = async (card) => {
     globalStore.updateFocusOnCardId(cardId)
   }
 }
+const showCardDetails = () => {
+  const cardId = currentCard.value.id
+  globalStore.closeAllDialogs()
+  cardStore.showCardDetails(cardId)
+}
 
 // update cards
 
@@ -444,7 +449,7 @@ const changeSpace = (spaceId) => {
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogElement" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
-    button(@click="focusOnCard(null)")
+    button(@click="showCardDetails")
       span Edit Card
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
