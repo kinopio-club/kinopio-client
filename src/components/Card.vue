@@ -36,9 +36,11 @@ import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
-const uploadStore = useUploadStore()
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 
 dayjs.extend(isToday)
+extend([namesPlugin])
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -49,6 +51,7 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const broadcastStore = useBroadcastStore()
+const uploadStore = useUploadStore()
 
 const cardElement = ref(null)
 
@@ -228,7 +231,7 @@ const currentBackgroundColor = computed(() => {
 const backgroundColor = computed(() => {
   let nameColor
   if (nameIsColor.value) {
-    nameColor = props.card.name
+    nameColor = props.card.name.trim()
   }
   const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
   return color
@@ -238,7 +241,8 @@ const backgroundColorIsDark = computed(() => {
   return utils.colorIsDark(color)
 })
 const nameIsColor = computed(() => {
-  return utils.colorNameIsValid(props.card.name)
+  const name = props.card.name.trim()
+  return colord(name).isValid()
 })
 const currentBackgroundColorIsDark = computed(() => {
   const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor

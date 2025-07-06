@@ -13,7 +13,6 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
-import namesPlugin from 'colord/plugins/names'
 import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
@@ -24,7 +23,6 @@ import randomColor from 'randomcolor'
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
-extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
@@ -866,9 +864,6 @@ export default {
 
   cssVariable (name) {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
-  },
-  colorNameIsValid (color) {
-    return color === colord(color).toName()
   },
   colorIsValid (color) {
     return colord(color).isValid()
