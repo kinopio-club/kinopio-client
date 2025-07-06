@@ -1117,7 +1117,8 @@ export const useSpaceStore = defineStore('space', {
       })
       await cache.updateSpace('tags', this.tags, this.id)
     },
-    async updateTagNameColor (updatedTag) {
+    async updateTagColorByName (updatedTag) {
+      const apiStore = useApiStore()
       this.tags = this.tags.map(tag => {
         if (tag.name === updatedTag.name) {
           tag.color = updatedTag.color
@@ -1125,6 +1126,7 @@ export const useSpaceStore = defineStore('space', {
         return tag
       })
       await cache.updateTagColorInAllSpaces(updatedTag)
+      await apiStore.addToQueue({ name: 'updateTagColorByName', body: { tag: updatedTag } })
     },
     async removeUnusedTagsFromCard (cardId) {
       const cardStore = useCardStore()

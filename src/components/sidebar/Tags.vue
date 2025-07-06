@@ -26,7 +26,7 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'shouldHideFooter' && props.visible) {
-        updateTags()
+        updateTagsList()
       }
     }
   )
@@ -41,10 +41,10 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'removeTags') {
         removeTag(args[0])
-      } else if (name === 'updateTagNameColor') {
+      } else if (name === 'updateTagColorByName') {
         updateTagColor(args[0])
       } else if (tagActions.includes(name) && props.visible) {
-        updateTags()
+        updateTagsList()
       }
     }
   )
@@ -75,7 +75,7 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 const init = () => {
-  updateTags()
+  updateTagsList()
   updateResultsSectionHeight()
 }
 
@@ -129,13 +129,12 @@ const updateTagColor = (updated) => {
 
 // tags list
 
-const updateTags = async () => {
-  const spaceTags = spaceStore.getSpaceTags
-  state.tags = spaceTags || []
+const updateTagsList = async () => {
+  const spaceTags = spaceStore.getSpaceTags || []
   const cachedTags = await cache.allTags()
-  const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
+  const mergedTags = utils.mergeArrays({ previous: cachedTags, updated: spaceTags, key: 'name' })
   state.tags = mergedTags
-  // remote tags
+  // replace with remote tags
   state.isLoading = true
   const remoteTags = await globalStore.updateRemoteTags(true)
   state.tags = remoteTags || []

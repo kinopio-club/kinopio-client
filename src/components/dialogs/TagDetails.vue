@@ -246,10 +246,10 @@ const updateCardsWithTagColor = (name, newColor) => {
   })
   updateCardsList(cards)
 }
-const updateTagNameColor = (newColor) => {
+const updateTagColorByName = (newColor) => {
   const tag = utils.clone(currentTag.value)
   tag.color = newColor
-  spaceStore.updateTagNameColor(tag)
+  spaceStore.updateTagColorByName(tag)
   updateCardsWithTagColor(tag.name, newColor)
 }
 
@@ -455,7 +455,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogEle
         .button-wrap
           button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             .current-color(:style="{backgroundColor: color}")
-          ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateTagNameColor")
+          ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateTagColorByName")
         .tag-name {{name}}
       //- Filter
       .button-wrap

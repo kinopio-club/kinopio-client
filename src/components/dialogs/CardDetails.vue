@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -42,6 +43,7 @@ const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
 const broadcastStore = useBroadcastStore()
+const apiStore = useApiStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -410,6 +412,10 @@ const closeCard = async () => {
   globalStore.updatePageSizes()
   updateDimensionsAndPaths(cardId)
   globalStore.checkIfItemShouldIncreasePageSize(item)
+  const tags = spaceStore.getSpaceTagsInCard(item)
+  if (tags.length) {
+    await apiStore.addToQueue({ name: 'updateTags', body: { tags } })
+  }
 }
 
 // share url
