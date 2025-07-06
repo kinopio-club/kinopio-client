@@ -380,10 +380,14 @@ export const useBoxStore = defineStore('boxes', {
 
     // contained items
 
-    isItemInSelectedBoxes (item, type) {
+    isItemInSelectedBoxes (item, type, selectedBox) {
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
-      const selectedBoxes = this.getBoxesSelected
+      let selectedBoxes = this.getBoxesSelected
+      if (selectedBox?.id === item.id) { return }
+      if (selectedBox) {
+        selectedBoxes = [selectedBox]
+      }
       return selectedBoxes.find(box => {
         box.width = box.resizeWidth
         box.height = box.resizeHeight
@@ -406,20 +410,20 @@ export const useBoxStore = defineStore('boxes', {
         return isTopLeft && isTopRight && isBottomLeft && isBottomRight
       })
     },
-    getItemsContainedInSelectedBoxes () {
+    getItemsContainedInSelectedBoxes (selectedBox) {
       const cards = []
       const boxes = []
       // cards
       const cardStore = useCardStore()
       cardStore.getCardsSelectableByY.cards.forEach(card => {
-        if (this.isItemInSelectedBoxes(card, 'card')) {
+        if (this.isItemInSelectedBoxes(card, 'card', selectedBox)) {
           cards.push(card)
         }
       })
       // boxes
       const selectableBoxes = this.getAllBoxes
       this.getBoxesSelectableByY.boxes.forEach(box => {
-        if (this.isItemInSelectedBoxes(box, 'box')) {
+        if (this.isItemInSelectedBoxes(box, 'box', selectedBox)) {
           boxes.push(box)
         }
       })
