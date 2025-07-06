@@ -255,6 +255,7 @@ export const useBoxStore = defineStore('boxes', {
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
+      const directions = utils.cursorDirections(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -285,7 +286,7 @@ export const useBoxStore = defineStore('boxes', {
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
-      this.updateBoxSnapGuides({ items: updates })
+      this.updateBoxSnapGuides({ items: updates, directions })
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
@@ -449,7 +450,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, origin: item, target: targetBox, time }
     },
-    updateBoxSnapGuides ({ items, isCards }) {
+    updateBoxSnapGuides ({ items, isCards, directions }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }

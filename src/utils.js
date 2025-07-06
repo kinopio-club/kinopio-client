@@ -238,6 +238,16 @@ export default {
       y: this.roundToNearest(position.y, gridSpacing)
     }
   },
+  cursorDirections (currentCursor, prevCursor) {
+    const xDelta = currentCursor.x - prevCursor.x
+    const yDelta = currentCursor.y - prevCursor.y
+    return {
+      left: xDelta < 0,
+      right: xDelta > 0,
+      up: yDelta < 0,
+      down: yDelta > 0
+    }
+  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX
