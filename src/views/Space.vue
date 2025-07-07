@@ -98,7 +98,6 @@ const init = async () => {
   await spaceStore.initializeSpace()
   // broadcastStore.connect()
   await groupStore.initializeGroups()
-  await globalStore.updateTags()
   checkIfShouldShowExploreOnLoad()
   historyStore.init()
 }

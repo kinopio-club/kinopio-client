@@ -505,13 +505,6 @@ export default {
   userIsUpgraded (user) {
     return Boolean(user.stripeSubscriptionId || user.stripePlanIsPurchased || user.downgradeAt || user.appleSubscriptionIsActive)
   },
-  mergeArrays ({ previous, updated, key }) {
-    const updatedKeys = updated.map(item => item[key])
-    const base = previous.filter(item => !updatedKeys.includes(item[key]))
-    let merged = base.concat(updated)
-    merged = uniqBy(merged, key)
-    return merged
-  },
   splitArrayIntoChunks (array, chunkSize) {
     const numberOfChunks = Math.ceil(array.length / chunkSize)
     const chunks = []

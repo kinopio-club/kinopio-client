@@ -1224,7 +1224,7 @@ export const useApiStore = defineStore('api', {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline
-      if (!shouldRequest({ apiKey, isOnline })) { return }
+      if (!shouldRequest({ apiKey, isOnline })) { return [] }
       try {
         let params = ''
         if (removeUnusedTags) {
@@ -1232,7 +1232,7 @@ export const useApiStore = defineStore('api', {
         }
         const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/tags${params}`, options)
-        return normalizeResponse(response)
+        return normalizeResponse(response) || []
       } catch (error) {
         this.handleServerError({ name: 'getUserTags', error })
       }

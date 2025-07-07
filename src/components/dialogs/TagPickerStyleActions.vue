@@ -34,16 +34,15 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateHeights()
-    updateTags()
     updateResultsSectionHeight()
+    scrollIntoView()
   }
 })
 
 const state = reactive({
   resultsSectionHeight: null,
   dialogHeight: null,
-  tags: [],
-  loading: false
+  tags: []
 })
 
 const isThemeDark = computed(() => userStore.theme === 'dark')
@@ -54,28 +53,11 @@ const scrollIntoView = async () => {
   globalStore.scrollElementIntoView({ element })
 }
 
-// tags list
+// tags
 
 const currentTags = computed(() => {
-  return props.tagNamesInCard || globalStore.getAllTags
+  return props.tagNamesInCard || globalStore.getTags
 })
-const updateTags = async () => {
-  const spaceTags = spaceStore.getSpaceTags
-  state.tags = spaceTags || []
-  const cachedTags = await cache.allTags()
-  const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
-  state.tags = mergedTags
-  await updateRemoteTags()
-  updateHeights()
-  scrollIntoView()
-}
-const updateRemoteTags = async () => {
-  state.loading = true
-  const remoteTags = await globalStore.updateRemoteTags()
-  const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
-  state.tags = mergedTags
-  state.loading = false
-}
 
 // select tag
 
@@ -124,11 +106,10 @@ const updateCardDimensions = () => {
   cardStore.clearResizeCards(cardIds)
 }
 const addTag = (name) => {
-  let tag = state.tags.find(item => item.name === name)
+  let tag = currentTags.value.find(item => item.name === name)
   const color = newTagColor()
   tag = { name, color }
   spaceStore.addTag(tag)
-  state.tags.unshift(tag)
   selectTag(tag)
 }
 
@@ -156,8 +137,8 @@ const updateResultsSectionHeight = async () => {
 
 <template lang="pug">
 dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialogElement" @click.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section.results-section(v-if="state.tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-    TagList(:tags="state.tags" :isLoading="state.loading" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
+  section.results-section(v-if="currentTags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    TagList(:tags="currentTags" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
 </template>
 
 <style lang="stylus">

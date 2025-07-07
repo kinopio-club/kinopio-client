@@ -151,7 +151,7 @@ export const useSpaceStore = defineStore('space', {
       return uniq(colors)
     },
     getSpaceTags () {
-      return uniqBy(this.tags, 'name')
+      return uniqBy(this.tags, 'name') || []
     }
   },
 
@@ -450,6 +450,7 @@ export const useSpaceStore = defineStore('space', {
         this.updateUserLastSpaceId()
         globalStore.isLoadingSpace = false
         globalStore.triggerDrawingInitialize()
+        globalStore.updateTags()
         this.updateOtherUsers()
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
