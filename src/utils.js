@@ -368,6 +368,9 @@ export default {
   percentageBetween ({ value, min, max }) {
     return ((value - min) / (max - min)) * 100
   },
+  isNullish (value) {
+    return value === null || value === undefined || Number.isNaN(value)
+  },
   clone (object) {
     if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })
