@@ -202,13 +202,6 @@ const checkIfShouldShowExploreOnLoad = () => {
 watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
   updatePageSizes(value)
 })
-watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
-  const isAfterResize = prevValue && !value
-  if (isAfterResize) {
-    afterResizeCards()
-  }
-  updatePageSizes(value)
-})
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
@@ -325,21 +318,21 @@ const stopTiltingCards = () => {
 
 // resize cards
 
-const resizeCards = (event) => {
+const resizeCards = async (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsResizingCardIds
   const deltaX = endCursor.x - prevCursor.x
   cardStore.resizeCards(cardIds, deltaX)
+  await nextTick()
+  cardStore.updateCardsDimensions(cardIds)
+  await nextTick()
+  connectionStore.updateConnectionPaths(cardIds)
+  globalStore.updatePageSizes()
 }
 const stopResizingCards = async () => {
   globalStore.currentUserIsResizingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
-}
-const afterResizeCards = async () => {
-  const cardIds = globalStore.currentUserIsResizingCardIds
-  await nextTick()
-  connectionStore.updateConnectionPaths(cardIds)
 }
 
 // boxes
@@ -362,7 +355,7 @@ const addBox = (event) => {
   globalStore.currentBoxIsNew = true
   event.preventDefault() // allows dragging boxes without scrolling on touch
 }
-const resizeBoxes = () => {
+const resizeBoxes = async () => {
   if (!prevCursor) { return }
   const boxes = boxStore.getBoxesResizing
   const ids = boxes.map(box => box.id)
@@ -377,6 +370,8 @@ const resizeBoxes = () => {
     y: Math.round(delta.y * zoom)
   }
   boxStore.resizeBoxes(ids, delta)
+  await nextTick()
+  globalStore.updatePageSizes()
 }
 const stopResizingBoxes = () => {
   if (!globalStore.currentUserIsResizingBox) { return }
