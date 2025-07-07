@@ -57,7 +57,7 @@ const updateCardColor = (color) => {
   userStore.updateUser({ defaultCardBackgroundColor: color })
 }
 const clearCardColor = (color) => {
-  userStore.updateUser({ defaultCardBackgroundColor: state.defaultColor })
+  userStore.updateUser({ defaultCardBackgroundColor: undefined })
 }
 const dialogTitle = computed(() => 'New Card Color')
 const itemColors = computed(() => spaceStore.getSpaceItemColors)
