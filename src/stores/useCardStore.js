@@ -366,15 +366,6 @@ export const useCardStore = defineStore('cards', {
     updateCard (update) {
       this.updateCards([update])
     },
-    updateCardNameRemovePlaceholders (cardId) {
-      const card = this.getCard(cardId)
-      if (!card) { return }
-      const name = card.name.replaceAll(consts.uploadPlaceholder, '')
-      this.updateCard({
-        id: card.id,
-        name
-      })
-    },
 
     // remove
 
