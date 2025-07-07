@@ -176,7 +176,7 @@ const updateMetaRSSFeed = () => {
 </script>
 
 <template lang='pug'>
-.app(
+#app.app(
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
@@ -184,7 +184,7 @@ const updateMetaRSSFeed = () => {
   :data-current-user-id="currentUserId"
 )
   //- router-view is Space or Add
-  router-view
+  nuxt-page
 </template>
 
 <style lang="stylus">

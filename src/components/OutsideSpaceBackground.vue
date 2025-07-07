@@ -154,7 +154,8 @@ const colorCycleFrame = () => {
 }
 const updateMetaThemeColor = (color) => {
   const metaThemeColor = document.querySelector('meta[name=theme-color]')
-  metaThemeColor.setAttribute('content', color)
+  // TODO: fix when meta tags are working again or find different solution
+  // metaThemeColor.setAttribute('content', color)
   postMessage.send({ name: 'setBackgroundColor', value: color })
 }
 const styles = computed(() => {
