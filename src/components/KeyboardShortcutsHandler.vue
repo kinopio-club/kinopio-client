@@ -927,11 +927,11 @@ const selectAllItems = () => {
 
 const focusOnSpaceDetailsFilter = async () => {
   globalStore.closeAllDialogs()
-  globalStore.SpaceDetailsVisible()
+  globalStore.triggerSpaceDetailsVisible()
   await nextTick()
   await nextTick()
   await nextTick()
-  globalStore.FocusResultsFilter()
+  globalStore.triggerFocusResultsFilter()
 }
 const focusOnSearchCardFilter = async (event) => {
   globalStore.closeAllDialogs()
