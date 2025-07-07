@@ -12,6 +12,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -84,6 +85,7 @@ if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
   window.groupStore = useGroupStore()
+  window.themeStore = useThemeStore()
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
