@@ -1680,7 +1680,7 @@ export default {
   },
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
-    if (!space.removedCards) {
+    if (!space?.removedCards) {
       space.removedCards = []
     }
     return space

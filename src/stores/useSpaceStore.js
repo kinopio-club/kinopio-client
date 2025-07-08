@@ -518,34 +518,38 @@ export const useSpaceStore = defineStore('space', {
       }
     },
     async changeSpace (space) {
-      const globalStore = useGlobalStore()
-      const apiStore = useApiStore()
-      const userStore = useUserStore()
-      globalStore.updatePrevSpaceIdInSession(this.id)
-      globalStore.updatePrevSpaceIdInSessionPagePosition()
-      globalStore.clearAllInteractingWithAndSelected()
-      console.info('🚟 Change space', space)
-      globalStore.isLoadingSpace = true
-      globalStore.notifySpaceIsRemoved = false
-      globalStore.currentUserToolbar = 'card'
-      space = utils.migrationEnsureRemovedCards(space)
-      await this.loadSpace(space)
-      globalStore.triggerUpdateWindowHistory()
-      const userIsMember = userStore.getUserIsSpaceMember
-      if (!userIsMember) { return }
-      globalStore.parentCardId = ''
-      this.updateUserLastSpaceId()
-      const cardId = globalStore.loadSpaceFocusOnCardId
-      if (cardId) {
-        globalStore.updateFocusOnCardId(cardId)
+      try {
+        const globalStore = useGlobalStore()
+        const apiStore = useApiStore()
+        const userStore = useUserStore()
+        globalStore.updatePrevSpaceIdInSession(this.id)
+        globalStore.updatePrevSpaceIdInSessionPagePosition()
+        globalStore.clearAllInteractingWithAndSelected()
+        console.info('🚟 Change space', space)
+        globalStore.isLoadingSpace = true
+        globalStore.notifySpaceIsRemoved = false
+        globalStore.currentUserToolbar = 'card'
+        space = utils.migrationEnsureRemovedCards(space)
+        await this.loadSpace(space)
+        globalStore.triggerUpdateWindowHistory()
+        const userIsMember = userStore.getUserIsSpaceMember
+        if (!userIsMember) { return }
+        globalStore.parentCardId = ''
+        this.updateUserLastSpaceId()
+        const cardId = globalStore.loadSpaceFocusOnCardId
+        if (cardId) {
+          globalStore.updateFocusOnCardId(cardId)
+        }
+        globalStore.restoreMultipleSelectedItemsToLoad()
+        const body = { id: space.id, updatedAt: new Date() }
+        await apiStore.addToQueue({
+          name: 'updateSpace',
+          body
+        })
+        await cache.updateSpace('updatedAt', body.updatedAt, space.id)
+      } catch (error) {
+        console.error('🚒 changeSpace', error)
       }
-      globalStore.restoreMultipleSelectedItemsToLoad()
-      const body = { id: space.id, updatedAt: new Date() }
-      await apiStore.addToQueue({
-        name: 'updateSpace',
-        body
-      })
-      await cache.updateSpace('updatedAt', body.updatedAt, space.id)
     },
 
     // save
