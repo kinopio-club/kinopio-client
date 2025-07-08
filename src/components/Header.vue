@@ -802,7 +802,7 @@ header
       margin-top 6px
       margin-left 39px
       @media(max-width 550px)
-        margin-left 42px
+        margin-left 40px
       // 1st row
       &:first-child
         margin-top 0
