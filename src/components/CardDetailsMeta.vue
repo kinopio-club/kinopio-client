@@ -166,9 +166,9 @@ const toggleCardsSettingsIsVisible = () => {
     margin-right 5px
   .button-indicator
     position absolute
-    background-color var(--primary-transparent)
+    background-color var(--primary)
     left 0
-    bottom 2px
+    bottom 0px
     width 6px
     height 1px
     border-radius var(--entity-radius)
