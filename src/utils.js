@@ -1935,34 +1935,6 @@ export default {
     }
     return dayjs(date)
   },
-  moonPhase (date) {
-    // adapted from https://github.com/t1mwillis/simple-moonphase-js/blob/master/index.js
-    if (!date) {
-      date = dayjs(new Date())
-    }
-    const phases = ['new-moon', 'waxing-crescent', 'waxing-quarter', 'waxing-gibbous', 'full-moon', 'waning-gibbous', 'waning-quarter', 'waning-crescent']
-    const day = date.get('date')
-    let month = date.get('month') + 1 // January is 0!
-    let year = dayjs().get('year')
-    let c = 0
-    let e = 0
-    let jd = 0
-    let phase = 0
-    if (month < 3) {
-      year--
-      month += 12
-    }
-    ++month
-    c = 365.25 * year
-    e = 30.6 * month
-    jd = c + e + day - 694039.09 // jd is total days elapsed
-    jd /= 29.5305882 // divide by the moon cycle
-    phase = parseInt(jd) // int(jd) -> phase, take integer part of jd
-    jd -= phase // subtract integer part to leave fractional part of original jd
-    phase = Math.round(jd * 8) // scale fraction from 0-8 and round
-    if (phase >= 8) phase = 0 // 0 and 8 are the same so turn 8 into 0
-    return phases[phase] // 'new-moon', ...
-  },
 
   // urls 🌍
 
@@ -2623,18 +2595,6 @@ export default {
     })
     return commands
   },
-  commandIconsFromString (string) {
-    const allowedCommands = Object.keys(consts.systemCommandIcons)
-    // https://regexr.com/7h3ia
-    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
-    let commands = string.match(commandPattern)
-    if (!commands) { return }
-    commands = commands.filter(command => {
-      const name = this.commandNameFromCommand(command)
-      return allowedCommands.includes(name)
-    })
-    return commands
-  },
   commandNameFromCommand (string) {
     // https://regexr.com/7h3ig
     // ::system_command=xyz → matches xyz
@@ -2676,7 +2636,6 @@ export default {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
-    const commandIcons = this.commandIconsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2721,12 +2680,6 @@ export default {
       const endPosition = startPosition + command.length
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
-    })
-    commandIcons.forEach(command => {
-      const startPosition = name.indexOf(command)
-      const endPosition = startPosition + command.length
-      const commandName = this.commandNameFromCommand(command)
-      segments.push({ startPosition, endPosition, commandIcon: commandName, name: consts.systemCommandIcons[commandName], isCommandIcon: true })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

@@ -617,7 +617,6 @@ export const useSpaceStore = defineStore('space', {
       space.editedAt = new Date()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
-      space.moonPhase = utils.moonPhase()
       const shouldHideTutorialCards = userStore.shouldHideTutorialCards
       if (shouldHideTutorialCards) {
         space.connectionTypes = []
