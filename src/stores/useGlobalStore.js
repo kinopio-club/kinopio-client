@@ -27,8 +27,6 @@ export const useGlobalStore = defineStore('global', {
     isOnline: true,
     isBeta: false,
     shouldHideConnectionOutline: false,
-    changelogIsUpdated: false,
-    changelog: [],
     stripeIsLoaded: false,
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,

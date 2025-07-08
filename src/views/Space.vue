@@ -13,6 +13,7 @@ import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useChangelogStore } from '@/stores/useChangelogStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -69,6 +70,7 @@ const groupStore = useGroupStore()
 const analyticsStore = useAnalyticsStore()
 const broadcastStore = useBroadcastStore()
 const historyStore = useHistoryStore()
+const changelogStore = useChangelogStore()
 
 let unsubscribes
 
@@ -81,6 +83,7 @@ window.cardStore = useCardStore()
 window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
+window.changelogStore = useChangelogStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
@@ -102,6 +105,7 @@ const init = async () => {
   await groupStore.initializeGroups()
   checkIfShouldShowExploreOnLoad()
   historyStore.init()
+  changelogStore.init()
 }
 init()
 

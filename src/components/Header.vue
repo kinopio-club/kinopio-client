@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useChangelogStore } from '@/stores/useChangelogStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -52,6 +53,7 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const cardStore = useCardStore()
+const changelogStore = useChangelogStore()
 
 let unsubscribes
 
@@ -199,7 +201,7 @@ const toolbarIsVisible = computed(() => {
 
 const shouldShowChangelogIsUpdated = computed(() => {
   const isNotHelloSpace = !spaceStore.getSpaceIsHello
-  return globalStore.changelogIsUpdated && isNotHelloSpace && userCanEditSpace.value
+  return changelogStore.isUpdated && isNotHelloSpace && userCanEditSpace.value
 })
 
 // current space
