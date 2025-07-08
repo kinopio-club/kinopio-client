@@ -164,7 +164,6 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
     updates: stroke,
     action: 'triggerAddRemoteDrawingStroke'
   })
-  console.log('🔮🔮triggerAddRemoteDrawingStroke')
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
