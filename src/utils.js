@@ -1678,13 +1678,6 @@ export default {
     space = this.updateSpaceItemsUserId(space, user.id)
     return space
   },
-  // migration added oct 2019
-  migrationEnsureRemovedCards (space) {
-    if (!space?.removedCards) {
-      space.removedCards = []
-    }
-    return space
-  },
   excludeCurrentUser (users, currentUserId) {
     users = users.filter(user => user.id !== currentUserId)
     return users

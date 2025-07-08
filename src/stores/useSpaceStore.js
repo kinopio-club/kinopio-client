@@ -529,7 +529,6 @@ export const useSpaceStore = defineStore('space', {
         globalStore.isLoadingSpace = true
         globalStore.notifySpaceIsRemoved = false
         globalStore.currentUserToolbar = 'card'
-        space = utils.migrationEnsureRemovedCards(space)
         await this.loadSpace(space)
         globalStore.triggerUpdateWindowHistory()
         const userIsMember = userStore.getUserIsSpaceMember
