@@ -28,6 +28,9 @@ onMounted(() => {
   if (isOffline) { return }
   initChangelog()
 })
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+})
 
 const props = defineProps({
   visible: Boolean
@@ -70,11 +73,9 @@ const updateDialogHeight = async () => {
 
 // check changelog updates
 
-const changelogIsUpdated = computed(() => globalStore.changelogIsUpdated)
-const changelog = computed(() => globalStore.changelog)
 const initChangelog = async () => {
   await updateChangelog()
-  if (!utils.arrayHasItems(changelog.value)) { return }
+  if (!utils.arrayHasItems(globalStore.changelog)) { return }
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
     updateChangelog()
   }, 1000 * 60 * 60 * 1) // 1 hour
@@ -91,7 +92,8 @@ const updateChangelog = async () => {
   }
 }
 const checkChangelogIsUpdated = async () => {
-  const newId = changelog.value[0].id
+  if (!globalStore.changelog) { return }
+  const newId = globalStore.changelog[0]?.id || 0
   const prevId = await cache.prevReadChangelogId()
   if (!prevId) {
     // first time visitors are updated to latest changelog
@@ -107,7 +109,7 @@ const checkChangelogIsUpdated = async () => {
 
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const changelogId = changelog.value[0].id
+  const changelogId = globalStore.changelog[0].id
   cache.updatePrevReadChangelogId(changelogId)
   globalStore.changelogIsUpdated = false
   spaceStore.changeSpace(space)
