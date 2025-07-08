@@ -92,7 +92,7 @@ const dateUpdatedAt = computed(() => {
 const toggleFilterShowAbsoluteDates = () => {
   closeDialogs()
   const value = !userStore.filterShowAbsoluteDates
-  userStore.updateUser('filterShowAbsoluteDates', value)
+  userStore.updateUser({ filterShowAbsoluteDates: value })
 }
 
 // user
