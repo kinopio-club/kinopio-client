@@ -628,18 +628,18 @@ export const useSpaceStore = defineStore('space', {
         space.cards = [
           {
             id: '1',
-            x: 94,
-            y: 296,
+            x: 82,
+            y: 251,
             z: 0,
             name: 'Get your thoughts, ideas and feelings out',
             width: 200,
             height: 51
           },
           {
-            id: 'wQ9-NzxQyWoIGGKEgHRMF',
+            id: '2',
             x: 151,
-            y: 373,
-            name: 'Connect them together\n\n[Help and Tutorials](https://help.kinopio.club)',
+            y: 328,
+            name: 'Connect them together\n[Help and Tutorials](https://help.kinopio.club)',
             z: 3,
             width: 193,
             height: 69
@@ -648,15 +648,15 @@ export const useSpaceStore = defineStore('space', {
         space.connections = [
           {
             startItemId: '1',
-            endItemId: 'wQ9-NzxQyWoIGGKEgHRMF',
-            path: 'm255,323 q90,40 48,77',
+            endItemId: '2',
+            path: 'm267,266 q90,40 50,77',
             id: 'gg7DEsxy0n3syEkxfKKS4',
-            connectionTypeId: 'TDbVDxv4cebeN_99XAz8T'
+            connectionTypeId: '3'
           }
         ]
         space.connectionTypes = [
           {
-            id: 'TDbVDxv4cebeN_99XAz8T',
+            id: '3',
             name: 'Connection Type 1',
             color: randomColor({ luminosity: 'light' })
           }
@@ -664,17 +664,16 @@ export const useSpaceStore = defineStore('space', {
       }
       const shouldHideDateCards = userStore.shouldHideDateCards
       if (!shouldHideDateCards) {
-        const date = dayjs().format('dddd') // Sunday
-        const moonPhaseSystemCommandIcon = '::systemCommand=moonPhase'
+        const date = dayjs().format('ddd').toUpperCase() // SUN
         const dateCard = {
           id: nanoid(),
-          x: 73,
+          x: 82,
           y: 125,
           z: 0,
-          name: `${moonPhaseSystemCommandIcon} ${date} ${globalStore.getDateImageUrl}`,
-          width: 144,
-          height: 144,
-          resizeWidth: 144
+          name: `${date} ${globalStore.getDateImageUrl}`,
+          width: 94,
+          height: 94,
+          resizeWidth: 94
         }
         space.cards.push(dateCard)
       }
