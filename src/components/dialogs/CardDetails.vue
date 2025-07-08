@@ -1470,7 +1470,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           span Share
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
-    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
+    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
     CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible")
