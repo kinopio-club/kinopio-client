@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
+import { useHead } from '#app'
 
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -22,7 +23,7 @@ let statusRetryCount = 0
 
 let unsubscribes
 
-onMounted(() => {
+onMounted(async () => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
   if (utils.isLinux()) {
@@ -50,6 +51,8 @@ onMounted(() => {
     broadcastActionUnsubscribe()
     globalActionUnsubscribe()
   }
+
+  await userStore.initializeUser()
 })
 onBeforeUnmount(() => {
   window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
@@ -134,6 +137,12 @@ const logSystemThemeChange = (event) => {
 const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
+
+useHead({
+  meta: [
+    { name: 'theme-color', content: globalStore.outsideSpaceBackgroundColor }
+  ]
+})
 
 // remote
 
