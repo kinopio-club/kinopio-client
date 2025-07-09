@@ -382,13 +382,6 @@ export const useGlobalStore = defineStore('global', {
         spaceId
       }
     },
-    getItem (itemId) {
-      const cardStore = useCardStore()
-      const boxStore = useBoxStore()
-      const card = cardStore.getCard(itemId)
-      const box = boxStore.getBox(itemId)
-      return card || box
-    },
 
     // subscribe triggers
 
