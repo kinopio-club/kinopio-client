@@ -1720,6 +1720,7 @@ export default {
       box.userId = userId
       return box
     })
+    connectionTypes = uniqBy(connectionTypes, 'id')
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
       const newId = nanoid()
