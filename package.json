@@ -29,17 +29,13 @@
     "randomcolor": "^0.5.4",
     "shader": "^1.0.0",
     "smartquotes": "^2.3.2",
-    "uuid": "^9.0.0",
-    "vue": "^3.5",
-    "vue-router": "^4.0.11"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/eslint-parser": "^7.23.3",
     "@babel/preset-env": "^7.26.9",
     "@types/lodash-es": "^4.17.3",
-    "@vitejs/plugin-vue": "^5.2.3",
-    "@vue/compiler-sfc": "^3.2.6",
     "@vue/eslint-config-standard": "^8.0.1",
     "autoprefixer": "^10.4.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
@@ -50,9 +46,6 @@
     "pug": "^3.0.3",
     "stylus": "^0.63",
     "stylus-loader": "^3.0.2",
-    "vite": "^6.3.4",
-    "vite-plugin-pwa": "^1.0.0",
-    "vite-plugin-sitemap": "^0.7.1",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {
