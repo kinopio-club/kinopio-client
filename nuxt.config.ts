@@ -7,6 +7,65 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
     '@nuxtjs/robots'
   ],
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: 'en'
+      },
+      title: 'Kinopio',
+      meta: [
+        // https://github.com/netlify/prerender
+        { name: 'fragment', content: '!' },
+        // mobile
+        { name: 'apple-mobile-web-app-title', content: 'Kinopio' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        { name: 'msapplication-TileColor', content: '#00aba9' },
+        // meta tags updated in page-meta
+        // title
+        { property: 'og:title', content: 'Kinopio – Thinking Canvas' },
+        { property: 'og:type', content: 'website' },
+        // preview image
+        { property: 'og:image', content: 'https://updates.kinopio.club/og-image.png' },
+        { property: 'og:image:type', content: 'image/png' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        // description
+        { property: 'og:description', content: 'Kinopio is a spatial note taking tool for visually collecting and connecting your thoughts, ideas, and feelings.' },
+        { name: 'description', content: 'Kinopio is a spatial note taking tool for visually collecting and connecting your thoughts, ideas, and feelings.' },
+        { name: 'theme-color', content: '#ffffff' },
+        { property: 'og:site_name', content: 'Kinopio' },
+        { name: 'twitter:site', content: '@KinopioClub' },
+        { name: 'twitter:card', content: 'summary' }
+      ],
+      link: [
+        // favicon
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
+        { rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#21e4e4' },
+        // offline cache - specified in vite.config.js runtimeCaching
+        { rel: 'dns-prefetch', href: 'https://cdn.kinopio.club' },
+        { rel: 'dns-prefetch', href: 'https://bk.kinopio.club' },
+        { rel: 'dns-prefetch', href: 'https://images.are.na' },
+        { rel: 'dns-prefetch', href: 'https://d2w9rnfcy7mm78.cloudfront.net' },
+        { rel: 'preconnect', crossorigin: 'anonymous', href: 'https://cdn.kinopio.club' },
+        { rel: 'preconnect', crossorigin: 'anonymous', href: 'https://bk.kinopio.club' },
+        { rel: 'preconnect', crossorigin: 'anonymous', href: 'https://images.are.na' },
+        { rel: 'preconnect', crossorigin: 'anonymous', href: 'https://d2w9rnfcy7mm78.cloudfront.net' }
+      ],
+      script: [
+        // json-ld
+        { type: 'application/ld+json' },
+        // polyfills
+        { type: 'module', src: '/src/polyfills/path-data-polyfill.js', tagPosition: 'bodyClose' }
+      ],
+      noscript: [
+        { children: 'I\'m sorry but Kinopio doesn\'t work properly without JavaScript enabled. Please enable it to continue.', tagPosition: 'bodyOpen' }
+      ]
+    }
+  },
   devServer: {
     https: {
       key: './.cert/key.pem',
