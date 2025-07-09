@@ -34,6 +34,9 @@ onMounted(async () => {
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
 
+  const urlParams = new URLSearchParams(window.location.search)
+  globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
