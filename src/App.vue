@@ -138,12 +138,6 @@ const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
 
-useHead({
-  meta: [
-    { name: 'theme-color', content: globalStore.outsideSpaceBackgroundColor }
-  ]
-})
-
 // remote
 
 const broadcastUserLabelCursor = (event) => {

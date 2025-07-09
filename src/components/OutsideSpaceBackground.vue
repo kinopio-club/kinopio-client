@@ -6,6 +6,8 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
+import { useHead } from '#app'
+
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -102,6 +104,13 @@ const preventTouchScrolling = (event) => {
   }
 }
 
+// `useHead()` is reactive so this automatically updates when `globalStore.outsideSpaceBackgroundColor` updates.
+useHead({
+  meta: [
+    { name: 'theme-color', content: () => globalStore.outsideSpaceBackgroundColor }
+  ]
+})
+
 // update color
 
 const updateBackgroundColor = () => {
@@ -153,9 +162,6 @@ const colorCycleFrame = () => {
   window.requestAnimationFrame(colorCycleFrame)
 }
 const updateMetaThemeColor = (color) => {
-  const metaThemeColor = document.querySelector('meta[name=theme-color]')
-  // TODO: fix when meta tags are working again or find different solution
-  // metaThemeColor.setAttribute('content', color)
   postMessage.send({ name: 'setBackgroundColor', value: color })
 }
 const styles = computed(() => {
