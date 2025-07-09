@@ -152,6 +152,13 @@ onMounted(() => {
   unsubscribes = () => {
     globalActionUnsubscribe()
   }
+
+  const path = window.location.pathname
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('present')) {
+    globalStore.isPresentationMode = true
+  }
+  globalStore.updateSpaceAndCardUrlToLoad(path)
 })
 
 onBeforeUnmount(() => {
