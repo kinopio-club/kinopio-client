@@ -595,7 +595,7 @@ const cancelOpeningAnimationFrame = () => {
 }
 const startOpening = () => {
   if (globalStore.preventCardDetailsOpeningAnimation || !card.value.name) {
-    globalStore.currentDraggingCardId = false
+    globalStore.currentDraggingCardId = ''
     return
   }
   shouldCancelOpening = false

@@ -1448,7 +1448,7 @@ const showCardDetails = (event) => {
     return
   }
   globalStore.updateCardDetailsIsVisibleForCardId(props.card.id)
-  globalStore.currentDraggingCardId = true
+  globalStore.currentDraggingCardId = props.card.id
   globalStore.parentCardId = props.card.id
   event.stopPropagation() // only stop propagation if cardDetailsIsVisible
   globalStore.currentUserIsDraggingCard = false
