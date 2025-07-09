@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "nuxt dev",
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "nuxt generate",
+    "preview": "nuxt preview",
     "lint": "eslint src --ext .js,.vue",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
