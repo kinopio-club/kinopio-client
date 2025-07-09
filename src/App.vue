@@ -186,7 +186,7 @@ const updateMetaRSSFeed = () => {
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
-  //- router-view is Space or Add
+  //- nuxt-page is the root for Nuxt's router, which will mount the components in the pages directory.
   nuxt-page
 </template>
 
