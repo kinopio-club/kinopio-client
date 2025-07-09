@@ -938,18 +938,6 @@ export default {
     const box = this.boxElementFromId(itemId)
     return card || box
   },
-  itemElementDimensions (item) {
-    if (!item) { return }
-    const card = this.cardElementFromId(item.id)
-    const box = this.boxElementFromId(item.id)
-    let rect
-    if (card) {
-      rect = this.cardElementDimensions(item)
-    } else if (box) {
-      rect = this.boxElementDimensions(item)
-    }
-    return rect
-  },
   sortByAlphabetical (items, property) {
     const sorted = items.sort((a, b) => {
       // Case-insensitive comparison, ignore emojis

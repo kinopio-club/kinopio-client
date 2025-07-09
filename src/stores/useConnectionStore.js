@@ -406,8 +406,8 @@ export const useConnectionStore = defineStore('connections', {
       const connections = this.getConnectionsByItemIds(itemIds)
       const updates = []
       connections.forEach(connection => {
-        const startItem = utils.itemElementDimensions({ id: connection.startItemId })
-        const endItem = utils.itemElementDimensions({ id: connection.endItemId })
+        const startItem = globalStore.getItem(connection.startItemId)
+        const endItem = globalStore.getItem(connection.endItemId)
         const path = this.getConnectionPathBetweenItems({
           startItem,
           endItem,
