@@ -98,18 +98,20 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.spaceZoomPercent, async (value, prevValue) => {
-  await nextTick()
-  scroll()
-})
-watch(() => globalStore.zoomOrigin, async (value, prevValue) => {
-  await nextTick()
-  scroll()
-})
 watch(() => globalStore.currentUserToolbar, async (value, prevValue) => {
   updatePrevScroll()
   redraw()
 })
+watch(
+  [
+    () => globalStore.spaceZoomPercent,
+    () => globalStore.zoomOrigin
+  ],
+  async () => {
+    await nextTick()
+    scroll()
+  }
+)
 
 const state = reactive({
   prevScroll: { x: 0, y: 0 }
