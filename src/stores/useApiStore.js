@@ -31,28 +31,28 @@ clearOtherItemsQueue()
 
 // process queue
 
-const sortQueueItems = (queue) => {
-  // sort create connectiontype operations first
-  const createConnectionTypes = []
-  queue = queue.filter(request => {
-    if (request.name === 'createConnectionType') {
-      createConnectionTypes.push(request)
+const sortQueueItemsByPriority = (queue) => {
+  const sortPriority = ['createCard', 'createConnectionType', 'createConnection']
+  const buckets = {}
+  sortPriority.forEach(type => {
+    buckets[type] = []
+  })
+  buckets.other = []
+  // sort into buckets
+  queue.forEach(request => {
+    if (sortPriority.includes(request.name)) {
+      buckets[request.name].push(request)
     } else {
-      return true
+      buckets.other.push(request)
     }
   })
-  queue = createConnectionTypes.concat(queue)
-  // sort createCard operations first
-  const createCards = []
-  queue = queue.filter(request => {
-    if (request.name === 'createCard') {
-      createCards.push(request)
-    } else {
-      return true
-    }
+
+  const newQueue = []
+  sortPriority.forEach(type => {
+    newQueue.push(...buckets[type])
   })
-  queue = createCards.concat(queue)
-  return queue
+  newQueue.push(...buckets.other)
+  return newQueue
 }
 const merge = (accumulator, currentValue) => {
   return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
@@ -110,7 +110,7 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
-  squashed = sortQueueItems(squashed)
+  squashed = sortQueueItemsByPriority(squashed)
   return squashed
 }
 

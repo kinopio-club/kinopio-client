@@ -1720,6 +1720,7 @@ export default {
       box.userId = userId
       return box
     })
+    connectionTypes = uniqBy(connectionTypes, 'id')
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
       const newId = nanoid()
@@ -1859,7 +1860,8 @@ export default {
       const hasTypeId = Boolean(connection?.connectionTypeId)
       return hasTypeId
     })
-    space.connections = connections
+    space.connections = connections || []
+    space.cards = space.cards || []
     space.cards = space.cards.filter(card => card?.name) || []
     space.cards = space.cards.map(card => {
       if (card.resizeWidth) {

@@ -309,7 +309,7 @@ const splitCard = () => {
   const cardId = cards.value[0].id
   globalStore.clearMultipleSelected()
   globalStore.closeAllDialogs()
-  globalStore.currentDraggingCardId = true
+  globalStore.currentDraggingCardId = cardId
   globalStore.updateCardDetailsIsVisibleForCardId(cardId)
   globalStore.triggerSplitCard(cardId)
 }
