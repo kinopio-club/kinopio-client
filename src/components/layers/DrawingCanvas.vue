@@ -24,9 +24,10 @@ let canvas, context
 let isDrawing = false
 let currentStroke = []
 let currentStrokeId = ''
-let currentStrokes = []
+let spaceStrokes = []
 let remoteStrokes = []
 let redoStrokes = []
+const newStrokes = []
 
 let unsubscribes
 
@@ -58,20 +59,22 @@ onMounted(() => {
         remoteStrokes = remoteStrokes.filter(points => {
           return points[0].id !== stroke[0].id
         })
-        redraw()
+        redrawStrokes()
       } else if (name === 'triggerDrawingUndo') {
         undo()
       } else if (name === 'triggerDrawingRedo') {
         redo()
       } else if (name === 'triggerDrawingInitialize') {
-        redraw()
-        const strokes = currentStrokes.concat(remoteStrokes)
-        await updateDrawingDataUrl(strokes)
+        // perf: save spaceStore.drawingStrokes to var, and clear state
+        spaceStrokes = utils.clone(spaceStore.drawingStrokes)
+        spaceStrokes.reverse()
+        spaceStore.drawingStrokes = []
+        redrawStrokes()
+        await updateDrawingDataUrl()
       } else if (name === 'triggerDrawingReset') {
         clearDrawing()
       } else if (name === 'triggetUpdateDrawingDataUrl') {
-        const strokes = currentStrokes.concat(remoteStrokes)
-        await updateDrawingDataUrl(strokes)
+        await updateDrawingDataUrl()
         globalStore.triggerEndDrawing()
       }
     }
@@ -98,18 +101,20 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.spaceZoomPercent, async (value, prevValue) => {
-  await nextTick()
-  scroll()
-})
-watch(() => globalStore.zoomOrigin, async (value, prevValue) => {
-  await nextTick()
-  scroll()
-})
 watch(() => globalStore.currentUserToolbar, async (value, prevValue) => {
   updatePrevScroll()
-  redraw()
+  redrawStrokes()
 })
+watch(
+  [
+    () => globalStore.spaceZoomPercent,
+    () => globalStore.zoomOrigin
+  ],
+  async () => {
+    await nextTick()
+    scroll()
+  }
+)
 
 const state = reactive({
   prevScroll: { x: 0, y: 0 }
@@ -132,7 +137,7 @@ const clearDrawing = () => {
   globalStore.drawingStrokeColors = []
   globalStore.drawingEraserIsActive = false
   redoStrokes = []
-  currentStrokes = []
+  spaceStrokes = []
   remoteStrokes = []
   clearCanvas()
 }
@@ -230,7 +235,8 @@ const dataUrlFromOffscreenCanvas = (offscreenCanvas) => {
       .catch(reject)
   })
 }
-const updateDrawingDataUrl = async (strokes) => {
+const updateDrawingDataUrl = async () => {
+  const strokes = allStrokes()
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
@@ -279,6 +285,9 @@ const startDrawing = (event) => {
 
 // draw
 
+const allStrokes = () => {
+  return spaceStrokes.concat(newStrokes).concat(remoteStrokes)
+}
 const draw = (event) => {
   if (utils.isMultiTouch(event)) { return }
   if (!isDrawing) { return }
@@ -286,27 +295,27 @@ const draw = (event) => {
   renderStroke(currentStroke)
   globalStore.triggerUpdateDrawingBackground()
 }
-const redraw = async () => {
+const redrawStrokes = async () => {
   clearCanvas()
   context.globalCompositeOperation = 'source-over'
-  currentStrokes = spaceStore.drawingStrokes
-  currentStrokes.forEach(stroke => {
+  spaceStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
   remoteStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
   globalStore.triggerUpdateDrawingBackground()
-  updatePageSizes(currentStrokes)
+  updatePageSizes()
 }
 
 // stop
 
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
-  const strokes = currentStrokes.concat(remoteStrokes)
-  await updateDrawingDataUrl(strokes)
+  const strokes = allStrokes()
+  console.log(strokes)
+  await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
-  updatePageSizes(strokes)
+  updatePageSizes()
   if (isRemovedStroke) {
     await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   } else {
@@ -321,7 +330,7 @@ const endDrawing = async (event) => {
     return
   }
   globalStore.addToDrawingStrokeColors(currentStroke[0].color)
-  currentStrokes.push(currentStroke)
+  spaceStrokes.push(currentStroke)
   saveStroke({ stroke: currentStroke })
   currentStroke = []
   redoStrokes = []
@@ -331,17 +340,18 @@ const endDrawing = async (event) => {
 // undo redo
 
 const undo = () => {
-  const prevStroke = currentStrokes.pop() // remove last stroke
+  const strokes = spaceStrokes.concat(newStrokes)
+  const prevStroke = strokes.pop() // remove last stroke
   redoStrokes.push(prevStroke) // append to redo stack
-  redraw()
+  redrawStrokes()
   saveStroke({ stroke: prevStroke, isRemovedStroke: true })
   broadcastRemoveStroke(prevStroke)
 }
 const redo = () => {
   if (!redoStrokes.length) { return }
   const prevStroke = redoStrokes.pop()
-  currentStrokes.push(prevStroke)
-  redraw()
+  spaceStrokes.push(prevStroke)
+  redrawStrokes()
   saveStroke({ stroke: prevStroke })
   broadcastAddStroke(prevStroke)
 }
@@ -357,7 +367,7 @@ const updatePrevScroll = () => {
 }
 const scroll = () => {
   updatePrevScroll()
-  redraw()
+  redrawStrokes() // todo redraw from drawingImageUrl
 }
 const resize = async () => {
   await nextTick()
@@ -366,7 +376,8 @@ const resize = async () => {
     scroll()
   }, 10)
 }
-const updatePageSizes = (strokes) => {
+const updatePageSizes = () => {
+  const strokes = allStrokes()
   let x = 0
   let y = 0
   const drawingBrushSizeDiameter = consts.drawingBrushSizeDiameter.l // 40
