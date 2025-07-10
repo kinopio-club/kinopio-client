@@ -430,13 +430,11 @@ export const useSpaceStore = defineStore('space', {
       space = utils.normalizeSpace(cachedSpace)
       globalStore.resetStateMeta()
       globalStore.resetPageSizes()
-      // load local space while fetching remote space
+      // restore local space, and then fetch and restore remote space
       try {
-        const [localData, remoteData] = await Promise.all([
-          this.restoreSpaceLocal(space),
-          this.loadRemoteSpace(space)
-        ])
+        await this.restoreSpaceLocal(space)
         // restore remote space
+        const remoteData = await this.loadRemoteSpace(space)
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
