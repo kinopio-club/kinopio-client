@@ -67,7 +67,6 @@ onMounted(() => {
       } else if (name === 'triggerDrawingInitialize') {
         // perf: save spaceStore.drawingStrokes to var, and clear state
         spaceStrokes = utils.clone(spaceStore.drawingStrokes)
-        spaceStrokes.reverse()
         spaceStore.drawingStrokes = []
         redrawStrokes()
         await updateDrawingDataUrl()
