@@ -400,6 +400,7 @@ export const useConnectionStore = defineStore('connections', {
     // path
 
     async updateConnectionPaths (itemIds) {
+      await nextTick()
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       if (!itemIds.length) { return }
