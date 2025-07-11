@@ -157,7 +157,6 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Removed
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
-            img.icon.remove-undo(src="@/assets/undo.svg")
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
             img.icon.time(src="@/assets/time.svg")

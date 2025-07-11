@@ -22,7 +22,7 @@ let statusRetryCount = 0
 
 let unsubscribes
 
-onMounted(() => {
+onMounted(async () => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
   if (utils.isLinux()) {
@@ -33,6 +33,9 @@ onMounted(() => {
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+
+  const urlParams = new URLSearchParams(window.location.search)
+  globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
 
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -50,6 +53,8 @@ onMounted(() => {
     broadcastActionUnsubscribe()
     globalActionUnsubscribe()
   }
+
+  await userStore.initializeUser()
 })
 onBeforeUnmount(() => {
   window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
@@ -176,15 +181,15 @@ const updateMetaRSSFeed = () => {
 </script>
 
 <template lang='pug'>
-.app(
+#app.app(
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
-  //- router-view is Space or Add
-  router-view
+  //- nuxt-page is the root for Nuxt's router, which will mount the components in the pages directory.
+  nuxt-page
 </template>
 
 <style lang="stylus">

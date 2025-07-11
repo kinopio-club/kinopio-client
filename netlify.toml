@@ -6,3 +6,8 @@
   function = "page-meta"
   excludedPath = ["/", "/assets/*", "/*.js", "/*.css", "/*.txt", "/*.png", "/*.ico", "/*.jpeg", "/*.jpg", "/*.webmanifest"]
   cache = "manual"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"

@@ -22,3 +22,5 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+.nuxt
+.output

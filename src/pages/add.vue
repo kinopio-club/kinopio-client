@@ -55,6 +55,8 @@ window.addEventListener('message', (event) => {
 })
 
 onMounted(() => {
+  globalStore.isAddPage = true
+
   initUser()
   initCardTextarea()
   updateSpaces()

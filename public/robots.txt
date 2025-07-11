@@ -1,2 +1,0 @@
-# sitemap generated in vite.config.js
-Sitemap: https://kinopio.club/sitemap.xml
