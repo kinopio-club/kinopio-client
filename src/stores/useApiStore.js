@@ -32,7 +32,7 @@ clearOtherItemsQueue()
 // process queue
 
 const sortQueueItemsByPriority = (queue) => {
-  const sortPriority = ['createCard', 'createConnectionType', 'createConnection']
+  const sortPriority = ['createCard', 'createConnectionType', 'createConnection', 'createBox']
   const buckets = {}
   sortPriority.forEach(type => {
     buckets[type] = []
@@ -80,7 +80,7 @@ const merge = (accumulator, currentValue) => {
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
-    const shouldNotSquashOperations = ['createDrawingStroke', 'removeDrawingStroke']
+    const shouldNotSquashOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
     if (shouldNotSquashOperations.includes(request.name)) {
       squashed.push(request)
       return
