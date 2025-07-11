@@ -8,6 +8,10 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     strategies: 'generateSW',
+    manifest: {
+      name: 'Kinopio',
+      short_name: 'Kinopio',
+    },
     workbox: {
       navigateFallbackDenylist: [
         // Exclude exact route only
