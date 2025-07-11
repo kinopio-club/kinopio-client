@@ -16,6 +16,7 @@
     "@nuxtjs/robots": "^5.3.0",
     "@nuxtjs/sitemap": "^7.4.3",
     "@pinia/nuxt": "^0.11.1",
+    "@vite-pwa/nuxt": "^1.0.4",
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
     "dayjs": "^1.9.1",

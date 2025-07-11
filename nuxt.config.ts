@@ -1,12 +1,91 @@
+const yearTime = 60 * 60 * 24 * 365 // 365 days
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-09',
   srcDir: 'src',
   ssr: false,
-  modules: [
-    '@pinia/nuxt',
-    '@nuxtjs/sitemap',
-    '@nuxtjs/robots'
-  ],
+  modules: ['@pinia/nuxt', '@nuxtjs/sitemap', '@nuxtjs/robots', '@vite-pwa/nuxt'],
+  pwa: {
+    registerType: 'autoUpdate',
+    strategies: 'generateSW',
+    workbox: {
+      navigateFallbackDenylist: [
+        // Exclude exact route only
+        /^\/robots\.txt$/,
+        /^\/sitemap\.xml$/,
+        /^\/changelog$/,
+        /^\/roadmap$/,
+        /^\/discord$/,
+        /^\/survey$/,
+        // Exclude '/route' and all subpaths (e.g. /route/post)
+        /^\/help(?:\/.*)?$/,
+        /^\/about(?:\/.*)?$/,
+        /^\/api(?:\/.*)?$/,
+        /^\/blog(?:\/.*)?$/,
+        /^\/forum(?:\/.*)?$/,
+        /^\/blog(?:\/.*)?$/
+      ],
+      globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i, // match all except mp3/mp4
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'cdn-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: yearTime
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          urlPattern: /^https:\/\/bk\.kinopio\.club\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'bk-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: yearTime
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          urlPattern: /^https:\/\/images\.are\.na\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'are-na-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: yearTime
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          urlPattern: /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i, // are.na cdn
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'are-na-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: yearTime
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        }
+      ]
+    }
+  },
   app: {
     head: {
       htmlAttrs: {
