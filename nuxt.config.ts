@@ -100,6 +100,7 @@ export default defineNuxtConfig({
         // https://github.com/netlify/prerender
         { name: 'fragment', content: '!' },
         // mobile
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes' },
         { name: 'apple-mobile-web-app-title', content: 'Kinopio' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'mobile-web-app-capable', content: 'yes' },
