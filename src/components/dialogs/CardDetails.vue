@@ -595,7 +595,7 @@ const cancelOpeningAnimationFrame = () => {
 }
 const startOpening = () => {
   if (globalStore.preventCardDetailsOpeningAnimation || !card.value.name) {
-    globalStore.currentDraggingCardId = false
+    globalStore.currentDraggingCardId = ''
     return
   }
   shouldCancelOpening = false
@@ -1470,7 +1470,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           span Share
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
-    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
+    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
     CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible")
@@ -1566,7 +1566,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'width']")
+    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'width', 'height']")
 </template>
 
 <style lang="stylus">

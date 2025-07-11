@@ -400,12 +400,14 @@ export const useConnectionStore = defineStore('connections', {
     // path
 
     async updateConnectionPaths (itemIds) {
+      await nextTick()
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       if (!itemIds.length) { return }
       const connections = this.getConnectionsByItemIds(itemIds)
       const updates = []
       connections.forEach(connection => {
+        // perf: use dom lookup bc faster than getting state item
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
         const endItem = utils.itemElementDimensions({ id: connection.endItemId })
         const path = this.getConnectionPathBetweenItems({

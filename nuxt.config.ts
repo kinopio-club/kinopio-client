@@ -154,7 +154,11 @@ export default defineNuxtConfig({
     https: {
       key: './.cert/key.pem',
       cert: './.cert/cert.pem'
-    }
+    },
+    port: 8080,
+  },
+  devtools: {
+    enabled: true,
   },
   postcss: {
     plugins: {

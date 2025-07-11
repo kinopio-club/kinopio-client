@@ -799,8 +799,9 @@ const remoteUploadDraggedOverCardColor = computed(() => {
     return undefined
   }
 })
-const addFile = (file) => {
+const addFile = async (file) => {
   let name = props.card.name
+  name = name.replaceAll(consts.uploadPlaceholder, '')
   const url = file.url
   const urlType = utils.urlType(url)
   const checkbox = utils.checkboxFromString(name)
@@ -829,6 +830,8 @@ const addFile = (file) => {
   }
   cardStore.updateCard(update)
   globalStore.triggerUpdateHeaderAndFooterPosition()
+  await nextTick()
+  cardStore.updateCardDimensions(props.card.id)
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
@@ -1445,7 +1448,7 @@ const showCardDetails = (event) => {
     return
   }
   globalStore.updateCardDetailsIsVisibleForCardId(props.card.id)
-  globalStore.currentDraggingCardId = true
+  globalStore.currentDraggingCardId = props.card.id
   globalStore.parentCardId = props.card.id
   event.stopPropagation() // only stop propagation if cardDetailsIsVisible
   globalStore.currentUserIsDraggingCard = false

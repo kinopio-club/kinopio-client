@@ -251,7 +251,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
             img.icon.arena(src="@/assets/arena.svg")
             span Authorize Kinopio
             Loader(:visible="isAuthenticatingWithArena")
-      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   template(v-if="arenaAccessToken")
     section
@@ -262,11 +262,11 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
           button.borderless.clear-input-wrap(@mouseup.left="clearForm" @touchend="clearForm")
             img.cancel.icon(src="@/assets/add.svg")
 
-        .badge.danger.badge-with-url(v-if="error.invalidUrl") Url should look like
+        .badge.danger.badge-with-url(v-if="state.error.invalidUrl") Url should look like
           br
           span https://www.are.na/user/channel-name
-        .badge.danger(v-if="error.channelNotFound") Could not find {{error.channelNotFoundName}} on Are.na
-        .badge.danger(v-if="error.unknownServerError") Are.na authentication failed, Please try again or contact support
+        .badge.danger(v-if="state.error.channelNotFound") Could not find {{state.error.channelNotFoundName}} on Are.na
+        .badge.danger(v-if="state.error.unknownServerError") Are.na authentication failed, Please try again or contact support
 
         button(:class="{active: loading}" type="submit")
           img.icon.arena(src="@/assets/arena.svg")

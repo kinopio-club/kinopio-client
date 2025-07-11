@@ -13,7 +13,7 @@ import utils from '@/utils.js'
 import debounce from 'lodash-es/debounce'
 import isEqual from 'lodash-es/isEqual'
 
-const showDebugMessages = true
+const showDebugMessages = false
 const max = 30
 
 export const useHistoryStore = defineStore('history', {

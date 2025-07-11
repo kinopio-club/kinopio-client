@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useChangelogStore } from '@/stores/useChangelogStore'
 
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -22,6 +23,7 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const changelogStore = useChangelogStore()
 
 let unsubscribes
 
@@ -215,10 +217,10 @@ const removeById = (item) => {
 
 const changelogIsUpdated = computed(() => {
   if (!currentUserIsSignedIn.value) { return }
-  return globalStore.changelogIsUpdated
+  return changelogStore.isUpdated
 })
 const latestChangelogPost = computed(() => {
-  return globalStore.changelog[0]
+  return changelogStore.updates[0]
 })
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }

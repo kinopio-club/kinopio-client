@@ -186,6 +186,7 @@ const styles = computed(() => {
   return styles
 })
 const backgroundStyles = computed(() => {
+  if (!hasFill.value) { return }
   if (!props.box.background) { return }
   const newStyles = utils.clone(styles.value)
   delete newStyles.border

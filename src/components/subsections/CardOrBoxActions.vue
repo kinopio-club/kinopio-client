@@ -8,6 +8,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -26,6 +27,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const analyticsStore = useAnalyticsStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
@@ -60,6 +62,7 @@ const props = defineProps({
   labelIsVisible: Boolean,
   tagsInCard: Array,
   backgroundColor: String,
+  backgroundColorIsFromTheme: Boolean,
   cards: {
     type: Array,
     default (value) {
@@ -320,7 +323,11 @@ const toggleColorPickerIsVisible = () => {
   state.colorPickerIsVisible = !isVisible
 }
 const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColor: background.value })
+  if (props.backgroundColorIsFromTheme) {
+    return utils.colorClasses({ backgroundColorIsDark: themeStore.getIsThemeDark })
+  } else {
+    return utils.colorClasses({ backgroundColor: background.value })
+  }
 })
 
 // frames

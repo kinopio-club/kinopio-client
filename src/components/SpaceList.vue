@@ -593,10 +593,6 @@ span.space-list-wrap
       padding 6px
       padding-right 0
 
-    .moon-phase
-      margin-top 4px
-      margin-right 4px
-
     .preview-thumbnail-image-wrap
       position relative
       flex-shrink 0

@@ -120,10 +120,6 @@ export const useUploadStore = defineStore('upload', {
             globalStore.triggerUploadComplete(complete)
             this.removePendingUpload({ cardId, spaceId, boxId })
             resolve(request.response)
-            await nextTick()
-            await nextTick()
-            const card = { id: cardId }
-            cardStore.updateCardNameRemovePlaceholders(cardId)
           }
         }
         // start
@@ -174,10 +170,13 @@ export const useUploadStore = defineStore('upload', {
         const positionOffset = 20
         const cardId = nanoid()
         cardIds.push(cardId)
+        const cards = cardStore.getAllCards
+        const highestCardZ = utils.highestItemZ(cards)
         const newCard = {
           position: {
             x: position.x + (index * positionOffset),
-            y: position.y + (index * positionOffset)
+            y: position.y + (index * positionOffset),
+            z: highestCardZ
           },
           name: consts.uploadPlaceholder,
           id: cardId
@@ -207,11 +206,6 @@ export const useUploadStore = defineStore('upload', {
           globalStore.addNotification({ message: error.message, type: 'danger' })
         }
       }))
-      // remove placeholders from card names
-      files.forEach((file, index) => {
-        const cardId = cardIds[index]
-        cardStore.updateCardNameRemovePlaceholders(cardId)
-      })
     }
 
   }

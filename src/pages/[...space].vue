@@ -12,6 +12,8 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+import { useChangelogStore } from '@/stores/useChangelogStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -68,6 +70,7 @@ const groupStore = useGroupStore()
 const analyticsStore = useAnalyticsStore()
 const broadcastStore = useBroadcastStore()
 const historyStore = useHistoryStore()
+const changelogStore = useChangelogStore()
 
 let unsubscribes
 
@@ -80,10 +83,12 @@ window.cardStore = useCardStore()
 window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
+window.changelogStore = useChangelogStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
   window.groupStore = useGroupStore()
+  window.themeStore = useThemeStore()
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
@@ -98,9 +103,9 @@ const init = async () => {
   await spaceStore.initializeSpace()
   // broadcastStore.connect()
   await groupStore.initializeGroups()
-  await globalStore.updateTags()
   checkIfShouldShowExploreOnLoad()
   historyStore.init()
+  changelogStore.init()
 }
 init()
 
@@ -206,13 +211,6 @@ const checkIfShouldShowExploreOnLoad = () => {
 // page size
 
 watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
-  updatePageSizes(value)
-})
-watch(() => globalStore.currentUserIsResizingCard, (value, prevValue) => {
-  const isAfterResize = prevValue && !value
-  if (isAfterResize) {
-    afterResizeCards()
-  }
   updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
@@ -331,21 +329,21 @@ const stopTiltingCards = () => {
 
 // resize cards
 
-const resizeCards = (event) => {
+const resizeCards = async (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsResizingCardIds
   const deltaX = endCursor.x - prevCursor.x
   cardStore.resizeCards(cardIds, deltaX)
+  await nextTick()
+  cardStore.updateCardsDimensions(cardIds)
+  await nextTick()
+  connectionStore.updateConnectionPaths(cardIds)
+  globalStore.updatePageSizes()
 }
 const stopResizingCards = async () => {
   globalStore.currentUserIsResizingCard = false
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingCards' })
-}
-const afterResizeCards = async () => {
-  const cardIds = globalStore.currentUserIsResizingCardIds
-  await nextTick()
-  connectionStore.updateConnectionPaths(cardIds)
 }
 
 // boxes
@@ -368,7 +366,7 @@ const addBox = (event) => {
   globalStore.currentBoxIsNew = true
   event.preventDefault() // allows dragging boxes without scrolling on touch
 }
-const resizeBoxes = () => {
+const resizeBoxes = async () => {
   if (!prevCursor) { return }
   const boxes = boxStore.getBoxesResizing
   const ids = boxes.map(box => box.id)
@@ -383,6 +381,8 @@ const resizeBoxes = () => {
     y: Math.round(delta.y * zoom)
   }
   boxStore.resizeBoxes(ids, delta)
+  await nextTick()
+  globalStore.updatePageSizes()
 }
 const stopResizingBoxes = () => {
   if (!globalStore.currentUserIsResizingBox) { return }

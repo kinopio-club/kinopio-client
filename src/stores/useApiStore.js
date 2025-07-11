@@ -31,28 +31,28 @@ clearOtherItemsQueue()
 
 // process queue
 
-const sortQueueItems = (queue) => {
-  // sort create connectiontype operations first
-  const createConnectionTypes = []
-  queue = queue.filter(request => {
-    if (request.name === 'createConnectionType') {
-      createConnectionTypes.push(request)
+const sortQueueItemsByPriority = (queue) => {
+  const sortPriority = ['createCard', 'createConnectionType', 'createConnection', 'createBox']
+  const buckets = {}
+  sortPriority.forEach(type => {
+    buckets[type] = []
+  })
+  buckets.other = []
+  // sort into buckets
+  queue.forEach(request => {
+    if (sortPriority.includes(request.name)) {
+      buckets[request.name].push(request)
     } else {
-      return true
+      buckets.other.push(request)
     }
   })
-  queue = createConnectionTypes.concat(queue)
-  // sort createCard operations first
-  const createCards = []
-  queue = queue.filter(request => {
-    if (request.name === 'createCard') {
-      createCards.push(request)
-    } else {
-      return true
-    }
+
+  const newQueue = []
+  sortPriority.forEach(type => {
+    newQueue.push(...buckets[type])
   })
-  queue = createCards.concat(queue)
-  return queue
+  newQueue.push(...buckets.other)
+  return newQueue
 }
 const merge = (accumulator, currentValue) => {
   return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
@@ -80,7 +80,7 @@ const merge = (accumulator, currentValue) => {
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
-    const shouldNotSquashOperations = ['createDrawingStroke', 'removeDrawingStroke']
+    const shouldNotSquashOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
     if (shouldNotSquashOperations.includes(request.name)) {
       squashed.push(request)
       return
@@ -110,7 +110,7 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
-  squashed = sortQueueItems(squashed)
+  squashed = sortQueueItemsByPriority(squashed)
   return squashed
 }
 
@@ -200,6 +200,7 @@ export const useApiStore = defineStore('api', {
     // Queue Operations
 
     async addToQueue ({ name, body, spaceId }) {
+      console.log('🌺🌺 added to queue', name, body, spaceId)
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace
@@ -1224,7 +1225,7 @@ export const useApiStore = defineStore('api', {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline
-      if (!shouldRequest({ apiKey, isOnline })) { return }
+      if (!shouldRequest({ apiKey, isOnline })) { return [] }
       try {
         let params = ''
         if (removeUnusedTags) {
@@ -1232,7 +1233,7 @@ export const useApiStore = defineStore('api', {
         }
         const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/tags${params}`, options)
-        return normalizeResponse(response)
+        return normalizeResponse(response) || []
       } catch (error) {
         this.handleServerError({ name: 'getUserTags', error })
       }

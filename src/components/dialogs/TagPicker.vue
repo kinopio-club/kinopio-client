@@ -7,7 +7,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
-import Loader from '@/components/Loader.vue'
 import Tag from '@/components/Tag.vue'
 import utils from '@/utils.js'
 
@@ -61,7 +60,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateHeights()
     state.randomColor = color()
-    updateTags()
+    scrollIntoView()
   }
 })
 watch(() => props.search, (value, prevValue) => {
@@ -73,8 +72,6 @@ watch(() => props.search, (value, prevValue) => {
 })
 
 const state = reactive({
-  tags: [],
-  loading: false,
   focusOnName: '',
   randomColor: '',
   dialogHeight: null,
@@ -90,7 +87,8 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const closeDialog = () => {
   emit('closeDialog')
 }
-const scrollIntoView = () => {
+const scrollIntoView = async () => {
+  await nextTick()
   const element = dialogElement.value
   globalStore.scrollElementIntoView({ element })
 }
@@ -98,7 +96,7 @@ const scrollIntoView = () => {
 // tags list
 
 const filteredTags = computed(() => {
-  let tags = state.tags.filter(tag => {
+  let tags = globalStore.getTags.filter(tag => {
     return tag.name !== props.search
   })
   const options = {
@@ -113,28 +111,11 @@ const filteredTags = computed(() => {
   tags = filtered.map(item => item.original)
   return tags.slice(0, 5)
 })
-const updateTags = async () => {
-  const spaceTags = spaceStore.getSpaceTags
-  state.tags = spaceTags || []
-  const cachedTags = await cache.allTags()
-  const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
-  state.tags = mergedTags
-  await updateRemoteTags()
-  await nextTick()
-  scrollIntoView()
-}
-const updateRemoteTags = async () => {
-  state.loading = true
-  const remoteTags = await globalStore.updateRemoteTags()
-  const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
-  state.tags = mergedTags
-  state.loading = false
-}
 
 // search tags matching
 
 const searchTagMatch = computed(() => {
-  const tag = state.tags.find(tag => {
+  const tag = globalStore.getTags.find(tag => {
     return tag.name === props.search
   })
   if (tag) {
@@ -272,15 +253,12 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
         Tag(:tag="searchTag" :tagBadgeLabel="tagBadgeLabel" @clickTag="clickTag")
       li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: state.focusOnName === tag.name}")
         Tag(:tag="tag" @clickTag="clickTag")
-    Loader(:visible="state.loading")
 </template>
 
 <style lang="stylus">
 dialog.tag-picker
   min-height 200px
   overflow auto
-  .loader
-    margin-left 6px
   .info-section
     padding-bottom 4px
   .results-section
