@@ -762,7 +762,7 @@ const handlePasteEvent = async (event) => {
   if (!canEditSpace) { return }
   // get clipboard data
   const data = await getClipboardData()
-  console.info('🎊 pasteData', data, position)
+  console.info('🎊 pasteData', data, position, globalStore.clipboardData)
   if (!data) { return }
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
