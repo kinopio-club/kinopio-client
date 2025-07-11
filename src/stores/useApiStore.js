@@ -200,6 +200,7 @@ export const useApiStore = defineStore('api', {
     // Queue Operations
 
     async addToQueue ({ name, body, spaceId }) {
+      console.log('🌺🌺 added to queue', name, body, spaceId)
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace
