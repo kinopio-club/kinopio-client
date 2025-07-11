@@ -622,6 +622,7 @@ export const useApiStore = defineStore('api', {
       try {
         userIds = userIds.slice(0, max)
         userIds = userIds.join(',')
+        if (!userIds) { return }
         console.info('🛬🛬 getting remote public users', userIds)
         const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
