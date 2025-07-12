@@ -360,7 +360,9 @@ export const useConnectionStore = defineStore('connections', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       this.removeConnectionsState(ids)
-      await apiStore.addToQueue({ name: 'removeConnections', body: { ids } })
+      for (const id of ids) {
+        await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
+      }
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
     },
     async removeConnection (id) {
