@@ -198,7 +198,7 @@ export const useApiStore = defineStore('api', {
         name,
         body
       }
-      // add item to queue
+      // try to to merge new item into matching prev one
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
       const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
       let isPrevItem
@@ -219,6 +219,7 @@ export const useApiStore = defineStore('api', {
           return prevItem
         }
       })
+      // if no matching prev item, add new item to the queue
       if (!isPrevItem) {
         newQueue.push(newItem)
       }
