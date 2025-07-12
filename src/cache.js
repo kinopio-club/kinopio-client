@@ -6,7 +6,7 @@ import * as idb from 'idb-keyval'
 import utils from '@/utils.js'
 
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
-let showDebugMessages = false
+let showDebugMessages = true
 
 export default {
   async migrateFromLocalStorage () {
@@ -24,15 +24,15 @@ export default {
     idbKeys = await idb.keys()
     console.info('🥂 migrated from ls to idb', lsKeys, idbKeys)
   },
-  async storeLocal (key, value) {
+  async saveLocal (key, value) {
     try {
       if (showDebugMessages) {
-        console.info('🏬 storeLocal', key, value)
+        console.info('🏬 saveLocal', key, value)
       }
       await idb.set(key, value)
     } catch (error) {
       showDebugMessages = true
-      console.error('🚒 storeLocal could not save to idb', { key, value, valueType: typeof value }, error)
+      console.error('🚒 saveLocal could not save to idb', { key, value, valueType: typeof value }, error)
       this.notifyCouldNotSave()
       this.pruneLocal()
     }
@@ -105,11 +105,11 @@ export default {
     let user = await this.user()
     user = utils.normalizeToObject(user)
     const updatedUser = { ...user, ...update }
-    await this.storeLocal('user', updatedUser)
+    await this.saveLocal('user', updatedUser)
   },
   async saveUser (user) {
     user = utils.clone(user)
-    await this.storeLocal('user', user)
+    await this.saveLocal('user', user)
   },
 
   // Space
@@ -252,7 +252,7 @@ export default {
       return
     }
     space.cacheDate = Date.now()
-    await this.storeLocal(`space-${space.id}`, space)
+    await this.saveLocal(`space-${space.id}`, space)
   },
   async updateIdsInSpace (space, nullCardUsers) {
     const items = {
@@ -290,7 +290,7 @@ export default {
     await this.updateSpace('removeDate', Date.now(), space.id)
     const spaceKey = `space-${space.id}`
     space = await this.getLocal(spaceKey)
-    await this.storeLocal(`removed-${spaceKey}`, space)
+    await this.saveLocal(`removed-${spaceKey}`, space)
     await this.removeLocal(spaceKey)
   },
   async deleteSpace (space) {
@@ -328,7 +328,7 @@ export default {
   async saveGroups (groups) {
     groups = utils.clone(groups)
     groups = utils.denormalizeItems(groups)
-    await this.storeLocal('groups', groups)
+    await this.saveLocal('groups', groups)
   },
 
   // Tags
@@ -390,10 +390,10 @@ export default {
     return value
   },
   async updatePrevAddPageValue (value) {
-    await this.storeLocal('prevAddPageValue', value)
+    await this.saveLocal('prevAddPageValue', value)
   },
   async clearPrevAddPageValue (value) {
-    await this.storeLocal('prevAddPageValue', '')
+    await this.saveLocal('prevAddPageValue', '')
   },
 
   // API Queue
@@ -401,23 +401,30 @@ export default {
   async queue () {
     const queue = await this.getLocal('queue')
     // const queue = await idb.get('queue')
+    console.log('🛤️get Queue', queue)
     return queue || []
   },
-  async addToQueue (item) {
-    await idb.update('queue', (value) => {
-      if (!value) {
-        value = []
-      }
-      const isArray = utils.typeCheck({ value: item, type: 'array', silenceWarning: true })
-      if (isArray) {
-        value = value.concat(item)
-      } else {
-        value.push(item)
-      }
-      return value
-    })
+  async saveQueue (queue) {
+    console.log('♥️saveQueue', queue)
+    await this.saveLocal('queue', queue)
+    console.log('♥️♥️', queue)
   },
+  // async addToQueue (item) {
+  //   await idb.update('queue', (value) => {
+  //     if (!value) {
+  //       value = []
+  //     }
+  //     const isArray = utils.typeCheck({ value: item, type: 'array', silenceWarning: true })
+  //     if (isArray) {
+  //       value = value.concat(item)
+  //     } else {
+  //       value.push(item)
+  //     }
+  //     return value
+  //   })
+  // },
   async clearQueue () {
+    console.log('💐💐💐💐💐💐💐💐💐💐💐')
     await idb.update('queue', (value) => [])
   },
 
@@ -429,10 +436,10 @@ export default {
   //   return queue || []
   // },
   // async saveSendingQueue (queue) {
-  //   await this.storeLocal('sendingQueue', queue)
+  //   await this.saveLocal('sendingQueue', queue)
   // },
   // async clearSendingQueue () {
-  //   await this.storeLocal('sendingQueue', [])
+  //   await this.saveLocal('sendingQueue', [])
   // },
 
   // Invited Spaces
@@ -455,14 +462,14 @@ export default {
       return invitedSpace.id !== space.id
     })
     invitedSpaces.push(space)
-    await this.storeLocal('invitedSpaces', invitedSpaces)
+    await this.saveLocal('invitedSpaces', invitedSpaces)
   },
   async removeInvitedSpace (space) {
     let invitedSpaces = await this.invitedSpaces()
     invitedSpaces = invitedSpaces.filter(invitedSpace => {
       return invitedSpace.id !== space.id
     })
-    await this.storeLocal('invitedSpaces', invitedSpaces)
+    await this.saveLocal('invitedSpaces', invitedSpaces)
   },
 
   // Changelog
@@ -472,7 +479,7 @@ export default {
     return value || ''
   },
   async updatePrevReadChangelogId (id) {
-    await this.storeLocal('prevReadChangelogId', id)
+    await this.saveLocal('prevReadChangelogId', id)
   },
 
   // emoji
@@ -482,7 +489,7 @@ export default {
     return emojis || []
   },
   async updateEmojis ({ emojis, version }) {
-    await this.storeLocal('emojis', emojis)
-    await this.storeLocal('emojiUnicodeVersion', version)
+    await this.saveLocal('emojis', emojis)
+    await this.saveLocal('emojiUnicodeVersion', version)
   }
 }

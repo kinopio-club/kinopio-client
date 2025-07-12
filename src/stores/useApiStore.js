@@ -16,10 +16,9 @@ import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
+const sessionQueue = []
+
 let otherItemsQueue
-
-// other items queue
-
 const clearOtherItemsQueue = () => {
   otherItemsQueue = {
     cardIds: [],
@@ -31,88 +30,88 @@ clearOtherItemsQueue()
 
 // process queue
 
-const sortQueueItemsByPriority = (queue) => {
-  const sortPriority = ['createCard', 'createConnectionType', 'createConnection', 'createBox']
-  const buckets = {}
-  sortPriority.forEach(type => {
-    buckets[type] = []
-  })
-  buckets.other = []
-  // sort into buckets
-  queue.forEach(request => {
-    if (sortPriority.includes(request.name)) {
-      buckets[request.name].push(request)
-    } else {
-      buckets.other.push(request)
-    }
-  })
+// const sortQueueItemsByPriority = (queue) => {
+//   const sortPriority = ['createCard', 'createConnectionType', 'createConnection', 'createBox']
+//   const buckets = {}
+//   sortPriority.forEach(type => {
+//     buckets[type] = []
+//   })
+//   buckets.other = []
+//   // sort into buckets
+//   queue.forEach(request => {
+//     if (sortPriority.includes(request.name)) {
+//       buckets[request.name].push(request)
+//     } else {
+//       buckets.other.push(request)
+//     }
+//   })
 
-  const newQueue = []
-  sortPriority.forEach(type => {
-    newQueue.push(...buckets[type])
-  })
-  newQueue.push(...buckets.other)
-  return newQueue
-}
-const merge = (accumulator, currentValue) => {
-  return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
-    const isObjectArrays = Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id
-    if (isObjectArrays) {
-      const allEntities = [...objValue, ...srcValue]
-      const entityMap = allEntities.reduce((acc, entity) => {
-        // For each entity, merge with existing entity if it exists to preserve null values
-        if (acc[entity.id]) {
-          acc[entity.id] = mergeWith({}, acc[entity.id], entity, (objVal, srcVal) => {
-            // Preserve null values when merging individual entities
-            return srcVal === null ? null : undefined
-          })
-        } else {
-          acc[entity.id] = entity
-        }
-        return acc
-      }, {})
-      return Object.values(entityMap)
-    }
-    // Return undefined to let lodash handle the default merging behavior
-    return undefined
-  })
-}
-const squashQueue = (queue) => {
-  let squashed = []
-  queue.forEach(request => {
-    const shouldNotSquashOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
-    if (shouldNotSquashOperations.includes(request.name)) {
-      squashed.push(request)
-      return
-    }
-    // check if request has already been squashed
-    const isSquashed = squashed.find(queueItem => {
-      return queueItem.name === request.name && queueItem.body.id === request.body.id
-    })
-    if (isSquashed) { return }
-    // merge queue items with the same operation name and matching entity id
-    const matches = queue.filter(queueItem => {
-      return queueItem.name === request.name && queueItem.body.id === request.body.id
-    })
-    const reduced = matches.reduce((accumulator, currentValue) => {
-      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      // count operations
-      if (cumulativeDeltaOperations.includes(accumulator.name)) {
-        // {delta: 1}, {delta: 1} = {delta: 2}
-        accumulator.body.delta += currentValue.body.delta
-        return accumulator
-      // normal operations
-      } else {
-        // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
-        return merge(accumulator, currentValue)
-      }
-    })
-    reduced.name = request.name
-    squashed.push(reduced)
-  })
-  squashed = sortQueueItemsByPriority(squashed)
-  return squashed
-}
+//   const newQueue = []
+//   sortPriority.forEach(type => {
+//     newQueue.push(...buckets[type])
+//   })
+//   newQueue.push(...buckets.other)
+//   return newQueue
+// }
+// const merge = (accumulator, currentValue) => {
+//   return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
+//     const isObjectArrays = Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id
+//     if (isObjectArrays) {
+//       const allEntities = [...objValue, ...srcValue]
+//       const entityMap = allEntities.reduce((acc, entity) => {
+//         // For each entity, merge with existing entity if it exists to preserve null values
+//         if (acc[entity.id]) {
+//           acc[entity.id] = mergeWith({}, acc[entity.id], entity, (objVal, srcVal) => {
+//             // Preserve null values when merging individual entities
+//             return srcVal === null ? null : undefined
+//           })
+//         } else {
+//           acc[entity.id] = entity
+//         }
+//         return acc
+//       }, {})
+//       return Object.values(entityMap)
+//     }
+//     // Return undefined to let lodash handle the default merging behavior
+//     return undefined
+//   })
+// }
+// const squashQueue = (queue) => {
+//   let squashed = []
+//   queue.forEach(request => {
+//     const shouldNotSquashOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
+//     if (shouldNotSquashOperations.includes(request.name)) {
+//       squashed.push(request)
+//       return
+//     }
+//     // check if request has already been squashed
+//     const isSquashed = squashed.find(queueItem => {
+//       return queueItem.name === request.name && queueItem.body.id === request.body.id
+//     })
+//     if (isSquashed) { return }
+//     // merge queue items with the same operation name and matching entity id
+//     const matches = queue.filter(queueItem => {
+//       return queueItem.name === request.name && queueItem.body.id === request.body.id
+//     })
+//     const reduced = matches.reduce((accumulator, currentValue) => {
+//       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+//       // count operations
+//       if (cumulativeDeltaOperations.includes(accumulator.name)) {
+//         // {delta: 1}, {delta: 1} = {delta: 2}
+//         accumulator.body.delta += currentValue.body.delta
+//         return accumulator
+//       // normal operations
+//       } else {
+//         // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
+//         return merge(accumulator, currentValue)
+//       }
+//     })
+//     reduced.name = request.name
+//     squashed.push(reduced)
+//   })
+//   squashed = sortQueueItemsByPriority(squashed)
+//   return squashed
+// }
 
 // request handlers
 
@@ -199,8 +198,8 @@ export const useApiStore = defineStore('api', {
 
     // Queue Operations
 
+    // todo remove redundant spaceId param?
     async addToQueue ({ name, body, spaceId }) {
-      console.log('🌺🌺 added to queue', name, body, spaceId)
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace
@@ -213,19 +212,59 @@ export const useApiStore = defineStore('api', {
       body.clientCreatedAt = new Date()
       const isSignedIn = userStore.getUserIsSignedIn
       if (!isSignedIn) { return }
-      const request = {
+      const newItem = {
         name,
         body
       }
-      await cache.addToQueue(request)
+      // add item to queue
+      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+      //       // count operations
+      //       if (cumulativeDeltaOperations.includes(accumulator.name)) {
+      //         // {delta: 1}, {delta: 1} = {delta: 2}
+      //         accumulator.body.delta += currentValue.body.delta
+      //         return accumulator
+      //       // normal operations
+
+      let isPrevItem
+      const queue = await cache.queue()
+      console.log('🌺🌺 added to queue', name, body)
+
+      const newQueue = queue.map(prevItem => {
+        // if (cumulativeDeltaOperations.includes(newItem.name)
+
+        const isOperationName = prevItem.name === newItem.name
+        const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
+        const isItemId = prevItem.body.id === newItem.body.id
+        const shouldIncrement = isOperationName && isOperationDelta
+        const shouldMerge = isOperationName && isItemId
+
+        if (shouldIncrement) {
+          newItem.body.delta += prevItem.body.delta
+          console.log('🐸 is incremented', newItem)
+          return newItem
+        } else if (shouldMerge) {
+          isPrevItem = true
+          newItem.body = { ...prevItem.body, ...newItem.body } // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } = { a: 1, b: 3, c:2 }
+          console.log('🔮 new queue item is merged into prev', newItem)
+          return newItem
+        } else {
+          return prevItem
+        }
+      })
+      console.log('newqueue 1', queue, newQueue)
+
+      if (!isPrevItem) {
+        newQueue.push(newItem)
+        console.log('🅰️ new queue item is added', newItem)
+      }
+      // await cache.addToQueue(request)
+      await cache.saveQueue(newQueue)
       this.debouncedSendQueue()
     },
 
     debouncedSendQueue: debounce(function () {
       this.sendQueue()
     }, 500),
-
-    // Send Queue Operations
 
     async handleServerOperationsError ({ error, response }) {
       const globalStore = useGlobalStore()
@@ -262,19 +301,19 @@ export const useApiStore = defineStore('api', {
       const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
-      const body = squashQueue(queue)
-      globalStore.sendingQueue = body
+      // const body = squashQueue(queue)
+      globalStore.sendingQueue = queue
       cache.clearQueue()
       // send
       let response
       try {
         const requestId = nanoid()
-        console.warn('🛫 sending operations', body, `●requestId=${requestId}`)
+        console.warn('🛫 sending operations', queue, `●requestId=${requestId}`)
         if (!spaceStore.id) { throw 'operation missing spaceId' }
-        const options = await this.requestOptions({ body, method: 'POST', requestId })
+        const options = await this.requestOptions({ body: queue, method: 'POST', requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
-          console.info('🛬 operations ok', body)
+          console.info('🛬 operations ok', queue)
           // clear sendingQueue on success
           globalStore.clearSendingQueue()
         } else {
