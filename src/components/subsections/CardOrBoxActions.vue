@@ -488,10 +488,12 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  const ids = props.cards.map(card => card.id)
-  cardStore.updateCardsDimensions(ids)
-  await nextTick()
-  await nextTick()
+  setTimeout(async function () {
+    const ids = props.cards.map(card => card.id)
+    cardStore.updateCardsDimensions(ids)
+    await nextTick()
+    await nextTick()
+  }, 10)
 }
 const updateCard = async (card, updates) => {
   const keys = Object.keys(updates)
