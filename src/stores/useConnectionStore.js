@@ -401,7 +401,7 @@ export const useConnectionStore = defineStore('connections', {
 
     // path
 
-    async updateConnectionPaths (itemIds) {
+    async updateConnectionPathsByItemIds (itemIds) {
       await nextTick()
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
@@ -431,8 +431,8 @@ export const useConnectionStore = defineStore('connections', {
       }
       globalStore.clearShouldExplicitlyRenderCardIds()
     },
-    updateConnectionPath (itemId) {
-      this.updateConnectionPaths([itemId])
+    updateConnectionPathByItemId (itemId) {
+      this.updateConnectionPathsByItemIds([itemId])
     },
 
     // label

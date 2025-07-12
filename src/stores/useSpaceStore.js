@@ -1160,7 +1160,7 @@ export const useSpaceStore = defineStore('space', {
         connection.connectionTypeId = type.id
         connection.type = type
         await connectionStore.createConnection(connection)
-        await connectionStore.updateConnectionPath(connection.startItemId)
+        await connectionStore.updateConnectionPathByItemId(connection.startItemId)
       }
       tags.forEach(tag => {
         tag.userId = userStore.id

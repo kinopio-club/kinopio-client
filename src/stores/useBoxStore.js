@@ -185,7 +185,7 @@ export const useBoxStore = defineStore('boxes', {
       // const isNameUpdated = updates.find(update => Boolean(update.name))
       // if (isNameUpdated) {
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       // }
     },
     async updateBoxes (updates) {
@@ -285,7 +285,7 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(itemIds)
+      connectionStore.updateConnectionPathsByItemIds(itemIds)
       this.updateBoxSnapGuides({ items: updates, cursorDirection })
     },
     updateBoxInfoDimensions (update) {
@@ -341,7 +341,7 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.currentUserIsResizingBoxIds = [box.id]
       })
       const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       this.updateBoxes(updates)
     },
 
