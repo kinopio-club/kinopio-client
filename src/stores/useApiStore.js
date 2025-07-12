@@ -16,7 +16,12 @@ import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
-const sessionQueue = []
+let sessionQueue = []
+const restoreSessionQueue = async () => {
+  sessionQueue = await cache.queue()
+  console.log('🌺🌺🌺🌺🌺', sessionQueue)
+}
+restoreSessionQueue()
 
 let otherItemsQueue
 const clearOtherItemsQueue = () => {
@@ -218,20 +223,11 @@ export const useApiStore = defineStore('api', {
       }
       // add item to queue
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      //       // count operations
-      //       if (cumulativeDeltaOperations.includes(accumulator.name)) {
-      //         // {delta: 1}, {delta: 1} = {delta: 2}
-      //         accumulator.body.delta += currentValue.body.delta
-      //         return accumulator
-      //       // normal operations
-
       let isPrevItem
-      const queue = await cache.queue()
-      console.log('🌺🌺 added to queue', name, body)
+      // const queue = sessionQueue //await cache.queue()
+      console.log('🌺🌺 added to sessionQueue', name, body, sessionQueue)
 
-      const newQueue = queue.map(prevItem => {
-        // if (cumulativeDeltaOperations.includes(newItem.name)
-
+      const newQueue = sessionQueue.map(prevItem => {
         const isOperationName = prevItem.name === newItem.name
         const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
         const isItemId = prevItem.body.id === newItem.body.id
@@ -251,14 +247,15 @@ export const useApiStore = defineStore('api', {
           return prevItem
         }
       })
-      console.log('newqueue 1', queue, newQueue)
+      console.log('newqueue 1', sessionQueue, newQueue)
 
       if (!isPrevItem) {
         newQueue.push(newItem)
         console.log('🅰️ new queue item is added', newItem)
       }
       // await cache.addToQueue(request)
-      await cache.saveQueue(newQueue)
+      // await cache.saveQueue(newQueue)
+      sessionQueue = newQueue
       this.debouncedSendQueue()
     },
 
@@ -298,11 +295,13 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline
+      await cache.saveQueue(sessionQueue)
       const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       // const body = squashQueue(queue)
       globalStore.sendingQueue = queue
+      sessionQueue = []
       cache.clearQueue()
       // send
       let response
