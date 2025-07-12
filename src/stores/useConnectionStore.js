@@ -304,7 +304,7 @@ export const useConnectionStore = defineStore('connections', {
       this.updateConnectionsState(updates)
       broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnectionsState' })
       for (const connection of updates) {
-        await apiStore.addToQueue({ name: 'updateConnection', body: connection, spaceId: spaceStore.id })
+        await apiStore.addToQueue({ name: 'updateConnection', body: connection })
       }
       await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },

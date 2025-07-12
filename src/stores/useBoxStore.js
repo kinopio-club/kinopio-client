@@ -197,7 +197,7 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBoxesState(updates)
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
       for (const box of updates) {
-        await apiStore.addToQueue({ name: 'updateBox', body: box, spaceId: spaceStore.id })
+        await apiStore.addToQueue({ name: 'updateBox', body: box })
       }
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
     },

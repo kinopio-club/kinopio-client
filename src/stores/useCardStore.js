@@ -361,7 +361,7 @@ export const useCardStore = defineStore('cards', {
       connectionStore.updateConnectionPaths(ids)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       for (const card of updates) {
-        await apiStore.addToQueue({ name: 'updateCard', body: card, spaceId: spaceStore.id })
+        await apiStore.addToQueue({ name: 'updateCard', body: card })
       }
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
     },

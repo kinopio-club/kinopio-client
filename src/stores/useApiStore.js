@@ -117,7 +117,6 @@ export const useApiStore = defineStore('api', {
 
     // Queue Operations
 
-    // todo remove redundant spaceId param?
     async addToQueue ({ name, body, spaceId }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
