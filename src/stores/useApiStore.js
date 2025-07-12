@@ -215,7 +215,7 @@ export const useApiStore = defineStore('api', {
           return newItem
         } else if (shouldMerge) {
           isPrevItem = true
-          newItem.body = { ...prevItem.body, ...newItem.body } // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } = { a: 1, b: 3, c:2 }
+          newItem.body = { ...prevItem.body, ...newItem.body } // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } → { a: 1, b: 3, c:2 }
           return newItem
         } else {
           return prevItem
