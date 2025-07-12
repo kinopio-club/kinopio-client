@@ -104,7 +104,8 @@ const checkIsSpaceScope = (event) => {
   const classes = [...nodeList]
   const isFocusedCard = classes.includes('card')
   const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
-  return isBody || isMain || isFocusedCard || isSpaceNameButton
+  const isChromeFix = classes.includes('label')
+  return isBody || isMain || isFocusedCard || isSpaceNameButton || isChromeFix
 }
 const checkIsCardScope = (event) => {
   const isFromCardName = event.target.closest('dialog.card-details')
