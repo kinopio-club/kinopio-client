@@ -405,26 +405,9 @@ export default {
     return queue || []
   },
   async saveQueue (queue) {
-    console.log('♥️saveQueue', queue)
     await this.saveLocal('queue', queue)
-    console.log('♥️♥️', queue)
   },
-  // async addToQueue (item) {
-  //   await idb.update('queue', (value) => {
-  //     if (!value) {
-  //       value = []
-  //     }
-  //     const isArray = utils.typeCheck({ value: item, type: 'array', silenceWarning: true })
-  //     if (isArray) {
-  //       value = value.concat(item)
-  //     } else {
-  //       value.push(item)
-  //     }
-  //     return value
-  //   })
-  // },
   async clearQueue () {
-    console.log('💐💐💐💐💐💐💐💐💐💐💐')
     await idb.update('queue', (value) => [])
   },
 

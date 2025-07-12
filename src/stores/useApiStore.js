@@ -19,7 +19,6 @@ import { nanoid } from 'nanoid'
 let sessionQueue = []
 const restoreSessionQueue = async () => {
   sessionQueue = await cache.queue()
-  console.log('🌺🌺🌺🌺🌺', sessionQueue)
 }
 restoreSessionQueue()
 
@@ -32,91 +31,6 @@ const clearOtherItemsQueue = () => {
   }
 }
 clearOtherItemsQueue()
-
-// process queue
-
-// const sortQueueItemsByPriority = (queue) => {
-//   const sortPriority = ['createCard', 'createConnectionType', 'createConnection', 'createBox']
-//   const buckets = {}
-//   sortPriority.forEach(type => {
-//     buckets[type] = []
-//   })
-//   buckets.other = []
-//   // sort into buckets
-//   queue.forEach(request => {
-//     if (sortPriority.includes(request.name)) {
-//       buckets[request.name].push(request)
-//     } else {
-//       buckets.other.push(request)
-//     }
-//   })
-
-//   const newQueue = []
-//   sortPriority.forEach(type => {
-//     newQueue.push(...buckets[type])
-//   })
-//   newQueue.push(...buckets.other)
-//   return newQueue
-// }
-// const merge = (accumulator, currentValue) => {
-//   return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
-//     const isObjectArrays = Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id
-//     if (isObjectArrays) {
-//       const allEntities = [...objValue, ...srcValue]
-//       const entityMap = allEntities.reduce((acc, entity) => {
-//         // For each entity, merge with existing entity if it exists to preserve null values
-//         if (acc[entity.id]) {
-//           acc[entity.id] = mergeWith({}, acc[entity.id], entity, (objVal, srcVal) => {
-//             // Preserve null values when merging individual entities
-//             return srcVal === null ? null : undefined
-//           })
-//         } else {
-//           acc[entity.id] = entity
-//         }
-//         return acc
-//       }, {})
-//       return Object.values(entityMap)
-//     }
-//     // Return undefined to let lodash handle the default merging behavior
-//     return undefined
-//   })
-// }
-// const squashQueue = (queue) => {
-//   let squashed = []
-//   queue.forEach(request => {
-//     const shouldNotSquashOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
-//     if (shouldNotSquashOperations.includes(request.name)) {
-//       squashed.push(request)
-//       return
-//     }
-//     // check if request has already been squashed
-//     const isSquashed = squashed.find(queueItem => {
-//       return queueItem.name === request.name && queueItem.body.id === request.body.id
-//     })
-//     if (isSquashed) { return }
-//     // merge queue items with the same operation name and matching entity id
-//     const matches = queue.filter(queueItem => {
-//       return queueItem.name === request.name && queueItem.body.id === request.body.id
-//     })
-//     const reduced = matches.reduce((accumulator, currentValue) => {
-//       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-//       // count operations
-//       if (cumulativeDeltaOperations.includes(accumulator.name)) {
-//         // {delta: 1}, {delta: 1} = {delta: 2}
-//         accumulator.body.delta += currentValue.body.delta
-//         return accumulator
-//       // normal operations
-//       } else {
-//         // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
-//         return merge(accumulator, currentValue)
-//       }
-//     })
-//     reduced.name = request.name
-//     squashed.push(reduced)
-//   })
-//   squashed = sortQueueItemsByPriority(squashed)
-//   return squashed
-// }
 
 // request handlers
 
@@ -224,37 +138,26 @@ export const useApiStore = defineStore('api', {
       // add item to queue
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
       let isPrevItem
-      // const queue = sessionQueue //await cache.queue()
-      console.log('🌺🌺 added to sessionQueue', name, body, sessionQueue)
-
       const newQueue = sessionQueue.map(prevItem => {
         const isOperationName = prevItem.name === newItem.name
         const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
         const isItemId = prevItem.body.id === newItem.body.id
         const shouldIncrement = isOperationName && isOperationDelta
         const shouldMerge = isOperationName && isItemId
-
         if (shouldIncrement) {
           newItem.body.delta += prevItem.body.delta
-          console.log('🐸 is incremented', newItem)
           return newItem
         } else if (shouldMerge) {
           isPrevItem = true
           newItem.body = { ...prevItem.body, ...newItem.body } // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } = { a: 1, b: 3, c:2 }
-          console.log('🔮 new queue item is merged into prev', newItem)
           return newItem
         } else {
           return prevItem
         }
       })
-      console.log('newqueue 1', sessionQueue, newQueue)
-
       if (!isPrevItem) {
         newQueue.push(newItem)
-        console.log('🅰️ new queue item is added', newItem)
       }
-      // await cache.addToQueue(request)
-      // await cache.saveQueue(newQueue)
       sessionQueue = newQueue
       this.debouncedSendQueue()
     },
@@ -299,7 +202,6 @@ export const useApiStore = defineStore('api', {
       const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
-      // const body = squashQueue(queue)
       globalStore.sendingQueue = queue
       sessionQueue = []
       cache.clearQueue()
