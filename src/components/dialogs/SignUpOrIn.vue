@@ -288,7 +288,7 @@ const notifyIsJoiningGroup = () => {
 
 const backupLocalSpaces = async () => {
   const spaces = await cache.getAllSpaces()
-  await cache.storeLocal('spacesBackup', spaces)
+  await cache.saveLocal('spacesBackup', spaces)
 }
 const migrationSpacesConnections = async () => {
   const spaces = await cache.getAllSpaces()
