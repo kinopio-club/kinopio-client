@@ -499,7 +499,7 @@ aside.notifications(@click.left="closeAllDialogs")
           span Refresh
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
-    button.button-only(@click.left="duplicateSpace")
+    button.button-only.small-button(@click.left="duplicateSpace")
       img.icon.duplicate(src="@/assets/duplicate.svg")
       span Duplicate Space
 
