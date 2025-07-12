@@ -774,7 +774,7 @@ const handlePasteEvent = async (event) => {
   } else if (data.clipboardData) {
     items = utils.updateSpaceItemsAddPosition(data.clipboardData.data, position)
     items = await spaceStore.getNewItems(items)
-    spaceStore.createSpaceItems(items)
+    await spaceStore.createSpaceItems(items)
     // select new items
     await nextTick()
     globalStore.closeAllDialogs()
