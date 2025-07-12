@@ -6,7 +6,7 @@ import * as idb from 'idb-keyval'
 import utils from '@/utils.js'
 
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
-let showDebugMessages = true
+let showDebugMessages = false
 
 export default {
   async migrateFromLocalStorage () {
@@ -401,7 +401,6 @@ export default {
   async queue () {
     const queue = await this.getLocal('queue')
     // const queue = await idb.get('queue')
-    console.error('🛤️get Queue', queue)
     return queue || []
   },
   async saveQueue (queue) {
