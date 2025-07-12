@@ -400,7 +400,6 @@ export default {
 
   async queue () {
     const queue = await this.getLocal('queue')
-    // const queue = await idb.get('queue')
     return queue || []
   },
   async saveQueue (queue) {

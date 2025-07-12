@@ -202,13 +202,14 @@ export const useApiStore = defineStore('api', {
       }
       // add item to queue
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+      const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
       let isPrevItem
       const newQueue = sessionQueue.map(prevItem => {
         const isOperationName = prevItem.name === newItem.name
         const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
         const isItemId = prevItem.body.id === newItem.body.id
         const shouldIncrement = isOperationName && isOperationDelta
-        const shouldMerge = isOperationName && isItemId
+        const shouldMerge = isOperationName && isItemId && !shouldNotMergeOperations.includes(newItem.name)
         if (shouldIncrement) {
           newItem.body.delta += prevItem.body.delta
           return newItem
