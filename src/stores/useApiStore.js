@@ -148,8 +148,8 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline
-      await cache.saveQueue(sessionQueue)
       const queue = utils.clone(sessionQueue)
+      await cache.saveQueue(queue)
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       globalStore.sendingQueue = queue
