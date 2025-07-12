@@ -122,7 +122,7 @@ const updateDimensionsAndPaths = async () => {
   cardStore.updateCardsDimensions(ids)
   await nextTick()
   await nextTick()
-  connectionStore.updateConnectionPaths(ids)
+  connectionStore.updateConnectionPathsByItemIds(ids)
 }
 </script>
 

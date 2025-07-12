@@ -262,7 +262,7 @@ const updateDimensionsAndPaths = async (cardId) => {
 const updatePaths = async (cardId) => {
   cardId = cardId || card.value.id
   await nextTick()
-  connectionStore.updateConnectionPath(cardId)
+  connectionStore.updateConnectionPathByItemId(cardId)
 }
 
 // space

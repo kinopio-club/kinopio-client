@@ -331,7 +331,7 @@ const resizeCards = async (event) => {
   await nextTick()
   cardStore.updateCardsDimensions(cardIds)
   await nextTick()
-  connectionStore.updateConnectionPaths(cardIds)
+  connectionStore.updateConnectionPathsByItemIds(cardIds)
   globalStore.updatePageSizes()
 }
 const stopResizingCards = async () => {

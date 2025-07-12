@@ -256,6 +256,8 @@ export const useConnectionStore = defineStore('connections', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const isThemeDark = userStore.theme === 'dark'
+      const prevTypeInCurrentSpace = this.getConnectionTypeByName(type.name) || this.getConnectionType(type.id)
+      if (prevTypeInCurrentSpace) { return }
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
@@ -403,7 +405,7 @@ export const useConnectionStore = defineStore('connections', {
 
     // path
 
-    async updateConnectionPaths (itemIds) {
+    async updateConnectionPathsByItemIds (itemIds) {
       await nextTick()
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
@@ -433,8 +435,8 @@ export const useConnectionStore = defineStore('connections', {
       }
       globalStore.clearShouldExplicitlyRenderCardIds()
     },
-    updateConnectionPath (itemId) {
-      this.updateConnectionPaths([itemId])
+    updateConnectionPathByItemId (itemId) {
+      this.updateConnectionPathsByItemIds([itemId])
     },
 
     // label

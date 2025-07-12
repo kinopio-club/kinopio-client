@@ -358,7 +358,7 @@ export const useCardStore = defineStore('cards', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
       for (const card of updates) {
         await apiStore.addToQueue({ name: 'updateCard', body: card })
@@ -581,7 +581,7 @@ export const useCardStore = defineStore('cards', {
         await this.distributeCardsVertically(alignedCards)
         const cardIds = alignedCards.map(card => card.id)
         const connectionStore = useConnectionStore()
-        connectionStore.updateConnectionPaths(cardIds)
+        connectionStore.updateConnectionPathsByItemIds(cardIds)
       }
     },
     async updateCardsDimensions (ids) {
@@ -730,7 +730,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
 
     // vote

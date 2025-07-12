@@ -104,7 +104,8 @@ const checkIsSpaceScope = (event) => {
   const classes = [...nodeList]
   const isFocusedCard = classes.includes('card')
   const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
-  return isBody || isMain || isFocusedCard || isSpaceNameButton
+  const isChromeFix = classes.includes('label')
+  return isBody || isMain || isFocusedCard || isSpaceNameButton || isChromeFix
 }
 const checkIsCardScope = (event) => {
   const isFromCardName = event.target.closest('dialog.card-details')
@@ -773,7 +774,7 @@ const handlePasteEvent = async (event) => {
   } else if (data.clipboardData) {
     items = utils.updateSpaceItemsAddPosition(data.clipboardData.data, position)
     items = await spaceStore.getNewItems(items)
-    spaceStore.createSpaceItems(items)
+    await spaceStore.createSpaceItems(items)
     // select new items
     await nextTick()
     globalStore.closeAllDialogs()
@@ -783,7 +784,7 @@ const handlePasteEvent = async (event) => {
     globalStore.addMultipleToMultipleBoxesSelected(boxIds)
     await nextTick()
     const connectionIds = items.connections.map(connection => connection.map)
-    connectionStore.updateConnectionPaths(connectionIds)
+    connectionStore.updateConnectionPathsByItemIds(connectionIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)

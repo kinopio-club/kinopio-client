@@ -1144,7 +1144,7 @@ export const useSpaceStore = defineStore('space', {
 
     // items
 
-    createSpaceItems (items) {
+    async createSpaceItems (items) {
       const userStore = useUserStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
@@ -1152,15 +1152,16 @@ export const useSpaceStore = defineStore('space', {
       const { cards, boxes, connections, connectionTypes, tags } = items
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
-      connections.forEach(connection => {
+      for (const connection of connections) {
         let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
         const prevTypeInCurrentSpace = connectionStore.getConnectionTypeByName(type.name)
         type = prevTypeInCurrentSpace || type
-        connectionStore.createConnectionType(type)
+        await connectionStore.createConnectionType(type)
         connection.connectionTypeId = type.id
         connection.type = type
-        connectionStore.createConnection(connection)
-      })
+        await connectionStore.createConnection(connection)
+        await connectionStore.updateConnectionPathByItemId(connection.startItemId)
+      }
       tags.forEach(tag => {
         tag.userId = userStore.id
         this.addTag(tag)
