@@ -117,6 +117,72 @@ export const useApiStore = defineStore('api', {
 
     // Queue Operations
 
+    async handleServerOperationsError ({ error, response }) {
+      const globalStore = useGlobalStore()
+      if (!response) {
+        console.error('🚒 handleServerOperationsError', error, response)
+        globalStore.updateNotifyServerCouldNotSave(true)
+        return
+      }
+      const data = await response.json()
+      const operations = data.operations
+      console.warn('🚑 serverOperationsError', data)
+      const nonCriticalErrorStatusCodes = [400, 401, 404]
+      operations.forEach(operation => {
+        const error = operation.error
+        if (!error) { return }
+        const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
+        if (isCritical) {
+          console.error('🚒 critical serverOperationsError operation', operation)
+          globalStore.updateNotifyServerCouldNotSave(true)
+        } else {
+          console.warn('🚑 non-critical serverOperationsError operation', operation)
+        }
+        // globalStore.moveFailedSendingQueueOperationBackIntoQueue(operation)
+      })
+      globalStore.clearSendingQueue()
+    },
+    async sendQueue () {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const globalStore = useGlobalStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      await cache.saveQueue(sessionQueue)
+      const queue = await cache.queue()
+      if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
+      // empty queue into sendingQueue
+      globalStore.sendingQueue = queue
+      sessionQueue = []
+      cache.clearQueue()
+      // send
+      let response
+      try {
+        const requestId = nanoid()
+        console.warn('🛫 sending operations', queue, `●requestId=${requestId}`)
+        if (!spaceStore.id) { throw 'operation missing spaceId' }
+        const options = await this.requestOptions({ body: queue, method: 'POST', requestId })
+        response = await fetch(`${consts.apiHost()}/operations`, options)
+        if (response.ok) {
+          console.info('🛬 operations ok', queue)
+          globalStore.clearSendingQueue()
+        } else {
+          throw response.statusText
+        }
+        if (globalStore.notifyServerCouldNotSave) {
+          globalStore.addNotification({ message: 'Reconnected to server', type: 'success' })
+        }
+      } catch (error) {
+        console.error('🚑 sendQueue', error)
+        // move failed sendingQueue operations back into queue
+        this.handleServerOperationsError({ error, response })
+      }
+    },
+
+    debouncedSendQueue: debounce(function () {
+      this.sendQueue()
+    }, 500),
+
     async addToQueue ({ name, body, spaceId }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -159,74 +225,6 @@ export const useApiStore = defineStore('api', {
       }
       sessionQueue = newQueue
       this.debouncedSendQueue()
-    },
-
-    debouncedSendQueue: debounce(function () {
-      this.sendQueue()
-    }, 500),
-
-    async handleServerOperationsError ({ error, response }) {
-      const globalStore = useGlobalStore()
-      if (!response) {
-        console.error('🚒 handleServerOperationsError', error, response)
-        globalStore.updateNotifyServerCouldNotSave(true)
-        return
-      }
-      const data = await response.json()
-      const operations = data.operations
-      console.warn('🚑 serverOperationsError', data)
-      const nonCriticalErrorStatusCodes = [400, 401, 404]
-      operations.forEach(operation => {
-        const error = operation.error
-        if (!error) { return }
-        const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
-        if (isCritical) {
-          console.error('🚒 critical serverOperationsError operation', operation)
-          globalStore.updateNotifyServerCouldNotSave(true)
-        } else {
-          console.warn('🚑 non-critical serverOperationsError operation', operation)
-        }
-        // globalStore.moveFailedSendingQueueOperationBackIntoQueue(operation)
-      })
-      // clear sending queue
-      globalStore.clearSendingQueue()
-    },
-    async sendQueue () {
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const globalStore = useGlobalStore()
-      const apiKey = userStore.apiKey
-      const isOnline = globalStore.isOnline
-      await cache.saveQueue(sessionQueue)
-      const queue = await cache.queue()
-      if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
-      // empty queue into sendingQueue
-      globalStore.sendingQueue = queue
-      sessionQueue = []
-      cache.clearQueue()
-      // send
-      let response
-      try {
-        const requestId = nanoid()
-        console.warn('🛫 sending operations', queue, `●requestId=${requestId}`)
-        if (!spaceStore.id) { throw 'operation missing spaceId' }
-        const options = await this.requestOptions({ body: queue, method: 'POST', requestId })
-        response = await fetch(`${consts.apiHost()}/operations`, options)
-        if (response.ok) {
-          console.info('🛬 operations ok', queue)
-          // clear sendingQueue on success
-          globalStore.clearSendingQueue()
-        } else {
-          throw response.statusText
-        }
-        if (globalStore.notifyServerCouldNotSave) {
-          globalStore.addNotification({ message: 'Reconnected to server', type: 'success' })
-        }
-      } catch (error) {
-        console.error('🚑 sendQueue', error)
-        // move failed sendingQueue operations back into queue
-        this.handleServerOperationsError({ error, response })
-      }
     },
 
     // Meta
