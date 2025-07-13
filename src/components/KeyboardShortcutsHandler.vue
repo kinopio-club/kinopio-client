@@ -776,7 +776,7 @@ const handlePasteEvent = async (event) => {
     console.log('☎️', data.clipboardData.data, items)
 
     items = await spaceStore.getNewItems(items)
-    console.log('☎️☎️', items)
+    console.log('☎️☎️to createSpaceItems', items)
 
     await spaceStore.createSpaceItems(items)
     console.log('☎️☎️☎️', true)
