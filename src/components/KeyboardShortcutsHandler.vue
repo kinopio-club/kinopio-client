@@ -768,7 +768,7 @@ const handlePasteEvent = async (event) => {
     itemsData = globalStore.clipboardData.data
   }
 
-  console.info('🎊 pasteData', data, itemsData, position, globalStore.clipboardData)
+  console.info('🎊 pasteData', data, itemsData, position, globalStore.clipboardData, Boolean(data))
 
   if (!data) { return }
   console.log('☎️START')
