@@ -772,8 +772,9 @@ const handlePasteEvent = async (event) => {
     uploadStore.addCardsAndUploadFiles({ files: [data.file], position })
   // add kinopio items
   } else if (data.clipboardData) {
-    console.log('☎️', data.clipboardData.data)
     items = utils.updateSpaceItemsAddPosition(data.clipboardData.data, position)
+    console.log('☎️', data.clipboardData.data, items)
+
     items = await spaceStore.getNewItems(items)
     console.log('☎️☎️', items)
 
