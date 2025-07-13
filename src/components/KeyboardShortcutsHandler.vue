@@ -764,12 +764,12 @@ const handlePasteEvent = async (event) => {
   // get clipboard data
   const data = await getClipboardData()
   let itemsData = data.clipboardData?.data
-  if (globalStore.clipboardData.text === data.text) {
+  if (utils.normalizeString(data.text) === utils.normalizeString(globalStore.clipboardData.text)) {
     itemsData = globalStore.clipboardData.data
   }
 
   console.info('🎊 pasteData', data, itemsData, globalStore.clipboardData.text, globalStore.clipboardData, Boolean(data))
-  console.log('🎊🎊🎊', data.text, globalStore.clipboardData.text, globalStore.clipboardData.text === data.text, itemsData)
+  console.log('🎊🎊🎊🎊', utils.normalizeString(data.text), utils.normalizeString(globalStore.clipboardData.text), utils.normalizeString(globalStore.clipboardData.text) === utils.normalizeString(data.text), itemsData)
 
   if (!data) { return }
   console.log('☎️START', itemsData)
