@@ -767,12 +767,8 @@ const handlePasteEvent = async (event) => {
   if (utils.normalizeString(data.text) === utils.normalizeString(globalStore.clipboardData.text)) {
     itemsData = globalStore.clipboardData.data
   }
-
-  console.info('🎊 pasteData', data, itemsData, globalStore.clipboardData.text, globalStore.clipboardData, Boolean(data))
-  console.log('🎊🎊🎊🎊', utils.normalizeString(data.text), utils.normalizeString(globalStore.clipboardData.text), utils.normalizeString(globalStore.clipboardData.text) === utils.normalizeString(data.text), itemsData)
-
+  console.info('🎊 pasteData', data, itemsData)
   if (!data) { return }
-  console.log('☎️START', itemsData)
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
   // add data items
@@ -780,14 +776,9 @@ const handlePasteEvent = async (event) => {
     uploadStore.addCardsAndUploadFiles({ files: [data.file], position })
   // add kinopio items
   } else if (itemsData) {
-    console.log('☎️', itemsData)
     items = utils.updateSpaceItemsAddPosition(itemsData, position)
     items = await spaceStore.getNewItems(items)
-    console.log('☎️☎️to createSpaceItems', items)
-
     await spaceStore.createSpaceItems(items)
-    console.log('☎️☎️☎️', true)
-
     // select new items
     await nextTick()
     globalStore.closeAllDialogs()
