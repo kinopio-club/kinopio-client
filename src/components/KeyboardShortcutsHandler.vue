@@ -771,6 +771,7 @@ const handlePasteEvent = async (event) => {
   console.info('🎊 pasteData', data, itemsData, position, globalStore.clipboardData)
 
   if (!data) { return }
+  console.log('☎️START')
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
   // add data items
