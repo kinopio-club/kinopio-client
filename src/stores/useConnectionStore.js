@@ -256,8 +256,10 @@ export const useConnectionStore = defineStore('connections', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const isThemeDark = userStore.theme === 'dark'
-      const prevTypeInCurrentSpace = this.getConnectionTypeByName(type.name) || this.getConnectionType(type.id)
-      if (prevTypeInCurrentSpace) { return }
+      if (type) {
+        const prevTypeInCurrentSpace = this.getConnectionTypeByName(type.name) || this.getConnectionType(type.id)
+        if (prevTypeInCurrentSpace) { return }
+      }
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
