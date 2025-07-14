@@ -243,10 +243,10 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                   img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
                   span.space-name {{notification.space.name}}
             //- add to explore button
-            .row(v-if="notification.type === 'askToAddToExplore'")
+            .row.add-to-explore-row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
             //- card details
-            .row(v-if="notification.card")
+            .row.card-details-row(v-if="notification.cardId")
               a(:href="cardUrl(notification)")
                 .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :style="{backgroundColor: notification.card.backgroundColor}")
                   template(v-for="segment in cardNameSegments(notification.card.name)")
