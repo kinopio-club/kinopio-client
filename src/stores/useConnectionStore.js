@@ -307,7 +307,9 @@ export const useConnectionStore = defineStore('connections', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateConnectionsState(updates)
       broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnectionsState' })
-      await apiStore.addToQueue({ name: 'updateMultipleConnections', body: { connections: updates } })
+      for (const connection of updates) {
+        await apiStore.addToQueue({ name: 'updateConnection', body: connection })
+      }
       await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },
     updateConnection (update) {
@@ -362,7 +364,9 @@ export const useConnectionStore = defineStore('connections', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       this.removeConnectionsState(ids)
-      await apiStore.addToQueue({ name: 'removeConnections', body: { ids } })
+      for (const id of ids) {
+        await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
+      }
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
     },
     async removeConnection (id) {

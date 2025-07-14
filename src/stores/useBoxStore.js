@@ -196,7 +196,9 @@ export const useBoxStore = defineStore('boxes', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateBoxesState(updates)
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
-      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
+      for (const box of updates) {
+        await apiStore.addToQueue({ name: 'updateBox', body: box })
+      }
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
     },
     async updateBox (update) {
