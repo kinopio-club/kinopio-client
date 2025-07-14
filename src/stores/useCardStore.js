@@ -477,10 +477,14 @@ export const useCardStore = defineStore('cards', {
       }
       let cards = this.getCardsSelected
       cards = cards.map(card => {
+        let x = Math.round(card.x + delta.x)
+        x = Math.max(0, x)
+        let y = Math.round(card.y + delta.y)
+        y = Math.max(0, y)
         return {
           id: card.id,
-          x: Math.round(card.x + delta.x),
-          y: Math.round(card.y + delta.y)
+          x,
+          y
         }
       })
       this.updatePageSize(cards[0])
