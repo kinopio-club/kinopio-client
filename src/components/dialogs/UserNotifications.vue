@@ -187,7 +187,7 @@ const updateAddToExplore = async (space) => {
     if (!notification.space) {
       return notification
     }
-    if (notification.space.id === space.id) {
+    if (notification.space?.id === space.id) {
       notification.space.showInExplore = space.showInExplore
     }
     return notification
