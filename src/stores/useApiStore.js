@@ -1263,8 +1263,9 @@ export const useApiStore = defineStore('api', {
       try {
         const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/notification`, options)
+        console.log('🛤️🛤️getNotifications', response)
+
         const notifications = await normalizeResponse(response)
-        console.log('🛤️🛤️getNotifications', response, notifications)
 
         return notifications
       } catch (error) {
