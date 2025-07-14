@@ -79,14 +79,14 @@ const isCurrentSpace = (spaceId) => {
 }
 const spaceUrl = (notification) => {
   if (!notification.space) { return }
-  return `${consts.kinopioDomain()}/${notification.space.id}`
+  return `${consts.kinopioDomain()}/${notification.space?.id}`
 }
 
 // card
 
 const cardUrl = (notification) => {
   if (!notification.card) { return }
-  return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
+  return `${consts.kinopioDomain()}/${notification.space?.id}/${notification.card.id}`
 }
 const cardDetailsIsVisible = (cardId) => {
   return globalStore.cardDetailsIsVisibleForCardId === cardId
