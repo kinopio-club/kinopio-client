@@ -1266,6 +1266,7 @@ export const useApiStore = defineStore('api', {
         console.log('🛤️🛤️getNotifications', response)
 
         const notifications = await normalizeResponse(response)
+        console.log('🛤️🛤️notifications', notifications)
 
         return notifications
       } catch (error) {

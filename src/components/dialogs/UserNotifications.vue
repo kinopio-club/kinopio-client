@@ -276,6 +276,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       &.active,
       &:focus
         border-radius var(--entity-radius)
+    a:last-child
+      li
+        border-bottom 0
 
   .notification-info
     margin-top 4px
