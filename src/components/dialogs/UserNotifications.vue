@@ -244,7 +244,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                   span.space-name {{notification.space.name}}
             //- add to explore button
             .row.add-to-explore-row(v-if="notification.type === 'askToAddToExplore'")
-              AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore")
+              AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore" :isSmall="true")
             //- card details
             .row.card-details-row(v-if="notification.cardId")
               a(:href="cardUrl(notification)")

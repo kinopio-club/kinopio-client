@@ -37,7 +37,8 @@ const emit = defineEmits(['updateLocalSpaces', 'updateAddToExplore'])
 
 const props = defineProps({
   space: Object,
-  visible: Boolean
+  visible: Boolean,
+  isSmall: Boolean
 })
 const state = reactive({
   error: {
@@ -144,7 +145,7 @@ const clearErrors = () => {
 
 <template lang="pug">
 .button-wrap.add-to-explore(@click.stop v-if="isVisible")
-  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+  button(:class="{active: showInExplore, 'small-button': props.isSmall}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span(v-if="!showInExplore") Add to Explore
