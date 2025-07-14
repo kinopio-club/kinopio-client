@@ -104,7 +104,6 @@ onMounted(() => {
         const position = updateRemotePosition(circle)
         circle.x = position.x
         circle.y = position.y
-        console.log('🅰️')
         createRemotePaintingCircle(circle)
       } else if (name === 'triggerNotifyOffscreenCardCreated') {
         const card = args[0]
