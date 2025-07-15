@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
+import vike from 'vike/plugin'
 
 const yearTime = 60 * 60 * 24 * 365 // 365 days
 
@@ -51,10 +52,8 @@ export default defineConfig(async ({ command, mode }) => {
     },
     plugins: [
       // .vue support
-      vue({
-        // Disable SSR warnings
-        ssr: false
-      }),
+      vue(),
+      vike(),
       // offline support
       VitePWA({
         registerType: 'autoUpdate',
