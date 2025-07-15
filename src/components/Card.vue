@@ -586,7 +586,10 @@ const tiltResizeIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
   if (!canEditCard.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
-  if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+  // on mobile, resize handlers get in the way of touching when zoomed out
+  if (globalStore.isTouchDevice || utils.isMobile()) {
+    if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+  }
   return true
 })
 const x = computed(() => {
@@ -1060,7 +1063,7 @@ const isLoadingUrlPreview = computed(() => {
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    // connectionStore.updateConnectionPath(props.card.id)
+    // connectionStore.updateConnectionPathByItemId(props.card.id)
   }
   return isLoading
   // if (!isLoading) { return }

@@ -358,9 +358,11 @@ export const useCardStore = defineStore('cards', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
+      for (const card of updates) {
+        await apiStore.addToQueue({ name: 'updateCard', body: card })
+      }
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
     },
     updateCard (update) {
@@ -475,10 +477,14 @@ export const useCardStore = defineStore('cards', {
       }
       let cards = this.getCardsSelected
       cards = cards.map(card => {
+        let x = Math.round(card.x + delta.x)
+        x = Math.max(0, x)
+        let y = Math.round(card.y + delta.y)
+        y = Math.max(0, y)
         return {
           id: card.id,
-          x: Math.round(card.x + delta.x),
-          y: Math.round(card.y + delta.y)
+          x,
+          y
         }
       })
       this.updatePageSize(cards[0])
@@ -579,7 +585,7 @@ export const useCardStore = defineStore('cards', {
         await this.distributeCardsVertically(alignedCards)
         const cardIds = alignedCards.map(card => card.id)
         const connectionStore = useConnectionStore()
-        connectionStore.updateConnectionPaths(cardIds)
+        connectionStore.updateConnectionPathsByItemIds(cardIds)
       }
     },
     async updateCardsDimensions (ids) {
@@ -728,7 +734,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
 
     // vote

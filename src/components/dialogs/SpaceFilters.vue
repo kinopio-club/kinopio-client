@@ -164,6 +164,7 @@ const filterByGroup = (event, group) => {
   }
 }
 const updateGroupFilter = (value) => {
+  value = utils.clone(value)
   userStore.updateUser({ dialogSpaceFilterByGroup: value })
 }
 

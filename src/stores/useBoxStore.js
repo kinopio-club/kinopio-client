@@ -185,7 +185,7 @@ export const useBoxStore = defineStore('boxes', {
       // const isNameUpdated = updates.find(update => Boolean(update.name))
       // if (isNameUpdated) {
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       // }
     },
     async updateBoxes (updates) {
@@ -196,7 +196,9 @@ export const useBoxStore = defineStore('boxes', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateBoxesState(updates)
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
-      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
+      for (const box of updates) {
+        await apiStore.addToQueue({ name: 'updateBox', body: box })
+      }
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
     },
     async updateBox (update) {
@@ -285,7 +287,7 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(itemIds)
+      connectionStore.updateConnectionPathsByItemIds(itemIds)
       this.updateBoxSnapGuides({ items: updates, cursorDirection })
     },
     updateBoxInfoDimensions (update) {
@@ -341,7 +343,7 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.currentUserIsResizingBoxIds = [box.id]
       })
       const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       this.updateBoxes(updates)
     },
 

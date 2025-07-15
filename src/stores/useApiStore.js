@@ -16,10 +16,13 @@ import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
+let sessionQueue = []
+const restoreSessionQueue = async () => {
+  sessionQueue = await cache.queue()
+}
+restoreSessionQueue()
+
 let otherItemsQueue
-
-// other items queue
-
 const clearOtherItemsQueue = () => {
   otherItemsQueue = {
     cardIds: [],
@@ -28,91 +31,6 @@ const clearOtherItemsQueue = () => {
   }
 }
 clearOtherItemsQueue()
-
-// process queue
-
-const sortQueueItemsByPriority = (queue) => {
-  const sortPriority = ['createCard', 'createConnectionType', 'createConnection']
-  const buckets = {}
-  sortPriority.forEach(type => {
-    buckets[type] = []
-  })
-  buckets.other = []
-  // sort into buckets
-  queue.forEach(request => {
-    if (sortPriority.includes(request.name)) {
-      buckets[request.name].push(request)
-    } else {
-      buckets.other.push(request)
-    }
-  })
-
-  const newQueue = []
-  sortPriority.forEach(type => {
-    newQueue.push(...buckets[type])
-  })
-  newQueue.push(...buckets.other)
-  return newQueue
-}
-const merge = (accumulator, currentValue) => {
-  return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
-    const isObjectArrays = Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id
-    if (isObjectArrays) {
-      const allEntities = [...objValue, ...srcValue]
-      const entityMap = allEntities.reduce((acc, entity) => {
-        // For each entity, merge with existing entity if it exists to preserve null values
-        if (acc[entity.id]) {
-          acc[entity.id] = mergeWith({}, acc[entity.id], entity, (objVal, srcVal) => {
-            // Preserve null values when merging individual entities
-            return srcVal === null ? null : undefined
-          })
-        } else {
-          acc[entity.id] = entity
-        }
-        return acc
-      }, {})
-      return Object.values(entityMap)
-    }
-    // Return undefined to let lodash handle the default merging behavior
-    return undefined
-  })
-}
-const squashQueue = (queue) => {
-  let squashed = []
-  queue.forEach(request => {
-    const shouldNotSquashOperations = ['createDrawingStroke', 'removeDrawingStroke']
-    if (shouldNotSquashOperations.includes(request.name)) {
-      squashed.push(request)
-      return
-    }
-    // check if request has already been squashed
-    const isSquashed = squashed.find(queueItem => {
-      return queueItem.name === request.name && queueItem.body.id === request.body.id
-    })
-    if (isSquashed) { return }
-    // merge queue items with the same operation name and matching entity id
-    const matches = queue.filter(queueItem => {
-      return queueItem.name === request.name && queueItem.body.id === request.body.id
-    })
-    const reduced = matches.reduce((accumulator, currentValue) => {
-      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      // count operations
-      if (cumulativeDeltaOperations.includes(accumulator.name)) {
-        // {delta: 1}, {delta: 1} = {delta: 2}
-        accumulator.body.delta += currentValue.body.delta
-        return accumulator
-      // normal operations
-      } else {
-        // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
-        return merge(accumulator, currentValue)
-      }
-    })
-    reduced.name = request.name
-    squashed.push(reduced)
-  })
-  squashed = sortQueueItemsByPriority(squashed)
-  return squashed
-}
 
 // request handlers
 
@@ -199,33 +117,6 @@ export const useApiStore = defineStore('api', {
 
     // Queue Operations
 
-    async addToQueue ({ name, body, spaceId }) {
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const canEditSpace = userStore.getUserCanEditSpace
-      const editOperations = ['updateUrlPreviewImage', 'updateCard', 'updateConnection']
-      if (editOperations.includes(name) && !canEditSpace) { return }
-      body = utils.clone(body)
-      body.operationId = nanoid()
-      body.spaceId = spaceId || spaceStore.id
-      body.userId = userStore.id
-      body.clientCreatedAt = new Date()
-      const isSignedIn = userStore.getUserIsSignedIn
-      if (!isSignedIn) { return }
-      const request = {
-        name,
-        body
-      }
-      await cache.addToQueue(request)
-      this.debouncedSendQueue()
-    },
-
-    debouncedSendQueue: debounce(function () {
-      this.sendQueue()
-    }, 500),
-
-    // Send Queue Operations
-
     async handleServerOperationsError ({ error, response }) {
       const globalStore = useGlobalStore()
       if (!response) {
@@ -249,7 +140,6 @@ export const useApiStore = defineStore('api', {
         }
         // globalStore.moveFailedSendingQueueOperationBackIntoQueue(operation)
       })
-      // clear sending queue
       globalStore.clearSendingQueue()
     },
     async sendQueue () {
@@ -258,23 +148,23 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline
-      const queue = await cache.queue()
+      const queue = utils.clone(sessionQueue)
+      await cache.saveQueue(queue)
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
-      const body = squashQueue(queue)
-      globalStore.sendingQueue = body
+      globalStore.sendingQueue = queue
+      sessionQueue = []
       cache.clearQueue()
       // send
       let response
       try {
         const requestId = nanoid()
-        console.warn('🛫 sending operations', body, `●requestId=${requestId}`)
+        console.warn('🛫 sending operations', queue, `●requestId=${requestId}`)
         if (!spaceStore.id) { throw 'operation missing spaceId' }
-        const options = await this.requestOptions({ body, method: 'POST', requestId })
+        const options = await this.requestOptions({ body: queue, method: 'POST', requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
-          console.info('🛬 operations ok', body)
-          // clear sendingQueue on success
+          console.info('🛬 operations ok', queue)
           globalStore.clearSendingQueue()
         } else {
           throw response.statusText
@@ -287,6 +177,54 @@ export const useApiStore = defineStore('api', {
         // move failed sendingQueue operations back into queue
         this.handleServerOperationsError({ error, response })
       }
+    },
+
+    debouncedSendQueue: debounce(function () {
+      this.sendQueue()
+    }, 500),
+
+    async addToQueue ({ name, body, spaceId }) {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      body = utils.clone(body)
+      body.operationId = nanoid()
+      body.spaceId = spaceId || spaceStore.id
+      body.userId = userStore.id
+      body.clientCreatedAt = new Date()
+      const isSignedIn = userStore.getUserIsSignedIn
+      if (!isSignedIn) { return }
+      const newItem = {
+        name,
+        body
+      }
+      // try to to merge new item into matching prev one
+      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+      const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
+      let isPrevItem
+      const newQueue = sessionQueue.map(prevItem => {
+        const isOperationName = prevItem.name === newItem.name
+        const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
+        const isItemId = prevItem.body.id === newItem.body.id
+        const shouldIncrement = isOperationName && isOperationDelta
+        const shouldMerge = isOperationName && isItemId && !shouldNotMergeOperations.includes(newItem.name)
+        if (shouldIncrement) {
+          newItem.body.delta += prevItem.body.delta
+          return newItem
+        } else if (shouldMerge) {
+          isPrevItem = true
+          newItem.body = { ...prevItem.body, ...newItem.body } // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } → { a: 1, b: 3, c:2 }
+          return newItem
+        } else {
+          return prevItem
+        }
+      })
+      // if no matching prev item, add new item to the queue
+      if (!isPrevItem) {
+        newQueue.push(newItem)
+      }
+      sessionQueue = newQueue
+      this.debouncedSendQueue()
     },
 
     // Meta
@@ -621,6 +559,7 @@ export const useApiStore = defineStore('api', {
       try {
         userIds = userIds.slice(0, max)
         userIds = userIds.join(',')
+        if (!userIds) { return }
         console.info('🛬🛬 getting remote public users', userIds)
         const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))

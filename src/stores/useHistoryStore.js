@@ -373,7 +373,7 @@ export const useHistoryStore = defineStore('history', {
             card = item.prev
             cardStore.updateCard(card)
             await nextTick()
-            connectionStore.updateConnectionPath(card.id)
+            connectionStore.updateConnectionPathByItemId(card.id)
             break
           case 'cardCreated':
             card = item.new
@@ -396,7 +396,7 @@ export const useHistoryStore = defineStore('history', {
             box = item.prev
             boxStore.updateBox(box)
             await nextTick()
-            connectionStore.updateConnectionPath(box.id)
+            connectionStore.updateConnectionPathByItemId(box.id)
             break
           // connections
           case 'connectionUpdated':
@@ -457,7 +457,7 @@ export const useHistoryStore = defineStore('history', {
               cardStore.createCard(card, true)
             }
             await nextTick()
-            connectionStore.updateConnectionPath(card.id)
+            connectionStore.updateConnectionPathByItemId(card.id)
             break
           case 'cardCreated':
             card = item.new
@@ -485,7 +485,7 @@ export const useHistoryStore = defineStore('history', {
             box = item.new
             boxStore.updateBox(box)
             await nextTick()
-            connectionStore.updateConnectionPath(box.id)
+            connectionStore.updateConnectionPathByItemId(box.id)
             break
           // connections
           case 'connectionUpdated':

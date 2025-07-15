@@ -26,7 +26,7 @@ const currentHoveredCard = computed(() => {
 const currentHoveredCardIsComment = computed(() => {
   const card = currentHoveredCard.value
   if (!card) { return }
-  return card.isComment
+  return cardStore.getIsCommentCard(card)
 })
 const cardCommentPreviewIsVisible = computed(() => {
   if (shouldPrevent.value) { return }

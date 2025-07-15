@@ -90,7 +90,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box, drawing
     currentUserIsDraggingConnectionIdLabel: '',
-    clipboardData: {}, // for kinopio data pasting
+    clipboardData: {}, // for copy paste kinopio items
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
 

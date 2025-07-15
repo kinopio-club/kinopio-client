@@ -148,7 +148,13 @@ const dialogSpaceFilterByGroup = computed(() => userStore.dialogSpaceFilterByGro
 const dialogSpaceFilterByTemplates = computed(() => userStore.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
+  return Boolean(
+    dialogSpaceFilterShowHidden.value ||
+    utils.objectHasKeys(dialogSpaceFilterByUser.value) ||
+    dialogSpaceFilterSortByIsActive.value ||
+    utils.objectHasKeys(dialogSpaceFilterByGroup.value) ||
+    dialogSpaceFilterByTemplates.value
+  )
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
