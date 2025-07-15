@@ -271,10 +271,6 @@ export const useSpaceStore = defineStore('space', {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         await this.loadSpace(space)
-      // restore inbox space
-      } else if (globalStore.loadInboxSpace) {
-        console.info('🚃 Restore inbox space')
-        await this.loadInboxSpace()
       // create new space
       } else if (globalStore.loadNewSpace) {
         console.info('🚃 Create new space')
