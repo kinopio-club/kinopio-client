@@ -3,14 +3,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 // import { useGlobalStore } from '@/stores/useGlobalStore'
 // import { useCardStore } from '@/stores/useCardStore'
-// import { useUserStore } from '@/stores/useUserStore'
+import { useUserStore } from '@/stores/useUserStore'
 // import { useSpaceStore } from '@/stores/useSpaceStore'
 
 // import utils from '@/utils.js'
 
 // const globalStore = useGlobalStore()
 // const cardStore = useCardStore()
-// const userStore = useUserStore()
+const userStore = useUserStore()
 // const spaceStore = useSpaceStore()
 
 onMounted(() => {
@@ -36,6 +36,7 @@ const state = reactive({
 // const themeName = computed(() => userStore.theme)
 const incrementBy = () => {
   state.count = state.count + 1
+  console.log(userStore)
   // themeStore.updateThemeIsSystem(false)
 }
 

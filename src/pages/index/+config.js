@@ -1,6 +1,7 @@
 import vikeVue from 'vike-vue/config'
+import vikeVuePinia from 'vike-vue-pinia/config'
 
 export default {
-  // ...
-  extends: [vikeVue]
+  ssr: false,
+  extends: [vikeVue, vikeVuePinia]
 }
