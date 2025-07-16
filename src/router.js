@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
-// import { useGlobalStore } from '@/stores/useGlobalStore'
-// import { useUserStore } from '@/stores/useUserStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-// import { useApiStore } from '@/stores/useApiStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Space from '@/views/Space.vue'
 import Landing from '@/views/Landing.vue'
@@ -21,14 +21,16 @@ const router = {
       // route level code-splitting
       // this generates a separate chunk (Add.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('./views/Add.vue')
-      // beforeEnter: (to, from, next) => {
-      //   const globalStore = useGlobalStore()
-      //   window.document.title = 'Add Card'
-      //   const urlParams = new URLSearchParams(window.location.search)
-      //   globalStore.isAddPage = true
-      //   next()
-      // }
+      component: () => import('./views/Add.vue'),
+      beforeEnter: (to, from, next) => {
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          window.document.title = 'Add Card'
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.isAddPage = true
+        }
+        next()
+      }
     }, {
       path: '/',
       name: 'landing',
@@ -36,51 +38,57 @@ const router = {
     }, {
       path: '/space-demo',
       name: 'space',
-      component: Space
-      // beforeEnter: (to, from, next) => {
-      //   if (!import.meta.env.SSR) {
-      //     const globalStore = useGlobalStore()
-      //     const urlParams = new URLSearchParams(window.location.search)
-      //     globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-      //   }
-      //   next()
-      // }
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        }
+        next()
+      }
     }, {
       path: '/beta',
       name: 'beta',
-      component: Space
-      // beforeEnter: (to, from, next) => {
-      //   const globalStore = useGlobalStore()
-      //   globalStore.isBeta = true
-      //   globalStore.addNotification({ message: 'No features currently in Beta' }) // 'No features currently in Beta'
-      //   next()
-      // }
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          globalStore.isBeta = true
+          globalStore.addNotification({ message: 'No features currently in Beta' }) // 'No features currently in Beta'
+        }
+        next()
+      }
     }, {
       path: '/confirm-email',
       name: 'confirm-email',
-      component: Space
-      // redirect: to => {
-      //   const globalStore = useGlobalStore()
-      //   const userStore = useUserStore()
-      //   userStore.updateUserEmailIsVerified()
-      //   globalStore.addNotification({ message: 'Email Confirmed', type: 'success' })
-      //   return '/'
-      // }
+      component: Space,
+      redirect: to => {
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          const userStore = useUserStore()
+          userStore.updateUserEmailIsVerified()
+          globalStore.addNotification({ message: 'Email Confirmed', type: 'success' })
+        }
+        return '/'
+      }
     }, {
       path: '/reset-password',
       name: 'reset-password',
-      component: Space
-      // beforeEnter: (to, from, next) => {
-      //   const globalStore = useGlobalStore()
-      //   const urlParams = new URLSearchParams(window.location.search)
-      //   const apiKey = urlParams.get('apiKey')
-      //   if (apiKey) {
-      //     globalStore.updatePasswordApiKey = apiKey
-      //     globalStore.passwordResetIsVisible = true
-      //   }
-      //   next()
-      //   history.replaceState({}, document.title, window.location.origin)
-      // }
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          const apiKey = urlParams.get('apiKey')
+          if (apiKey) {
+            globalStore.updatePasswordApiKey = apiKey
+            globalStore.passwordResetIsVisible = true
+          }
+          history.replaceState({}, document.title, window.location.origin)
+        }
+        next()
+      }
     }, {
       path: '/update-arena-access-token',
       name: 'update-arena-access-token',
