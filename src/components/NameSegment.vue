@@ -6,7 +6,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
-import CodeBlock from '@/components/CodeBlock.vue'
+// import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
 
@@ -161,7 +161,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-else-if="markdown.type === 'strikethrough'")
           del {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'codeBlock'")
-          CodeBlock(:content="markdown.content" :parentCardId="props.parentCardId")
+          //CodeBlock(:content="markdown.content" :parentCardId="props.parentCardId")
         template(v-else-if="markdown.type === 'code'")
           code {{markdown.content}}
     //- Name results list

@@ -1,6 +1,6 @@
 <template lang="pug">
-  //- router-view is Space or Add
-  router-view
+  div Hello World!
+  router-link(to="/space-demo") Space Demo
 </template>
 
 <script setup>

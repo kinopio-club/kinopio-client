@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite-ssg build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.vue",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -49,6 +49,7 @@
     "vite": "^6.3.4",
     "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-sitemap": "^0.7.1",
+    "vite-ssg": "^28.0.0",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {

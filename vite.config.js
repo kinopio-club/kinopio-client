@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { VitePWA } from 'vite-plugin-pwa'
-import Sitemap from 'vite-plugin-sitemap'
+// import { VitePWA } from 'vite-plugin-pwa'
+// import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
 
@@ -41,6 +41,14 @@ export default defineConfig(async ({ command, mode }) => {
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
   // config
   return {
+    ssgOptions: {
+      // script: 'async',
+      entry: 'src/main.js',
+      includedRoutes (paths, routes) {
+        // exclude all the route paths that contains 'foo'
+        return ['/']
+      }
+    },
     optimizeDeps: {
       include: ['pinia']
     },
@@ -54,96 +62,96 @@ export default defineConfig(async ({ command, mode }) => {
       vue({
         // Disable SSR warnings
         ssr: false
-      }),
-      // offline support
-      VitePWA({
-        registerType: 'autoUpdate',
-        strategies: 'generateSW',
-        workbox: {
-          navigateFallbackDenylist: [
-            // Exclude exact route only
-            /^\/robots\.txt$/,
-            /^\/sitemap\.xml$/,
-            /^\/changelog$/,
-            /^\/roadmap$/,
-            /^\/discord$/,
-            /^\/survey$/,
-            // Exclude '/route' and all subpaths (e.g. /route/post)
-            /^\/help(?:\/.*)?$/,
-            /^\/about(?:\/.*)?$/,
-            /^\/api(?:\/.*)?$/,
-            /^\/blog(?:\/.*)?$/,
-            /^\/forum(?:\/.*)?$/,
-            /^\/blog(?:\/.*)?$/
-          ],
-          globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i, // match all except mp3/mp4
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'cdn-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/bk\.kinopio\.club\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'bk-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/images\.are\.na\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'are-na-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i, // are.na cdn
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'are-na-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            }
-          ]
-        }
-      }),
-      // sitemap
-      Sitemap({
-        hostname: 'http://kinopio.club',
-        dynamicRoutes,
-        readable: true,
-        generateRobotsTxt: false
       })
+      // offline support
+      // VitePWA({
+      //   registerType: 'autoUpdate',
+      //   strategies: 'generateSW',
+      //   workbox: {
+      //     navigateFallbackDenylist: [
+      //       // Exclude exact route only
+      //       /^\/robots\.txt$/,
+      //       /^\/sitemap\.xml$/,
+      //       /^\/changelog$/,
+      //       /^\/roadmap$/,
+      //       /^\/discord$/,
+      //       /^\/survey$/,
+      //       // Exclude '/route' and all subpaths (e.g. /route/post)
+      //       /^\/help(?:\/.*)?$/,
+      //       /^\/about(?:\/.*)?$/,
+      //       /^\/api(?:\/.*)?$/,
+      //       /^\/blog(?:\/.*)?$/,
+      //       /^\/forum(?:\/.*)?$/,
+      //       /^\/blog(?:\/.*)?$/
+      //     ],
+      //     globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
+      //     runtimeCaching: [
+      //       {
+      //         urlPattern: /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i, // match all except mp3/mp4
+      //         handler: 'CacheFirst',
+      //         options: {
+      //           cacheName: 'cdn-cache',
+      //           expiration: {
+      //             maxEntries: 10,
+      //             maxAgeSeconds: yearTime
+      //           },
+      //           cacheableResponse: {
+      //             statuses: [0, 200]
+      //           }
+      //         }
+      //       },
+      //       {
+      //         urlPattern: /^https:\/\/bk\.kinopio\.club\/.*/i,
+      //         handler: 'CacheFirst',
+      //         options: {
+      //           cacheName: 'bk-cache',
+      //           expiration: {
+      //             maxEntries: 10,
+      //             maxAgeSeconds: yearTime
+      //           },
+      //           cacheableResponse: {
+      //             statuses: [0, 200]
+      //           }
+      //         }
+      //       },
+      //       {
+      //         urlPattern: /^https:\/\/images\.are\.na\/.*/i,
+      //         handler: 'CacheFirst',
+      //         options: {
+      //           cacheName: 'are-na-cache',
+      //           expiration: {
+      //             maxEntries: 10,
+      //             maxAgeSeconds: yearTime
+      //           },
+      //           cacheableResponse: {
+      //             statuses: [0, 200]
+      //           }
+      //         }
+      //       },
+      //       {
+      //         urlPattern: /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i, // are.na cdn
+      //         handler: 'CacheFirst',
+      //         options: {
+      //           cacheName: 'are-na-cache',
+      //           expiration: {
+      //             maxEntries: 10,
+      //             maxAgeSeconds: yearTime
+      //           },
+      //           cacheableResponse: {
+      //             statuses: [0, 200]
+      //           }
+      //         }
+      //       }
+      //     ]
+      //   }
+      // }),
+      // sitemap
+      // Sitemap({
+      //   hostname: 'http://kinopio.club',
+      //   dynamicRoutes,
+      //   readable: true,
+      //   generateRobotsTxt: false
+      // })
     ],
     server: {
       port: 8080,
