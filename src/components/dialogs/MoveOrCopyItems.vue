@@ -267,7 +267,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
       span {{buttonLabel}}
       Loader(:visible="state.loading")
   //- error
-  .error-card-limit(v-if="state.cardsCreatedIsOverLimit")
+  section.error-card-limit(v-if="state.cardsCreatedIsOverLimit")
     .badge.danger Out of Cards
     p To add more cards you'll need to upgrade
     button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited

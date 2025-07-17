@@ -102,14 +102,6 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/inbox',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        globalStore.loadInboxSpace = true
-        next()
-      }
-    }, {
       path: '/:space/:card',
       component: Space,
       beforeEnter: (to, from, next) => {

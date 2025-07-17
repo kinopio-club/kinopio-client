@@ -61,9 +61,6 @@ const updateMaxCardWidthIsWide = (isWide) => {
 <style lang="stylus">
 .cards-settings
   overflow auto
-  section:not(.subsection)
-    border-top 1px solid var(--primary-border)
-    border-radius 0 !important
   .current-color
     height 14px
     width 14px

@@ -426,6 +426,22 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getUserSpaces', error })
       }
     },
+    async getUserTemplateSpaces () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetch(`${consts.apiHost()}/user/template-spaces`, options)
+        const currentUser = userStore
+        const spaces = await normalizeResponse(response)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+      } catch (error) {
+        this.handleServerError({ name: 'getUserTemplateSpaces', error })
+      }
+    },
     async getUserGroupSpaces () {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()

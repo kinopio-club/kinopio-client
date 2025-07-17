@@ -221,7 +221,6 @@ export const useGlobalStore = defineStore('global', {
     loadSpaceFocusOnCardId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
-    loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
