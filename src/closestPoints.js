@@ -23,7 +23,7 @@ export default {
     }
   },
 
-  getCorners (rect) {
+  getPoints (rect) {
     return {
       topLeft: { x: rect.left, y: rect.top },
       topRight: { x: rect.right, y: rect.top }
@@ -37,24 +37,24 @@ export default {
     rect1 = this.updateRectWithPadding(rect1, item1.itemType)
     rect2 = this.updateRectWithPadding(rect2, item2.itemType)
 
-    // Get all corners
-    const corners1 = this.getCorners(rect1)
-    const corners2 = this.getCorners(rect2)
+    // Get all points
+    const rectPoints1 = this.getPoints(rect1)
+    const rectPoints2 = this.getPoints(rect2)
 
-    // Find the pair of corners with minimum distance
+    // Find the pair of points with minimum distance
     let minDistance = Infinity
     let closestPair = { point1: null, point2: null }
 
-    // Iterate through all corner pairs using object values
-    Object.values(corners1).forEach(corner1 => {
-      Object.values(corners2).forEach(corner2 => {
-        const dx = corner1.x - corner2.x
-        const dy = corner1.y - corner2.y
+    // Iterate through all point pairs using object values
+    Object.values(rectPoints1).forEach(point1 => {
+      Object.values(rectPoints2).forEach(point2 => {
+        const dx = point1.x - point2.x
+        const dy = point1.y - point2.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
         if (distance < minDistance) {
           minDistance = distance
-          closestPair = { point1: { ...corner1 }, point2: { ...corner2 } }
+          closestPair = { point1: { ...point1 }, point2: { ...point2 } }
         }
       })
     })
