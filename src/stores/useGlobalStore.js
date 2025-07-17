@@ -27,8 +27,6 @@ export const useGlobalStore = defineStore('global', {
     isOnline: true,
     isBeta: false,
     shouldHideConnectionOutline: false,
-    changelogIsUpdated: false,
-    changelog: [],
     stripeIsLoaded: false,
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
@@ -92,7 +90,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box, drawing
     currentUserIsDraggingConnectionIdLabel: '',
-    clipboardData: {}, // for kinopio data pasting
+    clipboardData: {}, // for copy paste kinopio items
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
 
@@ -197,8 +195,7 @@ export const useGlobalStore = defineStore('global', {
     tagDetailsPosition: {}, // x, y
     tagDetailsPositionShouldUpdate: false,
     currentSelectedTag: {},
-    remoteTags: [],
-    remoteTagsIsFetched: false,
+    tags: [],
 
     // other items (links)
     otherCardDetailsIsVisible: false,
@@ -224,7 +221,6 @@ export const useGlobalStore = defineStore('global', {
     loadSpaceFocusOnCardId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
-    loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
@@ -327,21 +323,17 @@ export const useGlobalStore = defineStore('global', {
         return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
       }
     },
-    getAllTags () {
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const allTags = this.tags
-      const userTags = userStore.tags
-      const spaceTags = spaceStore.tags
-      const tags = spaceTags.concat(userTags).concat(allTags)
-      // tags = uniqBy(tags, 'name') // removed for perf reasons
-      return tags || []
-    },
     getToolbarIsDrawing () {
       return this.currentUserToolbar === 'drawing'
     },
     getToolbarIsBox () {
       return this.currentUserToolbar === 'box'
+    },
+    getTags () {
+      const apiStore = useApiStore()
+      const spaceStore = useSpaceStore()
+      const tags = spaceStore.tags.concat(this.tags)
+      return uniqBy(tags, 'name')
     }
   },
 
@@ -791,19 +783,12 @@ export const useGlobalStore = defineStore('global', {
       this.remoteBoxesDragging = this.remoteBoxesDragging.filter(box => box.userId !== update.userId)
     },
 
-    // Tag
+    // Tags
 
-    async updateRemoteTags (removeUnusedTags) {
-      const userStore = useUserStore()
+    async updateTags () {
       const apiStore = useApiStore()
-      if (!userStore.getUserIsSignedIn || this.remoteTagsIsFetched) {
-        return this.remoteTags
-      }
-      let tags = await apiStore.getUserTags(removeUnusedTags) || []
-      tags = uniqBy(tags, 'name')
-      this.remoteTags = tags
-      this.remoteTagsIsFetched = true
-      return tags
+      const userTags = await apiStore.getUserTags()
+      this.tags = uniqBy(userTags, 'name')
     },
 
     // Connection Details
@@ -1144,10 +1129,6 @@ export const useGlobalStore = defineStore('global', {
       if (card) {
         card.name = name
       }
-    },
-    async updateTags () {
-      const tags = await cache.allTags()
-      this.tags = tags
     },
 
     // Sync Session Data

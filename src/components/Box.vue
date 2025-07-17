@@ -186,6 +186,7 @@ const styles = computed(() => {
   return styles
 })
 const backgroundStyles = computed(() => {
+  if (!hasFill.value) { return }
   if (!props.box.background) { return }
   const newStyles = utils.clone(styles.value)
   delete newStyles.border
@@ -307,7 +308,7 @@ const shrinkToDefaultBoxSize = () => {
 }
 const shrink = () => {
   prevSelectedBox = props.box
-  const { cards, boxes } = boxStore.getItemsContainedInSelectedBoxes()
+  const { cards, boxes } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
   prevSelectedBox = null
   const items = cards.concat(boxes)
   if (!items.length) {

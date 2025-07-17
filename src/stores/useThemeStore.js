@@ -120,6 +120,7 @@ export const useThemeStore = defineStore('theme', {
       } else {
         this.systemTheme = 'light'
       }
+      this.restoreTheme()
     },
 
     // theme is system

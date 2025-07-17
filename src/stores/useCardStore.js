@@ -358,22 +358,15 @@ export const useCardStore = defineStore('cards', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateCardsState(updates)
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
+      for (const card of updates) {
+        await apiStore.addToQueue({ name: 'updateCard', body: card })
+      }
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
     },
     updateCard (update) {
       this.updateCards([update])
-    },
-    updateCardNameRemovePlaceholders (cardId) {
-      const card = this.getCard(cardId)
-      if (!card) { return }
-      const name = card.name.replaceAll(consts.uploadPlaceholder, '')
-      this.updateCard({
-        id: card.id,
-        name
-      })
     },
 
     // remove
@@ -385,7 +378,7 @@ export const useCardStore = defineStore('cards', {
       if (!canEditSpace) { return }
       for (const card of cards) {
         const idIndex = this.allIds.indexOf(card.id)
-        if (!idIndex) { continue }
+        if (utils.isNullish(idIndex)) { continue }
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
@@ -469,6 +462,7 @@ export const useCardStore = defineStore('cards', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
+      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -483,16 +477,21 @@ export const useCardStore = defineStore('cards', {
       }
       let cards = this.getCardsSelected
       cards = cards.map(card => {
+        let x = Math.round(card.x + delta.x)
+        x = Math.max(0, x)
+        let y = Math.round(card.y + delta.y)
+        y = Math.max(0, y)
         return {
           id: card.id,
-          x: Math.round(card.x + delta.x),
-          y: Math.round(card.y + delta.y)
+          x,
+          y
         }
       })
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
-      boxStore.updateBoxSnapGuides(cards, true)
+      cards = cards.map(card => this.getCard(card.id))
+      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -586,7 +585,7 @@ export const useCardStore = defineStore('cards', {
         await this.distributeCardsVertically(alignedCards)
         const cardIds = alignedCards.map(card => card.id)
         const connectionStore = useConnectionStore()
-        connectionStore.updateConnectionPaths(cardIds)
+        connectionStore.updateConnectionPathsByItemIds(cardIds)
       }
     },
     async updateCardsDimensions (ids) {
@@ -735,7 +734,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
 
     // vote

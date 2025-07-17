@@ -13,7 +13,6 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
-import namesPlugin from 'colord/plugins/names'
 import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
@@ -24,7 +23,6 @@ import randomColor from 'randomcolor'
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
-extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
@@ -238,6 +236,23 @@ export default {
       y: this.roundToNearest(position.y, gridSpacing)
     }
   },
+  cursorDirection (currentCursor, prevCursor) {
+    const xDelta = currentCursor.x - prevCursor.x
+    const yDelta = currentCursor.y - prevCursor.y
+    const noMovement = xDelta === 0 && yDelta === 0
+    const directions = {
+      left: xDelta < 0,
+      right: xDelta > 0,
+      up: yDelta < 0,
+      down: yDelta > 0,
+      noMovement
+    }
+    directions.leftDrag = directions.left || noMovement
+    directions.rightDrag = directions.right || noMovement
+    directions.upDrag = directions.up || noMovement
+    directions.downDrag = directions.down || noMovement
+    return directions
+  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX
@@ -352,6 +367,9 @@ export default {
   },
   percentageBetween ({ value, min, max }) {
     return ((value - min) / (max - min)) * 100
+  },
+  isNullish (value) {
+    return value === null || value === undefined || Number.isNaN(value)
   },
   clone (object) {
     if (!object) { return }
@@ -489,13 +507,6 @@ export default {
   },
   userIsUpgraded (user) {
     return Boolean(user.stripeSubscriptionId || user.stripePlanIsPurchased || user.downgradeAt || user.appleSubscriptionIsActive)
-  },
-  mergeArrays ({ previous, updated, key }) {
-    const updatedKeys = updated.map(item => item[key])
-    const base = previous.filter(item => !updatedKeys.includes(item[key]))
-    let merged = base.concat(updated)
-    merged = uniqBy(merged, key)
-    return merged
   },
   splitArrayIntoChunks (array, chunkSize) {
     const numberOfChunks = Math.ceil(array.length / chunkSize)
@@ -849,9 +860,6 @@ export default {
 
   cssVariable (name) {
     return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`)
-  },
-  colorNameIsValid (color) {
-    return color === colord(color).toName()
   },
   colorIsValid (color) {
     return colord(color).isValid()
@@ -1670,13 +1678,6 @@ export default {
     space = this.updateSpaceItemsUserId(space, user.id)
     return space
   },
-  // migration added oct 2019
-  migrationEnsureRemovedCards (space) {
-    if (!space.removedCards) {
-      space.removedCards = []
-    }
-    return space
-  },
   excludeCurrentUser (users, currentUserId) {
     users = users.filter(user => user.id !== currentUserId)
     return users
@@ -1719,6 +1720,7 @@ export default {
       box.userId = userId
       return box
     })
+    connectionTypes = uniqBy(connectionTypes, 'id')
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
       const newId = nanoid()
@@ -1858,7 +1860,8 @@ export default {
       const hasTypeId = Boolean(connection?.connectionTypeId)
       return hasTypeId
     })
-    space.connections = connections
+    space.connections = connections || []
+    space.cards = space.cards || []
     space.cards = space.cards.filter(card => card?.name) || []
     space.cards = space.cards.map(card => {
       if (card.resizeWidth) {
@@ -1934,34 +1937,6 @@ export default {
     }
     return dayjs(date)
   },
-  moonPhase (date) {
-    // adapted from https://github.com/t1mwillis/simple-moonphase-js/blob/master/index.js
-    if (!date) {
-      date = dayjs(new Date())
-    }
-    const phases = ['new-moon', 'waxing-crescent', 'waxing-quarter', 'waxing-gibbous', 'full-moon', 'waning-gibbous', 'waning-quarter', 'waning-crescent']
-    const day = date.get('date')
-    let month = date.get('month') + 1 // January is 0!
-    let year = dayjs().get('year')
-    let c = 0
-    let e = 0
-    let jd = 0
-    let phase = 0
-    if (month < 3) {
-      year--
-      month += 12
-    }
-    ++month
-    c = 365.25 * year
-    e = 30.6 * month
-    jd = c + e + day - 694039.09 // jd is total days elapsed
-    jd /= 29.5305882 // divide by the moon cycle
-    phase = parseInt(jd) // int(jd) -> phase, take integer part of jd
-    jd -= phase // subtract integer part to leave fractional part of original jd
-    phase = Math.round(jd * 8) // scale fraction from 0-8 and round
-    if (phase >= 8) phase = 0 // 0 and 8 are the same so turn 8 into 0
-    return phases[phase] // 'new-moon', ...
-  },
 
   // urls 🌍
 
@@ -1970,7 +1945,10 @@ export default {
     // remove punctuation characters, what's → whats
     string = string.replace(/'|"|‘|’|“|”/ig, '')
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
-    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+    string = string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+    // replace carriage returns with new lines
+    string = string.replace(/\r\n/g, '\n')
+    return string
   },
   removeLeadingDashes (string) {
     // -123-abc -> 123-abc
@@ -2622,18 +2600,6 @@ export default {
     })
     return commands
   },
-  commandIconsFromString (string) {
-    const allowedCommands = Object.keys(consts.systemCommandIcons)
-    // https://regexr.com/7h3ia
-    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
-    let commands = string.match(commandPattern)
-    if (!commands) { return }
-    commands = commands.filter(command => {
-      const name = this.commandNameFromCommand(command)
-      return allowedCommands.includes(name)
-    })
-    return commands
-  },
   commandNameFromCommand (string) {
     // https://regexr.com/7h3ig
     // ::system_command=xyz → matches xyz
@@ -2675,7 +2641,6 @@ export default {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
-    const commandIcons = this.commandIconsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2720,12 +2685,6 @@ export default {
       const endPosition = startPosition + command.length
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
-    })
-    commandIcons.forEach(command => {
-      const startPosition = name.indexOf(command)
-      const endPosition = startPosition + command.length
-      const commandName = this.commandNameFromCommand(command)
-      segments.push({ startPosition, endPosition, commandIcon: commandName, name: consts.systemCommandIcons[commandName], isCommandIcon: true })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

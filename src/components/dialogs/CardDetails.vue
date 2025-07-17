@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -42,6 +43,7 @@ const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
 const broadcastStore = useBroadcastStore()
+const apiStore = useApiStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -260,7 +262,7 @@ const updateDimensionsAndPaths = async (cardId) => {
 const updatePaths = async (cardId) => {
   cardId = cardId || card.value.id
   await nextTick()
-  connectionStore.updateConnectionPath(cardId)
+  connectionStore.updateConnectionPathByItemId(cardId)
 }
 
 // space
@@ -410,6 +412,10 @@ const closeCard = async () => {
   globalStore.updatePageSizes()
   updateDimensionsAndPaths(cardId)
   globalStore.checkIfItemShouldIncreasePageSize(item)
+  const tags = spaceStore.getSpaceTagsInCard(item)
+  if (tags.length) {
+    await apiStore.addToQueue({ name: 'updateTags', body: { tags } })
+  }
 }
 
 // share url
@@ -589,7 +595,7 @@ const cancelOpeningAnimationFrame = () => {
 }
 const startOpening = () => {
   if (globalStore.preventCardDetailsOpeningAnimation || !card.value.name) {
-    globalStore.currentDraggingCardId = false
+    globalStore.currentDraggingCardId = ''
     return
   }
   shouldCancelOpening = false
@@ -1464,7 +1470,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           span Share
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
-    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
+    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
     CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible")
@@ -1560,7 +1566,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'width']")
+    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'width', 'height']")
 </template>
 
 <style lang="stylus">

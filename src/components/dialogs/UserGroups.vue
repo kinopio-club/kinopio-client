@@ -43,6 +43,12 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
+const state = reactive({
+  dialogHeight: null,
+  groupDetailsIsVisibleForGroupId: '',
+  addGroupIsVisible: false
+})
+
 const visible = computed(() => globalStore.groupsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
@@ -59,19 +65,14 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-
-const state = reactive({
-  dialogHeight: null,
-  groupDetailsIsVisibleForGroupId: '',
-  addGroupIsVisible: false
-})
 const closeDialogs = () => {
   state.addGroupIsVisible = false
   state.groupDetailsIsVisibleForGroupId = ''
 }
-
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
+
+const dialogIsVisible = computed(() => Boolean(state.groupDetailsIsVisibleForGroupId))
 
 // groups
 
@@ -104,7 +105,7 @@ const selectedGroup = computed(() => {
 </script>
 
 <template lang="pug">
-dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
       div
@@ -129,6 +130,8 @@ dialog.user-groups
   left initial
   right 16px
   top 20px
+  &.overflow
+    overflow auto
   .results-section
     overflow initial
   .loader

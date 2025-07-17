@@ -8,6 +8,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -26,6 +27,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const analyticsStore = useAnalyticsStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
@@ -60,6 +62,7 @@ const props = defineProps({
   labelIsVisible: Boolean,
   tagsInCard: Array,
   backgroundColor: String,
+  backgroundColorIsFromTheme: Boolean,
   cards: {
     type: Array,
     default (value) {
@@ -320,7 +323,11 @@ const toggleColorPickerIsVisible = () => {
   state.colorPickerIsVisible = !isVisible
 }
 const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColor: background.value })
+  if (props.backgroundColorIsFromTheme) {
+    return utils.colorClasses({ backgroundColorIsDark: themeStore.getIsThemeDark })
+  } else {
+    return utils.colorClasses({ backgroundColor: background.value })
+  }
 })
 
 // frames
@@ -395,7 +402,7 @@ const updateHeaderFont = async (font) => {
   })
   userStore.updateUser({ prevHeaderFontId: font.id })
   await nextTick()
-  connectionStore.updateConnectionPaths(cardIds.value)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 const udpateHeaderFontSize = async (size) => {
   props.cards.forEach(card => {
@@ -405,7 +412,7 @@ const udpateHeaderFontSize = async (size) => {
     updateBox(box, { headerFontSize: size })
   })
   await nextTick()
-  connectionStore.updateConnectionPaths(cardIds.value)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 
 // lock
@@ -453,7 +460,7 @@ const toggleIsComment = async () => {
   })
   await nextTick()
   await updateCardDimensions()
-  connectionStore.updateConnectionPaths(cardIds.value)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 
 // vote counter
@@ -481,10 +488,12 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  const ids = props.cards.map(card => card.id)
-  cardStore.updateCardsDimensions(ids)
-  await nextTick()
-  await nextTick()
+  setTimeout(async function () {
+    const ids = props.cards.map(card => card.id)
+    cardStore.updateCardsDimensions(ids)
+    await nextTick()
+    await nextTick()
+  }, 10)
 }
 const updateCard = async (card, updates) => {
   const keys = Object.keys(updates)
@@ -494,7 +503,7 @@ const updateCard = async (card, updates) => {
   })
   cardStore.updateCard(card)
   await updateCardDimensions()
-  connectionStore.updateConnectionPath(card.id)
+  connectionStore.updateConnectionPathByItemId(card.id)
 }
 
 // box

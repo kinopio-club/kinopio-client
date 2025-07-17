@@ -185,7 +185,7 @@ export const useBoxStore = defineStore('boxes', {
       // const isNameUpdated = updates.find(update => Boolean(update.name))
       // if (isNameUpdated) {
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       // }
     },
     async updateBoxes (updates) {
@@ -196,7 +196,9 @@ export const useBoxStore = defineStore('boxes', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateBoxesState(updates)
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
-      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
+      for (const box of updates) {
+        await apiStore.addToQueue({ name: 'updateBox', body: box })
+      }
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
     },
     async updateBox (update) {
@@ -255,6 +257,7 @@ export const useBoxStore = defineStore('boxes', {
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
+      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -284,8 +287,8 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(itemIds)
-      this.updateBoxSnapGuides(updates)
+      connectionStore.updateConnectionPathsByItemIds(itemIds)
+      this.updateBoxSnapGuides({ items: updates, cursorDirection })
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
@@ -340,7 +343,7 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.currentUserIsResizingBoxIds = [box.id]
       })
       const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       this.updateBoxes(updates)
     },
 
@@ -379,10 +382,14 @@ export const useBoxStore = defineStore('boxes', {
 
     // contained items
 
-    isItemInSelectedBoxes (item, type) {
+    isItemInSelectedBoxes (item, type, selectedBox) {
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
-      const selectedBoxes = this.getBoxesSelected
+      let selectedBoxes = this.getBoxesSelected
+      if (selectedBox?.id === item.id) { return }
+      if (selectedBox) {
+        selectedBoxes = [selectedBox]
+      }
       return selectedBoxes.find(box => {
         box.width = box.resizeWidth
         box.height = box.resizeHeight
@@ -405,20 +412,20 @@ export const useBoxStore = defineStore('boxes', {
         return isTopLeft && isTopRight && isBottomLeft && isBottomRight
       })
     },
-    getItemsContainedInSelectedBoxes () {
+    getItemsContainedInSelectedBoxes (selectedBox) {
       const cards = []
       const boxes = []
       // cards
       const cardStore = useCardStore()
       cardStore.getCardsSelectableByY.cards.forEach(card => {
-        if (this.isItemInSelectedBoxes(card, 'card')) {
+        if (this.isItemInSelectedBoxes(card, 'card', selectedBox)) {
           cards.push(card)
         }
       })
       // boxes
       const selectableBoxes = this.getAllBoxes
       this.getBoxesSelectableByY.boxes.forEach(box => {
-        if (this.isItemInSelectedBoxes(box, 'box')) {
+        if (this.isItemInSelectedBoxes(box, 'box', selectedBox)) {
           boxes.push(box)
         }
       })
@@ -449,7 +456,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, origin: item, target: targetBox, time }
     },
-    updateBoxSnapGuides (items, isCards) {
+    updateBoxSnapGuides ({ items, isCards, cursorDirection }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
@@ -495,29 +502,29 @@ export const useBoxStore = defineStore('boxes', {
           const targetBoxIsMinX = targetBox.x <= spaceEdgeThreshold
           const targetBoxIsMinY = targetBox.y <= spaceEdgeThreshold
           // snap left
-          const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold
-          const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold
+          const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold && cursorDirection.rightDrag
+          const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold && cursorDirection.leftDrag
           if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'left', item, targetBox })
             snapGuides.push(snapGuide)
           }
           // snap right
-          const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold
-          const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold
+          const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold && cursorDirection.leftDrag
+          const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold && cursorDirection.rightDrag
           if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'right', item, targetBox })
             snapGuides.push(snapGuide)
           }
           // snap top
-          const isSnapTopFromItemBottom = Math.abs(itemTop - targetBoxTop) <= snapThreshold
-          const isSnapTopFromItemTop = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
+          const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold && cursorDirection.upDrag
+          const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold && cursorDirection.downDrag
           if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
             snapGuides.push(snapGuide)
           }
           // snap bottom
-          const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold
-          const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold
+          const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold && cursorDirection.upDrag
+          const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold && cursorDirection.downDrag
           if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'bottom', item, targetBox })
             snapGuides.push(snapGuide)

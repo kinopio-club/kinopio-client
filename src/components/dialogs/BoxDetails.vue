@@ -205,6 +205,9 @@ const toggleBackgroundPickerIsVisible = () => {
   closeDialogs()
   state.backgroundPickerIsVisible = value
 }
+const warningBackgroundFillIsEmptyIsVisible = computed(() => {
+  return currentBox.value.background && currentBox.value.fill === 'empty'
+})
 
 // remove
 
@@ -309,13 +312,17 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundPickerIsVisible")
         BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundPickerIsVisible")
         BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
-    ItemDetailsDebug(:item="currentBox" :keys="['infoWidth']")
+    ItemDetailsDebug(:item="currentBox" :keys="['infoWidth', 'fill', 'background']")
 
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
+
+    p.badge.info(v-if="warningBackgroundFillIsEmptyIsVisible")
+      span Background image won't be drawn because fill mode is set to empty{{' '}}
+      img.icon.box-icon(src="@/assets/box-empty.svg")
 </template>
 
 <style lang="stylus">

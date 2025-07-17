@@ -36,9 +36,11 @@ import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
-const uploadStore = useUploadStore()
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 
 dayjs.extend(isToday)
+extend([namesPlugin])
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -49,6 +51,7 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const broadcastStore = useBroadcastStore()
+const uploadStore = useUploadStore()
 
 const cardElement = ref(null)
 
@@ -228,7 +231,7 @@ const currentBackgroundColor = computed(() => {
 const backgroundColor = computed(() => {
   let nameColor
   if (nameIsColor.value) {
-    nameColor = props.card.name
+    nameColor = props.card.name.trim()
   }
   const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
   return color
@@ -238,7 +241,8 @@ const backgroundColorIsDark = computed(() => {
   return utils.colorIsDark(color)
 })
 const nameIsColor = computed(() => {
-  return utils.colorNameIsValid(props.card.name)
+  const name = props.card.name.trim()
+  return colord(name).isValid()
 })
 const currentBackgroundColorIsDark = computed(() => {
   const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
@@ -582,7 +586,10 @@ const tiltResizeIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
   if (!canEditCard.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
-  if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+  // on mobile, resize handlers get in the way of touching when zoomed out
+  if (globalStore.isTouchDevice || utils.isMobile()) {
+    if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+  }
   return true
 })
 const x = computed(() => {
@@ -795,8 +802,9 @@ const remoteUploadDraggedOverCardColor = computed(() => {
     return undefined
   }
 })
-const addFile = (file) => {
+const addFile = async (file) => {
   let name = props.card.name
+  name = name.replaceAll(consts.uploadPlaceholder, '')
   const url = file.url
   const urlType = utils.urlType(url)
   const checkbox = utils.checkboxFromString(name)
@@ -825,6 +833,8 @@ const addFile = (file) => {
   }
   cardStore.updateCard(update)
   globalStore.triggerUpdateHeaderAndFooterPosition()
+  await nextTick()
+  cardStore.updateCardDimensions(props.card.id)
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
@@ -1053,7 +1063,7 @@ const isLoadingUrlPreview = computed(() => {
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    // connectionStore.updateConnectionPath(props.card.id)
+    // connectionStore.updateConnectionPathByItemId(props.card.id)
   }
   return isLoading
   // if (!isLoading) { return }
@@ -1441,7 +1451,7 @@ const showCardDetails = (event) => {
     return
   }
   globalStore.updateCardDetailsIsVisibleForCardId(props.card.id)
-  globalStore.currentDraggingCardId = true
+  globalStore.currentDraggingCardId = props.card.id
   globalStore.parentCardId = props.card.id
   event.stopPropagation() // only stop propagation if cardDetailsIsVisible
   globalStore.currentUserIsDraggingCard = false

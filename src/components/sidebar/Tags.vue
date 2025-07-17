@@ -15,47 +15,14 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
-let unsubscribes
-
 const resultsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateResultsSectionHeight)
   init()
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'shouldHideFooter' && props.visible) {
-        updateTags()
-      }
-    }
-  )
-  const tagActions = [
-    'addTag',
-    'removeTag',
-    'removeTags',
-    'removeTagsFromCard',
-    'deleteTagsFromAllRemovedCardsPermanent'
-  ]
-  const spaceActionUnsubscribe = spaceStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'removeTags') {
-        removeTag(args[0])
-      } else if (name === 'updateTagNameColor') {
-        updateTagColor(args[0])
-      } else if (tagActions.includes(name) && props.visible) {
-        updateTags()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-    spaceActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateResultsSectionHeight)
-  unsubscribes()
 })
 
 const props = defineProps({
@@ -65,7 +32,6 @@ const props = defineProps({
 
 const state = reactive({
   resultsSectionHeight: null,
-  tags: [],
   isLoading: false
 })
 
@@ -75,7 +41,6 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 const init = () => {
-  updateTags()
   updateResultsSectionHeight()
 }
 
@@ -89,8 +54,9 @@ const updateResultsSectionHeight = async () => {
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
+const tags = computed(() => globalStore.getTags)
 const filteredTags = computed(() => {
-  let tags = state.tags
+  let tags = globalStore.getTags
   if (shouldShowCurrentSpaceTags.value) {
     tags = spaceStore.getSpaceTags
   }
@@ -103,49 +69,11 @@ const toggleShouldShowCurrentSpaceTags = () => {
   const value = !shouldShowCurrentSpaceTags.value
   userStore.updateUser({ shouldShowCurrentSpaceTags: value })
 }
-
-// update tag
-
-const removeTag = (tagToRemove) => {
-  globalStore.tagDetailsIsVisible = false
-  let tags = utils.clone(state.tags)
-  tags = tags.filter(tag => {
-    return tag.name !== tagToRemove.name
-  })
-  state.tags = tags
-  globalStore.remoteTagsIsFetched = false
-}
-const updateTagColor = (updated) => {
-  let tags = utils.clone(state.tags)
-  tags = tags.map(tag => {
-    if (tag.name === updated.name) {
-      tag.color = updated.color
-    }
-    return tag
-  })
-  state.tags = tags
-  globalStore.remoteTagsIsFetched = false
-}
-
-// tags list
-
-const updateTags = async () => {
-  const spaceTags = spaceStore.getSpaceTags
-  state.tags = spaceTags || []
-  const cachedTags = await cache.allTags()
-  const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
-  state.tags = mergedTags
-  // remote tags
-  state.isLoading = true
-  const remoteTags = await globalStore.updateRemoteTags(true)
-  state.tags = remoteTags || []
-  state.isLoading = false
-}
 </script>
 
 <template lang="pug">
 .tags(v-if="props.visible")
-  section.results-section(v-if="state.tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section(v-if="tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
       label(:class="{ active: shouldShowCurrentSpaceTags }")
         input(type="checkbox" v-model="shouldShowCurrentSpaceTags")

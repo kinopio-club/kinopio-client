@@ -124,7 +124,7 @@ const color = computed({
   },
   set (newColor) {
     newColor = normalizeColor(newColor)
-    throttledUpdateColor(newColor)
+    updateColorThrottle(newColor)
   }
 })
 const select = (newColor, isFavorite) => {
@@ -142,7 +142,7 @@ const shuffleColors = () => {
   }
   state.colors.unshift(props.currentColor)
 }
-const throttledUpdateColor = throttle((color) => {
+const updateColorThrottle = throttle((color) => {
   updateColor(color)
 }, 400)
 

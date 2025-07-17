@@ -330,7 +330,7 @@ const updateCardDimensions = async () => {
 const updateConnectionPaths = async () => {
   await updateCardDimensions()
   const itemIds = globalStore.getMultipleItemsSelected
-  connectionStore.updateConnectionPaths(itemIds)
+  connectionStore.updateConnectionPathsByItemIds(itemIds)
 }
 
 // update positions

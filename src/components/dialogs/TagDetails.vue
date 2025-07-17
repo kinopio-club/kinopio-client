@@ -198,6 +198,11 @@ const focusOnCard = async (card) => {
     globalStore.updateFocusOnCardId(cardId)
   }
 }
+const showCardDetails = () => {
+  const cardId = currentCard.value.id
+  globalStore.closeAllDialogs()
+  cardStore.showCardDetails(cardId)
+}
 
 // update cards
 
@@ -246,10 +251,10 @@ const updateCardsWithTagColor = (name, newColor) => {
   })
   updateCardsList(cards)
 }
-const updateTagNameColor = (newColor) => {
+const updateTagColorByName = (newColor) => {
   const tag = utils.clone(currentTag.value)
   tag.color = newColor
-  spaceStore.updateTagNameColor(tag)
+  spaceStore.updateTagColorByName(tag)
   updateCardsWithTagColor(tag.name, newColor)
 }
 
@@ -444,7 +449,7 @@ const changeSpace = (spaceId) => {
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogElement" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
-    button(@click="focusOnCard(null)")
+    button(@click="showCardDetails")
       span Edit Card
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
@@ -455,7 +460,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogEle
         .button-wrap
           button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             .current-color(:style="{backgroundColor: color}")
-          ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateTagNameColor")
+          ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateTagColorByName")
         .tag-name {{name}}
       //- Filter
       .button-wrap

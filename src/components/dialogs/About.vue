@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useChangelogStore } from '@/stores/useChangelogStore'
 
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
@@ -17,16 +18,15 @@ import dayjs from 'dayjs'
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const changelogStore = useChangelogStore()
 
 const dialogElement = ref(null)
 
-let checkKinopioUpdatesIntervalTimer
-
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  const isOffline = !globalStore.isOnline
-  if (isOffline) { return }
-  initChangelog()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
 })
 
 const props = defineProps({
@@ -68,48 +68,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-// check changelog updates
-
-const changelogIsUpdated = computed(() => globalStore.changelogIsUpdated)
-const changelog = computed(() => globalStore.changelog)
-const initChangelog = async () => {
-  await updateChangelog()
-  if (!utils.arrayHasItems(changelog.value)) { return }
-  checkKinopioUpdatesIntervalTimer = setInterval(() => {
-    updateChangelog()
-  }, 1000 * 60 * 60 * 1) // 1 hour
-}
-const updateChangelog = async () => {
-  try {
-    let posts = await apiStore.getChangelog()
-    if (!posts) { return }
-    posts = posts.slice(0, 20)
-    globalStore.changelog = posts
-    checkChangelogIsUpdated()
-  } catch (error) {
-    console.error('🚒 updateChangelog', error)
-  }
-}
-const checkChangelogIsUpdated = async () => {
-  const newId = changelog.value[0].id
-  const prevId = await cache.prevReadChangelogId()
-  if (!prevId) {
-    // first time visitors are updated to latest changelog
-    cache.updatePrevReadChangelogId(newId)
-    globalStore.changelogIsUpdated = false
-  } else {
-    const isUpdated = prevId !== newId
-    globalStore.changelogIsUpdated = isUpdated
-  }
-}
-
 // changelog
 
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const changelogId = changelog.value[0].id
+  const changelogId = changelogStore.updates[0].id
   cache.updatePrevReadChangelogId(changelogId)
-  globalStore.changelogIsUpdated = false
+  changelogStore.isUpdated = false
   spaceStore.changeSpace(space)
   globalStore.addNotification({ message: 'Changelog space opened', type: 'success' })
 }
