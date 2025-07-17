@@ -1,7 +1,4 @@
 export default {
-  clamp (value, min, max) {
-    return Math.max(min, Math.min(max, value))
-  },
   normalizeRect (item) {
     return {
       left: item.x,
@@ -10,11 +7,21 @@ export default {
       bottom: item.y + item.height
     }
   },
+
   updateRectWithPadding (rect, itemType) {
-    let padding = 2 // box
-    if (itemType === 'card') {
-      padding = 6
+    let padding
+    switch (itemType) {
+      case 'card':
+        padding = 6
+        break
+      case 'box':
+        padding = 2
+        break
+      default:
+        padding = 2
+        break
     }
+
     return {
       left: rect.left + padding,
       right: rect.right - padding,
@@ -22,48 +29,53 @@ export default {
       bottom: rect.bottom - padding
     }
   },
-  movePointToNearestEdge (point, rect) {
-    const xIsInside = point.x > rect.left && point.x < rect.right
-    const yIsInside = point.y > rect.top && point.y < rect.bottom
-    if (xIsInside && yIsInside) {
-      const distToLeft = point.x - rect.left
-      const distToRight = rect.right - point.x
-      const distToTop = point.y - rect.top
-      const distToBottom = rect.bottom - point.y
-      const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom)
-      if (minDist === distToLeft) point.x = rect.left
-      else if (minDist === distToRight) point.x = rect.right
-      else if (minDist === distToTop) point.y = rect.top
-      else point.y = rect.bottom
+
+  getCardinalPoints (rect) {
+    const centerX = (rect.left + rect.right) / 2
+    const centerY = (rect.top + rect.bottom) / 2
+
+    return {
+      north: { x: centerX, y: rect.top },
+      east: { x: rect.right, y: centerY },
+      south: { x: centerX, y: rect.bottom },
+      west: { x: rect.left, y: centerY },
+      northEast: { x: rect.right, y: rect.top },
+      southEast: { x: rect.right, y: rect.bottom },
+      southWest: { x: rect.left, y: rect.bottom },
+      northWest: { x: rect.left, y: rect.top }
     }
-    return point
   },
+
   findClosestPoints (item1, item2) {
+    console.log(item1, item2.name)
+    // Normalize and add padding to rectangles
     let rect1 = this.normalizeRect(item1)
     let rect2 = this.normalizeRect(item2)
     rect1 = this.updateRectWithPadding(rect1, item1.itemType)
     rect2 = this.updateRectWithPadding(rect2, item2.itemType)
-    // Find closest point on item1 to item2
-    const closest1 = {
-      x: this.clamp(rect2.left + (rect2.right - rect2.left) / 2, rect1.left, rect1.right),
-      y: this.clamp(rect2.top + (rect2.bottom - rect2.top) / 2, rect1.top, rect1.bottom)
-    }
-    // If the clamped point is inside item1, move it to the nearest edge
-    this.movePointToNearestEdge(closest1, rect1)
-    // Find closest point on item2 to the point we found on item1
-    const closest2 = {
-      x: this.clamp(closest1.x, rect2.left, rect2.right),
-      y: this.clamp(closest1.y, rect2.top, rect2.bottom)
-    }
-    // If the clamped point is inside item2, move it to the nearest edge
-    this.movePointToNearestEdge(closest2, rect2)
-    // Refine closest1 based on final closest2
-    const refined1 = {
-      x: this.clamp(closest2.x, rect1.left, rect1.right),
-      y: this.clamp(closest2.y, rect1.top, rect1.bottom)
-    }
-    // If the refined point is inside item1, move it to the nearest edge
-    this.movePointToNearestEdge(refined1, rect1)
-    return { point1: refined1, point2: closest2 }
+
+    // Get all cardinal points
+    const points1 = this.getCardinalPoints(rect1)
+    const points2 = this.getCardinalPoints(rect2)
+
+    // Find the pair of points with minimum distance
+    let minDistance = Infinity
+    let closestPair = { point1: null, point2: null }
+
+    // Iterate through all point pairs
+    Object.values(points1).forEach(point1 => {
+      Object.values(points2).forEach(point2 => {
+        const dx = point1.x - point2.x
+        const dy = point1.y - point2.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        if (distance < minDistance) {
+          minDistance = distance
+          closestPair = { point1: { ...point1 }, point2: { ...point2 } }
+        }
+      })
+    })
+
+    return closestPair
   }
 }
