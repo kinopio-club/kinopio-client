@@ -44,7 +44,7 @@ const changeSpace = (space) => {
 const updateUserTemplates = async () => {
   try {
     state.isLoadingRemoteSpaces = true
-    state.userTemplates = await apiStore.getUserTemplateSpaces()
+    state.userTemplates = await apiStore.getUserTemplateSpaces() || []
   } catch (error) {
     console.error('🚒 updateUserTemplates', error)
   }

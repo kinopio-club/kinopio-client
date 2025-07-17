@@ -104,6 +104,10 @@ const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
+const showTemplatesDialog = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerTemplatesIsVisible()
+}
 
 // dialog heights
 
@@ -384,6 +388,9 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       div
         //- New Space
         AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" :isSmall="true")
+        //- Templates
+        button.small-button(@click="showTemplatesDialog")
+          img.icon.templates(src="@/assets/templates.svg")
       //- Filters
       .button-wrap
         // no filters
