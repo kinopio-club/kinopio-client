@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import NameSegment from '@/components/NameSegment.vue'
 
 import fonts from '@/data/fonts.js'
 import utils from '@/utils.js'
@@ -24,7 +25,9 @@ const props = defineProps({
   boxes: Array
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  previewFontSize: '1',
+  previewFontId: 0
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -59,6 +62,7 @@ const items = computed(() => {
 const fontIsSelected = (font) => {
   return items.value.find(item => {
     const currentFontId = item.headerFontId || 0
+    state.previewFontId = currentFontId
     return currentFontId === font.id
   })
 }
@@ -70,13 +74,48 @@ const selectFont = (font) => {
 
 const isFontSize = (size) => {
   return items.value.find(item => {
-    const currentFontId = item.headerFontSize || 's'
-    return currentFontId === size
+    const currentFontSize = item.headerFontSize || 's'
+    state.previewFontSize = currentFontSize
+    return currentFontSize === size
   })
 }
 const selectFontSize = (size) => {
   emit('selectFontSize', size)
+  state.previewFontSize = size
 }
+
+// preview
+
+const previewSegments = computed(() => {
+  let preview, type
+  items.value.some(item => {
+    const h1 = utils.markdown().h1Pattern.exec(item.name)
+    const h2 = utils.markdown().h2Pattern.exec(item.name)
+    const h3 = utils.markdown().h3Pattern.exec(item.name)
+    const match = h1 || h2 || h3
+    if (h1) {
+      type = 'h1'
+    } else if (h2) {
+      type = 'h2'
+    } else if (h3) {
+      type = 'h3'
+    }
+    if (match) {
+      preview = match[2].trim()
+    }
+    return match
+  })
+  if (!preview) { return }
+  preview = utils.cardNameSegments(preview)
+  preview = preview.map(segment => {
+    segment.markdown = [{
+      type,
+      content: segment.content
+    }]
+    return segment
+  })
+  return preview
+})
 </script>
 
 <template lang="pug">
@@ -95,6 +134,10 @@ dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @cl
       template(v-for="font in fonts" :key="font.id")
         li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
           img.preview-image(:src="font.previewImage" :title="font.name")
+dialog.narrow.font-picker-preview(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop)
+  section.subsection
+    template(v-for="segment in previewSegments")
+      NameSegment(:segment="segment" :headerFontSize="state.previewFontSize" :headerFontId="state.previewFontId" :backgroundColorIsDark="isThemeDark")
 </template>
 
 <style lang="stylus">
@@ -124,5 +167,9 @@ dialog.font-picker
   .is-dark-theme
     .preview-image
       filter invert()
-
+dialog.font-picker-preview
+  top 44px
+  left 215%
+  max-height 180px
+  overflow auto
 </style>
