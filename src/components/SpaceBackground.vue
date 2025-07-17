@@ -14,7 +14,6 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
 const isSpacePage = computed(() => {
   const isOther = globalStore.isAddPage
@@ -29,7 +28,8 @@ const backgroundIsDefault = computed(() => !spaceStore.background)
 const backgroundStyles = computed(() => {
   let url = backgroundUrl.value
   const tintColor = spaceStore.backgroundTint
-  const styles = {}
+  let styles = {}
+  styles = globalStore.updateSpaceBorderRadiusStyles(styles)
   if (tintColor) {
     styles.background = 'transparent'
   }
@@ -87,7 +87,7 @@ template(v-if="spaceStore.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 //- or image
 template(v-else)
-  #space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
+  #space-background-image(:style="backgroundStyles")
 </template>
 
 <style lang="stylus">

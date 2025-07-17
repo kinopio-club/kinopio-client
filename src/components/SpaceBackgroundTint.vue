@@ -39,23 +39,24 @@ const backgroundTint = computed(() => {
 
 // styles
 
-const spaceShouldHaveBorderRadius = computed(() => globalStore.getSpaceShouldHaveBorderRadius)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
-  return {
+  let styles = {
     width: `${pageWidth.value}px`,
     height: `${pageHeight.value}px`,
     background: backgroundTint.value
   }
+  styles = globalStore.updateSpaceBorderRadiusStyles(styles)
+  return styles
 })
 
 </script>
 
 <template lang="pug">
-#space-background-tint(v-if="visible" :style="styles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
+#space-background-tint(v-if="visible" :style="styles")
 </template>
 
 <style lang="stylus">

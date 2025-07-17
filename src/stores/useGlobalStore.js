@@ -312,10 +312,6 @@ export const useGlobalStore = defineStore('global', {
     getMultipleItemsSelected () {
       return this.multipleCardsSelectedIds.concat(this.multipleBoxesSelectedIds)
     },
-    getSpaceShouldHaveBorderRadius () {
-      const isNativeApp = consts.isSecureAppContext
-      if (isNativeApp || utils.isMobile()) { return true }
-    },
     getDateImageUrl () {
       if (this.dateImageUrl) {
         return this.dateImageUrl
@@ -339,6 +335,18 @@ export const useGlobalStore = defineStore('global', {
   },
 
   actions: {
+    updateSpaceBorderRadiusStyles (styles) {
+      const isZoomed = this.spaceZoomPercent !== 100
+      const isMobile = consts.isSecureAppContext || utils.isMobile()
+      const radius = parseInt(utils.cssVariable('entity-radius'))
+      if (isZoomed) {
+        styles.borderRadius = `${radius}px`
+      }
+      if (isMobile) {
+        styles.borderRadius = `${radius * 2}px`
+      }
+      return styles
+    },
     getShouldScrollAtEdges (event) {
       if (window.visualViewport.scale > 1) { return }
       let isPainting
