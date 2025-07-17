@@ -13,4 +13,5 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 .locked-boxes,
 .locked-cards
   transform-origin top left
+  pointer-events none
 </style>
