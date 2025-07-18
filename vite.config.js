@@ -46,7 +46,7 @@ export default defineConfig(async ({ command, mode }) => {
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
         // exclude all the route paths that contains 'foo'
-        return ['/']
+        return ['/ssg-demo']
       }
     },
     optimizeDeps: {

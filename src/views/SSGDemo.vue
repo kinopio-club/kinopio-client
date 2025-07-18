@@ -1,9 +1,10 @@
 <template lang="pug">
-  div Hello World!
-  router-link(to="/space-demo") Space Demo
+  router-link(to="/") back
+  Counter
 </template>
 
 <script setup>
+import Counter from '@/components/Counter.vue'
 </script>
 
 <style lang="stylus">
