@@ -49,24 +49,24 @@ export default {
     }
   },
   kinopioDomain () {
-    const domain = 'https://kinopio.club'
-    // if (this.isDevelopment()) {
-    //   domain = 'https://kinopio.local:8080'
-    // }
+    let domain = 'https://kinopio.club'
+    if (this.isDevelopment()) {
+      domain = 'https://kinopio.local:8080'
+    }
     return domain
   },
   apiHost () {
-    const host = 'https://api.kinopio.club'
-    // if (this.isDevelopment()) {
-    //   host = 'https://kinopio.local:3000'
-    // }
+    let host = 'https://api.kinopio.club'
+    if (this.isDevelopment()) {
+      host = 'https://kinopio.local:3000'
+    }
     return host
   },
   websocketHost () {
-    const host = 'wss://api.kinopio.club'
-    // if (this.isDevelopment()) {
-    //   host = 'wss://kinopio.local:3000'
-    // }
+    let host = 'wss://api.kinopio.club'
+    if (this.isDevelopment()) {
+      host = 'wss://kinopio.local:3000'
+    }
     return host
   },
   userPrefersReducedMotion () {
