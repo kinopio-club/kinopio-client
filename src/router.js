@@ -34,13 +34,15 @@ const router = {
       name: 'ssg-demo',
       component: SSGDemo
     }, {
-      path: '/space-demo',
+      path: '/',
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        }
         next()
       }
     }, {
