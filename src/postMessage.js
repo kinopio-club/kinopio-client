@@ -5,14 +5,16 @@ import debounce from 'lodash-es/debounce'
 
 const showDebugMessages = false
 
-window.addEventListener('message', (event) => {
-  console.info('🛫 received postmessage', event)
-  const isAddPage = window.location.pathname === '/add'
-  if (isAddPage) {
-    cache.updatePrevAddPageValue(event.data)
-    console.info('🛫 cache.updatePrevAddPageValue', event.data)
-  }
-})
+if (!import.meta.env.SSR) {
+  window.addEventListener('message', (event) => {
+    console.info('🛫 received postmessage', event)
+    const isAddPage = window.location.pathname === '/add'
+    if (isAddPage) {
+      cache.updatePrevAddPageValue(event.data)
+      console.info('🛫 cache.updatePrevAddPageValue', event.data)
+    }
+  })
+}
 
 const debouncedSendHaptics = debounce((body) => {
   self.send(body)

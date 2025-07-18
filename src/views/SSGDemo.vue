@@ -1,9 +1,10 @@
 <template lang="pug">
-  //- router-view is Space or Add
-  router-view
+  router-link(to="/") back
+  Counter
 </template>
 
 <script setup>
+import Counter from '@/components/Counter.vue'
 </script>
 
 <style lang="stylus">

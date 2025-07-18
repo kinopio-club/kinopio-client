@@ -15,6 +15,7 @@ import { useHistoryStore } from '@/stores/useHistoryStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useChangelogStore } from '@/stores/useChangelogStore'
 
+import AppWrapper from '@/components/AppWrapper.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
@@ -676,59 +677,60 @@ const stopInteractions = async (event) => {
 </script>
 
 <template lang="pug">
-//- page
-OutsideSpaceBackground
-//- user presence cursors
-template(v-for="user in users")
-  UserLabelCursor(:user="user")
-//- space
-main#space.space(
-  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
-  @mousedown.left="initInteractions"
-  @touchstart="initInteractions"
-  :style="styles"
-  :data-zoom="spaceZoomDecimal"
-)
-  SpaceBackground
-  SpaceBackgroundTint
-  DrawingCanvasBackground
-  ItemsLocked
-  #box-backgrounds
-  Connections
-  Boxes
-  Cards
-  ItemUnlockButtons
-  DrawingCanvas
-  BoxDetails
-  CardDetails
-  OtherCardDetails
-  ConnectionDetails
-  CodeLanguagePicker
-  MultipleSelectedActions
-  ScrollAtEdgesHandler
-  NotificationsWithPosition(layer="space")
-  BoxSelecting
-  SnapGuideLines
-aside
-  PaintSelectCanvas
-  DrawingHandler
-  SonarPing
-//- page ui, dialogs
-Header
-Footer
-TagDetails
-UserDetails
-#space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
-  MinimapCanvas(:visible="true" :size="200")
-//- handlers
-WindowHistoryHandler
-KeyboardShortcutsHandler
-ScrollAndTouchHandler
-Panning
-NotificationsWithPosition(layer="app")
-Preload
-.badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
-  span DEV
+AppWrapper
+  //- page
+  OutsideSpaceBackground
+  //- user presence cursors
+  template(v-for="user in users")
+    UserLabelCursor(:user="user")
+  //- space
+  main#space.space(
+    :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
+    @mousedown.left="initInteractions"
+    @touchstart="initInteractions"
+    :style="styles"
+    :data-zoom="spaceZoomDecimal"
+  )
+    SpaceBackground
+    SpaceBackgroundTint
+    DrawingCanvasBackground
+    ItemsLocked
+    #box-backgrounds
+    Connections
+    Boxes
+    Cards
+    ItemUnlockButtons
+    DrawingCanvas
+    BoxDetails
+    CardDetails
+    OtherCardDetails
+    ConnectionDetails
+    CodeLanguagePicker
+    MultipleSelectedActions
+    ScrollAtEdgesHandler
+    NotificationsWithPosition(layer="space")
+    BoxSelecting
+    SnapGuideLines
+  aside
+    PaintSelectCanvas
+    DrawingHandler
+    SonarPing
+  //- page ui, dialogs
+  Header
+  Footer
+  TagDetails
+  UserDetails
+  #space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
+    MinimapCanvas(:visible="true" :size="200")
+  //- handlers
+  WindowHistoryHandler
+  KeyboardShortcutsHandler
+  ScrollAndTouchHandler
+  Panning
+  NotificationsWithPosition(layer="app")
+  Preload
+  .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+    span DEV
 </template>
 
 <style lang="stylus">
