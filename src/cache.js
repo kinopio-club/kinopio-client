@@ -228,31 +228,35 @@ export default {
   },
   async saveSpace (space) {
     if (!space) { return }
-    // removes functions and circular references from objects
-    const getCircularReplacer = () => {
-      const seen = new WeakSet()
-      return (key, value) => {
-      // Skip functions
-        if (typeof value === 'function') {
-          return undefined
-        }
-        // Handle circular references
-        if (typeof value === 'object' && value !== null) {
-          if (seen.has(value)) {
-            return undefined // or return a placeholder like '[Circular]'
+    try {
+      // removes functions and circular references from objects
+      const getCircularReplacer = () => {
+        const seen = new WeakSet()
+        return (key, value) => {
+        // Skip functions
+          if (typeof value === 'function') {
+            return undefined
           }
-          seen.add(value)
+          // Handle circular references
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+              return undefined // or return a placeholder like '[Circular]'
+            }
+            seen.add(value)
+          }
+          return value
         }
-        return value
       }
+      space = JSON.parse(JSON.stringify(space, getCircularReplacer()))
+      if (!space.id) {
+        console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
+        return
+      }
+      space.cacheDate = Date.now()
+      await this.saveLocal(`space-${space.id}`, space)
+    } catch (error) {
+      console.error('🚒 saveSpace', space, error)
     }
-    space = JSON.parse(JSON.stringify(space, getCircularReplacer()))
-    if (!space.id) {
-      console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
-      return
-    }
-    space.cacheDate = Date.now()
-    await this.saveLocal(`space-${space.id}`, space)
   },
   async updateIdsInSpace (space, nullCardUsers) {
     const items = {
