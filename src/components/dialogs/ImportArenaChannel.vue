@@ -258,7 +258,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
       p Make a moodboard from the newest 100 blocks in a channel
       form(@submit.prevent="importChannel")
         .input-wrap
-          input(type="url" placeholder="Are.na channel url" required @input="clearErrors" v-model="channelUrl")
+          input(type="url" placeholder="Are.na channel url" required @input="clearErrors" v-model="state.channelUrl")
           button.borderless.clear-input-wrap(@mouseup.left="clearForm" @touchend="clearForm")
             img.cancel.icon(src="@/assets/add.svg")
 
@@ -268,10 +268,10 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
         .badge.danger(v-if="state.error.channelNotFound") Could not find {{state.error.channelNotFoundName}} on Are.na
         .badge.danger(v-if="state.error.unknownServerError") Are.na authentication failed, Please try again or contact support
 
-        button(:class="{active: loading}" type="submit")
+        button(:class="{active: state.loading}" type="submit")
           img.icon.arena(src="@/assets/arena.svg")
           span Import
-          Loader(:visible="loading")
+          Loader(:visible="state.loading")
 
     section
       button(@click.left="forgetArenaAccessToken") Forget Me
