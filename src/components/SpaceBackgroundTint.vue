@@ -22,7 +22,7 @@ const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 const backgroundTint = computed(() => {
   let color = currentSpace.value.backgroundTint
-  if (!color) { return }
+  color = color || utils.cssVariable('primary-background')
   const colorIsDark = utils.colorIsDark(color, 0.8)
   if (isThemeDark.value) {
     let darkness = 0.4
