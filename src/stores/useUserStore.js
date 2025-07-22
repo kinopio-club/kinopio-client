@@ -527,18 +527,6 @@ export const useUserStore = defineStore('users', {
       return space
     },
 
-    // email
-
-    async updateUserEmailIsVerified () {
-      const apiStore = useApiStore()
-      await apiStore.addToQueue({
-        name: 'updateUser',
-        body: {
-          emailIsVerified: true
-        }
-      })
-    },
-
     // are.na
 
     async updateUserArenaAccessToken (arenaReturnedCode) {

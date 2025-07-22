@@ -15,9 +15,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import last from 'lodash-es/last'
-import sortBy from 'lodash-es/sortBy'
 import randomColor from 'randomcolor'
-import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
@@ -162,10 +160,7 @@ const currentConnectionType = computed(() => {
 
 const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const connectionTypesByUpdatedAt = computed(() => {
-  let types = connectionTypes.value
-  types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
-  types.reverse()
-  return types
+  return connectionStore.getConnectionTypesByUpdatedAt()
 })
 const canEditConnection = computed(() => {
   const isSpaceMember = userStore.getUserIsSpaceMember

@@ -641,7 +641,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
 
 // card buttons
 

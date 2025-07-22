@@ -38,27 +38,6 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/beta',
-      name: 'beta',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        globalStore.isBeta = true
-        globalStore.addNotification({ message: 'No features currently in Beta' }) // 'No features currently in Beta'
-        next()
-      }
-    }, {
-      path: '/confirm-email',
-      name: 'confirm-email',
-      component: Space,
-      redirect: to => {
-        const globalStore = useGlobalStore()
-        const userStore = useUserStore()
-        userStore.updateUserEmailIsVerified()
-        globalStore.addNotification({ message: 'Email Confirmed', type: 'success' })
-        return '/'
-      }
-    }, {
       path: '/reset-password',
       name: 'reset-password',
       component: Space,
