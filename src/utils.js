@@ -1942,6 +1942,7 @@ export default {
 
   // same as server util
   normalizeString (string) {
+    if (!string) { return }
     // remove punctuation characters, what's → whats
     string = string.replace(/'|"|‘|’|“|”/ig, '')
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s

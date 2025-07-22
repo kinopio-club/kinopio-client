@@ -761,10 +761,10 @@ const handlePasteEvent = async (event) => {
   userStore.notifyReadOnly(position)
   const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
-  // get clipboard data
   const data = await getClipboardData()
+  // get and set itemsData
   let itemsData = data.clipboardData?.data
-  if (utils.normalizeString(data.text) === utils.normalizeString(globalStore.clipboardData.text)) {
+  if (data.text && utils.normalizeString(data.text) === utils.normalizeString(globalStore.clipboardData?.text)) {
     itemsData = globalStore.clipboardData.data
   }
   console.info('🎊 pasteData', data, itemsData)
