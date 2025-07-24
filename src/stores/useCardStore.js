@@ -421,7 +421,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
       connectionStore.removeConnectionsFromItems(ids)
-      userStore.updateUserCardsCreatedCount(cardsToRemove, true)
+      userStore.updateUserCardsCreatedCount(cards, true)
     },
     removeCard (id) {
       this.removeCards([id])
