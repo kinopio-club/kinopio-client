@@ -209,7 +209,8 @@ export const useApiStore = defineStore('api', {
         const shouldIncrement = isOperationName && isOperationDelta
         const shouldMerge = isOperationName && isItemId && !shouldNotMergeOperations.includes(newItem.name)
         if (shouldIncrement) {
-          newItem.body.delta += prevItem.body.delta
+          newItem.body.delta = newItem.body.delta + prevItem.body.delta
+          isPrevItem = true
           return newItem
         } else if (shouldMerge) {
           isPrevItem = true

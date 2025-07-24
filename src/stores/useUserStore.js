@@ -492,6 +492,7 @@ export const useUserStore = defineStore('users', {
 
     async updateUserCardsCreatedCount (cards, shouldDecrement) {
       const apiStore = useApiStore()
+      cards = cards.filter(card => Boolean(card))
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => this.getUserIsCurrentUser({ id: card.userId }))
       let delta = cards.length
