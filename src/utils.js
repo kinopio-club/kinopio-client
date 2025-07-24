@@ -1366,6 +1366,7 @@ export default {
   },
   migrationConnections (connections) { // migration added July 2024
     if (!connections) { return }
+    connections = connections.filter(connection => Boolean(connection))
     return connections.map(connection => {
       if (connection.startCardId) {
         connection.startItemId = connection.startCardId
