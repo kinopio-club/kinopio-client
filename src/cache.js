@@ -2,6 +2,7 @@
 
 import debounce from 'lodash-es/debounce'
 import * as idb from 'idb-keyval'
+import { stringify, parse } from 'flatted'
 
 import utils from '@/utils.js'
 
@@ -229,25 +230,7 @@ export default {
   async saveSpace (space) {
     if (!space) { return }
     try {
-      // removes functions and circular references from objects
-      const getCircularReplacer = () => {
-        const seen = new WeakSet()
-        return (key, value) => {
-        // Skip functions
-          if (typeof value === 'function') {
-            return undefined
-          }
-          // Handle circular references
-          if (typeof value === 'object' && value !== null) {
-            if (seen.has(value)) {
-              return undefined // or return a placeholder like '[Circular]'
-            }
-            seen.add(value)
-          }
-          return value
-        }
-      }
-      space = JSON.parse(JSON.stringify(space, getCircularReplacer()))
+      space = parse(stringify(space)) // removes functions and circular references from object
       if (!space.id) {
         console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
         return
