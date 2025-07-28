@@ -1688,7 +1688,7 @@ export default {
     if (nullItemUsers) {
       userId = null
     } else {
-      userId = item.userId || user.id
+      userId = user.id || item.userId
     }
     return userId
   },
@@ -1743,8 +1743,10 @@ export default {
       return connection
     })
     tags = tags.map(tag => {
+      const userId = this.itemUserId(user, tag, nullItemUsers)
       tag.id = nanoid()
       tag.cardId = this.updateAllIds(tag, 'cardId', itemIdDeltas)
+      tag.userId = userId
       return tag
     })
     items = { cards, connections, connectionTypes, boxes, tags }
