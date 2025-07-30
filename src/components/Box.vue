@@ -186,11 +186,12 @@ const boxStyles = computed(() => {
   return styles
 })
 const infoStyles = computed(() => {
-  const { x, y } = normalizedBox.value
+  const { x, y, resizeWidth } = normalizedBox.value
   // x, y
   const styles = {
     left: x + 'px',
     top: y + 'px',
+    maxWidth: resizeWidth + 'px',
     backgroundColor: color.value
   }
   if (isLocked.value) {
