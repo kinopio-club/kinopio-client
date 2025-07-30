@@ -240,13 +240,7 @@ const disconnectItems = () => {
 
 // connections
 
-const moreLineOptionsLabel = computed(() => {
-  if (multipleConnectionsSelectedIds.value.length > 1) {
-    return 'LINES'
-  } else {
-    return 'LINE'
-  }
-})
+const moreLineOptionsLabel = computed(() => 'LINE')
 const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
@@ -493,6 +487,7 @@ dialog.narrow.multiple-selected-actions(
       :cards="cards"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
+      :labelIsVisible="true"
     )
     CardOrBoxActions(
       :labelIsVisible="true"
