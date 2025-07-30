@@ -25,7 +25,6 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
 const dialogElement = ref(null)
-const newSpaceNameElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -49,7 +48,6 @@ const props = defineProps({
 })
 watch(() => props.visible, async (value, prevValue) => {
   await nextTick()
-  clearState()
   if (value) {
     updateDialogHeight()
     updateSpaces()
@@ -64,8 +62,6 @@ watch(() => props.userSpaces, (value, prevValue) => {
 const state = reactive({
   isLoading: false,
   spaces: [],
-  newSpaceIsVisible: false,
-  newSpaceName: '',
   isLoadingNewSpace: false,
   dialogHeight: null
 })
@@ -130,10 +126,6 @@ const filteredSpaces = computed(() => {
 })
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
-const handleFocusBeforeFirstItem = () => {
-  if (state.newSpaceIsVisible) { return }
-  toggleNewSpaceIsVisible()
-}
 const excludeCurrentSpace = () => {
   if (!props.shouldExcludeCurrentSpace) { return }
   const currentSpace = spaceStore.getSpaceAllState
@@ -171,50 +163,34 @@ const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
 }
-const toggleNewSpaceIsVisible = async () => {
-  state.newSpaceIsVisible = !state.newSpaceIsVisible
-  if (state.newSpaceIsVisible) {
-    await nextTick()
-    focusNewSpaceNameInput()
-  }
-}
 const createNewSpace = async (name) => {
   if (state.isLoadingNewSpace) { return }
-  if (!state.newSpaceName) {
-    state.newSpaceName = utils.newSpaceName()
-  }
+  name = name || utils.newSpaceName()
   const currentUser = userStore.getUserAllState
   const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
   state.isLoadingNewSpace = true
-  let space = utils.clone(newSpace)
-  space.name = name
-  space.id = nanoid()
-  space.url = utils.url({ name: space.name, id: space.id })
-  space.userId = user.id
-  space.users.push(user)
-  space.cards = []
-  space.connections = []
-  space.connectionTypes = []
-  space = utils.newSpaceBackground(space, currentUser)
-  space.background = space.background || consts.defaultSpaceBackground
-  space = await cache.updateIdsInSpace(space)
-  console.info('🚚 create new space', space)
-  if (currentUserIsSignedIn.value) {
-    await apiStore.createSpace(space)
+  try {
+    let space = utils.clone(newSpace)
+    space.name = name
+    space.id = nanoid()
+    space.url = utils.url({ name: space.name, id: space.id })
+    space.userId = user.id
+    space.users.push(user)
+    space.cards = []
+    space.connections = []
+    space.connectionTypes = []
+    space = utils.newSpaceBackground(space, currentUser)
+    space.background = space.background || consts.defaultSpaceBackground
+    space = await cache.updateIdsInSpace(space)
+    console.info('🚚 create new space', space)
+    selectSpace(space)
+    if (currentUserIsSignedIn.value) {
+      await apiStore.createSpace(space)
+    }
+  } catch (error) {
+    console.error('🚒 createNewSpace', name, error)
   }
   state.isLoadingNewSpace = false
-  selectSpace(space)
-}
-
-const clearState = () => {
-  state.newSpaceIsVisible = false
-  state.newSpaceName = utils.newSpaceName()
-}
-const focusNewSpaceNameInput = () => {
-  const element = newSpaceNameElement.value
-  if (!element) { return }
-  element.focus()
-  element.setSelectionRange(0, 99999)
 }
 
 const spaceListIsVisible = computed(() => {
@@ -234,19 +210,6 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
         span To link to a space,
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-  //- New Space
-  section.options(v-if="showCreateNewSpaceFromSearch")
-    .row.title-row
-      button.small-button(@click="toggleNewSpaceIsVisible" :class="{ active: state.newSpaceIsVisible }")
-        img.icon(src="@/assets/add.svg")
-    section.subsection(v-if="state.newSpaceIsVisible")
-      .row
-        .button-wrap
-        input(placeholder="name" ref="newSpaceNameElement" v-model="state.newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
-      .row
-        button(@click="createNewSpace")
-          span Create New Space
-          Loader(:visible="state.isLoadingNewSpace")
 
   //- Type to Search
   section.info-section(v-if="parentIsCardDetails && !search && currentUserIsSignedIn")
@@ -264,7 +227,6 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       :selectedSpace="selectedSpace"
       @selectSpace="selectSpace"
       :search="search"
-      @focusBeforeFirstItem="handleFocusBeforeFirstItem"
       :parentDialog="parentDialog"
       :showCreateNewSpaceFromSearch="props.showCreateNewSpaceFromSearch"
       :shouldEmitcreateNewSpace="true"
