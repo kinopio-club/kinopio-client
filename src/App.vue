@@ -991,7 +991,8 @@ li
     //   background-position center
     //   background-size 60%
 .is-dark-theme
-  label
+  label,
+  li
     input[type="checkbox"]
       &:checked
         background-image url('assets/checkmark-invert.svg')
