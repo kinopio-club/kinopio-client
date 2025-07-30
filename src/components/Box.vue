@@ -166,7 +166,7 @@ const removeViewportObserver = () => {
 
 // styles
 
-const styles = computed(() => {
+const boxStyles = computed(() => {
   const { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
   const width = resizeWidth
   const height = resizeHeight
@@ -185,22 +185,35 @@ const styles = computed(() => {
   }
   return styles
 })
+const infoStyles = computed(() => {
+  const { x, y } = normalizedBox.value
+  // x, y
+  const styles = {
+    left: x + 'px',
+    top: y + 'px',
+    backgroundColor: color.value
+  }
+  if (isLocked.value) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
+})
 const backgroundStyles = computed(() => {
   if (!hasFill.value) { return }
   if (!props.box.background) { return }
-  const newStyles = utils.clone(styles.value)
-  delete newStyles.border
-  delete newStyles.backgroundColor
+  const styles = utils.clone(boxStyles.value)
+  delete styles.border
+  delete styles.backgroundColor
   const isRetina = utils.urlIsRetina(props.box.background)
   if (isRetina) {
-    newStyles.backgroundImage = `image-set("${props.box.background}" 2x)`
+    styles.backgroundImage = `image-set("${props.box.background}" 2x)`
   } else {
-    newStyles.backgroundImage = `url("${props.box.background}")`
+    styles.backgroundImage = `url("${props.box.background}")`
   }
   if (props.box.backgroundIsStretch) {
-    newStyles.backgroundSize = 'cover'
+    styles.backgroundSize = 'cover'
   }
-  return newStyles
+  return styles
 })
 const userColor = computed(() => userStore.color)
 const color = computed(() => {
@@ -329,18 +342,6 @@ const shrink = () => {
 // locked to background
 
 const isLocked = computed(() => props.box.isLocked)
-
-// label
-
-const infoStyles = computed(() => {
-  const styles = {
-    backgroundColor: color.value
-  }
-  if (isLocked.value) {
-    styles.pointerEvents = 'none'
-  }
-  return styles
-})
 
 // interacting
 
@@ -709,74 +710,75 @@ const focusColor = computed(() => {
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
 
-  :style="styles"
+  :style="boxStyles"
   :class="classes"
   ref="boxElement"
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
   teleport(to="#box-backgrounds")
     .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
-  //- name
-  .box-info(
-    v-if="shouldRender"
-    :data-box-id="box.id"
-    :data-is-visible-in-viewport="state.isVisibleInViewport"
-    :style="infoStyles"
-    :class="infoClasses"
-    tabindex="0"
+  teleport(to="#box-infos")
+    //- name
+    .box-info(
+      v-if="shouldRender"
+      :data-box-id="box.id"
+      :data-is-visible-in-viewport="state.isVisibleInViewport"
+      :style="infoStyles"
+      :class="infoClasses"
+      tabindex="0"
 
-    @mouseover="updateIsHover(true)"
-    @mouseleave="updateIsHover(false)"
-    @mousedown.left="startBoxInfoInteraction"
+      @mouseover="updateIsHover(true)"
+      @mouseleave="updateIsHover(false)"
+      @mousedown.left="startBoxInfoInteraction"
 
-    @mouseup.left="endBoxInfoInteraction"
-    @keyup.stop.enter="endBoxInfoInteraction"
+      @mouseup.left="endBoxInfoInteraction"
+      @keyup.stop.enter="endBoxInfoInteraction"
 
-    @touchstart="startLocking"
-    @touchmove="updateCurrentTouchPosition"
-    @touchend="endBoxInfoInteractionTouch"
-  )
-    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    //- [·]
-    .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
-      label(:class="{active: isChecked, disabled: !canEditBox}")
-        input(name="checkbox" type="checkbox" v-model="checkboxState")
-    .name-wrap(:class="{'is-checked': isChecked}")
-      //- simplified nameSegments
-      template(v-for="segment in nameSegments")
-        template(v-if="segment.type === 'text'")
-          span {{smartQuotes(segment.content)}}
-        template(v-else-if="segment.type === 'bold'")
-          strong {{smartQuotes(segment.content)}}
-        template(v-else-if="segment.type === 'h1'")
-          h1 {{smartQuotes(segment.content)}}
-        template(v-else-if="segment.type === 'h2'")
-          h2 {{smartQuotes(segment.content)}}
-        template(v-else-if="segment.type === 'h3'")
-          h3 {{smartQuotes(segment.content)}}
-        template(v-else-if="segment.type === 'h4'")
-          h4 {{segment.content}}
-        template(v-else-if="segment.type === 'emphasis'")
-          em {{smartQuotes(segment.content)}}
-        template(v-else-if="segment.type === 'strikethrough'")
-          del {{smartQuotes(segment.content)}}
-      .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
-        img(src="@/assets/anon-avatar.svg")
-
-    ItemConnectorButton(
-      :visible="connectorIsVisible"
-      :isHiddenByOpacity="connectorIsHiddenByOpacity"
-      :box="box"
-      :isConnectingTo="isConnectingTo"
-      :isConnectingFrom="isConnectingFrom"
-      :isVisibleInViewport="state.isVisibleInViewport"
-      :isRemoteConnecting="state.isRemoteConnecting"
-      :remoteConnectionColor="state.remoteConnectionColor"
-      :currentBackgroundColor="color"
-      :backgroundIsTransparent="true"
-      :parentDetailsIsVisible="currentBoxDetailsIsVisible"
-      @shouldRenderParent="updateShouldRenderParent"
+      @touchstart="startLocking"
+      @touchmove="updateCurrentTouchPosition"
+      @touchend="endBoxInfoInteractionTouch"
     )
+      .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
+      //- [·]
+      .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
+        label(:class="{active: isChecked, disabled: !canEditBox}")
+          input(name="checkbox" type="checkbox" v-model="checkboxState")
+      .name-wrap(:class="{'is-checked': isChecked}")
+        //- simplified nameSegments
+        template(v-for="segment in nameSegments")
+          template(v-if="segment.type === 'text'")
+            span {{smartQuotes(segment.content)}}
+          template(v-else-if="segment.type === 'bold'")
+            strong {{smartQuotes(segment.content)}}
+          template(v-else-if="segment.type === 'h1'")
+            h1 {{smartQuotes(segment.content)}}
+          template(v-else-if="segment.type === 'h2'")
+            h2 {{smartQuotes(segment.content)}}
+          template(v-else-if="segment.type === 'h3'")
+            h3 {{smartQuotes(segment.content)}}
+          template(v-else-if="segment.type === 'h4'")
+            h4 {{segment.content}}
+          template(v-else-if="segment.type === 'emphasis'")
+            em {{smartQuotes(segment.content)}}
+          template(v-else-if="segment.type === 'strikethrough'")
+            del {{smartQuotes(segment.content)}}
+        .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
+          img(src="@/assets/anon-avatar.svg")
+
+      ItemConnectorButton(
+        :visible="connectorIsVisible"
+        :isHiddenByOpacity="connectorIsHiddenByOpacity"
+        :box="box"
+        :isConnectingTo="isConnectingTo"
+        :isConnectingFrom="isConnectingFrom"
+        :isVisibleInViewport="state.isVisibleInViewport"
+        :isRemoteConnecting="state.isRemoteConnecting"
+        :remoteConnectionColor="state.remoteConnectionColor"
+        :currentBackgroundColor="color"
+        :backgroundIsTransparent="true"
+        :parentDetailsIsVisible="currentBoxDetailsIsVisible"
+        @shouldRenderParent="updateShouldRenderParent"
+      )
 
   //- resize
   .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
@@ -821,61 +823,73 @@ const focusColor = computed(() => {
     transition none
   &.is-checked
     opacity var(--is-checked-opacity)
-  .box-info
-    --header-font var(--header-font-0)
-    z-index 1
-    border-radius 4px
-    display flex
-    align-items center
-    &.header-font-1
-      --header-font var(--header-font-1)
-    &.header-font-2
-      --header-font var(--header-font-2)
-    &.header-font-3
-      --header-font var(--header-font-3)
-    &.header-font-4
-      --header-font var(--header-font-4)
-    &.header-font-5
-      --header-font var(--header-font-5)
-    &.header-font-6
-      --header-font var(--header-font-6)
-    &.header-font-7
-      --header-font var(--header-font-7)
-    &.header-font-8
-      --header-font var(--header-font-8)
-    &.header-font-9
-      --header-font var(--header-font-9)
-    &.header-font-size-modifier-s
-      h1
-        font-size 18px
-      h2
-        font-size 16px
-    &.header-font-size-m
-      h1
-        font-size 44px
-      h2
-        font-size 36px
-      h3
-        font-size 24px
-    &.header-font-size-l
-      h1
-        font-size 66px
-      h2
-        font-size 52px
-      h3
-        font-size 36px
-    pointer-events all
-    position absolute
-    cursor pointer
-    border-bottom-right-radius var(--entity-radius)
-    word-break break-word
-    color var(--primary-on-light-background)
-    &:hover
-      box-shadow var(--hover-shadow)
-    &:active
-      box-shadow var(--active-shadow)
-    &.is-dark
-      color var(--primary-on-dark-background)
+
+  // resize
+  .bottom-button-wrap
+    .inline-button-wrap
+      cursor nwse-resize
+      button
+        cursor nwse-resize
+      .resize-icon
+        top 0
+        left 0
+
+.box-info
+  --header-font var(--header-font-0)
+  z-index 1
+  border-radius 4px
+  display flex
+  align-items center
+  width max-content
+  &.header-font-1
+    --header-font var(--header-font-1)
+  &.header-font-2
+    --header-font var(--header-font-2)
+  &.header-font-3
+    --header-font var(--header-font-3)
+  &.header-font-4
+    --header-font var(--header-font-4)
+  &.header-font-5
+    --header-font var(--header-font-5)
+  &.header-font-6
+    --header-font var(--header-font-6)
+  &.header-font-7
+    --header-font var(--header-font-7)
+  &.header-font-8
+    --header-font var(--header-font-8)
+  &.header-font-9
+    --header-font var(--header-font-9)
+  &.header-font-size-modifier-s
+    h1
+      font-size 18px
+    h2
+      font-size 16px
+  &.header-font-size-m
+    h1
+      font-size 44px
+    h2
+      font-size 36px
+    h3
+      font-size 24px
+  &.header-font-size-l
+    h1
+      font-size 66px
+    h2
+      font-size 52px
+    h3
+      font-size 36px
+  pointer-events all
+  position absolute
+  cursor pointer
+  border-bottom-right-radius var(--entity-radius)
+  word-break break-word
+  color var(--primary-on-light-background)
+  &:hover
+    box-shadow var(--hover-shadow)
+  &:active
+    box-shadow var(--active-shadow)
+  &.is-dark
+    color var(--primary-on-dark-background)
 
   .checkbox-wrap
     padding-left 8px
@@ -940,34 +954,6 @@ const focusColor = computed(() => {
     margin-top 2px
     vertical-align sub // to align with checkboxes
 
-  // resize
-  .bottom-button-wrap
-    .inline-button-wrap
-      cursor nwse-resize
-      button
-        cursor nwse-resize
-      .resize-icon
-        top 0
-        left 0
-
-  .locking-frame
-    position absolute
-    z-index -1
-    pointer-events none
-
-  // same as Card.vue
-  .selected-user-avatar
-    padding 0 3px
-    border-radius var(--small-entity-radius)
-    position absolute
-    top -5px
-    left -5px
-    pointer-events none
-    z-index 1
-    img
-      width 10px
-      height 10px
-
   .connector
     padding 8px
     padding-top 4px
@@ -987,4 +973,23 @@ const focusColor = computed(() => {
   .connected-colors
     left 1px
     top 5px
+
+  .locking-frame
+    position absolute
+    z-index -1
+    pointer-events none
+
+  // same as Card.vue
+  .selected-user-avatar
+    padding 0 3px
+    border-radius var(--small-entity-radius)
+    position absolute
+    top -5px
+    left -5px
+    pointer-events none
+    z-index 1
+    img
+      width 10px
+      height 10px
+
 </style>

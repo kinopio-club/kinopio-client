@@ -694,8 +694,9 @@ main#space.space(
   DrawingCanvasBackground
   ItemsLocked
   #box-backgrounds
-  Connections
   Boxes
+  Connections
+  #box-infos
   Cards
   ItemUnlockButtons
   DrawingCanvas
@@ -752,7 +753,8 @@ Preload
   right 8px
   bottom 50px
 
-#box-backgrounds
+#box-backgrounds,
+#box-infos
   position absolute
   .box-background
     border-radius var(--entity-radius)
