@@ -49,9 +49,6 @@ export default defineConfig(async ({ command, mode }) => {
         '@': path.resolve(__dirname, './src')
       }
     },
-    build: {
-      minify: false
-    },
     plugins: [
       // .vue support
       vue({
