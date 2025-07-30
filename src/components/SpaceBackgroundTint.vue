@@ -27,7 +27,7 @@ const backgroundTint = computed(() => {
   if (isThemeDark.value) {
     let darkness = 0.4
     if (colorIsDark) {
-      darkness = 0.1
+      darkness = 0
     }
     color = colord(color).darken(darkness).toRgbString()
   } else {
