@@ -236,11 +236,10 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
   //- New Space
   section.options(v-if="shouldShowNewSpace")
-    .row
-      button(@click="toggleNewSpaceIsVisible" :class="{ active: state.newSpaceIsVisible }")
+    .row.title-row
+      button.small-button(@click="toggleNewSpaceIsVisible" :class="{ active: state.newSpaceIsVisible }")
         img.icon(src="@/assets/add.svg")
-        span New Space
-    template(v-if="state.newSpaceIsVisible")
+    section.subsection(v-if="state.newSpaceIsVisible")
       .row
         .button-wrap
         input(placeholder="name" ref="newSpaceNameElement" v-model="state.newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
@@ -279,6 +278,8 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 dialog.space-picker
   min-height 150px
   overflow auto
+  .title-row
+    flex-direction row-reverse
   .results-section
     padding-top 4px
     @media(max-height 700px)
@@ -297,6 +298,6 @@ dialog.space-picker
   section.options
     margin 0
     width 100%
-    padding-bottom 5px
+    padding-bottom 0
     border-top none
 </style>
