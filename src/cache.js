@@ -2,7 +2,6 @@
 
 import debounce from 'lodash-es/debounce'
 import * as idb from 'idb-keyval'
-import { stringify, parse } from 'flatted'
 
 import utils from '@/utils.js'
 
@@ -228,10 +227,9 @@ export default {
     await this.saveSpace(space)
   },
   async saveSpace (space) {
-    console.log('🌺🌺🌺🌺saveSpace🌺', space)
     if (!space) { return }
     try {
-      space = parse(stringify(space)) // removes functions and circular references from object
+      space = JSON.parse(JSON.stringify(space)) // removes functions from objects
       if (!space.id) {
         console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
         return
@@ -239,7 +237,7 @@ export default {
       space.cacheDate = Date.now()
       await this.saveLocal(`space-${space.id}`, space)
     } catch (error) {
-      console.error('🚒 saveSpace', space, error)
+      console.error('🚒 saveSpace could not save', space, error)
     }
   },
   async updateIdsInSpace (space, nullCardUsers) {
