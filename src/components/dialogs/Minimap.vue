@@ -116,7 +116,7 @@ dialog.narrow.minimap.is-pinnable(
             .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
               span {{box.name}}
         .row(v-else)
-          .badge.secondary
+          p
             img.icon.box-icon(src="@/assets/box.svg")
             span No boxes in this space yet
 </template>
@@ -140,6 +140,9 @@ dialog.minimap
       flex-wrap wrap
       .badge
         margin-bottom 10px
+        text-align left
+  .icon.box-icon
+    border-radius 0
   summary
     text-align left
 </style>
