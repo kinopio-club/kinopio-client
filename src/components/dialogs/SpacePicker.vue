@@ -243,8 +243,6 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 dialog.space-picker
   min-height 150px
   overflow auto
-  .title-row
-    flex-direction row-reverse
   .results-section
     padding-top 4px
     @media(max-height 700px)
@@ -260,9 +258,4 @@ dialog.space-picker
   .info-section
     padding-bottom 4px
     border-top 0
-  section.options
-    margin 0
-    width 100%
-    padding-bottom 0
-    border-top none
 </style>
