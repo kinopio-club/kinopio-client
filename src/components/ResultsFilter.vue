@@ -61,7 +61,8 @@ const emit = defineEmits([
   'onBlur',
   'focusNextItem',
   'focusPreviousItem',
-  'selectItem'
+  'selectItem',
+  'createNewSpace'
 ])
 
 const props = defineProps({
@@ -74,6 +75,7 @@ const props = defineProps({
   isLoading: Boolean,
   parentIsPinned: Boolean,
   showCreateNewSpaceFromSearch: Boolean,
+  shouldEmitcreateNewSpace: Boolean,
   isInitialValueFromSpaceListFilterInfo: Boolean
 })
 
@@ -95,6 +97,12 @@ const isManyItems = computed(() => Boolean(props.items.length >= 5))
 const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && state.filter.length > 1)
 const addSpace = async () => {
   const name = state.filter
+  if (props.shouldEmitcreateNewSpace) {
+    emit('createNewSpace', name)
+    const shouldClearFilterInfo = true
+    clearFilter(shouldClearFilterInfo)
+    return
+  }
   window.scrollTo(0, 0)
   await spaceStore.createNewSpace(name)
   await nextTick()

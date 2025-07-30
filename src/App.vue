@@ -1307,6 +1307,7 @@ code
   padding-left 5px
   padding-right 5px
   margin-top -2px
+  margin-left 0
   img
     padding 0
     vertical-align 2px
