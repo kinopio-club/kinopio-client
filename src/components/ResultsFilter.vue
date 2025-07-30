@@ -239,9 +239,9 @@ const selectItem = () => {
     @keyup.delete.stop
     @keyup.clear.stop
   )
-  button.borderless.clear-input-wrap(v-if="addSpaceIsVisible" @click="addSpace")
+  button.borderless.clear-input-wrap(v-if="addSpaceIsVisible" @click="addSpace" title="New Space")
     img.icon.add(src="@/assets/add.svg")
-  button.borderless.clear-input-wrap(@click.left="clearFilter(true)")
+  button.borderless.clear-input-wrap(@click.left="clearFilter(true)" title="Clear")
     img.icon.cancel(src="@/assets/add.svg")
 </template>
 
