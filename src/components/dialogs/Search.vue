@@ -147,6 +147,7 @@ const cardsToSearch = computed(() => {
 })
 const recentlyUpdatedCards = computed(() => {
   let cards = cardStore.getAllCards
+  cards = utils.clone(cards)
   cards = cards.filter(card => card.name)
   cards = cards.map(card => {
     const date = card.nameUpdatedAt || card.createdAt

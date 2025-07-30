@@ -228,6 +228,7 @@ export default {
     await this.saveSpace(space)
   },
   async saveSpace (space) {
+    console.log('🌺🌺🌺🌺saveSpace🌺', space)
     if (!space) { return }
     try {
       space = parse(stringify(space)) // removes functions and circular references from object
