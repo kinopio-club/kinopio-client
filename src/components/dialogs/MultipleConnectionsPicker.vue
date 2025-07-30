@@ -88,6 +88,7 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
 
 <style lang="stylus">
 .multiple-connections-picker
+  overflow auto
   .badge-in-button
     margin-left 5px
 </style>
