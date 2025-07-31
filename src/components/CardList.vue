@@ -8,6 +8,7 @@ import { useThemeStore } from '@/stores/useThemeStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -57,6 +58,7 @@ const props = defineProps({
   cards: Array,
   search: String,
   cardsShowRemoveButton: Boolean,
+  shouldHideDate: Boolean,
   dateIsCreatedAt: Boolean,
   resultsSectionHeight: Number,
   currentCard: Object,
@@ -140,10 +142,13 @@ const isCurrentCard = (card) => {
   return props.currentCard?.id === card.id
 }
 
-// checkbox cards
+// [·] checkbox cards
 
 const cardIsTodo = (card) => {
-  return utils.checkboxFromString(card.name)
+  return Boolean(utils.checkboxFromString(card.name))
+}
+const canEditCard = (card) => {
+  return userStore.getUserCanEditCard(card)
 }
 
 // scroll
@@ -203,7 +208,7 @@ span
     template(v-for="card in itemsRendered" :key="card.id")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
-        span.badge.status.inline-badge(:class="{'date-is-today': dateIsToday(card)}")
+        span.badge.status.inline-badge(v-if="!props.shouldHideDate" :class="{'date-is-today': dateIsToday(card)}")
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
         //- space
@@ -211,11 +216,10 @@ span
           span {{ card.space.name }}
         //- user
         UserLabelInline(v-if="card.user.id && userIsNotCurrentUser(card.user.id)" :user="card.user")
+        //- [·]
+        ItemCheckboxButton(:visible="cardIsTodo(card)" :card="card" :canEditItem="canEditCard(card)" :parentIsList="true")
         //- card info
         span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
-          //- checkbox
-          template(v-if="cardIsTodo(card)")
-            button.small-button ss
           //- name
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")

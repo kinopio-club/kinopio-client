@@ -81,6 +81,7 @@ const selectCard = (card) => {
   section.results-section(v-if="cards.length")
     CardList(
       :cards="cards"
+      :shouldHideDate="true"
       @selectCard="selectCard"
     )
 </template>

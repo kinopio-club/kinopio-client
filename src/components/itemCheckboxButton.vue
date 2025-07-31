@@ -22,6 +22,7 @@ const emit = defineEmits(['toggleItemChecked'])
 const props = defineProps({
   visible: Boolean,
   canEditItem: Boolean,
+  parentIsList: Boolean,
   card: Object,
   box: Object
 })
@@ -42,7 +43,9 @@ const toggleItemChecked = (event) => {
   if (globalStore.preventDraggedBoxFromShowingDetails) { return }
   if (!props.canEditItem) { return }
   const value = !isChecked.value
-  globalStore.closeAllDialogs()
+  if (!props.parentIsList) {
+    globalStore.closeAllDialogs()
+  }
   if (props.card) {
     cardStore.toggleCardChecked(props.card.id, value)
   } else if (props.box) {
@@ -80,7 +83,7 @@ const handleMouseLeaveCheckbox = () => {
   @touchend.prevent="toggleItemChecked"
   @mouseenter="handleMouseEnterCheckbox"
   @mouseleave="handleMouseLeaveCheckbox"
-  :class="{ 'is-box': props.box }"
+  :class="{ 'is-box': props.box, 'parent-is-list': props.parentIsList }"
 )
   label(:class="{active: isChecked, disabled: !props.canEditItem}")
     input(name="checkbox" type="checkbox" v-model="checkboxState")
@@ -97,6 +100,12 @@ const handleMouseLeaveCheckbox = () => {
     padding-left 8px
     padding-top 5px
     padding-bottom 6px
+  &.parent-is-list
+    padding-top 0
+    padding-left 0
+    padding-bottom 0
+    padding-right 5px
+
   label
     pointer-events none
     width 20px

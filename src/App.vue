@@ -967,7 +967,8 @@ li
   color var(--primary)
   &:hover,
   &:focus
-    input[type="checkbox"]
+    input[type="checkbox"],
+    label
       background-color var(--secondary-hover-background)
   input[type="checkbox"]
     pointer-events none
