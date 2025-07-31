@@ -30,7 +30,7 @@ let currentIteration, updatePositionTimer
 let unsubscribes
 
 onMounted(() => {
-  globalStore.clearPreviousResultItem()
+  clearPreviousResultItem()
   window.addEventListener('resize', updateHeights)
 
   const globalActionUnsubscribe = globalStore.$onAction(
@@ -66,7 +66,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   updateHeights()
   if (value) {
-    globalStore.clearPreviousResultItem()
+    clearPreviousResultItem()
     state.hasSearched = false
     globalStore.shouldExplicitlyHideFooter = true
     if (utils.isMobile()) { return }
@@ -81,6 +81,9 @@ const triggerFocusResultsFilter = async () => {
 }
 const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const clearPreviousResultItem = () => {
+  globalStore.clearPreviousResultItem()
+}
 
 // search
 
