@@ -16,6 +16,8 @@ import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 
 dayjs.extend(isToday)
 
@@ -125,11 +127,6 @@ const colorIsDark = (card) => {
   }
   return utils.colorIsDark(card.backgroundColor)
 }
-const styles = (card) => {
-  return {
-    backgroundColor: card.backgroundColor
-  }
-}
 const dateIsToday = (card) => {
   const date = cardDate(card)
   if (!date) { return }
@@ -137,6 +134,20 @@ const dateIsToday = (card) => {
 }
 const isCurrentCard = (card) => {
   return props.currentCard?.id === card.id
+}
+const nameIsColor = (card) => {
+  const name = card.name.trim()
+  return colord(name).isValid()
+}
+const cardInfoStyles = (card) => {
+  const styles = {}
+  if (card.backgroundColor) {
+    styles.backgroundColor = card.backgroundColor
+  }
+  if (nameIsColor(card)) {
+    styles.backgroundColor = card.name
+  }
+  return styles
 }
 
 // [·] checkbox cards
@@ -216,7 +227,7 @@ span
         //- [·]
         ItemCheckboxButton(:visible="cardIsTodo(card)" :card="card" :canEditItem="canEditCard(card)" :parentIsList="true")
         //- card info
-        span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
+        span.card-info(:class="{ badge: card.backgroundColor || nameIsColor(card), 'is-dark': colorIsDark(card) }" :style="cardInfoStyles(card)")
           //- name
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
