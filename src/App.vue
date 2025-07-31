@@ -1414,8 +1414,8 @@ progress::-moz-progress-bar
   height 100%
   background-color pink
   transform-origin center
-  animation: focusing .3s infinite alternate ease-out;
-  // filter blur(10px)
+  animation focusing .3s alternate ease-out
+  animation-iteration-count 6 // animation plays for ~3s
   border-radius var(--entity-radius)
   pointer-events none
 
