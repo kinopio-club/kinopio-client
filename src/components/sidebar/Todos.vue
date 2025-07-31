@@ -50,6 +50,14 @@ const updateResultsSectionHeight = async () => {
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
+
+const cards = computed(() => cardStore.getCardsIsTodo)
+
+const selectCard = (card) => {
+  console.log('🦅🦅🦅🦅', card)
+  // instead of selectcard, update cardlist to have checkbox button if card is todo,
+  // reqs userStore.getUserCanEditSpace
+}
 </script>
 
 <template lang="pug">
@@ -58,11 +66,15 @@ const updateResultsSectionHeight = async () => {
     .row
       p Todos
       Loader(:visible="!spaceIsLoaded" :isSmall="true")
-    section.subsection
+    section.subsection(v-if="!cards.length")
       p Prepend cards with
         .badge.info [ ]
         span to create checkbox cards
-
+  section.results-section(v-if="cards.length")
+    CardList(
+      :cards="cards"
+      @selectCard="selectCard"
+    )
 </template>
 
 <style lang="stylus">

@@ -144,6 +144,10 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(cardId => this.getCard(cardId))
       cards = cards.filter(card => Boolean(card))
       return cards
+    },
+    getCardsIsTodo () {
+      const cards = this.allIds.map(id => this.byId[id])
+      return cards.filter(card => utils.checkboxFromString(card.name))
     }
   },
 
