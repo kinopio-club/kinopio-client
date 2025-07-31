@@ -61,7 +61,8 @@ const emit = defineEmits([
   'onBlur',
   'focusNextItem',
   'focusPreviousItem',
-  'selectItem'
+  'selectItem',
+  'createNewSpace'
 ])
 
 const props = defineProps({
@@ -74,6 +75,7 @@ const props = defineProps({
   isLoading: Boolean,
   parentIsPinned: Boolean,
   showCreateNewSpaceFromSearch: Boolean,
+  shouldEmitcreateNewSpace: Boolean,
   isInitialValueFromSpaceListFilterInfo: Boolean
 })
 
@@ -95,6 +97,12 @@ const isManyItems = computed(() => Boolean(props.items.length >= 5))
 const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && state.filter.length > 1)
 const addSpace = async () => {
   const name = state.filter
+  if (props.shouldEmitcreateNewSpace) {
+    emit('createNewSpace', name)
+    const shouldClearFilterInfo = true
+    clearFilter(shouldClearFilterInfo)
+    return
+  }
   window.scrollTo(0, 0)
   await spaceStore.createNewSpace(name)
   await nextTick()
@@ -117,9 +125,17 @@ const clearExpiredFilter = () => {
     updateFilter(info.filter)
   }
 }
-const inputPlaceholder = computed(() => props.placeholder || 'Search')
+const inputPlaceholder = computed(() => {
+  if (props.placeholder) {
+    return props.placeholder
+  } else if (props.showCreateNewSpaceFromSearch) {
+    return 'Search or Create'
+  } else {
+    return 'Search'
+  }
+})
 const shouldShowFilter = computed(() => {
-  if (props.showFilter || state.forceShowFilter) {
+  if (props.showFilter || state.forceShowFilter || props.showCreateNewSpaceFromSearch) {
     return true
   } else if (props.hideFilter || !isManyItems.value) {
     return false
@@ -231,9 +247,9 @@ const selectItem = () => {
     @keyup.delete.stop
     @keyup.clear.stop
   )
-  button.borderless.clear-input-wrap(v-if="addSpaceIsVisible" @click="addSpace")
+  button.borderless.clear-input-wrap(v-if="addSpaceIsVisible" @click="addSpace" title="New Space")
     img.icon.add(src="@/assets/add.svg")
-  button.borderless.clear-input-wrap(@click.left="clearFilter(true)")
+  button.borderless.clear-input-wrap(@click.left="clearFilter(true)" title="Clear")
     img.icon.cancel(src="@/assets/add.svg")
 </template>
 
