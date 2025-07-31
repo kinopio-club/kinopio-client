@@ -132,8 +132,14 @@ const updateResultsSectionHeight = async () => {
 <template lang="pug">
 .todos(v-if="props.visible")
   section
-    p Todos
-    Loader(:visible="state.loading" :isSmall="true")
+    .row
+      p Todos
+      Loader(:visible="!spaceIsLoaded" :isSmall="true")
+    section.subsection
+      p Prepend cards with
+        .badge.info [ ]
+        span to create checkbox cards
+
   //- section.results-section(v-if="shouldShowSpaces" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
   //-   SpaceList(
   //-     :spaces="filteredSpaces"
