@@ -75,10 +75,7 @@ const state = reactive({
 const normalizedCards = computed(() => {
   const items = props.cards.filter(card => !state.removedCardIds.includes(card.id))
   return items.map(card => {
-    // if (cardIsTodo(card)) {
-    // todo remove []s from card name
-    // }
-    card = cardStore.cardWithNameSegments(card)
+    card = cardStore.cardWithNameSegments(card, true)
     card.user = spaceStore.getSpaceUserById(card.userId)
     globalStore.updateOtherUsers(card.user)
     if (!card.user) {

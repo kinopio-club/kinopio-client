@@ -51,7 +51,7 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 
-const cards = computed(() => cardStore.getCardsIsTodo)
+const cards = computed(() => cardStore.getCardsIsTodoSortedByY)
 
 // update cardlist to have checkbox button if card is todo,
 // reqs userStore.getUserCanEditSpace, else disabled
