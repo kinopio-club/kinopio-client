@@ -54,14 +54,13 @@ const toggleItemChecked = (event) => {
   postMessage.sendHaptics({ name: 'heavyImpact' })
   emit('toggleItemChecked')
   globalStore.currentUserIsDraggingCard = false
+  globalStore.currentUserIsDraggingBox = false
   const userId = userStore.id
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   event.stopPropagation()
   globalStore.preventMultipleSelectedActionsIsVisible = false
-  globalStore.clearMultipleSelected()
   globalStore.currentDraggingBoxId = ''
-  globalStore.updateMultipleBoxesSelectedIds([])
 }
 
 // handle events
