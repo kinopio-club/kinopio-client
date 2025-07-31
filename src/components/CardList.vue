@@ -73,6 +73,9 @@ const state = reactive({
 const normalizedCards = computed(() => {
   const items = props.cards.filter(card => !state.removedCardIds.includes(card.id))
   return items.map(card => {
+    // if (cardIsTodo(card)) {
+    // todo remove []s from card name
+    // }
     card = cardStore.cardWithNameSegments(card)
     card.user = spaceStore.getSpaceUserById(card.userId)
     globalStore.updateOtherUsers(card.user)
@@ -137,6 +140,12 @@ const isCurrentCard = (card) => {
   return props.currentCard?.id === card.id
 }
 
+// checkbox cards
+
+const cardIsTodo = (card) => {
+  return utils.checkboxFromString(card.name)
+}
+
 // scroll
 
 watch(() => props.resultsSectionHeight, async (value, prevValue) => {
@@ -197,12 +206,17 @@ span
         span.badge.status.inline-badge(:class="{'date-is-today': dateIsToday(card)}")
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
+        //- space
         span.badge.status.inline-badge(v-if="card.space")
           span {{ card.space.name }}
         //- user
         UserLabelInline(v-if="card.user.id && userIsNotCurrentUser(card.user.id)" :user="card.user")
-        //- name
+        //- card info
         span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
+          //- checkbox
+          template(v-if="cardIsTodo(card)")
+            button.small-button ss
+          //- name
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
