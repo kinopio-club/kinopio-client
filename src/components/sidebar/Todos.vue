@@ -5,7 +5,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import CardList from '@/components/CardList.vue'
@@ -13,6 +12,7 @@ import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
+const spaceStore = useSpaceStore()
 
 const resultsElement = ref(null)
 
@@ -53,10 +53,18 @@ const updateResultsSectionHeight = async () => {
 
 const cards = computed(() => cardStore.getCardsIsTodo)
 
+// update cardlist to have checkbox button if card is todo,
+// reqs userStore.getUserCanEditSpace, else disabled
+
 const selectCard = (card) => {
-  console.log('🦅🦅🦅🦅', card)
-  // instead of selectcard, update cardlist to have checkbox button if card is todo,
-  // reqs userStore.getUserCanEditSpace
+  const isCardInCurrentSpace = card.spaceId === spaceStore.id
+  if (isCardInCurrentSpace) {
+    globalStore.updateFocusOnCardId(card.id)
+    globalStore.previousResultItem = card
+  }
+  // } else {
+  // selectSpaceCard(card) Search.vue
+  // }
 }
 </script>
 
