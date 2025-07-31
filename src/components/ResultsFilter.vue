@@ -125,9 +125,17 @@ const clearExpiredFilter = () => {
     updateFilter(info.filter)
   }
 }
-const inputPlaceholder = computed(() => props.placeholder || 'Search')
+const inputPlaceholder = computed(() => {
+  if (props.placeholder) {
+    return props.placeholder
+  } else if (props.showCreateNewSpaceFromSearch) {
+    return 'Search or Create'
+  } else {
+    return 'Search'
+  }
+})
 const shouldShowFilter = computed(() => {
-  if (props.showFilter || state.forceShowFilter) {
+  if (props.showFilter || state.forceShowFilter || props.showCreateNewSpaceFromSearch) {
     return true
   } else if (props.hideFilter || !isManyItems.value) {
     return false
