@@ -13,7 +13,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
-import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+// import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
@@ -720,7 +720,7 @@ const focusColor = computed(() => {
     )
       .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
       //- [·]
-      ItemCheckboxButton(:visible="hasCheckbox" :box="box" :canEditItem="canEditBox" @toggleItemChecked="cancelLocking")
+      //- ItemCheckboxButton(:visible="hasCheckbox" :box="box" :canEditItem="canEditBox" @toggleItemChecked="cancelLocking")
       //- name
       .name-wrap(:class="{'is-checked': isChecked}")
         //- simplified nameSegments
