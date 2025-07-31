@@ -30,6 +30,7 @@ let currentIteration, updatePositionTimer
 let unsubscribes
 
 onMounted(() => {
+  globalStore.clearPreviousResultItem()
   window.addEventListener('resize', updateHeights)
 
   const globalActionUnsubscribe = globalStore.$onAction(
@@ -65,6 +66,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   updateHeights()
   if (value) {
+    globalStore.clearPreviousResultItem()
     state.hasSearched = false
     globalStore.shouldExplicitlyHideFooter = true
     if (utils.isMobile()) { return }
@@ -258,7 +260,6 @@ const updatePositionFrame = () => {
     updatePositionTimer = undefined
   }
 }
-
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()

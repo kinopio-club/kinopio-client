@@ -17,6 +17,7 @@ const spaceStore = useSpaceStore()
 const resultsElement = ref(null)
 
 onMounted(() => {
+  globalStore.clearPreviousResultItem()
   updateResultsSectionHeight()
   window.addEventListener('resize', updateResultsSectionHeight)
 })
@@ -33,6 +34,7 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    globalStore.clearPreviousResultItem()
     updateResultsSectionHeight()
   }
 })
