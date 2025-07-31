@@ -21,6 +21,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
@@ -269,27 +270,8 @@ const removeCommentBrackets = (name) => {
 
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
-  return utils.checkboxFromString(name.value)
+  return Boolean(utils.checkboxFromString(name.value))
 })
-const checkboxState = computed({
-  get () {
-    return isChecked.value
-  }
-})
-const toggleCardChecked = () => {
-  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
-  if (globalStore.preventDraggedCardFromShowingDetails) { return }
-  if (!canEditCard.value) { return }
-  const value = !isChecked.value
-  globalStore.closeAllDialogs()
-  cardStore.toggleCardChecked(props.card.id, value)
-  postMessage.sendHaptics({ name: 'heavyImpact' })
-  cancelLocking()
-  globalStore.currentUserIsDraggingCard = false
-  const userId = userStore.id
-  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
-  event.stopPropagation()
-}
 
 // media
 
@@ -1612,12 +1594,6 @@ const handleMouseLeave = () => {
   unstickToCursor()
   globalStore.currentUserIsHoveringOverCardId = ''
 }
-const handleMouseEnterCheckbox = () => {
-  globalStore.currentUserIsHoveringOverCheckboxCardId = props.card.id
-}
-const handleMouseLeaveCheckbox = () => {
-  globalStore.currentUserIsHoveringOverCheckboxCardId = ''
-}
 const handleMouseEnterUrlButton = () => {
   globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
 }
@@ -1649,7 +1625,7 @@ const updateShouldNotStickMap = () => {
     stickyMap.push(rect)
   }
   // checkbox
-  const checkbox = element.querySelector('.checkbox-wrap')
+  const checkbox = element.querySelector('.item-checkbox-button')
   if (checkbox) {
     rect = checkbox.getBoundingClientRect()
     rect = utils.rectDimensions(rect)
@@ -2034,9 +2010,7 @@ const focusColor = computed(() => {
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked" @mouseenter="handleMouseEnterCheckbox" @mouseleave="handleMouseLeaveCheckbox")
-          label(:class="{active: isChecked, disabled: !canEditCard}")
-            input(name="checkbox" type="checkbox" v-model="checkboxState")
+        ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
         //- Name
         .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
           img.icon.view(src="@/assets/comment.svg")
@@ -2055,9 +2029,7 @@ const focusColor = computed(() => {
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
           //- [·]
-          .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
-            label(:class="{active: isChecked, disabled: !canEditCard}")
-              input(name="checkbox" type="checkbox" v-model="checkboxState")
+          ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
@@ -2255,33 +2227,12 @@ const focusColor = computed(() => {
       vertical-align -2px
       margin-left 3px
 
-    .checkbox-wrap
-      z-index 1
-
     .name-wrap,
     .card-comment
       display flex
       align-items flex-start
       > .loader
         transform translateX(8px) translateY(8px)
-      .checkbox-wrap
-        padding-top 8px
-        padding-left 8px
-        padding-bottom 8px
-        label
-          pointer-events none
-          width 20px
-          height 16px
-          display flex
-          align-items center
-          padding-left 4px
-          padding-right 4px
-          input
-            margin 0
-            margin-top -1px
-            width 10px
-            height 10px
-            background-size contain
       .name
         margin 8px
         margin-top 7px
@@ -2327,26 +2278,6 @@ const focusColor = computed(() => {
     p + .url-wrap,
     .badge + .url-wrap
       margin-left 0
-
-    .checkbox-wrap
-      &:hover
-        label
-          box-shadow 3px 3px 0 var(--heavy-shadow)
-          background-color var(--secondary-hover-background)
-          input
-            background-color var(--secondary-hover-background)
-        label.active
-          box-shadow var(--active-inset-shadow)
-          background-color var(--secondary-active-background)
-          input
-            background-color var(--secondary-active-background)
-      &:active
-        label
-          box-shadow none
-          color var(--primary)
-          background-color var(--secondary-active-background)
-        input
-          background-color var(--secondary-active-background)
 
     .lock-icon
       position absolute
