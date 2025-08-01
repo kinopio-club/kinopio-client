@@ -52,6 +52,9 @@ export default defineConfig(async ({ command, mode }) => {
     optimizeDeps: {
       include: ['pinia']
     },
+    ssr: {
+      noExternal: ['macrolight']
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src')
