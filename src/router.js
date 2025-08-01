@@ -1,14 +1,16 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import Space from '@/views/Space.vue'
+import SSGDemo from '@/views/SSGDemo.vue'
+
 import consts from './consts.js'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+const router = {
+  history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
   // server level redirects in _redirects
 
@@ -28,13 +30,19 @@ const router = createRouter({
         next()
       }
     }, {
+      path: '/ssg-demo',
+      name: 'ssg-demo',
+      component: SSGDemo
+    }, {
       path: '/',
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        if (!import.meta.env.SSR) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        }
         next()
       }
     }, {
@@ -49,8 +57,8 @@ const router = createRouter({
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
         }
-        next()
         history.replaceState({}, document.title, window.location.origin)
+        next()
       }
     }, {
       path: '/update-arena-access-token',
@@ -78,6 +86,14 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadNewSpace = true
+        next()
+      }
+    }, {
+      path: '/inbox',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
+        globalStore.loadInboxSpace = true
         next()
       }
     }, {
@@ -205,12 +221,7 @@ const router = createRouter({
       }
     }
   ]
-})
-
-router.beforeEach(async (to, from) => {
-  const userStore = useUserStore()
-  await userStore.initializeUser()
-})
+}
 
 export default router
 

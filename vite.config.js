@@ -41,8 +41,17 @@ export default defineConfig(async ({ command, mode }) => {
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
   // config
   return {
+    ssgOptions: {
+      entry: 'src/main.js',
+      includedRoutes (paths, routes) {
+        return ['/ssg-demo']
+      }
+    },
     optimizeDeps: {
       include: ['pinia']
+    },
+    ssr: {
+      noExternal: ['macrolight']
     },
     resolve: {
       alias: {
