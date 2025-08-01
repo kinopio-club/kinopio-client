@@ -42,10 +42,8 @@ export default defineConfig(async ({ command, mode }) => {
   // config
   return {
     ssgOptions: {
-      // script: 'async',
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
-        // exclude all the route paths that contains 'foo'
         return ['/ssg-demo']
       }
     },
