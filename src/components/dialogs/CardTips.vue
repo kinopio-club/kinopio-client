@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import UserSettingsCards from '@/components/dialogs/UserSettingsCards.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -20,7 +21,8 @@ const props = defineProps({
   shouldHideAdvanced: Boolean
 })
 const state = reactive({
-  markdownInfoIsVisible: false
+  markdownInfoIsVisible: false,
+  cardsSettingsIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -35,16 +37,17 @@ const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftE
 const meta = computed(() => utils.metaKey())
 
 // buttons
-
+const closeDialogs = () => {
+  state.cardsSettingsIsVisible = false
+}
 const toggleMarkdownInfoIsVisible = () => {
   state.markdownInfoIsVisible = !state.markdownInfoIsVisible
   if (state.markdownInfoIsVisible) {
     scrollIntoView()
   }
 }
-const showCardSettings = () => {
-  userStore.updateUser({ prevSettingsSection: 'cards' })
-  globalStore.userSettingsIsVisible = true
+const toggleCardSettingsIsVisible = () => {
+  state.cardsSettingsIsVisible = !state.cardsSettingsIsVisible
 }
 
 // dialog position
@@ -65,13 +68,14 @@ const updateDialogHeight = async () => {
 </script>
 
 <template lang="pug">
-dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogElement")
+dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible" ref="dialogElement")
   section
     .row.title-row
       span Tips
-      button.small-button(@click="showCardSettings")
-        img.settings.icon(src="@/assets/settings.svg")
-        span Card Settings
+      .button-details
+        button.small-button(@click.stop="toggleCardSettingsIsVisible" :class="{ active: state.cardsSettingsIsVisible }")
+          img.settings.icon(src="@/assets/settings.svg")
+        UserSettingsCards(:visible="state.cardsSettingsIsVisible")
   section
     article
       div
@@ -176,5 +180,4 @@ dialog.card-tips
     margin-left 6px
   .row
     justify-content space-between
-
 </style>

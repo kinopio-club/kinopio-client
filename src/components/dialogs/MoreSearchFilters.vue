@@ -222,7 +222,7 @@ const frameIsActive = (frame) => {
 </script>
 
 <template lang="pug">
-dialog.more-filters.narrow(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.stop)
+dialog.more-search-filters.narrow(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.stop)
   section
     //- Clear
     button(@click.left="clearAllFilters")
@@ -262,7 +262,7 @@ dialog.more-filters.narrow(v-if="props.visible" :open="props.visible" ref="dialo
 </template>
 
 <style lang="stylus">
-dialog.more-filters
+dialog.more-search-filters
   @media(max-width 630px)
     left -100px
   @media(max-width 510px)

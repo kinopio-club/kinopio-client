@@ -641,7 +641,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
 
 // card buttons
 
@@ -1682,32 +1682,26 @@ const stopSticking = () => {
   clearStickyPositionOffsets()
   preventSticking = true
 }
-const isValidStickySize = (width, height, min) => {
-  const isWidth = width > min
-  const isHeight = height > min
-  return isWidth || isHeight
-}
 const updateStickyStretchResistance = () => {
   const zoom = globalStore.getSpaceZoomDecimal
   let { height, width } = props.card
   height = height * zoom
   width = width * zoom
-  let stretchResistance = 6 // higher resistance moves less
-  // larger sizes have higher resistance
-  const size = {
-    s: isValidStickySize(width, height, 250),
-    m: isValidStickySize(width, height, 500),
-    l: isValidStickySize(width, height, 1000),
-    xl: width > 1200 || height > 1000
-  }
-  if (size.xl) {
-    stretchResistance = 20
-  } else if (size.l) {
-    stretchResistance = 16
-  } else if (size.m) {
-    stretchResistance = 14
-  } else if (size.s) {
-    stretchResistance = 12
+  // larger sizes have stick less
+  let stretchResistance // higher resistance moves less
+  const area = width * height
+  switch (true) {
+    case area > 1000000:
+      stretchResistance = 24
+      break
+    case area > 60000:
+      stretchResistance = 16
+      break
+    case area > 20000:
+      stretchResistance = 10
+      break
+    default:
+      stretchResistance = 6
   }
   state.stickyStretchResistance = stretchResistance
 }

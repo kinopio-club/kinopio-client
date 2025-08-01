@@ -40,6 +40,9 @@ const scrollIntoView = () => {
 
 // types
 
+const connectionTypesByUpdatedAt = computed(() => {
+  return connectionStore.getConnectionTypesByUpdatedAt()
+})
 const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const changeConnectionTypes = (type) => {
   props.selectedConnections.forEach(connection => {
@@ -77,7 +80,7 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
       span Type
   section.results-section
     ul.results-list
-      template(v-for="type in connectionTypes" :key="type.id")
+      template(v-for="type in connectionTypesByUpdatedAt" :key="type.id")
         li(:class="{ active: connectionTypeIsActive(type) }" @click.left="changeConnectionTypes(type)" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
@@ -85,6 +88,7 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
 
 <style lang="stylus">
 .multiple-connections-picker
+  overflow auto
   .badge-in-button
     margin-left 5px
 </style>

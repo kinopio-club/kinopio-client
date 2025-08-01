@@ -124,14 +124,13 @@ const clearSearch = async () => {
 }
 const searchResultsCards = computed(() => {
   if (state.scopeIsCurrentSpace) {
-    return globalStore.searchResultsCardIds.map(id => cardStore.getCard(id))
+    return globalStore.searchResultsCardIds.map(id => utils.clone(cardStore.getCard(id)))
   } else {
     return state.searchResultsRemoteCards
   }
 })
 const previousResultItem = computed(() => globalStore.previousResultItem)
 const cards = computed(() => {
-  let cards
   if (search.value) {
     return searchResultsCards.value
   } else {
@@ -147,6 +146,7 @@ const cardsToSearch = computed(() => {
 })
 const recentlyUpdatedCards = computed(() => {
   let cards = cardStore.getAllCards
+  cards = utils.clone(cards)
   cards = cards.filter(card => card.name)
   cards = cards.map(card => {
     const date = card.nameUpdatedAt || card.createdAt

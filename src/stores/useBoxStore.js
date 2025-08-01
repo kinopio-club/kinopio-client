@@ -115,6 +115,7 @@ export const useBoxStore = defineStore('boxes', {
     // init
 
     initializeBoxes (boxes = []) {
+      boxes = boxes.filter(box => Boolean(box))
       const byId = {}
       const allIds = []
       boxes.forEach(box => {

@@ -1082,10 +1082,14 @@ export const useSpaceStore = defineStore('space', {
     },
     decrementCardsCreatedCountFromSpace (space) {
       const userStore = useUserStore()
-      space.cards = space.cards.filter(card => {
-        return userStore.getUserIsCurrentUser({ id: card.userId })
+      const cardStore = useCardStore()
+      let cards = cardStore.getAllCards
+      cards = cards.filter(card => {
+        const isSpace = card.spaceId === space.id
+        const isUser = userStore.getUserIsCurrentUser({ id: card.userId })
+        return isSpace && isUser
       })
-      userStore.updateUserCardsCreatedCount(space.cards, true)
+      userStore.updateUserCardsCreatedCount(cards, true)
     },
 
     // tags

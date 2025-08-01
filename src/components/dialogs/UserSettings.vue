@@ -113,4 +113,8 @@ dialog.user-settings
     right 8px
   .pin-button
     margin 0
+  .cards-settings
+    section
+      border-top 1px solid var(--primary-border)
+      border-radius 0 !important
 </style>
