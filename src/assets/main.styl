@@ -39,8 +39,6 @@
 @font-face
   font-family 'recoleta'
   src url("/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
-        // background-image url('assets/checkmark.svg')
-
   font-weight bold
   font-style normal
 @font-face
@@ -338,7 +336,7 @@ table
 select
   max-width 100%
   -webkit-appearance none
-  background-image url('assets/down-arrow.svg')
+  background-image url('down-arrow.svg')
   background-repeat no-repeat
   background-position center
   background-position-x calc(100% - 6px)
@@ -792,11 +790,11 @@ li
     background-color var(--primary-background)
     &:checked
       background-color var(--secondary-active-background)
-      background-image url('assets/checkmark.svg')
+      background-image url('checkmark.svg')
       background-repeat no-repeat
       background-position center
     // &.add
-    //   background-image url('assets/add.svg')
+    //   background-image url('add.svg')
     //   background-repeat no-repeat
     //   background-position center
     //   background-size 60%
@@ -805,13 +803,13 @@ li
   li
     input[type="checkbox"]
       &:checked
-        background-image url('assets/checkmark-invert.svg')
+        background-image url('checkmark-invert.svg')
       // &.add
-      //   background-image url('assets/add-invert.svg')
+      //   background-image url('add-invert.svg')
 
 details
   summary
-    background url('assets/right-arrow.svg') left top no-repeat
+    background url('right-arrow.svg') left top no-repeat
     background-position 10px 11px
     list-style-type none
     cursor pointer
@@ -833,7 +831,7 @@ details
       border-radius var(--entity-radius)
 details[open]
   > summary
-    background url('assets/down-arrow.svg') left top no-repeat
+    background url('down-arrow.svg') left top no-repeat
     background-position 10px 11px
     box-shadow var(--button-active-inset-shadow)
     background-color var(--secondary-active-background)
@@ -1043,7 +1041,7 @@ code
     filter invert(1)
 
 .marker
-  background-image url('assets/marker.svg')
+  background-image url('marker.svg')
 
 .updated,
 .open
@@ -1141,7 +1139,7 @@ code
       padding-top 5px
 
 .logo-image
-  background-image url('assets/logo-base.png')
+  background-image url('logo-base.png')
 .logo
   .logo-image
     margin-top 1px
@@ -1156,11 +1154,11 @@ code
   &:focus
     outline none
     .logo-image
-      background-image url('assets/logo-hover.png')
+      background-image url('logo-hover.png')
   &:active,
   &.active
     .logo-image
-      background-image url('assets/logo-active.png')
+      background-image url('logo-active.png')
 
 .search-wrap
   margin-left 5px
