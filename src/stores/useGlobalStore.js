@@ -595,6 +595,11 @@ export const useGlobalStore = defineStore('global', {
       this.searchResultsCardIds = []
       this.previousResultItem = {}
     },
+    clearPreviousResultItem () {
+      if (!this.focusOnCardId && !this.focusOnBoxId) {
+        this.previousResultItem = {}
+      }
+    },
 
     // Cards
 

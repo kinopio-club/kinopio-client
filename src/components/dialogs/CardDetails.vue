@@ -26,7 +26,7 @@ import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
-import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -1454,7 +1454,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
-        ItemCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
+        ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
         //- Image
         .button-wrap
           button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")

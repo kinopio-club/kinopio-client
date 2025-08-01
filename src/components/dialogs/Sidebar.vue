@@ -14,6 +14,7 @@ import Stats from '@/components/sidebar/Stats.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
+import Todos from '@/components/sidebar/Todos.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -62,7 +63,8 @@ const state = reactive({
   inboxIsVisible: false,
   statsIsVisible: false,
   favoritesIsVisible: false,
-  historyIsVisible: false
+  historyIsVisible: false,
+  todosIsVisible: false
 })
 
 const clearVisible = () => {
@@ -73,6 +75,7 @@ const clearVisible = () => {
   state.statsIsVisible = false
   state.favoritesIsVisible = false
   state.historyIsVisible = false
+  state.todosIsVisible = false
 }
 
 const updateDialogHeight = async () => {
@@ -107,7 +110,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = userStore.lastSidebarSection
-  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'todos'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -154,13 +157,15 @@ dialog#sidebar.sidebar.is-pinnable(
             span Links
         //- second row
         .segmented-buttons
+          button(@click.left="toggleSection('todos')" :class="{ active: state.todosIsVisible}" title="Todos")
+            span Todos
+          //- Favorites
+          button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
+            img.icon.time(src="@/assets/time.svg")
           //- Removed
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
-          //- Favorites
-          button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
-            img.icon.time(src="@/assets/time.svg")
 
       //- Pin
       .title-row
@@ -175,6 +180,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
+  Todos(:visible="state.todosIsVisible")
 
 </template>
 
