@@ -6,6 +6,8 @@ import { createPinia } from 'pinia'
 import webSocketPlugin from './stores/plugins/webSocketPlugin'
 import { useUserStore } from './stores/useUserStore'
 
+import './assets/main.stylus'
+
 export const createApp = ViteSSG(
   // the root component
   App,
