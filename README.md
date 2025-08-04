@@ -44,7 +44,8 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 
 | File | Description |
 | ------------- |-------------|
-| `router` | Client-side routes |
+| `main.js` | Entry point, inits router |
+| `router`  | Handles static page and app routes |
 | `App.vue` | Root component, used by all routes|
 | `stores/useGlobalStore.js` | [Pinia](https://pinia.vuejs.org//) store with global interaction state |
 | `stores/useSpaceStore.js` | Pinia store module that handles loading spaces. Each item type in a space has it's own store, e.g. `useCardStore.js`, `useBoxStore.js`, …
@@ -106,13 +107,13 @@ To view the logs:
 
 Netlify website → Deploys → Edge Functions
 
-## Static-Site Generation
+## Static Pages use Static-Site Generation (SSG)
 
-[`vite-ssg`](https://github.com/antfu-collective/vite-ssg) is used to generate static HTML files of content-heavy routes, to make them more performant and accessible to robots.
+[`vite-ssg`](https://github.com/antfu-collective/vite-ssg) is used to generate static HTML files of static page routes in `views/`, to make them accessible to robots/SEO.
 
 Routes that should get statically generated at build time (`npm run build`) are defined in `vite.config.js` in `ssgOptions.includedRoutes`. Included routes will get rendered by the server at build time. The generated HTML for each page will get stored as static HTML file.
 
-To include/exclude code execution on the server-side we can use [`import.meta.env.SSR`](https://vite.dev/guide/env-and-mode.html#built-in-constants) for JavaScript and [`<ClientOnly>`](https://github.com/antfu-collective/vite-ssg?tab=readme-ov-file#clientonly) for Vue components.
+To include/exclude code execution on the server-side we can use [`import.meta.env.SSR`](https://vite.dev/guide/env-and-mode.html#built-in-constants) for JavaScript and [`ClientOnly`](https://github.com/antfu-collective/vite-ssg?tab=readme-ov-file#clientonly) in Vue component templates.
 
 ## See Also
 
