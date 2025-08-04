@@ -1025,12 +1025,9 @@ export const useSpaceStore = defineStore('space', {
         return collaborator.id !== user.id
       })
       await cache.updateSpace('collaborators', this.collaborators, this.id)
-      if (isFromBroadcast) {
-        broadcastStore.update({ updates: user, name: 'userLeftSpace' })
-        apiStore.removeSpaceCollaborator({ space, user })
-      }
       const isCurrentUser = userStore.getUserIsCurrentUser(user)
       if (isCurrentUser) {
+        apiStore.removeSpaceCollaborator({ space, user })
         this.loadLastSpace()
         cache.removeInvitedSpace(space)
         cache.deleteSpace(space)
