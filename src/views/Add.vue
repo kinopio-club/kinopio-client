@@ -73,8 +73,8 @@ const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const currentUser = computed(() => userStore.getUserAllState)
 const isAddPage = computed(() => globalStore.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
-const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
-const textareaPlaceholder = computed(() => 'Add cards by typing here, or paste a URL')
+// const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
+const textareaPlaceholder = computed(() => 'Add cards to Inbox by typing here, or paste a URL')
 const name = computed({
   get () {
     return state.newName
@@ -199,50 +199,54 @@ const addCard = async () => {
   if (state.cardsCreatedIsOverLimit) { return }
   if (state.error.maxLength) { return }
   if (!state.newName) { return }
-  // show completion immediately, assume success
-  const newName = state.newName
-  state.success = true
-  state.newName = ''
-  textareaElement.value.style.height = 'initial'
-  focusAndSelectName()
-  const url = utils.urlFromString(newName)
-  // create card
-  const card = {
-    id: nanoid(),
-    name: newName,
-    z: 1
-  }
-  if (url) {
-    card.urlPreviewUrl = url
-    card.shouldUpdateUrlPreview = true
-  }
-  let space
   try {
+    // show completion immediately, assume success
+    const newName = state.newName
+    state.success = true
+    state.newName = ''
+    textareaElement.value.style.height = 'initial'
+    focusAndSelectName()
+    // create card
     const user = userStore.getUserAllState
-    card.userId = user.id
-    let spaceId
-    // save to inbox
-    if (state.selectedSpaceId === 'inbox') {
-      console.info('🛫 create card in inbox space', card)
-      await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
-    // save to space
-    } else {
-      spaceId = state.selectedSpaceId
-      card.spaceId = spaceId
-      console.info('🛫 create card in space', card, state.selectedSpaceId)
-      await apiStore.addToQueue({ name: 'createCard', body: card, spaceId })
+    const space = await cache.getInboxSpace()
+    const card = {
+      id: nanoid(),
+      name: newName,
+      z: 1,
+      userId: user.id,
+      spaceId: space.id
     }
-    space = { id: spaceId }
+    const url = utils.urlFromString(newName)
+    if (url) {
+      card.urlPreviewUrl = url
+      card.shouldUpdateUrlPreview = true
+    }
+
+    // let space
+    // let spaceId
+    // save to inbox
+    // if (state.selectedSpaceId === 'inbox') {
+    addCardToSpaceLocal(card)
+    postMessage.send({ name: 'addCardFromAddPage', value: card })
+    postMessage.send({ name: 'onAdded', value: true })
+    console.info('🛫 create card in inbox space', card)
+    await apiStore.createCardInInbox(card)
+    // await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
+    // save to space
+    // } else {
+    //   spaceId = state.selectedSpaceId
+    //   card.spaceId = spaceId
+    //   console.info('🛫 create card in space', card, state.selectedSpaceId)
+    //   await apiStore.addToQueue({ name: 'createCard', body: card, spaceId })
+    // }
+    // space = { id: spaceId }
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
-  addCardToSpaceLocal(card, space)
-  postMessage.send({ name: 'addCardFromAddPage', value: card })
-  postMessage.send({ name: 'onAdded', value: true })
 }
-const addCardToSpaceLocal = async (card, space) => {
-  space = await cache.space(space.id)
+const addCardToSpaceLocal = async (card) => {
+  const space = await cache.getInboxSpace()
   if (!space) { return }
   if (!space.cards) { return }
   const cards = space.cards.push(card)
@@ -347,24 +351,24 @@ main.add-page
             @touchend="focusName"
           )
       //- space picker
-      ResultsFilter(
-        v-if="state.filterIsVisible"
-        :showFilter="state.filterIsVisible"
-        :placeholder="filterPlaceholder"
-        :isLoading="state.loading.updateSpaces"
-        :items="state.spaces"
-        @updateFilteredItems="updateFilteredItems"
-        @clearFilter="clearFilter"
-      )
-      .row
+      //- ResultsFilter(
+      //-   v-if="state.filterIsVisible"
+      //-   :showFilter="state.filterIsVisible"
+      //-   :placeholder="filterPlaceholder"
+      //-   :isLoading="state.loading.updateSpaces"
+      //-   :items="state.spaces"
+      //-   @updateFilteredItems="updateFilteredItems"
+      //-   @clearFilter="clearFilter"
+      //- )
+      //- .row
         //- .segmented-buttons
         //-   button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
         //-     img.icon.search(src="@/assets/search.svg")
-        select(name="spaces" v-model="state.selectedSpaceId")
-          option(value="inbox" default) Inbox
-          template(v-for="space in filteredSpaces")
-            option(:value="space.id") {{space.name}}
-        Loader(:visible="state.loading.updateSpaces")
+        //- select(name="spaces" v-model="state.selectedSpaceId")
+        //-   option(value="inbox" default) Inbox
+        //-   template(v-for="space in filteredSpaces")
+        //-     option(:value="space.id") {{space.name}}
+        //- Loader(:visible="state.loading.updateSpaces")
       //- submit
       .row
         .button-wrap
