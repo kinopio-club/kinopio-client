@@ -93,7 +93,6 @@ if (consts.isDevelopment()) {
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
-// init user and space app state
 const init = async () => {
   if (globalStore.shouldNotifyIsJoiningGroup) {
     globalStore.updateNotifyIsJoiningGroup(true)
@@ -108,9 +107,11 @@ const init = async () => {
   historyStore.init()
   changelogStore.init()
 }
-init()
 
-onMounted(() => {
+onMounted(async () => {
+  setTimeout(() => { // move async init out of vue rendering cycle, to fix race condition
+    init()
+  }, 0)
   // bind events to window to receive events when mouse is outside window
   window.addEventListener('touchstart', handleTouchStart)
   window.addEventListener('mousemove', interact)

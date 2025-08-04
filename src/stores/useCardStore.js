@@ -313,9 +313,9 @@ export const useCardStore = defineStore('cards', {
       }
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
-      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       broadcastStore.update({ updates: card, store: 'cardStore', action: 'addCardToState' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
+      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
     },
     async createCards (cards, shouldOffsetPosition) {
       const userStore = useUserStore()
