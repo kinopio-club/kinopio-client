@@ -26,8 +26,7 @@ const state = reactive({
   email: '',
   password: '',
   loading: {
-    signIn: false,
-    updateSpaces: false
+    signIn: false
   },
   error: {
     unknownServerError: false,
@@ -38,11 +37,7 @@ const state = reactive({
   },
   success: false,
   newName: '',
-  keyboardShortcutTipIsVisible: false,
-  selectedSpaceId: 'inbox',
-  spaces: [],
-  filterIsVisible: false,
-  filteredSpaces: []
+  keyboardShortcutTipIsVisible: false
 })
 
 const textareaElement = ref(null)
@@ -57,7 +52,6 @@ window.addEventListener('message', (event) => {
 onMounted(() => {
   initUser()
   initCardTextarea()
-  updateSpaces()
   restoreValue()
 })
 
@@ -161,37 +155,6 @@ const signIn = async (event) => {
   }
 }
 
-// spaces
-
-const updateSpaces = async () => {
-  try {
-    state.loading.updateSpaces = true
-    await updateSpacesLocal()
-    await updateSpacesRemote()
-  } catch (error) {
-    console.error('🚒', error)
-  }
-  state.loading.updateSpaces = false
-}
-const updateSpacesLocal = async () => {
-  let spaces = await cache.getAllSpaces()
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  state.spaces = spaces
-}
-const updateSpacesRemote = async () => {
-  let spaces = await apiStore.getUserSpaces()
-  if (!spaces) { return }
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  state.spaces = spaces
-}
-const filteredSpaces = computed(() => {
-  if (state.filteredSpaces.length) {
-    return state.filteredSpaces
-  } else {
-    return state.spaces
-  }
-})
-
 // card
 
 const addCard = async () => {
@@ -200,7 +163,6 @@ const addCard = async () => {
   if (state.error.maxLength) { return }
   if (!state.newName) { return }
   try {
-    // show completion immediately, assume success
     const newName = state.newName
     state.success = true
     state.newName = ''
@@ -221,25 +183,11 @@ const addCard = async () => {
       card.urlPreviewUrl = url
       card.shouldUpdateUrlPreview = true
     }
-
-    // let space
-    // let spaceId
-    // save to inbox
-    // if (state.selectedSpaceId === 'inbox') {
     addCardToSpaceLocal(card)
     postMessage.send({ name: 'addCardFromAddPage', value: card })
     postMessage.send({ name: 'onAdded', value: true })
     console.info('🛫 create card in inbox space', card)
-    await apiStore.createCardInInbox(card)
-    // await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
-    // save to space
-    // } else {
-    //   spaceId = state.selectedSpaceId
-    //   card.spaceId = spaceId
-    //   console.info('🛫 create card in space', card, state.selectedSpaceId)
-    //   await apiStore.addToQueue({ name: 'createCard', body: card, spaceId })
-    // }
-    // space = { id: spaceId }
+    await apiStore.createCardInInbox(card) // show completion immediately, assume success
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
@@ -293,26 +241,6 @@ const insertLineBreak = async (event) => {
   await nextTick()
   updateTextareaSize()
 }
-
-// space filter
-
-const filterPlaceholder = computed(() => 'Filter Spaces')
-const toggleFilterIsVisible = async () => {
-  const value = !state.filterIsVisible
-  state.filterIsVisible = value
-  if (value) {
-    await nextTick()
-    globalStore.triggerFocusResultsFilter()
-  } else {
-    clearFilter()
-  }
-}
-const updateFilteredItems = (spaces) => {
-  state.filteredSpaces = spaces
-}
-const clearFilter = () => {
-  state.filteredSpaces = []
-}
 </script>
 
 <template lang="pug">
@@ -350,26 +278,7 @@ main.add-page
             @keydown.ctrl.enter.exact.stop="insertLineBreak"
             @touchend="focusName"
           )
-      //- space picker
-      //- ResultsFilter(
-      //-   v-if="state.filterIsVisible"
-      //-   :showFilter="state.filterIsVisible"
-      //-   :placeholder="filterPlaceholder"
-      //-   :isLoading="state.loading.updateSpaces"
-      //-   :items="state.spaces"
-      //-   @updateFilteredItems="updateFilteredItems"
-      //-   @clearFilter="clearFilter"
-      //- )
-      //- .row
-        //- .segmented-buttons
-        //-   button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
-        //-     img.icon.search(src="@/assets/search.svg")
-        //- select(name="spaces" v-model="state.selectedSpaceId")
-        //-   option(value="inbox" default) Inbox
-        //-   template(v-for="space in filteredSpaces")
-        //-     option(:value="space.id") {{space.name}}
-        //- Loader(:visible="state.loading.updateSpaces")
-      //- submit
+      //- buttons
       .row
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
