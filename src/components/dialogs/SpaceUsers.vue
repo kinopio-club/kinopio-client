@@ -76,6 +76,14 @@ const closeDialogs = () => {
   globalStore.userDetailsIsVisible = false
   state.groupIsVisible = false
 }
+
+// leave space
+
+const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
+const removeCollaboratorFromSpace = () => {
+  spaceStore.removeCollaboratorFromSpace(userStore.getUserAllState)
+  globalStore.closeAllDialogs()
+}
 </script>
 
 <template lang="pug">
@@ -91,6 +99,11 @@ dialog.narrow.space-users(
     p.badge.success(v-if="spaceIsOpen")
       img.icon.open(src="@/assets/open.svg")
       span Space privacy is Open, so anyone can leave comments
+    p(v-if="currentUserIsSpaceCollaborator")
+      button.danger.small-button(@click="removeCollaboratorFromSpace")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Leave Space
+
   //- users
   section.results-section(v-if="users.length")
     UserList(
