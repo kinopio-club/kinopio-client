@@ -106,6 +106,14 @@ To view the logs:
 
 Netlify website → Deploys → Edge Functions
 
+## Static-Site Generation
+
+[`vite-ssg`](https://github.com/antfu-collective/vite-ssg) is used to generate static HTML files of content-heavy routes, to make them more performant and accessible to robots.
+
+Routes that should get statically generated at build time (`npm run build`) are defined in `vite.config.js` in `ssgOptions.includedRoutes`. Included routes will get rendered by the server at build time. The generated HTML for each page will get stored as static HTML file.
+
+To include/exclude code execution on the server-side we can use [`import.meta.env.SSR`](https://vite.dev/guide/env-and-mode.html#built-in-constants) for JavaScript and [`<ClientOnly>`](https://github.com/antfu-collective/vite-ssg?tab=readme-ov-file#clientonly) for Vue components.
+
 ## See Also
 
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
