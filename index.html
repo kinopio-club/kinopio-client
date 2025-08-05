@@ -2,9 +2,11 @@
 <html lang="en">
   <head>
     <script>
-    if (document.location.pathname === '/' && document.cookie && document.cookie.indexOf('kinopio=') > -1) {
-      window.location.href = '/app';
-    }
+      const isRootPath = document.location.pathname === '/'
+      const isCookie = document.cookie.includes('kinopio')
+      if (isRootPath && isCookie) {
+        window.location.href = '/app'
+      }
     </script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
