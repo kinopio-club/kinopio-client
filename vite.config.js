@@ -68,6 +68,9 @@ export default defineConfig(async ({ command, mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         strategies: 'generateSW',
+        manifest: {
+          start_url: '/app'
+        },
         workbox: {
           navigateFallbackDenylist: [
             // Exclude exact route only
