@@ -173,6 +173,21 @@ export default defineConfig(async ({ command, mode }) => {
         key: fs.readFileSync('./.cert/key.pem'),
         cert: fs.readFileSync('./.cert/cert.pem')
       }
+    },
+    build: {
+      // skip non-important build warnings
+      rollupOptions: {
+        onwarn (warning, warn) {
+          if (
+            warning.message.includes('onUnmounted') ||
+            warning.message.includes('/*#__PURE__*/')
+          ) {
+            return
+          }
+          warn(warning)
+        }
+      }
     }
+
   }
 })
