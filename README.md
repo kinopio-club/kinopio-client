@@ -111,7 +111,7 @@ Netlify website → Deploys → Edge Functions
 
 During the build process (`npm run build`), [`vite-ssg`](https://github.com/antfu-collective/vite-ssg) generates static HTML files of routes defined in `vite.config.js` in `ssgOptions.includedRoutes`, to make them accessible to robots/SEO. Pre-rendendered pages HTML is stored in `/dist`.
 
-To test SSG routes use `npm run build-preview` to serve the static files.
+To test pre-rendered page routes use `npm run build-dev`.
 
 ## See Also
 

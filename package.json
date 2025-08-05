@@ -8,6 +8,7 @@
     "build": "vite-ssg build",
     "preview": "vite preview",
     "build-preview": "npm run build && npm run preview",
+    "build-dev": "nodemon --watch src --ext vue,styl --exec \"npm run build-preview\"",
     "lint": "eslint src --ext .js,.vue",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -43,6 +44,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
     "lint-staged": "^13.2.1",
+    "nodemon": "^3.1.10",
     "postcss": "^8.4.31",
     "pug": "^3.0.3",
     "stylus": "^0.63",
