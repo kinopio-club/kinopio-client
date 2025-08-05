@@ -28,13 +28,11 @@ onMounted(() => {
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
-  if (!import.meta.env.SSR) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
-    updateIsOnline()
-    window.addEventListener('online', updateIsOnline)
-    window.addEventListener('offline', updateIsOnline)
-  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
+  updateIsOnline()
+  window.addEventListener('online', updateIsOnline)
+  window.addEventListener('offline', updateIsOnline)
 
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -54,12 +52,10 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  if (!import.meta.env.SSR) {
-    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
-    window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateSystemTheme)
-    window.removeEventListener('online', updateIsOnline)
-    window.removeEventListener('offline', updateIsOnline)
-  }
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateSystemTheme)
+  window.removeEventListener('online', updateIsOnline)
+  window.removeEventListener('offline', updateIsOnline)
   unsubscribes()
 })
 
