@@ -158,8 +158,12 @@ export default defineConfig(async ({ command, mode }) => {
         generateRobotsTxt: false
       })
     ],
+    preview: {
+      host: '0.0.0.0' // accept connections from https://kinopio.local
+    },
     server: {
       port: 8080,
+      host: '0.0.0.0',
       fs: {
         // Allow serving files from one level up to the project root
         allow: ['..']
