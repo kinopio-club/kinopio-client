@@ -1,5 +1,5 @@
 <template lang="pug">
-  //- router-view is Space or Add
+  //- router-view is the route component (e.g. Space, Add)
   router-view
 </template>
 

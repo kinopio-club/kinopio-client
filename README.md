@@ -107,15 +107,11 @@ To view the logs:
 
 Netlify website → Deploys → Edge Functions
 
-## Static Pages use Static-Site Generation (SSG)
+## Pre-rendered Pages (Static-Site Generation, SSG)
 
-[`vite-ssg`](https://github.com/antfu-collective/vite-ssg) is used to generate static HTML files of static routes in `views/`, to make them accessible to robots/SEO.
+During the build process (`npm run build`), [`vite-ssg`](https://github.com/antfu-collective/vite-ssg) generates static HTML files of routes defined in `vite.config.js` in `ssgOptions.includedRoutes`, to make them accessible to robots/SEO. Pre-rendendered pages HTML is stored in `/dist`.
 
-Routes that should get statically generated at build time (`npm run build`) are defined in `vite.config.js` in `ssgOptions.includedRoutes`. Included routes will get rendered by the server at build time. The generated HTML for each page will get stored as static HTML file in the `dist` directory.
-
-To include/exclude code execution on the server-side we can use [`import.meta.env.SSR`](https://vite.dev/guide/env-and-mode.html#built-in-constants) for JavaScript and [`ClientOnly`](https://github.com/antfu-collective/vite-ssg?tab=readme-ov-file#clientonly) in Vue component templates.
-
-SSG is not used when running `npm run dev`. To test SSG routes run `npm run build` and then `npm run preview` to serve the static files.
+To test SSG routes run `npm run build` and then `npm run preview` to serve the static files.
 
 ## See Also
 
