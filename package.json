@@ -8,7 +8,7 @@
     "build": "vite-ssg build",
     "preview": "vite preview",
     "build-preview": "npm run build && npm run preview",
-    "build-dev": "nodemon --watch src --ext vue,styl,js --exec \"npm run build-preview\"",
+    "build-dev": "nodemon --watch src --ext vue,styl,js,html --exec \"npm run build-preview\"",
     "lint": "eslint src --ext .js,.vue",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
