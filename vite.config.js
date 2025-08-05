@@ -72,6 +72,7 @@ export default defineConfig(async ({ command, mode }) => {
           start_url: '/app'
         },
         workbox: {
+          navigateFallback: '/app.html',
           navigateFallbackDenylist: [
             // Exclude exact route only
             /^\/robots\.txt$/,
