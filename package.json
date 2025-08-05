@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite-ssg build",
+    "build-env-development": "cross-env MODE=development vite-ssg build",
     "preview": "vite preview",
-    "build-preview": "npm run build && npm run preview",
-    "build-dev": "nodemon --watch src --ext vue,styl,js,html --exec \"npm run build-preview\"",
+    "build-dev": "nodemon --watch src --ext vue,styl,js,html --exec \"npm run build-env-development && npm run preview\"",
     "lint": "eslint src --ext .js,.vue",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -41,6 +41,7 @@
     "@vue/eslint-config-standard": "^8.0.1",
     "autoprefixer": "^10.4.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "cross-env": "^10.0.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
     "lint-staged": "^13.2.1",
