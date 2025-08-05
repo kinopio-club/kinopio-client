@@ -5,7 +5,7 @@ import debounce from 'lodash-es/debounce'
 
 const showDebugMessages = false
 
-if (!import.meta.env.SSR) {
+if (consts.pageIsApp) {
   window.addEventListener('message', (event) => {
     console.info('🛫 received postmessage', event)
     const isAddPage = window.location.pathname === '/add'

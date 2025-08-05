@@ -10,7 +10,7 @@ import SSGDemo from '@/views/SSGDemo.vue'
 import consts from './consts.js'
 
 const router = {
-  history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
+  history: consts.pageIsPrerendered ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
   // server level redirects in _redirects
 
@@ -38,7 +38,7 @@ const router = {
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        if (!import.meta.env.SSR) {
+        if (consts.pageIsApp) {
           const globalStore = useGlobalStore()
           const urlParams = new URLSearchParams(window.location.search)
           globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
