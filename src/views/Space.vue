@@ -15,7 +15,6 @@ import { useHistoryStore } from '@/stores/useHistoryStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useChangelogStore } from '@/stores/useChangelogStore'
 
-import AppWrapper from '@/components/AppWrapper.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
@@ -72,11 +71,13 @@ const analyticsStore = useAnalyticsStore()
 const broadcastStore = useBroadcastStore()
 const historyStore = useHistoryStore()
 const changelogStore = useChangelogStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
+let statusRetryCount = 0
 
 // expose pinia stores to browser console for developers
 window.globalStore = useGlobalStore()
@@ -109,6 +110,18 @@ const init = async () => {
 }
 
 onMounted(async () => {
+  console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
+  console.info('🐸 kinopio-server URL', consts.apiHost())
+  if (utils.isLinux()) {
+    utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
+  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
+  updateIsOnline()
+  window.addEventListener('online', updateIsOnline)
+  window.addEventListener('offline', updateIsOnline)
+
+  // Space initialization
   setTimeout(() => { // move async init out of vue rendering cycle, to fix race condition
     init()
   }, 0)
@@ -154,14 +167,29 @@ onMounted(async () => {
         const event = args[0]
         addBox(event)
       }
+      if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
+    }
+  )
+  const broadcastActionUnsubscribe = broadcastStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'joinSpaceRoom') {
+        updateMetaRSSFeed()
+      }
     }
   )
   unsubscribes = () => {
+    broadcastActionUnsubscribe()
     globalActionUnsubscribe()
   }
 })
 
 onBeforeUnmount(() => {
+  // App cleanup
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateSystemTheme)
+  window.removeEventListener('online', updateIsOnline)
+  window.removeEventListener('offline', updateIsOnline)
+  // Space cleanup
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
@@ -225,14 +253,41 @@ const updateViewportSizes = () => {
 // user
 
 const currentUser = computed(() => userStore.getUserAllState)
+const currentUserId = computed(() => userStore.id)
 const users = computed(() => {
   let users = spaceStore.getSpaceAllUsers
   users = utils.excludeCurrentUser(users, userStore.id)
   return users
 })
 
-// styles
+const spaceName = computed(() => spaceStore.name)
+const isSpacePage = computed(() => globalStore.getIsSpacePage)
 
+// styles and position
+
+const appPageWidth = computed(() => {
+  if (!isSpacePage.value) { return }
+  const size = Math.max(globalStore.pageWidth, globalStore.viewportWidth)
+  return size + 'px'
+})
+const appPageHeight = computed(() => {
+  if (!isSpacePage.value) { return }
+  const size = Math.max(globalStore.pageHeight, globalStore.viewportHeight)
+  return size + 'px'
+})
+const pageCursor = computed(() => {
+  const isPanning = globalStore.currentUserIsPanning
+  const isPanningReady = globalStore.currentUserIsPanningReady
+  const toolbarIsBox = globalStore.getToolbarIsBox
+  if (isPanning) {
+    return 'grabbing'
+  } else if (isPanningReady) {
+    return 'grab'
+  } else if (toolbarIsBox) {
+    return 'crosshair'
+  }
+  return undefined
+})
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
@@ -675,10 +730,97 @@ const stopInteractions = async (event) => {
   globalStore.shouldSnapToGrid = false
   spaceStore.updateSpaceEditedAt()
 }
+
+// online
+
+const updateIsOnline = () => {
+  const clientStatus = window.navigator.onLine
+  if (!clientStatus) {
+    globalStore.updateIsOnline(false)
+    return
+  }
+  updateServerIsOnline()
+}
+const updateServerIsOnline = async () => {
+  const maxIterations = 10
+  const initialDelay = 1000 // 1 second
+  const serverStatus = await apiStore.getStatus()
+  if (serverStatus) {
+    globalStore.updateIsOnline(true)
+  // error offline
+  } else {
+    console.info('server online status', serverStatus)
+    globalStore.updateIsOnline(false)
+  }
+  // retry
+  let delay // delay increases up to ~15 minutes
+  if (statusRetryCount < maxIterations) {
+    statusRetryCount++
+    delay = Math.pow(2, statusRetryCount) * initialDelay
+  }
+  delay = delay || 15 * 60 * 1000 // 15 minutes
+  setTimeout(updateServerIsOnline, delay)
+}
+
+// theme
+
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const logSystemThemeChange = (event) => {
+  const themeIsSystem = userStore.themeIsSystem
+  console.warn('🌓 logSystemThemeChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
+}
+const updateSystemTheme = () => {
+  themeStore.updateSystemTheme()
+}
+
+// remote
+
+const broadcastUserLabelCursor = (event) => {
+  if (!globalStore.getIsSpacePage) { return }
+  const updates = utils.cursorPositionInSpace(event)
+  if (!updates) { return }
+  updates.userId = userStore.id
+  updates.zoom = spaceZoomDecimal.value
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
+}
+const isTouchDevice = () => {
+  globalStore.isTouchDevice = true
+}
+
+// rss
+
+const clearMetaRSSFeed = () => {
+  const link = document.querySelector("link[type='application/rss+xml']")
+  if (link) {
+    link.remove()
+  }
+}
+const updateMetaRSSFeed = () => {
+  const spaceIsPrivate = spaceStore.privacy === 'private'
+  const spaceIsRemote = spaceStore.getSpaceIsRemote
+  clearMetaRSSFeed()
+  if (!spaceIsRemote) { return }
+  if (spaceIsPrivate) { return }
+  const head = document.querySelector('head')
+  const spaceId = spaceStore.id
+  const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
+  const link = document.createElement('link')
+  link.rel = 'alternative'
+  link.type = 'application/rss+xml'
+  link.title = 'JSON Feed'
+  link.href = url
+  head.appendChild(link)
+}
 </script>
 
 <template lang="pug">
-AppWrapper
+.app(
+  @pointermove="broadcastUserLabelCursor"
+  @touchstart="isTouchDevice"
+  :style="{ width: appPageWidth + 'px', height: appPageHeight + 'px', cursor: pageCursor }"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
+  :data-current-user-id="currentUserId"
+)
   //- page
   OutsideSpaceBackground
   //- user presence cursors
