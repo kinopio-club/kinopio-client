@@ -3,7 +3,7 @@ import Counter from '@/components/Counter.vue'
 </script>
 
 <template lang="pug">
-  router-link(to="/") back
+  router-link(to="/app") App
   Counter
 </template>
 

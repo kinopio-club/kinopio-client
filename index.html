@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-  	<script>
-	  if (document.cookie && document.cookie.indexOf('kinopio=') > -1 || window.location.search.includes('app=true')) {
-	    if (document.location.pathname === '/ssg-demo') {
-	      window.location.href = '/';
-	    }
-	  }
-   	</script>
+    <script>
+    if (document.location.pathname === '/' && document.cookie && document.cookie.indexOf('kinopio=') > -1) {
+      window.location.href = '/app';
+    }
+    </script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 

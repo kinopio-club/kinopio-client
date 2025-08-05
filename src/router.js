@@ -30,11 +30,11 @@ const router = {
         next()
       }
     }, {
-      path: '/ssg-demo',
+      path: '/',
       name: 'ssg-demo',
       component: SSGDemo
     }, {
-      path: '/',
+      path: '/app',
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
