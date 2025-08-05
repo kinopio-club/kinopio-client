@@ -14,6 +14,7 @@ const exploreSpaces = async () => {
     const apiHost = 'https://api.kinopio.club'
     const response = await fetch(`${apiHost}/space/explore-spaces`)
     const data = await response.json()
+    if (!data) { return }
     const paths = data.map(space => space.url)
     return paths.map(path => `/${path}`)
   } catch (error) {
