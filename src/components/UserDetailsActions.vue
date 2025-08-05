@@ -171,25 +171,41 @@ const toggleGroupsIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.groupsIsVisible = true
 }
+
+// leave space
+
+const currentUserIsSpaceCollaborator = computed(() => isCurrentUser.value && userStore.getUserIsSpaceCollaborator)
+const removeCollaboratorFromSpace = () => {
+  spaceStore.removeCollaboratorFromSpace(userStore.getUserAllState)
+  globalStore.closeAllDialogs()
+}
 </script>
 
 <template lang="pug">
 .user-details-actions(@click.stop="closeDialogs")
   //- Current User
   section(v-if="isCurrentUser")
-    //- group
+    //- groups
     .row
       .button-wrap
         button(@click.stop="toggleGroupsIsVisible")
           img.icon.group(src="@/assets/group.svg")
           span My Groups
+  //- leave space
+  section(v-if="currentUserIsSpaceCollaborator")
+    button.danger(@click="removeCollaboratorFromSpace")
+      img.icon.cancel(src="@/assets/add.svg")
+      span Leave Space
+
   section(v-if="isCurrentUser")
     //- settings, sign out
     .row
+      //- settings
       .button-wrap
         button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
           img.icon.settings(src="@/assets/settings.svg")
           span Settings
+      //- sign out
       button.danger(v-if="currentUserIsSignedIn" @click.left="signOut")
         img.icon.sign-out(src="@/assets/sign-out.svg")
         span Sign Out
