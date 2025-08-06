@@ -34,11 +34,9 @@ When the app starts up, the `🐸 kinopio-server URL` will be displayed in the b
 
 ## Linting
 
+Linting runs on commit, but you can manually run it with
+
 	npm run lint
-
-Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Chrome. For Safari, uncomment code in `main.js` then,
-
-	./node_modules/.bin/vue-devtools
 
 ## Primary Files
 
