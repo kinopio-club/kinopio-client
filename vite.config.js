@@ -98,7 +98,7 @@ export default defineConfig(async ({ command, mode }) => {
             createCache('bk-cache', /^https:\/\/bk\.kinopio\.club\/.*/i),
             createCache('updates-cache', /^https:\/\/updates\.kinopio\.club\/.*/i),
             createCache('are-na-cache', /^https:\/\/images\.are\.na\/.*/i),
-            createCache('are-na-cache', /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i)
+            createCache('are-na-cache', /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i) // are.na cdn
           ]
         }
       }),
