@@ -95,6 +95,7 @@ export default defineConfig(async ({ command, mode }) => {
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
           runtimeCaching: [
             createCache('cdn-cache', /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i), // match all except mp3/mp4
+            createCache('img-cache', /^https:\/\/img\.kinopio\.club\/.*/i),
             createCache('bk-cache', /^https:\/\/bk\.kinopio\.club\/.*/i),
             createCache('updates-cache', /^https:\/\/updates\.kinopio\.club\/.*/i),
             createCache('are-na-cache', /^https:\/\/images\.are\.na\/.*/i),
