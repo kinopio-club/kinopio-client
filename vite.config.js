@@ -22,7 +22,7 @@ const exploreSpaces = async () => {
 const createCache = (name, pattern) => {
   const yearTime = 60 * 60 * 24 * 365 // 365 days
   return {
-    urlPattern: pattern, // match all except mp3/mp4
+    urlPattern: pattern,
     handler: 'CacheFirst',
     options: {
       cacheName: name,
