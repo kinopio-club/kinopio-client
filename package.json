@@ -8,7 +8,7 @@
     "build": "vite-ssg build",
     "build-env-development": "cross-env MODE=development vite-ssg build",
     "preview": "vite preview",
-    "build-dev": "nodemon --watch src --ext vue,styl,js,html --exec \"npm run build-env-development && npm run preview\"",
+    "build-dev": "nodemon --ignore dist --ext vue,styl,js,html --exec \"npm run build-env-development && npm run preview\"",
     "lint": "eslint src --ext .js,.vue",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
