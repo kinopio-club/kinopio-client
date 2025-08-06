@@ -365,6 +365,7 @@ const startBoxInfoInteraction = (event) => {
   if (!currentBoxIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
+  if (!canEditBox.value) { return }
   globalStore.currentDraggingBoxId = ''
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingBox = true
