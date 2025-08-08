@@ -108,13 +108,15 @@ export const useUploadStore = defineStore('upload', {
           }
           this.updatePendingUpload(updates)
           broadcastStore.update({ updates, name: 'updateRemotePendingUploads' })
+          cardStore.insertCardUploadPlaceholder(file, cardId)
           // end
           if (percentComplete >= 100) {
             const complete = {
               cardId,
               spaceId,
               boxId,
-              url: `${consts.cdnHost}/${key}`
+              url: `${consts.cdnHost}/${key}`,
+              fileName
             }
             console.info('🛬 Upload completed or failed', event, complete)
             globalStore.triggerUploadComplete(complete)

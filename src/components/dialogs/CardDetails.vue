@@ -1114,6 +1114,8 @@ const uploadFile = async (file) => {
   }
   try {
     await uploadStore.uploadFile({ file, cardId: card.value.id })
+    closeDialogs()
+    textareaSizes()
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
@@ -1191,7 +1193,10 @@ const addSplitCards = async (newCards) => {
 const updatePastedName = (event) => {
   const files = event.clipboardData.files
   if (files.length) {
-    uploadFile(files[0])
+    const file = files[0]
+    cardStore.insertCardUploadPlaceholder(file, card.value.id)
+    uploadFile(file)
+    return
   } else {
     const text = event.clipboardData.getData('text')
     state.pastedName = text

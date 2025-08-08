@@ -102,7 +102,7 @@ onMounted(async () => {
       } else if (name === 'triggerUploadComplete') {
         const { cardId, url } = args[0]
         if (cardId !== props.card.id) { return }
-        addFile({ url })
+        addFile(args[0])
       } else if (name === 'triggerUpdateUrlPreview') {
         if (args[0] === props.card.id) {
           updateMediaUrls()
@@ -803,9 +803,10 @@ const remoteUploadDraggedOverCardColor = computed(() => {
   }
 })
 const addFile = async (file) => {
+  const { url, fileName } = file
   let name = props.card.name
   name = name.replaceAll(consts.uploadPlaceholder, '')
-  const url = file.url
+  name = name.replace(fileName, '')
   const urlType = utils.urlType(url)
   const checkbox = utils.checkboxFromString(name)
   const previousUrls = utils.urlsFromString(name) || []
@@ -817,7 +818,6 @@ const addFile = async (file) => {
     }
   })
   if (!isReplaced) {
-    // prepend url to name
     name = utils.trim(name)
     name = `${url}\n\n${name}`
   }
