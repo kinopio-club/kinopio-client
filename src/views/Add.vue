@@ -170,10 +170,6 @@ const addCard = async () => {
     focusAndSelectName()
     // create card
     const user = userStore.getUserAllState
-    // const space = await cache.getInboxSpace()
-    // if (!space) {
-    //   throw new Error('inbox space not found in cache')
-    // }
     const card = {
       id: nanoid(),
       name: newName,
@@ -185,6 +181,7 @@ const addCard = async () => {
       card.urlPreviewUrl = url
       card.shouldUpdateUrlPreview = true
     }
+    // save card
     addCardToSpaceLocal(card)
     postMessage.send({ name: 'addCardFromAddPage', value: card })
     postMessage.send({ name: 'onAdded', value: true })
@@ -282,6 +279,11 @@ main.add-page
           )
       //- buttons
       .row
+        .button-wrap
+          a(:href="inboxUrl")
+            button
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+              span Inbox
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")
