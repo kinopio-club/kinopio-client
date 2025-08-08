@@ -45,7 +45,7 @@ const props = defineProps({
   position: Object,
   search: String,
   cursorPosition: Number,
-  showCreateNewSpaceFromSearch: Boolean
+  shouldShowNewSpace: Boolean
 })
 watch(() => props.visible, async (value, prevValue) => {
   await nextTick()
@@ -178,7 +178,7 @@ const toggleNewSpaceIsVisible = async () => {
     focusNewSpaceNameInput()
   }
 }
-const createNewSpace = async (name) => {
+const createNewSpace = async () => {
   if (state.isLoadingNewSpace) { return }
   if (!state.newSpaceName) {
     state.newSpaceName = utils.newSpaceName()
@@ -187,7 +187,7 @@ const createNewSpace = async (name) => {
   const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
   state.isLoadingNewSpace = true
   let space = utils.clone(newSpace)
-  space.name = name
+  space.name = state.newSpaceName
   space.id = nanoid()
   space.url = utils.url({ name: space.name, id: space.id })
   space.userId = user.id
@@ -235,7 +235,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
   //- New Space
-  section.options(v-if="showCreateNewSpaceFromSearch")
+  section.options(v-if="shouldShowNewSpace")
     .row.title-row
       button.small-button(@click="toggleNewSpaceIsVisible" :class="{ active: state.newSpaceIsVisible }")
         img.icon(src="@/assets/add.svg")
@@ -266,15 +266,12 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       :search="search"
       @focusBeforeFirstItem="handleFocusBeforeFirstItem"
       :parentDialog="parentDialog"
-      :showCreateNewSpaceFromSearch="props.showCreateNewSpaceFromSearch"
-      :shouldEmitcreateNewSpace="true"
-      @createNewSpace="createNewSpace"
     )
     .error-container(v-if="!filteredSpaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-      span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
-      span(v-else-if="activeUserIsCurrentUser") has no spaces
-      span(v-else) has no public spaces
+      span(v-if="activeUserIsCurrentUser && search") no spaces matching {{search}}
+      span(v-else-if="activeUserIsCurrentUser") no spaces
+      span(v-else) no public spaces
 </template>
 
 <style lang="stylus">
