@@ -41,6 +41,8 @@ export default {
   itemTypesWithPositions: ['boxes', 'cards'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   itemDetailsDebugIsVisible: true,
+  pageIsPrerendered: env.SSR,
+  pageIsApp: !env.SSR,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
