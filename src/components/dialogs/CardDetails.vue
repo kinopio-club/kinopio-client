@@ -1103,6 +1103,13 @@ const toggleImagePickerIsVisible = () => {
 
 // upload
 
+const removeFilenameFromCardName = (fileName, cardId) => {
+  if (cardId !== card.value.id) { return }
+  const cardName = cardId.value.name
+  // filename is not preceded by /
+  const regex = new RegExp(`(?<!/)\\b${fileName}\\b`, 'g')
+  return cardName.replace(regex, '')
+}
 const cardPendingUpload = computed(() => {
   const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => upload.cardId === card.value.id)
@@ -1114,6 +1121,10 @@ const uploadFile = async (file) => {
   }
   try {
     await uploadStore.uploadFile({ file, cardId: card.value.id })
+    const newName = removeFilenameFromCardName(file.name, cardId)
+    updateCardName(newName)
+    closeDialogs()
+    textareaSizes()
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
