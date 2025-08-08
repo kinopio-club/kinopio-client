@@ -170,13 +170,15 @@ const addCard = async () => {
     focusAndSelectName()
     // create card
     const user = userStore.getUserAllState
-    const space = await cache.getInboxSpace()
+    // const space = await cache.getInboxSpace()
+    // if (!space) {
+    //   throw new Error('inbox space not found in cache')
+    // }
     const card = {
       id: nanoid(),
       name: newName,
       z: 1,
-      userId: user.id,
-      spaceId: space.id
+      userId: user.id
     }
     const url = utils.urlFromString(newName)
     if (url) {
