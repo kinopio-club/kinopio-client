@@ -96,7 +96,7 @@ const boxes = computed(() => {
       p Prepend cards with
         .badge.info [ ]
         span to create checkbox cards
-  section.results-section(v-if="cards.length")
+  section.results-section(v-if="cards.length || boxes.length")
     BoxList(
       :boxes="boxes"
       @selectBox="selectBox"
@@ -127,4 +127,8 @@ const boxes = computed(() => {
       .user-avatar
         width 17px
         height 16px
+  .boxes-list
+    padding-left 2px
+    padding-right 2px
+    padding-bottom 2px
 </style>
