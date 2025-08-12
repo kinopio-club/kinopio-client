@@ -144,6 +144,12 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(cardId => this.getCard(cardId))
       cards = cards.filter(card => Boolean(card))
       return cards
+    },
+    getCardsIsTodoSortedByY () {
+      let cards = this.allIds.map(id => this.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards = sortBy(cards, 'y')
+      return cards.filter(card => utils.checkboxFromString(card.name))
     }
   },
 
@@ -796,8 +802,12 @@ export const useCardStore = defineStore('cards', {
 
     // name
 
-    cardWithNameSegments (card) {
+    cardWithNameSegments (card, excludeCheckboxString) {
       let name = card.name
+      if (excludeCheckboxString) {
+        const checkbox = utils.checkboxFromString(name)
+        name = name.replace(checkbox, '')
+      }
       const url = utils.urlFromString(name)
       let imageUrl
       if (utils.urlIsImage(url)) {

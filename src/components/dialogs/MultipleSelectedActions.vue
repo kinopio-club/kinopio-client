@@ -13,7 +13,7 @@ import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
-import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
@@ -460,7 +460,7 @@ dialog.narrow.multiple-selected-actions(
     //- Edit Cards
     .row(v-if="cardOrBoxIsSelected")
       //- [·]
-      ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
+      ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
       //- Connect
       button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
         img.connect-items.icon(src="@/assets/connect-items.svg")

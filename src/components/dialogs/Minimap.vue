@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 
+import BoxList from '@/components/BoxList.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
@@ -79,9 +80,6 @@ const boxes = computed(() => {
   items = utils.sortByDistanceFromOrigin(items)
   return items
 })
-const boxColorClasses = (box) => {
-  return utils.colorClasses({ backgroundColor: box.color })
-}
 const scrollIntoView = (box) => {
   globalStore.updateFocusOnBoxId(box.id)
 }
@@ -111,11 +109,8 @@ dialog.narrow.minimap.is-pinnable(
         //- .row
         span Jump to Box
       section.subsection
-        .row.boxes-row(v-if="boxes.length")
-          template(v-for="box in boxes" :key="box.id")
-            .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
-              span {{box.name}}
-        .row(v-else)
+        BoxList(:boxes="boxes" @selectBox="scrollIntoView")
+        .row(v-if="!boxes.length")
           p
             img.icon.box-icon(src="@/assets/box.svg")
             span No boxes in this space yet
@@ -136,11 +131,6 @@ dialog.minimap
     user-select none
   section.boxes-section
     user-select none
-    .row.boxes-row
-      flex-wrap wrap
-      .badge
-        margin-bottom 10px
-        text-align left
   .icon.box-icon
     border-radius 0
   summary
