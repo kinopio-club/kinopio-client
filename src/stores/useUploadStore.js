@@ -185,10 +185,11 @@ export const useUploadStore = defineStore('upload', {
         }
         cardStore.createCard(newCard)
         const fileName = utils.normalizeFileUrl(file.name)
+        const fileType = utils.fileNameImageType(file)
         const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({
           key,
-          type: file.type
+          type: file.type || fileType
         })
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
