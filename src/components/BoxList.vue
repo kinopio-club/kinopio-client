@@ -1,7 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useUserStore } from '@/stores/useUserStore'
+
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
+
+const userStore = useUserStore()
 
 const emit = defineEmits(['selectBox'])
 
@@ -15,12 +20,19 @@ const boxColorClasses = (box) => {
 const select = (box) => {
   emit('selectBox', box)
 }
+const canEditBox = (box) => {
+  return userStore.getUserCanEditBox(box)
+}
+const boxIsTodo = (box) => {
+  return Boolean(utils.checkboxFromString(box.name))
+}
 </script>
 
 <template lang="pug">
 .row.boxes-list(v-if="props.boxes.length")
   template(v-for="box in props.boxes" :key="box.id")
     .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="select(box)")
+      ItemCheckboxButton(:visible="boxIsTodo(box)" :box="box" :canEditItem="canEditBox(box)" :parentIsList="true")
       span {{box.name}}
 </template>
 
