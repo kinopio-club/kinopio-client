@@ -59,7 +59,8 @@ export const useUploadStore = defineStore('upload', {
       }
     },
     addImageDataUrl ({ file, cardId, spaceId }) {
-      const isImage = file.type.includes('image')
+      const fileType = file.type || utils.imageFileTypeFromName(file)
+      const isImage = fileType.includes('image')
       if (!isImage) { return null }
       this.updatePendingUpload({
         cardId,
@@ -185,11 +186,10 @@ export const useUploadStore = defineStore('upload', {
         }
         cardStore.createCard(newCard)
         const fileName = utils.normalizeFileUrl(file.name)
-        const fileType = utils.fileNameImageType(file)
         const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({
           key,
-          type: file.type || fileType
+          type: file.type
         })
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
