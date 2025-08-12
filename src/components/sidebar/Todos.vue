@@ -131,4 +131,6 @@ const boxes = computed(() => {
     padding-left 2px
     padding-right 2px
     padding-bottom 2px
+  .loader
+    margin-left 6px
 </style>
