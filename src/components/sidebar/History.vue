@@ -154,7 +154,7 @@ template(v-if="props.visible")
           button.small-button(@click="copyOperations")
             img.icon(src="@/assets/copy.svg")
     .row
-      .badge.info While History is in Beta, it is mainly for debugging sync issues
+      .badge.info While History is in Beta, it is mainly for debug purposes
     OfflineBadge
 
   section.results-section.history
