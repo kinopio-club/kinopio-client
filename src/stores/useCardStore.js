@@ -361,17 +361,21 @@ export const useCardStore = defineStore('cards', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
-      if (!userStore.getUserCanEditSpace) { return }
-      this.updateCardsState(updates)
-      const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPathsByItemIds(ids)
-      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      for (const card of updates) {
-        await apiStore.addToQueue({ name: 'updateCard', body: card })
+      try {
+        if (!userStore.getUserCanEditSpace) { return }
+        this.updateCardsState(updates)
+        const ids = updates.map(update => update.id)
+        connectionStore.updateConnectionPathsByItemIds(ids)
+        broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
+        for (const card of updates) {
+          await apiStore.addToQueue({ name: 'updateCard', body: card })
+        }
+        let cards = this.getAllCards
+        cards = JSON.parse(JSON.stringify(cards))
+        await cache.updateSpace('cards', cards, spaceStore.id)
+      } catch (error) {
+        console.error('🚒 updateCards', error)
       }
-      let cards = this.getAllCards
-      cards = JSON.parse(JSON.stringify(cards))
-      await cache.updateSpace('cards', cards, spaceStore.id)
     },
     updateCard (update) {
       this.updateCards([update])
