@@ -2222,6 +2222,16 @@ export default {
     const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
   },
+  imageFileTypeFromName (file) {
+    // https://regexr.com/8ggu1
+    // based on imageUrlPattern
+    // starts with a word boundary, no trailing characters
+    const imageNamePattern = new RegExp(/(\b)(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif|\.heic)/igm)
+    const match = file.name.match(imageNamePattern)
+    if (!match) { return }
+    const fileType = match[0].replace('.', 'image/')
+    return fileType
+  },
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '

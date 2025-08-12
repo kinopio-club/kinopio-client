@@ -1067,7 +1067,8 @@ const addImageOrFile = async (file) => {
   globalStore.triggerUploadComplete({
     cardId,
     spaceId,
-    url: file.url
+    url: file.url,
+    filename: file.name
   })
   await nextTick()
   updateMediaUrls()
@@ -1103,13 +1104,6 @@ const toggleImagePickerIsVisible = () => {
 
 // upload
 
-const removeFilenameFromCardName = (fileName, cardId) => {
-  if (cardId !== card.value.id) { return }
-  const cardName = cardId.value.name
-  // filename is not preceded by /
-  const regex = new RegExp(`(?<!/)\\b${fileName}\\b`, 'g')
-  return cardName.replace(regex, '')
-}
 const cardPendingUpload = computed(() => {
   const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => upload.cardId === card.value.id)
@@ -1121,8 +1115,6 @@ const uploadFile = async (file) => {
   }
   try {
     await uploadStore.uploadFile({ file, cardId: card.value.id })
-    const newName = removeFilenameFromCardName(file.name, cardId)
-    updateCardName(newName)
     closeDialogs()
     textareaSizes()
   } catch (error) {
@@ -1202,7 +1194,10 @@ const addSplitCards = async (newCards) => {
 const updatePastedName = (event) => {
   const files = event.clipboardData.files
   if (files.length) {
-    uploadFile(files[0])
+    const file = files[0]
+    cardStore.insertCardUploadPlaceholder(file, card.value.id)
+    uploadFile(file)
+    return
   } else {
     const text = event.clipboardData.getData('text')
     state.pastedName = text

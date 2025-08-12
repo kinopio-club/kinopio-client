@@ -99,7 +99,7 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
 
   UserSettingsGeneral(:visible="currentSettingsIsGeneral")
   UserSettingsControls(:visible="currentSettingsIsControls")
-  UserSettingsCards(:visible="currentSettingsIsCards")
+  UserSettingsCards(:visible="currentSettingsIsCards" :parentIsUserSettings="true")
 </template>
 
 <style lang="stylus">
