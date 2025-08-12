@@ -369,7 +369,9 @@ export const useCardStore = defineStore('cards', {
       for (const card of updates) {
         await apiStore.addToQueue({ name: 'updateCard', body: card })
       }
-      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
+      let cards = this.getAllCards
+      cards = JSON.parse(JSON.stringify(cards))
+      await cache.updateSpace('cards', cards, spaceStore.id)
     },
     updateCard (update) {
       this.updateCards([update])
