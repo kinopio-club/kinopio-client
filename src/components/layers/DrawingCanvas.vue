@@ -27,7 +27,6 @@ let currentStrokeId = ''
 let spaceStrokes = []
 let remoteStrokes = []
 let redoStrokes = []
-const newStrokes = []
 
 let unsubscribes
 
@@ -286,7 +285,7 @@ const startDrawing = (event) => {
 // draw
 
 const allStrokes = () => {
-  return spaceStrokes.concat(newStrokes).concat(remoteStrokes)
+  return spaceStrokes.concat(remoteStrokes)
 }
 const draw = (event) => {
   if (utils.isMultiTouch(event)) { return }
@@ -312,7 +311,6 @@ const redrawStrokes = async () => {
 
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = allStrokes()
-  console.log(strokes)
   await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
   updatePageSizes()
@@ -340,8 +338,7 @@ const endDrawing = async (event) => {
 // undo redo
 
 const undo = () => {
-  const strokes = spaceStrokes.concat(newStrokes)
-  const prevStroke = strokes.pop() // remove last stroke
+  const prevStroke = spaceStrokes.pop() // remove last stroke
   redoStrokes.push(prevStroke) // append to redo stack
   redrawStrokes()
   saveStroke({ stroke: prevStroke, isRemovedStroke: true })

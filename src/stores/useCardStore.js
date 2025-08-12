@@ -319,9 +319,9 @@ export const useCardStore = defineStore('cards', {
       }
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
-      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       broadcastStore.update({ updates: card, store: 'cardStore', action: 'addCardToState' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
+      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
     },
     async createCards (cards, shouldOffsetPosition) {
       const userStore = useUserStore()
@@ -840,6 +840,18 @@ export const useCardStore = defineStore('cards', {
       } else {
         return userStore.color
       }
+    },
+    insertCardUploadPlaceholder (file, id) {
+      const card = this.getCard(id)
+      if (!card) { return }
+      const isMatch = card.name.includes(file.name)
+      if (!isMatch) { return }
+      const name = card.name.replace(file.name, consts.uploadPlaceholder)
+      const update = {
+        id,
+        name
+      }
+      this.updateCard(update)
     },
     clearCardNameUploadPlaceholder (id) {
       const card = this.getCard(id)

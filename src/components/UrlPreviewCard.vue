@@ -279,9 +279,9 @@ const openUrl = async (event, url) => {
       @mouseenter="handleMouseEnterPlayButton"
       @mouseleave="handleMouseLeavePlayButton"
     )
-      button.small-button(v-if="!isTwitterUrl")
-        img.icon.stop(v-if="shouldDisplayIframe" src="@/assets/box-filled.svg")
-        img.icon.play(v-else src="@/assets/play.svg")
+      button.small-button(v-if="!isTwitterUrl" :class="colorClasses")
+        img.icon.stop(v-if="shouldDisplayIframe" src="@/assets/box-filled.svg" :class="colorClasses")
+        img.icon.play(v-else src="@/assets/play.svg" :class="colorClasses")
       img.favicon(v-if="props.card.urlPreviewFavicon" :src="props.card.urlPreviewFavicon")
     //- text
     .text(v-if="!shouldHideInfo")

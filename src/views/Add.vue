@@ -26,8 +26,7 @@ const state = reactive({
   email: '',
   password: '',
   loading: {
-    signIn: false,
-    updateSpaces: false
+    signIn: false
   },
   error: {
     unknownServerError: false,
@@ -38,11 +37,7 @@ const state = reactive({
   },
   success: false,
   newName: '',
-  keyboardShortcutTipIsVisible: false,
-  selectedSpaceId: 'inbox',
-  spaces: [],
-  filterIsVisible: false,
-  filteredSpaces: []
+  keyboardShortcutTipIsVisible: false
 })
 
 const textareaElement = ref(null)
@@ -57,7 +52,6 @@ window.addEventListener('message', (event) => {
 onMounted(() => {
   initUser()
   initCardTextarea()
-  updateSpaces()
   restoreValue()
 })
 
@@ -73,8 +67,8 @@ const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const currentUser = computed(() => userStore.getUserAllState)
 const isAddPage = computed(() => globalStore.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
-const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
-const textareaPlaceholder = computed(() => 'Add cards by typing here, or paste a URL')
+// const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
+const textareaPlaceholder = computed(() => 'Add cards to Inbox by typing here, or paste a URL')
 const name = computed({
   get () {
     return state.newName
@@ -161,37 +155,6 @@ const signIn = async (event) => {
   }
 }
 
-// spaces
-
-const updateSpaces = async () => {
-  try {
-    state.loading.updateSpaces = true
-    await updateSpacesLocal()
-    await updateSpacesRemote()
-  } catch (error) {
-    console.error('🚒', error)
-  }
-  state.loading.updateSpaces = false
-}
-const updateSpacesLocal = async () => {
-  let spaces = await cache.getAllSpaces()
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  state.spaces = spaces
-}
-const updateSpacesRemote = async () => {
-  let spaces = await apiStore.getUserSpaces()
-  if (!spaces) { return }
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  state.spaces = spaces
-}
-const filteredSpaces = computed(() => {
-  if (state.filteredSpaces.length) {
-    return state.filteredSpaces
-  } else {
-    return state.spaces
-  }
-})
-
 // card
 
 const addCard = async () => {
@@ -199,50 +162,38 @@ const addCard = async () => {
   if (state.cardsCreatedIsOverLimit) { return }
   if (state.error.maxLength) { return }
   if (!state.newName) { return }
-  // show completion immediately, assume success
-  const newName = state.newName
-  state.success = true
-  state.newName = ''
-  textareaElement.value.style.height = 'initial'
-  focusAndSelectName()
-  const url = utils.urlFromString(newName)
-  // create card
-  const card = {
-    id: nanoid(),
-    name: newName,
-    z: 1
-  }
-  if (url) {
-    card.urlPreviewUrl = url
-    card.shouldUpdateUrlPreview = true
-  }
-  let space
   try {
+    const newName = state.newName
+    state.success = true
+    state.newName = ''
+    textareaElement.value.style.height = 'initial'
+    focusAndSelectName()
+    // create card
     const user = userStore.getUserAllState
-    card.userId = user.id
-    let spaceId
-    // save to inbox
-    if (state.selectedSpaceId === 'inbox') {
-      console.info('🛫 create card in inbox space', card)
-      await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
-    // save to space
-    } else {
-      spaceId = state.selectedSpaceId
-      card.spaceId = spaceId
-      console.info('🛫 create card in space', card, state.selectedSpaceId)
-      await apiStore.addToQueue({ name: 'createCard', body: card, spaceId })
+    const card = {
+      id: nanoid(),
+      name: newName,
+      z: 1,
+      userId: user.id
     }
-    space = { id: spaceId }
+    const url = utils.urlFromString(newName)
+    if (url) {
+      card.urlPreviewUrl = url
+      card.shouldUpdateUrlPreview = true
+    }
+    // save card
+    addCardToSpaceLocal(card)
+    postMessage.send({ name: 'addCardFromAddPage', value: card })
+    postMessage.send({ name: 'onAdded', value: true })
+    console.info('🛫 create card in inbox space', card)
+    await apiStore.createCardInInbox(card) // show completion immediately, assume success
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true
   }
-  addCardToSpaceLocal(card, space)
-  postMessage.send({ name: 'addCardFromAddPage', value: card })
-  postMessage.send({ name: 'onAdded', value: true })
 }
-const addCardToSpaceLocal = async (card, space) => {
-  space = await cache.space(space.id)
+const addCardToSpaceLocal = async (card) => {
+  const space = await cache.getInboxSpace()
   if (!space) { return }
   if (!space.cards) { return }
   const cards = space.cards.push(card)
@@ -289,26 +240,6 @@ const insertLineBreak = async (event) => {
   await nextTick()
   updateTextareaSize()
 }
-
-// space filter
-
-const filterPlaceholder = computed(() => 'Filter Spaces')
-const toggleFilterIsVisible = async () => {
-  const value = !state.filterIsVisible
-  state.filterIsVisible = value
-  if (value) {
-    await nextTick()
-    globalStore.triggerFocusResultsFilter()
-  } else {
-    clearFilter()
-  }
-}
-const updateFilteredItems = (spaces) => {
-  state.filteredSpaces = spaces
-}
-const clearFilter = () => {
-  state.filteredSpaces = []
-}
 </script>
 
 <template lang="pug">
@@ -346,27 +277,13 @@ main.add-page
             @keydown.ctrl.enter.exact.stop="insertLineBreak"
             @touchend="focusName"
           )
-      //- space picker
-      ResultsFilter(
-        v-if="state.filterIsVisible"
-        :showFilter="state.filterIsVisible"
-        :placeholder="filterPlaceholder"
-        :isLoading="state.loading.updateSpaces"
-        :items="state.spaces"
-        @updateFilteredItems="updateFilteredItems"
-        @clearFilter="clearFilter"
-      )
+      //- buttons
       .row
-        //- .segmented-buttons
-        //-   button(@click='toggleFilterIsVisible' :class="{ active: state.filterIsVisible }")
-        //-     img.icon.search(src="@/assets/search.svg")
-        select(name="spaces" v-model="state.selectedSpaceId")
-          option(value="inbox" default) Inbox
-          template(v-for="space in filteredSpaces")
-            option(:value="space.id") {{space.name}}
-        Loader(:visible="state.loading.updateSpaces")
-      //- submit
-      .row
+        .button-wrap
+          a(:href="inboxUrl")
+            button
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+              span Inbox
         .button-wrap
           button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
             img.icon.add-icon(src="@/assets/add.svg")

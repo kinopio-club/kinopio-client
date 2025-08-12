@@ -498,6 +498,10 @@ label // used for checkbox buttons
     span.options-button-text
       font-size 12px
       vertical-align 4px
+  &.is-background-light
+    border-color var(--primary-border-on-light-background)
+  &.is-background-dark
+    border-color var(--primary-border-on-dark-background)
 
   &.fixed-height
     height var(--button-fixed-height)
@@ -1308,7 +1312,6 @@ code
   padding-left 5px
   padding-right 5px
   margin-top -2px
-  margin-left 0
   img
     padding 0
     vertical-align 2px

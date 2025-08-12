@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 
 import consts from '@/consts.js'
 import utils from '@/utils.js'
@@ -13,7 +14,8 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  parentIsUserSettings: Boolean
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
@@ -56,6 +58,10 @@ const updateMaxCardWidthIsWide = (isWide) => {
         span Normal
       button(@click="updateMaxCardWidthIsWide(true)" :class="{ active: maxCardWidthIsWide }")
         span Wide
+  section(v-if="parentIsUserSettings")
+    .row
+      p New Spaces
+    UserSettingsNewSpaces
 </template>
 
 <style lang="stylus">

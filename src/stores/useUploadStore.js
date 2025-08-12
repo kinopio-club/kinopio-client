@@ -59,7 +59,8 @@ export const useUploadStore = defineStore('upload', {
       }
     },
     addImageDataUrl ({ file, cardId, spaceId }) {
-      const isImage = file.type.includes('image')
+      const fileType = file.type || utils.imageFileTypeFromName(file)
+      const isImage = fileType.includes('image')
       if (!isImage) { return null }
       this.updatePendingUpload({
         cardId,
@@ -108,13 +109,15 @@ export const useUploadStore = defineStore('upload', {
           }
           this.updatePendingUpload(updates)
           broadcastStore.update({ updates, name: 'updateRemotePendingUploads' })
+          cardStore.insertCardUploadPlaceholder(file, cardId)
           // end
           if (percentComplete >= 100) {
             const complete = {
               cardId,
               spaceId,
               boxId,
-              url: `${consts.cdnHost}/${key}`
+              url: `${consts.cdnHost}/${key}`,
+              fileName
             }
             console.info('🛬 Upload completed or failed', event, complete)
             globalStore.triggerUploadComplete(complete)

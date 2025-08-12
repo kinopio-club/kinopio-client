@@ -83,7 +83,7 @@ onBeforeUnmount(() => {
   }
 })
 
-const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace', 'createNewSpace'])
+const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])
 
 const props = defineProps({
   spaces: Array,
@@ -103,7 +103,6 @@ const props = defineProps({
   readSpaceIds: Array,
   spaceReadDateType: String,
   showCreateNewSpaceFromSearch: Boolean,
-  shouldEmitcreateNewSpace: Boolean,
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
   search: String,
@@ -126,10 +125,6 @@ const state = reactive({
 const isOnline = computed(() => globalStore.isOnline)
 const isOffline = computed(() => !isOnline.value)
 const currentUser = computed(() => userStore.getUserAllState)
-
-const createNewSpace = (name) => {
-  emit('createNewSpace', name)
-}
 
 // spaces
 
@@ -410,15 +405,13 @@ const group = (groupId) => {
 <template lang="pug">
 span.space-list-wrap
   ResultsFilter(
-    :hideFilter="props.hideFilter"
-    :showFilter="props.showFilter"
+    :hideFilter="hideFilter"
+    :showFilter="showFilter"
     :items="spaces"
     :placeholder="placeholder"
-    :isLoading="props.isLoading"
-    :parentIsPinned="props.parentIsPinned"
-    :showCreateNewSpaceFromSearch="props.showCreateNewSpaceFromSearch"
-    :shouldEmitcreateNewSpace="props.shouldEmitcreateNewSpace"
-    @createNewSpace="createNewSpace"
+    :isLoading="isLoading"
+    :parentIsPinned="parentIsPinned"
+    :showCreateNewSpaceFromSearch="showCreateNewSpaceFromSearch"
     :isInitialValueFromSpaceListFilterInfo="true"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredSpaces"

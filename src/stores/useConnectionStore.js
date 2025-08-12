@@ -249,7 +249,11 @@ export const useConnectionStore = defineStore('connections', {
       })
       if (isExistingConnection) { return }
       if (connection.startItemId === connection.endItemId) { return }
-      const type = connection.type || this.getNewConnectionType
+      let type = connection.type || this.getNewConnectionType
+      if (!type) {
+        await this.createConnectionType()
+        type = this.getNewConnectionType
+      }
       connection.id = connection.id || nanoid()
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id
