@@ -247,7 +247,7 @@ span
     display block !important
     .button-badge
       box-shadow none
-      display initial
+      display inline-block
       margin-right 0
       pointer-events none
       &:hover,
