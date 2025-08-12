@@ -279,4 +279,6 @@ span
       position initial
       &.is-dark
         color var(--primary-on-dark-background)
+  .strikethrough
+    opacity 0.5
 </style>
