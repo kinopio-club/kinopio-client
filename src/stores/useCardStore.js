@@ -371,7 +371,7 @@ export const useCardStore = defineStore('cards', {
           await apiStore.addToQueue({ name: 'updateCard', body: card })
         }
         let cards = this.getAllCards
-        cards = JSON.parse(JSON.stringify(cards))
+        cards = utils.clone(cards)
         await cache.updateSpace('cards', cards, spaceStore.id)
       } catch (error) {
         console.error('🚒 updateCards', error)
