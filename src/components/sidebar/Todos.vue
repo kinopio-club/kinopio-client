@@ -4,13 +4,16 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import CardList from '@/components/CardList.vue'
+import BoxList from '@/components/BoxList.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
+const boxStore = useBoxStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 
@@ -56,11 +59,9 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 
+// cards
+
 const cards = computed(() => cardStore.getCardsIsTodoSortedByY)
-
-// update cardlist to have checkbox button if card is todo,
-// reqs userStore.getUserCanEditSpace, else disabled
-
 const selectCard = (card) => {
   const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
@@ -71,6 +72,18 @@ const selectCard = (card) => {
   // selectSpaceCard(card) Search.vue
   // }
 }
+
+// boxes
+
+const selectBox = (box) => {
+  globalStore.updateFocusOnBoxId(box.id)
+}
+const boxes = computed(() => {
+  let items = boxStore.getAllBoxes
+  items = utils.sortByDistanceFromOrigin(items)
+  items = items.filter(item => utils.checkboxFromString(item.name))
+  return items
+})
 </script>
 
 <template lang="pug">
@@ -84,6 +97,10 @@ const selectCard = (card) => {
         .badge.info [ ]
         span to create checkbox cards
   section.results-section(v-if="cards.length")
+    BoxList(
+      :boxes="boxes"
+      @selectBox="selectBox"
+    )
     CardList(
       :cards="cards"
       :shouldHideDate="true"
