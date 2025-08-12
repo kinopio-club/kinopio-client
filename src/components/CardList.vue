@@ -28,6 +28,7 @@ const themeStore = useThemeStore()
 const globalStore = useGlobalStore()
 
 const itemsPerPage = 15
+const minItemHeight = 32 // 36 // 37.5
 const resultsListElement = ref(null)
 let unsubscribes
 
@@ -179,7 +180,6 @@ const updateScroll = async () => {
   }
   state.scrollY = element.scrollTop
   const scrollHeight = element.getBoundingClientRect().height
-  const minItemHeight = 36 // 37.5
   state.pageHeight = itemsPerPage * minItemHeight * state.currentPage
   updateCurrentPage()
 }
@@ -188,9 +188,8 @@ const updateScroll = async () => {
 
 const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
-  const threshold = 0
-  const nearBottomY = state.pageHeight - (threshold * state.currentPage)
-  const isNextPage = (state.scrollY * zoom) > nearBottomY
+  const perPageHeight = itemsPerPage * minItemHeight
+  const isNextPage = (state.scrollY * zoom) + perPageHeight >= state.pageHeight
   if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
@@ -201,10 +200,8 @@ const totalPages = computed(() => {
   return total
 })
 const itemsRendered = computed(() => {
-  let items = props.cards
   const max = state.currentPage * itemsPerPage
-  items = normalizedCards.value.slice(0, max)
-  return items
+  return normalizedCards.value.slice(0, max)
 })
 
 </script>
