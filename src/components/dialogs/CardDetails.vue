@@ -1067,7 +1067,8 @@ const addImageOrFile = async (file) => {
   globalStore.triggerUploadComplete({
     cardId,
     spaceId,
-    url: file.url
+    url: file.url,
+    filename: file.name
   })
   await nextTick()
   updateMediaUrls()

@@ -100,9 +100,9 @@ onMounted(async () => {
           globalStore.scrollElementIntoView({ element, positionIsCenter: true })
         }
       } else if (name === 'triggerUploadComplete') {
-        const { cardId, url } = args[0]
+        const { cardId, url } = args[0] // cardId, spaceId, url, fileName
         if (cardId !== props.card.id) { return }
-        addFile(args[0])
+        addCompletedUpload(args[0])
       } else if (name === 'triggerUpdateUrlPreview') {
         if (args[0] === props.card.id) {
           updateMediaUrls()
@@ -802,8 +802,8 @@ const remoteUploadDraggedOverCardColor = computed(() => {
     return undefined
   }
 })
-const addFile = async (file) => {
-  const { url, fileName } = file
+const addCompletedUpload = async (upload) => {
+  const { url, fileName } = upload
   let name = props.card.name
   name = name.replaceAll(consts.uploadPlaceholder, '')
   name = name.replace(fileName, '')
