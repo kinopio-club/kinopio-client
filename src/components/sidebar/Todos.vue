@@ -61,7 +61,11 @@ const updateResultsSectionHeight = async () => {
 
 // cards
 
-const cards = computed(() => cardStore.getCardsIsTodoSortedByY)
+const cards = computed(() => {
+  let items = cardStore.getCardsIsTodoSortedByY
+  items = utils.sortByDistanceFromOrigin(items)
+  return items
+})
 const selectCard = (card) => {
   const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
