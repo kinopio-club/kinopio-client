@@ -26,6 +26,14 @@ const canEditBox = (box) => {
 const boxIsTodo = (box) => {
   return Boolean(utils.checkboxFromString(box.name))
 }
+const boxName = (box) => {
+  const checkbox = utils.checkboxFromString(box.name)
+  if (checkbox) {
+    return box.name.replace(checkbox, '')
+  } else {
+    return box.name
+  }
+}
 </script>
 
 <template lang="pug">
@@ -33,7 +41,7 @@ const boxIsTodo = (box) => {
   template(v-for="box in props.boxes" :key="box.id")
     .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="select(box)")
       ItemCheckboxButton(:visible="boxIsTodo(box)" :box="box" :canEditItem="canEditBox(box)" :parentIsList="true")
-      span {{box.name}}
+      span {{boxName(box)}}
 </template>
 
 <style lang="stylus">
