@@ -341,6 +341,11 @@ const controlPointPosition = ({ x, y }) => {
   y = newPointPosition(y, cycleProgress, isForwardCycle)
   return { x, y }
 }
+const updateElementPath = (path) => {
+  const element = connectionPathElement.value
+  if (!element) { return }
+  element.setAttribute('d', path)
+}
 // line jiggling animation
 const animationFrame = () => {
   if (state.frameCount === 0) {
@@ -363,9 +368,7 @@ const animationFrame = () => {
   })
   const controlPoint = curveMatch[0]
   state.pathWhileSelected = updatedPath(state.pathWhileSelected, controlPoint, x, y)
-  const element = connectionPathElement.value
-  if (!element) { return }
-  element.setAttribute('d', state.pathWhileSelected)
+  updateElementPath(state.pathWhileSelected)
   if (shouldAnimate.value) {
     window.requestAnimationFrame(animationFrame)
   }
@@ -432,6 +435,13 @@ const isActive = computed(() => {
     isCurrentItemConnection.value ||
     isConnectedToMultipleCardsSelected.value ||
     isDraggingCurrentConnectionLabel.value
+})
+watch(() => isActive.value, (value, prevValue) => {
+  if (value) { return }
+  // delay until animationFrame complete
+  setTimeout(() => {
+    updateElementPath(props.connection.path)
+  }, 10)
 })
 const isHovered = computed(() => {
   if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
