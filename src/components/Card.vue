@@ -88,6 +88,7 @@ onMounted(async () => {
     globalStore.updateFocusOnCardId(props.card.id)
   }
   await updateUrlPreviewOnload()
+  updateUrls()
   checkIfShouldUpdateIframeUrl()
   initViewportObserver()
 
@@ -162,7 +163,11 @@ const state = reactive({
   pathIsUpdated: false,
   isVisibleInViewport: false,
   shouldRenderParent: false,
-  safeColors: {}
+  safeColors: {},
+  urls: []
+})
+watch(() => props.card.name, (value, prevValue) => {
+  updateUrls()
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -268,9 +273,9 @@ const removeCommentBrackets = (name) => {
 
 // checkbox
 
-const isChecked = computed(() => utils.nameIsChecked(name.value))
+const isChecked = computed(() => utils.nameIsChecked(props.card.name))
 const hasCheckbox = computed(() => {
-  return Boolean(utils.checkboxFromString(name.value))
+  return Boolean(utils.checkboxFromString(props.card.name))
 })
 
 // media
@@ -290,9 +295,8 @@ const isAudioCard = computed(() => {
   return state.formats.audio
 })
 const cardHasMedia = computed(() => state.formats.image || state.formats.video || state.formats.audio)
-const urlsInName = computed(() => utils.urlsFromString(props.card.name))
 const updateMediaUrls = (urls) => {
-  urls = urls || urlsInName.value
+  urls = urls || state.urls
   state.formats.image = ''
   state.formats.video = ''
   state.formats.audio = ''
@@ -323,7 +327,7 @@ const updateIsPlayingAudio = (value) => {
 // group invite
 
 const groupInviteUrl = computed(() => {
-  const urls = urlsInName.value || []
+  const urls = state.urls || []
   return urls.find(url => utils.urlIsGroupInvite(url))
 })
 
@@ -336,7 +340,7 @@ const otherCard = computed(() => {
 })
 const otherCardIsVisible = computed(() => {
   if (!props.card.linkToCardId) { return }
-  const urls = urlsInName.value || []
+  const urls = state.urls || []
   const value = urls.find((url) => {
     return url?.includes(props.card.linkToCardId)
   })
@@ -502,7 +506,7 @@ const shouldJiggle = computed(() => {
 })
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
-  const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
+  const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
   let cardWidth = resizeWidth.value
   if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
@@ -872,15 +876,12 @@ const uploadFile = async (event) => {
 
 // name
 
-const name = computed(() => {
-  return props.card.name
-})
 const hasTextSegments = computed(() => {
   return nameSegments.value.find(segment => segment.isText && segment.content)
 })
 const normalizedName = computed(() => {
   // name without urls and checkbox text
-  let newName = name.value
+  let newName = props.card.name
   if (!newName) { return }
   if (newName === ' ') { return }
   if (cardHasMedia.value) {
@@ -1006,23 +1007,15 @@ const previewIsVisible = computed(() => {
 
 // url preview
 
-const urls = computed(() => {
-  const normalizedName = utils.removeMarkdownCodeblocksFromString(name.value)
-  let urls = utils.urlsFromString(normalizedName)
+const updateUrls = () => {
+  const name = utils.removeMarkdownCodeblocksFromString(props.card.name)
+  const urls = utils.urlsFromString(name)
   if (urls) {
     urls.reverse()
   }
   updateMediaUrls(urls)
-  urls = urls?.filter(url => Boolean(url))
-  return urls || []
-})
-const cardHasUrls = computed(() => {
-  if (!urls.value.length) {
-    return false
-  } else {
-    return true
-  }
-})
+  state.urls = urls?.filter(url => Boolean(url)) || []
+}
 const urlPreviewImageIsVisible = computed(() => {
   return Boolean(cardUrlPreviewIsVisible.value && props.card.urlPreviewImage && !props.card.shouldHideUrlPreviewImage)
 })
