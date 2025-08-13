@@ -4,7 +4,8 @@ export default {
       left: item.x,
       right: item.x + item.width,
       top: item.y,
-      bottom: item.y + item.height
+      bottom: item.y + item.height,
+      width: item.width
     }
   },
 
@@ -19,12 +20,14 @@ export default {
       left: rect.left + padding,
       right: rect.right - padding,
       top: rect.top + padding,
-      bottom: rect.bottom - padding
+      bottom: rect.bottom - padding,
+      width: rect.width - (padding * 2)
     }
   },
 
   getPoints (rect) {
     return [
+      { name: 'topCenter', x: rect.left + (rect.width / 2), y: rect.top },
       { name: 'topRight', x: rect.right, y: rect.top },
       { name: 'topLeft', x: rect.left, y: rect.top }
     ]
