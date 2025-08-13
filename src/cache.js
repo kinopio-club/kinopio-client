@@ -395,19 +395,18 @@ export default {
     await idb.update('queue', (value) => [])
   },
 
-  // API Sending in Progress Queue
-  // queue items are moved here at api.sendQueue
+  // Backup API queue
 
-  // async sendingQueue () {
-  //   const queue = await this.getLocal('sendingQueue')
-  //   return queue || []
-  // },
-  // async saveSendingQueue (queue) {
-  //   await this.saveLocal('sendingQueue', queue)
-  // },
-  // async clearSendingQueue () {
-  //   await this.saveLocal('sendingQueue', [])
-  // },
+  async queueBackup () {
+    const queue = await this.getLocal('queueBackup')
+    return queue || []
+  },
+  async saveQueueBackup (queue) {
+    await this.saveLocal('queueBackup', queue)
+  },
+  async clearQueueBackup () {
+    await this.saveLocal('queueBackup', [])
+  },
 
   // Invited Spaces
 
