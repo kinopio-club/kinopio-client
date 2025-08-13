@@ -27,7 +27,7 @@ export default {
 
   getPoints (rect) {
     return [
-      { name: 'topCenter', x: rect.left + (rect.width / 2), y: rect.top },
+      // { name: 'topCenter', x: rect.left + (rect.width / 2), y: rect.top },
       { name: 'topRight', x: rect.right, y: rect.top },
       { name: 'topLeft', x: rect.left, y: rect.top }
     ]
