@@ -11,14 +11,16 @@ export default {
 
   updateRectWithPadding (rect, itemType) {
     let padding
+    let offset = 0
     if (itemType === 'card') {
       padding = 12
     } else if (itemType === 'box') {
       padding = 2
+      offset = 1
     }
     return {
-      left: rect.left + padding,
-      right: rect.right - padding,
+      left: rect.left + padding + offset,
+      right: rect.right - padding - offset,
       top: rect.top + padding,
       bottom: rect.bottom - padding,
       width: rect.width - (padding * 2)
