@@ -169,7 +169,6 @@ export const useApiStore = defineStore('api', {
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
           console.info('🛬 operations ok', queue)
-          globalStore.clearSendingQueue()
         } else {
           throw response.statusText
         }
