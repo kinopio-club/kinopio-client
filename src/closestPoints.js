@@ -26,10 +26,10 @@ export default {
   },
 
   getPoints (rect) {
+    // topLeft is prioritized when distances are equal
     return [
-      // { name: 'topCenter', x: rect.left + (rect.width / 2), y: rect.top },
-      { name: 'topRight', x: rect.right, y: rect.top },
-      { name: 'topLeft', x: rect.left, y: rect.top }
+      { name: 'topLeft', x: rect.left, y: rect.top },
+      { name: 'topRight', x: rect.right, y: rect.top }
     ]
   },
 
