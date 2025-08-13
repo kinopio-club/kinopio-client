@@ -51,7 +51,8 @@ export default {
         const dx = point1.x - point2.x
         const dy = point1.y - point2.y
         const distance = Math.sqrt(dx * dx + dy * dy)
-        if (distance < minDistance) {
+        const threshold = 15
+        if (distance < (minDistance + threshold)) {
           minDistance = distance
           closestPair = { point1: { ...point1 }, point2: { ...point2 } }
           // console.log(point1, point2, distance)
