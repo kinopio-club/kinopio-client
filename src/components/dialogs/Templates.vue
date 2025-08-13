@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import templates from '@/data/templates.js'
@@ -9,6 +10,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsSectionElement = ref(null)
@@ -21,15 +23,15 @@ const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
+  updateUserTemplates()
   updateHeight()
 })
 
 const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
-  localSpaces: [],
-  spaces: [],
-  isLoadingRemoteSpaces: false
+  isLoadingRemoteSpaces: false,
+  userTemplates: []
 })
 
 const parentDialog = computed(() => 'templates')
@@ -39,15 +41,29 @@ const changeSpace = (space) => {
 
 // templates
 
-const systemTemplates = computed(() => {
-  const spaces = templates.spaces()
-  return spaces.map(space => {
+const updateUserTemplates = async () => {
+  try {
+    state.isLoadingRemoteSpaces = true
+    state.userTemplates = await apiStore.getUserTemplateSpaces() || []
+  } catch (error) {
+    console.error('🚒 updateUserTemplates', error)
+  }
+  state.isLoadingRemoteSpaces = false
+  await nextTick()
+  updateHeight()
+}
+const allTemplates = computed(() => {
+  let systemTemplates = templates.spaces()
+  systemTemplates = systemTemplates.map(space => {
     if (!space.categoryId) { return }
     const category = templates.categories().find(category => category.id === space.categoryId)
     space.category = category.name
     space.fullName = `${space.category} – ${space.name}`
     return space
   })
+  const value = state.userTemplates.concat(systemTemplates)
+  console.log(value)
+  return value
 })
 
 // dialog height
@@ -81,9 +97,9 @@ dialog.templates.narrow(
 )
   section
     p Templates
-  section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section.results-section-border-top(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
-      :spaces="systemTemplates"
+      :spaces="allTemplates"
       :showCategory="true"
       @selectSpace="changeSpace"
       :isLoading="state.isLoadingRemoteSpaces"

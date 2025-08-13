@@ -127,22 +127,11 @@ const items = computed(() => {
 })
 const label = computed(() => {
   let label, cardLabel, boxLabel
-  const isMultipleCards = props.cards.length > 1
-  const isMultipleBoxes = props.boxes.length > 1
   if (isCards.value) {
     cardLabel = 'card'
   }
-  if (isMultipleCards) {
-    cardLabel = 'cards'
-  }
   if (isBoxes.value) {
     boxLabel = 'box'
-  }
-  if (isMultipleBoxes) {
-    boxLabel = 'boxes'
-  }
-  if (cardLabel && boxLabel) {
-    label = `${cardLabel} + ${boxLabel}`
   } else {
     label = cardLabel || boxLabel
   }

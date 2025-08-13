@@ -29,7 +29,10 @@ onMounted(() => {
 const props = defineProps({
   visible: Boolean,
   cards: Array,
-  tagNamesInCard: Array
+  tagNamesInCard: {
+    type: Array,
+    default: () => []
+  }
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -56,7 +59,11 @@ const scrollIntoView = async () => {
 // tags
 
 const currentTags = computed(() => {
-  return props.tagNamesInCard || globalStore.getTags
+  if (props.tagNamesInCard.length) {
+    return props.tagNamesInCard
+  } else {
+    return globalStore.getTags
+  }
 })
 
 // select tag

@@ -153,6 +153,8 @@ dialog.pricing
   left initial
   right 8px
   max-height calc(100vh - 25px)
+  @media(max-width 500px)
+    right -100px
   p
     user-select text
   .subsection

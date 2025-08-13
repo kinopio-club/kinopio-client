@@ -200,7 +200,7 @@ export const useApiStore = defineStore('api', {
       }
       // try to to merge new item into matching prev one
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke']
+      const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
       let isPrevItem
       const newQueue = sessionQueue.map(prevItem => {
         const isOperationName = prevItem.name === newItem.name
@@ -209,7 +209,8 @@ export const useApiStore = defineStore('api', {
         const shouldIncrement = isOperationName && isOperationDelta
         const shouldMerge = isOperationName && isItemId && !shouldNotMergeOperations.includes(newItem.name)
         if (shouldIncrement) {
-          newItem.body.delta += prevItem.body.delta
+          newItem.body.delta = newItem.body.delta + prevItem.body.delta
+          isPrevItem = true
           return newItem
         } else if (shouldMerge) {
           isPrevItem = true
@@ -424,6 +425,22 @@ export const useApiStore = defineStore('api', {
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         this.handleServerError({ name: 'getUserSpaces', error })
+      }
+    },
+    async getUserTemplateSpaces () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetch(`${consts.apiHost()}/user/template-spaces`, options)
+        const currentUser = userStore
+        const spaces = await normalizeResponse(response)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+      } catch (error) {
+        this.handleServerError({ name: 'getUserTemplateSpaces', error })
       }
     },
     async getUserGroupSpaces () {

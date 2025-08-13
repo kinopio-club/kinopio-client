@@ -84,15 +84,14 @@ window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
 window.changelogStore = useChangelogStore()
+window.themeStore = useThemeStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
   window.groupStore = useGroupStore()
-  window.themeStore = useThemeStore()
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
-// init user and space app state
 const init = async () => {
   if (globalStore.shouldNotifyIsJoiningGroup) {
     globalStore.updateNotifyIsJoiningGroup(true)
@@ -107,9 +106,11 @@ const init = async () => {
   historyStore.init()
   changelogStore.init()
 }
-init()
 
-onMounted(() => {
+onMounted(async () => {
+  setTimeout(() => { // move async init out of vue rendering cycle, to fix race condition
+    init()
+  }, 0)
   // bind events to window to receive events when mouse is outside window
   window.addEventListener('touchstart', handleTouchStart)
   window.addEventListener('mousemove', interact)
@@ -694,8 +695,9 @@ main#space.space(
   DrawingCanvasBackground
   ItemsLocked
   #box-backgrounds
-  Connections
   Boxes
+  Connections
+  #box-infos
   Cards
   ItemUnlockButtons
   DrawingCanvas
@@ -752,7 +754,8 @@ Preload
   right 8px
   bottom 50px
 
-#box-backgrounds
+#box-backgrounds,
+#box-infos
   position absolute
   .box-background
     border-radius var(--entity-radius)

@@ -239,7 +239,7 @@ const notifyNewSpaceSuccess = (newSpace) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeDialogs")
+dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeDialogs")
   section(v-if="!actionIsMove && text")
     //- Copy Card Names
     button(@click.left="copyText")
@@ -248,18 +248,18 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
   section
     .row
       p {{actionLabelCapitalized}} {{pluralItem}} to space
-    //- recent spaces
-    .row.recent-spaces-row(v-if="recentSpaces.length")
-      .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
-        span {{recentSpace.name}}
     //- space picker
     .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: state.spacePickerIsVisible}")
           img.preview-thumbnail-image(v-if="state.selectedSpace.previewThumbnailImage && isOnline" :src="state.selectedSpace.previewThumbnailImage")
           span {{state.selectedSpace.name}}
-          img.down-arrow(src="@/assets/down-arrow.svg")
+          img.icon.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true" :shouldExcludeCurrentSpace="true")
+    //- recent spaces
+    .row.recent-spaces-row(v-if="recentSpaces.length")
+      .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
+        span {{recentSpace.name}}
     //- submit button
     button(@click.left="moveOrCopyToSpace" :class="{active: state.loading}")
       img.icon.cut(v-if="actionIsMove" src="@/assets/cut.svg")
@@ -267,14 +267,14 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
       span {{buttonLabel}}
       Loader(:visible="state.loading")
   //- error
-  .error-card-limit(v-if="state.cardsCreatedIsOverLimit")
+  section.error-card-limit(v-if="state.cardsCreatedIsOverLimit")
     .badge.danger Out of Cards
     p To add more cards you'll need to upgrade
     button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 </template>
 
 <style lang="stylus">
-dialog.more-or-copy-cards
+dialog.more-or-copy-items
   top -100px
   cursor initial
   .error-card-limit

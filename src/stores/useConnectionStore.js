@@ -11,11 +11,13 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import closestPoints from '@/closestPoints.js'
 
+import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
+import sortBy from 'lodash-es/sortBy'
 
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
@@ -179,6 +181,12 @@ export const useConnectionStore = defineStore('connections', {
       this.typeById = byId
       this.typeAllIds = allIds
     },
+    getConnectionTypesByUpdatedAt (types) {
+      types = types || this.getAllConnectionTypes
+      types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
+      types.reverse()
+      return types
+    },
 
     // indexes
 
@@ -250,7 +258,11 @@ export const useConnectionStore = defineStore('connections', {
       })
       if (isExistingConnection) { return }
       if (connection.startItemId === connection.endItemId) { return }
-      const type = connection.type || this.getNewConnectionType
+      let type = connection.type || this.getNewConnectionType
+      if (!type) {
+        await this.createConnectionType()
+        type = this.getNewConnectionType
+      }
       connection.id = connection.id || nanoid()
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id

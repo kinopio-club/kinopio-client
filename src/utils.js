@@ -1366,6 +1366,7 @@ export default {
   },
   migrationConnections (connections) { // migration added July 2024
     if (!connections) { return }
+    connections = connections.filter(connection => Boolean(connection))
     return connections.map(connection => {
       if (connection.startCardId) {
         connection.startItemId = connection.startCardId
@@ -1687,7 +1688,7 @@ export default {
     if (nullItemUsers) {
       userId = null
     } else {
-      userId = item.userId || user.id
+      userId = user.id || item.userId
     }
     return userId
   },
@@ -1742,8 +1743,10 @@ export default {
       return connection
     })
     tags = tags.map(tag => {
+      const userId = this.itemUserId(user, tag, nullItemUsers)
       tag.id = nanoid()
       tag.cardId = this.updateAllIds(tag, 'cardId', itemIdDeltas)
+      tag.userId = userId
       return tag
     })
     items = { cards, connections, connectionTypes, boxes, tags }
@@ -1942,6 +1945,7 @@ export default {
 
   // same as server util
   normalizeString (string) {
+    if (!string) { return }
     // remove punctuation characters, what's → whats
     string = string.replace(/'|"|‘|’|“|”/ig, '')
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
@@ -2217,6 +2221,16 @@ export default {
     const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif|\.heic)(?:\n| |\?|&)/igm)
     const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
+  },
+  imageFileTypeFromName (file) {
+    // https://regexr.com/8ggu1
+    // based on imageUrlPattern
+    // starts with a word boundary, no trailing characters
+    const imageNamePattern = new RegExp(/(\b)(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif|\.heic)/igm)
+    const match = file.name.match(imageNamePattern)
+    if (!match) { return }
+    const fileType = match[0].replace('.', 'image/')
+    return fileType
   },
   urlIsVideo (url) {
     if (!url) { return }

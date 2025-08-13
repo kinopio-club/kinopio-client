@@ -8,6 +8,7 @@ import { useThemeStore } from '@/stores/useThemeStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -15,6 +16,8 @@ import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 
 dayjs.extend(isToday)
 
@@ -25,6 +28,7 @@ const themeStore = useThemeStore()
 const globalStore = useGlobalStore()
 
 const itemsPerPage = 15
+const minItemHeight = 32 // 36 // 37.5
 const resultsListElement = ref(null)
 let unsubscribes
 
@@ -57,6 +61,7 @@ const props = defineProps({
   cards: Array,
   search: String,
   cardsShowRemoveButton: Boolean,
+  shouldHideDate: Boolean,
   dateIsCreatedAt: Boolean,
   resultsSectionHeight: Number,
   currentCard: Object,
@@ -73,7 +78,7 @@ const state = reactive({
 const normalizedCards = computed(() => {
   const items = props.cards.filter(card => !state.removedCardIds.includes(card.id))
   return items.map(card => {
-    card = cardStore.cardWithNameSegments(card)
+    card = cardStore.cardWithNameSegments(card, true)
     card.user = spaceStore.getSpaceUserById(card.userId)
     globalStore.updateOtherUsers(card.user)
     if (!card.user) {
@@ -123,11 +128,6 @@ const colorIsDark = (card) => {
   }
   return utils.colorIsDark(card.backgroundColor)
 }
-const styles = (card) => {
-  return {
-    backgroundColor: card.backgroundColor
-  }
-}
 const dateIsToday = (card) => {
   const date = cardDate(card)
   if (!date) { return }
@@ -135,6 +135,29 @@ const dateIsToday = (card) => {
 }
 const isCurrentCard = (card) => {
   return props.currentCard?.id === card.id
+}
+const nameIsColor = (card) => {
+  const name = card.name.trim()
+  return colord(name).isValid()
+}
+const cardInfoStyles = (card) => {
+  const styles = {}
+  if (card.backgroundColor) {
+    styles.backgroundColor = card.backgroundColor
+  }
+  if (nameIsColor(card)) {
+    styles.backgroundColor = card.name
+  }
+  return styles
+}
+
+// [·] checkbox cards
+
+const cardIsTodo = (card) => {
+  return Boolean(utils.checkboxFromString(card.name))
+}
+const canEditCard = (card) => {
+  return userStore.getUserCanEditCard(card)
 }
 
 // scroll
@@ -157,7 +180,6 @@ const updateScroll = async () => {
   }
   state.scrollY = element.scrollTop
   const scrollHeight = element.getBoundingClientRect().height
-  const minItemHeight = 36 // 37.5
   state.pageHeight = itemsPerPage * minItemHeight * state.currentPage
   updateCurrentPage()
 }
@@ -166,9 +188,8 @@ const updateScroll = async () => {
 
 const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
-  const threshold = 0
-  const nearBottomY = state.pageHeight - (threshold * state.currentPage)
-  const isNextPage = (state.scrollY * zoom) > nearBottomY
+  const perPageHeight = itemsPerPage * minItemHeight
+  const isNextPage = (state.scrollY * zoom) + perPageHeight >= state.pageHeight
   if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
@@ -179,10 +200,8 @@ const totalPages = computed(() => {
   return total
 })
 const itemsRendered = computed(() => {
-  let items = props.cards
   const max = state.currentPage * itemsPerPage
-  items = normalizedCards.value.slice(0, max)
-  return items
+  return normalizedCards.value.slice(0, max)
 })
 
 </script>
@@ -194,15 +213,19 @@ span
     template(v-for="card in itemsRendered" :key="card.id")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
-        span.badge.status.inline-badge(:class="{'date-is-today': dateIsToday(card)}")
+        span.badge.status.inline-badge(v-if="!props.shouldHideDate" :class="{'date-is-today': dateIsToday(card)}")
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
+        //- space
         span.badge.status.inline-badge(v-if="card.space")
           span {{ card.space.name }}
         //- user
         UserLabelInline(v-if="card.user.id && userIsNotCurrentUser(card.user.id)" :user="card.user")
-        //- name
-        span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
+        //- [·]
+        ItemCheckboxButton(:visible="cardIsTodo(card)" :card="card" :canEditItem="canEditCard(card)" :parentIsList="true")
+        //- card info
+        span.card-info(:class="{ badge: card.backgroundColor || nameIsColor(card), 'is-dark': colorIsDark(card) }" :style="cardInfoStyles(card)")
+          //- name
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
@@ -221,7 +244,7 @@ span
     display block !important
     .button-badge
       box-shadow none
-      display initial
+      display inline-block
       margin-right 0
       pointer-events none
       &:hover,
@@ -253,4 +276,6 @@ span
       position initial
       &.is-dark
         color var(--primary-on-dark-background)
+  .strikethrough
+    opacity 0.5
 </style>

@@ -286,6 +286,10 @@ export const useSpaceStore = defineStore('space', {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         await this.loadSpace(space)
+      // restore inbox space
+      } else if (globalStore.loadInboxSpace) {
+        console.info('🚃 Restore inbox space')
+        await this.loadInboxSpace()
       // create new space
       } else if (globalStore.loadNewSpace) {
         console.info('🚃 Create new space')
@@ -1040,12 +1044,9 @@ export const useSpaceStore = defineStore('space', {
         return collaborator.id !== user.id
       })
       await cache.updateSpace('collaborators', this.collaborators, this.id)
-      if (isFromBroadcast) {
-        broadcastStore.update({ updates: user, name: 'userLeftSpace' })
-        apiStore.removeSpaceCollaborator({ space, user })
-      }
       const isCurrentUser = userStore.getUserIsCurrentUser(user)
       if (isCurrentUser) {
+        apiStore.removeSpaceCollaborator({ space, user })
         this.loadLastSpace()
         cache.removeInvitedSpace(space)
         cache.deleteSpace(space)
@@ -1097,10 +1098,14 @@ export const useSpaceStore = defineStore('space', {
     },
     decrementCardsCreatedCountFromSpace (space) {
       const userStore = useUserStore()
-      space.cards = space.cards.filter(card => {
-        return userStore.getUserIsCurrentUser({ id: card.userId })
+      const cardStore = useCardStore()
+      let cards = cardStore.getAllCards
+      cards = cards.filter(card => {
+        const isSpace = card.spaceId === space.id
+        const isUser = userStore.getUserIsCurrentUser({ id: card.userId })
+        return isSpace && isUser
       })
-      userStore.updateUserCardsCreatedCount(space.cards, true)
+      userStore.updateUserCardsCreatedCount(cards, true)
     },
 
     // tags

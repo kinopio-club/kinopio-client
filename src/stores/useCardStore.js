@@ -144,6 +144,12 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(cardId => this.getCard(cardId))
       cards = cards.filter(card => Boolean(card))
       return cards
+    },
+    getCardsIsTodoSortedByY () {
+      let cards = this.allIds.map(id => this.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards = sortBy(cards, 'y')
+      return cards.filter(card => utils.checkboxFromString(card.name))
     }
   },
 
@@ -313,9 +319,9 @@ export const useCardStore = defineStore('cards', {
       }
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
-      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       broadcastStore.update({ updates: card, store: 'cardStore', action: 'addCardToState' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
+      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
     },
     async createCards (cards, shouldOffsetPosition) {
       const userStore = useUserStore()
@@ -355,15 +361,21 @@ export const useCardStore = defineStore('cards', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
-      if (!userStore.getUserCanEditSpace) { return }
-      this.updateCardsState(updates)
-      const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPathsByItemIds(ids)
-      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      for (const card of updates) {
-        await apiStore.addToQueue({ name: 'updateCard', body: card })
+      try {
+        if (!userStore.getUserCanEditSpace) { return }
+        this.updateCardsState(updates)
+        const ids = updates.map(update => update.id)
+        connectionStore.updateConnectionPathsByItemIds(ids)
+        broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
+        for (const card of updates) {
+          await apiStore.addToQueue({ name: 'updateCard', body: card })
+        }
+        let cards = this.getAllCards
+        cards = utils.clone(cards)
+        await cache.updateSpace('cards', cards, spaceStore.id)
+      } catch (error) {
+        console.error('🚒 updateCards', error)
       }
-      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
     },
     updateCard (update) {
       this.updateCards([update])
@@ -421,7 +433,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
       connectionStore.removeConnectionsFromItems(ids)
-      userStore.updateUserCardsCreatedCount(cardsToRemove, true)
+      userStore.updateUserCardsCreatedCount(cards, true)
     },
     removeCard (id) {
       this.removeCards([id])
@@ -796,8 +808,12 @@ export const useCardStore = defineStore('cards', {
 
     // name
 
-    cardWithNameSegments (card) {
+    cardWithNameSegments (card, excludeCheckboxString) {
       let name = card.name
+      if (excludeCheckboxString) {
+        const checkbox = utils.checkboxFromString(name)
+        name = name.replace(checkbox, '')
+      }
       const url = utils.urlFromString(name)
       let imageUrl
       if (utils.urlIsImage(url)) {
@@ -830,6 +846,18 @@ export const useCardStore = defineStore('cards', {
       } else {
         return userStore.color
       }
+    },
+    insertCardUploadPlaceholder (file, id) {
+      const card = this.getCard(id)
+      if (!card) { return }
+      const isMatch = card.name.includes(file.name)
+      if (!isMatch) { return }
+      const name = card.name.replace(file.name, consts.uploadPlaceholder)
+      const update = {
+        id,
+        name
+      }
+      this.updateCard(update)
     },
     clearCardNameUploadPlaceholder (id) {
       const card = this.getCard(id)

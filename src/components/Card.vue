@@ -21,6 +21,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
@@ -100,9 +101,9 @@ onMounted(async () => {
           globalStore.scrollElementIntoView({ element, positionIsCenter: true })
         }
       } else if (name === 'triggerUploadComplete') {
-        const { cardId, url } = args[0]
+        const { cardId, url } = args[0] // cardId, spaceId, url, fileName
         if (cardId !== props.card.id) { return }
-        addFile({ url })
+        addCompletedUpload(args[0])
       } else if (name === 'triggerUpdateUrlPreview') {
         if (args[0] === props.card.id) {
           updateMediaUrls()
@@ -269,27 +270,8 @@ const removeCommentBrackets = (name) => {
 
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
-  return utils.checkboxFromString(name.value)
+  return Boolean(utils.checkboxFromString(name.value))
 })
-const checkboxState = computed({
-  get () {
-    return isChecked.value
-  }
-})
-const toggleCardChecked = () => {
-  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
-  if (globalStore.preventDraggedCardFromShowingDetails) { return }
-  if (!canEditCard.value) { return }
-  const value = !isChecked.value
-  globalStore.closeAllDialogs()
-  cardStore.toggleCardChecked(props.card.id, value)
-  postMessage.sendHaptics({ name: 'heavyImpact' })
-  cancelLocking()
-  globalStore.currentUserIsDraggingCard = false
-  const userId = userStore.id
-  broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
-  event.stopPropagation()
-}
 
 // media
 
@@ -641,7 +623,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
 
 // card buttons
 
@@ -802,10 +784,11 @@ const remoteUploadDraggedOverCardColor = computed(() => {
     return undefined
   }
 })
-const addFile = async (file) => {
+const addCompletedUpload = async (upload) => {
+  const { url, fileName } = upload
   let name = props.card.name
   name = name.replaceAll(consts.uploadPlaceholder, '')
-  const url = file.url
+  name = name.replace(fileName, '')
   const urlType = utils.urlType(url)
   const checkbox = utils.checkboxFromString(name)
   const previousUrls = utils.urlsFromString(name) || []
@@ -817,7 +800,6 @@ const addFile = async (file) => {
     }
   })
   if (!isReplaced) {
-    // prepend url to name
     name = utils.trim(name)
     name = `${url}\n\n${name}`
   }
@@ -1612,12 +1594,6 @@ const handleMouseLeave = () => {
   unstickToCursor()
   globalStore.currentUserIsHoveringOverCardId = ''
 }
-const handleMouseEnterCheckbox = () => {
-  globalStore.currentUserIsHoveringOverCheckboxCardId = props.card.id
-}
-const handleMouseLeaveCheckbox = () => {
-  globalStore.currentUserIsHoveringOverCheckboxCardId = ''
-}
 const handleMouseEnterUrlButton = () => {
   globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
 }
@@ -1649,7 +1625,7 @@ const updateShouldNotStickMap = () => {
     stickyMap.push(rect)
   }
   // checkbox
-  const checkbox = element.querySelector('.checkbox-wrap')
+  const checkbox = element.querySelector('.item-checkbox-button')
   if (checkbox) {
     rect = checkbox.getBoundingClientRect()
     rect = utils.rectDimensions(rect)
@@ -1682,32 +1658,26 @@ const stopSticking = () => {
   clearStickyPositionOffsets()
   preventSticking = true
 }
-const isValidStickySize = (width, height, min) => {
-  const isWidth = width > min
-  const isHeight = height > min
-  return isWidth || isHeight
-}
 const updateStickyStretchResistance = () => {
   const zoom = globalStore.getSpaceZoomDecimal
   let { height, width } = props.card
   height = height * zoom
   width = width * zoom
-  let stretchResistance = 6 // higher resistance moves less
-  // larger sizes have higher resistance
-  const size = {
-    s: isValidStickySize(width, height, 250),
-    m: isValidStickySize(width, height, 500),
-    l: isValidStickySize(width, height, 1000),
-    xl: width > 1200 || height > 1000
-  }
-  if (size.xl) {
-    stretchResistance = 20
-  } else if (size.l) {
-    stretchResistance = 16
-  } else if (size.m) {
-    stretchResistance = 14
-  } else if (size.s) {
-    stretchResistance = 12
+  // larger sizes have stick less
+  let stretchResistance // higher resistance moves less
+  const area = width * height
+  switch (true) {
+    case area > 1000000:
+      stretchResistance = 24
+      break
+    case area > 60000:
+      stretchResistance = 16
+      break
+    case area > 20000:
+      stretchResistance = 10
+      break
+    default:
+      stretchResistance = 6
   }
   state.stickyStretchResistance = stretchResistance
 }
@@ -2040,9 +2010,7 @@ const focusColor = computed(() => {
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked" @mouseenter="handleMouseEnterCheckbox" @mouseleave="handleMouseLeaveCheckbox")
-          label(:class="{active: isChecked, disabled: !canEditCard}")
-            input(name="checkbox" type="checkbox" v-model="checkboxState")
+        ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
         //- Name
         .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
           img.icon.view(src="@/assets/comment.svg")
@@ -2061,9 +2029,7 @@ const focusColor = computed(() => {
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
           //- [·]
-          .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
-            label(:class="{active: isChecked, disabled: !canEditCard}")
-              input(name="checkbox" type="checkbox" v-model="checkboxState")
+          ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
@@ -2261,33 +2227,12 @@ const focusColor = computed(() => {
       vertical-align -2px
       margin-left 3px
 
-    .checkbox-wrap
-      z-index 1
-
     .name-wrap,
     .card-comment
       display flex
       align-items flex-start
       > .loader
         transform translateX(8px) translateY(8px)
-      .checkbox-wrap
-        padding-top 8px
-        padding-left 8px
-        padding-bottom 8px
-        label
-          pointer-events none
-          width 20px
-          height 16px
-          display flex
-          align-items center
-          padding-left 4px
-          padding-right 4px
-          input
-            margin 0
-            margin-top -1px
-            width 10px
-            height 10px
-            background-size contain
       .name
         margin 8px
         margin-top 7px
@@ -2333,26 +2278,6 @@ const focusColor = computed(() => {
     p + .url-wrap,
     .badge + .url-wrap
       margin-left 0
-
-    .checkbox-wrap
-      &:hover
-        label
-          box-shadow 3px 3px 0 var(--heavy-shadow)
-          background-color var(--secondary-hover-background)
-          input
-            background-color var(--secondary-hover-background)
-        label.active
-          box-shadow var(--active-inset-shadow)
-          background-color var(--secondary-active-background)
-          input
-            background-color var(--secondary-active-background)
-      &:active
-        label
-          box-shadow none
-          color var(--primary)
-          background-color var(--secondary-active-background)
-        input
-          background-color var(--secondary-active-background)
 
     .lock-icon
       position absolute

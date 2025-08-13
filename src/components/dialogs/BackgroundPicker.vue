@@ -717,7 +717,7 @@ dialog.background-picker
     margin-top 10px
   .right-side-button-wrap
     pointer cursor
-    padding-right 5px
+    padding-right 4px
 
   .gradients-list
     display flex
@@ -725,6 +725,7 @@ dialog.background-picker
     align-items flex-start
     li
       width 40px
+      max-width 17%
       height 40px
       position relative
       padding 3px
@@ -738,4 +739,5 @@ dialog.background-picker
       height calc(100% - 6px)
       border-radius var(--entity-radius)
       pointer-events all
+      width 90%
 </style>

@@ -492,6 +492,7 @@ export const useUserStore = defineStore('users', {
 
     async updateUserCardsCreatedCount (cards, shouldDecrement) {
       const apiStore = useApiStore()
+      cards = cards.filter(card => Boolean(card))
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => this.getUserIsCurrentUser({ id: card.userId }))
       let delta = cards.length
@@ -525,18 +526,6 @@ export const useUserStore = defineStore('users', {
         }
       }
       return space
-    },
-
-    // email
-
-    async updateUserEmailIsVerified () {
-      const apiStore = useApiStore()
-      await apiStore.addToQueue({
-        name: 'updateUser',
-        body: {
-          emailIsVerified: true
-        }
-      })
     },
 
     // are.na

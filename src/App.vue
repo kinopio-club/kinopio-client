@@ -498,6 +498,10 @@ label // used for checkbox buttons
     span.options-button-text
       font-size 12px
       vertical-align 4px
+  &.is-background-light
+    border-color var(--primary-border-on-light-background)
+  &.is-background-dark
+    border-color var(--primary-border-on-dark-background)
 
   &.fixed-height
     height var(--button-fixed-height)
@@ -967,7 +971,8 @@ li
   color var(--primary)
   &:hover,
   &:focus
-    input[type="checkbox"]
+    input[type="checkbox"],
+    label
       background-color var(--secondary-hover-background)
   input[type="checkbox"]
     pointer-events none
@@ -991,7 +996,8 @@ li
     //   background-position center
     //   background-size 60%
 .is-dark-theme
-  label
+  label,
+  li
     input[type="checkbox"]
       &:checked
         background-image url('assets/checkmark-invert.svg')
@@ -1411,8 +1417,8 @@ progress::-moz-progress-bar
   height 100%
   background-color pink
   transform-origin center
-  animation: focusing .3s infinite alternate ease-out;
-  // filter blur(10px)
+  animation focusing .3s alternate ease-out
+  animation-iteration-count 4 // animation plays for ~2s
   border-radius var(--entity-radius)
   pointer-events none
 
