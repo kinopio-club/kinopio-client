@@ -145,7 +145,7 @@ export const useApiStore = defineStore('api', {
 
     // Add and Send Queue Operations
 
-    async sendQueue () {
+    sendQueue: debounce(async function () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const globalStore = useGlobalStore()
@@ -183,10 +183,6 @@ export const useApiStore = defineStore('api', {
         globalStore.clearSendingQueue()
         cache.clearQueueBackup()
       }
-    },
-
-    debouncedSendQueue: debounce(function () {
-      this.sendQueue()
     }, 500),
 
     async addToQueue ({ name, body, spaceId }) {
@@ -232,8 +228,8 @@ export const useApiStore = defineStore('api', {
       }
       sessionQueue = newQueue
       cache.saveQueueBackup(sessionQueue)
-      // trigger sending after wait
-      this.debouncedSendQueue()
+      // send to API after debounce period
+      this.sendQueue()
     },
 
     // Meta
