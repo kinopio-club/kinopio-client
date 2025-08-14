@@ -1100,7 +1100,7 @@ ul.results-list
 .badge,
 code
   min-width 17px
-  min-height 19px
+  min-height 18px
   border-radius var(--entity-radius)
   padding 2px 5px
   margin-right 6px
