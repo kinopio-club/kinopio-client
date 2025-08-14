@@ -209,7 +209,7 @@ template(v-if="visible")
 
   section.export
     .row
-      p Download Space
+      p Download File
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: state.pdfIsVisible }")
@@ -225,7 +225,7 @@ template(v-if="visible")
       .button-wrap
         button(@click.left="downloadLocalJson")
           img.icon.file(src="@/assets/file.svg")
-          span Kinopio JSON
+          span Space JSON
 
   section.export
     // anon user
