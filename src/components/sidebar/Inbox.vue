@@ -66,9 +66,8 @@ const updateInboxCardsLocal = async () => {
   }
 }
 const updateInboxCardsRemote = async () => {
-  if (!globalStore.isOnline) { return }
   await spaceStore.updateInboxCache()
-  updateInboxCardsLocal()
+  await updateInboxCardsLocal()
 }
 const sortCards = () => {
   state.cards = sortBy(state.cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
@@ -78,12 +77,13 @@ const restoreInboxCards = async () => {
   if (state.isLoading) { return }
   try {
     state.isLoading = true
-    updateInboxCardsLocal()
-    updateInboxCardsRemote()
+    await updateInboxCardsLocal()
+    await updateInboxCardsRemote()
   } catch (error) {
     console.error('🚒 restoreInboxCards', error)
+  } finally {
+    state.isLoading = false
   }
-  state.isLoading = false
 }
 
 // remove card

@@ -213,10 +213,6 @@ export const useSpaceStore = defineStore('space', {
       value = Boolean(value)
       return value
     },
-    getSpaceIsInbox (spaceName) {
-      spaceName = spaceName || this.name
-      return spaceName === 'Inbox'
-    },
 
     // user getters
 
@@ -1203,11 +1199,9 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const isOffline = !globalStore.isOnline
-      if (this.getSpaceIsInbox) { return }
       if (!isSignedIn) { return }
       if (isOffline) { return }
       const inbox = await apiStore.getUserInboxSpace()
-      console.info('🌍 updateInboxCache')
       await cache.saveSpace(inbox)
     }
 
