@@ -13,6 +13,7 @@ import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import AddToInbox from '@/components/AddToInbox.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
@@ -51,10 +52,7 @@ const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
-
-const loadInboxSpace = () => {
-  spaceStore.loadInboxSpace()
-}
+const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 
 // list cards
 
@@ -149,9 +147,10 @@ template(v-if="visible")
         span Move from Inbox
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
-      button.small-button(@click="loadInboxSpace")
-        img.icon(src="@/assets/inbox.svg")
-        img.icon.visit(src="@/assets/visit.svg")
+      a(:href="inboxUrl")
+        button.small-button
+          img.icon(src="@/assets/inbox.svg")
+          img.icon.visit(src="@/assets/visit.svg")
 
   section.results-section.inbox(v-if="isOnline")
     ul.results-list(v-if="state.cards.length")
