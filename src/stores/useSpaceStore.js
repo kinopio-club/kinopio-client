@@ -355,7 +355,6 @@ export const useSpaceStore = defineStore('space', {
         return remoteSpace
       } catch (error) {
         console.error('🚒 getRemoteSpace', space.id, error)
-        loadSpaceIdsError.push(space.id)
         throw error
       }
     },
@@ -366,8 +365,9 @@ export const useSpaceStore = defineStore('space', {
       try {
         remoteSpace = await this.getRemoteSpace(space)
       } catch (error) {
-        console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         const preventRepeatError = loadSpaceIdsError.includes(space.id)
+        loadSpaceIdsError.push(space.id)
+        console.warn('🚑 loadRemoteSpace error', error.status, error, space.id, preventRepeatError)
         if (preventRepeatError) {
           globalStore.updateNotifySpaceNotFound(true)
           return
