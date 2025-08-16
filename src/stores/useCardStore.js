@@ -810,6 +810,10 @@ export const useCardStore = defineStore('cards', {
 
     cardWithNameSegments (card, excludeCheckboxString) {
       let name = card.name
+      if (!name) {
+        card.nameSegments = []
+        return card
+      }
       if (excludeCheckboxString) {
         const checkbox = utils.checkboxFromString(name)
         name = name.replace(checkbox, '')
