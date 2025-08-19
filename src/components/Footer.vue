@@ -98,6 +98,7 @@ const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
 const isFadingOut = computed(() => globalStore.isFadingOutDuringTouch)
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
+const isOnline = computed(() => globalStore.isOnline)
 
 // visible
 
@@ -229,10 +230,11 @@ const updatePositionInVisualViewport = () => {
     footer
       Notifications
       template(v-if="leftControlsIsVisible")
-        .footer-button-wrap
-          DiscoveryButtons
-        .footer-button-wrap
-          FavoriteSpaceButton(:isSmall="true")
+        template(v-if="isOnline")
+          .footer-button-wrap
+            DiscoveryButtons
+          .footer-button-wrap
+            FavoriteSpaceButton(:isSmall="true")
         .footer-button-wrap
           NewCardColorButton
 
