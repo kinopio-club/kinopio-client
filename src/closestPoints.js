@@ -47,8 +47,8 @@ export default {
     let minDistance = Infinity
     let closestPair = { point1: null, point2: null }
     // threshold
-    const shortestWidth = Math.min(rect1.width, rect2.width)
-    const threshold = Math.round(shortestWidth / 2)
+    const shortestWidth = Math.min(item1.width, item2.width)
+    const threshold = Math.round(shortestWidth / 4)
     // handle x aligned cards
     if (item1.x === item2.x) {
       closestPair = { point1: points1[1], point2: points2[1] }
