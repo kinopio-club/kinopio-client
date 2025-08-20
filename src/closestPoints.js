@@ -1,5 +1,3 @@
-const threshold = 50
-
 export default {
   normalizeRect (item) {
     return {
@@ -59,6 +57,7 @@ export default {
         const dx = point1.x - point2.x
         const dy = point1.y - point2.y
         const distance = Math.sqrt(dx * dx + dy * dy)
+        const threshold = rect1.width / 2
         if (distance < (minDistance + threshold)) {
           minDistance = distance
           closestPair = { point1: { ...point1 }, point2: { ...point2 } }
