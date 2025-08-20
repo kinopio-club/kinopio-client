@@ -268,7 +268,7 @@ const prependInboxSpaces = (spaces) => {
   const inboxSpaces = []
   const otherSpaces = []
   spaces.forEach(space => {
-    const isInbox = spaceStore.getSpaceIsInbox(space.name)
+    const isInbox = space.name === 'Inbox'
     if (isInbox) {
       inboxSpaces.push(space)
     } else {

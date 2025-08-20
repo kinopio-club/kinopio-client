@@ -1,7 +1,7 @@
 import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
 const apiHost = 'https://api.kinopio.club'
-
+const timeout = 5000 // 5s
 const inviteDescription = 'Work on shared spaces together'
 const privateSpaceDescription = 'Space is private or could not be found'
 
@@ -31,7 +31,7 @@ const normalizeResponse = async (response) => {
 const spacePublicMeta = async (context, spaceId) => {
   try {
     const url = `${apiHost}/space/${spaceId}/public-meta`
-    const response = await fetch(url)
+    const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
     const space = await normalizeResponse(response)
     return space
   } catch (error) {

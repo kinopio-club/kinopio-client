@@ -376,6 +376,7 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       width 14px
       border-radius var(--small-entity-radius)
       display inline-block
+      margin-right 0
     .color
       width 26px
   input

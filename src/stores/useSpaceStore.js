@@ -215,10 +215,6 @@ export const useSpaceStore = defineStore('space', {
       value = Boolean(value)
       return value
     },
-    getSpaceIsInbox (spaceName) {
-      spaceName = spaceName || this.name
-      return spaceName === 'Inbox'
-    },
     updateItemWithItemType (item) {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
@@ -374,7 +370,6 @@ export const useSpaceStore = defineStore('space', {
         return remoteSpace
       } catch (error) {
         console.error('🚒 getRemoteSpace', space.id, error)
-        loadSpaceIdsError.push(space.id)
         throw error
       }
     },
@@ -385,8 +380,9 @@ export const useSpaceStore = defineStore('space', {
       try {
         remoteSpace = await this.getRemoteSpace(space)
       } catch (error) {
-        console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         const preventRepeatError = loadSpaceIdsError.includes(space.id)
+        loadSpaceIdsError.push(space.id)
+        console.warn('🚑 loadRemoteSpace error', error.status, error, space.id, preventRepeatError)
         if (preventRepeatError) {
           globalStore.updateNotifySpaceNotFound(true)
           return
@@ -478,31 +474,22 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerScrollCardIntoView(cardId)
       }
     },
-    async loadInboxSpace (prevFailedSpace) {
-      let space
-      const userStore = useUserStore()
-      let spaceToRestore = await cache.space(userStore.lastSpaceId)
-      if (!spaceToRestore.id) {
-        spaceToRestore = null
-      } else if (spaceToRestore?.id === prevFailedSpace?.id) {
-        spaceToRestore = null
-      }
-      const cachedHelloSpace = await cache.getSpaceByName('Hello Kinopio')
-      const cachedSpace = await cache.getAllSpaces()[0]
-      const prevSpace = cachedHelloSpace || cachedSpace
-      if (spaceToRestore?.id) {
-        space = spaceToRestore
-      } else if (userStore.lastSpaceId) {
-        space = { id: userStore.lastSpaceId }
-      } else if (prevSpace) {
-        space = prevSpace
-        await cache.saveSpace(space)
-      }
-      // load space
-      if (space) {
-        await this.loadSpace(space)
-      } else {
-        this.initializeSpace()
+    async loadInboxSpace () {
+      const apiStore = useApiStore()
+      try {
+        // get inbox
+        let space = await cache.getInboxSpace()
+        if (!space) {
+          space = await apiStore.getInboxSpace()
+        }
+        // load or create
+        if (space) {
+          await this.loadSpace(space)
+        } else {
+          this.createNewInboxSpace()
+        }
+      } catch (error) {
+        console.error('🚒 loadInboxSpace', error)
       }
     },
     async loadLastSpace (prevFailedSpace) {
@@ -1218,11 +1205,9 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const isOffline = !globalStore.isOnline
-      if (this.getSpaceIsInbox) { return }
       if (!isSignedIn) { return }
       if (isOffline) { return }
       const inbox = await apiStore.getUserInboxSpace()
-      console.info('🌍 updateInboxCache')
       await cache.saveSpace(inbox)
     }
 

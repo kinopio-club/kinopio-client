@@ -217,7 +217,7 @@ const toggleFilteredInSpace = () => {
 // use last type
 
 const lastTypeColor = computed(() => {
-  const lastType = connectionStore.prevConnectionTypeId
+  const lastType = connectionStore.getPrevConnectionType
   return lastType?.color
 })
 const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
@@ -348,7 +348,11 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
   .results-actions
     .badge-in-button
       margin-left 5px
-      border-radius var(--small-entity-radius)
+      padding 7px 7px
+      min-height initial
+      display inline-block
+      min-width initial
+      vertical-align middle
     label
       .badge-in-button
         margin-left 0

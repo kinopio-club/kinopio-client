@@ -234,7 +234,7 @@ span
           button.small-button.remove-button.danger(v-if="props.cardsShowRemoveButton" @click.left.stop="removeCard(card)")
             img.icon(src="@/assets/remove.svg")
           //- loading
-          Loader(:visible="card.isLoading")
+          Loader(:visible="card.isLoading" :isSmall="true")
 </template>
 
 <style lang="stylus">
@@ -269,8 +269,8 @@ span
       vertical-align 0
   .loader
     position absolute
-    top 6px
-    left 8px
+    top 8px
+    left 2px
   .card-info
     &.badge
       position initial

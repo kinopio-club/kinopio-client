@@ -13,6 +13,7 @@ import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import AddToInbox from '@/components/AddToInbox.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
@@ -51,10 +52,7 @@ const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
-
-const loadInboxSpace = () => {
-  spaceStore.loadInboxSpace()
-}
+const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 
 // list cards
 
@@ -66,9 +64,8 @@ const updateInboxCardsLocal = async () => {
   }
 }
 const updateInboxCardsRemote = async () => {
-  if (!globalStore.isOnline) { return }
   await spaceStore.updateInboxCache()
-  updateInboxCardsLocal()
+  await updateInboxCardsLocal()
 }
 const sortCards = () => {
   state.cards = sortBy(state.cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
@@ -78,12 +75,13 @@ const restoreInboxCards = async () => {
   if (state.isLoading) { return }
   try {
     state.isLoading = true
-    updateInboxCardsLocal()
-    updateInboxCardsRemote()
+    await updateInboxCardsLocal()
+    await updateInboxCardsRemote()
   } catch (error) {
     console.error('🚒 restoreInboxCards', error)
+  } finally {
+    state.isLoading = false
   }
-  state.isLoading = false
 }
 
 // remove card
@@ -94,8 +92,15 @@ const removeFromCardList = (removedCard) => {
   cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
 const removeCardFromInbox = async (card) => {
+  card = utils.clone(card)
+  delete card.user
   removeFromCardList(card)
   await apiStore.addToQueue({ name: 'removeCard', body: card, spaceId: card.spaceId })
+}
+const removeCard = (card) => {
+  if (card.isLoading) { return }
+  updateCardIsLoading(card)
+  removeCardFromInbox(card)
 }
 
 // update card
@@ -115,8 +120,7 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  const scroll = globalStore.getWindowScrollWithSpaceOffset()
-  const skipCardDetailsIsVisible = true
+  const scroll = globalStore.getWindowScrollWithSpaceOffset
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = spaceStore.id
@@ -124,13 +128,9 @@ const selectCard = async (card) => {
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  cardStore.createCard(newCard, skipCardDetailsIsVisible)
+  delete newCard.user
+  cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
   globalStore.updateFocusOnCardId(newCard.id)
-  removeCardFromInbox(card)
-}
-const removeCard = (card) => {
-  if (card.isLoading) { return }
-  updateCardIsLoading(card)
   removeCardFromInbox(card)
 }
 const addCard = (card) => {
@@ -147,9 +147,10 @@ template(v-if="visible")
         span Move from Inbox
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
-      button.small-button(@click="loadInboxSpace")
-        img.icon(src="@/assets/inbox.svg")
-        img.icon.visit(src="@/assets/visit.svg")
+      a(:href="inboxUrl")
+        button.small-button
+          img.icon(src="@/assets/inbox.svg")
+          img.icon.visit(src="@/assets/visit.svg")
 
   section.results-section.inbox(v-if="isOnline")
     ul.results-list(v-if="state.cards.length")

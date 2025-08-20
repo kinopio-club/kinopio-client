@@ -60,10 +60,12 @@ const changeSpace = (space) => {
 <template lang="pug">
 dialog.live(v-if="props.visible" :open="props.visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p
-      img.icon.camera.blink(src="@/assets/camera.svg")
-      span Live Public Spaces
-      Loader(:visible="props.loading")
+    .row.title-row
+      span
+        img.icon.camera(src="@/assets/camera.svg")
+        span Live Public Spaces
+        Loader(:visible="props.loading")
+      span {{props.spaces.length}}
   section.results-section.results-section-border-top(v-if="props.spaces.length" ref="results" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="props.spaces"

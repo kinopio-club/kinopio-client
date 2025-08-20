@@ -40,6 +40,7 @@ onMounted(() => {
       } else if (name === 'triggerFocusSpaceDetailsName') {
         await nextTick()
         await nextTick()
+        await nextTick()
         const element = nameElement.value
         if (!element) { return }
         element.focus()
