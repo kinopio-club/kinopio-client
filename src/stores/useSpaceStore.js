@@ -216,6 +216,9 @@ export const useSpaceStore = defineStore('space', {
       return value
     },
     updateItemWithItemType (item) {
+      console.log('🌷🌷🌷🌷', item.id, item)
+
+      if (!item) { return }
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const card = cardStore.getCard(item.id)
