@@ -1,3 +1,5 @@
+import consts from '@/consts.js'
+
 export default {
   normalizeRect (item) {
     return {
@@ -35,6 +37,16 @@ export default {
     ]
   },
 
+  pointByName (points, name) {
+    return points.find(point => point.name === name)
+  },
+
+  rectsIsAligned (rect1, rect2) {
+    const isAlignedX = rect1.x === rect2.x
+    const isAlignedY = rect1.y + rect1.height + consts.spaceBetweenCards === rect2.y
+    return isAlignedX && isAlignedY
+  },
+
   findClosestPoints (item1, item2) {
     // Normalize and add padding to rectangles
     let rect1 = this.normalizeRect(item1)
@@ -44,29 +56,24 @@ export default {
     const points1 = this.getPoints(rect1)
     const points2 = this.getPoints(rect2)
     // Find the pair of points with minimum distance
-    let minDistance = Infinity
+    const minDistance = Infinity
     let closestPair = { point1: null, point2: null }
-    // threshold
-    const shortestWidth = Math.min(item1.width, item2.width)
-    const threshold = Math.round(shortestWidth / 4)
-    // handle x aligned cards
-    if (item1.x === item2.x) {
+    // handle left aligned and distributed cards
+    if (this.rectsIsAligned(item1, item2)) {
       closestPair = { point1: points1[1], point2: points2[1] }
       return closestPair
     }
-    // handle other cases
-    points1.forEach(point1 => {
-      points2.forEach(point2 => {
-        const dx = point1.x - point2.x
-        const dy = point1.y - point2.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
-        if (distance < (minDistance + threshold)) {
-          minDistance = distance
-          closestPair = { point1: { ...point1 }, point2: { ...point2 } }
-        }
-      })
-    })
-
+    // or, compare the center points of both rectangles
+    // if rect1Center is left of rect2Center → rect1Center uses topRight, rect2Center uses topLeft
+    // if rect1Center is right of rect2Center → rect1Center uses topLeft, rect2Center uses topRight
+    const rect1Center = { x: item1.x + item1.width / 2, y: item1.y + item1.height / 2 }
+    const rect2Center = { x: item2.x + item2.width / 2, y: item2.y + item2.height / 2 }
+    const rect1Name = rect1Center.x < rect2Center.x ? 'topRight' : 'topLeft'
+    const rect2Name = rect2Center.x < rect1Center.x ? 'topRight' : 'topLeft'
+    closestPair = {
+      point1: this.pointByName(points1, rect1Name),
+      point2: this.pointByName(points2, rect2Name)
+    }
     return closestPair
   }
 }
