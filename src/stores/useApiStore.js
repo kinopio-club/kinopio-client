@@ -17,10 +17,14 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let sessionQueue = []
-const restoreSessionQueue = async () => {
-  sessionQueue = await cache.queue()
+
+const restoreSessionQueueFromBackup = async () => {
+  sessionQueue = await cache.queueBackup()
+  if (sessionQueue.length) {
+    console.log('🛫 restored sessionQueue from backup', sessionQueue)
+  }
 }
-restoreSessionQueue()
+restoreSessionQueueFromBackup()
 
 let otherItemsQueue
 const clearOtherItemsQueue = () => {
@@ -115,8 +119,6 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    // Queue Operations
-
     async handleServerOperationsError ({ error, response }) {
       const globalStore = useGlobalStore()
       if (!response) {
@@ -138,11 +140,12 @@ export const useApiStore = defineStore('api', {
         } else {
           console.warn('🚑 non-critical serverOperationsError operation', operation)
         }
-        // globalStore.moveFailedSendingQueueOperationBackIntoQueue(operation)
       })
-      globalStore.clearSendingQueue()
     },
-    async sendQueue () {
+
+    // Add and Send Queue Operations
+
+    sendQueue: debounce(async function () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const globalStore = useGlobalStore()
@@ -153,6 +156,7 @@ export const useApiStore = defineStore('api', {
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       globalStore.sendingQueue = queue
+      // clear queue before sending
       sessionQueue = []
       cache.clearQueue()
       // send
@@ -165,7 +169,6 @@ export const useApiStore = defineStore('api', {
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
           console.info('🛬 operations ok', queue)
-          globalStore.clearSendingQueue()
         } else {
           throw response.statusText
         }
@@ -174,13 +177,11 @@ export const useApiStore = defineStore('api', {
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)
-        // move failed sendingQueue operations back into queue
         this.handleServerOperationsError({ error, response })
+      } finally {
+        globalStore.clearSendingQueue()
+        cache.clearQueueBackup()
       }
-    },
-
-    debouncedSendQueue: debounce(function () {
-      this.sendQueue()
     }, 500),
 
     async addToQueue ({ name, body, spaceId }) {
@@ -225,7 +226,9 @@ export const useApiStore = defineStore('api', {
         newQueue.push(newItem)
       }
       sessionQueue = newQueue
-      this.debouncedSendQueue()
+      cache.saveQueueBackup(sessionQueue)
+      // send to API after debounce period
+      this.sendQueue()
     },
 
     // Meta
