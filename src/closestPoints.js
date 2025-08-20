@@ -1,4 +1,4 @@
-const threshold = 30
+const threshold = 50
 
 export default {
   normalizeRect (item) {
@@ -48,6 +48,12 @@ export default {
     // Find the pair of points with minimum distance
     let minDistance = Infinity
     let closestPair = { point1: null, point2: null }
+    // handle x aligned cards
+    if (item1.x === item2.x) {
+      closestPair = { point1: points1[0], point2: points2[0] }
+      return closestPair
+    }
+    // handle other cases
     points1.forEach(point1 => {
       points2.forEach(point2 => {
         const dx = point1.x - point2.x
@@ -56,7 +62,6 @@ export default {
         if (distance < (minDistance + threshold)) {
           minDistance = distance
           closestPair = { point1: { ...point1 }, point2: { ...point2 } }
-          // console.log(point1, point2, distance)
         }
       })
     })
