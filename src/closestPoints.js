@@ -46,6 +46,9 @@ export default {
     // Find the pair of points with minimum distance
     let minDistance = Infinity
     let closestPair = { point1: null, point2: null }
+    // threshold
+    const shortestWidth = Math.min(rect1.width, rect2.width)
+    const threshold = Math.round(shortestWidth / 2)
     // handle x aligned cards
     if (item1.x === item2.x) {
       closestPair = { point1: points1[0], point2: points2[0] }
@@ -57,7 +60,6 @@ export default {
         const dx = point1.x - point2.x
         const dy = point1.y - point2.y
         const distance = Math.sqrt(dx * dx + dy * dy)
-        const threshold = rect1.width / 2
         if (distance < (minDistance + threshold)) {
           minDistance = distance
           closestPair = { point1: { ...point1 }, point2: { ...point2 } }
