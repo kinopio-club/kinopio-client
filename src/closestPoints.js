@@ -51,7 +51,7 @@ export default {
     const threshold = Math.round(shortestWidth / 2)
     // handle x aligned cards
     if (item1.x === item2.x) {
-      closestPair = { point1: points1[0], point2: points2[0] }
+      closestPair = { point1: points1[1], point2: points2[1] }
       return closestPair
     }
     // handle other cases
