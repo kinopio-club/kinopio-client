@@ -72,9 +72,8 @@ const currentBoxSnapGuide = computed(() => {
   if (isMultipleBoxesSelectedIds) { return }
   const guides = boxStore.boxSnapGuides
   return guides.find(guide => {
-    const isTarget = guide.target.id === props.box.id
-    const isOrigin = guide.origin.id === props.box.id
-    return isTarget || isOrigin
+    const isTargetBox = guide.target.id === props.box.id
+    return isTargetBox
   })
 })
 watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
