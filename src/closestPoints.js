@@ -43,8 +43,9 @@ export default {
 
   rectsIsAligned (rect1, rect2) {
     const isAlignedX = rect1.x === rect2.x
-    const isAlignedY = rect1.y + rect1.height + consts.spaceBetweenCards === rect2.y
-    return isAlignedX && isAlignedY
+    const isAlignedYTop = rect1.y + rect1.height + consts.spaceBetweenCards === rect2.y
+    const isAlignedYBottom = rect2.y + rect2.height + consts.spaceBetweenCards === rect1.y
+    return isAlignedX && (isAlignedYTop || isAlignedYBottom)
   },
 
   findClosestPoints (item1, item2) {
