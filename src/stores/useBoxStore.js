@@ -461,13 +461,23 @@ export const useBoxStore = defineStore('boxes', {
 
     // snap guides
 
-    getBoxSnapGuide ({ side, item, targetBox }) {
+    createBoxSnapGuide ({ side, item, targetBox, cursor }) {
       let time = Date.now()
       const prevGuide = this.boxSnapGuides.find(guide => guide.side === side)
       if (prevGuide) {
         time = prevGuide.time
       }
-      return { side, origin: item, target: targetBox, time }
+      let distance
+      if (side === 'left') {
+        distance = Math.abs(cursor.x - targetBox.x)
+      } else if (side === 'right') {
+        distance = Math.abs(cursor.x - (targetBox.x + targetBox.width))
+      } else if (side === 'top') {
+        distance = Math.abs(cursor.y - targetBox.y)
+      } else if (side === 'bottom') {
+        distance = Math.abs(cursor.y - (targetBox.y + targetBox.height))
+      }
+      return { side, origin: item, target: targetBox, time, distance }
     },
     updateBoxSnapGuides ({ items, isCards, cursorDirection, cursor }) {
       const globalStore = useGlobalStore()
@@ -526,30 +536,26 @@ export const useBoxStore = defineStore('boxes', {
           const itemBottomIsInsideTargetBox = utils.isBetween({ value: itemBottom, min: targetBoxTop, max: targetBoxBottom })
           // snap left
           if (itemIsOverTargetBoxLeft && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'left', item, targetBox })
+            const snapGuide = this.createBoxSnapGuide({ side: 'left', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
           // snap right
           if (itemIsOverTargetBoxRight && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'right', item, targetBox })
+            const snapGuide = this.createBoxSnapGuide({ side: 'right', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
           // snap top
           if (itemIsOverTargetBoxTop && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
+            const snapGuide = this.createBoxSnapGuide({ side: 'top', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
           // snap bottom
           if (itemIsOverTargetBoxBottom && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'bottom', item, targetBox })
+            const snapGuide = this.createBoxSnapGuide({ side: 'bottom', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
-          // filter closest side
-          if (snapGuides.length > 1) {
-            const closestSide = utils.closestRectSideFromPoint(targetBox, cursor)
-            snapGuides = snapGuides.filter(guide => guide.side === closestSide)
-          }
         })
+        snapGuides = sortBy(snapGuides, ['distance'])
       })
       // limit each origin item to it's closest target
       const normalizedGuides = {}

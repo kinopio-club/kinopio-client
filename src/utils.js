@@ -1222,19 +1222,6 @@ export default {
       (rectA.y + rectA.height) <= (rectB.y + rectB.height)
     )
   },
-  closestRectSideFromPoint (rect, point) {
-    // distance to each edge
-    const toLeft = Math.abs(point.x - rect.x)
-    const toRight = Math.abs(point.x - (rect.x + rect.width))
-    const toTop = Math.abs(point.y - rect.y)
-    const toBottom = Math.abs(point.y - (rect.y + rect.height))
-    const closest = Math.min(toLeft, toRight, toTop, toBottom)
-    // Return the edge with the minimum toce
-    if (closest === toLeft) return 'left'
-    if (closest === toRight) return 'right'
-    if (closest === toTop) return 'top'
-    if (closest === toBottom) return 'bottom'
-  },
   boundaryRectFromItems (items) {
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
