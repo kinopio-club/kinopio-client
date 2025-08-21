@@ -645,6 +645,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
+  boxStore.boxSnapGuides = []
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
