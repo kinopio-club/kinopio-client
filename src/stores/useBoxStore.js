@@ -587,10 +587,10 @@ export const useBoxStore = defineStore('boxes', {
       // size
       if (alignWithItemY) {
         update.y = target.y
-        update.resizeHeight = Math.max(target.resizeHeight, item.resizeHeight)
+        update.resizeHeight = target.resizeHeight
       } else {
         update.x = target.x
-        update.resizeWidth = Math.max(target.resizeWidth, item.resizeWidth)
+        update.resizeWidth = target.resizeWidth
       }
       // position
       if (side === 'right') {
