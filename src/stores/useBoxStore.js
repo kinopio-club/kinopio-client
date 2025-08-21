@@ -467,17 +467,21 @@ export const useBoxStore = defineStore('boxes', {
       if (prevGuide) {
         time = prevGuide.time
       }
-      let distance
+      let distance, sizeOutside
       if (side === 'left') {
         distance = Math.abs(cursor.x - targetBox.x)
+        sizeOutside = Math.abs(targetBox.x - item.x)
       } else if (side === 'right') {
         distance = Math.abs(cursor.x - (targetBox.x + targetBox.width))
+        sizeOutside = Math.abs((targetBox.x + targetBox.width) - (item.x + item.width))
       } else if (side === 'top') {
         distance = Math.abs(cursor.y - targetBox.y)
+        sizeOutside = Math.abs(targetBox.y - item.y)
       } else if (side === 'bottom') {
         distance = Math.abs(cursor.y - (targetBox.y + targetBox.height))
+        sizeOutside = Math.abs((targetBox.y + targetBox.height) - (item.y + item.height))
       }
-      return { side, item, target: targetBox, time, distance } // sizeOutside
+      return { side, item, target: targetBox, time, distance, sizeOutside }
     },
     updateBoxSnapGuides ({ items, isCards, cursorDirection, cursor }) {
       const globalStore = useGlobalStore()
@@ -603,7 +607,7 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBox(update)
     },
     async updateBoxSnapToSize (snapGuide) {
-      const { side, item, target } = snapGuide
+      const { side, item, target, sizeOutside } = snapGuide
       const padding = consts.spaceBetweenCards
       const update = { id: target.id }
       const delta = {
@@ -612,32 +616,32 @@ export const useBoxStore = defineStore('boxes', {
       }
       if (side === 'right') {
         // increase width
-        update.resizeWidth = target.width + item.width + padding
-        // increase height if item is taller than target
+        update.resizeWidth = target.width + sizeOutside + padding
+        // increase target box height if item is taller than target
         if (item.height + delta.y > target.resizeHeight) {
           update.resizeHeight = item.height + delta.y + padding
         }
       } else if (side === 'left') {
         // increase width and shift left
-        update.resizeWidth = target.width + item.width + padding
-        update.x = target.x - item.width - padding
-        // increase height if item is taller than target
+        update.resizeWidth = target.width + sizeOutside + padding
+        update.x = target.x - sizeOutside - padding
+        // increase target box height if item is taller than target
         if (item.height + delta.y > target.resizeHeight) {
           update.resizeHeight = item.height + delta.y + padding
         }
       } else if (side === 'top') {
         // increase height and shift up
         const paddingTop = 30 + padding
-        update.resizeHeight = target.resizeHeight + item.height + paddingTop
-        update.y = target.y - item.height - paddingTop
-        // increase width if item is wider than target
+        update.resizeHeight = target.resizeHeight + sizeOutside + paddingTop
+        update.y = target.y - sizeOutside - paddingTop
+        // increase target box width if item is wider than target
         if (item.width + delta.x > target.resizeWidth) {
           update.resizeWidth = item.width + delta.x + padding
         }
       } else if (side === 'bottom') {
         // increase width
-        update.resizeHeight = target.resizeHeight + item.height + padding
-        // increase width if item is wider than target
+        update.resizeHeight = target.resizeHeight + sizeOutside + padding
+        // increase target box width if item is wider than target
         if (item.width + delta.x > target.resizeWidth) {
           update.resizeWidth = item.width + delta.x + padding
         }
