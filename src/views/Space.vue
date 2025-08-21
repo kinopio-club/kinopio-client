@@ -74,7 +74,7 @@ const changelogStore = useChangelogStore()
 
 let unsubscribes
 
-let prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // expose pinia stores to browser console for developers
@@ -445,7 +445,7 @@ const dragItems = () => {
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
-  boxStore.moveBoxes({ endCursor, prevCursor })
+  boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -573,6 +573,7 @@ const updateShouldSnapToGrid = (event) => {
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
+  endSpaceCursor = utils.cursorPositionInSpace(event)
   updateShouldSnapToGrid(event)
   if (isDraggingCard.value) {
     dragItems()

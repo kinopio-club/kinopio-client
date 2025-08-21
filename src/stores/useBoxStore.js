@@ -265,7 +265,7 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.pageWidth = boxX
       }
     },
-    moveBoxes ({ endCursor, prevCursor, delta }) {
+    moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
@@ -283,7 +283,6 @@ export const useBoxStore = defineStore('boxes', {
         x: delta.x * zoom,
         y: delta.y * zoom
       }
-
       const boxes = this.getBoxesSelected
       const updates = []
       boxes.forEach(box => {
@@ -301,7 +300,8 @@ export const useBoxStore = defineStore('boxes', {
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPathsByItemIds(itemIds)
-      this.updateBoxSnapGuides({ items: updates, cursorDirection, cursor: endCursor })
+      const cursor = endSpaceCursor || endCursor
+      this.updateBoxSnapGuides({ items: updates, cursorDirection, cursor })
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)

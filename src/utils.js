@@ -211,8 +211,6 @@ export default {
       x: position.x - spaceRect.x,
       y: position.y - spaceRect.y
     }
-    // console.log('space',position, spaceRect)
-
     // #app
     const app = document.getElementById('app')
     const appRect = app.getBoundingClientRect()
