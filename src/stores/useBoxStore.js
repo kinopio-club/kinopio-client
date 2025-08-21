@@ -477,7 +477,7 @@ export const useBoxStore = defineStore('boxes', {
       } else if (side === 'bottom') {
         distance = Math.abs(cursor.y - (targetBox.y + targetBox.height))
       }
-      return { side, origin: item, target: targetBox, time, distance }
+      return { side, item, target: targetBox, time, distance } // sizeOutside
     },
     updateBoxSnapGuides ({ items, isCards, cursorDirection, cursor }) {
       const globalStore = useGlobalStore()
@@ -560,13 +560,13 @@ export const useBoxStore = defineStore('boxes', {
       // limit each origin item to it's closest target
       const normalizedGuides = {}
       snapGuides.forEach(snapGuide => {
-        const originGuide = normalizedGuides[snapGuide.origin.id]
-        if (originGuide) {
-          if (snapGuide.distance < originGuide.distance) {
-            normalizedGuides[snapGuide.origin.id] = snapGuide
+        const itemGuide = normalizedGuides[snapGuide.item.id]
+        if (itemGuide) {
+          if (snapGuide.distance < itemGuide.distance) {
+            normalizedGuides[snapGuide.item.id] = snapGuide
           }
         } else {
-          normalizedGuides[snapGuide.origin.id] = snapGuide
+          normalizedGuides[snapGuide.item.id] = snapGuide
         }
       })
       const normalizedGuideKeys = Object.keys(normalizedGuides)
@@ -574,27 +574,27 @@ export const useBoxStore = defineStore('boxes', {
       this.boxSnapGuides = snapGuides
     },
     async updateBoxSnapToPosition (snapGuide) {
-      let { side, origin, target } = snapGuide
+      let { side, item, target } = snapGuide
       const borderWidth = 2
-      const update = { id: origin.id }
-      origin = this.byId[origin.id]
-      if (!origin) { return }
-      const alignWithOriginY = side === 'right' || side === 'left'
+      const update = { id: item.id }
+      item = this.byId[item.id]
+      if (!item) { return }
+      const alignWithItemY = side === 'right' || side === 'left'
       // size
-      if (alignWithOriginY) {
+      if (alignWithItemY) {
         update.y = target.y
-        update.resizeHeight = Math.max(target.resizeHeight, origin.resizeHeight)
+        update.resizeHeight = Math.max(target.resizeHeight, item.resizeHeight)
       } else {
         update.x = target.x
-        update.resizeWidth = Math.max(target.resizeWidth, origin.resizeWidth)
+        update.resizeWidth = Math.max(target.resizeWidth, item.resizeWidth)
       }
       // position
       if (side === 'right') {
         update.x = target.x + target.resizeWidth - borderWidth
       } else if (side === 'left') {
-        update.x = target.x - origin.resizeWidth + borderWidth
+        update.x = target.x - item.resizeWidth + borderWidth
       } else if (side === 'top') {
-        update.y = target.y - origin.resizeHeight + borderWidth
+        update.y = target.y - item.resizeHeight + borderWidth
       } else if (side === 'bottom') {
         update.y = target.y + target.resizeHeight - borderWidth
       }
@@ -603,43 +603,43 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBox(update)
     },
     async updateBoxSnapToSize (snapGuide) {
-      const { side, origin, target } = snapGuide
+      const { side, item, target } = snapGuide
       const padding = consts.spaceBetweenCards
       const update = { id: target.id }
       const delta = {
-        x: origin.x - target.x,
-        y: origin.y - target.y
+        x: item.x - target.x,
+        y: item.y - target.y
       }
       if (side === 'right') {
         // increase width
-        update.resizeWidth = target.width + origin.width + padding
-        // increase height if origin is taller than target
-        if (origin.height + delta.y > target.resizeHeight) {
-          update.resizeHeight = origin.height + delta.y + padding
+        update.resizeWidth = target.width + item.width + padding
+        // increase height if item is taller than target
+        if (item.height + delta.y > target.resizeHeight) {
+          update.resizeHeight = item.height + delta.y + padding
         }
       } else if (side === 'left') {
         // increase width and shift left
-        update.resizeWidth = target.width + origin.width + padding
-        update.x = target.x - origin.width - padding
-        // increase height if origin is taller than target
-        if (origin.height + delta.y > target.resizeHeight) {
-          update.resizeHeight = origin.height + delta.y + padding
+        update.resizeWidth = target.width + item.width + padding
+        update.x = target.x - item.width - padding
+        // increase height if item is taller than target
+        if (item.height + delta.y > target.resizeHeight) {
+          update.resizeHeight = item.height + delta.y + padding
         }
       } else if (side === 'top') {
         // increase height and shift up
         const paddingTop = 30 + padding
-        update.resizeHeight = target.resizeHeight + origin.height + paddingTop
-        update.y = target.y - origin.height - paddingTop
-        // increase width if origin is wider than target
-        if (origin.width + delta.x > target.resizeWidth) {
-          update.resizeWidth = origin.width + delta.x + padding
+        update.resizeHeight = target.resizeHeight + item.height + paddingTop
+        update.y = target.y - item.height - paddingTop
+        // increase width if item is wider than target
+        if (item.width + delta.x > target.resizeWidth) {
+          update.resizeWidth = item.width + delta.x + padding
         }
       } else if (side === 'bottom') {
         // increase width
-        update.resizeHeight = target.resizeHeight + origin.height + padding
-        // increase width if origin is wider than target
-        if (origin.width + delta.x > target.resizeWidth) {
-          update.resizeWidth = origin.width + delta.x + padding
+        update.resizeHeight = target.resizeHeight + item.height + padding
+        // increase width if item is wider than target
+        if (item.width + delta.x > target.resizeWidth) {
+          update.resizeWidth = item.width + delta.x + padding
         }
       }
       this.updateBox(update)
