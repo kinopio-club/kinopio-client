@@ -503,7 +503,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection })
+      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards

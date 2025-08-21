@@ -301,7 +301,7 @@ export const useBoxStore = defineStore('boxes', {
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPathsByItemIds(itemIds)
-      this.updateBoxSnapGuides({ items: updates, cursorDirection })
+      this.updateBoxSnapGuides({ items: updates, cursorDirection, cursor: endCursor })
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
@@ -469,7 +469,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, origin: item, target: targetBox, time }
     },
-    updateBoxSnapGuides ({ items, isCards, cursorDirection }) {
+    updateBoxSnapGuides ({ items, isCards, cursorDirection, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
@@ -543,6 +543,11 @@ export const useBoxStore = defineStore('boxes', {
           if (itemIsOverTargetBoxBottom && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'bottom', item, targetBox })
             snapGuides.push(snapGuide)
+          }
+          // filter closest side
+          if (snapGuides.length > 1) {
+            const closestSide = utils.closestRectSideFromPoint(targetBox, cursor)
+            snapGuides = snapGuides.filter(guide => guide.side === closestSide)
           }
         })
       })
