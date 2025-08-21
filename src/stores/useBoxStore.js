@@ -502,31 +502,33 @@ export const useBoxStore = defineStore('boxes', {
           const targetBoxBottom = targetBox.y + targetBox.height
           const targetBoxIsMinX = targetBox.x <= spaceEdgeThreshold
           const targetBoxIsMinY = targetBox.y <= spaceEdgeThreshold
+          // item side is on target edge
+          const itemYIsOnTargetBoxTopEdge = utils.isBetween({ value: targetBoxTop, min: itemTop, max: itemBottom })
+          const itemYIsOnTargetBoxBottomEdge = utils.isBetween({ value: targetBoxBottom, min: itemTop, max: itemBottom })
+          const itemXIsOnTargetBoxLeftEdge = utils.isBetween({ value: targetBoxLeft, min: itemLeft, max: itemRight })
+          const itemXIsOnTargetBoxRightEdge = utils.isBetween({ value: targetBoxRight, min: itemLeft, max: itemRight })
+          // item inside target
+          const itemLeftIsInsideTargetBox = utils.isBetween({ value: itemLeft, min: targetBoxLeft, max: targetBoxRight })
+          const itemRightIsInsideTargetBox = utils.isBetween({ value: itemRight, min: targetBoxLeft, max: targetBoxRight })
+          const itemTopIsInsideTargetBox = utils.isBetween({ value: itemTop, min: targetBoxTop, max: targetBoxBottom })
+          const itemBottomIsInsideTargetBox = utils.isBetween({ value: itemBottom, min: targetBoxTop, max: targetBoxBottom })
           // snap left
-          const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold && cursorDirection.rightDrag
-          const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold && cursorDirection.leftDrag
-          if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
+          if (itemXIsOnTargetBoxLeftEdge && itemTopIsInsideTargetBox && itemBottomIsInsideTargetBox) {
             const snapGuide = this.getBoxSnapGuide({ side: 'left', item, targetBox })
             snapGuides.push(snapGuide)
           }
           // snap right
-          const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold && cursorDirection.leftDrag
-          const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold && cursorDirection.rightDrag
-          if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
+          if (itemXIsOnTargetBoxRightEdge && itemTopIsInsideTargetBox && itemBottomIsInsideTargetBox) {
             const snapGuide = this.getBoxSnapGuide({ side: 'right', item, targetBox })
             snapGuides.push(snapGuide)
           }
           // snap top
-          const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold && cursorDirection.upDrag
-          const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold && cursorDirection.downDrag
-          if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
+          if (itemYIsOnTargetBoxTopEdge && itemLeftIsInsideTargetBox && itemRightIsInsideTargetBox) {
             const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
             snapGuides.push(snapGuide)
           }
           // snap bottom
-          const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold && cursorDirection.upDrag
-          const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold && cursorDirection.downDrag
-          if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
+          if (itemYIsOnTargetBoxBottomEdge && itemLeftIsInsideTargetBox && itemRightIsInsideTargetBox) {
             const snapGuide = this.getBoxSnapGuide({ side: 'bottom', item, targetBox })
             snapGuides.push(snapGuide)
           }

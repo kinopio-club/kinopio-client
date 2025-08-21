@@ -402,7 +402,6 @@ const checkIfShouldExpandBoxes = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.notifyBoxSnappingIsReady) { return }
-    console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
