@@ -474,7 +474,6 @@ export const useCardStore = defineStore('cards', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -503,7 +502,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection, cursor: endCursor })
+      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards

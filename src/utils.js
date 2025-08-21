@@ -234,23 +234,6 @@ export default {
       y: this.roundToNearest(position.y, gridSpacing)
     }
   },
-  cursorDirection (currentCursor, prevCursor) {
-    const xDelta = currentCursor.x - prevCursor.x
-    const yDelta = currentCursor.y - prevCursor.y
-    const noMovement = xDelta === 0 && yDelta === 0
-    const directions = {
-      left: xDelta < 0,
-      right: xDelta > 0,
-      up: yDelta < 0,
-      down: yDelta > 0,
-      noMovement
-    }
-    directions.leftDrag = directions.left || noMovement
-    directions.rightDrag = directions.right || noMovement
-    directions.upDrag = directions.up || noMovement
-    directions.downDrag = directions.down || noMovement
-    return directions
-  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX
