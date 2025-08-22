@@ -72,9 +72,8 @@ const currentBoxSnapGuide = computed(() => {
   if (isMultipleBoxesSelectedIds) { return }
   const guides = boxStore.boxSnapGuides
   return guides.find(guide => {
-    const isTarget = guide.target.id === props.box.id
-    const isOrigin = guide.origin.id === props.box.id
-    return isTarget || isOrigin
+    const isTargetBox = guide.target.id === props.box.id
+    return isTargetBox
   })
 })
 watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
@@ -204,7 +203,7 @@ const waitingAnimationFrame = (timestamp) => {
 <style lang="stylus">
 .box-snap-guide
   --snap-guide-width 6px
-  --snap-guide-waiting-duration 0.2s // same as consts.boxSnapGuideWaitingDuration ms
+  --snap-guide-waiting-duration 0.1s // same as consts.boxSnapGuideWaitingDuration ms
   --snap-guide-ready-duration 0.4s
   position absolute
   &.left
