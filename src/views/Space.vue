@@ -74,7 +74,7 @@ const changelogStore = useChangelogStore()
 
 let unsubscribes
 
-let prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // expose pinia stores to browser console for developers
@@ -402,7 +402,6 @@ const checkIfShouldExpandBoxes = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.notifyBoxSnappingIsReady) { return }
-    console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
@@ -446,7 +445,7 @@ const dragItems = () => {
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
-  boxStore.moveBoxes({ endCursor, prevCursor })
+  boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -574,6 +573,7 @@ const updateShouldSnapToGrid = (event) => {
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
+  endSpaceCursor = utils.cursorPositionInSpace(event)
   updateShouldSnapToGrid(event)
   if (isDraggingCard.value) {
     dragItems()
@@ -646,6 +646,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
+  boxStore.boxSnapGuides = []
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
