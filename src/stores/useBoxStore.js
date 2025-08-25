@@ -607,7 +607,7 @@ export const useBoxStore = defineStore('boxes', {
     },
     async updateBoxSnapToSize (snapGuide) {
       const { side, item, target, sizeOutside } = snapGuide
-      const padding = consts.spaceBetweenCards
+      const padding = consts.spaceBetweenCards * 2
       const update = { id: target.id }
       const delta = {
         x: item.x - target.x,
@@ -630,7 +630,7 @@ export const useBoxStore = defineStore('boxes', {
         }
       } else if (side === 'top') {
         // increase height and shift up
-        const paddingTop = 30 + padding
+        const paddingTop = 20 + padding
         update.resizeHeight = target.resizeHeight + sizeOutside + paddingTop
         update.y = target.y - sizeOutside - paddingTop
         // increase target box width if item is wider than target
