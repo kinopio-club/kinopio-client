@@ -878,12 +878,9 @@ export const useApiStore = defineStore('api', {
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       const userId = userStore.id
-
       try {
         const body = { userId, spaceId, collaboratorKey }
         const space = { id: spaceId, collaboratorKey }
-        console.error('🐸🐸🐸 addSpaceCollaborator', body, space)
-
         const options = await this.requestOptions({ body, method: 'PATCH', space })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         return normalizeResponse(response)

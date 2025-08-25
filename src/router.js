@@ -227,7 +227,6 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   const userStore = useUserStore()
   const apiStore = useApiStore()
   const apiKey = userStore.apiKey
-  console.log('🔮🔮🔮apiKey', apiKey)
   if (!apiKey) {
     globalStore.spaceUrlToLoad = spaceId
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
