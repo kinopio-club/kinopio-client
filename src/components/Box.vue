@@ -678,6 +678,9 @@ const focusColor = computed(() => {
     return null
   }
 })
+const clearFocus = () => {
+  globalStore.focusOnBoxId = ''
+}
 </script>
 
 <template lang="pug">
@@ -699,7 +702,7 @@ const focusColor = computed(() => {
   :class="classes"
   ref="boxElement"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
     .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   teleport(to="#box-infos")
