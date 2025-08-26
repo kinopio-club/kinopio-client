@@ -144,7 +144,7 @@ const updateResultsSectionHeight = async () => {
       p Type
         span {{' '}}
         span.badge.info /
-        span when editing a card to create links
+        span when editing a card to create links.
 </template>
 
 <style lang="stylus">

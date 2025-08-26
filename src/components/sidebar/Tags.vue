@@ -80,7 +80,7 @@ const toggleShouldShowCurrentSpaceTags = () => {
       p Type
         span {{' '}}
         span.badge.secondary [[
-        span when editing a card to create tags
+        span when editing a card to create tags.
   //- tags list
   section.results-section(v-if="tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
