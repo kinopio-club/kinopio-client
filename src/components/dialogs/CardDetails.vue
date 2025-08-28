@@ -156,6 +156,7 @@ const card = computed(() => {
   return cardStore.getCard(cardId.value) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     globalStore.preventMultipleSelectedActionsIsVisible = false
@@ -1576,7 +1577,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
-        span To upload files over 5mb,
+        span To upload files over {{freeUploadSizeLimit}}mb,
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")

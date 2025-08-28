@@ -16,6 +16,7 @@ export default {
   wideCardMaxWidth: 390,
   minCardIframeWidth: 260,
   freeCardsCreatedLimit: 100,
+  freeUploadSizeLimit: 5, // 5mb
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },

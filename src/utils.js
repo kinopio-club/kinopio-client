@@ -2479,7 +2479,7 @@ export default {
   // Upload
 
   isFileTooBig ({ file, userIsUpgraded }) {
-    const sizeLimit = 1024 * 1024 * 5 // 5mb
+    const sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
     }

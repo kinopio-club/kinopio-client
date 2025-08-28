@@ -99,6 +99,7 @@ const closeChildDialogs = () => {
 const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
 const spaceUser = computed(() => spaceStore.users[0])
 const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 </script>
 
@@ -128,7 +129,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td {{freeCardsCreatedLimit}} cards
           td Unlimited cards
         tr
-          td 5mb file upload size limit
+          td {{freeUploadSizeLimit}}mb file upload size limit
           td No upload limit
         tr
           td Can only join Groups

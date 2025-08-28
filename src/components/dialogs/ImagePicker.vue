@@ -83,6 +83,7 @@ const triggerUpgradeUserIsVisible = () => {
 const closeImagePicker = () => {
   cardStore.clearCardNameUploadPlaceholder(props.cardId)
 }
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 // input
 
@@ -411,7 +412,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
-        span To upload files over 5mb,
+        span To upload files over {{freeUploadSizeLimit}}mb,
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="state.error.unknownUploadError")
