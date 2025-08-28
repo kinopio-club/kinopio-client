@@ -11,11 +11,13 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 
+import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
+import sortBy from 'lodash-es/sortBy'
 
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
@@ -60,6 +62,10 @@ export const useConnectionStore = defineStore('connections', {
         paths.push(path)
       })
       return paths
+    },
+    getPrevConnectionType () {
+      const id = this.prevConnectionTypeId
+      return this.typeById[id]
     }
   },
 
@@ -170,6 +176,12 @@ export const useConnectionStore = defineStore('connections', {
       this.typeById = byId
       this.typeAllIds = allIds
     },
+    getConnectionTypesByUpdatedAt (types) {
+      types = types || this.getAllConnectionTypes
+      types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
+      types.reverse()
+      return types
+    },
 
     // indexes
 
@@ -241,7 +253,11 @@ export const useConnectionStore = defineStore('connections', {
       })
       if (isExistingConnection) { return }
       if (connection.startItemId === connection.endItemId) { return }
-      const type = connection.type || this.getNewConnectionType
+      let type = connection.type || this.getNewConnectionType
+      if (!type) {
+        await this.createConnectionType()
+        type = this.getNewConnectionType
+      }
       connection.id = connection.id || nanoid()
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id
@@ -256,6 +272,10 @@ export const useConnectionStore = defineStore('connections', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const isThemeDark = userStore.theme === 'dark'
+      if (type) {
+        const prevTypeInCurrentSpace = this.getConnectionTypeByName(type.name) || this.getConnectionType(type.id)
+        if (prevTypeInCurrentSpace) { return }
+      }
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
@@ -303,7 +323,9 @@ export const useConnectionStore = defineStore('connections', {
       if (!userStore.getUserCanEditSpace) { return }
       this.updateConnectionsState(updates)
       broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnectionsState' })
-      await apiStore.addToQueue({ name: 'updateMultipleConnections', body: { connections: updates } })
+      for (const connection of updates) {
+        await apiStore.addToQueue({ name: 'updateConnection', body: connection })
+      }
       await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },
     updateConnection (update) {
@@ -358,7 +380,9 @@ export const useConnectionStore = defineStore('connections', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       this.removeConnectionsState(ids)
-      await apiStore.addToQueue({ name: 'removeConnections', body: { ids } })
+      for (const id of ids) {
+        await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
+      }
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
     },
     async removeConnection (id) {
@@ -399,7 +423,7 @@ export const useConnectionStore = defineStore('connections', {
 
     // path
 
-    async updateConnectionPaths (itemIds) {
+    async updateConnectionPathsByItemIds (itemIds) {
       await nextTick()
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
@@ -429,8 +453,8 @@ export const useConnectionStore = defineStore('connections', {
       }
       globalStore.clearShouldExplicitlyRenderCardIds()
     },
-    updateConnectionPath (itemId) {
-      this.updateConnectionPaths([itemId])
+    updateConnectionPathByItemId (itemId) {
+      this.updateConnectionPathsByItemIds([itemId])
     },
 
     // label

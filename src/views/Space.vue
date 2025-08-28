@@ -74,7 +74,7 @@ const changelogStore = useChangelogStore()
 
 let unsubscribes
 
-let prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // expose pinia stores to browser console for developers
@@ -84,15 +84,14 @@ window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
 window.changelogStore = useChangelogStore()
+window.themeStore = useThemeStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
   window.groupStore = useGroupStore()
-  window.themeStore = useThemeStore()
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
-// init user and space app state
 const init = async () => {
   if (globalStore.shouldNotifyIsJoiningGroup) {
     globalStore.updateNotifyIsJoiningGroup(true)
@@ -107,9 +106,11 @@ const init = async () => {
   historyStore.init()
   changelogStore.init()
 }
-init()
 
-onMounted(() => {
+onMounted(async () => {
+  setTimeout(() => { // move async init out of vue rendering cycle, to fix race condition
+    init()
+  }, 0)
   // bind events to window to receive events when mouse is outside window
   window.addEventListener('touchstart', handleTouchStart)
   window.addEventListener('mousemove', interact)
@@ -331,7 +332,7 @@ const resizeCards = async (event) => {
   await nextTick()
   cardStore.updateCardsDimensions(cardIds)
   await nextTick()
-  connectionStore.updateConnectionPaths(cardIds)
+  connectionStore.updateConnectionPathsByItemIds(cardIds)
   globalStore.updatePageSizes()
 }
 const stopResizingCards = async () => {
@@ -401,7 +402,6 @@ const checkIfShouldExpandBoxes = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.notifyBoxSnappingIsReady) { return }
-    console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
@@ -445,7 +445,7 @@ const dragItems = () => {
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
-  boxStore.moveBoxes({ endCursor, prevCursor })
+  boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -573,6 +573,7 @@ const updateShouldSnapToGrid = (event) => {
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
+  endSpaceCursor = utils.cursorPositionInSpace(event)
   updateShouldSnapToGrid(event)
   if (isDraggingCard.value) {
     dragItems()
@@ -645,6 +646,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
+  boxStore.boxSnapGuides = []
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
@@ -694,8 +696,9 @@ main#space.space(
   DrawingCanvasBackground
   ItemsLocked
   #box-backgrounds
-  Connections
   Boxes
+  Connections
+  #box-infos
   Cards
   ItemUnlockButtons
   DrawingCanvas
@@ -752,7 +755,8 @@ Preload
   right 8px
   bottom 50px
 
-#box-backgrounds
+#box-backgrounds,
+#box-infos
   position absolute
   .box-background
     border-radius var(--entity-radius)

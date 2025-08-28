@@ -127,22 +127,11 @@ const items = computed(() => {
 })
 const label = computed(() => {
   let label, cardLabel, boxLabel
-  const isMultipleCards = props.cards.length > 1
-  const isMultipleBoxes = props.boxes.length > 1
   if (isCards.value) {
     cardLabel = 'card'
   }
-  if (isMultipleCards) {
-    cardLabel = 'cards'
-  }
   if (isBoxes.value) {
     boxLabel = 'box'
-  }
-  if (isMultipleBoxes) {
-    boxLabel = 'boxes'
-  }
-  if (cardLabel && boxLabel) {
-    label = `${cardLabel} + ${boxLabel}`
   } else {
     label = cardLabel || boxLabel
   }
@@ -402,7 +391,7 @@ const updateHeaderFont = async (font) => {
   })
   userStore.updateUser({ prevHeaderFontId: font.id })
   await nextTick()
-  connectionStore.updateConnectionPaths(cardIds.value)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 const udpateHeaderFontSize = async (size) => {
   props.cards.forEach(card => {
@@ -412,7 +401,7 @@ const udpateHeaderFontSize = async (size) => {
     updateBox(box, { headerFontSize: size })
   })
   await nextTick()
-  connectionStore.updateConnectionPaths(cardIds.value)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 
 // lock
@@ -460,7 +449,7 @@ const toggleIsComment = async () => {
   })
   await nextTick()
   await updateCardDimensions()
-  connectionStore.updateConnectionPaths(cardIds.value)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 
 // vote counter
@@ -488,10 +477,12 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  const ids = props.cards.map(card => card.id)
-  cardStore.updateCardsDimensions(ids)
-  await nextTick()
-  await nextTick()
+  setTimeout(async function () {
+    const ids = props.cards.map(card => card.id)
+    cardStore.updateCardsDimensions(ids)
+    await nextTick()
+    await nextTick()
+  }, 10)
 }
 const updateCard = async (card, updates) => {
   const keys = Object.keys(updates)
@@ -501,7 +492,7 @@ const updateCard = async (card, updates) => {
   })
   cardStore.updateCard(card)
   await updateCardDimensions()
-  connectionStore.updateConnectionPath(card.id)
+  connectionStore.updateConnectionPathByItemId(card.id)
 }
 
 // box

@@ -13,7 +13,7 @@ import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
-import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
@@ -143,10 +143,11 @@ const multipleItemsIsSelected = computed(() => Boolean(multipleItemsSelectedIds.
 const itemsIsConnectedTogether = computed(() => {
   const itemIds = multipleItemsSelectedIds.value
   const connections = connectionStore.getConnectionsByItemIds(itemIds)
-  const startItemIds = connections.map(connection => connection.startItemId)
-  const endItemIds = connections.map(connection => connection.endItemId)
-  const connectedItemIds = startItemIds.concat(endItemIds)
-  const isConnected = itemIds.every(id => connectedItemIds.includes(id))
+  const isConnected = connections.some(connection => {
+    const isStart = itemIds.includes(connection.startItemId)
+    const isEnd = itemIds.includes(connection.endItemId)
+    return isStart && isEnd
+  })
   return isConnected
 })
 const styles = computed(() => {
@@ -215,7 +216,6 @@ const connectItems = (event) => {
     if (index + 1 < itemIds.length) { // create connections for middle items
       const startItemId = itemId
       const endItemId = itemIds[index + 1]
-      if (prevConnection(startItemId, endItemId).length) { return }
       const id = nanoid()
       const path = connectionStore.getConnectionPathBetweenItems({
         startItemId,
@@ -240,13 +240,7 @@ const disconnectItems = () => {
 
 // connections
 
-const moreLineOptionsLabel = computed(() => {
-  if (multipleConnectionsSelectedIds.value.length > 1) {
-    return 'LINES'
-  } else {
-    return 'LINE'
-  }
-})
+const moreLineOptionsLabel = computed(() => 'LINE')
 const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
@@ -271,13 +265,6 @@ const connectionType = (event) => {
   }
   type = connectionStore.getNewConnectionType
   return type
-}
-const prevConnection = (startItemId, endItemId) => {
-  const startConnection = connectionStore.getConnectionByStartItemId(startItemId)
-  const endConnection = connectionStore.getConnectionByEndItemId(endItemId)
-  if (startConnection?.id === endConnection?.id) {
-    return startConnection
-  }
 }
 
 // boxes
@@ -473,7 +460,7 @@ dialog.narrow.multiple-selected-actions(
     //- Edit Cards
     .row(v-if="cardOrBoxIsSelected")
       //- [·]
-      ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
+      ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
       //- Connect
       button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
         img.connect-items.icon(src="@/assets/connect-items.svg")
@@ -493,6 +480,7 @@ dialog.narrow.multiple-selected-actions(
       :cards="cards"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
+      :labelIsVisible="true"
     )
     CardOrBoxActions(
       :labelIsVisible="true"
@@ -501,9 +489,6 @@ dialog.narrow.multiple-selected-actions(
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
     )
-
-      //- :class="{ 'last-row': !connectionsIsSelected }"
-
     ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section

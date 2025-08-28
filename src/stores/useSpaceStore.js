@@ -213,10 +213,6 @@ export const useSpaceStore = defineStore('space', {
       value = Boolean(value)
       return value
     },
-    getSpaceIsInbox (spaceName) {
-      spaceName = spaceName || this.name
-      return spaceName === 'Inbox'
-    },
 
     // user getters
 
@@ -359,7 +355,6 @@ export const useSpaceStore = defineStore('space', {
         return remoteSpace
       } catch (error) {
         console.error('🚒 getRemoteSpace', space.id, error)
-        loadSpaceIdsError.push(space.id)
         throw error
       }
     },
@@ -370,8 +365,9 @@ export const useSpaceStore = defineStore('space', {
       try {
         remoteSpace = await this.getRemoteSpace(space)
       } catch (error) {
-        console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         const preventRepeatError = loadSpaceIdsError.includes(space.id)
+        loadSpaceIdsError.push(space.id)
+        console.warn('🚑 loadRemoteSpace error', error.status, error, space.id, preventRepeatError)
         if (preventRepeatError) {
           globalStore.updateNotifySpaceNotFound(true)
           return
@@ -463,31 +459,22 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerScrollCardIntoView(cardId)
       }
     },
-    async loadInboxSpace (prevFailedSpace) {
-      let space
-      const userStore = useUserStore()
-      let spaceToRestore = await cache.space(userStore.lastSpaceId)
-      if (!spaceToRestore.id) {
-        spaceToRestore = null
-      } else if (spaceToRestore?.id === prevFailedSpace?.id) {
-        spaceToRestore = null
-      }
-      const cachedHelloSpace = await cache.getSpaceByName('Hello Kinopio')
-      const cachedSpace = await cache.getAllSpaces()[0]
-      const prevSpace = cachedHelloSpace || cachedSpace
-      if (spaceToRestore?.id) {
-        space = spaceToRestore
-      } else if (userStore.lastSpaceId) {
-        space = { id: userStore.lastSpaceId }
-      } else if (prevSpace) {
-        space = prevSpace
-        await cache.saveSpace(space)
-      }
-      // load space
-      if (space) {
-        await this.loadSpace(space)
-      } else {
-        this.initializeSpace()
+    async loadInboxSpace () {
+      const apiStore = useApiStore()
+      try {
+        // get inbox
+        let space = await cache.getInboxSpace()
+        if (!space) {
+          space = await apiStore.getInboxSpace()
+        }
+        // load or create
+        if (space) {
+          await this.loadSpace(space)
+        } else {
+          this.createNewInboxSpace()
+        }
+      } catch (error) {
+        console.error('🚒 loadInboxSpace', error)
       }
     },
     async loadLastSpace (prevFailedSpace) {
@@ -828,7 +815,7 @@ export const useSpaceStore = defineStore('space', {
       otherUserIds = uniq(otherUserIds)
       if (!otherUserIds.length) { return }
       try {
-        const users = await apiStore.getPublicUsers(otherUserIds)
+        const users = await apiStore.getPublicUsers(otherUserIds) || []
         users.forEach(user => {
           globalStore.updateOtherUsers(user)
         })
@@ -1029,12 +1016,9 @@ export const useSpaceStore = defineStore('space', {
         return collaborator.id !== user.id
       })
       await cache.updateSpace('collaborators', this.collaborators, this.id)
-      if (isFromBroadcast) {
-        broadcastStore.update({ updates: user, name: 'userLeftSpace' })
-        apiStore.removeSpaceCollaborator({ space, user })
-      }
       const isCurrentUser = userStore.getUserIsCurrentUser(user)
       if (isCurrentUser) {
+        apiStore.removeSpaceCollaborator({ space, user })
         this.loadLastSpace()
         cache.removeInvitedSpace(space)
         cache.deleteSpace(space)
@@ -1086,10 +1070,14 @@ export const useSpaceStore = defineStore('space', {
     },
     decrementCardsCreatedCountFromSpace (space) {
       const userStore = useUserStore()
-      space.cards = space.cards.filter(card => {
-        return userStore.getUserIsCurrentUser({ id: card.userId })
+      const cardStore = useCardStore()
+      let cards = cardStore.getAllCards
+      cards = cards.filter(card => {
+        const isSpace = card.spaceId === space.id
+        const isUser = userStore.getUserIsCurrentUser({ id: card.userId })
+        return isSpace && isUser
       })
-      userStore.updateUserCardsCreatedCount(space.cards, true)
+      userStore.updateUserCardsCreatedCount(cards, true)
     },
 
     // tags
@@ -1144,7 +1132,7 @@ export const useSpaceStore = defineStore('space', {
 
     // items
 
-    createSpaceItems (items) {
+    async createSpaceItems (items) {
       const userStore = useUserStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
@@ -1152,15 +1140,16 @@ export const useSpaceStore = defineStore('space', {
       const { cards, boxes, connections, connectionTypes, tags } = items
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
-      connections.forEach(connection => {
+      for (const connection of connections) {
         let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
         const prevTypeInCurrentSpace = connectionStore.getConnectionTypeByName(type.name)
         type = prevTypeInCurrentSpace || type
-        connectionStore.createConnectionType(type)
+        await connectionStore.createConnectionType(type)
         connection.connectionTypeId = type.id
         connection.type = type
-        connectionStore.createConnection(connection)
-      })
+        await connectionStore.createConnection(connection)
+        await connectionStore.updateConnectionPathByItemId(connection.startItemId)
+      }
       tags.forEach(tag => {
         tag.userId = userStore.id
         this.addTag(tag)
@@ -1201,11 +1190,9 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const isOffline = !globalStore.isOnline
-      if (this.getSpaceIsInbox) { return }
       if (!isSignedIn) { return }
       if (isOffline) { return }
       const inbox = await apiStore.getUserInboxSpace()
-      console.info('🌍 updateInboxCache')
       await cache.saveSpace(inbox)
     }
 

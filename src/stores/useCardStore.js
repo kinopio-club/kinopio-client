@@ -144,6 +144,12 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(cardId => this.getCard(cardId))
       cards = cards.filter(card => Boolean(card))
       return cards
+    },
+    getCardsIsTodoSortedByY () {
+      let cards = this.allIds.map(id => this.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards = sortBy(cards, 'y')
+      return cards.filter(card => utils.checkboxFromString(card.name))
     }
   },
 
@@ -313,9 +319,9 @@ export const useCardStore = defineStore('cards', {
       }
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
-      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       broadcastStore.update({ updates: card, store: 'cardStore', action: 'addCardToState' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
+      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
     },
     async createCards (cards, shouldOffsetPosition) {
       const userStore = useUserStore()
@@ -355,13 +361,21 @@ export const useCardStore = defineStore('cards', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
-      if (!userStore.getUserCanEditSpace) { return }
-      this.updateCardsState(updates)
-      const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
-      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
-      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
+      try {
+        if (!userStore.getUserCanEditSpace) { return }
+        this.updateCardsState(updates)
+        const ids = updates.map(update => update.id)
+        connectionStore.updateConnectionPathsByItemIds(ids)
+        broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
+        for (const card of updates) {
+          await apiStore.addToQueue({ name: 'updateCard', body: card })
+        }
+        let cards = this.getAllCards
+        cards = utils.clone(cards)
+        await cache.updateSpace('cards', cards, spaceStore.id)
+      } catch (error) {
+        console.error('🚒 updateCards', error)
+      }
     },
     updateCard (update) {
       this.updateCards([update])
@@ -419,7 +433,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
       connectionStore.removeConnectionsFromItems(ids)
-      userStore.updateUserCardsCreatedCount(cardsToRemove, true)
+      userStore.updateUserCardsCreatedCount(cards, true)
     },
     removeCard (id) {
       this.removeCards([id])
@@ -460,7 +474,6 @@ export const useCardStore = defineStore('cards', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -475,17 +488,21 @@ export const useCardStore = defineStore('cards', {
       }
       let cards = this.getCardsSelected
       cards = cards.map(card => {
+        let x = Math.round(card.x + delta.x)
+        x = Math.max(0, x)
+        let y = Math.round(card.y + delta.y)
+        y = Math.max(0, y)
         return {
           id: card.id,
-          x: Math.round(card.x + delta.x),
-          y: Math.round(card.y + delta.y)
+          x,
+          y
         }
       })
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection })
+      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -579,7 +596,7 @@ export const useCardStore = defineStore('cards', {
         await this.distributeCardsVertically(alignedCards)
         const cardIds = alignedCards.map(card => card.id)
         const connectionStore = useConnectionStore()
-        connectionStore.updateConnectionPaths(cardIds)
+        connectionStore.updateConnectionPathsByItemIds(cardIds)
       }
     },
     async updateCardsDimensions (ids) {
@@ -728,7 +745,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
 
     // vote
@@ -790,8 +807,16 @@ export const useCardStore = defineStore('cards', {
 
     // name
 
-    cardWithNameSegments (card) {
+    cardWithNameSegments (card, excludeCheckboxString) {
       let name = card.name
+      if (!name) {
+        card.nameSegments = []
+        return card
+      }
+      if (excludeCheckboxString) {
+        const checkbox = utils.checkboxFromString(name)
+        name = name.replace(checkbox, '')
+      }
       const url = utils.urlFromString(name)
       let imageUrl
       if (utils.urlIsImage(url)) {
@@ -824,6 +849,18 @@ export const useCardStore = defineStore('cards', {
       } else {
         return userStore.color
       }
+    },
+    insertCardUploadPlaceholder (file, id) {
+      const card = this.getCard(id)
+      if (!card) { return }
+      const isMatch = card.name.includes(file.name)
+      if (!isMatch) { return }
+      const name = card.name.replace(file.name, consts.uploadPlaceholder)
+      const update = {
+        id,
+        name
+      }
+      this.updateCard(update)
     },
     clearCardNameUploadPlaceholder (id) {
       const card = this.getCard(id)

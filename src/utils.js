@@ -211,8 +211,6 @@ export default {
       x: position.x - spaceRect.x,
       y: position.y - spaceRect.y
     }
-    // console.log('space',position, spaceRect)
-
     // #app
     const app = document.getElementById('app')
     const appRect = app.getBoundingClientRect()
@@ -235,23 +233,6 @@ export default {
       x: this.roundToNearest(position.x, gridSpacing),
       y: this.roundToNearest(position.y, gridSpacing)
     }
-  },
-  cursorDirection (currentCursor, prevCursor) {
-    const xDelta = currentCursor.x - prevCursor.x
-    const yDelta = currentCursor.y - prevCursor.y
-    const noMovement = xDelta === 0 && yDelta === 0
-    const directions = {
-      left: xDelta < 0,
-      right: xDelta > 0,
-      up: yDelta < 0,
-      down: yDelta > 0,
-      noMovement
-    }
-    directions.leftDrag = directions.left || noMovement
-    directions.rightDrag = directions.right || noMovement
-    directions.upDrag = directions.up || noMovement
-    directions.downDrag = directions.down || noMovement
-    return directions
   },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
@@ -1366,6 +1347,7 @@ export default {
   },
   migrationConnections (connections) { // migration added July 2024
     if (!connections) { return }
+    connections = connections.filter(connection => Boolean(connection))
     return connections.map(connection => {
       if (connection.startCardId) {
         connection.startItemId = connection.startCardId
@@ -1687,7 +1669,7 @@ export default {
     if (nullItemUsers) {
       userId = null
     } else {
-      userId = item.userId || user.id
+      userId = user.id || item.userId
     }
     return userId
   },
@@ -1742,8 +1724,10 @@ export default {
       return connection
     })
     tags = tags.map(tag => {
+      const userId = this.itemUserId(user, tag, nullItemUsers)
       tag.id = nanoid()
       tag.cardId = this.updateAllIds(tag, 'cardId', itemIdDeltas)
+      tag.userId = userId
       return tag
     })
     items = { cards, connections, connectionTypes, boxes, tags }
@@ -1942,10 +1926,14 @@ export default {
 
   // same as server util
   normalizeString (string) {
+    if (!string) { return }
     // remove punctuation characters, what's → whats
     string = string.replace(/'|"|‘|’|“|”/ig, '')
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
-    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+    string = string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+    // replace carriage returns with new lines
+    string = string.replace(/\r\n/g, '\n')
+    return string
   },
   removeLeadingDashes (string) {
     // -123-abc -> 123-abc
@@ -2214,6 +2202,16 @@ export default {
     const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif|\.heic)(?:\n| |\?|&)/igm)
     const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
+  },
+  imageFileTypeFromName (file) {
+    // https://regexr.com/8ggu1
+    // based on imageUrlPattern
+    // starts with a word boundary, no trailing characters
+    const imageNamePattern = new RegExp(/(\b)(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif|\.heic)/igm)
+    const match = file.name.match(imageNamePattern)
+    if (!match) { return }
+    const fileType = match[0].replace('.', 'image/')
+    return fileType
   },
   urlIsVideo (url) {
     if (!url) { return }

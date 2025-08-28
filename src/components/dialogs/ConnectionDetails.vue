@@ -15,9 +15,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import last from 'lodash-es/last'
-import sortBy from 'lodash-es/sortBy'
 import randomColor from 'randomcolor'
-import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
@@ -162,10 +160,7 @@ const currentConnectionType = computed(() => {
 
 const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const connectionTypesByUpdatedAt = computed(() => {
-  let types = connectionTypes.value
-  types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
-  types.reverse()
-  return types
+  return connectionStore.getConnectionTypesByUpdatedAt()
 })
 const canEditConnection = computed(() => {
   const isSpaceMember = userStore.getUserIsSpaceMember
@@ -222,7 +217,7 @@ const toggleFilteredInSpace = () => {
 // use last type
 
 const lastTypeColor = computed(() => {
-  const lastType = connectionStore.prevConnectionTypeId
+  const lastType = connectionStore.getPrevConnectionType
   return lastType?.color
 })
 const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
@@ -353,7 +348,11 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
   .results-actions
     .badge-in-button
       margin-left 5px
-      border-radius var(--small-entity-radius)
+      padding 7px 7px
+      min-height initial
+      display inline-block
+      min-width initial
+      vertical-align middle
     label
       .badge-in-button
         margin-left 0

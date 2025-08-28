@@ -8,7 +8,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -103,10 +102,6 @@ const clearTips = () => {
 
 <template lang="pug">
 .controls-settings(v-if="visible")
-  section
-    .row
-      p New Spaces
-    UserSettingsNewSpaces
   section
     .row
       p Accessibility

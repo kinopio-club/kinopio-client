@@ -104,7 +104,8 @@ const checkIsSpaceScope = (event) => {
   const classes = [...nodeList]
   const isFocusedCard = classes.includes('card')
   const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
-  return isBody || isMain || isFocusedCard || isSpaceNameButton
+  const isChromeFix = classes.includes('label')
+  return isBody || isMain || isFocusedCard || isSpaceNameButton || isChromeFix
 }
 const checkIsCardScope = (event) => {
   const isFromCardName = event.target.closest('dialog.card-details')
@@ -653,21 +654,21 @@ const writeSelectedToClipboard = async (position) => {
   boxes = utils.sortByY(boxes)
   let data = { cards, connections, connectionTypes, boxes }
   data = utils.updateSpaceItemsRelativeToOrigin(data, position)
-  globalStore.clipboardData = data
   // text
   let items = cards.concat(boxes)
   items = utils.sortByY(items)
   const text = utils.nameStringFromItems(items)
   // clipboard
   try {
-    console.info('🎊 copyData', data, text)
+    globalStore.clipboardData = { data, text }
+    console.info('🎊 copyData', globalStore.clipboardData)
     await navigator.clipboard.writeText(text)
+    return text
   } catch (error) {
     console.warn('🚑 writeSelectedToClipboard', error)
     throw { error }
   }
 }
-
 const handleCopyCutEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
@@ -722,20 +723,10 @@ const handlePastePlainText = async (data, position) => {
   }, 100)
 }
 
-const kinopioClipboardDataFromData = (data) => {
+const clipboardDataFromData = (data) => {
   if (!data.text) { return }
   if (data.file) { return }
-  // match text with names
-  let isKinopioClipboardData
-  const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
-  names.forEach(name => {
-    const card = globalStore.clipboardData?.cards?.find(card => card.name === name)
-    const box = globalStore.clipboardData?.boxes?.find(box => box.name === name)
-    if (card || box) {
-      isKinopioClipboardData = true
-    }
-  })
-  if (!isKinopioClipboardData) { return }
+  if (data.text !== globalStore.clipboardData.text) { return }
   return utils.clone(globalStore.clipboardData)
 }
 const getClipboardData = async () => {
@@ -743,8 +734,8 @@ const getClipboardData = async () => {
   const position = currentCursorPosition || prevCursorPosition
   try {
     const data = await utils.dataFromClipboard()
-    data.kinopio = kinopioClipboardDataFromData(data, position)
-    if (data.text || data.file || data.kinopio) {
+    data.clipboardData = clipboardDataFromData(data, position)
+    if (data.text || data.file || data.clipboardData) {
       globalStore.addNotificationWithPosition({ message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       return data
     }
@@ -770,9 +761,13 @@ const handlePasteEvent = async (event) => {
   userStore.notifyReadOnly(position)
   const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
-  // get clipboard data
   const data = await getClipboardData()
-  console.info('🎊 pasteData', data, position)
+  // get and set itemsData
+  let itemsData = data.clipboardData?.data
+  if (data.text && utils.normalizeString(data.text) === utils.normalizeString(globalStore.clipboardData?.text)) {
+    itemsData = globalStore.clipboardData.data
+  }
+  console.info('🎊 pasteData', data, itemsData)
   if (!data) { return }
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
@@ -780,10 +775,10 @@ const handlePasteEvent = async (event) => {
   if (data.file) {
     uploadStore.addCardsAndUploadFiles({ files: [data.file], position })
   // add kinopio items
-  } else if (data.kinopio) {
-    items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
+  } else if (itemsData) {
+    items = utils.updateSpaceItemsAddPosition(itemsData, position)
     items = await spaceStore.getNewItems(items)
-    spaceStore.createSpaceItems(items)
+    await spaceStore.createSpaceItems(items)
     // select new items
     await nextTick()
     globalStore.closeAllDialogs()
@@ -793,7 +788,7 @@ const handlePasteEvent = async (event) => {
     globalStore.addMultipleToMultipleBoxesSelected(boxIds)
     await nextTick()
     const connectionIds = items.connections.map(connection => connection.map)
-    connectionStore.updateConnectionPaths(connectionIds)
+    connectionStore.updateConnectionPathsByItemIds(connectionIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)

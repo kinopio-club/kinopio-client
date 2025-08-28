@@ -162,11 +162,6 @@ const toggleSpaceUsersIsVisible = () => {
   closeDialogs()
   state.spaceUsersIsVisible = value
 }
-const usersLabel = computed(() => {
-  const condition = users.value.length !== 1
-  const label = utils.pluralize('User', condition)
-  return `${users.value.length} ${label}`
-})
 
 </script>
 
@@ -183,7 +178,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         //- users
         .button-wrap
           button.small-button(@click.stop="toggleSpaceUsersIsVisible" :class="{active: state.spaceUsersIsVisible}")
-            span {{usersLabel}}
+            span Users
           SpaceUsers(:visible="state.spaceUsersIsVisible")
         //- rss
         .button-wrap(v-if="spaceIsRemote")
@@ -232,7 +227,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           span Embed
         Embed(:visible="state.embedIsVisible")
     details(@toggle="updateDialogHeight")
-      summary 🌱 Spread the Word
+      summary Spread the Word
       section.subsection
         p I don't have the resources of a VC backed company, so when you tell a friend about Kinopio, or share spaces at work, it really helps.
         //- p Your voice is the water that grows this seedling.

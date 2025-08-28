@@ -26,7 +26,7 @@ import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
-import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -262,7 +262,7 @@ const updateDimensionsAndPaths = async (cardId) => {
 const updatePaths = async (cardId) => {
   cardId = cardId || card.value.id
   await nextTick()
-  connectionStore.updateConnectionPath(cardId)
+  connectionStore.updateConnectionPathByItemId(cardId)
 }
 
 // space
@@ -1067,7 +1067,8 @@ const addImageOrFile = async (file) => {
   globalStore.triggerUploadComplete({
     cardId,
     spaceId,
-    url: file.url
+    url: file.url,
+    filename: file.name
   })
   await nextTick()
   updateMediaUrls()
@@ -1114,6 +1115,8 @@ const uploadFile = async (file) => {
   }
   try {
     await uploadStore.uploadFile({ file, cardId: card.value.id })
+    closeDialogs()
+    textareaSizes()
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
@@ -1191,7 +1194,10 @@ const addSplitCards = async (newCards) => {
 const updatePastedName = (event) => {
   const files = event.clipboardData.files
   if (files.length) {
-    uploadFile(files[0])
+    const file = files[0]
+    cardStore.insertCardUploadPlaceholder(file, card.value.id)
+    uploadFile(file)
+    return
   } else {
     const text = event.clipboardData.getData('text')
     state.pastedName = text
@@ -1454,7 +1460,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
-        ItemCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
+        ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
         //- Image
         .button-wrap
           button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")

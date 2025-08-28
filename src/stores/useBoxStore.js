@@ -115,6 +115,7 @@ export const useBoxStore = defineStore('boxes', {
     // init
 
     initializeBoxes (boxes = []) {
+      boxes = boxes.filter(box => Boolean(box))
       const byId = {}
       const allIds = []
       boxes.forEach(box => {
@@ -173,6 +174,17 @@ export const useBoxStore = defineStore('boxes', {
 
     // update
 
+    normalizeUpdates (updates) {
+      return updates.map(update => {
+        if (update.x) {
+          update.x = Math.max(consts.minItemXY, update.x)
+        }
+        if (update.y) {
+          update.y = Math.max(consts.minItemXY, update.y)
+        }
+        return update
+      })
+    },
     async updateBoxesState (updates) {
       const connectionStore = useConnectionStore()
       updates.forEach(update => {
@@ -185,7 +197,7 @@ export const useBoxStore = defineStore('boxes', {
       // const isNameUpdated = updates.find(update => Boolean(update.name))
       // if (isNameUpdated) {
       const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       // }
     },
     async updateBoxes (updates) {
@@ -194,9 +206,12 @@ export const useBoxStore = defineStore('boxes', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       if (!userStore.getUserCanEditSpace) { return }
+      updates = this.normalizeUpdates(updates)
       this.updateBoxesState(updates)
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
-      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } })
+      for (const box of updates) {
+        await apiStore.addToQueue({ name: 'updateBox', body: box })
+      }
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
     },
     async updateBox (update) {
@@ -250,12 +265,11 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.pageWidth = boxX
       }
     },
-    moveBoxes ({ endCursor, prevCursor, delta }) {
+    moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -268,7 +282,6 @@ export const useBoxStore = defineStore('boxes', {
         x: delta.x * zoom,
         y: delta.y * zoom
       }
-
       const boxes = this.getBoxesSelected
       const updates = []
       boxes.forEach(box => {
@@ -285,8 +298,9 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
-      connectionStore.updateConnectionPaths(itemIds)
-      this.updateBoxSnapGuides({ items: updates, cursorDirection })
+      connectionStore.updateConnectionPathsByItemIds(itemIds)
+      const cursor = endSpaceCursor || endCursor
+      this.updateBoxSnapGuides({ items: updates, cursor })
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
@@ -341,7 +355,7 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.currentUserIsResizingBoxIds = [box.id]
       })
       const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPaths(ids)
+      connectionStore.updateConnectionPathsByItemIds(ids)
       this.updateBoxes(updates)
     },
 
@@ -446,15 +460,29 @@ export const useBoxStore = defineStore('boxes', {
 
     // snap guides
 
-    getBoxSnapGuide ({ side, item, targetBox }) {
+    createBoxSnapGuide ({ side, item, targetBox, cursor }) {
       let time = Date.now()
       const prevGuide = this.boxSnapGuides.find(guide => guide.side === side)
       if (prevGuide) {
         time = prevGuide.time
       }
-      return { side, origin: item, target: targetBox, time }
+      let distance, sizeOutside
+      if (side === 'left') {
+        distance = Math.abs(cursor.x - targetBox.x)
+        sizeOutside = Math.abs(targetBox.x - item.x)
+      } else if (side === 'right') {
+        distance = Math.abs(cursor.x - (targetBox.x + targetBox.width))
+        sizeOutside = Math.abs((targetBox.x + targetBox.width) - (item.x + item.width))
+      } else if (side === 'top') {
+        distance = Math.abs(cursor.y - targetBox.y)
+        sizeOutside = Math.abs(targetBox.y - item.y)
+      } else if (side === 'bottom') {
+        distance = Math.abs(cursor.y - (targetBox.y + targetBox.height))
+        sizeOutside = Math.abs((targetBox.y + targetBox.height) - (item.y + item.height))
+      }
+      return { side, item, target: targetBox, time, distance, sizeOutside }
     },
-    updateBoxSnapGuides ({ items, isCards, cursorDirection }) {
+    updateBoxSnapGuides ({ items, isCards, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
@@ -499,46 +527,49 @@ export const useBoxStore = defineStore('boxes', {
           const targetBoxBottom = targetBox.y + targetBox.height
           const targetBoxIsMinX = targetBox.x <= spaceEdgeThreshold
           const targetBoxIsMinY = targetBox.y <= spaceEdgeThreshold
+          // item side is on target edge
+          const itemIsOverTargetBoxTop = utils.isBetween({ value: targetBoxTop, min: itemTop, max: itemBottom })
+          const itemIsOverTargetBoxBottom = utils.isBetween({ value: targetBoxBottom, min: itemTop, max: itemBottom })
+          const itemIsOverTargetBoxLeft = utils.isBetween({ value: targetBoxLeft, min: itemLeft, max: itemRight })
+          const itemIsOverTargetBoxRight = utils.isBetween({ value: targetBoxRight, min: itemLeft, max: itemRight })
+          // item inside target
+          const itemLeftIsInsideTargetBox = utils.isBetween({ value: itemLeft, min: targetBoxLeft, max: targetBoxRight })
+          const itemRightIsInsideTargetBox = utils.isBetween({ value: itemRight, min: targetBoxLeft, max: targetBoxRight })
+          const itemTopIsInsideTargetBox = utils.isBetween({ value: itemTop, min: targetBoxTop, max: targetBoxBottom })
+          const itemBottomIsInsideTargetBox = utils.isBetween({ value: itemBottom, min: targetBoxTop, max: targetBoxBottom })
           // snap left
-          const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold && cursorDirection.rightDrag
-          const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold && cursorDirection.leftDrag
-          if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'left', item, targetBox })
+          if (itemIsOverTargetBoxLeft && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
+            const snapGuide = this.createBoxSnapGuide({ side: 'left', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
           // snap right
-          const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold && cursorDirection.leftDrag
-          const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold && cursorDirection.rightDrag
-          if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'right', item, targetBox })
+          if (itemIsOverTargetBoxRight && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
+            const snapGuide = this.createBoxSnapGuide({ side: 'right', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
           // snap top
-          const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold && cursorDirection.upDrag
-          const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold && cursorDirection.downDrag
-          if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
+          if (itemIsOverTargetBoxTop && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
+            const snapGuide = this.createBoxSnapGuide({ side: 'top', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
           // snap bottom
-          const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold && cursorDirection.upDrag
-          const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold && cursorDirection.downDrag
-          if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
-            const snapGuide = this.getBoxSnapGuide({ side: 'bottom', item, targetBox })
+          if (itemIsOverTargetBoxBottom && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
+            const snapGuide = this.createBoxSnapGuide({ side: 'bottom', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           }
         })
+        snapGuides = sortBy(snapGuides, ['distance'])
       })
       // limit each origin item to it's closest target
       const normalizedGuides = {}
       snapGuides.forEach(snapGuide => {
-        const originGuide = normalizedGuides[snapGuide.origin.id]
-        if (originGuide) {
-          if (snapGuide.distance < originGuide.distance) {
-            normalizedGuides[snapGuide.origin.id] = snapGuide
+        const itemGuide = normalizedGuides[snapGuide.item.id]
+        if (itemGuide) {
+          if (snapGuide.distance < itemGuide.distance) {
+            normalizedGuides[snapGuide.item.id] = snapGuide
           }
         } else {
-          normalizedGuides[snapGuide.origin.id] = snapGuide
+          normalizedGuides[snapGuide.item.id] = snapGuide
         }
       })
       const normalizedGuideKeys = Object.keys(normalizedGuides)
@@ -546,27 +577,27 @@ export const useBoxStore = defineStore('boxes', {
       this.boxSnapGuides = snapGuides
     },
     async updateBoxSnapToPosition (snapGuide) {
-      let { side, origin, target } = snapGuide
+      let { side, item, target } = snapGuide
       const borderWidth = 2
-      const update = { id: origin.id }
-      origin = this.byId[origin.id]
-      if (!origin) { return }
-      const alignWithOriginY = side === 'right' || side === 'left'
+      const update = { id: item.id }
+      item = this.byId[item.id]
+      if (!item) { return }
+      const alignWithItemY = side === 'right' || side === 'left'
       // size
-      if (alignWithOriginY) {
+      if (alignWithItemY) {
         update.y = target.y
-        update.resizeHeight = Math.max(target.resizeHeight, origin.resizeHeight)
+        update.resizeHeight = target.resizeHeight
       } else {
         update.x = target.x
-        update.resizeWidth = Math.max(target.resizeWidth, origin.resizeWidth)
+        update.resizeWidth = target.resizeWidth
       }
       // position
       if (side === 'right') {
         update.x = target.x + target.resizeWidth - borderWidth
       } else if (side === 'left') {
-        update.x = target.x - origin.resizeWidth + borderWidth
+        update.x = target.x - item.resizeWidth + borderWidth
       } else if (side === 'top') {
-        update.y = target.y - origin.resizeHeight + borderWidth
+        update.y = target.y - item.resizeHeight + borderWidth
       } else if (side === 'bottom') {
         update.y = target.y + target.resizeHeight - borderWidth
       }
@@ -575,43 +606,43 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBox(update)
     },
     async updateBoxSnapToSize (snapGuide) {
-      const { side, origin, target } = snapGuide
-      const padding = consts.spaceBetweenCards
+      const { side, item, target, sizeOutside } = snapGuide
+      const padding = consts.spaceBetweenCards * 2
       const update = { id: target.id }
       const delta = {
-        x: origin.x - target.x,
-        y: origin.y - target.y
+        x: item.x - target.x,
+        y: item.y - target.y
       }
       if (side === 'right') {
         // increase width
-        update.resizeWidth = target.width + origin.width + padding
-        // increase height if origin is taller than target
-        if (origin.height + delta.y > target.resizeHeight) {
-          update.resizeHeight = origin.height + delta.y + padding
+        update.resizeWidth = target.width + sizeOutside + padding
+        // increase target box height if item is taller than target
+        if (item.height + delta.y > target.resizeHeight) {
+          update.resizeHeight = item.height + delta.y + padding
         }
       } else if (side === 'left') {
         // increase width and shift left
-        update.resizeWidth = target.width + origin.width + padding
-        update.x = target.x - origin.width - padding
-        // increase height if origin is taller than target
-        if (origin.height + delta.y > target.resizeHeight) {
-          update.resizeHeight = origin.height + delta.y + padding
+        update.resizeWidth = target.width + sizeOutside + padding
+        update.x = target.x - sizeOutside - padding
+        // increase target box height if item is taller than target
+        if (item.height + delta.y > target.resizeHeight) {
+          update.resizeHeight = item.height + delta.y + padding
         }
       } else if (side === 'top') {
         // increase height and shift up
-        const paddingTop = 30 + padding
-        update.resizeHeight = target.resizeHeight + origin.height + paddingTop
-        update.y = target.y - origin.height - paddingTop
-        // increase width if origin is wider than target
-        if (origin.width + delta.x > target.resizeWidth) {
-          update.resizeWidth = origin.width + delta.x + padding
+        const paddingTop = 20 + padding
+        update.resizeHeight = target.resizeHeight + sizeOutside + paddingTop
+        update.y = target.y - sizeOutside - paddingTop
+        // increase target box width if item is wider than target
+        if (item.width + delta.x > target.resizeWidth) {
+          update.resizeWidth = item.width + delta.x + padding
         }
       } else if (side === 'bottom') {
         // increase width
-        update.resizeHeight = target.resizeHeight + origin.height + padding
-        // increase width if origin is wider than target
-        if (origin.width + delta.x > target.resizeWidth) {
-          update.resizeWidth = origin.width + delta.x + padding
+        update.resizeHeight = target.resizeHeight + sizeOutside + padding
+        // increase target box width if item is wider than target
+        if (item.width + delta.x > target.resizeWidth) {
+          update.resizeWidth = item.width + delta.x + padding
         }
       }
       this.updateBox(update)

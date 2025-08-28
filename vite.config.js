@@ -5,8 +5,6 @@ import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
 
-const yearTime = 60 * 60 * 24 * 365 // 365 days
-
 const isDevelopment = process.env.NODE_ENV === 'development'
 const exploreSpaces = async () => {
   try {
@@ -18,6 +16,24 @@ const exploreSpaces = async () => {
     return paths.map(path => `/${path}`)
   } catch (error) {
     console.error('🚒 exploreSpaceUrls', error)
+  }
+}
+
+const createCache = (name, pattern) => {
+  const yearTime = 60 * 60 * 24 * 365 // 365 days
+  return {
+    urlPattern: pattern,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: name,
+      expiration: {
+        maxEntries: 10,
+        maxAgeSeconds: yearTime
+      },
+      cacheableResponse: {
+        statuses: [0, 200]
+      }
+    }
   }
 }
 
@@ -78,62 +94,12 @@ export default defineConfig(async ({ command, mode }) => {
           ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
           runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i, // match all except mp3/mp4
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'cdn-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/bk\.kinopio\.club\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'bk-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/images\.are\.na\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'are-na-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              urlPattern: /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i, // are.na cdn
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'are-na-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: yearTime
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            }
+            createCache('cdn-cache', /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i), // match all except mp3/mp4
+            createCache('img-cache', /^https:\/\/img\.kinopio\.club\/.*/i),
+            createCache('bk-cache', /^https:\/\/bk\.kinopio\.club\/.*/i),
+            createCache('files-cache', /^https:\/\/files\.kinopio\.club\/.*/i),
+            createCache('are-na-cache', /^https:\/\/images\.are\.na\/.*/i),
+            createCache('are-na-cache', /^https:\/\/d2w9rnfcy7mm78\.cloudfront\.net\/.*/i) // are.na cdn
           ]
         }
       }),

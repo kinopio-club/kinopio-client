@@ -104,6 +104,10 @@ const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
+const showTemplatesDialog = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerTemplatesIsVisible()
+}
 
 // dialog heights
 
@@ -148,7 +152,13 @@ const dialogSpaceFilterByGroup = computed(() => userStore.dialogSpaceFilterByGro
 const dialogSpaceFilterByTemplates = computed(() => userStore.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
+  return Boolean(
+    dialogSpaceFilterShowHidden.value ||
+    utils.objectHasKeys(dialogSpaceFilterByUser.value) ||
+    dialogSpaceFilterSortByIsActive.value ||
+    utils.objectHasKeys(dialogSpaceFilterByGroup.value) ||
+    dialogSpaceFilterByTemplates.value
+  )
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
@@ -258,7 +268,7 @@ const prependInboxSpaces = (spaces) => {
   const inboxSpaces = []
   const otherSpaces = []
   spaces.forEach(space => {
-    const isInbox = spaceStore.getSpaceIsInbox(space.name)
+    const isInbox = space.name === 'Inbox'
     if (isInbox) {
       inboxSpaces.push(space)
     } else {
@@ -378,6 +388,9 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       div
         //- New Space
         AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" :isSmall="true")
+        //- Templates
+        button.small-button(@click="showTemplatesDialog")
+          img.icon.templates(src="@/assets/templates.svg")
       //- Filters
       .button-wrap
         // no filters
