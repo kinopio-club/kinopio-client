@@ -81,28 +81,51 @@ const selectFontSize = (size) => {
   emit('selectFontSize', size)
 }
 const currentFontSizeString = computed(() => {
-  const size = 20
-  // should match NameSegment .header-font-size-~
+  // should match NameSegment header-font-size styles
+  const sizes = {
+    s: {
+      h1: 20,
+      h2: 18,
+      h3: 16
+    },
+    m: {
+      h1: 44,
+      h2: 36,
+      h3: 24
+    },
+    l: {
+      h1: 66,
+      h2: 52,
+      h3: 36
+    }
+  }
+  const name = items.value[0].name
+  const h1 = utils.markdown().h1Pattern.exec(name)
+  const h2 = utils.markdown().h2Pattern.exec(name)
+  const h3 = utils.markdown().h3Pattern.exec(name)
+  let type
+  if (h1) {
+    type = 'h1'
+  } else if (h2) {
+    type = 'h2'
+  } else if (h3) {
+    type = 'h3'
+  }
+  const currentFontSize = items.value[0].headerFontSize || 's'
+  const size = sizes[currentFontSize][type]
   return size + 'px'
 })
 
 // preview
 
 const previewSegments = computed(() => {
-  let preview, type
+  let preview
   items.value.some(item => {
     const name = utils.truncated(item.name)
     const h1 = utils.markdown().h1Pattern.exec(name)
     const h2 = utils.markdown().h2Pattern.exec(name)
     const h3 = utils.markdown().h3Pattern.exec(name)
     const match = h1 || h2 || h3
-    if (h1) {
-      type = 'h1'
-    } else if (h2) {
-      type = 'h2'
-    } else if (h3) {
-      type = 'h3'
-    }
     if (match) {
       preview = match[2].trim()
     }
@@ -112,7 +135,7 @@ const previewSegments = computed(() => {
   preview = utils.cardNameSegments(preview)
   preview = preview.map(segment => {
     segment.markdown = [{
-      type,
+      type: 'h1',
       content: segment.content
     }]
     return segment
@@ -149,7 +172,7 @@ dialog.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.lef
 
 <style lang="stylus">
 dialog.font-picker
-  min-height 200px
+  min-height 300px
   overflow auto
   top calc(100% + 4px)
   .font-size-buttons
