@@ -32,7 +32,7 @@ const visible = computed(() => consts.isDevelopment() && consts.itemDetailsDebug
   margin-right 0
   table
     margin 0
-    overflow scroll
+    overflow auto
     max-width 100%
     display block
     td
