@@ -1415,7 +1415,6 @@ progress::-moz-progress-bar
   top 0px
   width 100%
   height 100%
-  background-color pink
   transform-origin center
   animation focusing .3s alternate ease-out
   animation-iteration-count 4 // animation plays for ~2s

@@ -1920,6 +1920,9 @@ const focusColor = computed(() => {
     return null
   }
 })
+const clearFocus = () => {
+  globalStore.focusOnCardId = ''
+}
 </script>
 
 <template lang="pug">
@@ -1944,7 +1947,7 @@ const focusColor = computed(() => {
   ref="cardElement"
   :class="cardWrapClasses"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
