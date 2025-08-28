@@ -91,9 +91,10 @@ const currentFontSizeString = computed(() => {
 const previewSegments = computed(() => {
   let preview, type
   items.value.some(item => {
-    const h1 = utils.markdown().h1Pattern.exec(item.name)
-    const h2 = utils.markdown().h2Pattern.exec(item.name)
-    const h3 = utils.markdown().h3Pattern.exec(item.name)
+    const name = utils.truncated(item.name)
+    const h1 = utils.markdown().h1Pattern.exec(name)
+    const h2 = utils.markdown().h2Pattern.exec(name)
+    const h3 = utils.markdown().h3Pattern.exec(name)
     const match = h1 || h2 || h3
     if (h1) {
       type = 'h1'
