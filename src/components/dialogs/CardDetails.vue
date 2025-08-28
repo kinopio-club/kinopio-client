@@ -87,8 +87,21 @@ onMounted(() => {
       }
     }
   )
+  const cardActionUnsubscribe = cardStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'updateCardsState' && visible.value) {
+        const updates = args[0]
+        const isCurrentCard = updates.some(update => {
+          const isId = update.id === card.value.id
+          return update.name && isId
+        })
+        textareaSizes()
+      }
+    }
+  )
   unsubscribes = () => {
     globalActionUnsubscribe()
+    cardActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -450,12 +463,8 @@ const textareaSizes = async () => {
   await nextTick()
   const element = nameElement.value
   if (!element) { return }
-  let modifier = 0
-  if (canEditCard.value) {
-    modifier = 1
-  }
   element.style.height = 'auto'
-  element.style.height = element.scrollHeight + modifier + 'px'
+  element.style.height = element.scrollHeight + 'px'
 }
 const resetTextareaHeight = () => {
   if (!visible.value) { return }
@@ -496,7 +505,6 @@ const name = computed({
       state.pastedName = ''
     }
     updateNameSplitIntoCardsCount()
-    textareaSizes()
   }
 })
 const updateCardName = async (newName) => {
