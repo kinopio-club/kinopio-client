@@ -691,11 +691,16 @@ export const useCardStore = defineStore('cards', {
 
     // tilt
 
-    tiltCards (ids, delta) {
-      const maxDegrees = 25
+    tiltCards (ids, prevCursor, currentCursor) {
+      const maxDegrees = 90
       const updates = []
       ids.forEach(id => {
         const card = this.getCard(id)
+        const rectCenter = {
+          x: card.x + (card.width / 2),
+          y: card.y + (card.height / 2)
+        }
+        const delta = utils.tiltDelta(prevCursor, currentCursor, rectCenter)
         let tilt = card.tilt || 0
         tilt = tilt + delta
         tilt = Math.min(maxDegrees, tilt)

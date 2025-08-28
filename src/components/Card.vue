@@ -2166,7 +2166,7 @@ const clearFocus = () => {
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
-    transform-origin top right
+    transform-origin: calc(100% - 16px) calc(0% + 16px)
     .name
       color var(--primary-on-light-background)
     &:hover,

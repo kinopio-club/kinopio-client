@@ -307,11 +307,7 @@ const tiltCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
-  let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
-  if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
-    delta = -delta
-  }
-  cardStore.tiltCards(cardIds, delta)
+  cardStore.tiltCards(cardIds, prevCursor, endCursor)
 }
 const stopTiltingCards = () => {
   const cardIds = globalStore.currentUserIsTiltingCardIds

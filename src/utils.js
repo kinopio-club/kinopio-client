@@ -779,14 +779,14 @@ export default {
     })
     return total / numbers.length
   },
-  distanceBetweenTwoPoints (point1, point2) {
-    if (!point1 || !point2) { return }
-    // https://www.mathwarehouse.com/algebra/distance_formula/index.php
-    const xDelta = Math.abs(point1.x - point2.x)
-    const yDelta = Math.abs(point1.y - point2.y)
-    const distance = Math.sqrt((xDelta ** 2) + (yDelta ** 2))
-    return Math.round(distance)
-  },
+  // distanceBetweenTwoPoints (point1, point2) {
+  //   if (!point1 || !point2) { return }
+  //   // https://www.mathwarehouse.com/algebra/distance_formula/index.php
+  //   const xDelta = Math.abs(point1.x - point2.x)
+  //   const yDelta = Math.abs(point1.y - point2.y)
+  //   const distance = Math.sqrt((xDelta ** 2) + (yDelta ** 2))
+  //   return Math.round(distance)
+  // },
   angleBetweenTwoPoints (point1, point2) {
     // https://www.mathisfunforum.com/viewtopic.php?id=16175
     const xDelta = Math.abs(point1.x - point2.x)
@@ -821,6 +821,25 @@ export default {
       }
     })
     return points
+  },
+  tiltDelta (prevCursor, currentCursor, rectCenter) {
+    const prevVector = {
+      x: prevCursor.x - rectCenter.x,
+      y: prevCursor.y - rectCenter.y
+    }
+    const currentVector = {
+      x: currentCursor.x - rectCenter.x,
+      y: currentCursor.y - rectCenter.y
+    }
+    // calculate angles using atan2 (returns angle in radians)
+    const prevAngle = Math.atan2(prevVector.y, prevVector.x)
+    const currentAngle = Math.atan2(currentVector.y, currentVector.x)
+    let angleDiff = currentAngle - prevAngle
+    // mormalize angle difference to [-π, π] range
+    while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI
+    while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI
+    const delta = angleDiff * (180 / Math.PI) // to degrees
+    return delta
   },
   innerHTMLText (htmlString) {
     // https://regexr.com/6olpg
