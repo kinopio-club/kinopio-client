@@ -2027,7 +2027,14 @@ export default {
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
-    url = url.replaceAll('?hidden=true', '')
+    const splitFragment = url.split('#')
+    if (splitFragment.length > 1) {
+      url = splitFragment[0]
+    }
+    const splitQuery = url.split('?')
+    if (splitQuery.length > 1) {
+      url = splitQuery[0]
+    }
     const id = url.substring(url.length - uuidLength, url.length)
     if (this.idIsValid(id)) { return id }
   },
@@ -2321,7 +2328,12 @@ export default {
     if (split.length <= 1) {
       return undefined
     } else {
-      return split[1]
+      const splitFragment = split[1].split('#')
+      if (split.length <= 1) {
+        return split[1]
+      } else {
+        return splitFragment[0]
+      }
     }
   },
   urlType (url) {
@@ -2367,25 +2379,32 @@ export default {
   },
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
-      url = url.trim()
-      url = this.clearTrailingSlash(url)
-      if (!this.urlIsWebsite(url)) { return }
-      const queryString = this.queryString(url) || ''
-      const domain = this.urlWithoutQueryString(url)
+      const originalUrl = url.trim()
+      const urlForProcessing = this.clearTrailingSlash(originalUrl)
+      if (!this.urlIsWebsite(urlForProcessing)) { return }
+
+      const hashIndex = originalUrl.indexOf('#')
+      const fragment = hashIndex !== -1 ? originalUrl.substring(hashIndex) : ''
+      const urlWithoutFragment = hashIndex !== -1 ? originalUrl.substring(0, hashIndex) : originalUrl
+
+      const queryString = this.queryString(urlWithoutFragment) || ''
+      const domain = urlWithoutFragment.split('?')[0]
       let queryObject = {}
       if (queryString) {
         queryObject = qs.decode(queryString)
       }
       queryObject.hidden = 'true'
-      const newUrl = qs.encode(domain, queryObject)
-      name = name.replace(url, newUrl)
+      const newUrl = qs.encode(domain, queryObject) + fragment
+      name = name.replace(originalUrl, newUrl)
     })
     return name
   },
   removeHiddenQueryStringFromURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       const prevUrl = url
       url = url.replace('?hidden=true', '')
