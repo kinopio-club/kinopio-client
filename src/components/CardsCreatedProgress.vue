@@ -35,7 +35,7 @@ const state = reactive({
 })
 
 const cardsCreatedCount = computed(() => userStore.cardsCreatedCount || 0)
-const cardsCreatedLimit = computed(() => consts.cardsCreatedLimit)
+const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
@@ -62,12 +62,12 @@ section.subsection.cards-created-progress(@click="closeChildDialogs")
   .row
     p
       img.icon.card(src="@/assets/card.svg")
-      span {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
+      span {{cardsCreatedCount}}/{{freeCardsCreatedLimit}} free cards created
     .button-wrap
       button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
         span(title="Free Limit FAQ") ?
       FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
-  progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
+  progress(:value="cardsCreatedCount" :max="freeCardsCreatedLimit")
   .row
     .button-wrap
       button(@click="triggerUpgradeUserIsVisible")
