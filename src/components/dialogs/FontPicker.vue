@@ -26,7 +26,6 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
-  previewFontSize: '1',
   previewFontId: 0
 })
 
@@ -75,14 +74,17 @@ const selectFont = (font) => {
 const isFontSize = (size) => {
   return items.value.find(item => {
     const currentFontSize = item.headerFontSize || 's'
-    state.previewFontSize = currentFontSize
     return currentFontSize === size
   })
 }
 const selectFontSize = (size) => {
   emit('selectFontSize', size)
-  state.previewFontSize = size
 }
+const currentFontSizeString = computed(() => {
+  const size = 20
+  // should match NameSegment .header-font-size-~
+  return size + 'px'
+})
 
 // preview
 
@@ -119,47 +121,44 @@ const previewSegments = computed(() => {
 </script>
 
 <template lang="pug">
-dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section.results-section
+dialog.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
+  section
+    section.subsection
+      template(v-for="segment in previewSegments")
+        NameSegment(:segment="segment" :headerFontId="state.previewFontId" :backgroundColorIsDark="isThemeDark")
+  section.font-size
     //- size
-    .segmented-buttons.font-size-buttons
-      button.small-button(title="Small" :class="{active: isFontSize('s')}" @click="selectFontSize('s')")
-        img.icon.size-small(src="@/assets/size-small.svg")
-      button.small-button(title="Medium" :class="{active: isFontSize('m')}" @click="selectFontSize('m')")
-        img.icon.size-medium(src="@/assets/size-medium.svg")
-      button.small-button(title="Large" :class="{active: isFontSize('l')}" @click="selectFontSize('l')")
-        img.icon.size-large(src="@/assets/size-large.svg")
+    .row
+      .segmented-buttons.font-size-buttons
+        button.small-button(title="Small" :class="{active: isFontSize('s')}" @click="selectFontSize('s')")
+          img.icon.size-small(src="@/assets/size-small.svg")
+        button.small-button(title="Medium" :class="{active: isFontSize('m')}" @click="selectFontSize('m')")
+          img.icon.size-medium(src="@/assets/size-medium.svg")
+        button.small-button(title="Large" :class="{active: isFontSize('l')}" @click="selectFontSize('l')")
+          img.icon.size-large(src="@/assets/size-large.svg")
+      .badge.info {{currentFontSizeString}}
+
+  section.results-section
     //- font
     ul.results-list(:class="{'is-dark-theme': isThemeDark}")
       template(v-for="font in fonts" :key="font.id")
         li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
           img.preview-image(:src="font.previewImage" :title="font.name")
-dialog.narrow.font-picker-preview(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop)
-  section.subsection
-    template(v-for="segment in previewSegments")
-      NameSegment(:segment="segment" :headerFontSize="state.previewFontSize" :headerFontId="state.previewFontId" :backgroundColorIsDark="isThemeDark")
 </template>
 
 <style lang="stylus">
 dialog.font-picker
   min-height 200px
   overflow auto
-  width 160px
   top calc(100% + 4px)
   .font-size-buttons
+    margin-right 6px
     .small-button
       padding 0 5px
     .icon.size-medium
       vertical-align -1px
-  section
-    padding-top 4px
-  .badge
-    width 20px
-    height 19px
-    display block
-    padding 0
   .preview-image
-    width 100%
+    height 20px
     vertical-align -5px
     user-select none
     -webkit-user-drag none

@@ -205,6 +205,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     --header-font var(--header-font-8)
   &.header-font-9
     --header-font var(--header-font-9)
+  // should match FontPicker.currentSize
   &.header-font-size-modifier-s
     .markdown
       h1
