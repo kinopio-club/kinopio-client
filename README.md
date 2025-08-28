@@ -36,6 +36,10 @@ When the app starts up, the `🐸 kinopio-server URL` will be displayed in the b
 
 	npm run lint
 
+## Unit Tests
+
+    npm run test
+
 Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Chrome. For Safari, uncomment code in `main.js` then,
 
 	./node_modules/.bin/vue-devtools
