@@ -98,6 +98,7 @@ const closeChildDialogs = () => {
 
 const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
 const spaceUser = computed(() => spaceStore.users[0])
+const cardsCreatedLimit = computed(() => consts.cardsCreatedLimit)
 
 </script>
 
@@ -107,9 +108,9 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
     .row.title-row
       //- price
       template(v-if="isSecureAppContextIOS")
-        p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+        p Kinopio is free for {{cardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
       template(v-else)
-        p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
+        p Kinopio is free for {{cardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?
