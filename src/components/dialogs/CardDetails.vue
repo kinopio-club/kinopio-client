@@ -454,6 +454,7 @@ const textareaSizes = async () => {
   if (canEditCard.value) {
     modifier = 1
   }
+  element.style.height = 'auto'
   element.style.height = element.scrollHeight + modifier + 'px'
 }
 const resetTextareaHeight = () => {
