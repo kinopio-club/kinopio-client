@@ -692,7 +692,7 @@ export const useCardStore = defineStore('cards', {
     // tilt
 
     tiltCards (ids, delta) {
-      const maxDegrees = 25
+      const maxDegrees = 90
       const updates = []
       ids.forEach(id => {
         const card = this.getCard(id)
