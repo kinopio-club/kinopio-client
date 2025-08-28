@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import consts from '@/consts.js'
 
+const isHidden = true
+
 const props = defineProps({
   item: Object,
   keys: {
@@ -11,7 +13,10 @@ const props = defineProps({
   }
 })
 
-const visible = computed(() => consts.isDevelopment() && consts.itemDetailsDebugIsVisible)
+const visible = computed(() => {
+  if (isHidden) { return }
+  return consts.isDevelopment() && consts.itemDetailsDebugIsVisible
+})
 
 </script>
 
