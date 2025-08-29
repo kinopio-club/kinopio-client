@@ -540,7 +540,7 @@ export const useSpaceStore = defineStore('space', {
       console.info('✨ saveSpace', space, user)
       cache.saveSpace(space)
       this.addUserToSpace(user)
-      userStore.incrementSpacesCreatedCount(space)
+      await userStore.incrementSpacesCreatedCount(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
@@ -564,7 +564,7 @@ export const useSpaceStore = defineStore('space', {
       await cache.restoreRemovedSpace(space)
       const restoredSpace = await apiStore.restoreRemovedSpace(space)
       space = restoredSpace || space
-      userStore.incrementSpacesCreatedCount(space)
+      await userStore.incrementSpacesCreatedCount(space)
       this.changeSpace(space)
     },
     async duplicateSpace () {
@@ -692,7 +692,7 @@ export const useSpaceStore = defineStore('space', {
       cache.saveSpace(space)
       this.restoreSpace(space)
       this.addUserToSpace(user)
-      userStore.incrementSpacesCreatedCount(space)
+      await userStore.incrementSpacesCreatedCount(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
@@ -892,7 +892,7 @@ export const useSpaceStore = defineStore('space', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const space = this.getSpaceAllState
-      userStore.decrementSpacesCreatedCount(space)
+      await userStore.decrementSpacesCreatedCount(space)
       await cache.removeSpace(space)
       globalStore.prevSpaceIdInSession = ''
       await apiStore.addToQueue({
