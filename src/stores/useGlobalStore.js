@@ -238,8 +238,8 @@ export const useGlobalStore = defineStore('global', {
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
     notifySignUpToJoinGroup: false,
-    notifyCardsCreatedIsNearLimit: false,
-    notifyCardsCreatedIsOverLimit: false,
+    notifySpacesCreatedIsNearLimit: false,
+    notifySpacesCreatedIsOverLimit: false,
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
     hasNotifiedPressAndHoldToDrag: false,
@@ -998,8 +998,8 @@ export const useGlobalStore = defineStore('global', {
       this.notifyServerCouldNotSave = false
       this.notifySignUpToEditSpace = false
       this.notifySignUpToJoinGroup = false
-      this.notifyCardsCreatedIsNearLimit = false
-      this.notifyCardsCreatedIsOverLimit = false
+      this.notifySpacesCreatedIsNearLimit = false
+      this.notifySpacesCreatedIsOverLimit = false
       this.notifyMoveOrCopyToSpace = false
       this.notificationsWithPosition = []
     },
@@ -1041,11 +1041,11 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'error' })
       }
     },
-    updateNotifyCardsCreatedIsOverLimit (value) {
+    updateNotifySpacesCreatedIsOverLimit (value) {
       utils.typeCheck({ value, type: 'boolean' })
-      this.notifyCardsCreatedIsOverLimit = value
+      this.notifySpacesCreatedIsOverLimit = value
       if (value === true) {
-        this.notifyCardsCreatedIsNearLimit = false
+        this.notifySpacesCreatedIsNearLimit = false
       }
     },
     updateNotifyIsJoiningGroup (value) {

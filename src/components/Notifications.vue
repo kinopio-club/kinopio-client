@@ -29,7 +29,7 @@ let unsubscribes
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
-const cardsOverLimitElement = ref(null)
+const spacesOverLimitElement = ref(null)
 const readOnlyElement = ref(null)
 const templateElement = ref(null)
 
@@ -47,8 +47,8 @@ onMounted(() => {
         update()
       } else if (name === 'triggerReadOnlyJiggle') {
         addReadOnlyJiggle()
-      } else if (name === 'notifyCardsCreatedIsOverLimit') {
-        toggleNotifyCardsCreatedIsOverLimit(true)
+      } else if (name === 'notifySpacesCreatedIsOverLimit') {
+        toggleNotifySpacesCreatedIsOverLimit(true)
       } else if (name === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
         checkIfShouldNotifySpaceOutOfSync()
       } else if (name === 'triggerNotifyCouldNotSave') {
@@ -83,7 +83,7 @@ watch(() => globalStore.currentUserIsPainting, (value, prevValue) => {
 
 const state = reactive({
   readOnlyJiggle: false,
-  notifyCardsCreatedIsOverLimitJiggle: false,
+  notifySpacesCreatedIsOverLimitJiggle: false,
   notifySpaceOutOfSync: false,
   notifiyCouldNotSave: false
 })
@@ -112,10 +112,10 @@ const privacyState = computed(() => {
     return state.name === spaceStore.privacy
   })
 })
-const cardsCreatedCountFromLimit = computed(() => {
-  const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
-  const cardsCreatedCount = userStore.cardsCreatedCount
-  return Math.max(freeCardsCreatedLimit - cardsCreatedCount, 0)
+const spacesCreatedCountFromLimit = computed(() => {
+  const freeSpacesCreatedLimit = consts.freeSpacesCreatedLimit
+  const spacesCreatedCount = userStore.spacesCreatedCount
+  return Math.max(freeSpacesCreatedLimit - spacesCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
   if (globalStore.isLoadingSpace) { return }
@@ -184,8 +184,8 @@ const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
 })
-const notifyCardsCreatedIsNearLimit = computed(() => globalStore.notifyCardsCreatedIsNearLimit)
-const notifyCardsCreatedIsOverLimit = computed(() => globalStore.notifyCardsCreatedIsOverLimit)
+const notifySpacesCreatedIsNearLimit = computed(() => globalStore.notifySpacesCreatedIsNearLimit)
+const notifySpacesCreatedIsOverLimit = computed(() => globalStore.notifySpacesCreatedIsOverLimit)
 const notifyMoveOrCopyToSpace = computed(() => globalStore.notifyMoveOrCopyToSpace)
 const notifyMoveOrCopyToSpaceDetails = computed(() => globalStore.notifyMoveOrCopyToSpaceDetails)
 const notifySpaceIsHidden = computed(() => globalStore.notifySpaceIsHidden)
@@ -230,8 +230,8 @@ const changeSpaceToChangelog = () => {
 
 // toggle notifications
 
-const toggleNotifyCardsCreatedIsOverLimit = (value) => {
-  state.notifyCardsCreatedIsOverLimitJiggle = true
+const toggleNotifySpacesCreatedIsOverLimit = (value) => {
+  state.notifySpacesCreatedIsOverLimitJiggle = true
 }
 const removeNotifyThanks = () => {
   globalStore.notifyThanksForDonating = false
@@ -285,14 +285,14 @@ const showRemoved = () => {
   resetNotifyCurrentSpaceIsNowRemoved()
   globalStore.triggerRemovedIsVisible()
 }
-const resetNotifyCardsCreatedIsNearLimit = () => {
-  globalStore.notifyCardsCreatedIsNearLimit = false
+const resetNotifySpacesCreatedIsNearLimit = () => {
+  globalStore.notifySpacesCreatedIsNearLimit = false
 }
 const resetNotifyMoveOrCopyToSpace = () => {
   globalStore.notifyMoveOrCopyToSpace = false
 }
-const resetNotifyCardsCreatedIsOverLimitJiggle = () => {
-  state.notifyCardsCreatedIsOverLimitJiggle = false
+const resetNotifySpacesCreatedIsOverLimitJiggle = () => {
+  state.notifySpacesCreatedIsOverLimitJiggle = false
 }
 const triggerUpgradeUserIsVisible = () => {
   closeAllDialogs()
@@ -411,13 +411,13 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.remove-undo(src="@/assets/undo.svg")
         span Undo
 
-  .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
-    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade
+  .item(v-if="notifySpacesCreatedIsNearLimit" @animationend="resetNotifySpacesCreatedIsNearLimit")
+    p You can create {{spacesCreatedCountFromLimit}} more space before you'll need to upgrade
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
-  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimitElement" :class="{'notification-jiggle': state.notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
-    p To add more cards, you'll need to upgrade
+  .persistent-item.danger(v-if="notifySpacesCreatedIsOverLimit" ref="spacesOverLimitElement" :class="{'notification-jiggle': state.notifySpacesCreatedIsOverLimitJiggle}" @animationend="resetNotifySpacesCreatedIsOverLimitJiggle")
+    p To add more spaces, you'll need to upgrade
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
