@@ -114,16 +114,10 @@ export const useUserStore = defineStore('users', {
     getUserIsSignedIn () {
       return Boolean(this.apiKey)
     },
-    getUserCardsCreatedIsOverLimit () {
-      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
+    getUserSpacesCreatedIsOverLimit () {
+      const freeSpacesCreatedLimit = consts.freeSpacesCreatedLimit
       if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount >= freeCardsCreatedLimit) { return true }
-    },
-    getShouldPreventCardsCreatedCountUpdate () {
-      const spaceStore = useSpaceStore()
-      const spaceCreatorIsUpgraded = spaceStore.getSpaceCreatorIsUpgraded
-      const userIsCreator = spaceStore.getSpaceCreatorIsCurrentUser
-      return (spaceCreatorIsUpgraded && !userIsCreator)
+      if (this.spacesCreatedCount >= freeSpacesCreatedLimit) { return true }
     },
     getUserTotalItemFadingFiltersActive () {
       const globalStore = useGlobalStore()
@@ -505,13 +499,8 @@ export const useUserStore = defineStore('users', {
       this.cardsCreatedCountRaw = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } })
       // update count
-      if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
-    },
-    getUserCardsCreatedWillBeOverLimit (count) {
-      if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount + count >= consts.freeCardsCreatedLimit) { return true }
     },
 
     // inbox

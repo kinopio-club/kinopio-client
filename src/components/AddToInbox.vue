@@ -27,13 +27,11 @@ const state = reactive({
   newName: '',
   error: {
     unknownServerError: false,
-    maxLength: false,
-    cardsCreatedIsOverLimit: false
+    maxLength: false
   },
   success: false
 })
 
-const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const textareaPlaceholder = computed(() => 'Type here, or paste a URL')
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const updateMaxLengthError = () => {
@@ -45,7 +43,6 @@ const updateMaxLengthError = () => {
 }
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
-  state.error.cardsCreatedIsOverLimit = false
   state.success = false
 }
 const name = computed({
@@ -79,10 +76,6 @@ const insertLineBreak = async (event) => {
 const addCard = async () => {
   clearErrorsAndSuccess()
   if (!state.newName) { return }
-  if (cardsCreatedIsOverLimit.value) {
-    state.error.cardsCreatedIsOverLimit = true
-    return
-  }
   if (state.error.maxLength) { return }
   // show completion immediately, assume success
   const newName = state.newName
@@ -147,8 +140,6 @@ section.add-to-inbox(v-if="props.visible")
       button(@click="addCard")
         img.icon.add-icon(src="@/assets/add.svg")
         span Add
-      .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
-        span Upgrade for more cards
       .badge.error-badge.danger(v-if="state.error.maxLength")
         span Max Length {{maxCardCharacterLimit}}
       .badge.error-badge.danger(v-if="state.error.unknownServerError")

@@ -48,7 +48,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
   inviteType: 'edit' // 'group', 'edit', 'readOnly'
@@ -81,7 +80,6 @@ const updateDefaultInviteType = () => {
 }
 const toggleInviteType = (type) => {
   state.inviteType = type
-  state.tipsIsVisible = false
 }
 
 // urls
@@ -160,10 +158,6 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 
 // tips
 
-const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
-}
-
 </script>
 
 <template lang="pug">
@@ -207,19 +201,6 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
     template(v-if="!inviteTypeIsGroup")
       .row.title-row
         .badge Anyone with the link can view
-        button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-          span ?
-      .row(v-if="state.tipsIsVisible")
-        .badge.info
-          p If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
-      //- .row(v-if="currentUserIsUpgraded")
-      //-   details
-      //-     summary
-      //-       span Collaborators edit for free
-      //-     section.subsection
-      //-       p If your account is upgraded, collaborators can create cards in this space without increasing their free card count
-            //- p
-            //-   img(src="https://cdn.kinopio.club/EoczbIBOicBBBh-GNuZOE/original-3a3d20bd4be668e1dffd7a97742a501d.gif")
 </template>
 
 <style lang="stylus">

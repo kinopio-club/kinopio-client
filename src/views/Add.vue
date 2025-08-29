@@ -62,7 +62,6 @@ onBeforeUnmount(() => {
 const isOffline = computed(() => !globalStore.isOnline)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const kinopioDomain = computed(() => consts.kinopioDomain())
-const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const currentUser = computed(() => userStore.getUserAllState)
 const isAddPage = computed(() => globalStore.isAddPage)
@@ -159,7 +158,6 @@ const signIn = async (event) => {
 
 const addCard = async () => {
   clearErrorsAndSuccess()
-  if (state.cardsCreatedIsOverLimit) { return }
   if (state.error.maxLength) { return }
   if (!state.newName) { return }
   try {
@@ -246,17 +244,9 @@ const insertLineBreak = async (event) => {
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
     section
-      .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength")
-        //- error: card limit
-        template(v-if="cardsCreatedIsOverLimit")
-          a(:href="kinopioDomain" v-if="isAddPage")
-            .badge.danger.button-badge
-              span Upgrade for more{{' '}}
-              img.icon.visit(src="@/assets/visit.svg")
-          .badge.danger(v-else)
-            span Upgrade for more cards
+      .row(v-if="state.error.unknownServerError || state.error.maxLength")
         //- error: connection
-        .badge.danger(v-if="state.error.unknownServerError || state.error.maxLength") (シ_ _)シ Server error
+        .badge.danger (シ_ _)シ Server error
       //- textarea
       .row
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")

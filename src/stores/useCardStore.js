@@ -304,10 +304,6 @@ export const useCardStore = defineStore('cards', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const userNotificationStore = useUserNotificationStore()
-      if (spaceStore.getShouldPreventAddCard) {
-        globalStore.updateNotifyCardsCreatedIsOverLimit(true)
-        return
-      }
       card = this.normailzeNewCard(card)
       this.addCardToState(card)
       if (card.isFromBroadcast) { return }
@@ -318,7 +314,6 @@ export const useCardStore = defineStore('cards', {
         globalStore.parentCardId = card.id
       }
       userStore.updateUserCardsCreatedCount([card])
-      spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
       broadcastStore.update({ updates: card, store: 'cardStore', action: 'addCardToState' })
       await apiStore.addToQueue({ name: 'createCard', body: card })
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })

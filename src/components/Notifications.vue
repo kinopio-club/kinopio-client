@@ -112,11 +112,6 @@ const privacyState = computed(() => {
     return state.name === spaceStore.privacy
   })
 })
-const spacesCreatedCountFromLimit = computed(() => {
-  const freeSpacesCreatedLimit = consts.freeSpacesCreatedLimit
-  const spacesCreatedCount = userStore.spacesCreatedCount
-  return Math.max(freeSpacesCreatedLimit - spacesCreatedCount, 0)
-})
 const currentSpaceIsTemplate = computed(() => {
   if (globalStore.isLoadingSpace) { return }
   if (globalStore.isPresentationMode) { return }
@@ -184,7 +179,6 @@ const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
 })
-const notifySpacesCreatedIsNearLimit = computed(() => globalStore.notifySpacesCreatedIsNearLimit)
 const notifySpacesCreatedIsOverLimit = computed(() => globalStore.notifySpacesCreatedIsOverLimit)
 const notifyMoveOrCopyToSpace = computed(() => globalStore.notifyMoveOrCopyToSpace)
 const notifyMoveOrCopyToSpaceDetails = computed(() => globalStore.notifyMoveOrCopyToSpaceDetails)
@@ -284,9 +278,6 @@ const triggerSignUpOrInIsVisible = () => {
 const showRemoved = () => {
   resetNotifyCurrentSpaceIsNowRemoved()
   globalStore.triggerRemovedIsVisible()
-}
-const resetNotifySpacesCreatedIsNearLimit = () => {
-  globalStore.notifySpacesCreatedIsNearLimit = false
 }
 const resetNotifyMoveOrCopyToSpace = () => {
   globalStore.notifyMoveOrCopyToSpace = false
@@ -410,11 +401,6 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(src="@/assets/remove.svg")
         img.icon.remove-undo(src="@/assets/undo.svg")
         span Undo
-
-  .item(v-if="notifySpacesCreatedIsNearLimit" @animationend="resetNotifySpacesCreatedIsNearLimit")
-    p You can create {{spacesCreatedCountFromLimit}} more space before you'll need to upgrade
-    .row
-      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   .persistent-item.danger(v-if="notifySpacesCreatedIsOverLimit" ref="spacesOverLimitElement" :class="{'notification-jiggle': state.notifySpacesCreatedIsOverLimitJiggle}" @animationend="resetNotifySpacesCreatedIsOverLimitJiggle")
     p To add more spaces, you'll need to upgrade

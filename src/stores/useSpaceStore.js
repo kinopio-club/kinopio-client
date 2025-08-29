@@ -66,19 +66,10 @@ export const useSpaceStore = defineStore('space', {
     getSpaceCreator () {
       return this.getSpaceMemberById(this.userId) || this.users[0]
     },
-    getSpaceCreatorIsUpgraded () {
-      const creatorUser = this.getSpaceCreator
-      return creatorUser?.isUpgraded
-    },
     getSpaceCreatorIsCurrentUser () {
       const userStore = useUserStore()
       const creatorUser = this.getSpaceCreator
       return userStore.getUserIsCurrentUser(creatorUser)
-    },
-    getShouldPreventAddCard () {
-      const userStore = useUserStore()
-      const cardsCreatedIsOverLimit = userStore.getUserCardsCreatedIsOverLimit
-      return cardsCreatedIsOverLimit && !this.getSpaceCreatorIsUpgraded
     },
     getSpaceIsRemote () {
       const userStore = useUserStore()
@@ -1050,17 +1041,6 @@ export const useSpaceStore = defineStore('space', {
 
     // user card count
 
-    checkIfShouldNotifyCardsCreatedIsNearLimit () {
-      const globalStore = useGlobalStore()
-      const userStore = useUserStore()
-      if (this.getSpaceCreatorIsUpgraded) { return }
-      if (userStore.isUpgraded) { return }
-      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
-      const value = freeCardsCreatedLimit - userStore.cardsCreatedCount
-      if (utils.isBetween({ value, min: 0, max: 15 })) {
-        globalStore.notifyCardsCreatedIsNearLimit = true
-      }
-    },
     incrementCardsCreatedCountFromSpace (space) {
       const userStore = useUserStore()
       const updatedCards = space.cards.filter(card => {

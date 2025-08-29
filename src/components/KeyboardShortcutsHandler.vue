@@ -752,11 +752,6 @@ const handlePasteEvent = async (event) => {
   let items
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
-  // check card limits
-  if (spaceStore.getShouldPreventAddCard) {
-    globalStore.updateNotifyCardsCreatedIsOverLimit(true)
-    return
-  }
   // check read only
   userStore.notifyReadOnly(position)
   const canEditSpace = userStore.getUserCanEditSpace
