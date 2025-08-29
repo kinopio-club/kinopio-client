@@ -37,6 +37,7 @@ export const useUserStore = defineStore('users', {
     hiddenSpaces: [],
     cardsCreatedCount: 0,
     cardsCreatedCountRaw: 0,
+    spacesCreatedCount: 0,
     isUpgraded: false,
     isModerator: false,
     filterShowUsers: false,
