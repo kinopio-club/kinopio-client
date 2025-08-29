@@ -81,11 +81,11 @@ const init = async () => {
 
 // restore
 
-const restore = (item) => {
+const restore = (event, item) => {
   if (state.cardsVisible) {
     restoreCard(item)
   } else {
-    restoreSpace(item)
+    restoreSpace(event, item)
   }
 }
 
@@ -215,7 +215,10 @@ const loadRemoteRemovedSpaces = async () => {
   })
   state.removedSpaces = removedSpaces
 }
-const restoreSpace = (space) => {
+const restoreSpace = (event, space) => {
+  if (userStore.checkIfShouldPreventNewSpace(event)) {
+    return
+  }
   spaceStore.restoreRemovedSpace(space)
   removeRemovedSpace(space)
 }
@@ -296,7 +299,7 @@ const items = computed(() => {
 
     ul.results-list
       template(v-for="item in items" :key="item.id")
-        li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)" :data-item-id="item.id")
+        li(@click.left="restore($event, item)" tabindex="0" v-on:keyup.enter="restore($event, item)" :data-item-id="item.id")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
