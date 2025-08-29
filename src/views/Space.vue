@@ -308,8 +308,9 @@ const tiltCards = (event) => {
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
-  const directionIsRight = endCursor.x > prevCursor.x
-  const directionIsUp = endCursor.y > prevCursor.y
+  const isMovementX = Math.abs(endCursor.x - prevCursor.x) > Math.abs(endCursor.y - prevCursor.y)
+  const directionIsRight = endCursor.x > prevCursor.x && isMovementX
+  const directionIsUp = endCursor.y > prevCursor.y && !isMovementX
   if (directionIsRight || directionIsUp) {
     delta = -delta
   }
