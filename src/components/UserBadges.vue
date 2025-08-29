@@ -72,7 +72,7 @@ const cardsCreatedCount = computed(() => {
 //- card count
 .row
   .badge.secondary
-    img.icon.card(src="@/assets/card.svg")
+    img.icon(src="@/assets/record.svg")
     span {{cardsCreatedCount}} Cards Created
 </template>
 
