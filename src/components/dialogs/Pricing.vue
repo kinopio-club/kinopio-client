@@ -7,7 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
-import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
+import SpacesCreatedProgress from '@/components/SpacesCreatedProgress.vue'
 import AboutMe from '@/components/AboutMe.vue'
 import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import AboutGroups from '@/components/dialogs/AboutGroups.vue'
@@ -96,9 +96,8 @@ const closeChildDialogs = () => {
 
 // free cards from space member
 
-const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
 const spaceUser = computed(() => spaceStore.users[0])
-const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
+const freeSpacesCreatedLimit = computed(() => consts.freeSpacesCreatedLimit)
 const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 </script>
@@ -109,9 +108,9 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
     .row.title-row
       //- price
       template(v-if="isSecureAppContextIOS")
-        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+        p Kinopio is free for {{freeSpacesCreatedLimit}} spaces, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
       template(v-else)
-        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
+        p Kinopio is free for {{freeSpacesCreatedLimit}} spaces, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?
@@ -126,8 +125,8 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             span.badge.success Upgraded
         tr
-          td {{freeCardsCreatedLimit}} cards
-          td Unlimited cards
+          td {{freeSpacesCreatedLimit}} spaces
+          td Unlimited spaces
         tr
           td {{freeUploadSizeLimit}}mb file upload size limit
           td No upload limit
@@ -139,12 +138,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
               button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
                 span ?
                 AboutGroups(:visible="state.aboutGroupsIsVisible")
-    CardsCreatedProgress
-    //- free cards from space member
-    section.subsection(v-if="spaceCreatorIsUpgraded")
-      p
-        UserLabelInline(:user="spaceUser")
-        span is upgraded, so cards you create in this space won't increase your free card count
+    SpacesCreatedProgress
   section
     AboutMe
 </template>

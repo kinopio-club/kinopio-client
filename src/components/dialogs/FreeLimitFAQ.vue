@@ -25,14 +25,14 @@ dialog.narrow.free-limit-faq(v-if="visible" :open="visible" @click.left.stop ref
     p Free Limit FAQ
   section.results-section
     details
-      summary(@click="closeOtherDetails") How are cards counted?
+      summary(@click="closeOtherDetails") How are spaces counted?
       section.subsection
-        p Cards you add will increment the card count. Cards you remove will decrement the card count.
+        p Spaces you create will increment the count. Spaces you remove will decrement the count. The ‘Inbox’ and ‘Hello Kinopio’ spaces are not counted.
 
     details
-      summary(@click="closeOtherDetails") What happens when I run out of free cards?
+      summary(@click="closeOtherDetails") What happens when I run out of free spaces?
       section.subsection
-        p You'll always have access to your cards and spaces. But you won't be able to create new cards unless you upgrade or remove cards to decrease your count.
+        p You'll always have access to your spaces. But you won't be able to create new ones unless you upgrade or remove spaces to decrease your count.
 
 </template>
 
