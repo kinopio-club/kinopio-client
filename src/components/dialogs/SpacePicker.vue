@@ -172,10 +172,7 @@ const triggerSignUpOrInIsVisible = () => {
   globalStore.triggerSignUpOrInIsVisible()
 }
 const toggleNewSpaceIsVisible = async (event) => {
-  if (userStore.getUserSpacesCreatedIsOverLimit) {
-    globalStore.notifySpacesCreatedIsOverLimit = true
-    const position = utils.cursorPositionInPage(event)
-    globalStore.addNotificationWithPosition({ message: 'Upgrade for More', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  if (userStore.checkIfShouldPreventNewSpace(event)) {
     return
   }
   state.newSpaceIsVisible = !state.newSpaceIsVisible

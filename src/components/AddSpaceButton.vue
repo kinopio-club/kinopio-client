@@ -25,10 +25,7 @@ const props = defineProps({
 
 const shouldAddSpaceDirectly = computed(() => !props.parentIsInDialog)
 const addNewSpace = async (event) => {
-  if (userStore.getUserSpacesCreatedIsOverLimit) {
-    globalStore.notifySpacesCreatedIsOverLimit = true
-    const position = utils.cursorPositionInPage(event)
-    globalStore.addNotificationWithPosition({ message: 'Upgrade for More', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  if (userStore.checkIfShouldPreventNewSpace(event)) {
     return
   }
   if (event.metaKey || event.ctrlKey) {

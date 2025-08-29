@@ -370,6 +370,17 @@ export const useUserStore = defineStore('users', {
       this.checkIfShouldJoinGroup()
       console.log('🍍 initializeUser', this.getUserAllState)
     },
+    checkIfShouldPreventNewSpace (event) {
+      const globalStore = useGlobalStore()
+      if (this.getUserSpacesCreatedIsOverLimit) {
+        globalStore.notifySpacesCreatedIsOverLimit = true
+        const position = utils.cursorPositionInPage(event)
+        globalStore.addNotificationWithPosition({ message: 'Upgrade for More', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        return true
+      } else {
+        return false
+      }
+    },
 
     // update
 
