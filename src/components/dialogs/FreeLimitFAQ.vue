@@ -39,8 +39,6 @@ dialog.narrow.free-limit-faq(v-if="visible" :open="visible" @click.left.stop ref
 <style lang="stylus">
 .free-limit-faq
   left initial
-  top -120px !important
-  right 2px
   .results-section
     border-top 1px solid var(--primary-border)
     padding-top 4px

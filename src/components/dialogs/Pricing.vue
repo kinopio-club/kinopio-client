@@ -105,6 +105,10 @@ const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 <template lang="pug">
 dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
+    p Pricing
+    SpacesCreatedProgress
+
+  section
     .row.title-row
       //- price
       template(v-if="isSecureAppContextIOS")
@@ -138,7 +142,6 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
               button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
                 span ?
                 AboutGroups(:visible="state.aboutGroupsIsVisible")
-    SpacesCreatedProgress
   section
     AboutMe
 </template>
@@ -164,5 +167,5 @@ dialog.pricing
     .small-button
       margin-top 0
   dialog.about-groups
-    max-height 150px !important
+    max-height 200px !important
 </style>
