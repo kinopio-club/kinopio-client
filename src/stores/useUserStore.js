@@ -115,9 +115,9 @@ export const useUserStore = defineStore('users', {
       return Boolean(this.apiKey)
     },
     getUserSpacesCreatedIsOverLimit () {
-      const freeSpacesCreatedLimit = consts.freeSpacesCreatedLimit
+      const freeSpacesCreatedCountLimit = consts.freeSpacesCreatedCountLimit
       if (this.isUpgraded) { return }
-      if (this.spacesCreatedCount >= freeSpacesCreatedLimit) { return true }
+      if (this.spacesCreatedCount >= freeSpacesCreatedCountLimit) { return true }
     },
     getUserTotalItemFadingFiltersActive () {
       const globalStore = useGlobalStore()

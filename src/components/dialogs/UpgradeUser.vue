@@ -133,7 +133,7 @@ dialog.upgrade-user.wide(v-if="props.visible" :open="props.visible" @click.left.
 
     //- student info
     .row(v-if="studentDiscountIsAvailable && isSecureAppContextIOS")
-      .badge.danger Your account qualifies for a student discount but you have to upgrade via the web to use it
+      .badge.danger Your account qualifies for a student discount but you need to upgrade via the web to use it
     .row(v-else-if="studentDiscountIsAvailable")
       .badge.success Your account qualifies for a student discount
     //- period picker

@@ -97,7 +97,7 @@ const closeChildDialogs = () => {
 // free cards from space member
 
 const spaceUser = computed(() => spaceStore.users[0])
-const freeSpacesCreatedLimit = computed(() => consts.freeSpacesCreatedLimit)
+const freeSpacesCreatedCountLimit = computed(() => consts.freeSpacesCreatedCountLimit)
 const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 </script>
@@ -112,9 +112,9 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
     .row.title-row
       //- price
       template(v-if="isSecureAppContextIOS")
-        p Kinopio is free for {{freeSpacesCreatedLimit}} spaces, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+        p Kinopio is free for {{freeSpacesCreatedCountLimit}} spaces, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
       template(v-else)
-        p Kinopio is free for {{freeSpacesCreatedLimit}} spaces, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
+        p Kinopio is free for {{freeSpacesCreatedCountLimit}} spaces, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?
@@ -129,7 +129,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             span.badge.success Upgraded
         tr
-          td {{freeSpacesCreatedLimit}} spaces
+          td {{freeSpacesCreatedCountLimit}} spaces
           td Unlimited spaces
         tr
           td {{freeUploadSizeLimit}}mb file upload size limit

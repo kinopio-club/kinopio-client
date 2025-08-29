@@ -35,7 +35,7 @@ const state = reactive({
 })
 
 const spacesCreatedCount = computed(() => userStore.spacesCreatedCount || 0)
-const freeSpacesCreatedLimit = computed(() => consts.freeSpacesCreatedLimit)
+const freeSpacesCreatedCountLimit = computed(() => consts.freeSpacesCreatedCountLimit)
 
 const triggerUpgradeUserIsVisible = () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
@@ -62,12 +62,12 @@ section.subsection.spaces-created-progress(@click="closeChildDialogs")
   .row
     p
       img.icon(src="@/assets/record.svg")
-      span {{spacesCreatedCount}}/{{freeSpacesCreatedLimit}} free spaces created
+      span {{spacesCreatedCount}}/{{freeSpacesCreatedCountLimit}} free spaces created
     .button-wrap
       button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
         span(title="Free Limit FAQ") ?
       FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
-  progress(:value="spacesCreatedCount" :max="freeSpacesCreatedLimit")
+  progress(:value="spacesCreatedCount" :max="freeSpacesCreatedCountLimit")
   .row
     .button-wrap
       button(@click="triggerUpgradeUserIsVisible")

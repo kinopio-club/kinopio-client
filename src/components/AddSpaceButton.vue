@@ -4,12 +4,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const analyticsStore = useAnalyticsStore()
+const userStore = useUserStore()
 
 const emit = defineEmits(['closeDialogs', 'addSpace'])
 
@@ -17,6 +19,8 @@ const props = defineProps({
   parentIsInDialog: Boolean,
   isSmall: Boolean
 })
+
+const spacesCreatedIsOverLimit = computed(() => userStore.getUserSpacesCreatedIsOverLimit)
 
 // add space
 

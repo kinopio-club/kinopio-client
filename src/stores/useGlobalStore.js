@@ -1039,10 +1039,6 @@ export const useGlobalStore = defineStore('global', {
         postMessage.sendHaptics({ name: 'error' })
       }
     },
-    updateNotifySpacesCreatedIsOverLimit (value) {
-      utils.typeCheck({ value, type: 'boolean' })
-      this.notifySpacesCreatedIsOverLimit = value
-    },
     updateNotifyIsJoiningGroup (value) {
       utils.typeCheck({ value, type: 'boolean' })
       this.notifyIsJoiningGroup = value

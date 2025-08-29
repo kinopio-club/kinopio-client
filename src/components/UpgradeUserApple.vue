@@ -79,7 +79,7 @@ const handleSubscriptionSuccess = (event) => {
   }
   userStore.isUpgraded = true
   userStore.appleSubscriptionIsActive = true
-  globalStore.updateNotifyCardsCreatedIsOverLimit(false)
+  globalStore.notifySpacesCreatedIsOverLimit = false
   if (!utils.dialogIsVisible()) {
     globalStore.addNotification({
       message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
