@@ -16,6 +16,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
+import UpgradeButton from '@/components/UpgradeButton.vue'
 
 import dayjs from 'dayjs'
 
@@ -285,10 +286,6 @@ const resetNotifyMoveOrCopyToSpace = () => {
 const resetNotifySpacesCreatedIsOverLimitJiggle = () => {
   state.notifySpacesCreatedIsOverLimitJiggle = false
 }
-const triggerUpgradeUserIsVisible = () => {
-  closeAllDialogs()
-  globalStore.triggerUpgradeUserIsVisible()
-}
 const refreshBrowser = () => {
   window.location.reload()
 }
@@ -405,7 +402,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.danger(v-if="notifySpacesCreatedIsOverLimit" ref="spacesOverLimitElement" :class="{'notification-jiggle': state.notifySpacesCreatedIsOverLimitJiggle}" @animationend="resetNotifySpacesCreatedIsOverLimitJiggle")
     p To add more spaces, you'll need to upgrade
     .row
-      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      UpgradeButton
 
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     p

@@ -205,13 +205,6 @@ const removeBoxes = (boxes) => {
   boxStore.removeBoxes(ids)
 }
 
-// should upgrade user
-
-const triggerUpgradeUserIsVisible = () => {
-  globalStore.closeAllDialogs()
-  globalStore.triggerUpgradeUserIsVisible()
-}
-
 // notify
 
 const notifySuccess = () => {
@@ -256,11 +249,6 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
       img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
       Loader(:visible="state.loading")
-  //- error
-  //- section.error-card-limit(v-if="state.spacesCreatedIsOverLimit")
-  //-   .badge.danger Out of Spaces
-  //-   p To add more spaces you'll need to upgrade
-  //-   button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 </template>
 
 <style lang="stylus">
@@ -274,8 +262,4 @@ dialog.more-or-copy-items
     margin-bottom 0px
     .badge
       margin-bottom 10px
-  dialog.space-picker
-    // top -100px
-    .results-section
-      max-height 250px
 </style>

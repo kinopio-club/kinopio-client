@@ -7,6 +7,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
@@ -20,12 +21,16 @@ const props = defineProps({
   isSmall: Boolean
 })
 
-const spacesCreatedIsOverLimit = computed(() => userStore.getUserSpacesCreatedIsOverLimit)
-
 // add space
 
 const shouldAddSpaceDirectly = computed(() => !props.parentIsInDialog)
 const addNewSpace = async (event) => {
+  if (userStore.getUserSpacesCreatedIsOverLimit) {
+    globalStore.notifySpacesCreatedIsOverLimit = true
+    const position = utils.cursorPositionInPage(event)
+    globalStore.addNotificationWithPosition({ message: 'Upgrade for More', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    return
+  }
   if (event.metaKey || event.ctrlKey) {
     window.open('/new') // opens url in new tab
     globalStore.preventDraggedCardFromShowingDetails = true

@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
+import UpgradeButton from '@/components/UpgradeButton.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -36,17 +37,6 @@ const state = reactive({
 
 const spacesCreatedCount = computed(() => userStore.spacesCreatedCount || 0)
 const freeSpacesCreatedCountLimit = computed(() => consts.freeSpacesCreatedCountLimit)
-
-const triggerUpgradeUserIsVisible = () => {
-  const currentUserIsSignedIn = userStore.getUserIsSignedIn
-  globalStore.closeAllDialogs()
-  if (currentUserIsSignedIn) {
-    globalStore.triggerUpgradeUserIsVisible()
-  } else {
-    globalStore.triggerSignUpOrInIsVisible()
-  }
-}
-
 const toggleFreeLimitFAQIsVisible = () => {
   const value = !state.freeLimitFAQIsVisible
   globalStore.triggerCloseChildDialogs()
@@ -69,9 +59,7 @@ section.subsection.spaces-created-progress(@click="closeChildDialogs")
       FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
   progress(:value="spacesCreatedCount" :max="freeSpacesCreatedCountLimit")
   .row
-    .button-wrap
-      button(@click="triggerUpgradeUserIsVisible")
-        span Upgrade for Unlimited
+    UpgradeButton
 </template>
 
 <style lang="stylus">
