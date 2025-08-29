@@ -43,6 +43,16 @@ const cardsCreatedCount = computed(() => {
   count = Math.max(0, count || 0)
   return count
 })
+const spacesCreatedCount = computed(() => {
+  let count
+  if (props.isCurrentUser) {
+    count = userStore.spacesCreatedCount
+  } else {
+    count = props.user.spacesCreatedCount
+  }
+  count = Math.max(0, count || 0)
+  return count
+})
 </script>
 
 <template lang="pug">
@@ -73,7 +83,7 @@ const cardsCreatedCount = computed(() => {
 .row
   .badge.secondary
     img.icon(src="@/assets/record.svg")
-    span {{props.user.spacesCreatedCount}} Spaces
+    span {{spacesCreatedCount}} Spaces
   .badge.secondary
     img.icon(src="@/assets/record.svg")
     span {{cardsCreatedCount}} Cards

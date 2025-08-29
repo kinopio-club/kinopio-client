@@ -502,23 +502,30 @@ export const useUserStore = defineStore('users', {
       this.cardsCreatedCount = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
     },
-    async incrementSpacesCreatedCount (space) {
+    async updateSpacesCreatedCount (count, delta) {
       const apiStore = useApiStore()
-      if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
-      this.spacesCreatedCount = this.spacesCreatedCount + 1
+      // update local
+      const update = { spacesCreatedCount: count }
+      this.updateUserState(update)
+      await cache.updateUser(update)
+      // update remote
       await apiStore.addToQueue({
         name: 'updateUserSpacesCreatedCount',
-        body: { delta: 1 }
+        body: { delta }
       })
+      console.log('🌺🌺🌺🌺🌺🌺🌺🌺', count, delta, this.spacesCreatedCount)
+    },
+    async incrementSpacesCreatedCount (space) {
+      if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
+      const count = this.spacesCreatedCount + 1
+      const delta = 1
+      this.updateSpacesCreatedCount(count, delta)
     },
     async decrementSpacesCreatedCount (space) {
-      const apiStore = useApiStore()
       if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
-      this.spacesCreatedCount = Math.max(this.spacesCreatedCount - 1, 0)
-      await apiStore.addToQueue({
-        name: 'updateUserSpacesCreatedCount',
-        body: { delta: -1 }
-      })
+      const count = Math.max(this.spacesCreatedCount - 1, 0)
+      const delta = -1
+      this.updateSpacesCreatedCount(count, delta)
     },
 
     // inbox
