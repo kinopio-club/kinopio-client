@@ -483,7 +483,7 @@ export const useUserStore = defineStore('users', {
       }
     },
 
-    // card limit
+    // counts
 
     async updateUserCardsCreatedCount (cards, shouldDecrement) {
       const apiStore = useApiStore()
@@ -501,6 +501,24 @@ export const useUserStore = defineStore('users', {
       // update count
       this.cardsCreatedCount = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
+    },
+    async incrementSpacesCreatedCount (space) {
+      const apiStore = useApiStore()
+      if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
+      this.spacesCreatedCount = this.spacesCreatedCount + 1
+      await apiStore.addToQueue({
+        name: 'updateUserSpacesCreatedCount',
+        body: { delta: 1 }
+      })
+    },
+    async decrementSpacesCreatedCount (space) {
+      const apiStore = useApiStore()
+      if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
+      this.spacesCreatedCount = Math.max(this.spacesCreatedCount - 1, 0)
+      await apiStore.addToQueue({
+        name: 'updateUserSpacesCreatedCount',
+        body: { delta: -1 }
+      })
     },
 
     // inbox

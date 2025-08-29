@@ -540,7 +540,7 @@ export const useSpaceStore = defineStore('space', {
       console.info('✨ saveSpace', space, user)
       cache.saveSpace(space)
       this.addUserToSpace(user)
-      this.incrementCardsCreatedCountFromSpace(space)
+      userStore.incrementSpacesCreatedCount(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
@@ -560,10 +560,11 @@ export const useSpaceStore = defineStore('space', {
 
     async restoreRemovedSpace (space) {
       const apiStore = useApiStore()
+      const userStore = useUserStore()
       await cache.restoreRemovedSpace(space)
       const restoredSpace = await apiStore.restoreRemovedSpace(space)
       space = restoredSpace || space
-      this.incrementCardsCreatedCountFromSpace(space)
+      userStore.incrementSpacesCreatedCount(space)
       this.changeSpace(space)
     },
     async duplicateSpace () {
@@ -691,7 +692,7 @@ export const useSpaceStore = defineStore('space', {
       cache.saveSpace(space)
       this.restoreSpace(space)
       this.addUserToSpace(user)
-      this.incrementCardsCreatedCountFromSpace(space)
+      userStore.incrementSpacesCreatedCount(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
@@ -889,8 +890,9 @@ export const useSpaceStore = defineStore('space', {
     async removeSpace () {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
+      const userStore = useUserStore()
       const space = this.getSpaceAllState
-      this.decrementCardsCreatedCountFromSpace(space)
+      userStore.decrementSpacesCreatedCount(space)
       await cache.removeSpace(space)
       globalStore.prevSpaceIdInSession = ''
       await apiStore.addToQueue({
@@ -1037,27 +1039,6 @@ export const useSpaceStore = defineStore('space', {
       if (!isSpaceMember && this.getSpaceIsOpen) {
         globalStore.addNotification({ message: 'This space is open to comments', icon: 'comment', type: 'success' })
       }
-    },
-
-    // user card count
-
-    incrementCardsCreatedCountFromSpace (space) {
-      const userStore = useUserStore()
-      const updatedCards = space.cards.filter(card => {
-        return userStore.getUserIsCurrentUser({ id: card.userId })
-      })
-      userStore.updateUserCardsCreatedCount(updatedCards)
-    },
-    decrementCardsCreatedCountFromSpace (space) {
-      const userStore = useUserStore()
-      const cardStore = useCardStore()
-      let cards = cardStore.getAllCards
-      cards = cards.filter(card => {
-        const isSpace = card.spaceId === space.id
-        const isUser = userStore.getUserIsCurrentUser({ id: card.userId })
-        return isSpace && isUser
-      })
-      userStore.updateUserCardsCreatedCount(cards, true)
     },
 
     // tags
