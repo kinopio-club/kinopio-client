@@ -34,8 +34,8 @@ const state = reactive({
   freeLimitFAQIsVisible: false
 })
 
-const cardsCreatedCount = computed(() => userStore.cardsCreatedCount || 0)
-const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
+const spacesCreatedCount = computed(() => userStore.spacesCreatedCount || 0)
+const freeSpacesCreatedLimit = computed(() => consts.freeSpacesCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
@@ -58,16 +58,16 @@ const closeChildDialogs = () => {
 </script>
 
 <template lang="pug">
-section.subsection.cards-created-progress(@click="closeChildDialogs")
+section.subsection.spaces-created-progress(@click="closeChildDialogs")
   .row
     p
-      img.icon.card(src="@/assets/card.svg")
-      span {{cardsCreatedCount}}/{{freeCardsCreatedLimit}} free cards created
+      img.icon(src="@/assets/record.svg")
+      span {{spacesCreatedCount}}/{{freeSpacesCreatedLimit}} free spaces created
     .button-wrap
       button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
         span(title="Free Limit FAQ") ?
       FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
-  progress(:value="cardsCreatedCount" :max="freeCardsCreatedLimit")
+  progress(:value="spacesCreatedCount" :max="freeSpacesCreatedLimit")
   .row
     .button-wrap
       button(@click="triggerUpgradeUserIsVisible")
@@ -75,7 +75,7 @@ section.subsection.cards-created-progress(@click="closeChildDialogs")
 </template>
 
 <style lang="stylus">
-.cards-created-progress
+.spaces-created-progress
   width 100%
   .row
     display flex
