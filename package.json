@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.vue",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "dependencies": {
     "@aguezz/qs-parse": "^2.0.0",
@@ -37,10 +37,12 @@
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/compiler-sfc": "^3.2.6",
     "@vue/eslint-config-standard": "^8.0.1",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
+    "jsdom": "^26.1.0",
     "lint-staged": "^13.2.1",
     "postcss": "^8.4.31",
     "pug": "^3.0.3",
@@ -49,6 +51,7 @@
     "vite": "^6.3.4",
     "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-sitemap": "^0.7.1",
+    "vitest": "^3.2.4",
     "yorkie": "^2.0.0"
   },
   "eslintConfig": {
