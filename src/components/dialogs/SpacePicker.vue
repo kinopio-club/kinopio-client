@@ -171,7 +171,10 @@ const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
 }
-const toggleNewSpaceIsVisible = async () => {
+const toggleNewSpaceIsVisible = async (event) => {
+  if (userStore.checkIfShouldPreventNewSpace(event)) {
+    return
+  }
   state.newSpaceIsVisible = !state.newSpaceIsVisible
   if (state.newSpaceIsVisible) {
     await nextTick()

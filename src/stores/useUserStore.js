@@ -37,6 +37,7 @@ export const useUserStore = defineStore('users', {
     hiddenSpaces: [],
     cardsCreatedCount: 0,
     cardsCreatedCountRaw: 0,
+    spacesCreatedCount: 0,
     isUpgraded: false,
     isModerator: false,
     filterShowUsers: false,
@@ -113,16 +114,10 @@ export const useUserStore = defineStore('users', {
     getUserIsSignedIn () {
       return Boolean(this.apiKey)
     },
-    getUserCardsCreatedIsOverLimit () {
-      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
+    getUserSpacesCreatedIsOverLimit () {
+      const freeSpacesCreatedCountLimit = consts.freeSpacesCreatedCountLimit
       if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount >= freeCardsCreatedLimit) { return true }
-    },
-    getShouldPreventCardsCreatedCountUpdate () {
-      const spaceStore = useSpaceStore()
-      const spaceCreatorIsUpgraded = spaceStore.getSpaceCreatorIsUpgraded
-      const userIsCreator = spaceStore.getSpaceCreatorIsCurrentUser
-      return (spaceCreatorIsUpgraded && !userIsCreator)
+      if (this.spacesCreatedCount >= freeSpacesCreatedCountLimit) { return true }
     },
     getUserTotalItemFadingFiltersActive () {
       const globalStore = useGlobalStore()
@@ -375,6 +370,17 @@ export const useUserStore = defineStore('users', {
       this.checkIfShouldJoinGroup()
       console.log('🍍 initializeUser', this.getUserAllState)
     },
+    checkIfShouldPreventNewSpace (event) {
+      const globalStore = useGlobalStore()
+      if (this.getUserSpacesCreatedIsOverLimit) {
+        globalStore.notifySpacesCreatedIsOverLimit = true
+        const position = utils.cursorPositionInPage(event)
+        globalStore.addNotificationWithPosition({ message: 'Upgrade for More', position, type: 'danger', layer: 'app', icon: 'cancel' })
+        return true
+      } else {
+        return false
+      }
+    },
 
     // update
 
@@ -488,7 +494,7 @@ export const useUserStore = defineStore('users', {
       }
     },
 
-    // card limit
+    // counts
 
     async updateUserCardsCreatedCount (cards, shouldDecrement) {
       const apiStore = useApiStore()
@@ -504,13 +510,28 @@ export const useUserStore = defineStore('users', {
       this.cardsCreatedCountRaw = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } })
       // update count
-      if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
     },
-    getUserCardsCreatedWillBeOverLimit (count) {
-      if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount + count >= consts.freeCardsCreatedLimit) { return true }
+    async updateSpacesCreatedCount (count, delta) {
+      const apiStore = useApiStore()
+      await this.updateUser({ spacesCreatedCount: count })
+      await apiStore.addToQueue({
+        name: 'updateUserSpacesCreatedCount',
+        body: { delta }
+      })
+    },
+    async incrementSpacesCreatedCount (space) {
+      if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
+      const count = this.spacesCreatedCount + 1
+      const delta = 1
+      await this.updateSpacesCreatedCount(count, delta)
+    },
+    async decrementSpacesCreatedCount (space) {
+      if (space.name === 'Inbox' || space.name === 'Hello Kinopio') { return }
+      const count = Math.max(this.spacesCreatedCount - 1, 0)
+      const delta = -1
+      await this.updateSpacesCreatedCount(count, delta)
     },
 
     // inbox

@@ -8,6 +8,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import UpgradeButton from '@/components/UpgradeButton.vue'
 import Textarea from '@/components/Textarea.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -81,10 +82,6 @@ const createSessionToken = () => {
 // requires upgraded user (temp)
 
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
-const triggerUpgradeUserIsVisible = () => {
-  globalStore.closeAllDialogs()
-  globalStore.triggerUpgradeUserIsVisible()
-}
 
 // emails
 
@@ -172,7 +169,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
       .mail-subsection(:class="{ dark: isDarkTheme }")
         template(v-if="!currentUserIsUpgraded")
           p To send invite emails, you'll need to upgrade
-          button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+          UpgradeButton
         template(v-if="currentUserIsUpgraded")
           //- from
           p.field-title From
