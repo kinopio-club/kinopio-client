@@ -57,6 +57,9 @@ export default defineConfig(async ({ command, mode }) => {
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
   // config
   return {
+    test: {
+      environment: 'jsdom'
+    },
     optimizeDeps: {
       include: ['pinia']
     },
