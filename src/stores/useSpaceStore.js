@@ -66,19 +66,10 @@ export const useSpaceStore = defineStore('space', {
     getSpaceCreator () {
       return this.getSpaceMemberById(this.userId) || this.users[0]
     },
-    getSpaceCreatorIsUpgraded () {
-      const creatorUser = this.getSpaceCreator
-      return creatorUser?.isUpgraded
-    },
     getSpaceCreatorIsCurrentUser () {
       const userStore = useUserStore()
       const creatorUser = this.getSpaceCreator
       return userStore.getUserIsCurrentUser(creatorUser)
-    },
-    getShouldPreventAddCard () {
-      const userStore = useUserStore()
-      const cardsCreatedIsOverLimit = userStore.getUserCardsCreatedIsOverLimit
-      return cardsCreatedIsOverLimit && !this.getSpaceCreatorIsUpgraded
     },
     getSpaceIsRemote () {
       const userStore = useUserStore()
@@ -549,7 +540,7 @@ export const useSpaceStore = defineStore('space', {
       console.info('✨ saveSpace', space, user)
       cache.saveSpace(space)
       this.addUserToSpace(user)
-      this.incrementCardsCreatedCountFromSpace(space)
+      await userStore.incrementSpacesCreatedCount(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
@@ -569,10 +560,11 @@ export const useSpaceStore = defineStore('space', {
 
     async restoreRemovedSpace (space) {
       const apiStore = useApiStore()
+      const userStore = useUserStore()
       await cache.restoreRemovedSpace(space)
       const restoredSpace = await apiStore.restoreRemovedSpace(space)
       space = restoredSpace || space
-      this.incrementCardsCreatedCountFromSpace(space)
+      await userStore.incrementSpacesCreatedCount(space)
       this.changeSpace(space)
     },
     async duplicateSpace () {
@@ -700,7 +692,7 @@ export const useSpaceStore = defineStore('space', {
       cache.saveSpace(space)
       this.restoreSpace(space)
       this.addUserToSpace(user)
-      this.incrementCardsCreatedCountFromSpace(space)
+      await userStore.incrementSpacesCreatedCount(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
       await apiStore.addToQueue({
@@ -898,8 +890,9 @@ export const useSpaceStore = defineStore('space', {
     async removeSpace () {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
+      const userStore = useUserStore()
       const space = this.getSpaceAllState
-      this.decrementCardsCreatedCountFromSpace(space)
+      await userStore.decrementSpacesCreatedCount(space)
       await cache.removeSpace(space)
       globalStore.prevSpaceIdInSession = ''
       await apiStore.addToQueue({
@@ -1046,38 +1039,6 @@ export const useSpaceStore = defineStore('space', {
       if (!isSpaceMember && this.getSpaceIsOpen) {
         globalStore.addNotification({ message: 'This space is open to comments', icon: 'comment', type: 'success' })
       }
-    },
-
-    // user card count
-
-    checkIfShouldNotifyCardsCreatedIsNearLimit () {
-      const globalStore = useGlobalStore()
-      const userStore = useUserStore()
-      if (this.getSpaceCreatorIsUpgraded) { return }
-      if (userStore.isUpgraded) { return }
-      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
-      const value = freeCardsCreatedLimit - userStore.cardsCreatedCount
-      if (utils.isBetween({ value, min: 0, max: 15 })) {
-        globalStore.notifyCardsCreatedIsNearLimit = true
-      }
-    },
-    incrementCardsCreatedCountFromSpace (space) {
-      const userStore = useUserStore()
-      const updatedCards = space.cards.filter(card => {
-        return userStore.getUserIsCurrentUser({ id: card.userId })
-      })
-      userStore.updateUserCardsCreatedCount(updatedCards)
-    },
-    decrementCardsCreatedCountFromSpace (space) {
-      const userStore = useUserStore()
-      const cardStore = useCardStore()
-      let cards = cardStore.getAllCards
-      cards = cards.filter(card => {
-        const isSpace = card.spaceId === space.id
-        const isUser = userStore.getUserIsCurrentUser({ id: card.userId })
-        return isSpace && isUser
-      })
-      userStore.updateUserCardsCreatedCount(cards, true)
     },
 
     // tags

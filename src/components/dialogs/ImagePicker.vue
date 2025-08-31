@@ -8,6 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 
+import UpgradeButton from '@/components/UpgradeButton.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -75,10 +76,6 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
-}
-const triggerUpgradeUserIsVisible = () => {
-  globalStore.closeAllDialogs()
-  globalStore.triggerUpgradeUserIsVisible()
 }
 const closeImagePicker = () => {
   cardStore.clearCardNameUploadPlaceholder(props.cardId)
@@ -414,7 +411,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
       p
         span To upload files over {{freeUploadSizeLimit}}mb,
         span.badge.info upgrade for unlimited
-      button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      UpgradeButton
     .error-container-top(v-if="state.error.unknownUploadError")
       .badge.danger
         span (シ_ _)シ Something went wrong, Please try again or contact support

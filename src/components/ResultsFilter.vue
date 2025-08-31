@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -12,6 +13,7 @@ import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
+const userStore = useUserStore()
 
 const resultsFilterElement = ref(null)
 const filterInputElement = ref(null)
@@ -93,7 +95,10 @@ const isManyItems = computed(() => Boolean(props.items.length >= 5))
 // add space
 
 const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && state.filter.length > 1)
-const addSpace = async () => {
+const addSpace = async (event) => {
+  if (userStore.checkIfShouldPreventNewSpace(event)) {
+    return
+  }
   const name = state.filter
   window.scrollTo(0, 0)
   await spaceStore.createNewSpace(name)

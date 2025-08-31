@@ -193,7 +193,7 @@ const updateUserColor = (newValue) => {
 
   .other-user-info
     max-height 200px
-    overflow scroll
+    overflow auto
     margin-bottom -8px
     padding-bottom 8px
   .explore-spaces-section

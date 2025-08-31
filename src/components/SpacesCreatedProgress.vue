@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
+import UpgradeButton from '@/components/UpgradeButton.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -34,19 +35,8 @@ const state = reactive({
   freeLimitFAQIsVisible: false
 })
 
-const cardsCreatedCount = computed(() => userStore.cardsCreatedCount || 0)
-const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
-
-const triggerUpgradeUserIsVisible = () => {
-  const currentUserIsSignedIn = userStore.getUserIsSignedIn
-  globalStore.closeAllDialogs()
-  if (currentUserIsSignedIn) {
-    globalStore.triggerUpgradeUserIsVisible()
-  } else {
-    globalStore.triggerSignUpOrInIsVisible()
-  }
-}
-
+const spacesCreatedCount = computed(() => userStore.spacesCreatedCount || 0)
+const freeSpacesCreatedCountLimit = computed(() => consts.freeSpacesCreatedCountLimit)
 const toggleFreeLimitFAQIsVisible = () => {
   const value = !state.freeLimitFAQIsVisible
   globalStore.triggerCloseChildDialogs()
@@ -58,24 +48,22 @@ const closeChildDialogs = () => {
 </script>
 
 <template lang="pug">
-section.subsection.cards-created-progress(@click="closeChildDialogs")
+section.subsection.spaces-created-progress(@click="closeChildDialogs")
   .row
     p
-      img.icon.card(src="@/assets/card.svg")
-      span {{cardsCreatedCount}}/{{freeCardsCreatedLimit}} free cards created
+      img.icon(src="@/assets/record.svg")
+      span {{spacesCreatedCount}}/{{freeSpacesCreatedCountLimit}} free spaces created
     .button-wrap
       button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
         span(title="Free Limit FAQ") ?
       FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
-  progress(:value="cardsCreatedCount" :max="freeCardsCreatedLimit")
+  progress(:value="spacesCreatedCount" :max="freeSpacesCreatedCountLimit")
   .row
-    .button-wrap
-      button(@click="triggerUpgradeUserIsVisible")
-        span Upgrade for Unlimited
+    UpgradeButton
 </template>
 
 <style lang="stylus">
-.cards-created-progress
+.spaces-created-progress
   width 100%
   .row
     display flex

@@ -28,6 +28,7 @@ import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import UpgradeButton from '@/components/UpgradeButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -1579,7 +1580,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       p
         span To upload files over {{freeUploadSizeLimit}}mb,
         span.badge.info upgrade for unlimited
-      button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      UpgradeButton
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
     ItemDetailsDebug(:item="card" :keys="['x', 'y', 'width', 'height']")

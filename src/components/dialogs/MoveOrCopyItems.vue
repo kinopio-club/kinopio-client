@@ -35,8 +35,7 @@ const state = reactive({
   spaces: [],
   selectedSpace: {},
   spacePickerIsVisible: false,
-  loading: false,
-  cardsCreatedIsOverLimit: false
+  loading: false
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -185,10 +184,6 @@ const copyToSelectedSpace = async (items) => {
 const moveOrCopyToSpace = async () => {
   if (state.loading) { return }
   const items = selectedItems.value
-  if (isCardsCreatedIsOverLimit()) {
-    state.cardsCreatedIsOverLimit = true
-    return
-  }
   await copyToSelectedSpace(items)
   notifySuccess()
   if (props.actionIsMove) {
@@ -208,18 +203,6 @@ const removeCards = (cards) => {
 const removeBoxes = (boxes) => {
   const ids = boxes.map(box => box.id)
   boxStore.removeBoxes(ids)
-}
-
-// should upgrade user
-
-const triggerUpgradeUserIsVisible = () => {
-  globalStore.closeAllDialogs()
-  globalStore.triggerUpgradeUserIsVisible()
-}
-const isCardsCreatedIsOverLimit = () => {
-  if (props.actionIsMove) { return }
-  const items = selectedItems.value.cards.length
-  return userStore.getUserCardsCreatedWillBeOverLimit(items)
 }
 
 // notify
@@ -266,11 +249,6 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
       img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
       Loader(:visible="state.loading")
-  //- error
-  section.error-card-limit(v-if="state.cardsCreatedIsOverLimit")
-    .badge.danger Out of Cards
-    p To add more cards you'll need to upgrade
-    button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 </template>
 
 <style lang="stylus">
@@ -284,8 +262,4 @@ dialog.more-or-copy-items
     margin-bottom 0px
     .badge
       margin-bottom 10px
-  dialog.space-picker
-    // top -100px
-    .results-section
-      max-height 250px
 </style>
