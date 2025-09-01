@@ -72,7 +72,7 @@ const yearlyPrice = computed(() => {
   const isStudentDiscount = userStore.studentDiscountIsAvailable
   return consts.price('year', isStudentDiscount).amount
 })
-const lifePrice = computed(() => consts.price('life').amount)
+const lifetimePrice = computed(() => consts.price('life').amount)
 
 // child dialogs
 
@@ -111,7 +111,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
       template(v-if="isSecureAppContextIOS")
         p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year.
       template(v-else)
-        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life.
+        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifetimePrice}}/life.
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?

@@ -150,7 +150,7 @@ export default {
     } else if (period === 'year') {
       return this.yearlyPrice(isStudentDiscount)
     } else if (period === 'life') {
-      return this.lifePrice()
+      return this.lifetimePrice()
     }
   },
   // mo
@@ -227,7 +227,7 @@ export default {
     }
     return price
   },
-  lifePrice () {
+  lifetimePrice () {
     const price = {
       amount: this.prices.standard.life.price,
       period: 'life',
