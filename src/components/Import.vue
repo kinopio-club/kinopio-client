@@ -164,9 +164,10 @@ template(v-if="visible")
         img.icon.json-canvas(src="@/assets/json-canvas.svg")
         span Canvas
         Loader(:visible="isLoadingCanvas")
+    .row
       button(@click.left="selectFile('json')" :class="{active: isLoadingJson}")
         img.icon.file(src="@/assets/file.svg")
-        span Space JSON
+        span Kinopio JSON
         Loader(:visible="isLoadingJson")
 
     .row(v-if="state.unknownError")
