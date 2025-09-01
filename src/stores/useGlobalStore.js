@@ -1179,7 +1179,7 @@ export const useGlobalStore = defineStore('global', {
       if (matches.cardId) {
         this.updateFocusOnCardId(matches.cardId)
       }
-      this.spaceUrlToLoad = matches.spaceUrl
+      this.spaceUrlToLoad = `${consts.kinopioDomain()}/${matches.spaceUrl}`
     },
     updateFocusOnCardId (cardId) {
       this.focusOnCardId = cardId
