@@ -107,29 +107,29 @@ export default {
     standard: {
       mo: {
         price: 8,
-        priceId: '-------',
+        priceId: 'price_1S2cymDFIr5ywhwoxYQpjwwx',
         devPriceId: 'price_1S2YjKDFIr5ywhwo9bTroXjb'
       },
       yr: {
         price: 80,
-        priceId: '-------',
+        priceId: 'price_1S2czcDFIr5ywhwoCiJ3UJFl',
         devPriceId: 'price_1S2YkjDFIr5ywhworJlITrlm'
       },
       life: {
         price: 250,
-        priceId: '-------',
+        priceId: 'price_1S2dCuDFIr5ywhwouB7Mpatd',
         devPriceId: 'price_1S2dahDFIr5ywhwoasGBlzaH'
       }
     },
     education: {
       mo: {
         price: 4,
-        priceId: '-------',
+        priceId: 'price_1S2d01DFIr5ywhwom6FcmrBE',
         devPriceId: 'price_1S2dWBDFIr5ywhwowrCrnKpt'
       },
       yr: {
         price: 40,
-        priceId: '-------',
+        priceId: 'price_1S2d0XDFIr5ywhwoDHendW1U',
         devPriceId: 'price_1S2dWKDFIr5ywhwoioe6WQAo'
       }
     },
