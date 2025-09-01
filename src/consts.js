@@ -104,29 +104,33 @@ export default {
   // price
 
   prices: {
-    regular: {
+    standard: {
       mo: {
         price: 8,
-        priceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
+        priceId: '-------',
         devPriceId: 'price_1S2YjKDFIr5ywhwo9bTroXjb'
       },
       yr: {
         price: 80,
-        priceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
+        priceId: '-------',
         devPriceId: 'price_1S2YkjDFIr5ywhworJlITrlm'
       },
       life: {
-        price: 250
+        price: 250,
+        priceId: '-------',
+        devPriceId: 'price_1S2dahDFIr5ywhwoasGBlzaH'
       }
     },
     education: {
       mo: {
-        price: 4
+        price: 4,
+        priceId: '-------',
+        devPriceId: 'price_1S2dWBDFIr5ywhwowrCrnKpt'
       },
       yr: {
         price: 40,
-        priceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP',
-        devPriceId: 'price_1Nie0DDFIr5ywhwoesLtHpVu'
+        priceId: '-------',
+        devPriceId: 'price_1S2dWKDFIr5ywhwoioe6WQAo'
       }
     },
     apple: {
@@ -142,28 +146,51 @@ export default {
   },
   price (period, isStudentDiscount) {
     if (period === 'month') {
-      return this.monthlyPrice()
+      return this.monthlyPrice(isStudentDiscount)
     } else if (period === 'year') {
       return this.yearlyPrice(isStudentDiscount)
     } else if (period === 'life') {
       return this.lifePrice()
     }
   },
-  monthlyPrice () {
+  // mo
+  monthlyPrice (isStudentDiscount) {
+    if (isStudentDiscount) {
+      return this.monthlyStudentPrice()
+    } else {
+      return this.monthlyStandardPrice()
+    }
+  },
+  monthlyStudentPrice () {
+    if (this.isSecureAppContextIOS) {
+      return this.monthlyStandardPrice()
+    }
     const price = {
-      amount: this.prices.regular.mo.price,
+      amount: this.prices.education.mo.price,
+      period: 'year',
+      stripePriceId: this.prices.education.mo.priceId
+    }
+    if (this.isDevelopment()) {
+      price.stripePriceId = this.prices.education.mo.devPriceId
+    }
+    return price
+  },
+  monthlyStandardPrice () {
+    const price = {
+      amount: this.prices.standard.mo.price,
       period: 'month',
-      stripePriceId: this.prices.regular.mo.priceId,
+      stripePriceId: this.prices.standard.mo.priceId,
       applePriceId: this.prices.apple.mo.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = this.prices.regular.mo.devPriceId
+      price.stripePriceId = this.prices.standard.mo.devPriceId
     }
     if (this.isSecureAppContextIOS) {
       price.amount = this.prices.apple.mo.price
     }
     return price
   },
+  // yr
   yearlyPrice (isStudentDiscount) {
     if (isStudentDiscount) {
       return this.yearlyStudentPrice()
@@ -173,13 +200,13 @@ export default {
   },
   yearlyStandardPrice () {
     const price = {
-      amount: this.prices.regular.yr.price,
+      amount: this.prices.standard.yr.price,
       period: 'year',
-      stripePriceId: this.prices.regular.yr.priceId,
+      stripePriceId: this.prices.standard.yr.priceId,
       applePriceId: this.prices.apple.yr.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = this.prices.regular.yr.devPriceId
+      price.stripePriceId = this.prices.standard.yr.devPriceId
     }
     if (this.isSecureAppContextIOS) {
       price.amount = this.prices.apple.yr.price
@@ -202,12 +229,12 @@ export default {
   },
   lifePrice () {
     const price = {
-      amount: this.prices.regular.life.price,
+      amount: this.prices.standard.life.price,
       period: 'life',
-      stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'
+      stripePriceId: this.prices.standard.life.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1O6k10DFIr5ywhwoXF87uKcl'
+      price.stripePriceId = this.prices.standard.life.devPriceId
     }
     return price
   }
