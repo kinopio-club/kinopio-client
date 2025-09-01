@@ -105,17 +105,39 @@ export default {
 
   prices: {
     regular: {
-      mo: 8,
-      yr: 80,
-      life: 250
+      mo: {
+        price: 8,
+        priceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
+        devPriceId: 'price_1S2YjKDFIr5ywhwo9bTroXjb'
+      },
+      yr: {
+        price: 80,
+        priceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
+        devPriceId: 'price_1S2YkjDFIr5ywhworJlITrlm'
+      },
+      life: {
+        price: 250
+      }
     },
     education: {
-      mo: 4,
-      yr: 40
+      mo: {
+        price: 4
+      },
+      yr: {
+        price: 40,
+        priceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP',
+        devPriceId: 'price_1Nie0DDFIr5ywhwoesLtHpVu'
+      }
     },
-    ios: {
-      mo: 7, // 9
-      yr: 70 // 90
+    apple: {
+      mo: {
+        price: 7, // 9
+        priceId: 'apple_monthly_2023'
+      },
+      yr: {
+        price: 70, // 90
+        priceId: 'apple_yearly_2023'
+      }
     }
   },
   price (period, isStudentDiscount) {
@@ -129,16 +151,16 @@ export default {
   },
   monthlyPrice () {
     const price = {
-      amount: this.prices.regular.mo,
+      amount: this.prices.regular.mo.price,
       period: 'month',
-      stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
-      applePriceId: 'apple_monthly_2023'
+      stripePriceId: this.prices.regular.mo.priceId,
+      applePriceId: this.prices.apple.mo.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
+      price.stripePriceId = this.prices.regular.mo.devPriceId
     }
     if (this.isSecureAppContextIOS) {
-      price.amount = this.prices.ios.mo
+      price.amount = this.prices.apple.mo.price
     }
     return price
   },
@@ -151,16 +173,16 @@ export default {
   },
   yearlyStandardPrice () {
     const price = {
-      amount: this.prices.regular.yr,
+      amount: this.prices.regular.yr.price,
       period: 'year',
-      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
-      applePriceId: 'apple_yearly_2023'
+      stripePriceId: this.prices.regular.yr.priceId,
+      applePriceId: this.prices.apple.yr.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
+      price.stripePriceId = this.prices.regular.yr.devPriceId
     }
     if (this.isSecureAppContextIOS) {
-      price.amount = this.prices.ios.yr
+      price.amount = this.prices.apple.yr.price
     }
     return price
   },
@@ -169,18 +191,18 @@ export default {
       return this.yearlyStandardPrice()
     }
     const price = {
-      amount: this.prices.education.mo,
+      amount: this.prices.education.yr.price,
       period: 'year',
-      stripePriceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP'
+      stripePriceId: this.prices.education.yr.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1Nie0DDFIr5ywhwoesLtHpVu'
+      price.stripePriceId = this.prices.education.yr.devPriceId
     }
     return price
   },
   lifePrice () {
     const price = {
-      amount: this.prices.regular.life,
+      amount: this.prices.regular.life.price,
       period: 'life',
       stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'
     }
