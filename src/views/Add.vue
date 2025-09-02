@@ -22,6 +22,10 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
+if (consts.isDevelopment()) {
+  window.userStore = useUserStore()
+}
+
 const state = reactive({
   email: '',
   password: '',
@@ -81,7 +85,7 @@ const name = computed({
   }
 })
 const initUser = async () => {
-  userStore.initializeUser()
+  await userStore.initializeUser()
 }
 const initCardTextarea = async () => {
   await nextTick()
@@ -146,13 +150,13 @@ const signIn = async (event) => {
   state.loading.signIn = true
   const response = await apiStore.signIn({ email, password })
   const result = await response.json()
-  state.loading.signIn = false
   if (isSuccess(response)) {
-    userStore.updateUserState(result)
-    initUser()
+    await userStore.updateUserState(result)
+    await userStore.initializeUserState(result)
   } else {
     handleSignInErrors(result)
   }
+  state.loading.signIn = false
 }
 
 // card
