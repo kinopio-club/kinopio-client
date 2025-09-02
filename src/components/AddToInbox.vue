@@ -135,7 +135,6 @@ const checkIsMissingInboxSpace = async () => {
   } else {
     state.error.isMissingInboxSpace = true
   }
-  console.log(space, state.error.isMissingInboxSpace)
   if (!currentUserIsSignedIn.value) { return }
   try {
     await apiStore.getUserInboxSpace()
