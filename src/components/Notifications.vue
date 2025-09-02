@@ -113,9 +113,9 @@ const privacyState = computed(() => {
   })
 })
 const cardsCreatedCountFromLimit = computed(() => {
-  const cardsCreatedLimit = consts.cardsCreatedLimit
+  const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
   const cardsCreatedCount = userStore.cardsCreatedCount
-  return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
+  return Math.max(freeCardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
   if (globalStore.isLoadingSpace) { return }

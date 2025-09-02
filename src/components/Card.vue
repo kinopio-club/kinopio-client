@@ -438,6 +438,9 @@ const cardStyle = computed(() => {
   if (props.card.tilt) {
     styles.transform = `rotate(${props.card.tilt}deg)`
   }
+  if (isImageCard.value) {
+    styles.background = 'transparent'
+  }
   if (isImageCard.value && isSelectedOrDragging.value) {
     color = safeColor(color)
     styles.background = color
@@ -1917,6 +1920,9 @@ const focusColor = computed(() => {
     return null
   }
 })
+const clearFocus = () => {
+  globalStore.focusOnCardId = ''
+}
 </script>
 
 <template lang="pug">
@@ -1941,7 +1947,7 @@ const focusColor = computed(() => {
   ref="cardElement"
   :class="cardWrapClasses"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
@@ -2160,7 +2166,7 @@ const focusColor = computed(() => {
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
-    transform-origin top right
+    transform-origin: calc(100% - 16px) calc(0% + 16px)
     .name
       color var(--primary-on-light-background)
     &:hover,

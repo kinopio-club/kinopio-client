@@ -87,8 +87,21 @@ onMounted(() => {
       }
     }
   )
+  const cardActionUnsubscribe = cardStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'updateCardsState' && visible.value) {
+        const updates = args[0]
+        const isCurrentCard = updates.some(update => {
+          const isId = update.id === card.value.id
+          return update.name && isId
+        })
+        textareaSizes()
+      }
+    }
+  )
   unsubscribes = () => {
     globalActionUnsubscribe()
+    cardActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -143,6 +156,7 @@ const card = computed(() => {
   return cardStore.getCard(cardId.value) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     globalStore.preventMultipleSelectedActionsIsVisible = false
@@ -450,11 +464,8 @@ const textareaSizes = async () => {
   await nextTick()
   const element = nameElement.value
   if (!element) { return }
-  let modifier = 0
-  if (canEditCard.value) {
-    modifier = 1
-  }
-  element.style.height = element.scrollHeight + modifier + 'px'
+  element.style.height = 'auto'
+  element.style.height = element.scrollHeight + 'px'
 }
 const resetTextareaHeight = () => {
   if (!visible.value) { return }
@@ -495,7 +506,6 @@ const name = computed({
       state.pastedName = ''
     }
     updateNameSplitIntoCardsCount()
-    textareaSizes()
   }
 })
 const updateCardName = async (newName) => {
@@ -1479,9 +1489,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
     CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
-    .row(v-if="nameMetaRowIsVisible")
+    .row(v-if="nameMetaRowIsVisible && canEditCard")
       //- Split by Line Breaks
-      .button-wrap(v-if="state.nameSplitIntoCardsCount && canEditCard")
+      .button-wrap(v-if="state.nameSplitIntoCardsCount")
         button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split.svg")
           span Split Card
@@ -1567,7 +1577,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
-        span To upload files over 5mb,
+        span To upload files over {{freeUploadSizeLimit}}mb,
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")

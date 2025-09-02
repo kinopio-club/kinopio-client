@@ -340,6 +340,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     margin-right 3px
   .space-name-wrap
     display inline
+    white-space normal
   .new-unread-badge
     position absolute
     top 0

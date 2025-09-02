@@ -1055,8 +1055,8 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       if (this.getSpaceCreatorIsUpgraded) { return }
       if (userStore.isUpgraded) { return }
-      const cardsCreatedLimit = consts.cardsCreatedLimit
-      const value = cardsCreatedLimit - userStore.cardsCreatedCount
+      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
+      const value = freeCardsCreatedLimit - userStore.cardsCreatedCount
       if (utils.isBetween({ value, min: 0, max: 15 })) {
         globalStore.notifyCardsCreatedIsNearLimit = true
       }

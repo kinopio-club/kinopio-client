@@ -114,9 +114,9 @@ export const useUserStore = defineStore('users', {
       return Boolean(this.apiKey)
     },
     getUserCardsCreatedIsOverLimit () {
-      const cardsCreatedLimit = consts.cardsCreatedLimit
+      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
       if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount >= cardsCreatedLimit) { return true }
+      if (this.cardsCreatedCount >= freeCardsCreatedLimit) { return true }
     },
     getShouldPreventCardsCreatedCountUpdate () {
       const spaceStore = useSpaceStore()
@@ -510,7 +510,7 @@ export const useUserStore = defineStore('users', {
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount + count >= consts.cardsCreatedLimit) { return true }
+      if (this.cardsCreatedCount + count >= consts.freeCardsCreatedLimit) { return true }
     },
 
     // inbox

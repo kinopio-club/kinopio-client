@@ -54,7 +54,7 @@ export const useUploadStore = defineStore('upload', {
       if (isFileTooBig) {
         throw {
           type: 'sizeLimit',
-          message: 'To upload files over 5mb, upgrade for unlimited size uploads'
+          message: `To upload files over ${consts.freeUploadSizeLimit}mb, upgrade for unlimited size uploads`
         }
       }
     },
@@ -164,7 +164,7 @@ export const useUploadStore = defineStore('upload', {
       })
       if (filesTooBig) {
         globalStore.addNotificationWithPosition({ message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' })
-        globalStore.addNotification({ message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' })
+        globalStore.addNotification({ message: `To upload files over ${consts.freeUploadSizeLimit}mb, upgrade for unlimited size uploads`, type: 'danger' })
         return
       }
       // add cards

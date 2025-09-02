@@ -1952,6 +1952,13 @@ export default {
       return id
     }
   },
+  newUrl (url) {
+    try {
+      return new URL(url)
+    } catch (error) {
+      return undefined
+    }
+  },
   spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     let url
     if (collaboratorKey || readOnlyKey) {
@@ -2027,8 +2034,10 @@ export default {
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
-    url = url.replaceAll('?hidden=true', '')
-    const id = url.substring(url.length - uuidLength, url.length)
+    url = this.newUrl(url)
+    if (!url) { return }
+    const path = url.pathname
+    const id = path.substring(path.length - uuidLength, path.length)
     if (this.idIsValid(id)) { return id }
   },
   idIsValid (id) {
@@ -2321,7 +2330,12 @@ export default {
     if (split.length <= 1) {
       return undefined
     } else {
-      return split[1]
+      const splitFragment = split[1].split('#')
+      if (split.length <= 1) {
+        return split[1]
+      } else {
+        return splitFragment[0]
+      }
     }
   },
   urlType (url) {
@@ -2367,25 +2381,27 @@ export default {
   },
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
-      url = url.trim()
-      url = this.clearTrailingSlash(url)
-      if (!this.urlIsWebsite(url)) { return }
-      const queryString = this.queryString(url) || ''
-      const domain = this.urlWithoutQueryString(url)
-      let queryObject = {}
-      if (queryString) {
-        queryObject = qs.decode(queryString)
+      const prevUrl = url.trim()
+      if (!this.urlIsWebsite(prevUrl)) { return }
+
+      url = this.newUrl(prevUrl)
+      if (!url) { return }
+
+      url.searchParams.set('hidden', 'true')
+      let newUrl = url.toString()
+      if (url.pathname === '/') {
+        newUrl = newUrl.replace(`${url.host}/`, url.host)
       }
-      queryObject.hidden = 'true'
-      const newUrl = qs.encode(domain, queryObject)
-      name = name.replace(url, newUrl)
+      name = name.replace(prevUrl, newUrl)
     })
     return name
   },
   removeHiddenQueryStringFromURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       const prevUrl = url
       url = url.replace('?hidden=true', '')
@@ -2479,7 +2495,7 @@ export default {
   // Upload
 
   isFileTooBig ({ file, userIsUpgraded }) {
-    const sizeLimit = 1024 * 1024 * 5 // 5mb
+    const sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
     }

@@ -72,7 +72,7 @@ const closeDialogs = () => {
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isLoadingGroups = computed(() => globalStore.isLoadingGroups)
 
-const dialogIsVisible = computed(() => Boolean(state.groupDetailsIsVisibleForGroupId))
+const dialogIsVisible = computed(() => Boolean(state.groupDetailsIsVisibleForGroupId || state.addGroupIsVisible))
 
 // groups
 

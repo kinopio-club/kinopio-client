@@ -81,7 +81,10 @@ const currentPrice = computed(() => {
   const isStudentDiscount = studentDiscountIsAvailable.value
   return consts.price(state.period, isStudentDiscount)
 })
-const monthlyPrice = computed(() => consts.price('month'))
+const monthlyPrice = computed(() => {
+  const isStudentDiscount = studentDiscountIsAvailable.value
+  return consts.price('month', isStudentDiscount)
+})
 const yearlyPrice = computed(() => {
   const isStudentDiscount = studentDiscountIsAvailable.value
   return consts.price('year', isStudentDiscount)
