@@ -20,6 +20,10 @@ const textareaElement = ref(null)
 
 const emit = defineEmits(['addCard'])
 
+onMounted(() => {
+  checkIsMissingInboxSpace()
+})
+
 const props = defineProps({
   visible: Boolean
 })
@@ -28,7 +32,8 @@ const state = reactive({
   error: {
     unknownServerError: false,
     maxLength: false,
-    cardsCreatedIsOverLimit: false
+    cardsCreatedIsOverLimit: false,
+    isMissingInboxSpace: false
   },
   success: false
 })
@@ -48,6 +53,7 @@ const clearErrorsAndSuccess = () => {
   state.error.cardsCreatedIsOverLimit = false
   state.success = false
 }
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const name = computed({
   get () {
     return state.newName
@@ -122,10 +128,29 @@ const addCardToSpaceLocal = async (card) => {
   const cards = space.cards.push(card)
   cache.updateSpace('cards', cards, space.id)
 }
+const checkIsMissingInboxSpace = async () => {
+  const space = await cache.getInboxSpace()
+  if (space) {
+    state.error.isMissingInboxSpace = false
+  } else {
+    state.error.isMissingInboxSpace = true
+  }
+  console.log(space, state.error.isMissingInboxSpace)
+  if (!currentUserIsSignedIn.value) { return }
+  try {
+    await apiStore.getUserInboxSpace()
+    state.error.isMissingInboxSpace = false
+  } catch (error) {
+    console.error('🚒 checkIsMissingInboxSpace', error)
+    state.error.isMissingInboxSpace = true
+  }
+}
 </script>
 
 <template lang="pug">
 section.add-to-inbox(v-if="props.visible")
+  .row.badge.danger(v-if="state.error.isMissingInboxSpace")
+    span Could not find space named Inbox
   section.subsection
     .row
       p Add to Inbox
@@ -144,7 +169,7 @@ section.add-to-inbox(v-if="props.visible")
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
       )
     .row
-      button(@click="addCard")
+      button(@click="addCard" :disabled="state.error.isMissingInboxSpace")
         img.icon.add-icon(src="@/assets/add.svg")
         span Add
       .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
