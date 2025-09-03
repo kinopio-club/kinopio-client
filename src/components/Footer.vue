@@ -306,7 +306,7 @@ const updatePositionInVisualViewport = () => {
     padding-right 0
     translate 0px 3px
     display inline-block
-    button
+    > button
       font-size 1rem
       padding-left 6px
       padding-right 6px

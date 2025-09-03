@@ -22,6 +22,10 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
+if (consts.isDevelopment()) {
+  window.userStore = useUserStore()
+}
+
 const state = reactive({
   email: '',
   password: '',
@@ -33,7 +37,8 @@ const state = reactive({
     // sign in
     tooManyAttempts: false,
     signInCredentials: false,
-    maxLength: false
+    maxLength: false,
+    isMissingInboxSpace: false
   },
   success: false,
   newName: '',
@@ -49,10 +54,11 @@ window.addEventListener('message', (event) => {
   restoreValue(event.data)
 })
 
-onMounted(() => {
-  initUser()
+onMounted(async () => {
+  await initUser()
   initCardTextarea()
   restoreValue()
+  checkIsMissingInboxSpace()
 })
 
 onBeforeUnmount(() => {
@@ -81,7 +87,7 @@ const name = computed({
   }
 })
 const initUser = async () => {
-  userStore.initializeUser()
+  await userStore.initializeUser()
 }
 const initCardTextarea = async () => {
   await nextTick()
@@ -100,6 +106,16 @@ const focusAndSelectName = () => {
   focusName()
   if (length) {
     element.setSelectionRange(0, length)
+  }
+}
+const checkIsMissingInboxSpace = async () => {
+  if (!currentUserIsSignedIn.value) { return }
+  try {
+    await apiStore.getUserInboxSpace()
+    state.error.isMissingInboxSpace = false
+  } catch (error) {
+    console.error('🚒 checkIsMissingInboxSpace', error)
+    state.error.isMissingInboxSpace = true
   }
 }
 
@@ -146,13 +162,14 @@ const signIn = async (event) => {
   state.loading.signIn = true
   const response = await apiStore.signIn({ email, password })
   const result = await response.json()
-  state.loading.signIn = false
   if (isSuccess(response)) {
-    userStore.updateUserState(result)
-    initUser()
+    await userStore.updateUserState(result)
+    await userStore.initializeUserState(result)
+    checkIsMissingInboxSpace()
   } else {
     handleSignInErrors(result)
   }
+  state.loading.signIn = false
 }
 
 // card
@@ -246,7 +263,7 @@ const insertLineBreak = async (event) => {
 main.add-page
   .add-form(v-if="currentUserIsSignedIn")
     section
-      .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength")
+      .row(v-if="cardsCreatedIsOverLimit || state.error.unknownServerError || state.error.maxLength || state.error.isMissingInboxSpace")
         //- error: card limit
         template(v-if="cardsCreatedIsOverLimit")
           a(:href="kinopioDomain" v-if="isAddPage")
@@ -257,6 +274,7 @@ main.add-page
             span Upgrade for more cards
         //- error: connection
         .badge.danger(v-if="state.error.unknownServerError || state.error.maxLength") (シ_ _)シ Server error
+        .badge.danger(v-if="state.error.isMissingInboxSpace") Could not find space named Inbox
       //- textarea
       .row
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
@@ -281,11 +299,11 @@ main.add-page
       .row
         .button-wrap
           a(:href="inboxUrl")
-            button
+            button(:disabled="state.error.isMissingInboxSpace")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
               span Inbox
         .button-wrap
-          button.success(@pointerup="addCard" :class="{disabled: state.error.maxLength}")
+          button.success(@pointerup="addCard" :disabled="state.error.maxLength || state.error.isMissingInboxSpace")
             img.icon.add-icon(src="@/assets/add.svg")
             span Add
           .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
