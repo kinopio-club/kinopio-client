@@ -133,6 +133,8 @@ const updateShouldRenderParent = (value) => {
   state.shouldRenderParent = value
 }
 const shouldRender = computed(() => {
+  if (globalStore.disableViewportOptimizations) { return true }
+  // if (isConnectingFrom.value) { return true }
   return state.isVisibleInViewport || state.shouldRenderParent
 })
 
