@@ -1506,6 +1506,8 @@ const isFilteredByBox = computed(() => {
   return isInBox
 })
 const isFiltered = computed(() => {
+  if (isSelectedOrDragging.value) { return }
+  if (currentCardIsBeingDragged.value) { return }
   if (!filtersIsActive.value) { return }
   const isInFilter = isFilteredByTags.value || isFilteredByConnectionType.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
   return !isInFilter
