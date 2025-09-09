@@ -135,12 +135,12 @@ export default {
     },
     apple: {
       mo: {
-        price: 7, // 9
-        priceId: 'apple_monthly_2023'
+        price: 9,
+        priceId: 'apple_monthly_2025'
       },
       yr: {
-        price: 70, // 90
-        priceId: 'apple_yearly_2023'
+        price: 90,
+        priceId: 'apple_yearly_2025'
       }
     }
   },
