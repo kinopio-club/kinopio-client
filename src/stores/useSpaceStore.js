@@ -778,7 +778,6 @@ export const useSpaceStore = defineStore('space', {
       const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace
-      const isPrivate = this.getSpaceIsPrivate
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)
