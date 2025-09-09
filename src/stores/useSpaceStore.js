@@ -781,7 +781,6 @@ export const useSpaceStore = defineStore('space', {
       const isPrivate = this.getSpaceIsPrivate
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
-      if (isPrivate) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)
       console.info('🙈 updated space preview image', response?.urls)
     }, 10 * 1000), // 10 seconds
