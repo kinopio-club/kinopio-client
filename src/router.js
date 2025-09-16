@@ -5,7 +5,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import Space from '@/views/Space.vue'
-import SSGDemo from '@/views/SSGDemo.vue'
+import About from '@/views/About.vue'
 
 import consts from './consts.js'
 
@@ -32,7 +32,7 @@ const router = {
     }, {
       path: '/',
       name: 'ssg-demo',
-      component: SSGDemo
+      component: About
     }, {
       path: '/app',
       name: 'space',
