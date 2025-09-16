@@ -1,5 +1,5 @@
 # Netlify settings for single-page application
-# Should match offline excluded routes in vite.vonfig.js
+# Should match offline excluded routes in vite.config.js
 
 /robots.txt       /robots.txt   200
 
@@ -10,7 +10,6 @@
 # help and about are currently the same site
 
 /help             https://help.kinopio.club   301
-/about            https://about.kinopio.club   301
 /blog             https://blog.kinopio.club   301
 
 /api              https://help.kinopio.club/api
