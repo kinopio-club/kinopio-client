@@ -41,7 +41,6 @@
     "@vue/eslint-config-standard": "^8.0.1",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.2",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "cross-env": "^10.0.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
