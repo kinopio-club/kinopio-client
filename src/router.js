@@ -31,7 +31,7 @@ const router = {
       }
     }, {
       path: '/',
-      name: 'ssg-demo',
+      name: 'about',
       component: About
     }, {
       path: '/app',
