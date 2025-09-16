@@ -3,92 +3,48 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
-import About from '@/components/dialogs/About.vue'
+import Header from '@/components/page/Header.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
-import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
-import Donate from '@/components/dialogs/Donate.vue'
 
 const globalStore = useGlobalStore()
+let unsubscribes
 
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
         closeDialogs()
-      } else if (name === 'triggerKeyboardShortcutsIsVisible') {
-        updateKeyboardShortcutsIsVisible(true)
-      } else if (name === 'triggerDonateIsVisible') {
-        updateDonateIsVisible(true)
       }
     }
   )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
+onBeforeUnmount(() => {
+  unsubscribes()
+})
+
 const state = reactive({
-  aboutIsVisible: false,
-  appsAndExtensionsIsVisible: false,
-  keyboardShortcutsIsVisible: false,
-  donateIsVisible: false
+  appsAndExtensionsIsVisible: false
 })
 
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
 const closeDialogs = () => {
-  state.aboutIsVisible = false
   state.appsAndExtensionsIsVisible = false
-  state.keyboardShortcutsIsVisible = false
-  state.donateIsVisible = false
 }
-
-// header
-
-const toggleAboutIsVisible = () => {
-  const isVisible = state.aboutIsVisible
-  closeAllDialogs()
-  state.aboutIsVisible = !isVisible
-}
-const updateKeyboardShortcutsIsVisible = (value) => {
-  state.keyboardShortcutsIsVisible = value
-}
-const updateDonateIsVisible = (value) => {
-  state.donateIsVisible = value
-}
-
-// page
 
 const toggleAppsAndExtensionsIsVisible = () => {
   const isVisible = state.appsAndExtensionsIsVisible
   closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
 }
-
 </script>
 
 <template lang="pug">
-  //- TODO to HeaderPage
-  header
-    nav
-      .row
-        .left
-          .logo-about
-            .button-wrap
-              .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
-                .logo-image
-              About(:visible="state.aboutIsVisible")
-              KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
-              Donate(:visible="state.donateIsVisible")
-
-        .right
-          .button-wrap
-            //- TODO
-            button Pricing
-          .button-wrap
-            router-link(to="/app")
-              button.success Open App
-
-    //- keybd shortcuts
-    //- donate
-
+  Header
   main.page(@click="closeAllDialogs")
     section
       h1 Kinopio

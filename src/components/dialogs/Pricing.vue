@@ -19,7 +19,8 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  parentIsPage: Boolean
 })
 const dialog = ref(null)
 
@@ -139,19 +140,19 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
               button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
                 span ?
                 AboutGroups(:visible="state.aboutGroupsIsVisible")
-    CardsCreatedProgress
-    //- free cards from space member
-    section.subsection(v-if="spaceCreatorIsUpgraded")
-      p
-        UserLabelInline(:user="spaceUser")
-        span is upgraded, so cards you create in this space won't increase your free card count
+    template(v-if="!props.parentIsPage")
+      CardsCreatedProgress
+      //- free cards from space member
+      section.subsection(v-if="spaceCreatorIsUpgraded")
+        p
+          UserLabelInline(:user="spaceUser")
+          span is upgraded, so cards you create in this space won't increase your free card count
   section
     AboutMe
 </template>
 
 <style lang="stylus">
 dialog.pricing
-  overflow auto
   left initial
   right 8px
   max-height calc(100vh - 25px)
@@ -170,5 +171,6 @@ dialog.pricing
     .small-button
       margin-top 0
   dialog.about-groups
-    max-height 150px !important
+    top -100px
+    right 16px
 </style>
