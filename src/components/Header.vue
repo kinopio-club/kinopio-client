@@ -757,20 +757,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             img.icon.sidebar(src="@/assets/sidebar.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
-    //- 3rd row
-    //- .row
-    //-   .left
-    //-   .right
-        //- Donate
-        //- .button-wrap
-        //-   .segmented-buttons
-        //-     button Donate
-        //-     button
-        //-       img.icon.cancel(src="@/assets/add.svg")
-
-        //- comments
-        //- CommentButton
-
   Toolbar(:visible="toolbarIsVisible")
   SelectAllBelow
   SelectAllRight

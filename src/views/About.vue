@@ -6,6 +6,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import About from '@/components/dialogs/About.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
+import Donate from '@/components/dialogs/Donate.vue'
 
 const globalStore = useGlobalStore()
 
@@ -16,6 +17,8 @@ onMounted(() => {
         closeDialogs()
       } else if (name === 'triggerKeyboardShortcutsIsVisible') {
         updateKeyboardShortcutsIsVisible(true)
+      } else if (name === 'triggerDonateIsVisible') {
+        updateDonateIsVisible(true)
       }
     }
   )
@@ -23,7 +26,8 @@ onMounted(() => {
 const state = reactive({
   aboutIsVisible: false,
   appsAndExtensionsIsVisible: false,
-  keyboardShortcutsIsVisible: false
+  keyboardShortcutsIsVisible: false,
+  donateIsVisible: false
 })
 
 const closeAllDialogs = () => {
@@ -33,6 +37,7 @@ const closeDialogs = () => {
   state.aboutIsVisible = false
   state.appsAndExtensionsIsVisible = false
   state.keyboardShortcutsIsVisible = false
+  state.donateIsVisible = false
 }
 
 // header
@@ -44,6 +49,9 @@ const toggleAboutIsVisible = () => {
 }
 const updateKeyboardShortcutsIsVisible = (value) => {
   state.keyboardShortcutsIsVisible = value
+}
+const updateDonateIsVisible = (value) => {
+  state.donateIsVisible = value
 }
 
 // page
@@ -68,6 +76,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
                 .logo-image
               About(:visible="state.aboutIsVisible")
               KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
+              Donate(:visible="state.donateIsVisible")
 
         .right
           .button-wrap
@@ -117,7 +126,7 @@ main.page
   padding-top 4rem
   background pink
   overflow auto
-
+  height 100dvh
   > section
     margin 3rem
     background teal
