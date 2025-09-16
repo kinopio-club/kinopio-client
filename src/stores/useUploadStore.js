@@ -54,12 +54,13 @@ export const useUploadStore = defineStore('upload', {
       if (isFileTooBig) {
         throw {
           type: 'sizeLimit',
-          message: 'To upload files over 5mb, upgrade for unlimited size uploads'
+          message: `To upload files over ${consts.freeUploadSizeLimit}mb, upgrade for unlimited size uploads`
         }
       }
     },
     addImageDataUrl ({ file, cardId, spaceId }) {
-      const isImage = file.type.includes('image')
+      const fileType = file.type || utils.imageFileTypeFromName(file)
+      const isImage = fileType.includes('image')
       if (!isImage) { return null }
       this.updatePendingUpload({
         cardId,
@@ -108,13 +109,15 @@ export const useUploadStore = defineStore('upload', {
           }
           this.updatePendingUpload(updates)
           broadcastStore.update({ updates, name: 'updateRemotePendingUploads' })
+          cardStore.insertCardUploadPlaceholder(file, cardId)
           // end
           if (percentComplete >= 100) {
             const complete = {
               cardId,
               spaceId,
               boxId,
-              url: `${consts.cdnHost}/${key}`
+              url: `${consts.cdnHost}/${key}`,
+              fileName
             }
             console.info('🛬 Upload completed or failed', event, complete)
             globalStore.triggerUploadComplete(complete)
@@ -161,7 +164,7 @@ export const useUploadStore = defineStore('upload', {
       })
       if (filesTooBig) {
         globalStore.addNotificationWithPosition({ message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' })
-        globalStore.addNotification({ message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' })
+        globalStore.addNotification({ message: `To upload files over ${consts.freeUploadSizeLimit}mb, upgrade for unlimited size uploads`, type: 'danger' })
         return
       }
       // add cards

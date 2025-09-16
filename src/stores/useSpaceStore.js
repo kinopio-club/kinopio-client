@@ -212,10 +212,6 @@ export const useSpaceStore = defineStore('space', {
       value = Boolean(value)
       return value
     },
-    getSpaceIsInbox (spaceName) {
-      spaceName = spaceName || this.name
-      return spaceName === 'Inbox'
-    },
 
     // user getters
 
@@ -270,6 +266,10 @@ export const useSpaceStore = defineStore('space', {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         await this.loadSpace(space)
+      // restore inbox space
+      } else if (globalStore.loadInboxSpace) {
+        console.info('🚃 Restore inbox space')
+        await this.loadInboxSpace()
       // create new space
       } else if (globalStore.loadNewSpace) {
         console.info('🚃 Create new space')
@@ -354,7 +354,6 @@ export const useSpaceStore = defineStore('space', {
         return remoteSpace
       } catch (error) {
         console.error('🚒 getRemoteSpace', space.id, error)
-        loadSpaceIdsError.push(space.id)
         throw error
       }
     },
@@ -365,8 +364,9 @@ export const useSpaceStore = defineStore('space', {
       try {
         remoteSpace = await this.getRemoteSpace(space)
       } catch (error) {
-        console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         const preventRepeatError = loadSpaceIdsError.includes(space.id)
+        loadSpaceIdsError.push(space.id)
+        console.warn('🚑 loadRemoteSpace error', error.status, error, space.id, preventRepeatError)
         if (preventRepeatError) {
           globalStore.updateNotifySpaceNotFound(true)
           return
@@ -458,31 +458,22 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerScrollCardIntoView(cardId)
       }
     },
-    async loadInboxSpace (prevFailedSpace) {
-      let space
-      const userStore = useUserStore()
-      let spaceToRestore = await cache.space(userStore.lastSpaceId)
-      if (!spaceToRestore.id) {
-        spaceToRestore = null
-      } else if (spaceToRestore?.id === prevFailedSpace?.id) {
-        spaceToRestore = null
-      }
-      const cachedHelloSpace = await cache.getSpaceByName('Hello Kinopio')
-      const cachedSpace = await cache.getAllSpaces()[0]
-      const prevSpace = cachedHelloSpace || cachedSpace
-      if (spaceToRestore?.id) {
-        space = spaceToRestore
-      } else if (userStore.lastSpaceId) {
-        space = { id: userStore.lastSpaceId }
-      } else if (prevSpace) {
-        space = prevSpace
-        await cache.saveSpace(space)
-      }
-      // load space
-      if (space) {
-        await this.loadSpace(space)
-      } else {
-        this.initializeSpace()
+    async loadInboxSpace () {
+      const apiStore = useApiStore()
+      try {
+        // get inbox
+        let space = await cache.getInboxSpace()
+        if (!space) {
+          space = await apiStore.getInboxSpace()
+        }
+        // load or create
+        if (space) {
+          await this.loadSpace(space)
+        } else {
+          this.createNewInboxSpace()
+        }
+      } catch (error) {
+        console.error('🚒 loadInboxSpace', error)
       }
     },
     async loadLastSpace (prevFailedSpace) {
@@ -786,10 +777,8 @@ export const useSpaceStore = defineStore('space', {
       const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace
-      const isPrivate = this.getSpaceIsPrivate
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
-      if (isPrivate) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)
       console.info('🙈 updated space preview image', response?.urls)
     }, 10 * 1000), // 10 seconds
@@ -1063,8 +1052,8 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       if (this.getSpaceCreatorIsUpgraded) { return }
       if (userStore.isUpgraded) { return }
-      const cardsCreatedLimit = consts.cardsCreatedLimit
-      const value = cardsCreatedLimit - userStore.cardsCreatedCount
+      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
+      const value = freeCardsCreatedLimit - userStore.cardsCreatedCount
       if (utils.isBetween({ value, min: 0, max: 15 })) {
         globalStore.notifyCardsCreatedIsNearLimit = true
       }
@@ -1198,11 +1187,9 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const isOffline = !globalStore.isOnline
-      if (this.getSpaceIsInbox) { return }
       if (!isSignedIn) { return }
       if (isOffline) { return }
       const inbox = await apiStore.getUserInboxSpace()
-      console.info('🌍 updateInboxCache')
       await cache.saveSpace(inbox)
     }
 

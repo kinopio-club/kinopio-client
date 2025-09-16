@@ -144,6 +144,12 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(cardId => this.getCard(cardId))
       cards = cards.filter(card => Boolean(card))
       return cards
+    },
+    getCardsIsTodoSortedByY () {
+      let cards = this.allIds.map(id => this.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards = sortBy(cards, 'y')
+      return cards.filter(card => utils.checkboxFromString(card.name))
     }
   },
 
@@ -355,15 +361,21 @@ export const useCardStore = defineStore('cards', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
-      if (!userStore.getUserCanEditSpace) { return }
-      this.updateCardsState(updates)
-      const ids = updates.map(update => update.id)
-      connectionStore.updateConnectionPathsByItemIds(ids)
-      broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      for (const card of updates) {
-        await apiStore.addToQueue({ name: 'updateCard', body: card })
+      try {
+        if (!userStore.getUserCanEditSpace) { return }
+        this.updateCardsState(updates)
+        const ids = updates.map(update => update.id)
+        connectionStore.updateConnectionPathsByItemIds(ids)
+        broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
+        for (const card of updates) {
+          await apiStore.addToQueue({ name: 'updateCard', body: card })
+        }
+        let cards = this.getAllCards
+        cards = utils.clone(cards)
+        await cache.updateSpace('cards', cards, spaceStore.id)
+      } catch (error) {
+        console.error('🚒 updateCards', error)
       }
-      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
     },
     updateCard (update) {
       this.updateCards([update])
@@ -462,7 +474,6 @@ export const useCardStore = defineStore('cards', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -491,7 +502,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection })
+      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -681,7 +692,7 @@ export const useCardStore = defineStore('cards', {
     // tilt
 
     tiltCards (ids, delta) {
-      const maxDegrees = 25
+      const maxDegrees = 90
       const updates = []
       ids.forEach(id => {
         const card = this.getCard(id)
@@ -796,8 +807,16 @@ export const useCardStore = defineStore('cards', {
 
     // name
 
-    cardWithNameSegments (card) {
+    cardWithNameSegments (card, excludeCheckboxString) {
       let name = card.name
+      if (!name) {
+        card.nameSegments = []
+        return card
+      }
+      if (excludeCheckboxString) {
+        const checkbox = utils.checkboxFromString(name)
+        name = name.replace(checkbox, '')
+      }
       const url = utils.urlFromString(name)
       let imageUrl
       if (utils.urlIsImage(url)) {
@@ -830,6 +849,18 @@ export const useCardStore = defineStore('cards', {
       } else {
         return userStore.color
       }
+    },
+    insertCardUploadPlaceholder (file, id) {
+      const card = this.getCard(id)
+      if (!card) { return }
+      const isMatch = card.name.includes(file.name)
+      if (!isMatch) { return }
+      const name = card.name.replace(file.name, consts.uploadPlaceholder)
+      const update = {
+        id,
+        name
+      }
+      this.updateCard(update)
     },
     clearCardNameUploadPlaceholder (id) {
       const card = this.getCard(id)

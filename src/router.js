@@ -89,7 +89,7 @@ const router = {
         next()
       }
     }, {
-      path: '/inbox',
+      path: '/inbox', // used by /add
       component: Space,
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
@@ -126,7 +126,7 @@ const router = {
         let zoom = urlParams.get('zoom')
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
-        globalStore.spaceUrlToLoad = spaceId
+        globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
         globalStore.spaceZoomPercent = zoom
         globalStore.isEmbedMode = true
         next()
@@ -231,7 +231,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   const apiStore = useApiStore()
   const apiKey = userStore.apiKey
   if (!apiKey) {
-    globalStore.spaceUrlToLoad = spaceId
+    globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
     next()
     return
@@ -239,7 +239,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   // join
   try {
     await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey })
-    globalStore.spaceUrlToLoad = spaceId
+    globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
     globalStore.addNotification({ message: 'You can now edit this space', type: 'success' })
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
   } catch (error) {
@@ -256,7 +256,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
 
 const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
   const globalStore = useGlobalStore()
-  globalStore.spaceUrlToLoad = spaceId
+  globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
   globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }
   next()
 }

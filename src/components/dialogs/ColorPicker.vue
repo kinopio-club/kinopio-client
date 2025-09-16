@@ -322,13 +322,13 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
   .colors
     display flex
     flex-wrap wrap
-    justify-content space-evenly
     margin-bottom 6px
   .recent-colors
     margin-bottom 8px
     margin-left 2px
   .color
-    width 30px
+    width 17%
+    max-width 30px
     height 22px
     margin-bottom 5px
     margin-right 5px
@@ -376,6 +376,7 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       width 14px
       border-radius var(--small-entity-radius)
       display inline-block
+      margin-right 0
     .color
       width 26px
   input

@@ -220,6 +220,7 @@ export const useGlobalStore = defineStore('global', {
     loadSpaceFocusOnCardId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
+    loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
@@ -594,6 +595,11 @@ export const useGlobalStore = defineStore('global', {
       this.search = ''
       this.searchResultsCardIds = []
       this.previousResultItem = {}
+    },
+    clearPreviousResultItem () {
+      if (!this.focusOnCardId && !this.focusOnBoxId) {
+        this.previousResultItem = {}
+      }
     },
 
     // Cards
@@ -1173,7 +1179,7 @@ export const useGlobalStore = defineStore('global', {
       if (matches.cardId) {
         this.updateFocusOnCardId(matches.cardId)
       }
-      this.spaceUrlToLoad = matches.spaceUrl
+      this.spaceUrlToLoad = `${consts.kinopioDomain()}/${matches.spaceUrl}`
     },
     updateFocusOnCardId (cardId) {
       this.focusOnCardId = cardId

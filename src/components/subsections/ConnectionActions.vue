@@ -62,7 +62,7 @@ const canEditAllConnections = computed(() => {
 })
 const connectionTypes = computed(() => {
   const ids = globalStore.multipleConnectionsSelectedIds
-  let types = ids.forEach(id => {
+  let types = ids.map(id => {
     return connectionStore.getConnectionTypeByConnectionId(id)
   })
   types = uniqBy(types, 'id')

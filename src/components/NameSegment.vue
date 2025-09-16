@@ -52,12 +52,13 @@ const nameSegmentClasses = computed(() => {
 const smartQuotes = (string) => {
   return smartquotes(string)
 }
-const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColorIsDark: props.backgroundColorIsDark })
-})
 const textClasses = computed(() => {
-  const classes = colorClasses.value
-  classes.strikethrough = props.isStrikeThrough
+  let classes = utils.colorClasses({ backgroundColorIsDark: props.backgroundColorIsDark })
+  if (props.isStrikeThrough) {
+    classes.push('strikethrough')
+  } else {
+    classes = classes.filter(item => item !== 'strikethrough')
+  }
   return classes
 })
 
@@ -140,7 +141,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="nameSegmentClasses")
   template(v-if="props.segment.isText && props.segment.content")
     //- Name markdown
-    span.markdown(v-if="props.segment.markdown" :class="colorClasses")
+    span.markdown(v-if="props.segment.markdown" :class="textClasses")
       template(v-for="markdown in props.segment.markdown")
         template(v-if="markdown.type === 'text'")
           span {{smartQuotes(markdown.content)}}
@@ -204,6 +205,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     --header-font var(--header-font-8)
   &.header-font-9
     --header-font var(--header-font-9)
+  // should match FontPicker.currentSize
   &.header-font-size-modifier-s
     .markdown
       h1

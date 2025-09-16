@@ -211,8 +211,6 @@ export default {
       x: position.x - spaceRect.x,
       y: position.y - spaceRect.y
     }
-    // console.log('space',position, spaceRect)
-
     // #app
     const app = document.getElementById('app')
     const appRect = app.getBoundingClientRect()
@@ -235,23 +233,6 @@ export default {
       x: this.roundToNearest(position.x, gridSpacing),
       y: this.roundToNearest(position.y, gridSpacing)
     }
-  },
-  cursorDirection (currentCursor, prevCursor) {
-    const xDelta = currentCursor.x - prevCursor.x
-    const yDelta = currentCursor.y - prevCursor.y
-    const noMovement = xDelta === 0 && yDelta === 0
-    const directions = {
-      left: xDelta < 0,
-      right: xDelta > 0,
-      up: yDelta < 0,
-      down: yDelta > 0,
-      noMovement
-    }
-    directions.leftDrag = directions.left || noMovement
-    directions.rightDrag = directions.right || noMovement
-    directions.upDrag = directions.up || noMovement
-    directions.downDrag = directions.down || noMovement
-    return directions
   },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
@@ -1971,6 +1952,13 @@ export default {
       return id
     }
   },
+  newUrl (url) {
+    try {
+      return new URL(url)
+    } catch (error) {
+      return undefined
+    }
+  },
   spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     let url
     if (collaboratorKey || readOnlyKey) {
@@ -2046,8 +2034,10 @@ export default {
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
-    url = url.replaceAll('?hidden=true', '')
-    const id = url.substring(url.length - uuidLength, url.length)
+    url = this.newUrl(url)
+    if (!url) { return }
+    const path = url.pathname
+    const id = path.substring(path.length - uuidLength, path.length)
     if (this.idIsValid(id)) { return id }
   },
   idIsValid (id) {
@@ -2222,6 +2212,16 @@ export default {
     const isImage = url.match(imageUrlPattern) || url.includes('is-image=true')
     return Boolean(isImage)
   },
+  imageFileTypeFromName (file) {
+    // https://regexr.com/8ggu1
+    // based on imageUrlPattern
+    // starts with a word boundary, no trailing characters
+    const imageNamePattern = new RegExp(/(\b)(?:\.gif|\.jpg|\.jpeg|\.jpe|\.jif|\.jfif|\.png|\.svg|\.webp|\.avif|\.heic)/igm)
+    const match = file.name.match(imageNamePattern)
+    if (!match) { return }
+    const fileType = match[0].replace('.', 'image/')
+    return fileType
+  },
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
@@ -2330,7 +2330,12 @@ export default {
     if (split.length <= 1) {
       return undefined
     } else {
-      return split[1]
+      const splitFragment = split[1].split('#')
+      if (split.length <= 1) {
+        return split[1]
+      } else {
+        return splitFragment[0]
+      }
     }
   },
   urlType (url) {
@@ -2376,25 +2381,27 @@ export default {
   },
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
-      url = url.trim()
-      url = this.clearTrailingSlash(url)
-      if (!this.urlIsWebsite(url)) { return }
-      const queryString = this.queryString(url) || ''
-      const domain = this.urlWithoutQueryString(url)
-      let queryObject = {}
-      if (queryString) {
-        queryObject = qs.decode(queryString)
+      const prevUrl = url.trim()
+      if (!this.urlIsWebsite(prevUrl)) { return }
+
+      url = this.newUrl(prevUrl)
+      if (!url) { return }
+
+      url.searchParams.set('hidden', 'true')
+      let newUrl = url.toString()
+      if (url.pathname === '/') {
+        newUrl = newUrl.replace(`${url.host}/`, url.host)
       }
-      queryObject.hidden = 'true'
-      const newUrl = qs.encode(domain, queryObject)
-      name = name.replace(url, newUrl)
+      name = name.replace(prevUrl, newUrl)
     })
     return name
   },
   removeHiddenQueryStringFromURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       const prevUrl = url
       url = url.replace('?hidden=true', '')
@@ -2488,7 +2495,7 @@ export default {
   // Upload
 
   isFileTooBig ({ file, userIsUpgraded }) {
-    const sizeLimit = 1024 * 1024 * 5 // 5mb
+    const sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
     }

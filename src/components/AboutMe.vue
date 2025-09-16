@@ -13,8 +13,9 @@ details.about-me
       a(href="https://pketh.org/organic-software.html") organic software
       span {{' '}}
       span designed by artists, built by craftspeople, and funded by the people who enjoy it.
-    p
-      a(href="https://pketh.org")
+    p If you're curious, I wrote{{' '}}
+      a(href="https://pketh.org/how-kinopio-is-made.html")
+        span How Kinopio is Made
 </template>
 
 <style lang="stylus">

@@ -75,7 +75,7 @@ const themeStore = useThemeStore()
 
 let unsubscribes
 
-let prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 let statusRetryCount = 0
 
@@ -86,11 +86,11 @@ window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
 window.spaceStore = useSpaceStore()
 window.changelogStore = useChangelogStore()
+window.themeStore = useThemeStore()
 if (consts.isDevelopment()) {
   window.userStore = useUserStore()
   window.historyStore = useHistoryStore()
   window.groupStore = useGroupStore()
-  window.themeStore = useThemeStore()
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 
@@ -370,7 +370,10 @@ const tiltCards = (event) => {
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
-  if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
+  const isMovementX = Math.abs(endCursor.x - prevCursor.x) > Math.abs(endCursor.y - prevCursor.y)
+  const directionIsRight = endCursor.x > prevCursor.x && isMovementX
+  const directionIsUp = endCursor.y > prevCursor.y && !isMovementX
+  if (directionIsRight || directionIsUp) {
     delta = -delta
   }
   cardStore.tiltCards(cardIds, delta)
@@ -464,7 +467,6 @@ const checkIfShouldExpandBoxes = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.notifyBoxSnappingIsReady) { return }
-    console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
@@ -508,7 +510,7 @@ const dragItems = () => {
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
-  boxStore.moveBoxes({ endCursor, prevCursor })
+  boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -636,6 +638,7 @@ const updateShouldSnapToGrid = (event) => {
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
+  endSpaceCursor = utils.cursorPositionInSpace(event)
   updateShouldSnapToGrid(event)
   if (isDraggingCard.value) {
     dragItems()
@@ -708,6 +711,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
+  boxStore.boxSnapGuides = []
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()

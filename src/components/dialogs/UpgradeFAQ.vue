@@ -38,6 +38,11 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
         p The lifetime plan is a perpetual licence for as long as Kinopio operates. Which is planned for many years, likely decades.
 
     details
+      summary(@click="closeOtherDetails") Will my subscription price ever increase?
+      section.subsection
+        p Your price will always stay the same as the day you subscribed.
+
+    details
       summary(@click="closeOtherDetails") Will Kinopio ever shut down?
       section.subsection
         p

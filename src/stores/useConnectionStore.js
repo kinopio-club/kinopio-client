@@ -62,6 +62,10 @@ export const useConnectionStore = defineStore('connections', {
         paths.push(path)
       })
       return paths
+    },
+    getPrevConnectionType () {
+      const id = this.prevConnectionTypeId
+      return this.typeById[id]
     }
   },
 

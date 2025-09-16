@@ -72,7 +72,7 @@ const yearlyPrice = computed(() => {
   const isStudentDiscount = userStore.studentDiscountIsAvailable
   return consts.price('year', isStudentDiscount).amount
 })
-const lifePrice = computed(() => consts.price('life').amount)
+const lifetimePrice = computed(() => consts.price('life').amount)
 
 // child dialogs
 
@@ -98,6 +98,8 @@ const closeChildDialogs = () => {
 
 const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
 const spaceUser = computed(() => spaceStore.users[0])
+const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 </script>
 
@@ -107,9 +109,9 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
     .row.title-row
       //- price
       template(v-if="isSecureAppContextIOS")
-        p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year.
       template(v-else)
-        p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
+        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifetimePrice}}/life.
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?
@@ -124,10 +126,10 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             span.badge.success Upgraded
         tr
-          td 100 cards
+          td {{freeCardsCreatedLimit}} cards
           td Unlimited cards
         tr
-          td 5mb file upload size limit
+          td {{freeUploadSizeLimit}}mb file upload size limit
           td No upload limit
         tr
           td Can only join Groups

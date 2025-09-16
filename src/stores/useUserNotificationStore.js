@@ -35,7 +35,6 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         }
         // group users who added cards
         let groupUsers = groupStore.getGroupUsersWhoAddedCards
-        console.log(groupUsers)
         groupUsers = groupUsers.map(user => user.id)
         recipients = recipients.concat(groupUsers)
         recipients = uniq(recipients)

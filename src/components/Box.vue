@@ -13,6 +13,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
@@ -132,6 +133,8 @@ const updateShouldRenderParent = (value) => {
   state.shouldRenderParent = value
 }
 const shouldRender = computed(() => {
+  if (globalStore.disableViewportOptimizations) { return true }
+  // if (isConnectingFrom.value) { return true }
   return state.isVisibleInViewport || state.shouldRenderParent
 })
 
@@ -365,6 +368,7 @@ const startBoxInfoInteraction = (event) => {
   if (!currentBoxIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
+  if (!canEditBox.value) { return }
   globalStore.currentDraggingBoxId = ''
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingBox = true
@@ -392,7 +396,11 @@ const endBoxInfoInteraction = (event) => {
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   globalStore.closeAllDialogs()
   if (isMeta) {
+    globalStore.updateMultipleBoxesSelectedIds([props.box.id])
+    boxStore.selectItemsInSelectedBoxes()
     globalStore.updateMultipleBoxesSelectedIds([])
+    globalStore.currentUserIsDraggingBox = false
+    globalStore.shouldCancelNextMouseUpInteraction = true
   } else {
     globalStore.clearMultipleSelected()
   }
@@ -635,30 +643,8 @@ const updateRemoteConnections = () => {
 
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
-  return utils.checkboxFromString(name.value)
+  return Boolean(utils.checkboxFromString(name.value))
 })
-const checkboxState = computed({
-  get () {
-    return isChecked.value
-  }
-})
-const toggleBoxChecked = () => {
-  if (globalStore.preventDraggedBoxFromShowingDetails) { return }
-  if (!canEditBox.value) { return }
-  const value = !isChecked.value
-  globalStore.closeAllDialogs()
-  boxStore.toggleBoxChecked(props.box.id, value)
-  postMessage.sendHaptics({ name: 'heavyImpact' })
-  cancelLocking()
-  globalStore.currentUserIsDraggingBox = false
-  const userId = userStore.id
-  broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
-  event.stopPropagation()
-  globalStore.preventMultipleSelectedActionsIsVisible = false
-  globalStore.clearMultipleSelected()
-  globalStore.currentDraggingBoxId = ''
-  globalStore.updateMultipleBoxesSelectedIds([])
-}
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
   if (globalStore.currentUserIsDraggingBox) { return }
@@ -694,6 +680,9 @@ const focusColor = computed(() => {
     return null
   }
 })
+const clearFocus = () => {
+  globalStore.focusOnBoxId = ''
+}
 </script>
 
 <template lang="pug">
@@ -715,7 +704,7 @@ const focusColor = computed(() => {
   :class="classes"
   ref="boxElement"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
     .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   teleport(to="#box-infos")
@@ -741,9 +730,8 @@ const focusColor = computed(() => {
     )
       .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
       //- [·]
-      .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
-        label(:class="{active: isChecked, disabled: !canEditBox}")
-          input(name="checkbox" type="checkbox" v-model="checkboxState")
+      ItemCheckboxButton(:visible="hasCheckbox" :box="box" :canEditItem="canEditBox" @toggleItemChecked="cancelLocking")
+      //- name
       .name-wrap(:class="{'is-checked': isChecked}")
         //- simplified nameSegments
         template(v-for="segment in nameSegments")
@@ -891,44 +879,6 @@ const focusColor = computed(() => {
     box-shadow var(--active-shadow)
   &.is-dark
     color var(--primary-on-dark-background)
-
-  .checkbox-wrap
-    padding-left 8px
-    padding-top 5px
-    padding-bottom 6px
-    display inline-block
-    label
-      pointer-events none
-      width 20px
-      height 16px
-      display flex
-      align-items center
-      padding-left 4px
-      padding-right 4px
-      input
-        margin 0
-        margin-top -1px
-        width 10px
-        height 10px
-        background-size contain
-    &:hover
-      label
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background-color var(--secondary-hover-background)
-        input
-          background-color var(--secondary-hover-background)
-      label.active
-        box-shadow var(--active-inset-shadow)
-        background-color var(--secondary-active-background)
-        input
-          background-color var(--secondary-active-background)
-    &:active
-      label
-        box-shadow none
-        color var(--primary)
-        background-color var(--secondary-active-background)
-      input
-        background-color var(--secondary-active-background)
 
   .name-wrap
     padding 6px 8px

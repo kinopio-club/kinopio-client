@@ -130,10 +130,27 @@ const isConnectorLightInDarkTheme = computed(() => {
   if (connectionTypeColorisDark.value) { return !connectionTypeColorisDark.value }
   return isLightInDarkTheme.value
 })
+const isImageCard = computed(() => {
+  if (!props.card) { return }
+  const name = props.card.name
+  const urls = utils.urlsFromString(name) || []
+  let isImage
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      isImage = true
+    } else if (utils.urlIsVideo(url)) {
+      isImage = true
+    }
+  })
+  return isImage
+})
 const connectorButtonBackground = computed(() => {
   if (globalStore.currentUserIsDraggingCard) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
   if (props.backgroundIsTransparent) { return }
+  if (isImageCard.value) {
+    return 'transparent'
+  }
   return props.currentBackgroundColor
 })
 const connectorGlowStyle = computed(() => {

@@ -61,6 +61,7 @@ const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 // operations
 
@@ -69,6 +70,7 @@ const clearOperations = () => {
 }
 const updateOperations = async () => {
   state.unknownServerError = false
+  if (!currentUserIsSignedIn.value) { return }
   if (state.isLoading) { return }
   try {
     state.isLoading = true
@@ -154,7 +156,9 @@ template(v-if="props.visible")
           button.small-button(@click="copyOperations")
             img.icon(src="@/assets/copy.svg")
     .row
-      .badge.info While History is in Beta, it is mainly for debugging sync issues
+      .badge.info While History is in Beta, it is mainly for debug purposes
+    .row(v-if="!currentUserIsSignedIn")
+      .badge.info Sign in to record space history
     OfflineBadge
 
   section.results-section.history
