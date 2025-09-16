@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import About from '@/components/dialogs/About.vue'
+import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 
 const globalStore = useGlobalStore()
 
@@ -17,7 +18,8 @@ onMounted(() => {
   )
 })
 const state = reactive({
-  aboutIsVisible: false
+  aboutIsVisible: false,
+  appsAndExtensionsIsVisible: false
 })
 
 const closeAllDialogs = () => {
@@ -25,11 +27,18 @@ const closeAllDialogs = () => {
 }
 const closeDialogs = () => {
   state.aboutIsVisible = false
+  state.appsAndExtensionsIsVisible = false
 }
 const toggleAboutIsVisible = () => {
   const isVisible = state.aboutIsVisible
-  globalStore.closeAllDialogs()
+  closeAllDialogs()
   state.aboutIsVisible = !isVisible
+}
+
+const toggleAppsAndExtensionsIsVisible = () => {
+  const isVisible = state.appsAndExtensionsIsVisible
+  closeAllDialogs()
+  state.appsAndExtensionsIsVisible = !isVisible
 }
 
 </script>
@@ -58,9 +67,19 @@ const toggleAboutIsVisible = () => {
     //- donate
 
   main.page(@click="closeAllDialogs")
-    //- .section-wrap
     section
       h1 Kinopio
+      p is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Create spaces to whiteboard, brainstorm, moodboard, research, plan, and take notes.
+      .row
+        .button-wrap
+          button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
+            img.icon.system(src="@/assets/system.svg")
+            span Apps
+          AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
+        .button-wrap
+          router-link(to="/app")
+            button.success Open App
+
 </template>
 
 <style lang="stylus">
@@ -75,22 +94,26 @@ const toggleAboutIsVisible = () => {
 //   font-weight normal
 //   font-style normal
 
+header
+  z-index 1
+
 main.page
   user-select text
   margin 0
-  padding-top 5rem
+  padding-top 4rem
   background pink
   overflow auto
 
-  // margin 1rem
-  // margin-top 5rem
-  // .section-wrap
-  section
-    margin 1rem
-    // margin-left auto
-    // margin-right auto
+  > section
+    margin 3rem
     background teal
-    max-width 800px
+    max-width 600px
+    @media(max-width 700px)
+      margin 2rem
+    @media(max-width 500px)
+      margin 1rem
+    > .row
+      margin-top 10px
 
   // h1
 </style>
