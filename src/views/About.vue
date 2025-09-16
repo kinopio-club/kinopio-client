@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import About from '@/components/dialogs/About.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
+import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 
 const globalStore = useGlobalStore()
 
@@ -13,13 +14,16 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
         closeDialogs()
+      } else if (name === 'triggerKeyboardShortcutsIsVisible') {
+        updateKeyboardShortcutsIsVisible(true)
       }
     }
   )
 })
 const state = reactive({
   aboutIsVisible: false,
-  appsAndExtensionsIsVisible: false
+  appsAndExtensionsIsVisible: false,
+  keyboardShortcutsIsVisible: false
 })
 
 const closeAllDialogs = () => {
@@ -28,12 +32,21 @@ const closeAllDialogs = () => {
 const closeDialogs = () => {
   state.aboutIsVisible = false
   state.appsAndExtensionsIsVisible = false
+  state.keyboardShortcutsIsVisible = false
 }
+
+// header
+
 const toggleAboutIsVisible = () => {
   const isVisible = state.aboutIsVisible
   closeAllDialogs()
   state.aboutIsVisible = !isVisible
 }
+const updateKeyboardShortcutsIsVisible = (value) => {
+  state.keyboardShortcutsIsVisible = value
+}
+
+// page
 
 const toggleAppsAndExtensionsIsVisible = () => {
   const isVisible = state.appsAndExtensionsIsVisible
@@ -54,6 +67,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
               .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
                 .logo-image
               About(:visible="state.aboutIsVisible")
+              KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
 
         .right
           .button-wrap
