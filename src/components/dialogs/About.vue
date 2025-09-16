@@ -120,7 +120,7 @@ const changeSpaceToRoadmap = () => {
 </script>
 
 <template lang="pug">
-dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
+dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section
     .row.title-row
       p About Kinopio
