@@ -32,6 +32,11 @@ import dayjs from 'dayjs'
 const idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 const loadSpaceIdsError = []
+const setCookie = () => {
+  const yearSeconds = 31536000
+  const millenium = yearSeconds * 1000
+  document.cookie = `name=kinopio; max-age=${millenium}; path=/;`
+}
 
 export const useSpaceStore = defineStore('space', {
   state: () => (utils.clone(newSpace)),
@@ -520,6 +525,7 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerUpdateWindowHistory()
         const userIsMember = userStore.getUserIsSpaceMember
         if (!userIsMember) { return }
+        setCookie()
         globalStore.parentCardId = ''
         this.updateUserLastSpaceId()
         const cardId = globalStore.loadSpaceFocusOnCardId
@@ -686,6 +692,7 @@ export const useSpaceStore = defineStore('space', {
       await this.saveSpace()
       this.updateUserLastSpaceId()
       globalStore.notifySignUpToEditSpace = false
+      setCookie()
     },
     async saveImportSpace (space) {
       const globalStore = useGlobalStore()
