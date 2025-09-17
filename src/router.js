@@ -34,12 +34,6 @@ const router = {
       name: 'root',
       component: About
     }, {
-      path: '/about',
-      name: 'about',
-      beforeEnter () {
-        return '/#about'
-      }
-    }, {
       path: '/app',
       name: 'space',
       component: Space,
