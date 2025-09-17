@@ -60,13 +60,19 @@ const closeDialogs = () => {
   state.appsAndExtensionsIsVisible = false
 }
 
-// intro section
+// page
 
 const toggleAppsAndExtensionsIsVisible = () => {
   const isVisible = state.appsAndExtensionsIsVisible
   closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
 }
+
+const yearsOld = computed(() => {
+  const startYear = 2018
+  const currentYear = new Date().getFullYear()
+  return currentYear - startYear
+})
 
 // creativity section
 
@@ -107,12 +113,16 @@ defineExpose({ vPauseAnimation })
   main.page(@click="closeAllDialogs")
     section.intro
       h1 Kinopio
-      p is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Create spaces to whiteboard, brainstorm, moodboard, research, plan, and take notes.
+      p
+        //- strong Kinopio
+        span {{' '}}is spatial note-taking software for collecting and connecting your thoughts, ideas, and feelings. Create spaces to whiteboard, brainstorm, moodboard, research, plan, and take notes.
+        //- img.frame-image.pot-standing-side(src="@/assets/frames/lil-guys/pot-standing-side.png")
+
       .row
         .button-wrap
-          button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
+          button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
             img.icon.system(src="@/assets/system.svg")
-            span Apps
+            span Download
           AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
         .button-wrap
           router-link(to="/app")
@@ -120,13 +130,14 @@ defineExpose({ vPauseAnimation })
 
     section.how-it-works
       h2 How it Works
-      p Kinopio is designed to get the chaotic messy thoughts and ideas out of your head, show you how they’re connected, help you figure out what they mean, and how to start working on them.
-      p Uniquely designed from the ground-up to work like your brain does.
+      p Kinopio helps you get the chaotic messy thoughts and ideas out of your head, show you how they’re connected, help you figure out what they mean, and how to start working on them.
+      p Designed from the ground-up to work like your brain does.
     .row.horizontal
+      //- vids 3:2
       figure
         video(autoplay loop muted playsinline)
           source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
-        figcaption ❶ Click anywhere and type to add cards […]
+        figcaption ❶ Tap anywhere and type to add cards
       figure
         video(autoplay loop muted playsinline)
           source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
@@ -161,6 +172,42 @@ defineExpose({ vPauseAnimation })
       .row.horizontal.marquee(v-pause-animation)
         p ● Trackable Todos ● Personal Templates ● Snap to Grid, Align and Distribute ● iOS and Desktop Apps
 
+    section.who-makes-kinopio
+      //- TODO decorate w mail/stationary border handfeel (emailinvites.vue)
+      h2 Why I Created Kinopio
+      p Hi, I'm Piri,
+      p I started building Kinopio {{yearsOld}} years ago, for people who have ideas, feelings, or thoughts they’re struggling to express, organize, and understand.
+      p
+        span I believe in building ethical, economically-sustainable, built-to-last{{' '}}
+        a(href="https://pketh.org/organic-software.html") organic software
+        span . Kinopio is 100% funded and made possible by people like you.
+      p
+        span If you're curious, I wrote{{' '}}
+        a(href="https://pketh.org/how-kinopio-is-made.html") How Kinopio is Made
+        span , and also share its{{' '}}
+        a(href="https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k") Architecture and Costs.
+      //- TODO sig img
+      p – Piri
+
+    section.social-proof
+      h2 People Seem to Like It
+      p
+        span Over the years, it’s been amazing to hear how people use Kinopio to map out and make sense of their ideas, feelings, and plans. I recently started capturing the nice things people are saying about it on the{{' '}}
+        a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love wall
+        span .
+      p Used by students, teachers, and researchers, at:
+      p ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
+        a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
+      p And by designers, engineers, and PMs, at:
+      p ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
+      p Kinopio has also been featured on{{' '}}
+        a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
+        span ,{{' '}}
+        a(href="https://appstacks.club/kinopio") App Stacks
+        span , and was the{{' '}}
+        a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
+        span .
+
     section.explore
       h2 Spaces to Explore
         //- span.badge.secondary
@@ -175,48 +222,8 @@ defineExpose({ vPauseAnimation })
       template(v-for="example in examples" :key="example.id")
         p {{example.spaceName}}
 
-    section.who-makes-kinopio
-      //- TODO decorate w mail/stationary border handfeel (emailinvites.vue)
-      h2 Why I Created Kinopio
-      p Hi, I'm Piri,
-      p I made Kinopio for people who have ideas, feelings, or thoughts they’re struggling to express, organize, and understand.
-      p
-        span I believe in building ethical, economically-sustainable, built-to-last{{' '}}
-        a(href="https://pketh.org/organic-software.html") organic software
-        span . Kinopio is 100% funded and made possible by people like you.
-      p
-        span If you're curious, I wrote{{' '}}
-        a(href="https://pketh.org/how-kinopio-is-made.html") How Kinopio is Made
-        span , and share its{{' '}}
-        a(href="https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k") Architecture and Costs.
-      p – Piri
-
-    section.social-proof
-      h2 People Seem to Like It
-      p
-        span Over the years, it’s been amazing to hear how people use Kinopio to map out and make sense of their ideas, feelings, and plans. I recently started capturing the nice things people are saying about it on the{{' '}}
-        a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love wall
-        span .
-      p Used by students, teachers, and researchers, at:
-    .row-wrap.social-proof-row
-      .row.horizontal.marquee(v-pause-animation)
-        p ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
-          a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
-    section.social-proof
-      p And by designers, engineers, and PMs, at:
-    .row-wrap.social-proof-row
-      .row.horizontal.marquee(v-pause-animation)
-        p ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
-    section.social-proof
-      p Kinopio has also been featured on{{' '}}
-        a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
-        span ,{{' '}}
-        a(href="https://appstacks.club/kinopio") App Stacks
-        span , and was the{{' '}}
-        a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
-        span .
-
     section.faq
+      img.flowers-divider(src="https://cdn.kinopio.club/fqoJozHGrobicZe0XUG1e/my-garden.webp")
       h2 FAQ
       //- 1
       details
@@ -227,8 +234,7 @@ defineExpose({ vPauseAnimation })
           p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and self-expression.
           figure
             video(autoplay loop muted playsinline)
-              source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
-            figcaption In a text document you just click and type. In a spreadsheet you just click and type. What if in a whiteboard… you just clicked and typed? Choices like colors, voting, commenting, and checkboxes are secondary, and when you're ready, you can use boxes and connections to group related ideas together.
+              source(src="@/assets/page/about/faq-example.mp4")
           p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
             a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
             span {{' '}}and conceptual – ideal for problem solving and consensus building.
@@ -266,39 +272,42 @@ defineExpose({ vPauseAnimation })
       //- 2
       details
         summary Should I use kinopio at work?
-        blockquote
-          p
-            span There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true.
-            br
-            span – Steve Jobs
+        section.subsection
+          blockquote
+            p
+              span There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true.
+              br
+              span – Steve Jobs
           p Whether it's your favorite camera, fountain pen, or keyboard, we’re inspired by the tools we use. Well-made daily tools encourage us to do our best work.
           p Kinopio is designed for small teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
       //- 3
       details
         summary What About my Data and Privacy?
-        ul
-          li You can use Kinopio anonymously without an account but to share spaces and collaborate, you will need to create an account.
-          li For developers, there's a fully documented [public API](https://help.kinopio.club/api/) that I encourage you to build cools things with.
-          li Kinopio does not have ads, nor does it sell your data. The only revenue sources are from upgraded users and donations.
-          li You can export JSON backups of your spaces. And you can permanently delete your account at anytime.
-        p
-          span More details in the{{' '}}
-          a(href="https://help.kinopio.club/posts/privacy-policy/") Privacy Policy
-          span .
+        section.subsection
+          ul
+            li You can use Kinopio anonymously without an account but to share spaces and collaborate, you will need to create an account.
+            li For developers, there's a fully documented [public API](https://help.kinopio.club/api/) that I encourage you to build cools things with.
+            li Kinopio does not have ads, nor does it sell your data. The only revenue sources are from upgraded users and donations.
+            li You can export JSON backups of your spaces. And you can permanently delete your account at anytime.
+          p
+            span More details in the{{' '}}
+            a(href="https://help.kinopio.club/posts/privacy-policy/") Privacy Policy
+            span .
       //- 4
       details
         summary Does kinopio have AI features?
-        p No it does not.
-        p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
-        p
-          span With whiteboarding, mind-mapping, or mood-boarding the journey of adding ideas and images, making connections, and figuring out what things should be grouped together is vitally important to building up your
-          a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
-          span . This is the magic that makes big ideas easier to recall and reason about.
+        section.subsection
+          p No it does not.
+          p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
+          p
+            span With whiteboarding, mind-mapping, or mood-boarding the journey of adding ideas and images, making connections, and figuring out what things should be grouped together is vitally important to building up your
+            a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
+            span . This is the magic that makes big ideas easier to recall and reason about.
 
     footer.sitemap
+      //- to bubble section
       img.icon.logo-bw(src="@/assets/logos/logo-bw.svg")
-
-      p XYZ
+      //- p est. 2018
       //- ## product
       //- about
       //- blog
@@ -322,14 +331,17 @@ defineExpose({ vPauseAnimation })
 </template>
 
 <style lang="stylus">
+:root
+  --container-width 380px
+
 // @font-face
-//   font-family 'recoleta'
-//   src url("/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+//   font-family 'migra2'
+//   src url("/fonts/migra/PPMigra-Bold.woff2") format("woff2")
 //   font-weight bold
 //   font-style normal
 // @font-face
-//   font-family 'recoleta'
-//   src url("/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
+//   font-family 'migra2'
+//   src url("/fonts/migra/PPMigra-Regular.woff2") format("woff2")
 //   font-weight normal
 //   font-style normal
 
@@ -340,43 +352,54 @@ main.page
   user-select text
   margin 0
   padding-top 4rem
-  // background pink
+  // background #c7ffcd
   overflow auto
   height 100dvh
   > section
     margin 3rem
     margin-left 6rem
-    background lightgrey
-    h1,
+    // background lightgrey
+    h1
+      font-size 24px
+      // margin-bottom 0
+      // font-family var(--glyphs-font)
+      // font-family 'migra2', sans-serif
     h2
-      font-size initial
+      font-size 18px
+      // font-family var(--header-font-1)
     p
-      max-width 400px
-      background lightblue
-      font-size initial
+      position relative
+    p,
+    strong,
+    span
+      max-width var(--container-width)
+      // background lightblue
+      font-size 15px
     @media(max-width 700px)
       margin 2rem
     @media(max-width 500px)
       margin 1rem
 
+  details
+    max-width var(--container-width)
+    figure
+      margin-top 1rem
   details + details
-    margin-top 1rem
+    margin-top 10px
 
   figure
     margin 0
-    max-width 400px
     video
-      border-radius var(--entity-radius)
+      border-radius calc(var(--entity-radius) * 2)
   figcaption
     font-size 14px
-    opacity 0.5
-    max-width 400px
+    // max-width var(--container-width)
 
   blockquote
     background lightgreen
 
   ul
-    max-width 400px
+    max-width var(--container-width)
     // li
     //   background yellow
 
@@ -389,7 +412,7 @@ main.page
   .row-wrap > .row
     margin-top 10px
     &.horizontal
-      background goldenrod
+      // background goldenrod
       display flex
       flex-wrap nowrap
       padding-left 1rem
@@ -401,7 +424,7 @@ main.page
       figure
         flex 0 0 auto
         video
-          max-height 220px
+          max-height 160px
     &.marquee
       overflow-x visible
       animation-name marquee
@@ -424,23 +447,18 @@ main.page
     margin-bottom 0
 
   .how-it-works + .row
+    margin-top 2rem
     margin-bottom 3rem
+    margin-left 1rem
     @media(max-width 700px)
       margin 2rem
+      margin-left 0
     @media(max-width 500px)
       margin 1rem
+      margin-left 0
 
   .row-wrap
     margin-top 1rem
-    margin-bottom 3rem
-
-  section.social-proof + .social-proof-row,
-  .social-proof-row + section.social-proof
-    margin-top 0
-    margin-bottom 0
-    // margin 0
-
-  // footer
 
   footer
     background plum
@@ -456,10 +474,24 @@ main.page
     .logo-bw
       width 35px
 
+  .frame-image
+    position absolute
+    &.pot-standing-side
+      width 32px
+      top -25px
+      right 10px
+      z-index -1
+      transform scaleX(-1)
+      // transform
+
+  .flowers-divider
+    margin-top 2rem
+    max-width 400px
+
 @keyframes marquee
   0%
     transform translate(100%)
   100%
-    transform translate(-100%)
+    transform translate(-80%)
 
 </style>

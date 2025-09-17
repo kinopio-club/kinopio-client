@@ -81,7 +81,7 @@ const togglePricingIsVisible = () => {
 
         .right
           .button-wrap
-            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
               span Pricing
             Pricing(:visible="pricingIsVisible" :parentIsPage="true")
           .button-wrap

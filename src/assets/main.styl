@@ -150,6 +150,19 @@
   src url("/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
   font-weight normal
   font-style normal
+// header-font-9
+:root
+  --header-font-9 eb2, var(--sans-serif-font)
+// @font-face
+//   font-family 'eb'
+//   src url("/fonts/eb/1ImageFuture-Bold-Trial.woff2") format("woff2")
+//   font-weight bold
+//   font-style normal
+@font-face
+  font-family 'eb2'
+  src url("/fonts/eb2/EBTrainerGroteskTrial-Book.woff") format("woff")
+  font-weight bold
+  font-style normal
 
 *
   // -webkit-overflow-scrolling touch
@@ -537,10 +550,6 @@ dialog
       user-select text
       &:first-child
         margin-top 0
-  section.subsection
-    background-color var(--secondary-background)
-    padding var(--subsection-padding)
-    border-radius var(--entity-radius)
   section + section
     border-top 1px solid var(--primary-border)
   section.subsection + section,
@@ -567,6 +576,11 @@ dialog
     height calc(100% + 2px)
     border-radius var(--entity-radius)
     z-index -1
+
+section.subsection
+  background-color var(--secondary-background)
+  padding var(--subsection-padding)
+  border-radius var(--entity-radius)
 
 .subsection-vertical-label
   writing-mode vertical-rl
