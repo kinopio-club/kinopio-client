@@ -8,7 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
-import AboutMe from '@/components/AboutMe.vue'
+import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
@@ -148,7 +148,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           UserLabelInline(:user="spaceUser")
           span is upgraded, so cards you create in this space won't increase your free card count
   section
-    AboutMe
+    WhoMakesKinopio
 </template>
 
 <style lang="stylus">

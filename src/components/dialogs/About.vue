@@ -11,7 +11,7 @@ import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import AboutMe from '@/components/AboutMe.vue'
+import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 
 import dayjs from 'dayjs'
 
@@ -180,7 +180,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
     .row
-      AboutMe
+      WhoMakesKinopio
   section
     .row
       .button-wrap
