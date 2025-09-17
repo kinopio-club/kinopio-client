@@ -41,6 +41,27 @@ const toggleAppsAndExtensionsIsVisible = () => {
   closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
 }
+
+const examples = computed(() => {
+  return [
+    {
+      spaceId: '123',
+      spaceName: 'MAGICAL REALISM',
+      spacePreviewImage: '',
+      spaceUserColor: '',
+      spaceUserName: '',
+      name: 'Moodboard'
+    }, {
+      spaceId: '123',
+      spaceName: 'Life Tasks',
+      spacePreviewImage: '',
+      spaceUserColor: '#a1f7ef',
+      spaceUserName: 'Piri',
+      name: 'Personal Space'
+    }
+  ]
+})
+
 </script>
 
 <template lang="pug">
@@ -89,14 +110,12 @@ const toggleAppsAndExtensionsIsVisible = () => {
       h2 Creativity Meets Productivity
       p Thinking is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
       p People use Kinopio to plan out projects, schemas, moodboards, note taking, and to organize their daily lives. Your spaces can be personalized with backgrounds, card frames, colors, and todos – to be as playful, or productive, as you want.
-      //- .row.horizontal
-      //-   p moodboard, software project/specs w md, collect ideas in inbox, storyboard, dnd, trip planning, personal website, startup idea, note taking
       p
         span New features are being added all the time in the{{' '}}
         a(href="/changelog") Changelog{{' '}}
         img.updated.icon(src="@/assets/updated.gif")
 
-    //- [horizontal marquee row, staggered multiline]
+    //- [horizontal marquee row, staggered speeds, stop scrolling on interaction]
     .row-wrap
       .row.horizontal
         p ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Options ● Comments ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs
@@ -143,6 +162,21 @@ const toggleAppsAndExtensionsIsVisible = () => {
         a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
         span .
 
+    section.conclusion
+      h2
+        span Spaces to Explore
+        span.badge.secondary
+          img.icon.sunglasses(src="@/assets/sunglasses.svg")
+      p I use Kinopio every day with a bunch of people all over the world. Maybe you'll like it too?
+    .row.horizontal.examples
+      //- demo cards , new demo
+      //- p imgs: moodboard, software project/specs w md, collect ideas in inbox, storyboard, dnd, trip planning, personal website, startup idea, note taking
+      //- [look1 grid biz] [look2 play, https://x.com/KinopioClub/status/1816148349436752026 , https://www.producthunt.com/posts/kinopio/embed]
+      //- https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k
+
+      //- TODO move setcookie: make it so that cookie is only set if creating a space or loaded a space that you're a member of
+      template(v-for="example in examples" :key="example.id")
+        p {{example.spaceName}}
     section.faq
       h2 FAQ
       //- 1
@@ -328,7 +362,8 @@ main.page
 
   section.how-it-works,
   section.creativity,
-  section.social-proof
+  section.social-proof,
+  section.conclusion
     margin-bottom 0
 
   .how-it-works + .row
