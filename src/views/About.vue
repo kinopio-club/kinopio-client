@@ -63,27 +63,47 @@ const toggleAppsAndExtensionsIsVisible = () => {
       h2 How it Works
       p Kinopio is designed to get the chaotic messy thoughts and ideas out of your head, show you how they’re connected, help you figure out what they mean, and how to start working on them.
       p Uniquely designed from the ground-up to work like your brain does.
-    .row.horizontal.how-it-works-row
-      p ❶ Click anywhere and type to add cards […]
-      p ❷ Drag cards to move them
-      p ❸ Drag to connect related cards together
-      p ❹ Paint select to edit together
-      p ❺ Everything works on mobile too(https://help.kinopio.club/assets/about/mobile.mp4)
+    .row.horizontal
+      figure
+        video(autoplay loop muted playsinline)
+          source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
+        figcaption ❶ Click anywhere and type to add cards […]
+      figure
+        video(autoplay loop muted playsinline)
+          source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
+        figcaption ❷ Drag cards to move them
+      figure
+        video(autoplay loop muted playsinline)
+          source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
+        figcaption ❸ Drag to connect related cards together
+      figure
+        video(autoplay loop muted playsinline)
+          source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
+        figcaption ❹ Paint select to edit together
+      figure
+        video(autoplay loop muted playsinline)
+          source(src="https://help.kinopio.club/assets/about/mobile.mp4")
+        figcaption ❺ Everything works on mobile too
 
     section.creativity
       h2 Creativity Meets Productivity
       p Thinking is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
-      p People use Kinopio to plan out projects, schemas, moodboards, note taking, and to organize their daily lives. Your spaces can be personalized with backgrounds, card frames, colors, and todos, to be as playful, or productive, as you want.
+      p People use Kinopio to plan out projects, schemas, moodboards, note taking, and to organize their daily lives. Your spaces can be personalized with backgrounds, card frames, colors, and todos – to be as playful, or productive, as you want.
+      //- .row.horizontal
+      //-   p moodboard, software project/specs w md, collect ideas in inbox, storyboard, dnd, trip planning, personal website, startup idea, note taking
       p
         span New features are being added all the time in the{{' '}}
         a(href="/changelog") Changelog{{' '}}
         img.updated.icon(src="@/assets/updated.gif")
 
     //- [horizontal marquee row, staggered multiline]
-    .features-row
-      .row.horizontal ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Options ● Comments ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs
-      .row.horizontal ● Import and Export ● Save as Pdf ● [Public Api] ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions
-      .row.horizontal ● Trackable Todos ● Personal Templates ● Snap to Grid, Align and Distribute ● iOS and Desktop Apps
+    .row-wrap
+      .row.horizontal
+        p ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Options ● Comments ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs
+      .row.horizontal
+        p ● Import and Export ● Save as Pdf ● Public Api ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions
+      .row.horizontal
+        p ● Trackable Todos ● Personal Templates ● Snap to Grid, Align and Distribute ● iOS and Desktop Apps
 
     section.about-me
       h2 Why I Created Kinopio
@@ -96,7 +116,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
       p
         span If you're curious, I wrote{{' '}}
         a(href="https://pketh.org/how-kinopio-is-made.html") How Kinopio is Made
-        span , and share the{{' '}}
+        span , and share its{{' '}}
         a(href="https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k") Architecture and Costs.
       p – Piri
 
@@ -106,14 +126,14 @@ const toggleAppsAndExtensionsIsVisible = () => {
         span Over the years, it’s been amazing to hear how people use Kinopio to map out and make sense of their ideas, feelings, and plans. I recently started capturing the nice things people are saying about it on the{{' '}}
         a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love wall
         span .
-      p Used by students, teachers, and researchers, at
+      p Used by students, teachers, and researchers, at:
     .row.horizontal.social-proof-row
-      span ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
+      p ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
         a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
     section.social-proof
-      p And by designers, engineers, and PMs, at
+      p And by designers, engineers, and PMs, at:
     .row.horizontal.social-proof-row
-      span ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
+      p ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
     section.social-proof
       p Kinopio has also been featured on{{' '}}
         a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
@@ -287,13 +307,22 @@ main.page
 
   > .row,
   section > .row
-  .features-row > .row
+  .row-wrap > .row
     margin-top 10px
     &.horizontal
       background goldenrod
       display flex
       flex-wrap nowrap
       padding-left 1rem
+      overflow-x: auto
+      gap 12px
+      p
+        flex 0 0 auto
+        margin 0
+      figure
+        flex 0 0 auto
+        video
+          max-height 220px
 
   // sections
 
@@ -302,14 +331,14 @@ main.page
   section.social-proof
     margin-bottom 0
 
-  .how-it-works-row
+  .how-it-works + .row
     margin-bottom 3rem
     @media(max-width 700px)
       margin 2rem
     @media(max-width 500px)
       margin 1rem
 
-  .features-row
+  .row-wrap
     margin-top 1rem
     margin-bottom 3rem
 
