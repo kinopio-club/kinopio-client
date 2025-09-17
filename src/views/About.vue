@@ -296,6 +296,8 @@ defineExpose({ vPauseAnimation })
           span . This is the magic that makes big ideas easier to recall and reason about.
 
     footer.sitemap
+      img.icon.logo-bw(src="@/assets/logos/logo-bw.svg")
+
       p XYZ
       //- ## product
       //- about
@@ -451,6 +453,8 @@ main.page
     @media(max-width 500px)
       padding 1rem
       // padding-bottom 4rem
+    .logo-bw
+      width 35px
 
 @keyframes marquee
   0%

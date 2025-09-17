@@ -2,7 +2,7 @@
 
 # kinopio-client
 
-<img src="./src/assets/logo-base.png" alt="logo" width="200">
+<img src="./src/assets/logos/logo-base.png" alt="logo" width="200">
 
 Kinopio is a spatial thinking canvas for your new ideas and hard problems.
 

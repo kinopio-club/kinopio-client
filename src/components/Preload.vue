@@ -30,8 +30,8 @@ const updateImageUrls = () => {
 
   .icons.hidden
     //- logo
-    img.icon(src="@/assets/logo-hover.png")
-    img.icon(src="@/assets/logo-active.png")
+    img.icon(src="@/assets/logos/logo-hover.png")
+    img.icon(src="@/assets/logos/logo-active.png")
 
     //- frames
     img(src="@/assets/frames/garden-leaves/flower.png")
