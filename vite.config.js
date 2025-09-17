@@ -38,6 +38,20 @@ const createCache = (name, pattern) => {
   }
 }
 
+// Custom plugin to create SPA version of app.html
+const createSPAPlugin = () => {
+  return {
+    name: 'create-spa-app',
+    apply: 'build',
+    closeBundle () {
+      const indexPath = path.resolve(__dirname, 'dist/index.html')
+      const appPath = path.resolve(__dirname, 'dist/app.html')
+      fs.copyFileSync(indexPath, appPath)
+      console.log('✓ Created SPA version at dist/app.html')
+    }
+  }
+}
+
 export default defineConfig(async ({ command, mode }) => {
   // sitemap routes
   const routes = [
@@ -61,7 +75,7 @@ export default defineConfig(async ({ command, mode }) => {
     ssgOptions: {
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
-        return ['/', '/app']
+        return ['/']
       }
     },
     test: {
@@ -84,6 +98,8 @@ export default defineConfig(async ({ command, mode }) => {
         // Disable SSR warnings
         ssr: false
       }),
+      // Create SPA version of app.html
+      createSPAPlugin(),
       // offline support
       VitePWA({
         registerType: 'autoUpdate',
