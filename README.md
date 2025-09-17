@@ -26,6 +26,10 @@ The `kinopio-client` is the client web app that users use to read and update spa
     npm run dev --host
     https://kinopio.local:8080
 
+## Run Tests
+
+    npm run test
+
 ## Run with Production API Server
 
 You can force the local app to use the prod API by editing `.env.local` so that `VITE_PROD_SERVER=true`. Create `env.local` by duplicating and renaming `.env.local.sample`.
