@@ -125,7 +125,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
 
     section.faq
       h2 FAQ
-
+      //- 1
       details
         summary How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?
         section.subsection
@@ -133,8 +133,10 @@ const toggleAppsAndExtensionsIsVisible = () => {
           p But the typical software whiteboard is designed for neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
           p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and self-expression.
           p
-            a(href="https://pketh.org/images/2024/whiteboard/k4-2.mp4") https://pketh.org/images/2024/whiteboard/k4-2.mp4
-          blockquote In a text document you just click and type. In a spreadsheet you just click and type. What if in a whiteboard… you just clicked and typed? Choices like colors, voting, commenting, and checkboxes are secondary, and when you're ready, you can use boxes and connections to group related ideas together.
+            figure
+              video(autoplay loop muted playsinline)
+                source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
+            figcaption In a text document you just click and type. In a spreadsheet you just click and type. What if in a whiteboard… you just clicked and typed? Choices like colors, voting, commenting, and checkboxes are secondary, and when you're ready, you can use boxes and connections to group related ideas together.
 
           p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
             a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
@@ -170,14 +172,44 @@ const toggleAppsAndExtensionsIsVisible = () => {
                 td.badge.info $0
 
           p The result? Kinopio is a product that embraces individuality and personality. Made for people, not drones.
-
-          p To see how this plays out IRL, here's a direct comparison of{{' '}}
+          p To see how this plays out IRL, here's a video by a customer comparing{{' '}}
             a(href="https://www.youtube.com/watch?v=Colow9UCPqM") Kinopio vs Milanote
             span .
-
+      //- 2
       details
-        summary Why should I use kinopio at work
-        p asldkfj
+        summary Should I use kinopio at work?
+        blockquote
+          p
+            span There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true.
+            br
+            span – Steve Jobs
+          p Whether it's your favorite camera, fountain pen, or keyboard, we’re inspired by the tools we use. Well-made daily tools encourage us to do our best work.
+          p Kinopio is designed for small teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
+      //- 3
+      details
+        summary What About my Data and Privacy?
+        ul
+          li You can use Kinopio anonymously without an account but to share spaces and collaborate, you will need to create an account.
+          li For developers, there's a fully documented [public API](https://help.kinopio.club/api/) that I encourage you to build cools things with.
+          li Kinopio does not have ads, nor does it sell your data. The only revenue sources are from upgraded users and donations.
+          li You can export JSON backups of your spaces. And you can permanently delete your account at anytime.
+        p
+          span More details in the{{' '}}
+          a(href="https://help.kinopio.club/posts/privacy-policy/") Privacy Policy
+          span .
+      //- 4
+      details
+        summary Does kinopio have AI features?
+        p No it does not.
+        p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
+        p
+          span With whiteboarding, mind-mapping, or mood-boarding the journey of adding ideas and images, making connections, and figuring out what things should be grouped together is vitally important to building up your
+          a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
+          span . This is the magic that makes big ideas easier to recall and reason about.
+
+    footer.sitemap
+      p XYZ
+
 </template>
 
 <style lang="stylus">
@@ -218,6 +250,24 @@ main.page
     @media(max-width 500px)
       margin 1rem
 
+  details + details
+    margin-top 1rem
+
+  figure
+    margin 0
+    video
+      border-radius var(--entity-radius)
+  figcaption
+    opacity 0.5
+
+  blockquote
+    background lightgreen
+
+  ul
+    max-width 400px
+    // li
+    //   background yellow
+
   > .row,
   section > .row
   .features-row > .row
@@ -249,5 +299,19 @@ main.page
   section.social-proof + .social-proof-row,
   .social-proof-row + section.social-proof
     margin-top 1rem
+
+  // footer
+
+  footer
+    background plum
+    padding 3rem
+    // margin-bottom 2rem
+    // padding-bottom 4rem
+    @media(max-width 700px)
+      padding 2rem
+      // padding-bottom 4rem
+    @media(max-width 500px)
+      padding 1rem
+      // padding-bottom 4rem
 
 </style>
