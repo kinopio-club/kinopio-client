@@ -132,20 +132,16 @@ const toggleAppsAndExtensionsIsVisible = () => {
           p Physical whiteboards are effective because of their expressiveness. Drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas.
           p But the typical software whiteboard is designed for neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
           p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and self-expression.
-          p
-            figure
-              video(autoplay loop muted playsinline)
-                source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
+          figure
+            video(autoplay loop muted playsinline)
+              source(src="https://pketh.org/images/2024/whiteboard/k4-2.mp4")
             figcaption In a text document you just click and type. In a spreadsheet you just click and type. What if in a whiteboard… you just clicked and typed? Choices like colors, voting, commenting, and checkboxes are secondary, and when you're ready, you can use boxes and connections to group related ideas together.
-
           p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
             a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
             span {{' '}}and conceptual – ideal for problem solving and consensus building.
-
           p The other major difference is that Kinopio is [organic software], paid for by the people who use it, rather than by VC investors looking for an{{' '}}
             a(href="https://ourincrediblejourney.tumblr.com/") exit
             span .
-
           table
             thead
               tr
@@ -170,7 +166,6 @@ const toggleAppsAndExtensionsIsVisible = () => {
               tr
                 td.badge.info Kinopio
                 td.badge.info $0
-
           p The result? Kinopio is a product that embraces individuality and personality. Made for people, not drones.
           p To see how this plays out IRL, here's a video by a customer comparing{{' '}}
             a(href="https://www.youtube.com/watch?v=Colow9UCPqM") Kinopio vs Milanote
@@ -209,6 +204,25 @@ const toggleAppsAndExtensionsIsVisible = () => {
 
     footer.sitemap
       p XYZ
+      //- ## product
+      //- about
+      //- blog
+      //- changelog
+      //- roadmap
+
+      //- ## support
+      //- api docs
+      //- help
+      //- email
+
+      //- ## community
+      //- discord
+      //- forum
+
+      //- ## Info
+      //- terms
+      //- privacy
+      //- press
 
 </template>
 
@@ -255,10 +269,13 @@ main.page
 
   figure
     margin 0
+    max-width 400px
     video
       border-radius var(--entity-radius)
   figcaption
+    font-size 14px
     opacity 0.5
+    max-width 400px
 
   blockquote
     background lightgreen
