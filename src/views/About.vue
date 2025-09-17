@@ -149,9 +149,9 @@ defineExpose({ vPauseAnimation })
       p Thinking is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
       p People use Kinopio to plan out projects, schemas, moodboards, note taking, and to organize their daily lives. Your spaces can be personalized with backgrounds, card frames, colors, and todos – to be as playful, or productive, as you want.
       p
+        img.updated.icon(src="@/assets/updated.gif")
         span New features are being added all the time in the{{' '}}
         a(href="/changelog") Changelog{{' '}}
-        img.updated.icon(src="@/assets/updated.gif")
     //- [horizontal marquee row, staggered speeds, stop scrolling on interaction]
     .row-wrap
       .row.horizontal.marquee(v-pause-animation)
