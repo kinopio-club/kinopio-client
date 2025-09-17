@@ -149,7 +149,6 @@ onMounted(async () => {
   setTimeout(() => {
     spaceStore.updateInboxCache()
   }, 15000) // 15 seconds after mounted
-  setCookie()
 
   // ⏰ scheduled tasks
   // retry failed sync operations
@@ -249,11 +248,6 @@ const updatePageSizes = async (value) => {
 }
 const updateViewportSizes = () => {
   globalStore.updateViewportSizes()
-}
-const setCookie = () => {
-  const yearSeconds = 31536000
-  const millenium = yearSeconds * 1000
-  document.cookie = `name=kinopio; max-age=${millenium}; path=/;`
 }
 
 // user
