@@ -9,6 +9,30 @@ import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 const globalStore = useGlobalStore()
 let unsubscribes
 
+const vPauseAnimation = {
+  mounted (el) {
+    const pauseAnimation = () => {
+      el.style.animationPlayState = 'paused'
+    }
+    const resumeAnimation = () => {
+      el.style.animationPlayState = 'running'
+    }
+    el.addEventListener('pointerover', pauseAnimation)
+    el.addEventListener('pointerout', resumeAnimation)
+    el._pauseAnimation = {
+      pauseAnimation,
+      resumeAnimation
+    }
+  },
+  unmounted (el) {
+    if (el._pauseAnimation) {
+      el.removeEventListener('pointerover', el._pauseAnimation.pauseAnimation)
+      el.removeEventListener('pointerout', el._pauseAnimation.resumeAnimation)
+      delete el._pauseAnimation
+    }
+  }
+}
+
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -36,11 +60,23 @@ const closeDialogs = () => {
   state.appsAndExtensionsIsVisible = false
 }
 
+// intro section
+
 const toggleAppsAndExtensionsIsVisible = () => {
   const isVisible = state.appsAndExtensionsIsVisible
   closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
 }
+
+// creativity section
+
+// const marqueeStyles = computed(() => {
+//   return {
+//     animationPlayState: 'running' // paused
+//   }
+// })
+
+// explore section
 
 const examples = computed(() => {
   return [
@@ -62,12 +98,14 @@ const examples = computed(() => {
   ]
 })
 
+defineExpose({ vPauseAnimation })
+
 </script>
 
 <template lang="pug">
   Header
   main.page(@click="closeAllDialogs")
-    section
+    section.intro
       h1 Kinopio
       p is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Create spaces to whiteboard, brainstorm, moodboard, research, plan, and take notes.
       .row
@@ -114,17 +152,31 @@ const examples = computed(() => {
         span New features are being added all the time in the{{' '}}
         a(href="/changelog") Changelog{{' '}}
         img.updated.icon(src="@/assets/updated.gif")
-
     //- [horizontal marquee row, staggered speeds, stop scrolling on interaction]
     .row-wrap
-      .row.horizontal
+      .row.horizontal.marquee(v-pause-animation)
         p ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Options ● Comments ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs
-      .row.horizontal
+      .row.horizontal.marquee(v-pause-animation)
         p ● Import and Export ● Save as Pdf ● Public Api ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions
-      .row.horizontal
+      .row.horizontal.marquee(v-pause-animation)
         p ● Trackable Todos ● Personal Templates ● Snap to Grid, Align and Distribute ● iOS and Desktop Apps
 
-    section.about-me
+    section.explore
+      h2 Spaces to Explore
+        //- span.badge.secondary
+        //-   img.icon.sunglasses(src="@/assets/sunglasses.svg")
+      p I use Kinopio every day with a bunch of people all over the world. Maybe you'll like it too?
+    .row.horizontal.examples
+      //- demo cards , new demo
+      //- use router-link
+      //- p imgs: moodboard, software project/specs w md, collect ideas in inbox, storyboard, dnd, trip planning, personal website, startup idea, note taking
+      //- [look1 grid biz] [look2 play, https://x.com/KinopioClub/status/1816148349436752026 , https://www.producthunt.com/posts/kinopio/embed]
+      //- https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k
+      template(v-for="example in examples" :key="example.id")
+        p {{example.spaceName}}
+
+    section.who-makes-kinopio
+      //- TODO decorate w mail/stationary border handfeel (emailinvites.vue)
       h2 Why I Created Kinopio
       p Hi, I'm Piri,
       p I made Kinopio for people who have ideas, feelings, or thoughts they’re struggling to express, organize, and understand.
@@ -146,13 +198,15 @@ const examples = computed(() => {
         a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love wall
         span .
       p Used by students, teachers, and researchers, at:
-    .row.horizontal.social-proof-row
-      p ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
-        a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
+    .row-wrap.social-proof-row
+      .row.horizontal.marquee(v-pause-animation)
+        p ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
+          a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
     section.social-proof
       p And by designers, engineers, and PMs, at:
-    .row.horizontal.social-proof-row
-      p ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
+    .row-wrap.social-proof-row
+      .row.horizontal.marquee(v-pause-animation)
+        p ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
     section.social-proof
       p Kinopio has also been featured on{{' '}}
         a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
@@ -162,21 +216,6 @@ const examples = computed(() => {
         a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
         span .
 
-    section.conclusion
-      h2
-        span Spaces to Explore
-        span.badge.secondary
-          img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      p I use Kinopio every day with a bunch of people all over the world. Maybe you'll like it too?
-    .row.horizontal.examples
-      //- demo cards , new demo
-      //- p imgs: moodboard, software project/specs w md, collect ideas in inbox, storyboard, dnd, trip planning, personal website, startup idea, note taking
-      //- [look1 grid biz] [look2 play, https://x.com/KinopioClub/status/1816148349436752026 , https://www.producthunt.com/posts/kinopio/embed]
-      //- https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k
-
-      //- TODO move setcookie: make it so that cookie is only set if creating a space or loaded a space that you're a member of
-      template(v-for="example in examples" :key="example.id")
-        p {{example.spaceName}}
     section.faq
       h2 FAQ
       //- 1
@@ -299,7 +338,7 @@ main.page
   user-select text
   margin 0
   padding-top 4rem
-  background pink
+  // background pink
   overflow auto
   height 100dvh
   > section
@@ -339,6 +378,10 @@ main.page
     // li
     //   background yellow
 
+  > .row-wrap
+    max-width 100%
+    overflow hidden
+
   > .row,
   section > .row
   .row-wrap > .row
@@ -357,13 +400,25 @@ main.page
         flex 0 0 auto
         video
           max-height 220px
+    &.marquee
+      overflow-x visible
+      animation-name marquee
+      animation-direction linear
+      animation-timing-function linear
+      animation-iteration-count infinite
+      &:nth-child(1)
+        animation-duration 25s
+      &:nth-child(2)
+        animation-duration 30s
+      &:nth-child(3)
+        animation-duration 35s
 
   // sections
 
   section.how-it-works,
   section.creativity,
   section.social-proof,
-  section.conclusion
+  section.explore
     margin-bottom 0
 
   .how-it-works + .row
@@ -379,7 +434,9 @@ main.page
 
   section.social-proof + .social-proof-row,
   .social-proof-row + section.social-proof
-    margin-top 1rem
+    margin-top 0
+    margin-bottom 0
+    // margin 0
 
   // footer
 
@@ -394,5 +451,11 @@ main.page
     @media(max-width 500px)
       padding 1rem
       // padding-bottom 4rem
+
+@keyframes marquee
+  0%
+    transform translate(100%)
+  100%
+    transform translate(-100%)
 
 </style>
