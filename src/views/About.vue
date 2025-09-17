@@ -85,6 +85,7 @@ const yearsOld = computed(() => {
 // explore section
 
 const examples = computed(() => {
+  // dnd, run a campaign
   return [
     {
       spaceId: '123',
@@ -229,12 +230,13 @@ defineExpose({ vPauseAnimation })
       details
         summary How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?
         section.subsection
-          p Physical whiteboards are effective because of their expressiveness. Drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas.
-          p But the typical software whiteboard is designed for neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
-          p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and self-expression.
-          figure
-            video(autoplay loop muted playsinline)
-              source(src="@/assets/page/about/faq-example.mp4")
+          p Physical whiteboards are so productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas and shared understanding.
+          p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
+          p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and experimentation.
+          //- TODO figure showing art
+          //- figure
+          //-   video(autoplay loop muted playsinline)
+          //-     source(src="@/assets/page/about/faq-example.mp4")
           p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
             a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
             span {{' '}}and conceptual – ideal for problem solving and consensus building.
