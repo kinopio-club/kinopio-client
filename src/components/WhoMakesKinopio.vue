@@ -1,5 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+
+const yearsOld = computed(() => {
+  const startYear = 2018
+  const currentYear = new Date().getFullYear()
+  return currentYear - startYear
+})
 </script>
 
 <template lang="pug">
@@ -7,7 +13,8 @@ details.about-me
   summary Who Makes Kinopio?
   section.subsection
     p Hi I'm{{' '}}
-      a(href="https://pketh.org") Piri,
+      a(href="https://pketh.org") Piri
+      span , and I've building Kinopio for {{yearsOld}} years.
     p I believe in building ethical, economically-sustainable,
       span {{' '}}
       a(href="https://pketh.org/organic-software.html") organic software
