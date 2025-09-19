@@ -39,6 +39,5 @@ dialog.about-groups
   right 0
   left initial
   bottom 25px
-  top initial !important
   overflow auto
 </style>
