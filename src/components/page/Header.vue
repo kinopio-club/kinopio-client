@@ -86,7 +86,7 @@ const togglePricingIsVisible = () => {
             Pricing(:visible="pricingIsVisible" :parentIsPage="true")
           .button-wrap
             router-link(to="/app")
-              button.success Open App
+              button.success Jump In
 </template>
 
 <style lang="stylus">

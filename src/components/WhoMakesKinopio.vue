@@ -1,16 +1,23 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
+import utils from '@/utils.js'
+
+const props = defineProps({
+  title: String
+})
+
 const yearsOld = computed(() => {
   const startYear = 2018
   const currentYear = new Date().getFullYear()
   return currentYear - startYear
 })
+const title = computed(() => props.title || 'Who Makes Kinopio?')
 </script>
 
 <template lang="pug">
 details.about-me
-  summary Who Makes Kinopio?
+  summary {{title}}
   section.subsection
     p Hi I'm{{' '}}
       a(href="https://pketh.org") Piri
