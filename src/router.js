@@ -31,7 +31,7 @@ const router = {
       }
     }, {
       path: '/',
-      name: 'about', // marketing page
+      name: 'root',
       component: About
     }, {
       path: '/app',
