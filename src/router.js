@@ -29,6 +29,7 @@ const router = createRouter({
       }
     }, {
       path: '/',
+      alias: '/app',
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
