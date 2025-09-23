@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import consts from '@/consts.js'
 
-const isHidden = true
+const isHidden = false
 
 const props = defineProps({
   item: Object,

@@ -35,8 +35,7 @@ onMounted(() => {
 const state = reactive({
   colorPickerIsVisible: false,
   resultsSectionMaxHeight: undefined, // number
-  nextConnectionTypeColor: '',
-  inputIsFocused: false
+  nextConnectionTypeColor: ''
 })
 
 // dialog
@@ -49,9 +48,9 @@ watch(() => visible.value, (value, prevValue) => {
     updateNextConnectionColor()
   } else {
     state.resultsSectionMaxHeight = undefined
-    if (state.inputIsFocused) {
-      state.inputIsFocused = false
-    }
+    const element = typeNameElement.value
+    if (!element) { return }
+    element.blur()
   }
 })
 
@@ -95,7 +94,7 @@ const scrollIntoView = async () => {
   globalStore.scrollElementIntoView({ element })
 }
 const scrollIntoViewAndFocus = async () => {
-  scrollIntoView()
+  await scrollIntoView()
   if (utils.isMobile()) { return }
   const element = typeNameElement.value
   const length = typeName.value.length
@@ -110,7 +109,6 @@ const triggerSignUpOrInIsVisible = () => {
 }
 const focus = () => {
   globalStore.pinchCounterZoomDecimal = 1
-  state.inputIsFocused = true
 }
 const updatePinchCounterZoomDecimal = () => {
   globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
@@ -118,7 +116,6 @@ const updatePinchCounterZoomDecimal = () => {
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
   const connectionType = utils.clone(currentConnectionType.value)
-  state.inputIsFocused = false
 }
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
@@ -151,6 +148,7 @@ watch(() => currentConnection.value, async (value, prevValue) => {
   }
 })
 const currentConnectionType = computed(() => {
+  if (!currentConnection.value) { return }
   const connectionType = connectionStore.getConnectionTypeByConnectionId(currentConnection.value.id)
   prevConnectionType = connectionType
   return connectionType
@@ -273,7 +271,6 @@ const focusName = async () => {
   const element = typeNameElement.value
   if (!element) { return }
   element.focus()
-  state.inputIsFocused = true
 }
 </script>
 
