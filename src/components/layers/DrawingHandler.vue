@@ -83,10 +83,12 @@ const preventTouchScrolling = (event) => {
 
 const startDrawing = (event) => {
   if (utils.isMultiTouch(event)) { return }
+  if (globalStore.currentUserIsPanningReady) { return }
   globalStore.currentUserIsDrawing = true
   globalStore.triggerStartDrawing(event)
 }
 const draw = throttle((event) => {
+  if (globalStore.currentUserIsPanningReady) { return }
   globalStore.triggerDraw(event)
 }, 16) // 60fps
 
