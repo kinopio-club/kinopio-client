@@ -260,6 +260,20 @@ export const useCardStore = defineStore('cards', {
       this.allIds = allIds
       tallestCardHeight = 0
     },
+    async alignLeftAddedCardsInInbox () {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      if (spaceStore.name !== 'Inbox') { return }
+      let cards = this.getAllCardsSortedByY
+      cards = cards.filter(card => card.x === consts.minItemXY)
+      const selectedCardIds = cards.map(card => card.id)
+      await this.updateCardsDimensions(selectedCardIds)
+      setTimeout(() => {
+        globalStore.multipleCardsSelectedIds = selectedCardIds
+        this.distributeCardsVertically(cards)
+        globalStore.multipleCardsSelectedIds = []
+      }, 100)
+    },
 
     // create
 
@@ -645,7 +659,7 @@ export const useCardStore = defineStore('cards', {
       await this.updateBelowCardsPosition(updates)
     },
     async updateCardDimensions (id) {
-      this.updateCardsDimensions([id])
+      await this.updateCardsDimensions([id])
     },
 
     // card details
