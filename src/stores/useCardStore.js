@@ -581,7 +581,8 @@ export const useCardStore = defineStore('cards', {
         } else {
           const prevCardElement = utils.cardElement(prevCard)
           const prevCardRect = prevCardElement.getBoundingClientRect()
-          card.y = prevCard.y + (prevCardRect.height * zoom) + consts.spaceBetweenCards
+          const prevCardHeight = prevCardRect.height || prevCard.height
+          card.y = prevCard.y + (prevCardHeight * zoom) + consts.spaceBetweenCards
           prevCard = card
         }
         const rect = utils.cardRectFromId(card.id)
@@ -589,7 +590,7 @@ export const useCardStore = defineStore('cards', {
           id: card.id,
           y: card.y,
           width: rect.width,
-          height: rect.height
+          height: rect.height || card.height
         }
         await this.updateCard(update)
         index += 1
