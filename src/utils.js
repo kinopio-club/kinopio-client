@@ -53,6 +53,8 @@ export default {
     if (!this.isKinopioUploadUrl(url)) {
       return url
     }
+    const isGif = url.includes('.gif')
+    if (isGif) { return url }
     if (maxDimensions) {
       return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${url}`
     } else {
