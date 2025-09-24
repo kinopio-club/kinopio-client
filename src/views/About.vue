@@ -75,14 +75,14 @@ const toggleAppsAndExtensionsIsVisible = () => {
 
       section.cta
         p Designed to work the way your mind works. No sign up required.
-        p
+        .row
           .button-wrap#download
             button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
               span Apps
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
           .button-wrap
             router-link(to="/app")
-              button.success Jump In
+              button.success Open Kinopio
 
       section.examples
         h2 Collect and Connect Your Thoughts, Ideas, and Feelings
@@ -96,6 +96,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
             span.badge.info.button-badge Present
             span.badge.info.button-badge Take Notes
             span and lots more.
+          //- whiteboard
           img(src="https://d2w9rnfcy7mm78.cloudfront.net/7376365/original_958590f5203dbea243925880e3d09dd4.gif")
           p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label similar concepts with [[tags]].
 
@@ -184,8 +185,32 @@ const toggleAppsAndExtensionsIsVisible = () => {
               a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
               span .
 
-      //- footer
+      footer.sitemap
+        p ABC 123
         //- api
+    //- footer.sitemap
+    //-   //- to bubble section
+    //-   img.icon.logo-bw(src="@/assets/logos/logo-bw.svg")
+
+    //-   //- ## product
+    //-   //- About
+    //-   //- Blog
+    //-   //- Changelog
+    //-   //- Roadmap
+
+    //-   //- ## support
+    //-   //- API
+    //-   //- Contact
+    //-   //- Help
+
+    //-   //- ## community
+    //-   //- Discord
+    //-   //- Forum
+
+    //-   //- ## zzz
+    //-   //- Terms
+    //-   //- Privacy
+
 </template>
 
 <style lang="stylus">
@@ -259,4 +284,12 @@ main.page
           td
             padding 5px 10px
 
+  footer.sitemap
+    padding 2rem
+    background pink
+    width pink
+    border-radius var(--page-entity-radius)
+    margin-bottom 2rem
+    p
+      margin-top 0
 </style>

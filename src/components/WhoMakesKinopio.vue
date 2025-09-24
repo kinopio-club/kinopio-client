@@ -30,6 +30,10 @@ details.about-me
     p If you're curious, I wrote{{' '}}
       a(href="https://pketh.org/how-kinopio-is-made.html")
         span How Kinopio is Made
+      span .
+    p Sometimes{{' '}}
+      a(href="https://lucas.love") Lucas
+      span {{' '}}helps out too.
 </template>
 
 <style lang="stylus">
