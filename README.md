@@ -111,7 +111,7 @@ Netlify website → Deploys → Edge Functions
 
 ## Pre-rendered Pages (Static-Site Generation, SSG)
 
-During the build process (`npm run build`), [`vite-ssg`](https://github.com/antfu-collective/vite-ssg) generates static HTML files of routes defined in `vite.config.js` in `ssgOptions.includedRoutes`, to make them accessible to robots/SEO. Pre-rendendered pages HTML is stored in `/dist`.
+During the deploy/build process (`npm run build`), [`vite-ssg`](https://github.com/antfu-collective/vite-ssg) generates static HTML pages of routes defined in `vite.config.js` in `ssgOptions.includedRoutes`. Static pages (compiled from vue router into `/dist`) are served to the client directly. The client only goes through vue router for non-static routes like `/app`.
 
 To test pre-rendered page routes use `npm run build-dev`.
 
