@@ -465,7 +465,7 @@ const textareaSizes = async () => {
   const element = nameElement.value
   if (!element) { return }
   element.style.height = 'auto'
-  element.style.height = element.scrollHeight + 'px'
+  element.style.height = element.scrollHeight + 2 + 'px' // +2 for chromium scrollbar fix
 }
 const resetTextareaHeight = () => {
   if (!visible.value) { return }
