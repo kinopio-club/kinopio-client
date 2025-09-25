@@ -114,34 +114,21 @@ const updateCardIsLoading = (newCard) => {
   })
 }
 const selectCard = async (card) => {
-  console.error('🐸🐸🐸', card)
-
   if (card.isLoading) { return }
   if (!canEditSpace.value) {
     globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
     return
   }
   updateCardIsLoading(card)
-
   const scroll = globalStore.getWindowScrollWithSpaceOffset
   delete card.user
-
-  console.log('🔮🔮🔮4', card)
-
   let newCard = utils.clone(card)
-  console.log('💐💐', newCard)
-
   newCard.id = nanoid()
   newCard.spaceId = spaceStore.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = cardStore.getAllCards
-  console.log('🔮🔮', newCard)
-
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-
-  console.log('🔮', newCard)
-
   cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
   globalStore.updateFocusOnCardId(newCard.id)
   removeCardFromInbox(card)
