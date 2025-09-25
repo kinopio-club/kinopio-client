@@ -121,7 +121,7 @@ const selectCard = async (card) => {
     globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
     return
   }
-  console.log('🔮🔮🔮')
+  console.log('🔮🔮🔮2')
   updateCardIsLoading(card)
   console.log('💐💐')
 
