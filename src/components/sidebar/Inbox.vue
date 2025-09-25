@@ -119,6 +119,7 @@ const selectCard = async (card) => {
     globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
     return
   }
+  console.error('🐸🐸🐸')
   updateCardIsLoading(card)
   const scroll = globalStore.getWindowScrollWithSpaceOffset
   let newCard = utils.clone(card)
