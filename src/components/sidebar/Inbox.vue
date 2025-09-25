@@ -123,6 +123,8 @@ const selectCard = async (card) => {
   }
   console.log('🔮🔮🔮')
   updateCardIsLoading(card)
+  console.log('💐💐')
+
   const scroll = globalStore.getWindowScrollWithSpaceOffset
   let newCard = utils.clone(card)
   newCard.id = nanoid()
