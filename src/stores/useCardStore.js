@@ -637,7 +637,9 @@ export const useCardStore = defineStore('cards', {
           card = {
             id: card.id,
             width: Math.round(rect.width * zoom),
-            height: Math.round(rect.height * zoom)
+            height: Math.round(rect.height * zoom),
+            prevWidth: card.prevWidth,
+            prevHeight: card.prevHeight
           }
         } else {
           card = utils.cardElementDimensions(card)
