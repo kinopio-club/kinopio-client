@@ -122,9 +122,10 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  console.log('🔮🔮🔮3')
 
   const scroll = globalStore.getWindowScrollWithSpaceOffset
+  console.log('🔮🔮🔮3', card)
+
   let newCard = utils.clone(card)
   console.log('💐💐', newCard)
 
