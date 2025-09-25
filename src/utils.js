@@ -357,7 +357,6 @@ export default {
   clone (object) {
     if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })
-    object = JSON.parse(JSON.stringify(object)) // removes functions from objects
     return cloneDeep(object)
   },
   isUndefinedOrNull (value) {
