@@ -104,7 +104,7 @@ const checkIsSpaceScope = (event) => {
   const classes = [...nodeList]
   const isFocusedCard = classes.includes('card')
   const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
-  const isChromeFix = classes.includes('label')
+  const isChromeFix = classes.includes('label') || tagName === 'SPAN'
   return isBody || isMain || isFocusedCard || isSpaceNameButton || isChromeFix
 }
 const checkIsCardScope = (event) => {
