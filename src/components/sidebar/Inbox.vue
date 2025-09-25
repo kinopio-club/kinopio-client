@@ -121,12 +121,13 @@ const selectCard = async (card) => {
     globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
     return
   }
-  console.log('🔮🔮🔮2')
   updateCardIsLoading(card)
-  console.log('💐💐')
+  console.log('🔮🔮🔮3')
 
   const scroll = globalStore.getWindowScrollWithSpaceOffset
   let newCard = utils.clone(card)
+  console.log('💐💐', newCard)
+
   newCard.id = nanoid()
   newCard.spaceId = spaceStore.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
