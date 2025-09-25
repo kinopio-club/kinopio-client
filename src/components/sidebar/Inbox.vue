@@ -124,7 +124,9 @@ const selectCard = async (card) => {
   updateCardIsLoading(card)
 
   const scroll = globalStore.getWindowScrollWithSpaceOffset
-  console.log('🔮🔮🔮3', card)
+  delete card.user
+
+  console.log('🔮🔮🔮4', card)
 
   let newCard = utils.clone(card)
   console.log('💐💐', newCard)
@@ -138,7 +140,6 @@ const selectCard = async (card) => {
 
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
 
-  delete newCard.user
   console.log('🔮', newCard)
 
   cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
