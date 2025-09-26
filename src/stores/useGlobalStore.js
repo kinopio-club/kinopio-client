@@ -234,6 +234,7 @@ export const useGlobalStore = defineStore('global', {
     notifyConnectionError: false,
     notifyConnectionErrorName: '',
     notifyServerCouldNotSave: false,
+    notifyServerUnresponsive: false,
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,

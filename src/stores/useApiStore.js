@@ -38,6 +38,11 @@ clearOtherItemsQueue()
 
 // request handlers
 
+const updateServerUnresponsive = (value) => {
+  const globalStore = useGlobalStore()
+  globalStore.notifyServerUnresponsive = value
+  globalStore.updateIsOnline(!value)
+}
 const fetchWithTimeout = async (url, options = {}) => {
   const controller = new AbortController()
   const { signal } = controller
@@ -47,10 +52,14 @@ const fetchWithTimeout = async (url, options = {}) => {
   try {
     const response = await fetch(url, { ...options, signal })
     clearTimeout(timeout)
+    updateServerUnresponsive(false)
     return response
   } catch (error) {
     clearTimeout(timeout)
-    console.error('🚒 fetchWithTimeout timed out', url, error.name)
+    console.error('🚒 fetchWithTimeout', url, error)
+    if (error.name === 'AbortError') { // timeout
+      updateServerUnresponsive(true)
+    }
     throw error
   }
 }

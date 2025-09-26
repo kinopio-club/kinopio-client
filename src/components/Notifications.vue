@@ -180,6 +180,7 @@ const notifyServerCouldNotSave = computed(() => {
   if (isOffline) { return }
   return globalStore.notifyServerCouldNotSave
 })
+const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
@@ -489,6 +490,17 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
+
+  .item.danger(v-if="notifyServerUnresponsive")
+    .row
+      p
+        img.icon.offline(src="@/assets/offline.svg")
+        span The server is unresponsive, but you can use Kinopio offline until it's back up.
+    .row
+      .button-wrap
+        a(href="mailto:support@kinopio.club?subject=Server Unresponsive")
+          button
+            span Email Support
 
   .persistent-item.danger(v-if="state.notifySpaceOutOfSync")
     p Space is out of sync, please refresh
