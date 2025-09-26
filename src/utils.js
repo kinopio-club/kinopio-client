@@ -692,24 +692,6 @@ export default {
       return object[key]
     }
   },
-  timeout (ms, promise) {
-    // https://github.com/github/fetch/issues/175#issuecomment-216791333
-    return new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        reject(new Error('promise timeout'))
-      }, ms)
-      promise.then(
-        (res) => {
-          clearTimeout(timeoutId)
-          resolve(res)
-        },
-        (err) => {
-          clearTimeout(timeoutId)
-          reject(err)
-        }
-      )
-    })
-  },
   pluralize (word, condition) {
     if (condition || condition === 0) {
       word = word + 's'
