@@ -11,7 +11,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
-import isEqual from 'lodash-es/isEqual'
 
 const showDebugMessages = false
 const max = 30

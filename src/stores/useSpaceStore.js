@@ -25,7 +25,6 @@ import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
-import defer from 'lodash-es/defer'
 import throttle from 'lodash-es/throttle'
 import dayjs from 'dayjs'
 
