@@ -12,6 +12,7 @@ import UserDeveloperInfo from '@/components/dialogs/UserDeveloperInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import User from '@/components/User.vue'
@@ -176,6 +177,7 @@ const deleteUserPermanent = async () => {
       .button-wrap(v-if="isModerator")
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
+        ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
   //- Delete Account
   section.delete-account
     .row
