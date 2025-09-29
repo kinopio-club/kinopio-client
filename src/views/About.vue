@@ -3,12 +3,21 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
+import { useHead } from '@unhead/vue'
+
 import Header from '@/components/page/Header.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 
 const globalStore = useGlobalStore()
 let unsubscribes
+
+useHead({
+  link: [{
+    rel: 'canonical',
+    href: 'https://kinopio.club'
+  }]
+})
 
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
