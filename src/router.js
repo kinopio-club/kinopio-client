@@ -31,7 +31,8 @@ const router = {
       }
     }, {
       path: '/',
-      name: 'root',
+      alias: '/about',
+      name: 'about',
       component: About
     }, {
       path: '/app',

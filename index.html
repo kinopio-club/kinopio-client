@@ -4,11 +4,8 @@
     <script>
       const isRootPath = document.location.pathname === '/'
       const isCookie = document.cookie.includes('kinopio')
-      const isHashEmpty = !document.location.hash
-      if (isRootPath && isCookie && isHashEmpty) {
+      if (isRootPath && isCookie) {
         window.location.href = '/app'
-      } else {
-      	document.location.hash = ''
       }
     </script>
     <meta charset="utf-8">
