@@ -1544,6 +1544,20 @@ export const useApiStore = defineStore('api', {
       } catch (error) {
         console.error('🚒 sendAnalyticsEvent', error)
       }
+    },
+
+    // Moderator
+
+    async moderatorRestartServer () {
+      try {
+        const options = await this.requestOptions({ method: 'POST' })
+        const response = await fetch(`${consts.helperHost()}/restart-server`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 moderatorRestartServer', error)
+        throw new Error(error)
+      }
     }
+
   }
 })

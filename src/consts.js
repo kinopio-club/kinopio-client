@@ -70,6 +70,13 @@ export default {
     }
     return host
   },
+  helperHost () {
+    let host = 'https://helper.kinopio.club'
+    if (this.isDevelopment()) {
+      host = 'https://kinopio.local:8082'
+    }
+    return host
+  },
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (query.matches) {

@@ -25,7 +25,10 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  error: {
+    unknownServerError: false
+  }
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -42,9 +45,16 @@ const updateDialogHeight = async () => {
 }
 
 const moderatorIsLoadingRestartServer = computed(() => globalStore.moderatorIsLoadingRestartServer)
-const restartServer = () => {
-  if (globalStore.moderatorIsLoadingRestartServer) { return }
-  globalStore.moderatorIsLoadingRestartServer = true
+const restartServer = async () => {
+  try {
+    if (globalStore.moderatorIsLoadingRestartServer) { return }
+    globalStore.moderatorIsLoadingRestartServer = true
+    await apiStore.moderatorRestartServer()
+  } catch (error) {
+    console.error('🚒 restartServer', error)
+    state.error.unknownServerError = true
+  }
+
   // http://localhost:8086/ or https://helper.kinopio.club
 }
 </script>
@@ -59,9 +69,12 @@ dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @clic
       button(@click="restartServer" :disabled="moderatorIsLoadingRestartServer")
         span Restart Server
         Loader(:visible="moderatorIsLoadingRestartServer" :isSmall="true")
-    .row(v-if="moderatorIsLoadingRestartServer")
+    .row(v-if="moderatorIsLoadingRestartServer && !state.error.unknownServerError")
       .badge.info
         span Server is Restarting. Refresh and try again in ~5 minutes.
+    .row(v-if="state.error.unknownServerError")
+      .badge.danger
+        span (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">
