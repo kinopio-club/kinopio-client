@@ -267,6 +267,7 @@ export const useGlobalStore = defineStore('global', {
     otherItems: { spaces: [], cards: [] },
     sendingQueue: [],
     currentUserIsInvitedButCannotEditCurrentSpace: false,
+    moderatorIsLoadingRestartServer: false,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,

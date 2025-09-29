@@ -2,36 +2,20 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useApiStore } from '@/stores/useApiStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import Loader from '@/components/Loader.vue'
 
 import utils from '@/utils.js'
 
-// const globalStore = useGlobalStore()
-// const userStore = useUserStore()
-// const spaceStore = useSpaceStore()
-
-// const ApiStore = useCardStore()
-
-// let unsubscribes
+const globalStore = useGlobalStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-
-  // const globalActionUnsubscribe = globalStore.$onAction(
-  //   ({ name, args }) => {
-  //     if (name === 'clearDraggingItems') {
-  //       console.log('clearDraggingItems')
-  //     }
-  //   }
-  // )
-  // unsubscribes = () => {
-  //   globalActionUnsubscribe()
-  // }
 })
 onBeforeUnmount(() => {
-  // unsubscribes()
   window.removeEventListener('resize', updateDialogHeight)
 })
 
@@ -41,9 +25,6 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  loading: {
-    restartServer: false
-  },
   dialogHeight: null
 })
 
@@ -52,7 +33,6 @@ watch(() => props.visible, (value, prevValue) => {
     updateDialogHeight()
   }
 })
-// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -61,15 +41,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-// const themeName = computed(() => userStore.theme)
-// const incrementBy = () => {
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // themeStore.updateThemeIsSystem(false)
-// }
+const moderatorIsLoadingRestartServer = computed(() => globalStore.moderatorIsLoadingRestartServer)
 const restartServer = () => {
-  state.restartServer = true
-  // apiStore.moderatorRestartServer
+  if (globalStore.moderatorIsLoadingRestartServer) { return }
+  globalStore.moderatorIsLoadingRestartServer = true
+  // http://localhost:8086/ or https://helper.kinopio.club
 }
 </script>
 
@@ -78,15 +54,14 @@ dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @clic
   section
     p Moderator Actions
   section
+    p All moderator actions are logged and will notify admins.
     .row
-      button(@click="restartServer" :disabled="state.loading.restartServer")
+      button(@click="restartServer" :disabled="moderatorIsLoadingRestartServer")
         span Restart Server
-        Loader(:visible="state.loading.restartServer" :isSmall="true")
-    .row
+        Loader(:visible="moderatorIsLoadingRestartServer" :isSmall="true")
+    .row(v-if="moderatorIsLoadingRestartServer")
       .badge.info
-        span Server is Restarting. Should take ~5 minutes.
-  section
-    p All moderator actions are logged and will email Piri.
+        span Server is Restarting. Refresh and try again in ~5 minutes.
 </template>
 
 <style lang="stylus">
