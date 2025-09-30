@@ -86,7 +86,7 @@ const togglePricingIsVisible = () => {
             Pricing(:visible="pricingIsVisible" :parentIsPage="true")
           .button-wrap
             router-link(to="/app")
-              button.success Jump In
+              button.success Open Kinopio
 </template>
 
 <style lang="stylus">
