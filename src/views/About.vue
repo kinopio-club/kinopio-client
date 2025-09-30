@@ -36,7 +36,8 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  appsAndExtensionsIsVisible: false
+  appsAndExtensionsIsVisible: false,
+  example: 'whiteboard' // mindmap, moodboard, research, plan, present, notes
 })
 
 const closeAllDialogs = () => {
@@ -50,6 +51,10 @@ const toggleAppsAndExtensionsIsVisible = () => {
   closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
 }
+const toggleExample = (value) => {
+  state.example = value
+}
+
 // const examples = computed(() => {
 //   // dnd, run a campaign
 //   return [
@@ -79,7 +84,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
       section.intro
         h1.wordmark Kinopio
         //- h2 Collect and connect your thoughts, ideas, and feelings
-        //- ss: multiple authors, overview hello space
+        //- TODO vid, showing multiple authors, hello space?
         img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
 
       section.cta
@@ -97,17 +102,33 @@ const toggleAppsAndExtensionsIsVisible = () => {
         h2 Collect and Connect Your Thoughts, Ideas, and Feelings
         .examples-wrap
           .row
-            span.badge.info.button-badge.active Whiteboard
-            span.badge.info.button-badge Mind Map
-            span.badge.info.button-badge Moodboard
-            span.badge.info.button-badge Research
-            span.badge.info.button-badge Plan
-            span.badge.info.button-badge Present
-            span.badge.info.button-badge Take Notes
+            span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
+              span Whiteboard
+            span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
+              span Mind Map
+            span.badge.info.button-badge(:class="{active: state.example === 'moodboard'}" @click="toggleExample('moodboard')")
+              span Moodboard
+            span.badge.info.button-badge(:class="{active: state.example === 'research'}" @click="toggleExample('research')")
+              span Research
+            span.badge.info.button-badge(:class="{active: state.example === 'plan'}" @click="toggleExample('plan')")
+              span Plan
+            span.badge.info.button-badge(:class="{active: state.example === 'present'}" @click="toggleExample('present')")
+              span Present
+            span.badge.info.button-badge(:class="{active: state.example === 'notes'}" @click="toggleExample('notes')")
+              span Take Notes
             span and lots more.
           //- whiteboard
-          img(src="https://d2w9rnfcy7mm78.cloudfront.net/7376365/original_958590f5203dbea243925880e3d09dd4.gif")
-          p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label similar concepts with [[tags]].
+          template(v-if="state.example === 'whiteboard'")
+            img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
+            //- img(src="https://d2w9rnfcy7mm78.cloudfront.net/7376365/original_958590f5203dbea243925880e3d09dd4.gif")
+            p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label similar concepts with [[tags]].
+          //- TODO
+          template(v-else-if="state.example === 'mindmap'")
+          template(v-else-if="state.example === 'moodboard'")
+          template(v-else-if="state.example === 'research'")
+          template(v-else-if="state.example === 'plan'")
+          template(v-else-if="state.example === 'present'")
+          template(v-else-if="state.example === 'notes'")
 
       section.faq
         h2 FAQ
@@ -195,17 +216,17 @@ const toggleAppsAndExtensionsIsVisible = () => {
               span .
 
       footer.sitemap
-        p ABC 123
-        //- api
-    //- footer.sitemap
-    //-   //- to bubble section
-    //-   img.icon.logo-bw(src="@/assets/logos/logo-bw.svg")
-
-    //-   //- ## product
-    //-   //- About
-    //-   //- Blog
-    //-   //- Changelog
-    //-   //- Roadmap
+        //- img.icon.logo-bw(src="@/assets/logos/logo-bw.svg")
+        .row
+          div
+            p PRODUCT
+            a(href="/about") About
+            //- a(href="/api") API Docs
+            a(href="/blog") Blog
+            a(href="/changelog") Changelog
+            a(href="/roadmap") Roadmap
+          div
+            p SUPPORT
 
     //-   //- ## support
     //-   //- API
@@ -295,10 +316,22 @@ main.page
 
   footer.sitemap
     padding 2rem
-    background pink
-    width pink
+    background #223c2f
     border-radius var(--page-entity-radius)
-    margin-bottom 2rem
+    max-width 100%
+    margin 4rem 12px
     p
       margin-top 0
+      margin-bottom 10px
+      color white
+    a
+      display block
+      color white
+      &:hover
+        text-decoration none
+    .row
+      display flex
+      flex-direction row
+      justify-content flex-start
+      gap 40px
 </style>
