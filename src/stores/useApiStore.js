@@ -1551,7 +1551,7 @@ export const useApiStore = defineStore('api', {
     async moderatorRestartServer () {
       try {
         const options = await this.requestOptions({ method: 'POST' })
-        const response = await fetch(`${consts.helperHost()}/restart-server`, options)
+        const response = await fetch(`${consts.helperServerHost()}/restart-server`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 moderatorRestartServer', error)

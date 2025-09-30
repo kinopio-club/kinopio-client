@@ -70,7 +70,7 @@ export default {
     }
     return host
   },
-  helperHost () {
+  helperServerHost () {
     let host = 'https://helper.kinopio.club'
     if (this.isDevelopment()) {
       host = 'https://kinopio.local:8082'
