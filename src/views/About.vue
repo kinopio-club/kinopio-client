@@ -7,6 +7,7 @@ import { useHead } from '@unhead/vue'
 
 import Header from '@/components/page/Header.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
+import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
@@ -75,15 +76,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
               button.success Open Kinopio
 
       AboutExamples
-
-      //- TODO horizontal marquee row, component
-      section.features
-        p ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Settings ● Comments ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions ● Trackable Todos ● Personal Templates ● Snap to Grid
-        p
-          img.updated.icon(src="@/assets/updated.gif")
-          span New features are being added all the time in{{' '}}
-          a(href src="") Changelog
-          span .
+      AboutFeatures
 
       section.faq
         h2 FAQ

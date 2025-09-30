@@ -34,28 +34,28 @@ section.examples
     //- TODO
 
     //- whiteboard
-    div(v-show="state.example === 'whiteboard'")
+    .example(v-show="state.example === 'whiteboard'")
       img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
       //- img(src="https://d2w9rnfcy7mm78.cloudfront.net/7376365/original_958590f5203dbea243925880e3d09dd4.gif")
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label similar concepts with [[tags]].
     //- mind map
-    div(v-show="state.example === 'mindmap'")
+    .example(v-show="state.example === 'mindmap'")
       p Unlike traditional mind maps and outliners, Kinopio lets you make your spaces truly yours with backgrounds, images, GIFs, MP3s, Youtube or Spotify URLs.
       p Draw anywhere to emphasize specific areas.
     //- moodboard
-    div(v-show="state.example === 'moodboard'")
+    .example(v-show="state.example === 'moodboard'")
       //- HONDA?
       p Collect quotes and visual inspiration to evoke a vibe and a direction for your next big project.
       p You can also import your Are.na channels.
     //- research
-    div(v-show="state.example === 'research'")
+    .example(v-show="state.example === 'research'")
       p Spatially organized information that’s easy to retrieve helps you get over anxiety and procrastination. Invite collaborators to collect ideas and comments.
     //- plan
-    div(v-show="state.example === 'plan'")
+    .example(v-show="state.example === 'plan'")
     //- present
-    div(v-show="state.example === 'present'")
+    .example(v-show="state.example === 'present'")
     //- notes
-    div(v-show="state.example === 'notes'")
+    .example(v-show="state.example === 'notes'")
 </template>
 
 <style lang="stylus">

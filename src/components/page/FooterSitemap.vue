@@ -19,6 +19,7 @@ footer.sitemap
       p COMMUNITY
       a(href="/api") API Docs
       a(href="/discord") Discord
+      a(href="https://github.com/kinopio-club") Github
     div
       p ﾉ乙(､ﾝ､)_
       a(href="https://help.kinopio.club/posts/terms-of-service/") Terms
