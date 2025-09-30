@@ -38,6 +38,31 @@ clearOtherItemsQueue()
 
 // request handlers
 
+const updateServerUnresponsive = (value) => {
+  const globalStore = useGlobalStore()
+  globalStore.notifyServerUnresponsive = value
+  globalStore.updateIsOnline(!value)
+}
+const fetchWithTimeout = async (url, options = {}) => {
+  const controller = new AbortController()
+  const { signal } = controller
+  const timeout = setTimeout(() => {
+    controller.abort()
+  }, consts.requestTimeout)
+  try {
+    const response = await fetch(url, { ...options, signal })
+    clearTimeout(timeout)
+    updateServerUnresponsive(false)
+    return response
+  } catch (error) {
+    clearTimeout(timeout)
+    console.error('🚒 fetchWithTimeout', url, error)
+    if (error.name === 'AbortError') { // timeout
+      updateServerUnresponsive(true)
+    }
+    throw error
+  }
+}
 const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
   if (utils.isUndefinedOrNull(isOnline)) {
     isOnline = true
@@ -235,7 +260,7 @@ export const useApiStore = defineStore('api', {
 
     async getStatus () {
       try {
-        const response = await fetch(`${consts.apiHost()}/`)
+        const response = await fetchWithTimeout(`${consts.apiHost()}/`)
         return normalizeResponse(response)
       } catch (error) {
         console.info('🚒 getStatus', error)
@@ -335,7 +360,7 @@ export const useApiStore = defineStore('api', {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await fetch(`${consts.apiHost()}/user`, options)
+        const response = await fetchWithTimeout(`${consts.apiHost()}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getUser', error })
@@ -582,7 +607,7 @@ export const useApiStore = defineStore('api', {
         if (!userIds) { return }
         console.info('🛬🛬 getting remote public users', userIds)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options)
         // notifyConnectionError
         return normalizeResponse(response)
       } catch (error) {
@@ -624,7 +649,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting explore spaces')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/explore-spaces`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/explore-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getExploreSpaces', error })
@@ -640,7 +665,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting everyone spaces')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/everyone-spaces`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/everyone-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getEveryoneSpaces', error })
@@ -655,7 +680,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting live spaces')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/live-spaces`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/live-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getLiveSpaces', error })
@@ -672,7 +697,7 @@ export const useApiStore = defineStore('api', {
         const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
         console.info('🛬 getting remote space', space.id)
         const options = await this.requestOptions({ method: 'GET', space, spaceReadOnlyKey })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpace', error })
@@ -685,7 +710,7 @@ export const useApiStore = defineStore('api', {
         if (!isOnline) { return }
         // console.info('🛬 getting remote space updatedAt', space.id)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/updated-at/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpace', error })
@@ -700,7 +725,7 @@ export const useApiStore = defineStore('api', {
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space favorites', spaceId)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${spaceId}/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpaceFavorites', error })
@@ -715,7 +740,7 @@ export const useApiStore = defineStore('api', {
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space history', spaceId)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${spaceId}/history`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpaceFavorites', error })
@@ -733,7 +758,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
         const options = await this.requestOptions({ method: 'GET', space, spaceReadOnlyKey })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpaceAnonymously', error })
@@ -743,7 +768,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting inbox space')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/inbox`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/inbox`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getInboxSpace', error })
@@ -967,7 +992,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
         const options = await this.requestOptions({ body, method: 'POST' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/item/multiple`, options)
         const data = await normalizeResponse(response)
         globalStore.updateOtherItems(data)
       } catch (error) {
@@ -1519,6 +1544,20 @@ export const useApiStore = defineStore('api', {
       } catch (error) {
         console.error('🚒 sendAnalyticsEvent', error)
       }
+    },
+
+    // Moderator
+
+    async moderatorRestartServer () {
+      try {
+        const options = await this.requestOptions({ method: 'POST' })
+        const response = await fetch(`${consts.helperServerHost()}/restart-server`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 moderatorRestartServer', error)
+        throw new Error(error)
+      }
     }
+
   }
 })

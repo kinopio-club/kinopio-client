@@ -234,6 +234,7 @@ export const useGlobalStore = defineStore('global', {
     notifyConnectionError: false,
     notifyConnectionErrorName: '',
     notifyServerCouldNotSave: false,
+    notifyServerUnresponsive: false,
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
@@ -266,6 +267,7 @@ export const useGlobalStore = defineStore('global', {
     otherItems: { spaces: [], cards: [] },
     sendingQueue: [],
     currentUserIsInvitedButCannotEditCurrentSpace: false,
+    moderatorIsLoadingRestartServer: false,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
