@@ -174,6 +174,14 @@ const toggleAppsAndExtensionsIsVisible = () => {
               a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
               span .
 
+      section
+        .button-wrap
+          router-link(to="/app")
+            button.success Open Kinopio
+        p I hope you enjoy using Kinopio and find it useful,
+        //- TODO sig img
+        p – Piri
+
       FooterSitemap
 </template>
 

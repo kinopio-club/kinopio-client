@@ -9,7 +9,7 @@ section.features
   p
     img.updated.icon(src="@/assets/updated.gif")
     span New features are being added all the time in{{' '}}
-    a(href src="") Changelog
+    a(href="/changelog") Changelog
     span .
 </template>
 

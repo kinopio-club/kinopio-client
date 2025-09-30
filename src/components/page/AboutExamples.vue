@@ -44,18 +44,22 @@ section.examples
       p Draw anywhere to emphasize specific areas.
     //- moodboard
     .example(v-show="state.example === 'moodboard'")
-      //- HONDA?
-      p Collect quotes and visual inspiration to evoke a vibe and a direction for your next big project.
+      //- :: HONDA?
+      p Collect quotes and visual inspiration to find ideas and direction for your next big project.
       p You can also import your Are.na channels.
     //- research
     .example(v-show="state.example === 'research'")
       p Spatially organized information that’s easy to retrieve helps you get over anxiety and procrastination. Invite collaborators to collect ideas and comments.
     //- plan
     .example(v-show="state.example === 'plan'")
+      //- spec?
+      //- p go from ideas to actions. turn any card or box into a trackable todo,
     //- present
     .example(v-show="state.example === 'present'")
+      //- p engage with your audience by presenting or teaching from a space instead of boring static slideshow,  . use boxes to represent slides, chapters, or major themes and quickly jump between them from the minimap
     //- notes
     .example(v-show="state.example === 'notes'")
+      //- p spatial note taking is a great way to build memory. when you're doing somethign else and inspiration strikes.. extension quick entry collect from inbox
 </template>
 
 <style lang="stylus">
