@@ -28,7 +28,7 @@ export default {
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   straightLineConnectionPathControlPoint: 'q00,00',
-  defaultTimeout: 40000,
+  requestTimeout: 5000,
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
@@ -69,6 +69,13 @@ export default {
     let host = 'wss://api.kinopio.club'
     if (this.isDevelopment()) {
       host = 'wss://kinopio.local:3000'
+    }
+    return host
+  },
+  helperServerHost () {
+    let host = 'https://helper.kinopio.club'
+    if (this.isDevelopment()) {
+      host = 'https://kinopio.local:8082'
     }
     return host
   },

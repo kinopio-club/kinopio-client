@@ -260,6 +260,20 @@ export const useCardStore = defineStore('cards', {
       this.allIds = allIds
       tallestCardHeight = 0
     },
+    async alignLeftAddedCardsInInbox () {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      if (spaceStore.name !== 'Inbox') { return }
+      let cards = this.getAllCardsSortedByY
+      cards = cards.filter(card => card.x === consts.minItemXY)
+      const selectedCardIds = cards.map(card => card.id)
+      await this.updateCardsDimensions(selectedCardIds)
+      setTimeout(() => {
+        globalStore.multipleCardsSelectedIds = selectedCardIds
+        this.distributeCardsVertically(cards)
+        globalStore.multipleCardsSelectedIds = []
+      }, 100)
+    },
 
     // create
 
@@ -567,7 +581,8 @@ export const useCardStore = defineStore('cards', {
         } else {
           const prevCardElement = utils.cardElement(prevCard)
           const prevCardRect = prevCardElement.getBoundingClientRect()
-          card.y = prevCard.y + (prevCardRect.height * zoom) + consts.spaceBetweenCards
+          const prevCardHeight = prevCardRect.height || prevCard.height
+          card.y = prevCard.y + (prevCardHeight * zoom) + consts.spaceBetweenCards
           prevCard = card
         }
         const rect = utils.cardRectFromId(card.id)
@@ -575,7 +590,7 @@ export const useCardStore = defineStore('cards', {
           id: card.id,
           y: card.y,
           width: rect.width,
-          height: rect.height
+          height: rect.height || card.height
         }
         await this.updateCard(update)
         index += 1
@@ -622,7 +637,9 @@ export const useCardStore = defineStore('cards', {
           card = {
             id: card.id,
             width: Math.round(rect.width * zoom),
-            height: Math.round(rect.height * zoom)
+            height: Math.round(rect.height * zoom),
+            prevWidth: card.prevWidth,
+            prevHeight: card.prevHeight
           }
         } else {
           card = utils.cardElementDimensions(card)
@@ -645,7 +662,7 @@ export const useCardStore = defineStore('cards', {
       await this.updateBelowCardsPosition(updates)
     },
     async updateCardDimensions (id) {
-      this.updateCardsDimensions([id])
+      await this.updateCardsDimensions([id])
     },
 
     // card details

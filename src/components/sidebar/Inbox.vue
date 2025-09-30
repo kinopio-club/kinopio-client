@@ -121,6 +121,7 @@ const selectCard = async (card) => {
   }
   updateCardIsLoading(card)
   const scroll = globalStore.getWindowScrollWithSpaceOffset
+  delete card.user
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = spaceStore.id
@@ -128,7 +129,6 @@ const selectCard = async (card) => {
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  delete newCard.user
   cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
   globalStore.updateFocusOnCardId(newCard.id)
   removeCardFromInbox(card)

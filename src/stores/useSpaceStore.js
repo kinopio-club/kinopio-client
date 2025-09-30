@@ -421,6 +421,7 @@ export const useSpaceStore = defineStore('space', {
     async loadSpace (space) {
       const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
+      const cardStore = useCardStore()
       isLoadingRemoteSpace = false
       space.connections = utils.migrationConnections(space.connections)
       globalStore.spaceZoomPercent = 100
@@ -462,6 +463,7 @@ export const useSpaceStore = defineStore('space', {
       if (cardId) {
         globalStore.triggerScrollCardIntoView(cardId)
       }
+      cardStore.alignLeftAddedCardsInInbox()
     },
     async loadInboxSpace () {
       const apiStore = useApiStore()

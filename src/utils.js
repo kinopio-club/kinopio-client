@@ -53,6 +53,8 @@ export default {
     if (!this.isKinopioUploadUrl(url)) {
       return url
     }
+    const isGif = url.includes('.gif')
+    if (isGif) { return url }
     if (maxDimensions) {
       return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${url}`
     } else {
@@ -689,24 +691,6 @@ export default {
     } else {
       return object[key]
     }
-  },
-  timeout (ms, promise) {
-    // https://github.com/github/fetch/issues/175#issuecomment-216791333
-    return new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        reject(new Error('promise timeout'))
-      }, ms)
-      promise.then(
-        (res) => {
-          clearTimeout(timeoutId)
-          resolve(res)
-        },
-        (err) => {
-          clearTimeout(timeoutId)
-          reject(err)
-        }
-      )
-    })
   },
   pluralize (word, condition) {
     if (condition || condition === 0) {
