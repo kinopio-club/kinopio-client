@@ -6,6 +6,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useHead } from '@unhead/vue'
 
 import Header from '@/components/page/Header.vue'
+import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 
@@ -54,27 +55,6 @@ const toggleAppsAndExtensionsIsVisible = () => {
 const toggleExample = (value) => {
   state.example = value
 }
-
-// const examples = computed(() => {
-//   // dnd, run a campaign
-//   return [
-//     {
-//       spaceId: '123',
-//       spaceName: 'MAGICAL REALISM',
-//       spacePreviewImage: '',
-//       spaceUserColor: '',
-//       spaceUserName: '',
-//       name: 'Moodboard'
-//     }, {
-//       spaceId: '123',
-//       spaceName: 'Life Tasks',
-//       spacePreviewImage: '',
-//       spaceUserColor: '#a1f7ef',
-//       spaceUserName: 'Piri',
-//       name: 'Personal Space'
-//     }
-//   ]
-// })
 </script>
 
 <template lang="pug">
@@ -215,32 +195,7 @@ const toggleExample = (value) => {
               a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
               span .
 
-      footer.sitemap
-        //- img.icon.logo-bw(src="@/assets/logos/logo-bw.svg")
-        .row
-          div
-            p PRODUCT
-            a(href="/about") About
-            //- a(href="/api") API Docs
-            a(href="/blog") Blog
-            a(href="/changelog") Changelog
-            a(href="/roadmap") Roadmap
-          div
-            p SUPPORT
-
-    //-   //- ## support
-    //-   //- API
-    //-   //- Contact
-    //-   //- Help
-
-    //-   //- ## community
-    //-   //- Discord
-    //-   //- Forum
-
-    //-   //- ## zzz
-    //-   //- Terms
-    //-   //- Privacy
-
+      FooterSitemap
 </template>
 
 <style lang="stylus">
@@ -313,25 +268,4 @@ main.page
         table
           td
             padding 5px 10px
-
-  footer.sitemap
-    padding 2rem
-    background #223c2f
-    border-radius var(--page-entity-radius)
-    max-width 100%
-    margin 4rem 12px
-    p
-      margin-top 0
-      margin-bottom 10px
-      color white
-    a
-      display block
-      color white
-      &:hover
-        text-decoration none
-    .row
-      display flex
-      flex-direction row
-      justify-content flex-start
-      gap 40px
 </style>
