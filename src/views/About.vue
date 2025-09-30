@@ -90,7 +90,9 @@ const toggleAppsAndExtensionsIsVisible = () => {
             p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
               a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
               span {{' '}}and conceptual – ideal for problem solving and consensus building.
-            p The other major difference is that Kinopio is [organic software], paid for by the people who use it, rather than by VC investors looking for an{{' '}}
+            p The other major difference is that Kinopio is{{' '}}
+              a(href="https://pketh.org/organic-software.html") organic software
+              span , paid for by the people who use it, rather than by VC investors looking for an{{' '}}
               a(href="https://ourincrediblejourney.tumblr.com/") easy exit
               span .
             table
@@ -129,7 +131,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
           section.subsection
             p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
             p
-              span With whiteboarding, mind-mapping, or mood-boarding, the journey of placing ideas and images, making connections, and figuring out what things should be grouped together yourself is vitally important to building up your{{' '}}
+              span With whiteboarding, mind-mapping, or mood-boarding, the journey of placing ideas and images, making connections, and figuring out what things should be grouped together yourself is vitally important to building up your own{{' '}}
               a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
               span . This is the magic that makes big ideas easier to recall and reason about.
 
@@ -142,6 +144,15 @@ const toggleAppsAndExtensionsIsVisible = () => {
             p Exploring big ideas and tackling hard problems is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
             p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
             p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
+
+        details
+          summary Can I export my data?
+          section.subsection
+            p Yes, of course – what you write inside Kinopio belongs only to you. There are export options in a variety of formats, and you can download a backup of all your spaces together.
+            p
+              span There is also a {{' '}}
+              a(href="/api") public API
+              span {{' '}}available.
 
         details
           summary Who else uses Kinopio?
