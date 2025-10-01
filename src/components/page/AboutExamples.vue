@@ -14,7 +14,7 @@ const toggleExample = (value) => {
 section.examples
   h2 Create Lively Freeform Spaces
   .examples-wrap
-    .row.examples-badges-row
+    .row
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
@@ -38,14 +38,6 @@ section.examples
       //- bk grid, or ghibli
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate in real-time.
-      .row.spaces-badges-row
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        a(href="")
-          .badge.secondary.button-badge
-            span Computing Happiness
-        a(href="")
-          .badge.secondary.button-badge
-            span Kinopio Architecture and Costs
 
     .example(v-show="state.example === 'mindmap'")
       //- bk image
@@ -83,14 +75,7 @@ section.examples
     flex-wrap wrap
     gap 6px 0
     align-items center
-  .examples-badges-row
     margin-bottom 20px
-  .spaces-badges-row
-    margin-top 20px
-    a
-      text-decoration none
-    .icon.sunglasses
-      margin-right 4px
   img,
   video
     border-radius calc(var(--entity-radius) * 2)
