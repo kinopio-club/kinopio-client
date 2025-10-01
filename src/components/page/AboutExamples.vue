@@ -51,9 +51,10 @@ section.examples
     //- research
     div(v-show="state.example === 'research'")
       p Spatially organized information that’s easy to retrieve helps you get over anxiety and procrastination. Invite collaborators to collect ideas and comments.
+      p backlinked tags , connect themes across spaces
     //- plan
     div(v-show="state.example === 'plan'")
-      p diagrams..
+      p diagrams.., specs, measure twice cut once. adapt to changes that happen midway through execution, from learning
     //- present
     div(v-show="state.example === 'present'")
       p engaging, that wow, help audiences get into your head follow your train of thought. connect the ‘what’ to the ‘why’. organize topics into boxes , jump between them with the minimap
