@@ -21,6 +21,71 @@ useHead({
   }]
 })
 
+// const vPauseAnimation = {
+//   mounted (el) {
+//     const pauseAnimation = () => {
+//       el.style.animationPlayState = 'paused'
+//     }
+//     const resumeAnimation = () => {
+//       el.style.animationPlayState = 'running'
+//     }
+//     el.addEventListener('pointerover', pauseAnimation)
+//     el.addEventListener('pointerout', resumeAnimation)
+//     el._pauseAnimation = {
+//       pauseAnimation,
+//       resumeAnimation
+//     }
+//   },
+//   unmounted (el) {
+//     if (el._pauseAnimation) {
+//       el.removeEventListener('pointerover', el._pauseAnimation.pauseAnimation)
+//       el.removeEventListener('pointerout', el._pauseAnimation.resumeAnimation)
+//       delete el._pauseAnimation
+//     }
+//   }
+// }
+// defineExpose({ vPauseAnimation })
+
+// .row.horizontal.marquee(v-pause-animation)
+// p ● Import and Export ● Save as Pdf ● Public Api ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions
+
+// > .row,
+// section > .row
+// .row-wrap > .row
+//   margin-top 10px
+//   &.horizontal
+//     // background goldenrod
+//     display flex
+//     flex-wrap nowrap
+//     padding-left 1rem
+//     overflow-x: auto
+//     gap 12px
+//     p
+//       flex 0 0 auto
+//       margin 0
+//     figure
+//       flex 0 0 auto
+//       video
+//         max-height 160px
+//   &.marquee
+//     overflow-x visible
+//     animation-name marquee
+//     animation-direction linear
+//     animation-timing-function linear
+//     animation-iteration-count infinite
+//     &:nth-child(1)
+//       animation-duration 25s
+//     &:nth-child(2)
+//       animation-duration 30s
+//     &:nth-child(3)
+//       animation-duration 35s
+
+// @keyframes marquee
+//   0%
+//     transform translate(100%)
+//   100%
+//     transform translate(-80%)
+
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -63,8 +128,8 @@ const toggleAppsAndExtensionsIsVisible = () => {
         //- TODO vid, showing multiple authors, hello space?
         img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
 
-      section.cta
-        p Designed to work the way your mind works. No sign up required.
+        p Spatial thinking tool designed to work the way your mind works.
+        p No sign up required.
         .row
           .button-wrap#download
             button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
