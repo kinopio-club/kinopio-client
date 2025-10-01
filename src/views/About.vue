@@ -63,7 +63,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
         h1.wordmark Kinopio
         //- TODO vid, showing multiple authors, hello space?
         img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
-        p Spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
+        p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
         p No sign up required.
         .row
           .button-wrap#download

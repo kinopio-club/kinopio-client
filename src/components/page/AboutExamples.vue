@@ -1,12 +1,33 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import CircleProgress from '@/components/CircleProgress.vue'
+
 const state = reactive({
-  example: 'whiteboard' // mindmap, moodboard, research, plan, present, notes, websites
+  example: 'whiteboard',
+  timerIsActive: true
 })
 
 const toggleExample = (value) => {
   state.example = value
+  state.timerIsActive = false
+  console.log(state.timerIsActive)
+}
+
+// timer
+
+//
+// dom w animationend = toggleNextExample
+
+const toggleNextExample = () => {
+  const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
+  const prevIndex = examples.findIndex(example => example === state.example)
+  let index = prevIndex + 1
+  if (index > examples.length - 1) {
+    index = 0
+  }
+  state.example = examples[index]
+  console.log('💐', prevIndex, index, examples[index])
 }
 </script>
 
@@ -32,26 +53,21 @@ section.examples
       span.badge.info.button-badge(:class="{active: state.example === 'websites'}" @click="toggleExample('websites')")
         span Websites
       span and lots more.
-      //- TODO add timer cresent timer, that toggles next example state. and stops/disappears on toggleExample
 
-    //- ? make templates: https://kinopio.club/-template-ideas-for-kinopio-copy-WQDU3JERWVGjbqIWnoWW5
+      //- TODO add timer cresent timer, that toggles next example state. and stops/disappears on toggleExample
+      CircleProgress(:visible="state.timerIsActive" @animationEnd="toggleNextExample" :isStatic="false")
+        //- (@animationEnd="" :isStatic="false" :animationDuration="" :progressPercent="30")
+        //- if :animationDuration then animated circle
+
+    //- TODO 7:5 ratio media
 
     .example(v-show="state.example === 'whiteboard'")
       img(src="@/assets/page/about/computing-happiness.webp")
-      //- img(src="https://d2w9rnfcy7mm78.cloudfront.net/7376365/original_958590f5203dbea243925880e3d09dd4.gif")
-      //- https://kinopio.club/digital-garden-by-aixdesign---community-participatory-feminist-slow-ai-H-fG2FyFI3T83Kj0Arxiz
-      //- https://kinopio.club/nocturne-vLcCieen2C4XFwyTbFKB7
-      //- https://kinopio.club/groove-structure-g7VrYLbRlY1kCVvBuxE-X
-
-      //- https://kinopio.club/small-ish-web-AIJCJnp1Pr3LmLT7YL-vA
-
-      //- https://kinopio.club/things-to-do-places-to-go-a02-JnPI-Kq5Q8hRetca-
-      //- https://kinopio.club/climate-change-9xJzBR-mh4obdtu1uKdQX
-      //- 7:5 ratio
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate together in real-time.
 
     .example(v-show="state.example === 'mindmap'")
+      img(src="@/assets/page/about/computing-happiness.webp")
       //- https://kinopio.club/computing-happiness-SrLvfAPsBIsor4g9iIW7D
       //- https://kinopio.club/konmari-7xxjlZ-gsZ6e2j0vUxBxF
       //- https://kinopio.club/biz-plan-IJwxi0Swu7SksLUenX7N7
@@ -101,9 +117,10 @@ section.examples
       //- https://kinopio.club/the-sketchbook-practice-xVBQM1oYj8bLwrK9L523H
       //- https://kinopio.club/-crochet-diary-4h1bgB0tQ_S2QD7P0Iyp1
       //- https://kinopio.club/primitives-P2fS1q3b4lV1sx50fi_0E
-
       //- https://kinopio.club/-skincare-journal-_3EaIFjJi87YO8jIMBni6
-      p Spatial note taking is an effective way to build relational memory so that ideas stick . Browser extensions let you quick capture ideas and URLs.
+      p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
+      p Browser extensions let you quick capture ideas and URLs.
+
     .example(v-show="state.example === 'websites'")
       //- https://kinopio.club/for-my-love-9_5Jwu0MVNDP7wLUfXVgq
       //- https://kinopio.club/happy-birthday--t7mDxRy1g1n8WN8o_VYhV
@@ -115,11 +132,10 @@ section.examples
       //- https://kinopio.club/happy-33rd-sandy-3-tEadBTIaknNWe5lPci-cD
       //- https://kinopio.club/personal-page--zo6_3wXV6ou5aKbiv_2j0
       //- https://kinopio.club/portfolio-bdo7hdjaRE9wY_yb99RVZ
-
-      p personalize and share
-      p xyz bday cards, personal page, portfolio webpages, or just to say i love you
-      p your spaces are private by default, but can be set to public read-only , or open to comments from everyone
-      p add it to explore to share it w the community
+      p Share uniquely personal birthday cards, about pages, and your portfolio. Spaces are private by default, but can be set to public read-only, or open to comments from everyone.
+      p
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        span Add the spaces you're especially proud of to Explore to share them with the community.
 
 </template>
 
@@ -132,6 +148,8 @@ section.examples
     padding 2rem
     @media(max-width 460px)
       padding 1rem
+  .circle-progress
+    margin-left 6px
   .row
     display flex
     flex-wrap wrap
