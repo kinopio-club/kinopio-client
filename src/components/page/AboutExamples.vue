@@ -14,7 +14,7 @@ const toggleExample = (value) => {
 section.examples
   h2 Create Lively Freeform Spaces
   .examples-wrap
-    .row
+    .row.examples-badges-row
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
@@ -30,43 +30,45 @@ section.examples
       span.badge.info.button-badge(:class="{active: state.example === 'notes'}" @click="toggleExample('notes')")
         span Take Notes
       span and lots more.
+      //- TODO add timer cresent timer, that toggles next example state. and stops/disappears on toggleExample
 
-    //- whiteboard
     .example(v-show="state.example === 'whiteboard'")
       img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
       //- img(src="https://d2w9rnfcy7mm78.cloudfront.net/7376365/original_958590f5203dbea243925880e3d09dd4.gif")
-      p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label similar concepts with [[tags]].
-      p Real-time collaboration ..
+      //- bk grid, or ghibli
+      p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Categorize and label concepts with backlinked [[tags]].
+      p Invite friends and group members to collaborate in real-time.
+      .row.spaces-badges-row
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        a(href="")
+          .badge.secondary.button-badge
+            span Computing Happiness
+        a(href="")
+          .badge.secondary.button-badge
+            span Kinopio Architecture and Costs
 
-    //- mind map
     .example(v-show="state.example === 'mindmap'")
+      //- bk image
       p Unlike traditional mind maps and outliners, Kinopio lets you make your spaces truly yours with backgrounds, images, GIFs, MP3s, Youtube or Spotify URLs.
-      p Draw anywhere to emphasize specific areas.
+      p Draw anywhere to decorate or emphasize specific areas.
 
-    //- moodboard
     .example(v-show="state.example === 'moodboard'")
-      //- HONDA?
+      //- HONDA? , inspiration
       p Collect quotes and visual inspiration to evoke a vibe and a direction for your next big project. Real-time collaboration and comment cards help keep everyone aligned.
       p You can also import your Are.na channels.
 
-    //- research
     .example(v-show="state.example === 'research'")
-      p Spatially organized information that’s easy to retrieve helps you get over anxiety and procrastination. Invite collaborators to collect ideas and comments.
-      p backlinked tags , connect themes across spaces
+      p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination. Invite collaborators to collect ideas and comments.
+      p Use backlinked [[tags]] to connect themes across spaces.
 
-    //- present
     .example(v-show="state.example === 'plan'")
-      //- p go from ideas to actions. turn any card or box into a trackable todo,
-      p diagrams.., specs, measure twice cut once. adapt to changes that happen midway through execution, from learning
+      p Build diagrams and specs that can adapt to changes midway through a project. Move from idea to actions by turning cards or boxes into trackable Todos.
 
-    //- present
     .example(v-show="state.example === 'present'")
-      p engaging, that wow, help audiences get into your head follow your train of thought. connect the ‘what’ to the ‘why’. organize topics into boxes , jump between them with the minimap
-      //- p engage with your audience by presenting or teaching from a space instead of boring static slideshow,  . use boxes to represent slides, chapters, or major themes and quickly jump between them from the minimap
+      p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them using the minimap.
 
-    //- notes
     .example(v-show="state.example === 'notes'")
-      //- p spatial note taking is a great way to build memory. when you're doing somethign else and inspiration strikes.. extension quick entry collect from inbox
+      p Spatial note taking is an effective way to build relational memory so that ideas stick . Browser extensions let you quick capture ideas and URLs.
 </template>
 
 <style lang="stylus">
@@ -80,10 +82,17 @@ section.examples
     display flex
     flex-wrap wrap
     gap 6px 0
+    align-items center
+  .examples-badges-row
     margin-bottom 20px
+  .spaces-badges-row
+    margin-top 20px
+    a
+      text-decoration none
+    .icon.sunglasses
+      margin-right 4px
   img,
   video
     border-radius calc(var(--entity-radius) * 2)
-    background-color #ba8b8b
     margin-bottom 0
 </style>
