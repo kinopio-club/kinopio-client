@@ -10,16 +10,22 @@ const state = reactive({
 const toggleExample = (value) => {
   state.example = value
 }
-
+const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
+const togglePrevExample = () => {
+  const prevIndex = examples.findIndex(example => example === state.example)
+  let index = prevIndex - 1
+  if (index < 0) {
+    index = examples.length - 1
+  }
+  state.example = examples[index]
+}
 const toggleNextExample = () => {
-  const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
   const prevIndex = examples.findIndex(example => example === state.example)
   let index = prevIndex + 1
   if (index > examples.length - 1) {
     index = 0
   }
   state.example = examples[index]
-  console.log('💐', prevIndex, index, examples[index])
 }
 </script>
 
@@ -28,6 +34,12 @@ section.examples
   h2 Create Lively Freeform Spaces
   .examples-wrap
     .row
+      .segmented-buttons
+        button.small-button.translucent-button(@click="togglePrevExample")
+          img.icon.left-arrow(src="@/assets/down-arrow.svg")
+        button.small-button.translucent-button(@click="toggleNextExample")
+          img.icon.right-arrow(src="@/assets/down-arrow.svg")
+
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
@@ -54,7 +66,6 @@ section.examples
       p Invite friends and group members to collaborate together in real-time.
 
     .example(v-show="state.example === 'mindmap'")
-      img(src="@/assets/page/about/computing-happiness.webp")
       //- https://kinopio.club/computing-happiness-SrLvfAPsBIsor4g9iIW7D
       //- https://kinopio.club/konmari-7xxjlZ-gsZ6e2j0vUxBxF
       //- https://kinopio.club/biz-plan-IJwxi0Swu7SksLUenX7N7
@@ -135,8 +146,12 @@ section.examples
     padding 2rem
     @media(max-width 460px)
       padding 1rem
-  .circle-progress
-    margin-left 6px
+  .segmented-buttons
+    margin-right 6px
+    button
+      min-width 20px
+      .icon
+        margin-left 1px
   .row
     display flex
     flex-wrap wrap
