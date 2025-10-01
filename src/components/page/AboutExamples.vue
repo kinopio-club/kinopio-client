@@ -4,20 +4,12 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import CircleProgress from '@/components/CircleProgress.vue'
 
 const state = reactive({
-  example: 'whiteboard',
-  timerIsActive: true
+  example: 'whiteboard'
 })
 
 const toggleExample = (value) => {
   state.example = value
-  state.timerIsActive = false
-  console.log(state.timerIsActive)
 }
-
-// timer
-
-//
-// dom w animationend = toggleNextExample
 
 const toggleNextExample = () => {
   const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
@@ -53,11 +45,6 @@ section.examples
       span.badge.info.button-badge(:class="{active: state.example === 'websites'}" @click="toggleExample('websites')")
         span Websites
       span and lots more.
-
-      //- TODO add timer cresent timer, that toggles next example state. and stops/disappears on toggleExample
-      CircleProgress(:visible="state.timerIsActive" @animationEnd="toggleNextExample" :isStatic="false")
-        //- (@animationEnd="" :isStatic="false" :animationDuration="" :progressPercent="30")
-        //- if :animationDuration then animated circle
 
     //- TODO 7:5 ratio media
 
