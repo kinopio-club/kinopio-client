@@ -1,11 +1,36 @@
 <script setup>
-// import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+const vPauseAnimation = {
+  mounted (el) {
+    const pauseAnimation = () => {
+      el.style.animationPlayState = 'paused'
+    }
+    const resumeAnimation = () => {
+      el.style.animationPlayState = 'running'
+    }
+    el.addEventListener('pointerover', pauseAnimation)
+    el.addEventListener('pointerout', resumeAnimation)
+    el._pauseAnimation = {
+      pauseAnimation,
+      resumeAnimation
+    }
+  },
+  unmounted (el) {
+    if (el._pauseAnimation) {
+      el.removeEventListener('pointerover', el._pauseAnimation.pauseAnimation)
+      el.removeEventListener('pointerout', el._pauseAnimation.resumeAnimation)
+      delete el._pauseAnimation
+    }
+  }
+}
+defineExpose({ vPauseAnimation })
 </script>
 
 <template lang="pug">
-//- TODO horizontal marquee row, component
 section.features
-  p ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Settings ● Comments ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions ● Trackable Todos ● Personal Templates ● Snap to Grid
+  .row.horizontal
+    p.marquee(v-pause-animation) Featuring ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Settings ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● Collect Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions ● Trackable Todos ● Personal Templates ● Snap to Grid ● Other secret features may be available… (don’t tell anyone)
   p
     img.updated.icon(src="@/assets/updated.gif")
     span New features are being added all the time in{{' '}}
@@ -14,5 +39,30 @@ section.features
 </template>
 
 <style lang="stylus">
-// .component-name
+section.features
+  .horizontal
+    display flex
+    flex-wrap nowrap
+    overflow-x hidden
+    max-width 100%
+    p
+      flex 0 0 auto
+      margin 0
+  .marquee
+    overflow-x hidden
+    animation-name marquee
+    animation-direction linear
+    animation-timing-function linear
+    animation-iteration-count infinite
+    animation-duration 60s
+    // &:nth-child(2)
+    //   animation-duration 30s
+    // &:nth-child(3)
+    //   animation-duration 35s
+
+@keyframes marquee
+  0%
+    transform translate(100px)
+  100%
+    transform translate(-100%)
 </style>
