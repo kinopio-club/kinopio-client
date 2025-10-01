@@ -22,14 +22,6 @@ useHead({
   }]
 })
 
-// .row.horizontal.marquee(v-pause-animation)
-// p ● Import and Export ● Save as Pdf ● Public Api ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions
-
-// > .row,
-// section > .row
-// .row-wrap > .row
-//   margin-top 10px
-
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
