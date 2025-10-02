@@ -1,14 +1,16 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import Space from '@/views/Space.vue'
+import About from '@/views/About.vue'
+
 import consts from './consts.js'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+const router = {
+  history: consts.pageIsPrerendered ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
   // server level redirects in _redirects
 
@@ -29,13 +31,19 @@ const router = createRouter({
       }
     }, {
       path: '/',
-      alias: '/app',
+      alias: '/about',
+      name: 'about',
+      component: About
+    }, {
+      path: '/app',
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        if (consts.pageIsApp) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        }
         next()
       }
     }, {
@@ -50,8 +58,8 @@ const router = createRouter({
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
         }
-        next()
         history.replaceState({}, document.title, window.location.origin)
+        next()
       }
     }, {
       path: '/update-arena-access-token',
@@ -214,12 +222,7 @@ const router = createRouter({
       }
     }
   ]
-})
-
-router.beforeEach(async (to, from) => {
-  const userStore = useUserStore()
-  await userStore.initializeUser()
-})
+}
 
 export default router
 

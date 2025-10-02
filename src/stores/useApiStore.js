@@ -12,7 +12,6 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
-import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 

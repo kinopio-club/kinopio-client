@@ -25,7 +25,6 @@ import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
-import defer from 'lodash-es/defer'
 import throttle from 'lodash-es/throttle'
 import dayjs from 'dayjs'
 
@@ -425,7 +424,9 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       isLoadingRemoteSpace = false
       space.connections = utils.migrationConnections(space.connections)
-      globalStore.spaceZoomPercent = 100
+      if (!globalStore.isEmbedMode) {
+        globalStore.spaceZoomPercent = 100
+      }
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
