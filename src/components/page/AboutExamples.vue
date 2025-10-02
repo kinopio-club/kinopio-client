@@ -30,23 +30,6 @@ const toggleExample = (value) => {
   resetVideos()
   playVideo(value)
 }
-const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
-const togglePrevExample = () => {
-  const prevIndex = examples.findIndex(example => example === state.example)
-  let index = prevIndex - 1
-  if (index < 0) {
-    index = examples.length - 1
-  }
-  toggleExample(examples[index])
-}
-const toggleNextExample = () => {
-  const prevIndex = examples.findIndex(example => example === state.example)
-  let index = prevIndex + 1
-  if (index > examples.length - 1) {
-    index = 0
-  }
-  toggleExample(examples[index])
-}
 </script>
 
 <template lang="pug">
@@ -54,12 +37,6 @@ section.examples(ref="parentElement")
   h2 Create Lively Freeform Spaces
   .examples-wrap
     .row
-      .segmented-buttons
-        button.small-button.translucent-button(@click="togglePrevExample")
-          img.icon.left-arrow(src="@/assets/down-arrow.svg")
-        button.small-button.translucent-button(@click="toggleNextExample")
-          img.icon.right-arrow(src="@/assets/down-arrow.svg")
-
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
