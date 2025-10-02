@@ -1386,7 +1386,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :disabled="!canEditCard"
         ref="nameElement"
         rows="1"
-        placeholder="Type here, or paste a URL"
+        placeholder="Type here, /, or paste a URL"
         v-model="name"
         @keydown.prevent.enter.exact
 
