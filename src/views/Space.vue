@@ -725,6 +725,7 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsDraggingBox = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
+  globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   prevCursor = undefined
   globalStore.clearDraggingItems()

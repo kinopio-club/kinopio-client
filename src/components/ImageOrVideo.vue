@@ -67,6 +67,8 @@ const state = reactive({
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
 const isInteracting = computed(() => {
+  const isResizing = globalStore.currentUserIsResizingCardIds.includes(props.cardId)
+  if (isResizing) { return }
   const isInteractingWithItem = globalStore.getIsInteractingWithItem
   const isPainting = globalStore.currentUserIsPainting
   const isPanning = globalStore.currentUserIsPanningReady
@@ -155,6 +157,7 @@ const playGif = () => {
   // remove pause canvas
   if (!imageIsGif.value) { return }
   const canvas = canvasElement()
+  if (!canvas) { return }
   canvas.remove()
   imageElement.value.style.opacity = 1
 }
