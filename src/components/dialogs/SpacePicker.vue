@@ -8,6 +8,7 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import User from '@/components/User.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import Loader from '@/components/Loader.vue'
 import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
@@ -45,7 +46,11 @@ const props = defineProps({
   position: Object,
   search: String,
   cursorPosition: Number,
-  shouldShowNewSpace: Boolean
+  shouldShowNewSpace: Boolean,
+
+  shouldIncludeCardOrBoxActions: Boolean,
+  cards: Array,
+  tagsInCard: Array
 })
 watch(() => props.visible, async (value, prevValue) => {
   await nextTick()
@@ -234,9 +239,12 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
         span To link to a space,
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+  //- item actions
+  section.options(v-if="props.shouldIncludeCardOrBoxActions && !props.search")
+    CardOrBoxActions(:visible="true" :cards="props.cards" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
   //- New Space
-  section.options(v-if="shouldShowNewSpace")
-    .row.title-row
+  section.options(v-if="props.shouldShowNewSpace")
+    .row
       button.small-button(@click="toggleNewSpaceIsVisible" :class="{ active: state.newSpaceIsVisible }")
         img.icon(src="@/assets/add.svg")
     section.subsection(v-if="state.newSpaceIsVisible")
@@ -293,4 +301,9 @@ dialog.space-picker
   .info-section
     padding-bottom 4px
     border-top 0
+
+  // CardOrBoxActions
+  .subsection.style-actions
+    background-color var(--secondary-background)
+    border none
 </style>
