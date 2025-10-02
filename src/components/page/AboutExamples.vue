@@ -17,12 +17,14 @@ const state = reactive({
 const resetVideos = () => {
   const videoElements = parentElement.value.querySelectorAll('video')
   videoElements.forEach(videoElement => {
+    if (!videoElement) { return }
     videoElement.pause()
     videoElement.currentTime = 0
   })
 }
 const playVideo = (value) => {
   const videoElement = parentElement.value.querySelector(`.example.${value} video`)
+  if (!videoElement) { return }
   videoElement.play()
 }
 const toggleExample = (value) => {
