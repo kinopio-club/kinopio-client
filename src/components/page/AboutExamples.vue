@@ -3,12 +3,32 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import CircleProgress from '@/components/CircleProgress.vue'
 
+// mounted pause all videos
+const parentElement = ref(null)
+
+onMounted(() => {
+  resetVideos()
+})
+
 const state = reactive({
   example: 'whiteboard'
 })
 
+const resetVideos = () => {
+  const videoElements = parentElement.value.querySelectorAll('video')
+  videoElements.forEach(videoElement => {
+    videoElement.pause()
+    videoElement.currentTime = 0
+  })
+}
+const playVideo = (value) => {
+  const videoElement = parentElement.value.querySelector(`.example.${value} video`)
+  videoElement.play()
+}
 const toggleExample = (value) => {
   state.example = value
+  resetVideos()
+  playVideo(value)
 }
 const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
 const togglePrevExample = () => {
@@ -17,7 +37,7 @@ const togglePrevExample = () => {
   if (index < 0) {
     index = examples.length - 1
   }
-  state.example = examples[index]
+  toggleExample(examples[index])
 }
 const toggleNextExample = () => {
   const prevIndex = examples.findIndex(example => example === state.example)
@@ -25,12 +45,12 @@ const toggleNextExample = () => {
   if (index > examples.length - 1) {
     index = 0
   }
-  state.example = examples[index]
+  toggleExample(examples[index])
 }
 </script>
 
 <template lang="pug">
-section.examples
+section.examples(ref="parentElement")
   h2 Create Lively Freeform Spaces
   .examples-wrap
     .row
@@ -59,13 +79,14 @@ section.examples
       span and lots more.
 
     //- TODO 7:5 ratio media
+    //- 970
 
-    .example(v-show="state.example === 'whiteboard'")
+    .example.whiteboard(v-show="state.example === 'whiteboard'")
       img(src="@/assets/page/about/computing-happiness.webp")
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate together in real-time.
 
-    .example(v-show="state.example === 'mindmap'")
+    .example.mindmap(v-show="state.example === 'mindmap'")
       //- img(src="@/assets/page/about/m3.png")
       video(autoplay loop muted playsinline)
         source(src="@/assets/page/about/mindmap.mp4")
@@ -82,11 +103,11 @@ section.examples
       p Unlike traditional mind maps and outliners, Kinopio lets you make your spaces truly yours with backgrounds, images, GIFs, MP3s, Youtube or Spotify URLs.
       p Draw anywhere to decorate or emphasize specific areas.
 
-    .example(v-show="state.example === 'moodboard'")
+    .example.moodboard(v-show="state.example === 'moodboard'")
 
-      img(src="@/assets/page/about/mo3.png")
+      //- img(src="@/assets/page/about/mo3.png")
       video(autoplay loop muted playsinline)
-        source(src="@/assets/page/about/mo4.mp4")
+        source(src="@/assets/page/about/mo5.mp4")
 
       //- HONDA? , inspiration
       //- https://kinopio.club/magical-realism-74NPft-m1bYFn5k2yGIXc
@@ -97,7 +118,7 @@ section.examples
       p Collect quotes and visual inspiration to guide the direction of your next big project. Real-time collaboration and comment cards help keep everyone aligned.
       p You can also import your Are.na channels.
 
-    .example(v-show="state.example === 'research'")
+    .example.research(v-show="state.example === 'research'")
       //- https://kinopio.club/a-bright-house-2pt3FR8E0m1D9Qe-fL1JM
       //- ? storyboarding https://kinopio.club/--ndNatW7S78rCwo5dhaPU7
       //- OLA https://kinopio.club/kinopio-content--0heepkAZIOuVyR6m7ZLO0
@@ -105,7 +126,7 @@ section.examples
       p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination. Invite collaborators to collect ideas and comments.
       p Use backlinked [[tags]] to connect themes across spaces.
 
-    .example(v-show="state.example === 'plan'")
+    .example.plan(v-show="state.example === 'plan'")
       //- https://kinopio.club/macrowave-beAvHVb6cD0jZ-D_ix5rC
       //- https://kinopio.club/spidersona---aura-BF-XTv6TqJgPwq0Hb7ab3 storyboarding
       //- https://kinopio.club/medical-device-software-tEslm-8njA0Q3QzpYoIyw
@@ -113,13 +134,13 @@ section.examples
       //- https://kinopio.club/-futureland-ios-app-stJZxX-JraefgRDzSKcXu
       p Build diagrams, storyboards, and specs, that can adapt to changes midway through a project. Move from idea to actions by turning cards or boxes into trackable Todos.
 
-    .example(v-show="state.example === 'present'")
+    .example.present(v-show="state.example === 'present'")
       //- https://kinopio.club/kn-glue-No2GvJ3kD7NUnJxihn6LG ?
       //- https://kinopio.club/robots---personality-with-math-video-KI1vsib33pLTQlbWCXqAZ
       //- https://kinopio.club/climate-ai-brain-dumps-ateHKvDeiAHNJRzaPmBZE
       p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them using the minimap.
 
-    .example(v-show="state.example === 'notes'")
+    .example.notes(v-show="state.example === 'notes'")
       //- https://kinopio.club/the-sketchbook-practice-xVBQM1oYj8bLwrK9L523H
       //- https://kinopio.club/-crochet-diary-4h1bgB0tQ_S2QD7P0Iyp1
       //- https://kinopio.club/primitives-P2fS1q3b4lV1sx50fi_0E
@@ -127,7 +148,7 @@ section.examples
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs.
 
-    .example(v-show="state.example === 'websites'")
+    .example.websites(v-show="state.example === 'websites'")
       //- https://kinopio.club/for-my-love-9_5Jwu0MVNDP7wLUfXVgq
       //- https://kinopio.club/happy-birthday--t7mDxRy1g1n8WN8o_VYhV
       //- https://kinopio.club/happy-birthday-mll--KT4r9y7SwV-kBBme-R0P2
