@@ -66,7 +66,10 @@ section.examples
       p Invite friends and group members to collaborate together in real-time.
 
     .example(v-show="state.example === 'mindmap'")
-      //- https://kinopio.club/computing-happiness-SrLvfAPsBIsor4g9iIW7D
+      //- img(src="@/assets/page/about/m3.png")
+      video(autoplay loop muted playsinline)
+        source(src="@/assets/page/about/mindmap.mp4")
+
       //- https://kinopio.club/konmari-7xxjlZ-gsZ6e2j0vUxBxF
       //- https://kinopio.club/biz-plan-IJwxi0Swu7SksLUenX7N7
       //- https://kinopio.club/trying-to-figure-out-my-obsessions-trend-gQVq_Fws0mWCCBbShtccF
@@ -80,13 +83,18 @@ section.examples
       p Draw anywhere to decorate or emphasize specific areas.
 
     .example(v-show="state.example === 'moodboard'")
+
+      img(src="@/assets/page/about/mo3.png")
+      video(autoplay loop muted playsinline)
+        source(src="@/assets/page/about/mo4.mp4")
+
       //- HONDA? , inspiration
       //- https://kinopio.club/magical-realism-74NPft-m1bYFn5k2yGIXc
       //- https://kinopio.club/tutorial-club-U5rh0oZrhVmSM8D5P19GG
       //- https://kinopio.club/tutorial-club-U5rh0oZrhVmSM8D5P19GG
       //- https://kinopio.club/georgette-EdTLKnh_nQMthXqchiFAL
 
-      p Collect quotes and visual inspiration to evoke a vibe and a direction for your next big project. Real-time collaboration and comment cards help keep everyone aligned.
+      p Collect quotes and visual inspiration to guide the direction of your next big project. Real-time collaboration and comment cards help keep everyone aligned.
       p You can also import your Are.na channels.
 
     .example(v-show="state.example === 'research'")
