@@ -27,9 +27,10 @@ const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const newSpaceNameElement = ref(null)
+const resultsElement = ref(null)
 
 onMounted(() => {
-  window.addEventListener('resize', updateDialogHeight)
+  window.addEventListener('resize', updateHeights)
 })
 
 const emit = defineEmits(['selectSpace'])
@@ -56,7 +57,7 @@ watch(() => props.visible, async (value, prevValue) => {
   await nextTick()
   clearState()
   if (value) {
-    updateDialogHeight()
+    updateHeights()
     updateSpaces()
     scrollIntoView()
     state.isLoading = props.loading
@@ -72,14 +73,26 @@ const state = reactive({
   newSpaceIsVisible: false,
   newSpaceName: '',
   isLoadingNewSpace: false,
-  dialogHeight: null
+  dialogHeight: null,
+  resultsSectionHeight: null
 })
 
+const updateHeights = async () => {
+  updateDialogHeight()
+  await nextTick()
+  updateResultsSectionHeight()
+}
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+}
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
 }
 
 const parentDialog = computed(() => 'spacePicker')
@@ -244,9 +257,14 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
     CardOrBoxActions(:visible="true" :cards="props.cards" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
   //- New Space
   section.options(v-if="props.shouldShowNewSpace")
-    .row
+    .row.title-row
+      .search-info(v-if="parentIsCardDetails && !search && currentUserIsSignedIn")
+        img.icon.search(src="@/assets/search.svg")
+        span Type to search spaces
+      //- +
       button.small-button(@click="toggleNewSpaceIsVisible" :class="{ active: state.newSpaceIsVisible }")
         img.icon(src="@/assets/add.svg")
+
     section.subsection(v-if="state.newSpaceIsVisible")
       .row
         .button-wrap
@@ -256,13 +274,8 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
           span Create New Space
           Loader(:visible="state.isLoadingNewSpace")
 
-  //- Type to Search
-  section.info-section(v-if="parentIsCardDetails && !search && currentUserIsSignedIn")
-    p
-      img.icon.search(src="@/assets/search.svg")
-      span Type to search spaces {{search}}
   //- Space List
-  section.results-section(v-if="spaceListIsVisible")
+  section.results-section(v-if="spaceListIsVisible" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     Loader(:visible="loading")
     SpaceList(
       v-if="filteredSpaces.length"
@@ -274,6 +287,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       :search="search"
       @focusBeforeFirstItem="handleFocusBeforeFirstItem"
       :parentDialog="parentDialog"
+      :resultsSectionHeight="state.resultsSectionHeight"
     )
     .error-container(v-if="!filteredSpaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
@@ -285,8 +299,8 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 <style lang="stylus">
 dialog.space-picker
   min-height 150px
-  overflow auto
   .results-section
+    overflow auto
     padding-top 4px
     @media(max-height 700px)
       max-height 50vh
@@ -298,9 +312,6 @@ dialog.space-picker
     align-items center
     .user
       margin-right 6px
-  .info-section
-    padding-bottom 4px
-    border-top 0
 
   // CardOrBoxActions
   .subsection.style-actions
