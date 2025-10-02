@@ -276,7 +276,7 @@ const updatePositionInVisualViewport = () => {
     transition 0.2s opacity
     &.is-embed
       position absolute
-      right 0
+      right 8px
   &.is-mobile
     margin-bottom 10px
   &.is-mobile-standalone

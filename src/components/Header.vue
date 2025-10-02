@@ -595,8 +595,14 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
-    .right
-      SpaceUsers(:userDetailsIsInline="true")
+      .label-badge-row.row
+        .label-badge
+          span(:class="{'invisible': state.readOnlyJiggle}")
+            span Read Only
+          span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+            span Read Only
+    //- .right
+    //-   SpaceUsers(:userDetailsIsInline="true")
 
   //- standard
   nav(v-if="!isEmbedMode")
