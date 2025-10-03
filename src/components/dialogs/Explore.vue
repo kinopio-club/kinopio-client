@@ -225,8 +225,8 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
         span ?
     OfflineBadge
-    .row(v-if="props.loading")
-      Loader(:isSmall="true" :visible="props.loading")
+    //- .row(v-if="props.loading")
+    //-   Loader(:isSmall="true" :visible="props.loading")
     .row(v-if="props.errorIsLoading")
       .badge.danger
         p (シ_ _)シ Something went wrong, Please try again or contact support
