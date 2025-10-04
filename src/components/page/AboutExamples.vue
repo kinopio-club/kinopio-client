@@ -66,52 +66,29 @@ section.examples(ref="parentElement")
       p Invite friends and group members to collaborate together in real-time.
 
     .example.mindmap(v-show="state.example === 'mindmap'")
-      //- img(src="@/assets/page/about/m3.png")
       video(autoplay loop muted playsinline)
         source(src="@/assets/page/about/mindmap.mp4")
-
-      //- https://kinopio.club/konmari-7xxjlZ-gsZ6e2j0vUxBxF
-      //- https://kinopio.club/biz-plan-IJwxi0Swu7SksLUenX7N7
-      //- https://kinopio.club/trying-to-figure-out-my-obsessions-trend-gQVq_Fws0mWCCBbShtccF
-      //- https://kinopio.club/-fields-of-somber-cabbages--hzcK2a-se8nuAHz2gG2-y
-      //- https://kinopio.club/strategy-vs-feeling-9aOChzb29sXRRTn_ssFfN
-
-            //- https://kinopio.club/engine-structure-CG89gGoo8awDT9xM2Vtb8
-
-      //- bk image
       p Unlike traditional mind maps and outliners, Kinopio lets you make your spaces truly yours with backgrounds, images, GIFs, MP3s, Youtube or Spotify URLs.
       p Draw anywhere to decorate or emphasize specific areas.
 
     .example.moodboard(v-show="state.example === 'moodboard'")
-
-      //- img(src="@/assets/page/about/mo3.png")
       video(autoplay loop muted playsinline)
         source(src="@/assets/page/about/mo5.mp4")
-
-      //- HONDA? , inspiration
-      //- https://kinopio.club/magical-realism-74NPft-m1bYFn5k2yGIXc
-      //- https://kinopio.club/tutorial-club-U5rh0oZrhVmSM8D5P19GG
-      //- https://kinopio.club/tutorial-club-U5rh0oZrhVmSM8D5P19GG
-      //- https://kinopio.club/georgette-EdTLKnh_nQMthXqchiFAL
-
       p Collect quotes and visual inspiration to guide the direction of your next big project. Real-time collaboration and comment cards help keep everyone aligned.
       p You can also import your Are.na channels.
 
     .example.research(v-show="state.example === 'research'")
-      //- https://kinopio.club/a-bright-house-2pt3FR8E0m1D9Qe-fL1JM
-      //- ? storyboarding https://kinopio.club/--ndNatW7S78rCwo5dhaPU7
-      //- OLA https://kinopio.club/kinopio-content--0heepkAZIOuVyR6m7ZLO0
-      //- https://kinopio.club/companionability-art-and-accessibility-zRCRZ3DDF2quHk8CJ02ik
-      p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination. Invite collaborators to collect ideas and comments.
-      p Use backlinked [[tags]] to connect themes across spaces.
+      img(src="@/assets/page/about/r2.png")
+      p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination.
+      p Invite collaborators to collect ideas and comments. Use backlinked [[tags]] to connect themes across spaces.
 
     .example.plan(v-show="state.example === 'plan'")
-      //- https://kinopio.club/macrowave-beAvHVb6cD0jZ-D_ix5rC
-      //- https://kinopio.club/spidersona---aura-BF-XTv6TqJgPwq0Hb7ab3 storyboarding
-      //- https://kinopio.club/medical-device-software-tEslm-8njA0Q3QzpYoIyw
-      //- https://kinopio.club/cybersecurity-certs-m1KW0HNAWzTT1LnVXcZip
-      //- https://kinopio.club/-futureland-ios-app-stJZxX-JraefgRDzSKcXu
-      p Build diagrams, storyboards, and specs, that can adapt to changes midway through a project. Move from idea to actions by turning cards or boxes into trackable Todos.
+      video(autoplay loop muted playsinline)
+        source(src="@/assets/page/about/plan-boxes.mp4")
+        //- update w box and card snapping
+        //- todo doing done
+
+      p Build diagrams, storyboards, specs, and plans, that can adapt to changes midway through a project. Move from idea to actions by turning cards or boxes into trackable Todos.
 
     .example.present(v-show="state.example === 'present'")
       //- https://kinopio.club/kn-glue-No2GvJ3kD7NUnJxihn6LG ?
@@ -123,7 +100,15 @@ section.examples(ref="parentElement")
       //- https://kinopio.club/the-sketchbook-practice-xVBQM1oYj8bLwrK9L523H
       //- https://kinopio.club/-crochet-diary-4h1bgB0tQ_S2QD7P0Iyp1
       //- https://kinopio.club/primitives-P2fS1q3b4lV1sx50fi_0E
+      //- https://kinopio.club/musings-on-slow-life-v1dmnw5ts800kWjsgSX9S
       //- https://kinopio.club/-skincare-journal-_3EaIFjJi87YO8jIMBni6
+
+      //- https://kinopio.club/a-bright-house-2pt3FR8E0m1D9Qe-fL1JM
+      //- ? storyboarding https://kinopio.club/--ndNatW7S78rCwo5dhaPU7
+      //- OLA https://kinopio.club/kinopio-content--0heepkAZIOuVyR6m7ZLO0
+      //- https://kinopio.club/companionability-art-and-accessibility-zRCRZ3DDF2quHk8CJ02ik
+      //- https://kinopio.club/mejor-branding-board-bvuDxO9wAEhnj1Sww6qw9
+
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs.
 
@@ -138,6 +123,7 @@ section.examples(ref="parentElement")
       //- https://kinopio.club/happy-33rd-sandy-3-tEadBTIaknNWe5lPci-cD
       //- https://kinopio.club/personal-page--zo6_3wXV6ou5aKbiv_2j0
       //- https://kinopio.club/portfolio-bdo7hdjaRE9wY_yb99RVZ
+      //- https://kinopio.club/link-in-bio-Vn7WpQst9migsCwpEpGMo
       p Share uniquely personal birthday cards, about pages, and your portfolio. Spaces are private by default, but can be set to public read-only, or open to comments from everyone.
       p
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
