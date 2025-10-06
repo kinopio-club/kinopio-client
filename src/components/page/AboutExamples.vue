@@ -91,26 +91,15 @@ section.examples(ref="parentElement")
       p Build diagrams, storyboards, specs, and plans, that can adapt to changes midway through a project. Move from idea to actions by turning cards or boxes into trackable Todos.
 
     .example.present(v-show="state.example === 'present'")
-      //- https://kinopio.club/kn-glue-No2GvJ3kD7NUnJxihn6LG ?
-      //- https://kinopio.club/robots---personality-with-math-video-KI1vsib33pLTQlbWCXqAZ
-      //- https://kinopio.club/climate-ai-brain-dumps-ateHKvDeiAHNJRzaPmBZE
-      p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them using the minimap.
+      video(autoplay loop muted playsinline)
+        source(src="@/assets/page/about/s1.mp4")
+      p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them with the minimap.
 
     .example.notes(v-show="state.example === 'notes'")
-      //- https://kinopio.club/the-sketchbook-practice-xVBQM1oYj8bLwrK9L523H
-      //- https://kinopio.club/-crochet-diary-4h1bgB0tQ_S2QD7P0Iyp1
-      //- https://kinopio.club/primitives-P2fS1q3b4lV1sx50fi_0E
-      //- https://kinopio.club/musings-on-slow-life-v1dmnw5ts800kWjsgSX9S
-      //- https://kinopio.club/-skincare-journal-_3EaIFjJi87YO8jIMBni6
-
-      //- https://kinopio.club/a-bright-house-2pt3FR8E0m1D9Qe-fL1JM
-      //- ? storyboarding https://kinopio.club/--ndNatW7S78rCwo5dhaPU7
-      //- OLA https://kinopio.club/kinopio-content--0heepkAZIOuVyR6m7ZLO0
-      //- https://kinopio.club/companionability-art-and-accessibility-zRCRZ3DDF2quHk8CJ02ik
-      //- https://kinopio.club/mejor-branding-board-bvuDxO9wAEhnj1Sww6qw9
-
+      video(autoplay loop muted playsinline)
+        source(src="@/assets/page/about/n1.mp4")
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
-      p Browser extensions let you quick capture ideas and URLs.
+      p Browser extensions let you quick capture ideas and URLs. If you can see it on the internet, you can put it inside Kinopio.
 
     .example.websites(v-show="state.example === 'websites'")
       //- https://kinopio.club/for-my-love-9_5Jwu0MVNDP7wLUfXVgq
