@@ -6,6 +6,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useHead } from '@unhead/vue'
 
 import Header from '@/components/page/Header.vue'
+import AboutHowTo from '@/components/page/AboutHowTo.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
@@ -61,7 +62,8 @@ const toggleAppsAndExtensionsIsVisible = () => {
     .page-wrap
       section.intro
         h1.wordmark Kinopio
-        //- TODO vid, showing multiple authors, hello space?
+        //- ? TODO vid, showing multiple authors, hello space?
+        //- TODO or static img showing multiple authors. wide
         img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
         p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
         p No sign up required.
@@ -74,6 +76,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
             router-link(to="/app")
               button.success Open Kinopio
 
+      AboutHowTo
       AboutExamples
       AboutFeatures
 
