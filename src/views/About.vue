@@ -76,7 +76,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
             router-link(to="/app")
               button.success Open Kinopio
 
-      AboutHowTo
+      //- AboutHowTo
       AboutExamples
       AboutFeatures
 
@@ -131,7 +131,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
               span .
 
         details
-          summary Why doesn't Kinopio Use AI?
+          summary Why doesn't Kinopio have AI features?
           section.subsection
             p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
             p
