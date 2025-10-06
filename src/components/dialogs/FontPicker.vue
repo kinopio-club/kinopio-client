@@ -58,10 +58,32 @@ const items = computed(() => {
 
 // fonts
 
+const hType = (name) => {
+  const h1 = utils.markdown().h1Pattern.exec(name)
+  const h2 = utils.markdown().h2Pattern.exec(name)
+  const h3 = utils.markdown().h3Pattern.exec(name)
+  let type
+  if (h1) {
+    type = 'h1'
+  } else if (h2) {
+    type = 'h2'
+  } else if (h3) {
+    type = 'h3'
+  }
+  return type
+}
+const headerFonts = computed(() => {
+  return items.value.filter(item => {
+    return hType(item.name)
+  })
+})
+
 const fontIsSelected = (font) => {
-  return items.value.find(item => {
+  return headerFonts.value.find(item => {
     const currentFontId = item.headerFontId || 0
-    state.previewFontId = currentFontId
+    if (!state.previewFontId) {
+      state.previewFontId = currentFontId
+    }
     return currentFontId === font.id
   })
 }
@@ -72,7 +94,7 @@ const selectFont = (font) => {
 // font size
 
 const isFontSize = (size) => {
-  return items.value.find(item => {
+  return headerFonts.value.find(item => {
     const currentFontSize = item.headerFontSize || 's'
     return currentFontSize === size
   })
@@ -99,18 +121,8 @@ const currentFontSizeString = computed(() => {
       h3: 36
     }
   }
-  const name = items.value[0].name
-  const h1 = utils.markdown().h1Pattern.exec(name)
-  const h2 = utils.markdown().h2Pattern.exec(name)
-  const h3 = utils.markdown().h3Pattern.exec(name)
-  let type
-  if (h1) {
-    type = 'h1'
-  } else if (h2) {
-    type = 'h2'
-  } else if (h3) {
-    type = 'h3'
-  }
+  const name = headerFonts.value[0].name
+  const type = hType(name)
   const currentFontSize = items.value[0].headerFontSize || 's'
   const size = sizes[currentFontSize][type]
   return size + 'px'
@@ -120,7 +132,7 @@ const currentFontSizeString = computed(() => {
 
 const previewSegments = computed(() => {
   let preview
-  items.value.some(item => {
+  headerFonts.value.some(item => {
     const name = utils.truncated(item.name)
     const h1 = utils.markdown().h1Pattern.exec(name)
     const h2 = utils.markdown().h2Pattern.exec(name)
