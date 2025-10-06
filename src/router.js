@@ -10,7 +10,7 @@ import About from '@/views/About.vue'
 import consts from './consts.js'
 
 const router = {
-  history: consts.pageIsPrerendered ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
+  history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
   // server level redirects in _redirects
 
@@ -39,7 +39,7 @@ const router = {
       name: 'space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        if (consts.pageIsApp) {
+        if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
           const urlParams = new URLSearchParams(window.location.search)
           globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')

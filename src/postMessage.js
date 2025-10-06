@@ -5,7 +5,7 @@ import debounce from 'lodash-es/debounce'
 
 const showDebugMessages = false
 
-if (consts.pageIsApp) {
+if (!consts.isStaticPrerenderingPage) {
   window.addEventListener('message', (event) => {
     console.info('🛫 received postmessage', event)
     const isAddPage = window.location.pathname === '/add'
