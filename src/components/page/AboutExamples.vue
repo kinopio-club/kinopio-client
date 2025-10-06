@@ -113,7 +113,11 @@ section.examples(ref="parentElement")
       //- https://kinopio.club/personal-page--zo6_3wXV6ou5aKbiv_2j0
       //- https://kinopio.club/portfolio-bdo7hdjaRE9wY_yb99RVZ
       //- https://kinopio.club/link-in-bio-Vn7WpQst9migsCwpEpGMo
-      p Share uniquely personal birthday cards, about pages, and your portfolio. Spaces are private by default, but can be set to public read-only, or open to comments from everyone.
+      //- img(src="@/assets/page/about/w1.webp")
+      video(autoplay loop muted playsinline)
+        source(src="@/assets/page/about/w2.mp4")
+
+      p Share uniquely personal birthday cards, hobby sites, about pages, and your portfolio. Spaces are private by default, but can be set to public read-only, or open to comments from everyone.
       p
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
         span Add the spaces you're especially proud of to Explore to share them with the community.
