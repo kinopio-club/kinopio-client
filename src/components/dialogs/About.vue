@@ -125,7 +125,8 @@ const changeSpaceToRoadmap = () => {
 dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section
     .row.title-row
-      p About Kinopio
+      a(href="/about")
+        button.small-button About Kinopio
       span
         button.small-button(@click.left="refreshBrowser" title="Refresh")
           img.refresh.icon(src="@/assets/refresh.svg")
