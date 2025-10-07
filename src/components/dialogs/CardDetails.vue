@@ -948,7 +948,7 @@ const otherCard = computed(() => {
   const item = globalStore.otherCardById(card.value.linkToCardId)
   return item
 })
-const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
+const otherCardUrl = computed(() => utils.urlFromSpaceAndItem({ itemId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
 
 // other space
 
