@@ -1275,7 +1275,7 @@ const updatePicker = (event) => {
     showSpacePicker()
   } else if (cursorStart === 0) {
     return
-  } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
+  } else if (keyIsLettterOrNumber && isInsideSlashCommand && !state.space.pickerIsVisible) {
     showSpacePicker()
   } else if (key === '[' && previousCharacter === '[') {
     showTagPicker()
@@ -1386,7 +1386,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :disabled="!canEditCard"
         ref="nameElement"
         rows="1"
-        placeholder="Type here, or paste a URL"
+        placeholder="Type here, /, or paste a URL"
         v-model="name"
         @keydown.prevent.enter.exact
 
@@ -1451,6 +1451,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :shouldShowNewSpace="currentUserIsSignedIn"
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
+        :shouldIncludeCardOrBoxActions="canEditCard"
+        :cards="[card]"
+        :tagsInCard="tagsInCard"
       )
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")

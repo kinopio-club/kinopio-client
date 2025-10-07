@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite-ssg build",
+    "build-env-development": "cross-env MODE=development vite-ssg build",
     "preview": "vite preview",
+    "build-dev": "nodemon --ignore dist --ext vue,styl,js,html --exec \"npm run build-env-development && npm run preview\"",
     "lint": "eslint src --ext .js,.vue",
     "test": "vitest"
   },
@@ -39,11 +41,13 @@
     "@vue/eslint-config-standard": "^8.0.1",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.2",
+    "cross-env": "^10.0.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
     "jsdom": "^26.1.0",
     "lint-staged": "^13.2.1",
+    "nodemon": "^3.1.10",
     "postcss": "^8.4.31",
     "pug": "^3.0.3",
     "stylus": "^0.63",
@@ -51,6 +55,7 @@
     "vite": "^6.3.6",
     "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-sitemap": "^0.7.1",
+    "vite-ssg": "^28.0.0",
     "vitest": "^3.2.4",
     "yorkie": "^2.0.0"
   },
