@@ -68,6 +68,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
         p No sign up required.
         .row
           .button-wrap#download
+            //- if not open, scrolldown a bit first  (325px), scroll into view
             button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
               span Apps
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")

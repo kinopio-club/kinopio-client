@@ -83,6 +83,7 @@ section.examples(ref="parentElement")
       p Invite collaborators to collect ideas and comments. Use backlinked [[tags]] to connect themes across spaces.
 
     .example.plan(v-show="state.example === 'plan'")
+      //- TODO redo
       video(autoplay loop muted playsinline)
         source(src="@/assets/page/about/plan-boxes.mp4")
         //- update w box and card snapping
@@ -98,26 +99,16 @@ section.examples(ref="parentElement")
     .example.notes(v-show="state.example === 'notes'")
       video(autoplay loop muted playsinline)
         source(src="@/assets/page/about/n1.mp4")
+      //- TODO REDO after embed card fixes
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs. If you can see it on the internet, you can put it inside Kinopio.
 
     .example.websites(v-show="state.example === 'websites'")
-      //- https://kinopio.club/for-my-love-9_5Jwu0MVNDP7wLUfXVgq
-      //- https://kinopio.club/happy-birthday--t7mDxRy1g1n8WN8o_VYhV
-      //- https://kinopio.club/happy-birthday-mll--KT4r9y7SwV-kBBme-R0P2
-      //- https://kinopio.club/-recipe-diary-VvppHTO84kBFu6Pq-LpA3
-      //- https://kinopio.club/ila-hype-board-eLJ3LuzB6HepDY4Ky_HXq
-      //- https://kinopio.club/personal-page--zo6_3wXV6ou5aKbiv_2j0
-      //- https://kinopio.club/true-blue--ktSBs7v7U0zL69FJblcxD
-      //- https://kinopio.club/happy-33rd-sandy-3-tEadBTIaknNWe5lPci-cD
-      //- https://kinopio.club/personal-page--zo6_3wXV6ou5aKbiv_2j0
-      //- https://kinopio.club/portfolio-bdo7hdjaRE9wY_yb99RVZ
-      //- https://kinopio.club/link-in-bio-Vn7WpQst9migsCwpEpGMo
-      //- img(src="@/assets/page/about/w1.webp")
       video(autoplay loop muted playsinline)
-        source(src="@/assets/page/about/w2.mp4")
-
-      p Share uniquely personal birthday cards, hobby sites, about pages, and your portfolio. Spaces are private by default, but can be set to public read-only, or open to comments from everyone.
+        source(src="@/assets/page/about/w3.mp4")
+        //- https://kinopio.club/october-5-2025-gpmChgJmhN4RaNR2BvVEl
+      p Share uniquely personal webpages to celebrate birthdays, share hobbies, mixtapes, about pages, and portfolios.
+      p Spaces are private by default and invitees don't need an account to view, but you can also set spaces to be public read-only, or open to comments from everyone.
       p
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
         span Add the spaces you're especially proud of to Explore to share them with the community.
