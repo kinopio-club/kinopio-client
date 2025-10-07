@@ -261,7 +261,7 @@ const users = computed(() => {
 })
 
 const spaceName = computed(() => spaceStore.name)
-const isSpacePage = computed(() => globalStore.getIsSpacePage)
+const isSpacePage = computed(() => globalStore.isSpacePage)
 
 // styles and position
 
@@ -781,7 +781,7 @@ const updateSystemTheme = () => {
 // remote
 
 const broadcastUserLabelCursor = (event) => {
-  if (!globalStore.getIsSpacePage) { return }
+  if (!globalStore.isSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
   updates.userId = userStore.id

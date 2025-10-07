@@ -72,9 +72,11 @@ const updateDialogHeight = async () => {
 
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const changelogId = changelogStore.updates[0].id
-  cache.updatePrevReadChangelogId(changelogId)
-  changelogStore.isUpdated = false
+  const changelogId = changelogStore.updates[0]?.id
+  if (changelogId) {
+    cache.updatePrevReadChangelogId(changelogId)
+    changelogStore.isUpdated = false
+  }
   spaceStore.changeSpace(space)
   globalStore.addNotification({ message: 'Changelog space opened', type: 'success' })
 }

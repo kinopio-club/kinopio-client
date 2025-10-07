@@ -263,6 +263,7 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       globalStore.isLoadingSpace = true
+      globalStore.isSpacePage = true
       const spaceUrl = globalStore.spaceUrlToLoad
       const cachedSpaces = await cache.getAllSpaces()
       // restore from url

@@ -278,8 +278,7 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      const isSpacePage = globalStore.getIsSpacePage
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         const response = await fetch(`${consts.apiHost()}/meta/changelog`)
         return normalizeResponse(response)
@@ -425,10 +424,9 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting following users spaces')
         const options = await this.requestOptions({ method: 'GET' })
@@ -641,10 +639,9 @@ export const useApiStore = defineStore('api', {
 
     async getExploreSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting explore spaces')
         const options = await this.requestOptions({ method: 'GET' })
@@ -657,10 +654,9 @@ export const useApiStore = defineStore('api', {
 
     async getEveryoneSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting everyone spaces')
         const options = await this.requestOptions({ method: 'GET' })
@@ -672,10 +668,9 @@ export const useApiStore = defineStore('api', {
     },
     async getLiveSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting live spaces')
         const options = await this.requestOptions({ method: 'GET' })
