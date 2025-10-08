@@ -22,6 +22,12 @@ const userStore = useUserStore()
 const appsButtonElement = ref(null)
 let unsubscribes
 
+window.globalStore = useGlobalStore()
+window.themeStore = useThemeStore()
+if (consts.isDevelopment()) {
+  window.userStore = useUserStore()
+}
+
 useHead({
   link: [{
     rel: 'canonical',
@@ -237,7 +243,10 @@ header
 main.page
   user-select text
   padding-top 6rem
+  padding-bottom 4rem
   margin 0
+  color var(--primary)
+  background-color var(--primary-background)
   .page-wrap
     margin-left auto
     margin-right auto
@@ -263,7 +272,7 @@ main.page
         &:last-child
           margin-bottom 0
       a
-        color var(--text-link-on-light-background)
+        color var(--text-link)
         &:hover
           text-decoration none
 
