@@ -30,9 +30,9 @@ defineExpose({ vPauseAnimation })
 <template lang="pug">
 section.features
   .row.horizontal
-    p.marquee(v-pause-animation) Featuring ● Code Blocks and Markdown ● Real-Time Collaboration ● Privacy Settings ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces
+    p.marquee(v-pause-animation) Featuring ● Real-Time Collaboration ● Privacy Settings ● Code Blocks and Markdown ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces
   .row.horizontal
-    p.marquee.row-2(v-pause-animation) ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups
+    p.marquee.row-2(v-pause-animation) ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups
   .row.horizontal
     p.marquee.row-3(v-pause-animation) ● Quick Save to Inbox With Browser Extensions ● Trackable Todos ● Personal Templates ● Snap to Grid ● Other secret features may be available… (don’t tell anyone)
 

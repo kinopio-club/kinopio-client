@@ -116,10 +116,13 @@ section.examples(ref="parentElement")
 </template>
 
 <style lang="stylus">
+:root
+  --example-button-active-inset-shadow inset 0 1px 2px var(--primary-transparent)
+
 section.examples
   .examples-wrap
     max-width 520px
-    background-color #889e9a
+    background-color var(--example-background)
     border-radius var(--page-entity-radius)
     padding 2rem
     @media(max-width 460px)
@@ -140,4 +143,6 @@ section.examples
   video
     border-radius calc(var(--entity-radius) * 2)
     margin-bottom 0
+  .button-badge.badge.active
+    box-shadow var(--example-button-active-inset-shadow)
 </style>

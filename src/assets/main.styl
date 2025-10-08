@@ -190,6 +190,13 @@ body
     pointer-events none
     z-index 100
 
+.page
+  p
+    line-height 1.3
+  dialog
+    p
+      line-height 1.2 // default
+
 .space-border-radius
   border-radius calc(var(--entity-radius) * 2)
 
@@ -854,6 +861,10 @@ details[open]
     border-bottom-left-radius 0
 details + details
   margin-top 2px
+.is-dark-theme
+  details
+    summary
+      background-image url('right-arrow-invert.svg')
 
 li
   input[type="checkbox"]
