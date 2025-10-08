@@ -9,6 +9,10 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
 
+const props = defineProps({
+  isSmall: Boolean
+})
+
 const themeName = computed(() => userStore.theme)
 const updateTheme = (themeName) => {
   themeStore.updateTheme(themeName)
@@ -18,9 +22,9 @@ const updateTheme = (themeName) => {
 </script>
 
 <template lang="pug">
-button(:class="{active: themeName === 'light'}" @click="updateTheme('light')" title="Light Mode (T)")
+button(:class="{active: themeName === 'light', 'small-button': props.isSmall}" @click="updateTheme('light')" title="Light Mode (T)")
   img.icon.light(src="@/assets/light.svg")
-button(:class="{active: themeName === 'dark'}" @click="updateTheme('dark')" title="Dark Mode (T)")
+button(:class="{active: themeName === 'dark', 'small-button': props.isSmall}" @click="updateTheme('dark')" title="Dark Mode (T)")
   img.icon.dark(src="@/assets/dark.svg")
 </template>
 
