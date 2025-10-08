@@ -39,6 +39,7 @@ onMounted(() => {
   if (!consts.isStaticPrerenderingPage) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
+    themeStore.restoreTheme()
   }
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
