@@ -98,9 +98,9 @@ const toggleShouldDisplayIframe = (event) => {
   value = !value
   if (value) {
     globalStore.iframeIsVisibleForCardId = props.card.id
-    // addAutoplay()
+    addAutoplay()
   } else {
-    // removeAutoplay()
+    removeAutoplay()
     globalStore.iframeIsVisibleForCardId = ''
   }
 }
@@ -124,20 +124,20 @@ const iframeHeight = computed(() => {
 
 // autoplay
 
-// const addAutoplay = async () => {
-//   await nextTick()
-//   document.querySelector('.url-preview-card iframe').addEventListener('load', autoplay)
-// }
-// const removeAutoplay = () => {
-//   document.querySelector('.url-preview-card iframe').removeEventListener('load', autoplay)
-// }
-// const autoplay = async (event) => {
-//   await nextTick()
-//   // spotify
-//   setTimeout(() => {
-//     document.querySelector('.url-preview-card iframe').contentWindow.postMessage({ command: 'play' }, '*')
-//   }, '300')
-// }
+const addAutoplay = async () => {
+  await nextTick()
+  document.querySelector('.url-preview-card iframe').addEventListener('load', autoplay)
+}
+const removeAutoplay = () => {
+  document.querySelector('.url-preview-card iframe').removeEventListener('load', autoplay)
+}
+const autoplay = async (event) => {
+  await nextTick()
+  // spotify
+  setTimeout(() => {
+    document.querySelector('.url-preview-card iframe').contentWindow.postMessage({ command: 'play' }, '*')
+  }, '500') // delay used because iframe onload happens before spotify's js is fully ready
+}
 
 // twitter
 
