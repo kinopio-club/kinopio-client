@@ -143,10 +143,10 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    async handleServerOperationsError ({ error, response }) {
+    async handleServerOperationsError ({ error, response, queue }) {
       const globalStore = useGlobalStore()
       if (!response) {
-        console.error('🚒 handleServerOperationsError', error, response)
+        console.error('🚒 handleServerOperationsError', error, response, queue)
         globalStore.updateNotifyServerCouldNotSave(true)
         return
       }
@@ -201,7 +201,7 @@ export const useApiStore = defineStore('api', {
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)
-        this.handleServerOperationsError({ error, response })
+        this.handleServerOperationsError({ error, response, queue })
       } finally {
         globalStore.clearSendingQueue()
         cache.clearQueueBackup()
