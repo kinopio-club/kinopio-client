@@ -12,6 +12,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 import AboutMe from '@/components/AboutMe.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 import dayjs from 'dayjs'
 
