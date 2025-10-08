@@ -1200,9 +1200,12 @@ const startDraggingCard = (event) => {
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPanningReady) { return }
-  if (!canEditCard.value) { return }
   if (utils.isMultiTouch(event)) {
     isMultiTouch = true
+    return
+  }
+  if (!canEditCard.value) {
+    cardStore.incrementCardZ(props.card.id)
     return
   }
   event.preventDefault()
