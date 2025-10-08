@@ -518,12 +518,10 @@ export const useSpaceStore = defineStore('space', {
         const globalStore = useGlobalStore()
         const apiStore = useApiStore()
         const userStore = useUserStore()
-
-        console.log('🍇🍇🍇🍇', globalStore.isSpacePage, space)
-        // if (!globalStore.isSpacePage) {
-        //   window.location = urlFromSpaceAndItem({spaceId: space.id})
-        // }
-
+        if (!globalStore.isSpacePage) {
+          window.location = utils.urlFromSpaceAndItem({ spaceId: space.id })
+          return
+        }
         globalStore.updatePrevSpaceIdInSession(this.id)
         globalStore.updatePrevSpaceIdInSessionPagePosition()
         globalStore.clearAllInteractingWithAndSelected()
