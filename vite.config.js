@@ -62,8 +62,7 @@ export default defineConfig(async ({ command, mode }) => {
     '/discord',
     '/forum',
     '/help',
-    '/roadmap',
-    '/survey'
+    '/roadmap'
   ]
   // TODO
   // pascal sitemap rec: get all public spaces with content, mark each as user generated
@@ -138,7 +137,7 @@ export default defineConfig(async ({ command, mode }) => {
       }),
       // sitemap
       Sitemap({
-        hostname: 'http://kinopio.club',
+        hostname: 'https://kinopio.club',
         dynamicRoutes,
         readable: true,
         generateRobotsTxt: false
