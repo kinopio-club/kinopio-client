@@ -68,7 +68,7 @@ section.features
       animation-duration 40s
 @keyframes marquee
   0%
-    transform translate(100px)
+    transform translate(50px)
   100%
     transform translate(-100%)
 </style>
