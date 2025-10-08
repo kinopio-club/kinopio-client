@@ -323,6 +323,9 @@ const updatePositionInVisualViewport = () => {
     img.icon
       filter invert(1)
 
+  dialog
+    top initial !important
+
 footer
   .is-mobile-icon
     vertical-align 2px !important
