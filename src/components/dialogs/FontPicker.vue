@@ -121,7 +121,7 @@ const currentFontSizeString = computed(() => {
       h3: 36
     }
   }
-  const name = headerFonts.value[0].name
+  const name = headerFonts.value[0]?.name
   const type = hType(name)
   const currentFontSize = items.value[0].headerFontSize || 's'
   const size = sizes[currentFontSize][type]
