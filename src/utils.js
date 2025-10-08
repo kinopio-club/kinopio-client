@@ -2284,6 +2284,9 @@ export default {
     })
     return isVideo
   },
+  urlIsSpotify (url) {
+    return url.includes('https://open.spotify.com')
+  },
   fileNameFromUrl (url) {
     if (!url) { return }
     if (!this.urlIsFile(url)) { return }

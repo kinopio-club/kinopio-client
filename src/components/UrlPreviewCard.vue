@@ -115,6 +115,8 @@ const iframeHeight = computed(() => {
   let aspectRatio = 2 / 3
   if (utils.urlIsYoutube(url)) {
     aspectRatio = 9 / 15
+  } else if (utils.urlIsSpotify(url)) {
+    aspectRatio = 1 / 2
   }
   const height = Math.round(width * aspectRatio)
   return height
