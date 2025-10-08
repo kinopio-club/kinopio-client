@@ -13,6 +13,7 @@ import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 
 const globalStore = useGlobalStore()
+const appsButtonElement = ref(null)
 let unsubscribes
 
 useHead({
@@ -48,7 +49,22 @@ const closeAllDialogs = () => {
 const closeDialogs = () => {
   state.appsAndExtensionsIsVisible = false
 }
+const scrollButtonIntoView = () => {
+  if (state.appsAndExtensionsIsVisible) { return }
+  const dialogHeight = 300
+  const element = appsButtonElement.value
+  const rect = element.getBoundingClientRect()
+  const distanceToBottom = window.innerHeight - rect.bottom
+  const distanceToScroll = dialogHeight - distanceToBottom
+  if (distanceToScroll < 0) { return }
+  window.scrollBy({
+    top: distanceToScroll,
+    left: 0,
+    behavior: 'smooth'
+  })
+}
 const toggleAppsAndExtensionsIsVisible = () => {
+  scrollButtonIntoView()
   const isVisible = state.appsAndExtensionsIsVisible
   closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
@@ -69,7 +85,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
         .row
           .button-wrap#download
             //- if not open, scrolldown a bit first  (325px), scroll into view
-            button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
+            button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
               span Apps
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
           .button-wrap

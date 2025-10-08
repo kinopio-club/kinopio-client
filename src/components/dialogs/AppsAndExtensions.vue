@@ -190,6 +190,7 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
 <style lang="stylus">
 dialog.apps
   overflow auto
+  min-height 190px // for about page
   .logo-wrap
     display flex
     align-items center
