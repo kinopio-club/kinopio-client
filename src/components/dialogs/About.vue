@@ -12,6 +12,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 import dayjs from 'dayjs'
 
@@ -127,7 +128,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
     .row.title-row
       a(href="/about")
         button.small-button About Kinopio
-      span
+      .title-controls
+        .segmented-buttons
+          ThemeToggle(:isSmall="true")
         button.small-button(@click.left="refreshBrowser" title="Refresh")
           img.refresh.icon(src="@/assets/refresh.svg")
 
@@ -212,4 +215,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
     border-radius var(--entity-radius)
   .icon.system
     vertical-align -1px
+  .title-controls
+    display flex
+    .segmented-buttons
+      margin-right 6px
 </style>
