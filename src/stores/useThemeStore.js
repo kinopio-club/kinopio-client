@@ -82,7 +82,7 @@ const themes = {
       'badge-moderator': 'olive',
       'badge-ambassador': '#0f9189',
       // pages
-      'example-background': '#244657'
+      'example-background': '#14292d'
 
     }
   }

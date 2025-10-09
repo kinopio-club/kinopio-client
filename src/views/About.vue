@@ -152,7 +152,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
                     td
                       strong Company
                     td
-                      strong VC Funding (Debt)
+                      strong VC Funding
                 tbody
                   tr
                     td Figjam

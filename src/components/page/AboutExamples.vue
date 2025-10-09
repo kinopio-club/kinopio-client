@@ -47,8 +47,8 @@ section.examples(ref="parentElement")
         span Moodboard
       span.badge.info.button-badge(:class="{active: state.example === 'research'}" @click="toggleExample('research')")
         span Research
-      span.badge.info.button-badge(:class="{active: state.example === 'todos'}" @click="toggleExample('todos')")
-        span Todos
+      span.badge.info.button-badge(:class="{active: state.example === 'plan'}" @click="toggleExample('plan')")
+        span Plan
       span.badge.info.button-badge(:class="{active: state.example === 'present'}" @click="toggleExample('present')")
         span Present
       span.badge.info.button-badge(:class="{active: state.example === 'notes'}" @click="toggleExample('notes')")
@@ -82,15 +82,12 @@ section.examples(ref="parentElement")
       p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination.
       p Invite collaborators to collect ideas and comments. Use backlinked [[tags]] to connect themes across spaces.
 
-    .example.todos(v-show="state.example === 'todos'")
-      //- TODO redo
-      video(autoplay loop muted playsinline)
-        source(src="@/assets/page/about/plan-boxes.mp4")
-        //- update w box and card snapping
-        //- todo doing done
-
+    .example.plan(v-show="state.example === 'plan'")
+      img(src="@/assets/page/about/p2.webp")
+      //- video(autoplay loop muted playsinline)
+      //-   source(src="@/assets/page/about/p3.mp4")
+      p Build roadmaps, diagrams, storyboards, specs, and plans, that give the ability to track project progress – while also making it easy to adapt to unexpected changes, new knowledge, or new ideas.
       p Move from idea to actions by turning cards or boxes into trackable Todos.
-      p Build diagrams, storyboards, specs, and plans, that give the ability to track project progress – while also making it easy to adapt to unexpected changes, new knowledge, or new ideas.
 
     .example.present(v-show="state.example === 'present'")
       video(autoplay loop muted playsinline)
@@ -99,14 +96,15 @@ section.examples(ref="parentElement")
 
     .example.notes(v-show="state.example === 'notes'")
       video(autoplay loop muted playsinline)
-        source(src="@/assets/page/about/n1.mp4")
-      //- TODO REDO
+        source(src="@/assets/page/about/w2.mp4")
+      //- img(src="@/assets/page/about/n3.png")
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs. If you can see it on the internet, you can put it inside Kinopio.
 
     .example.websites(v-show="state.example === 'websites'")
-      video(autoplay loop muted playsinline)
-        source(src="@/assets/page/about/w3.mp4")
+      img(src="@/assets/page/about/w4.png")
+      //- video(autoplay loop muted playsinline)
+      //-   source(src="@/assets/page/about/n2.mp4")
         //- https://kinopio.club/october-5-2025-gpmChgJmhN4RaNR2BvVEl
       p Share uniquely personal webpages to celebrate birthdays, share hobbies, mixtapes, about pages, and portfolios.
       p Spaces are private by default and invitees don't need an account to view, but you can also set spaces to be public read-only, or open to comments from everyone.
