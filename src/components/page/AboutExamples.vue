@@ -52,7 +52,7 @@ section.examples(ref="parentElement")
       span.badge.info.button-badge(:class="{active: state.example === 'present'}" @click="toggleExample('present')")
         span Present
       span.badge.info.button-badge(:class="{active: state.example === 'notes'}" @click="toggleExample('notes')")
-        span Take Notes
+        span Notes
       span.badge.info.button-badge(:class="{active: state.example === 'websites'}" @click="toggleExample('websites')")
         span Websites
       span and lots more.
