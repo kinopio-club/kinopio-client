@@ -32,8 +32,9 @@ footer.sitemap
   background #223c2f
   border-radius var(--page-entity-radius)
   max-width 100%
-  margin 4rem 12px
+  margin 2rem 12px
   margin-bottom 0
+  width max-content
   p
     margin-top 0
     margin-bottom 10px
@@ -51,4 +52,6 @@ footer.sitemap
   @media(max-width 520px)
     .row
       gap 15px
+  @media(max-width 460px)
+    padding 0.9rem
 </style>
