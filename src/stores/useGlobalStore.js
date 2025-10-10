@@ -38,6 +38,7 @@ export const useGlobalStore = defineStore('global', {
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
+    isSpacePage: false,
     isPresentationMode: false,
     isCommentMode: false,
     disableViewportOptimizations: false,
@@ -280,10 +281,6 @@ export const useGlobalStore = defineStore('global', {
   getters: {
     getGlobalAllState () {
       return { ...this.$state }
-    },
-    getIsSpacePage () {
-      if (window.location.pathname === '/add') { return }
-      return !this.isAddPage
     },
     getSpaceZoomDecimal () {
       return this.spaceZoomPercent / 100

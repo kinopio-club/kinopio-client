@@ -115,7 +115,7 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
       span.arrow.icon →
       img.icon(src="@/assets/computer.svg")
     .row
-      p App for Mac, Windows, and Linux
+      p Mac, Windows, and Linux
     .row
       a(href="https://dl.todesktop.com/201223j48l03cxi" download)
         button
@@ -190,6 +190,7 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
 <style lang="stylus">
 dialog.apps
   overflow auto
+  min-height 190px // for about page
   .logo-wrap
     display flex
     align-items center

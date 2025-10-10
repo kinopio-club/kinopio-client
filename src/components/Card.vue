@@ -333,7 +333,7 @@ const groupInviteUrl = computed(() => {
 
 // other card
 
-const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
+const otherCardUrl = computed(() => utils.urlFromSpaceAndItem({ itemId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
 const otherCard = computed(() => {
   const card = globalStore.otherCardById(props.card.linkToCardId)
   return card

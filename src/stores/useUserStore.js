@@ -174,7 +174,9 @@ export const useUserStore = defineStore('users', {
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     getUserCanEditSpace () {
+      const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
+      if (globalStore.isEmbedMode) { return }
       const spaceIsOpen = spaceStore.privacy === 'open'
       const currentUserIsSignedIn = this.getUserIsSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn

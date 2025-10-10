@@ -1956,10 +1956,10 @@ export default {
     url = new URL(url)
     return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
   },
-  urlFromSpaceAndCard ({ spaceId, cardId }) {
+  urlFromSpaceAndItem ({ spaceId, itemId }) {
     let url = `${consts.kinopioDomain()}/${spaceId}`
-    if (cardId) {
-      url = `${url}/${cardId}`
+    if (itemId) {
+      url = `${url}/${itemId}`
     }
     return url
   },
