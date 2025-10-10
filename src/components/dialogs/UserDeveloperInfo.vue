@@ -64,7 +64,7 @@ const copy = async (event, type) => {
 
 <template lang="pug">
 dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       span Developer
       .button-wrap

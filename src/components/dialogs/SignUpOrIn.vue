@@ -373,7 +373,7 @@ const addCollaboratorToInvitedSpaces = async () => {
 
 <template lang="pug">
 dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
-  section
+  section.title-section
     .segmented-buttons
       button(@click.left="showSignUpVisible" :class="{active : state.signUpVisible}") Sign Up
       button(@click.left="hideSignUpVisible" :class="{active : !state.signUpVisible}") Sign In

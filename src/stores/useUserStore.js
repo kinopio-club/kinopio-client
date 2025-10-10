@@ -174,7 +174,9 @@ export const useUserStore = defineStore('users', {
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     getUserCanEditSpace () {
+      const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
+      if (globalStore.isEmbedMode) { return }
       const spaceIsOpen = spaceStore.privacy === 'open'
       const currentUserIsSignedIn = this.getUserIsSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
@@ -465,14 +467,16 @@ export const useUserStore = defineStore('users', {
 
     async addToDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts.push(value)
+      const disabled = utils.clone(this.disabledKeyboardShortcuts)
       await cache.updateUser({
-        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+        disabledKeyboardShortcuts: disabled
       })
     },
     async removeFromDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts = this.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
+      const disabled = utils.clone(this.disabledKeyboardShortcuts)
       await cache.updateUser({
-        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+        disabledKeyboardShortcuts: disabled
       })
     },
 

@@ -194,7 +194,7 @@ const userListPlaceholder = computed(() => 'Search Collaborators')
 
 <template lang="pug">
 dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section.section-title
+  section.section-title.title-section
     .row.title-row
       div
         span Space Filters

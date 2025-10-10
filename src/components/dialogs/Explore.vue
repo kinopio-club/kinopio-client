@@ -209,7 +209,7 @@ const toggleTipsIsVisible = () => {
 
 <template lang="pug">
 dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.left.stop='closeDialogs')
-  section(v-if="visible" :open="visible")
+  section.title-section(v-if="visible" :open="visible")
     .row.title-row
       .segmented-buttons
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
@@ -225,8 +225,8 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
         span ?
     OfflineBadge
-    .row(v-if="props.loading")
-      Loader(:isSmall="true" :visible="props.loading")
+    //- .row(v-if="props.loading")
+    //-   Loader(:isSmall="true" :visible="props.loading")
     .row(v-if="props.errorIsLoading")
       .badge.danger
         p (シ_ _)シ Something went wrong, Please try again or contact support

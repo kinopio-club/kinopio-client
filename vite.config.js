@@ -12,6 +12,7 @@ const exploreSpaces = async () => {
     const apiHost = 'https://api.kinopio.club'
     const response = await fetch(`${apiHost}/space/explore-spaces`)
     const data = await response.json()
+    if (!data) { return }
     const paths = data.map(space => space.url)
     return paths.map(path => `/${path}`)
   } catch (error) {
@@ -37,6 +38,20 @@ const createCache = (name, pattern) => {
   }
 }
 
+// Custom plugin to create SPA version of app.html
+const createSPAPlugin = () => {
+  return {
+    name: 'create-spa-app',
+    apply: 'build',
+    closeBundle () {
+      const indexPath = path.resolve(__dirname, 'dist/index.html')
+      const appPath = path.resolve(__dirname, 'dist/app.html')
+      fs.copyFileSync(indexPath, appPath)
+      console.log('✓ Created SPA version at dist/app.html')
+    }
+  }
+}
+
 export default defineConfig(async ({ command, mode }) => {
   // sitemap routes
   const routes = [
@@ -47,8 +62,7 @@ export default defineConfig(async ({ command, mode }) => {
     '/discord',
     '/forum',
     '/help',
-    '/roadmap',
-    '/survey'
+    '/roadmap'
   ]
   // TODO
   // pascal sitemap rec: get all public spaces with content, mark each as user generated
@@ -57,11 +71,20 @@ export default defineConfig(async ({ command, mode }) => {
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
   // config
   return {
+    ssgOptions: {
+      entry: 'src/main.js',
+      includedRoutes (paths, routes) {
+        return ['/', '/about']
+      }
+    },
     test: {
       environment: 'jsdom'
     },
     optimizeDeps: {
       include: ['pinia']
+    },
+    ssr: {
+      noExternal: ['macrolight']
     },
     resolve: {
       alias: {
@@ -74,11 +97,17 @@ export default defineConfig(async ({ command, mode }) => {
         // Disable SSR warnings
         ssr: false
       }),
+      // Create SPA version of app.html
+      createSPAPlugin(),
       // offline support
       VitePWA({
         registerType: 'autoUpdate',
         strategies: 'generateSW',
+        manifest: {
+          start_url: '/app'
+        },
         workbox: {
+          navigateFallback: '/app.html',
           navigateFallbackDenylist: [
             // Exclude exact route only
             /^\/robots\.txt$/,
@@ -108,14 +137,18 @@ export default defineConfig(async ({ command, mode }) => {
       }),
       // sitemap
       Sitemap({
-        hostname: 'http://kinopio.club',
+        hostname: 'https://kinopio.club',
         dynamicRoutes,
         readable: true,
         generateRobotsTxt: false
       })
     ],
+    preview: {
+      host: '0.0.0.0' // accept connections from https://kinopio.local
+    },
     server: {
       port: 8080,
+      host: '0.0.0.0',
       fs: {
         // Allow serving files from one level up to the project root
         allow: ['..']
@@ -124,6 +157,21 @@ export default defineConfig(async ({ command, mode }) => {
         key: fs.readFileSync('./.cert/key.pem'),
         cert: fs.readFileSync('./.cert/cert.pem')
       }
+    },
+    build: {
+      // skip non-important build warnings
+      rollupOptions: {
+        onwarn (warning, warn) {
+          if (
+            warning.message.includes('onUnmounted') ||
+            warning.message.includes('/*#__PURE__*/')
+          ) {
+            return
+          }
+          warn(warning)
+        }
+      }
     }
+
   }
 })

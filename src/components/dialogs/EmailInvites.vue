@@ -109,11 +109,11 @@ const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')
 
 // send button
 
-const emailPlural = computed(() => {
+const invitePlural = computed(() => {
   if (state.emailsList.length === 1) {
-    return 'Email'
+    return 'Invite'
   } else {
-    return utils.pluralize('Email', state.emailsList.length)
+    return utils.pluralize('Invite', state.emailsList.length)
   }
 })
 const emailsLength = computed(() => {
@@ -157,7 +157,7 @@ const sendInvites = async () => {
 }
 
 const notifySuccessAndClose = () => {
-  const message = `Sent ${emailsLength.value} Invite ${emailPlural.value}`
+  const message = `Sent ${emailsLength.value} Invite ${invitePlural.value}`
   globalStore.addNotification({ message, type: 'success', icon: 'mail' })
   globalStore.triggerCloseChildDialogs()
 }
@@ -165,7 +165,7 @@ const notifySuccessAndClose = () => {
 
 <template lang="pug">
 dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDetails" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     p Email Invites to Edit
   section
     section.subsection
@@ -193,7 +193,7 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           .row.button-row
             button(@click.stop="sendInvites" :class="{ active: state.isLoading }")
               img.icon.mail(src="@/assets/mail.svg")
-              span Send {{emailsLength}} {{emailPlural}}
+              span Send {{emailsLength}} {{invitePlural}}
               Loader(:visible="state.isLoading")
           //- status
           Transition(name="fadeIn")

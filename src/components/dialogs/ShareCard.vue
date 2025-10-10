@@ -77,20 +77,18 @@ const webShare = () => {
 <template lang="pug">
 dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
   section(v-if="canShare")
-    section.subsection
-      .row
-        p Share this card publically, or paste it in another space
-      .row
-        .segmented-buttons
-          button(@click.left="copyUrl")
-            img.icon.copy(src="@/assets/copy.svg")
-            span Copy Card Link
-          //- button(v-if="webShareIsSupported" @click="webShare")
-          //-   img.icon.share(src="@/assets/share.svg")
-      .row(v-if="canShare && spaceIsPrivate")
-        .badge.danger
-          img.icon.lock-icon(src="@/assets/lock.svg")
-          span Cards in private spaces can only be viewed by space members
+    p Share this card publically, or paste it in another space
+    .row
+      .segmented-buttons
+        button(@click.left="copyUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Card Link
+        //- button(v-if="webShareIsSupported" @click="webShare")
+        //-   img.icon.share(src="@/assets/share.svg")
+    .row(v-if="canShare && spaceIsPrivate")
+      .badge.danger
+        img.icon.lock-icon(src="@/assets/lock.svg")
+        span Cards in private spaces can only be viewed by space members
 
   section(v-if="!canShare")
     p For your cards and spaces to have URLs, you'll need to sign up or in

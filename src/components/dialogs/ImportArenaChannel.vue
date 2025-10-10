@@ -239,7 +239,7 @@ const cardPositions = ({ currentIndex, lastCard }) => {
 
 <template lang="pug">
 dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialogElement")
-  section
+  section.title-section
     p Import Are.na Channel
 
   template(v-if="!arenaAccessToken")

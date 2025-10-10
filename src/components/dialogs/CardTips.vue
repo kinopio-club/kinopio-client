@@ -69,7 +69,7 @@ const updateDialogHeight = async () => {
 
 <template lang="pug">
 dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible" ref="dialogElement")
-  section
+  section.title-section
     .row.title-row
       span Tips
       .button-details

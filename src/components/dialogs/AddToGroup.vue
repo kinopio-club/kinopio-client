@@ -73,7 +73,7 @@ const toggleGroupsIsVisible = () => {
 
 <template lang="pug">
 dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'overflow-auto': !childDialogIsVisible}")
-  section
+  section.title-section
     .row
       Loader(:visible="isLoadingGroups" :isSmall="true")
       span Add to Group

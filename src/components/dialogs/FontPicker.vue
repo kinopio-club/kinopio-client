@@ -81,10 +81,10 @@ const headerFonts = computed(() => {
 const fontIsSelected = (font) => {
   return headerFonts.value.find(item => {
     const currentFontId = item.headerFontId || 0
-    if (!state.previewFontId) {
-      state.previewFontId = currentFontId
-    }
-    return currentFontId === font.id
+    const isCurrentFont = currentFontId === font.id
+    if (!isCurrentFont) { return }
+    state.previewFontId = currentFontId
+    return true
   })
 }
 const selectFont = (font) => {
@@ -158,10 +158,9 @@ const previewSegments = computed(() => {
 
 <template lang="pug">
 dialog.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    section.subsection
-      template(v-for="segment in previewSegments")
-        NameSegment(:segment="segment" :headerFontId="state.previewFontId" :backgroundColorIsDark="isThemeDark")
+  section.title-section
+    template(v-for="segment in previewSegments")
+      NameSegment(:segment="segment" :headerFontId="state.previewFontId" :backgroundColorIsDark="isThemeDark")
   section.font-size
     //- size
     .row

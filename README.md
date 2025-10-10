@@ -2,7 +2,7 @@
 
 # kinopio-client
 
-<img src="./src/assets/logo-base.png" alt="logo" width="200">
+<img src="./src/assets/logos/logo-base.png" alt="logo" width="200">
 
 Kinopio is a spatial thinking canvas for your new ideas and hard problems.
 
@@ -26,6 +26,10 @@ The `kinopio-client` is the client web app that users use to read and update spa
     npm run dev --host
     https://kinopio.local:8080
 
+## Run Tests
+
+    npm run test
+
 ## Run with Production API Server
 
 You can force the local app to use the prod API by editing `.env.local` so that `VITE_PROD_SERVER=true`. Create `env.local` by duplicating and renaming `.env.local.sample`.
@@ -34,17 +38,16 @@ When the app starts up, the `🐸 kinopio-server URL` will be displayed in the b
 
 ## Linting
 
+Linting runs on commit, but you can manually run it with
+
 	npm run lint
-
-Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Chrome. For Safari, uncomment code in `main.js` then,
-
-	./node_modules/.bin/vue-devtools
 
 ## Primary Files
 
 | File | Description |
 | ------------- |-------------|
-| `router` | Client-side routes |
+| `main.js` | Entry point, inits router |
+| `router`  | Handles static page and app routes |
 | `App.vue` | Root component, used by all routes|
 | `stores/useGlobalStore.js` | [Pinia](https://pinia.vuejs.org//) store with global interaction state |
 | `stores/useSpaceStore.js` | Pinia store module that handles loading spaces. Each item type in a space has it's own store, e.g. `useCardStore.js`, `useBoxStore.js`, …
@@ -105,6 +108,12 @@ I couldn't figure out how to run the netlify-cli locally, so instead I test this
 To view the logs: 
 
 Netlify website → Deploys → Edge Functions
+
+## Pre-rendered Pages (Static-Site Generation, SSG)
+
+During the deploy/build process (`npm run build`), [`vite-ssg`](https://github.com/antfu-collective/vite-ssg) generates static HTML pages of routes defined in `vite.config.js` in `ssgOptions.includedRoutes`. Static pages (compiled from vue router into `/dist`) are served to the client directly. The client only goes through vue router for non-static routes like `/app`.
+
+To test pre-rendered page routes use `npm run build-dev`.
 
 ## See Also
 

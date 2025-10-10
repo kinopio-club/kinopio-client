@@ -134,7 +134,7 @@ dialog#sidebar.sidebar.is-pinnable(
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section
+  section.title-section
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
         //- first row

@@ -92,7 +92,7 @@ const toggleBillingFAQIsVisible = () => {
 
 <template lang="pug">
 dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       span Billing
   //- free

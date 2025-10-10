@@ -43,7 +43,7 @@ const refreshBrowser = () => {
 
 <template lang="pug">
 dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement")
-  section
+  section.title-section
     .row.title-row
       p Offline
       span

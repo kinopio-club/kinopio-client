@@ -54,7 +54,7 @@ const updateSpaces = () => {
 
 <template lang="pug">
 dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     span(v-if="state.isImport") Import
     span(v-if="state.isExport") Export
   Import(:visible="state.isImport" @updateSpaces="updateSpaces")

@@ -59,13 +59,18 @@ const changeSpace = (space) => {
 
 <template lang="pug">
 dialog.live(v-if="props.visible" :open="props.visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       span
         img.icon.camera(src="@/assets/camera.svg")
         span Live Public Spaces
         Loader(:visible="props.loading")
       span {{props.spaces.length}}
+
+  section.empty(v-if="!props.spaces.length")
+    p No public spaces are currently being edited, check back soon
+    img.placeholder(src="@/assets/cat-book.jpg")
+
   section.results-section.results-section-border-top(v-if="props.spaces.length" ref="results" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="props.spaces"
@@ -77,9 +82,6 @@ dialog.live(v-if="props.visible" :open="props.visible" ref="dialog" :style="{'ma
       :previewImageIsWide="true"
       :hideFilter="true"
     )
-  section.empty(v-if="!props.spaces.length")
-    p No public spaces are currently being edited, check back soon
-    img.placeholder(src="@/assets/cat-book.jpg")
 </template>
 
 <style lang="stylus">
@@ -91,9 +93,6 @@ dialog.live
   max-height calc(100vh - 100px)
   .icon.camera
     vertical-align 1px
-  section.empty
-    border-top 0
-    padding-top 4px
   .placeholder
     border-radius var(--small-entity-radius)
     margin-top 10px

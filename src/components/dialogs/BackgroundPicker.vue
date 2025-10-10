@@ -483,7 +483,7 @@ const toggleBackgroundIsStretch = () => {
 
 <template lang="pug">
 dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref='dialogElement' :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       div
         BackgroundPreview(:space="props.space" :box="props.box")

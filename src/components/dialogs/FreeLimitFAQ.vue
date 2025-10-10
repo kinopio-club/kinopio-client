@@ -21,7 +21,7 @@ const closeOtherDetails = (event) => {
 
 <template lang="pug">
 dialog.narrow.free-limit-faq(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section
+  section.title-section
     p Free Limit FAQ
   section.results-section
     details
