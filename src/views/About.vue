@@ -109,14 +109,13 @@ const toggleAppsAndExtensionsIsVisible = () => {
       .page-wrap
         section.intro
           h1.wordmark Kinopio
-          //- ? TODO vid, showing multiple authors, hello space?
-          //- TODO or static img showing multiple authors. wide
-          img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
+          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp")
+            source(src="@/assets/page/about/hero/vid.mp4")
           p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
           p Free for 100 cards. No sign up required.
+          //- cta
           .row
             .button-wrap#download
-              //- if not open, scrolldown a bit first  (325px), scroll into view
               button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
                 span Apps
               AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
@@ -224,11 +223,12 @@ const toggleAppsAndExtensionsIsVisible = () => {
                 span .
 
         section
+          //- cta
           .button-wrap
             router-link(to="/app")
               button.success Open Kinopio
           p I hope you enjoy using Kinopio and find it useful,
-          img.signature(src="https://help.kinopio.club/assets/about/signature.png")
+          img.icon.signature(src="https://help.kinopio.club/assets/about/signature.png")
 
         FooterSitemap
 </template>
@@ -250,7 +250,7 @@ main.page
   .page-wrap
     margin-left auto
     margin-right auto
-    max-width 610px
+    max-width 720px
 
     > section
       width 100%
@@ -269,12 +269,17 @@ main.page
         border-radius var(--page-entity-radius)
       > p
         margin 1rem 0
+        max-width 440px
         &:last-child
           margin-bottom 0
       a
         color var(--text-link)
         &:hover
           text-decoration none
+
+    > section.intro
+      video
+        border-radius calc(var(--entity-radius) * 2)
 
     > section.faq
       max-width 480px
