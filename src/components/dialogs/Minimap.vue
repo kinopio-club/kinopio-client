@@ -95,12 +95,13 @@ dialog.narrow.minimap.is-pinnable(
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section.minimap-section
+  section.minimap-section.title-section
     .row.title-row(ref="rowElement")
       span Minimap
       .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
+  section
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
   section.boxes-section.results-section

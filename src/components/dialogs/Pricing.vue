@@ -106,6 +106,8 @@ const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 <template lang="pug">
 dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+  section.title-section
+    p Pricing
   section
     .row.title-row
       //- price

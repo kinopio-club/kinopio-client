@@ -37,6 +37,7 @@ dialog.narrow.brush-size-picker(v-if="props.visible" :open="props.visible" @clic
         button(:class="{active: isCurrentBrushSize('s')}" @click="updateBrushSize('s')")
           span S
     .row
+      //- TODO show empty previews for other sizes in a row
       .size-preview(:style="styles")
 </template>
 

@@ -209,7 +209,7 @@ const toggleTipsIsVisible = () => {
 
 <template lang="pug">
 dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.left.stop='closeDialogs')
-  section(v-if="visible" :open="visible")
+  section.title-section(v-if="visible" :open="visible")
     .row.title-row
       .segmented-buttons
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")

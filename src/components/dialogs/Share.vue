@@ -167,7 +167,7 @@ const toggleSpaceUsersIsVisible = () => {
 
 <template lang="pug">
 dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
-  section
+  section.title-section
     .row.title-row
       p Share
       .row

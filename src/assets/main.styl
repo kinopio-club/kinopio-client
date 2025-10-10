@@ -225,10 +225,10 @@ textarea,
     color var(--primary)
     border-bottom 0
     outline none
-  &.is-dark
+  &.is-dark,
+  &.is-background-dark
     color var(--primary-background)
     border-color var(--primary-background)
-
 button,
 input[type="color"],
 select,
@@ -520,6 +520,8 @@ dialog
   .title-row-flex
     display flex
     justify-content space-between
+  .title-section
+    background-color var(--secondary-background)
 
   p + button,
   button + p,

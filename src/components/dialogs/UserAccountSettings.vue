@@ -101,7 +101,7 @@ const clearStatus = () => {
 
 <template lang="pug">
 dialog.narrow.update-email(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     p Account
   template(v-if="!currentUserIsSignedIn")
     section

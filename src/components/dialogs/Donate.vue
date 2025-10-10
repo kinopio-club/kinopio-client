@@ -123,7 +123,7 @@ const donate = async () => {
 
 <template lang="pug">
 dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       p Donate
       .badge.secondary(v-if="currentUserIsDonor") Repeat Donor

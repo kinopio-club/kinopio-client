@@ -10,7 +10,7 @@ const props = defineProps({
 
 <template lang="pug">
 dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section
+  section.title-section
     .row
       a(href="https://help.kinopio.club")
         button

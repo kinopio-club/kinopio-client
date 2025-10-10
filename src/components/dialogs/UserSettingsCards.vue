@@ -22,6 +22,8 @@ const props = defineProps({
 
 <template lang="pug">
 dialog.narrow.cards-settings-dialog(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
+  //- section.title-section
+  //-   p Card Settings
   UserSettingsCards(:visible="props.visible")
 </template>
 
@@ -29,4 +31,6 @@ dialog.narrow.cards-settings-dialog(v-if="props.visible" :open="props.visible" @
 .cards-settings-dialog
   &.narrow
     width 200px
+  // .title-section
+  //   border-bottom 1px solid var(--primary-border)
 </style>

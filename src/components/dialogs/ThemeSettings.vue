@@ -74,7 +74,7 @@ const removeBackground = () => {
 
 <template lang="pug">
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" ref="dialogElement" @click.stop)
-  section
+  section.title-section
     p Theme Settings
   section
     .button-wrap
