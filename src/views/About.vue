@@ -113,7 +113,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
           //- TODO or static img showing multiple authors. wide
           img(src="https://d2w9rnfcy7mm78.cloudfront.net/4267518/original_0158cd97e9bdf510544c545cf7829ded.png")
           p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
-          p No sign up required.
+          p Free for 100 cards. No sign up required.
           .row
             .button-wrap#download
               //- if not open, scrolldown a bit first  (325px), scroll into view
@@ -228,8 +228,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
             router-link(to="/app")
               button.success Open Kinopio
           p I hope you enjoy using Kinopio and find it useful,
-          //- TODO sig img
-          p – Piri
+          img.signature(src="https://help.kinopio.club/assets/about/signature.png")
 
         FooterSitemap
 </template>
@@ -290,4 +289,7 @@ main.page
         table
           td
             padding 5px 10px
+    .signature
+      width 70px
+      margin 0
 </style>
