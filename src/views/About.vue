@@ -228,7 +228,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
           .button-wrap
             router-link(to="/app")
               button.success Open Kinopio
-          p I hope you enjoy using Kinopio and find it useful,
+          p I hope you enjoy using Kinopio and find it invaluable,
           img.icon.signature(src="https://help.kinopio.club/assets/about/signature.png")
 
         FooterSitemap
