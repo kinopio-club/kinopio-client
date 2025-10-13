@@ -21,10 +21,12 @@ const userStore = useUserStore()
 const appsButtonElement = ref(null)
 let unsubscribes
 
-window.globalStore = useGlobalStore()
-window.themeStore = useThemeStore()
-if (consts.isDevelopment()) {
-  window.userStore = useUserStore()
+if (!consts.isStaticPrerenderingPage) {
+  window.globalStore = useGlobalStore()
+  window.themeStore = useThemeStore()
+  if (consts.isDevelopment()) {
+    window.userStore = useUserStore()
+  }
 }
 
 useHead({
