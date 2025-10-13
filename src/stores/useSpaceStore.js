@@ -441,6 +441,7 @@ export const useSpaceStore = defineStore('space', {
           this.restoreSpaceLocal(space),
           this.loadRemoteSpace(space)
         ])
+        window.scrollTo(0, 0)
         // restore remote space
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
