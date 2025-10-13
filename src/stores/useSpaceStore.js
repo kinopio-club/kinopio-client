@@ -266,6 +266,7 @@ export const useSpaceStore = defineStore('space', {
       globalStore.isSpacePage = true
       const spaceUrl = globalStore.spaceUrlToLoad
       const cachedSpaces = await cache.getAllSpaces()
+      setCookie()
       // restore from url
       if (spaceUrl) {
         console.info('🚃 Restore space from url', spaceUrl)
@@ -533,7 +534,6 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerUpdateWindowHistory()
         const userIsMember = userStore.getUserIsSpaceMember
         if (!userIsMember) { return }
-        setCookie()
         globalStore.parentCardId = ''
         this.updateUserLastSpaceId()
         const cardId = globalStore.loadSpaceFocusOnCardId
@@ -700,7 +700,6 @@ export const useSpaceStore = defineStore('space', {
       await this.saveSpace()
       this.updateUserLastSpaceId()
       globalStore.notifySignUpToEditSpace = false
-      setCookie()
     },
     async saveImportSpace (space) {
       const globalStore = useGlobalStore()
