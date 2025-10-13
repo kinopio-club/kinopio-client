@@ -7,6 +7,7 @@ import About from '@/components/dialogs/About.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
+import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 
 const globalStore = useGlobalStore()
 let unsubscribes
@@ -37,13 +38,15 @@ const props = defineProps({
 const state = reactive({
   aboutIsVisible: false,
   keyboardShortcutsIsVisible: false,
-  donateIsVisible: false
+  donateIsVisible: false,
+  appsAndExtensionsIsVisible: false
 })
 
 const closeDialogs = () => {
   state.aboutIsVisible = false
   state.keyboardShortcutsIsVisible = false
   state.donateIsVisible = false
+  state.appsAndExtensionsIsVisible = false
 }
 
 const toggleAboutIsVisible = () => {
@@ -62,6 +65,11 @@ const togglePricingIsVisible = () => {
   const value = !pricingIsVisible.value
   globalStore.closeAllDialogs()
   globalStore.pricingIsVisible = value
+}
+const toggleAppsAndExtensionsIsVisible = () => {
+  const isVisible = state.appsAndExtensionsIsVisible
+  globalStore.closeAllDialogs()
+  state.appsAndExtensionsIsVisible = !isVisible
 }
 
 </script>
@@ -84,12 +92,21 @@ const togglePricingIsVisible = () => {
             button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
               span Pricing
             Pricing(:visible="pricingIsVisible" :parentIsPage="true")
+          .button-wrap#download
+            button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
+              span Apps
+            AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
           .button-wrap
             router-link(to="/app")
               button.success Open Kinopio
 </template>
 
 <style lang="stylus">
+header
+  dialog.apps
+    left initial
+    right 8px
+
 // same as components/Header.vue
 header
   pointer-events none

@@ -11,7 +11,6 @@ import Header from '@/components/page/Header.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
-import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import consts from '@/consts.js'
 
@@ -44,7 +43,7 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
-        closeDialogs()
+        // closeDialogs()
       }
     }
   )
@@ -56,15 +55,8 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const state = reactive({
-  appsAndExtensionsIsVisible: false
-})
-
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
-}
-const closeDialogs = () => {
-  state.appsAndExtensionsIsVisible = false
 }
 
 // theme
@@ -78,28 +70,6 @@ const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
 
-// apps button
-
-const scrollButtonIntoView = () => {
-  if (state.appsAndExtensionsIsVisible) { return }
-  const dialogHeight = 300
-  const element = appsButtonElement.value
-  const rect = element.getBoundingClientRect()
-  const distanceToBottom = window.innerHeight - rect.bottom
-  const distanceToScroll = dialogHeight - distanceToBottom
-  if (distanceToScroll < 0) { return }
-  window.scrollBy({
-    top: distanceToScroll,
-    left: 0,
-    behavior: 'smooth'
-  })
-}
-const toggleAppsAndExtensionsIsVisible = () => {
-  scrollButtonIntoView()
-  const isVisible = state.appsAndExtensionsIsVisible
-  closeAllDialogs()
-  state.appsAndExtensionsIsVisible = !isVisible
-}
 </script>
 
 <template lang="pug">
@@ -113,12 +83,9 @@ const toggleAppsAndExtensionsIsVisible = () => {
             source(src="@/assets/page/about/hero/vid.mp4")
           p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
           p Free for 100 cards. No sign up required.
+
           //- cta
           .row
-            .button-wrap#download
-              button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
-                span Apps
-              AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
             .button-wrap
               router-link(to="/app")
                 button.success Open Kinopio

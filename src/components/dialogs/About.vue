@@ -202,7 +202,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
 </template>
 
 <style lang="stylus">
-.about
+dialog.about
   top calc(100% - 6px) !important
   &.overflow
     overflow auto
@@ -219,4 +219,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
     display flex
     .segmented-buttons
       margin-right 6px
+  dialog.apps
+    left 8px
 </style>
