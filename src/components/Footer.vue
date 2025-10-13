@@ -7,7 +7,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
-import Loader from '@/components/Loader.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
