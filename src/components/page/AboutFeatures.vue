@@ -39,7 +39,7 @@ defineExpose({ vPauseAnimation })
 section.features
   .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
     .row.horizontal
-      p.marquee(v-pause-animation) ● Real-Time Collaboration ● Privacy Settings ● Code Blocks and Markdown ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces
+      p.marquee(v-pause-animation) Features ● Real-Time Collaboration ● Privacy Settings ● Code Blocks and Markdown ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces
     .row.horizontal
       p.marquee.row-2(v-pause-animation) ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups
     .row.horizontal
