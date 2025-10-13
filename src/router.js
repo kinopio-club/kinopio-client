@@ -4,9 +4,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
-import Space from '@/views/Space.vue'
-import About from '@/views/About.vue'
-
 import consts from './consts.js'
 
 const router = {
@@ -33,11 +30,11 @@ const router = {
       path: '/',
       alias: '/about',
       name: 'about',
-      component: About
+      component: () => import('./views/About.vue')
     }, {
       path: '/app',
       name: 'space',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
@@ -49,7 +46,7 @@ const router = {
     }, {
       path: '/reset-password',
       name: 'reset-password',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -64,7 +61,7 @@ const router = {
     }, {
       path: '/update-arena-access-token',
       name: 'update-arena-access-token',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         const arenaReturnedCode = urlParams.get('code')
@@ -75,7 +72,7 @@ const router = {
       }
     }, {
       path: '/explore',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.shouldShowExploreOnLoad = true
@@ -83,7 +80,7 @@ const router = {
       }
     }, {
       path: '/new',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadNewSpace = true
@@ -91,7 +88,7 @@ const router = {
       }
     }, {
       path: '/inbox', // used by /add
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadInboxSpace = true
@@ -99,7 +96,7 @@ const router = {
       }
     }, {
       path: '/:space/:card',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
@@ -115,7 +112,7 @@ const router = {
       }
     }, {
       path: '/embed',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -135,7 +132,7 @@ const router = {
     }, {
       path: '/donation-success',
       name: 'donation-success',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.notifyThanksForDonating = true
@@ -144,7 +141,7 @@ const router = {
     }, {
       path: '/subscription-success',
       name: 'subscription-success',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -157,7 +154,7 @@ const router = {
     }, {
       path: '/group/invite',
       name: 'groupInvite',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -170,7 +167,7 @@ const router = {
     }, {
       path: '/invite',
       name: 'invite',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
@@ -209,7 +206,7 @@ const router = {
       }
     }, {
       path: '/:space',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname

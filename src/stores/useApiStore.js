@@ -641,7 +641,6 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting explore spaces')
         const options = await this.requestOptions({ method: 'GET' })
@@ -670,7 +669,6 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting live spaces')
         const options = await this.requestOptions({ method: 'GET' })

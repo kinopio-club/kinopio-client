@@ -11,7 +11,7 @@ import Header from '@/components/page/Header.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
-import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
+import Footer from '@/components/page/Footer.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import consts from '@/consts.js'
 
@@ -22,10 +22,12 @@ const userStore = useUserStore()
 const appsButtonElement = ref(null)
 let unsubscribes
 
-window.globalStore = useGlobalStore()
-window.themeStore = useThemeStore()
-if (consts.isDevelopment()) {
-  window.userStore = useUserStore()
+if (!consts.isStaticPrerenderingPage) {
+  window.globalStore = useGlobalStore()
+  window.themeStore = useThemeStore()
+  if (consts.isDevelopment()) {
+    window.userStore = useUserStore()
+  }
 }
 
 useHead({
@@ -44,7 +46,7 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
-        closeDialogs()
+        // closeDialogs()
       }
     }
   )
@@ -56,15 +58,8 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const state = reactive({
-  appsAndExtensionsIsVisible: false
-})
-
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
-}
-const closeDialogs = () => {
-  state.appsAndExtensionsIsVisible = false
 }
 
 // theme
@@ -78,28 +73,6 @@ const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
 
-// apps button
-
-const scrollButtonIntoView = () => {
-  if (state.appsAndExtensionsIsVisible) { return }
-  const dialogHeight = 300
-  const element = appsButtonElement.value
-  const rect = element.getBoundingClientRect()
-  const distanceToBottom = window.innerHeight - rect.bottom
-  const distanceToScroll = dialogHeight - distanceToBottom
-  if (distanceToScroll < 0) { return }
-  window.scrollBy({
-    top: distanceToScroll,
-    left: 0,
-    behavior: 'smooth'
-  })
-}
-const toggleAppsAndExtensionsIsVisible = () => {
-  scrollButtonIntoView()
-  const isVisible = state.appsAndExtensionsIsVisible
-  closeAllDialogs()
-  state.appsAndExtensionsIsVisible = !isVisible
-}
 </script>
 
 <template lang="pug">
@@ -109,20 +82,15 @@ const toggleAppsAndExtensionsIsVisible = () => {
       .page-wrap
         section.intro
           h1.wordmark Kinopio
-          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp")
+          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
             source(src="@/assets/page/about/hero/vid.mp4")
-            aria-label Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.
           p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
           p Free for 100 cards. No sign up required.
+
           //- cta
-          .row
-            .button-wrap#download
-              button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
-                span Apps
-              AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
-            .button-wrap
-              router-link(to="/app")
-                button.success Open Kinopio
+          .button-wrap
+            router-link(to="/app")
+              button.success Open Kinopio
 
         AboutExamples
         AboutFeatures
@@ -228,10 +196,11 @@ const toggleAppsAndExtensionsIsVisible = () => {
           .button-wrap
             router-link(to="/app")
               button.success Open Kinopio
-          p I hope you enjoy using Kinopio and find it useful,
-          img.icon.signature(src="https://help.kinopio.club/assets/about/signature.png")
+          p I hope you enjoy using Kinopio and find it invaluable,
+          img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
 
         FooterSitemap
+    Footer
 </template>
 
 <style lang="stylus">
@@ -279,6 +248,11 @@ main.page
         color var(--text-link)
         &:hover
           text-decoration none
+      video
+        max-width 100%
+        height auto
+      details + details
+        margin-top 5px
 
     > section.intro
       video
