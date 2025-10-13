@@ -362,25 +362,4 @@ footer
     width 13px
     margin-left 6px
 
-  .space-functions-row
-    > .segmented-buttons,
-    &.segmented-buttons
-      display inline-block
-      > .button-wrap
-        > button
-          border-radius 0
-          border-right 0
-          .loader
-            margin 0
-        &:first-child
-          > button
-            border-top-left-radius var(--entity-radius)
-            border-bottom-left-radius var(--entity-radius)
-            border-right 0
-        &:last-child
-          > button
-            border-top-right-radius var(--entity-radius)
-            border-bottom-right-radius var(--entity-radius)
-            border-right 1px solid var(--primary-border)
-
   </style>
