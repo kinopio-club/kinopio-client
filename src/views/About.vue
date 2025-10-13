@@ -109,9 +109,8 @@ const toggleAppsAndExtensionsIsVisible = () => {
       .page-wrap
         section.intro
           h1.wordmark Kinopio
-          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp")
+          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
             source(src="@/assets/page/about/hero/vid.mp4")
-            aria-label Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.
           p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
           p Free for 100 cards. No sign up required.
           //- cta
