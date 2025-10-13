@@ -102,7 +102,7 @@ section.examples(ref="parentElement")
       p Share uniquely personal webpages to celebrate birthdays, share hobbies, mixtapes, about pages, and portfolios.
       p Spaces are private by default and invitees don't need an account to view, but you can also set spaces to be public read-only, or open to comments from everyone.
       p
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        img.icon.sunglasses(src="@/assets/sunglasses.svg" alt="explore icon")
         span Share spaces with the community by adding them to Explore.
 
 </template>

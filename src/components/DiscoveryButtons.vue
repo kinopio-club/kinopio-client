@@ -219,7 +219,7 @@ const liveSpacesCount = computed(() => {
     //- Explore
     .button-wrap
       button.small-button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible" title="Explore Spaces")
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        img.icon.sunglasses(src="@/assets/sunglasses.svg" alt="explore icon")
         span(v-if="state.unreadSpacesCount") {{state.unreadSpacesCount}}
       Explore(
         :visible="state.exploreIsVisible"
@@ -235,7 +235,7 @@ const liveSpacesCount = computed(() => {
     //- Live
     .button-wrap
       button.small-button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Live Spaces")
-        img.icon.camera(src="@/assets/camera.svg")
+        img.icon.camera(src="@/assets/camera.svg" alt="live icon")
         span(v-if="liveSpacesCount") {{ liveSpacesCount }}
       Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
 </template>
