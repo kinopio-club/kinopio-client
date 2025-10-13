@@ -467,14 +467,16 @@ export const useUserStore = defineStore('users', {
 
     async addToDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts.push(value)
+      const disabled = utils.clone(this.disabledKeyboardShortcuts)
       await cache.updateUser({
-        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+        disabledKeyboardShortcuts: disabled
       })
     },
     async removeFromDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts = this.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
+      const disabled = utils.clone(this.disabledKeyboardShortcuts)
       await cache.updateUser({
-        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+        disabledKeyboardShortcuts: disabled
       })
     },
 

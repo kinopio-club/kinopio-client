@@ -97,7 +97,7 @@ const toggleChecked = (name) => {
 
 <template lang="pug">
 dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" @click="closeDialogs" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row
       p Keyboard Shortcuts
       .badge.keyboard-shortcut ?
@@ -454,10 +454,11 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
 
   .checkbox-wrap
     display inline-block
+    margin-right 6px
     label
       padding 0
       padding-left 5px
-    margin-right 6px
+      padding-right 5px
 
   .is-disabled
     opacity 0.5

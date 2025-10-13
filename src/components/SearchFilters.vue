@@ -79,7 +79,7 @@ const clearSearchAndFilters = () => {
 </script>
 
 <template lang="pug">
-section.filters
+section.filters.title-section
   .row.title-row-flex
     .button-wrap.segmented-buttons-wrap
       //- first row

@@ -106,7 +106,7 @@ const selectedGroup = computed(() => {
 
 <template lang="pug">
 dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
-  section
+  section.title-section
     .row.title-row
       div
         Loader(:visible="isLoadingGroups" :isSmall="true")

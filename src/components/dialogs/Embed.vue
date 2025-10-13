@@ -115,7 +115,7 @@ const privacyName = (number) => {
 
 <template lang="pug">
 dialog.narrow.embed(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': dialogHeight + 'px'}")
-  section
+  section.title-section
     p Embed
   section
 

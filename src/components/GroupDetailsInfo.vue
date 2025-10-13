@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import EmojiPicker from '@/components/dialogs/EmojiPicker.vue'
+import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 
@@ -33,7 +34,8 @@ onBeforeUnmount(() => {
 const emit = defineEmits(['updateGroup', 'childDialogIsVisible'])
 
 const props = defineProps({
-  group: Object
+  group: Object,
+  isBackgroundColor: Boolean
 })
 const state = reactive({
   colorPickerIsVisible: false,
@@ -63,6 +65,11 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !isVisible
   emit('childDialogIsVisible', !isVisible)
 }
+const inputColorClasses = computed(() => {
+  if (!props.isBackgroundColor) { return }
+  console.log(utils.colorClasses({ backgroundColor: props.group.color }), props.group.color)
+  return utils.colorClasses({ backgroundColor: props.group.color })
+})
 
 // emoji
 
@@ -127,6 +134,7 @@ const groupName = computed({
     @keyup.stop.enter
     @mouseup.stop
     @touchend.stop
+    :class="inputColorClasses"
   )
 </template>
 

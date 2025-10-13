@@ -252,14 +252,11 @@ const toggleOpacity = () => {
 dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section(v-if="props.dialogTitle")
     p {{props.dialogTitle}}
-  section
+  section(:style="{backgroundColor: props.currentColor}")
     .row
-      .badge.full-width-color-badge(:style="{backgroundColor: props.currentColor}")
-        //- Input
-        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
-          //- Remove
-        button.small-button.remove-button(v-if="props.removeIsVisible" title="remove" @click="removeColor")
-          img.icon.cancel(src="@/assets/add.svg")
+      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
+      button.small-button.remove-button(v-if="props.removeIsVisible" title="remove" @click="removeColor")
+        img.icon.cancel(src="@/assets/add.svg")
   section
     //- Colors
     .recent-colors(v-if="uniqueRecentColors")
@@ -387,7 +384,8 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       color var(--primary-on-dark-background)
   .remove-button
     position absolute
-    right 4px
+    right 0
+    top -2px
   .icon.transparent
     margin-right 6px
     margin-top -1px
