@@ -11,6 +11,7 @@ import Header from '@/components/page/Header.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
+import Footer from '@/components/page/Footer.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import consts from '@/consts.js'
 
@@ -199,6 +200,7 @@ const updateSystemTheme = () => {
           img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
 
         FooterSitemap
+    Footer
 </template>
 
 <style lang="stylus">
@@ -249,6 +251,8 @@ main.page
       video
         max-width 100%
         height auto
+      details + details
+        margin-top 5px
 
     > section.intro
       video

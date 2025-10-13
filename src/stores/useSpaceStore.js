@@ -788,10 +788,12 @@ export const useSpaceStore = defineStore('space', {
     // update
 
     updateSpacePreviewImage: throttle(async function () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace
+      if (!globalStore.isSpacePage) { return }
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)

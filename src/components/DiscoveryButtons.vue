@@ -11,6 +11,7 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -23,8 +24,10 @@ const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
   // update spaces
-  window.addEventListener('online', updateLiveSpaces)
-  window.addEventListener('online', updateSpaces)
+  if (!consts.isStaticPrerenderingPage) {
+    window.addEventListener('online', updateLiveSpaces)
+    window.addEventListener('online', updateSpaces)
+  }
   updateLiveSpaces()
   updateSpaces()
   updateLiveSpacesIntervalTimer = setInterval(() => {
@@ -50,8 +53,10 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('online', updateLiveSpaces)
-  window.removeEventListener('online', updateSpaces)
+  if (!consts.isStaticPrerenderingPage) {
+    window.removeEventListener('online', updateLiveSpaces)
+    window.removeEventListener('online', updateSpaces)
+  }
   clearInterval(updateLiveSpacesIntervalTimer)
   clearInterval(updateSpacesIntervalTimer)
   unsubscribes()
