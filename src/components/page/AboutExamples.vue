@@ -61,7 +61,7 @@ section.examples(ref="parentElement")
     //- 970 width, 693 height
 
     .example.whiteboard(v-show="state.example === 'whiteboard'")
-      img(src="@/assets/page/about/examples/whiteboard.webp" width="460" height="328" alt="computing happiness whiteboard space")
+      img(src="@/assets/page/about/examples/whiteboard.webp" alt="computing happiness whiteboard space")
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate together in real-time.
 
