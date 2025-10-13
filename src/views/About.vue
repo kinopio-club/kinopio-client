@@ -220,14 +220,14 @@ main.page
   .page-wrap
     margin-left auto
     margin-right auto
-    max-width 720px
+    max-width 730px
     @media(max-width 760px)
       max-width 600px
 
     > section
       width 100%
       margin-bottom 2rem
-      padding 0 14px
+      padding 0 20px
       > h1
         font-family var(--header-font-9)
         font-size 66px
