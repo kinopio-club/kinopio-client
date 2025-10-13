@@ -4,23 +4,23 @@
 <template lang="pug">
 footer.sitemap
   nav.row
-    div
+    .column
       p PRODUCT
       a(href="/about") About
       a(href="/blog") Blog
       a(href="/changelog") Changelog
       a(href="/roadmap") Roadmap
-    div
+    .column
       p SUPPORT
       a(href="mailto:hi@kinopio.club") Contact
       a(href="/forum") Forum
       a(href="/help") Help
-    div
+    .column
       p COMMUNITY
       a(href="/api") API Docs
       a(href="/discord") Discord
       a(href="https://github.com/kinopio-club") Github
-    div
+    .column
       p ﾉ乙(､ﾝ､)_
       a(href="https://help.kinopio.club/posts/terms-of-service/") Terms
       a(href="https://help.kinopio.club/posts/privacy-policy/") Privacy
@@ -49,6 +49,12 @@ footer.sitemap
     flex-direction row
     justify-content flex-start
     gap 40px
+
+  .column
+    display flex
+    flex-direction column
+    gap 6px
+
   @media(max-width 520px)
     .row
       gap 15px

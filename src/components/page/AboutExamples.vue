@@ -61,46 +61,46 @@ section.examples(ref="parentElement")
     //- 970 width, 693 height
 
     .example.whiteboard(v-show="state.example === 'whiteboard'")
-      img(src="@/assets/page/about/examples/whiteboard.webp")
+      img(src="@/assets/page/about/examples/whiteboard.webp" width="460" height="328" alt="computing happiness whiteboard space")
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate together in real-time.
 
     .example.mindmap(v-show="state.example === 'mindmap'")
-      video(autoplay loop muted playsinline)
+      video(autoplay loop muted playsinline aria-label="mindmap space")
         source(src="@/assets/page/about/examples/mindmap.mp4")
       p Unlike traditional mind maps and outliners, Kinopio lets you make your spaces truly yours with backgrounds, images, GIFs, MP3s, Youtube or Spotify URLs.
       p Draw anywhere to decorate or emphasize specific areas.
 
     .example.moodboard(v-show="state.example === 'moodboard'")
-      video(autoplay loop muted playsinline)
+      video(autoplay loop muted playsinline aria-label="moodboard space")
         source(src="@/assets/page/about/examples/moodboard.mp4")
       p Collect quotes and visual inspiration to guide the direction of your next big project. Real-time collaboration and comment cards help keep everyone aligned.
       p You can also import your Are.na channels.
 
     .example.research(v-show="state.example === 'research'")
-      img(src="@/assets/page/about/examples/research.webp")
+      img(src="@/assets/page/about/examples/research.webp" alt="research space")
       p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination.
       p Invite collaborators to collect ideas and comments. Use backlinked [[tags]] to connect themes across spaces.
 
     .example.plan(v-show="state.example === 'plan'")
-      video(autoplay loop muted playsinline)
+      video(autoplay loop muted playsinline aria-label="planning space")
         source(src="@/assets/page/about/examples/plan.mp4")
       p Build roadmaps, diagrams, storyboards, specs, and project plans, that let you track project progress – while also making it easy to adapt to unexpected changes, new insight, or new ideas.
       p Move from idea to actions by turning cards or boxes into trackable Todos.
 
     .example.present(v-show="state.example === 'present'")
-      video(autoplay loop muted playsinline)
+      video(autoplay loop muted playsinline aria-label="presentation space")
         source(src="@/assets/page/about/examples/present.mp4")
       p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them with the minimap.
 
     .example.notes(v-show="state.example === 'notes'")
-      video(autoplay loop muted playsinline)
+      video(autoplay loop muted playsinline aria-label="note taking space")
         source(src="@/assets/page/about/examples/notes.mp4")
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs. If you can see it on the internet, you can put it inside Kinopio.
 
     .example.websites(v-show="state.example === 'websites'")
-      img(src="@/assets/page/about/examples/websites.webp")
+      img(src="@/assets/page/about/examples/websites.webp" alt="website space")
       p Share uniquely personal webpages to celebrate birthdays, share hobbies, mixtapes, about pages, and portfolios.
       p Spaces are private by default and invitees don't need an account to view, but you can also set spaces to be public read-only, or open to comments from everyone.
       p

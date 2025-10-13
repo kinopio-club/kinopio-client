@@ -90,5 +90,74 @@ const togglePricingIsVisible = () => {
 </template>
 
 <style lang="stylus">
-// .component-name
+// same as components/Header.vue
+header
+  pointer-events none
+  position fixed
+  top 0
+  user-select none
+  z-index var(--max-z - 1)
+  width 100%
+  padding 8px
+  display flex
+  justify-content space-between
+  transition 0.2s opacity
+  transform-origin left top
+  nav,
+  aside
+    pointer-events none
+    position relative
+    display -webkit-box
+    button
+      pointer-events all
+    > .row
+      width 100%
+      display flex
+      justify-content space-between
+      // 2nd row onwards
+      margin-top 6px
+      margin-left 39px
+      // 1st row
+      &:first-child
+        margin-top 0
+        margin-left 0
+      .left
+        display flex
+        flex-shrink 0
+      .right
+        display flex
+        justify-content flex-end
+        max-width 100%
+
+  nav
+    display flex
+    justify-content space-between
+    flex-wrap wrap
+    width 100%
+
+  .logo-about
+    pointer-events all
+    position relative
+    display inline-block
+    margin-right 6px
+    margin-bottom -6px
+  .logo
+    cursor pointer
+    display flex
+    .label-badge
+      bottom -2px
+
+    img
+      vertical-align middle
+    .down-arrow
+      padding-left 2px
+      opacity 0.5
+      @media(max-width 550px)
+        display none
+    .label-badge
+      transform translateY(10px)
+    &:active,
+    &.active
+      .down-arrow
+        transform translateY(2px)
 </style>

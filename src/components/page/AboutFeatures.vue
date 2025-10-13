@@ -47,7 +47,7 @@ section.features
   .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
     p Featuring ● Real-Time Collaboration ● Privacy Settings ● Code Blocks and Markdown ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Organize With Boxes ● Freehand Drawing ● Collaborative Space Groups ● Quick Save to Inbox With Browser Extensions ● Trackable Todos ● Personal Templates ● Snap to Grid ● Other secret features may be available… (don’t tell anyone)
   p
-    img.updated.icon(src="@/assets/updated.gif")
+    img.updated.icon(src="@/assets/updated.gif" alt="updated" width="44" height="12")
     span New features are being added all the time in{{' '}}
     a(href="/changelog") Changelog
     span .

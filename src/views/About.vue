@@ -109,7 +109,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
       .page-wrap
         section.intro
           h1.wordmark Kinopio
-          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
+          video(width="692" height="495" autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
             source(src="@/assets/page/about/hero/vid.mp4")
           p Kinopio is a spatial note taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
           p Free for 100 cards. No sign up required.
@@ -228,7 +228,7 @@ const toggleAppsAndExtensionsIsVisible = () => {
             router-link(to="/app")
               button.success Open Kinopio
           p I hope you enjoy using Kinopio and find it invaluable,
-          img.icon.signature(src="https://help.kinopio.club/assets/about/signature.png")
+          img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
 
         FooterSitemap
 </template>
