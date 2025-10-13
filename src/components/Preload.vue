@@ -30,8 +30,8 @@ const updateImageUrls = () => {
 
   .icons.hidden
     //- logo
-    img.icon(src="@/assets/logo-hover.png")
-    img.icon(src="@/assets/logo-active.png")
+    img.icon(src="@/assets/logos/logo-hover.png")
+    img.icon(src="@/assets/logos/logo-active.png")
 
     //- frames
     img(src="@/assets/frames/garden-leaves/flower.png")
@@ -127,6 +127,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/resize-corner.svg")
     img.icon(src="@/assets/resize.svg")
     img.icon(src="@/assets/right-arrow.svg")
+    img.icon(src="@/assets/right-arrow-invert.svg")
     img.icon(src="@/assets/rss.svg")
     img.icon(src="@/assets/search.svg")
     img.icon(src="@/assets/settings.svg")

@@ -57,7 +57,7 @@ const visible = computed(() => {
 })
 const otherSpace = computed(() => globalStore.getOtherSpaceById(otherCard.value.spaceId))
 const otherCard = computed(() => globalStore.currentSelectedOtherItem)
-const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
+const url = computed(() => utils.urlFromSpaceAndItem({ spaceId: otherSpace.value.id, itemId: otherCard.value.id }))
 const canEditOtherCard = computed(() => {
   const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
   if (canEditCard) { return true }

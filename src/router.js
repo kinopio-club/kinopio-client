@@ -1,14 +1,13 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
-import Space from '@/views/Space.vue'
 import consts from './consts.js'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+const router = {
+  history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
   // server level redirects in _redirects
 
@@ -29,19 +28,25 @@ const router = createRouter({
       }
     }, {
       path: '/',
-      alias: '/app',
+      alias: '/about',
+      name: 'about',
+      component: () => import('./views/About.vue')
+    }, {
+      path: '/app',
       name: 'space',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        if (!consts.isStaticPrerenderingPage) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        }
         next()
       }
     }, {
       path: '/reset-password',
       name: 'reset-password',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -50,13 +55,13 @@ const router = createRouter({
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
         }
-        next()
         history.replaceState({}, document.title, window.location.origin)
+        next()
       }
     }, {
       path: '/update-arena-access-token',
       name: 'update-arena-access-token',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         const arenaReturnedCode = urlParams.get('code')
@@ -67,7 +72,7 @@ const router = createRouter({
       }
     }, {
       path: '/explore',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.shouldShowExploreOnLoad = true
@@ -75,7 +80,7 @@ const router = createRouter({
       }
     }, {
       path: '/new',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadNewSpace = true
@@ -83,7 +88,7 @@ const router = createRouter({
       }
     }, {
       path: '/inbox', // used by /add
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadInboxSpace = true
@@ -91,7 +96,7 @@ const router = createRouter({
       }
     }, {
       path: '/:space/:card',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
@@ -107,7 +112,7 @@ const router = createRouter({
       }
     }, {
       path: '/embed',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -127,7 +132,7 @@ const router = createRouter({
     }, {
       path: '/donation-success',
       name: 'donation-success',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.notifyThanksForDonating = true
@@ -136,7 +141,7 @@ const router = createRouter({
     }, {
       path: '/subscription-success',
       name: 'subscription-success',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -149,7 +154,7 @@ const router = createRouter({
     }, {
       path: '/group/invite',
       name: 'groupInvite',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -162,7 +167,7 @@ const router = createRouter({
     }, {
       path: '/invite',
       name: 'invite',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
@@ -201,7 +206,7 @@ const router = createRouter({
       }
     }, {
       path: '/:space',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
@@ -214,12 +219,7 @@ const router = createRouter({
       }
     }
   ]
-})
-
-router.beforeEach(async (to, from) => {
-  const userStore = useUserStore()
-  await userStore.initializeUser()
-})
+}
 
 export default router
 

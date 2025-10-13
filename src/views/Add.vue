@@ -55,7 +55,6 @@ window.addEventListener('message', (event) => {
 })
 
 onMounted(async () => {
-  await initUser()
   initCardTextarea()
   restoreValue()
   checkIsMissingInboxSpace()
@@ -86,9 +85,6 @@ const name = computed({
     updateMaxLengthError()
   }
 })
-const initUser = async () => {
-  await userStore.initializeUser()
-}
 const initCardTextarea = async () => {
   await nextTick()
   focusAndSelectName()

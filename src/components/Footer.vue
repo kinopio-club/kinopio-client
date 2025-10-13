@@ -7,7 +7,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
-import Loader from '@/components/Loader.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
@@ -276,7 +275,7 @@ const updatePositionInVisualViewport = () => {
     transition 0.2s opacity
     &.is-embed
       position absolute
-      right 0
+      right 8px
   &.is-mobile
     margin-bottom 10px
   &.is-mobile-standalone
@@ -323,6 +322,9 @@ const updatePositionInVisualViewport = () => {
     img.icon
       filter invert(1)
 
+  dialog
+    top initial !important
+
 footer
   .is-mobile-icon
     vertical-align 2px !important
@@ -358,26 +360,5 @@ footer
     vertical-align 0px
     width 13px
     margin-left 6px
-
-  .space-functions-row
-    > .segmented-buttons,
-    &.segmented-buttons
-      display inline-block
-      > .button-wrap
-        > button
-          border-radius 0
-          border-right 0
-          .loader
-            margin 0
-        &:first-child
-          > button
-            border-top-left-radius var(--entity-radius)
-            border-bottom-left-radius var(--entity-radius)
-            border-right 0
-        &:last-child
-          > button
-            border-top-right-radius var(--entity-radius)
-            border-bottom-right-radius var(--entity-radius)
-            border-right 1px solid var(--primary-border)
 
   </style>

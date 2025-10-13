@@ -11,7 +11,7 @@ import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import AboutMe from '@/components/AboutMe.vue'
+import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 import dayjs from 'dayjs'
@@ -73,9 +73,11 @@ const updateDialogHeight = async () => {
 
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const changelogId = changelogStore.updates[0].id
-  cache.updatePrevReadChangelogId(changelogId)
-  changelogStore.isUpdated = false
+  const changelogId = changelogStore.updates[0]?.id
+  if (changelogId) {
+    cache.updatePrevReadChangelogId(changelogId)
+    changelogStore.isUpdated = false
+  }
   spaceStore.changeSpace(space)
   globalStore.addNotification({ message: 'Changelog space opened', type: 'success' })
 }
@@ -121,10 +123,11 @@ const changeSpaceToRoadmap = () => {
 </script>
 
 <template lang="pug">
-dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
+dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section
     .row.title-row
-      p About Kinopio
+      a(href="/about")
+        button.small-button About Kinopio
       .title-controls
         .segmented-buttons
           ThemeToggle(:isSmall="true")
@@ -183,7 +186,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
     .row
-      AboutMe
+      WhoMakesKinopio
   section
     .row
       .button-wrap
@@ -199,7 +202,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 </template>
 
 <style lang="stylus">
-.about
+dialog.about
   top calc(100% - 6px) !important
   &.overflow
     overflow auto
@@ -216,4 +219,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     display flex
     .segmented-buttons
       margin-right 6px
+  dialog.apps
+    left 8px
 </style>

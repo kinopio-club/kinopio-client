@@ -11,7 +11,7 @@ const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   const path = url.pathname
   const id = path.substring(path.length - uuidLength)
-  const idIsInvalid = id.includes('/') || id.includes('.')
+  const idIsInvalid = id.includes('/') || id.includes('.') || id.length !== uuidLength
   if (idIsInvalid) { return }
   console.info('🌷 spaceId', id)
   return id
@@ -120,8 +120,7 @@ export default async (request, context) => {
     }
     // space url
     const spaceId = spaceIdFromUrl(url)
-    const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
-    if (isHomepage || !spaceId) {
+    if (!spaceId) {
       console.info('👻 edge function skipped')
       return
     }

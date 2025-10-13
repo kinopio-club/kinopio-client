@@ -388,7 +388,7 @@ export const useCardStore = defineStore('cards', {
         cards = utils.clone(cards)
         await cache.updateSpace('cards', cards, spaceStore.id)
       } catch (error) {
-        console.error('🚒 updateCards', error)
+        console.error('🚒 updateCards', error, updates)
       }
     },
     updateCard (update) {

@@ -25,7 +25,6 @@ import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
-import defer from 'lodash-es/defer'
 import throttle from 'lodash-es/throttle'
 import dayjs from 'dayjs'
 
@@ -264,8 +263,10 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       globalStore.isLoadingSpace = true
+      globalStore.isSpacePage = true
       const spaceUrl = globalStore.spaceUrlToLoad
       const cachedSpaces = await cache.getAllSpaces()
+      setCookie()
       // restore from url
       if (spaceUrl) {
         console.info('🚃 Restore space from url', spaceUrl)
@@ -425,7 +426,9 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       isLoadingRemoteSpace = false
       space.connections = utils.migrationConnections(space.connections)
-      globalStore.spaceZoomPercent = 100
+      if (!globalStore.isEmbedMode) {
+        globalStore.spaceZoomPercent = 100
+      }
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
@@ -516,6 +519,10 @@ export const useSpaceStore = defineStore('space', {
         const globalStore = useGlobalStore()
         const apiStore = useApiStore()
         const userStore = useUserStore()
+        if (!globalStore.isSpacePage) {
+          window.location = utils.urlFromSpaceAndItem({ spaceId: space.id })
+          return
+        }
         globalStore.updatePrevSpaceIdInSession(this.id)
         globalStore.updatePrevSpaceIdInSessionPagePosition()
         globalStore.clearAllInteractingWithAndSelected()
@@ -527,7 +534,6 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerUpdateWindowHistory()
         const userIsMember = userStore.getUserIsSpaceMember
         if (!userIsMember) { return }
-        setCookie()
         globalStore.parentCardId = ''
         this.updateUserLastSpaceId()
         const cardId = globalStore.loadSpaceFocusOnCardId
@@ -694,7 +700,6 @@ export const useSpaceStore = defineStore('space', {
       await this.saveSpace()
       this.updateUserLastSpaceId()
       globalStore.notifySignUpToEditSpace = false
-      setCookie()
     },
     async saveImportSpace (space) {
       const globalStore = useGlobalStore()
@@ -783,10 +788,12 @@ export const useSpaceStore = defineStore('space', {
     // update
 
     updateSpacePreviewImage: throttle(async function () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace
+      if (!globalStore.isSpacePage) { return }
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)

@@ -14,7 +14,7 @@ const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
 
-const visible = computed(() => globalStore.getIsSpacePage)
+const visible = computed(() => globalStore.isSpacePage)
 const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 

@@ -540,6 +540,7 @@ svg.connection(
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
+    title {{typeName}}
 
   defs(v-if="state.isVisibleInViewport")
     linearGradient(:id="gradientId")
