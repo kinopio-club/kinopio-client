@@ -58,13 +58,13 @@ section.features
   .scrolling-rows
     cursor pointer
   .horizontal
-    display flex
-    flex-wrap nowrap
     overflow-x hidden
     max-width 100%
     p
-      flex 0 0 auto
+      display flex
       margin 0
+      text-wrap nowrap
+      overflow visible
   .row
     cursor pointer
   .row + .row
