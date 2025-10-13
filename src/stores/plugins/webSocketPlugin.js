@@ -162,6 +162,7 @@ export default function webSocketPlugin () {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     const broadcastStore = useBroadcastStore(pinia)
+    if (!globalStore.isSpacePage) { return }
     // prevent duplicate connections
     if (websocket || globalStore.isConnectingToBroadcast) {
       // console.info('🌙 websocket connection already in progress or established')
@@ -320,6 +321,7 @@ export default function webSocketPlugin () {
     const broadcastStore = useBroadcastStore(pinia)
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
+    if (!globalStore.isSpacePage) { return }
     const message = args[0]
     switch (name) {
       case 'connect':
