@@ -2,6 +2,7 @@
 # Should match offline excluded routes in vite.config.js
 
 /robots.txt       /robots.txt   200
+/security.txt       /security.txt   200
 
 # sitemap entries in vite.config.js
 
