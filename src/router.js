@@ -168,7 +168,7 @@ const router = {
       path: '/invite',
       name: 'invite',
       component: () => import('./views/Space.vue'),
-      beforeEnter: (to, from, next) => {
+      beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -184,7 +184,7 @@ const router = {
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
-        userStore.initializeUser()
+        await userStore.restoreRemoteUser()
         globalStore.isLoadingSpace = true
         if (!spaceId) {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
