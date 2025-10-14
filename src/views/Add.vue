@@ -159,7 +159,7 @@ const signIn = async (event) => {
   const response = await apiStore.signIn({ email, password })
   const result = await response.json()
   if (isSuccess(response)) {
-    await userStore.updateUserState(result)
+    userStore.updateUserState(result)
     await userStore.initializeUserState(result)
     checkIsMissingInboxSpace()
   } else {
