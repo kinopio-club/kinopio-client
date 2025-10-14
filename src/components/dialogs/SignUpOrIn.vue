@@ -356,8 +356,7 @@ const addCollaboratorToCurrentSpace = async () => {
   const currentUser = userStore.getUserAllState
   if (invitedSpaceIds.includes(currentSpace?.id)) {
     spaceStore.addCollaboratorToSpace(currentUser)
-    broadcastStore.close()
-    broadcastStore.joinSpaceRoom()
+    broadcastStore.reconnect()
   }
 }
 const addCollaboratorToInvitedSpaces = async () => {

@@ -54,6 +54,7 @@ import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
+import SpaceWebsockets from '@/SpaceWebsockets.js'
 
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
@@ -74,6 +75,7 @@ const changelogStore = useChangelogStore()
 const themeStore = useThemeStore()
 
 let unsubscribes
+let websocketController
 
 let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
@@ -102,7 +104,6 @@ const init = async () => {
   analyticsStore.event('pageview')
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
-  // broadcastStore.connect()
   await groupStore.initializeGroups()
   checkIfShouldShowExploreOnLoad()
   historyStore.init()
@@ -120,6 +121,10 @@ onMounted(async () => {
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+
+  // Initialize websocket controller for space
+  websocketController = SpaceWebsockets()
+  broadcastStore.connect()
 
   // Space initialization
   setTimeout(() => { // move async init out of vue rendering cycle, to fix race condition
@@ -204,6 +209,10 @@ onBeforeUnmount(() => {
   clearInterval(processQueueIntervalTimer)
   clearInterval(hourlyTasks)
   unsubscribes()
+  // Close websocket connection
+  if (websocketController) {
+    websocketController.close()
+  }
 })
 
 const state = reactive({
@@ -310,7 +319,9 @@ const loadSpaceOnBackOrForward = (event) => {
   spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
-  broadcastStore.close()
+  if (websocketController) {
+    websocketController.close()
+  }
   spaceStore.removeEmptyCards()
   globalStore.triggerUnloadPage()
 }

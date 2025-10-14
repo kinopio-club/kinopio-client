@@ -299,7 +299,6 @@ export const useSpaceStore = defineStore('space', {
       await this.checkIfShouldCreateNewUserSpaces()
       globalStore.triggerUpdateWindowHistory()
       globalStore.isLoadingSpace = false
-      broadcastStore.connect()
     },
 
     // load

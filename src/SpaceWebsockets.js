@@ -1,3 +1,4 @@
+// Space-scoped WebSocket controller
 // watches and sends to broadcastStore actions
 // connect → join space room → send/receive messages
 
@@ -28,19 +29,20 @@ import debounce from 'lodash-es/debounce'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-export default function webSocketPlugin () {
+export default function SpaceWebsockets () {
   let websocket, currentSpaceRoom, isConnected
   const clientId = nanoid()
+  let broadcastUnsubscribe
 
   console.info('🌳 websocket client initialized', clientId)
 
-  const getPiniaStore = (store, pinia) => {
-    const globalStore = useGlobalStore(pinia)
-    const spaceStore = useSpaceStore(pinia)
-    const userStore = useUserStore(pinia)
-    const cardStore = useCardStore(pinia)
-    const boxStore = useBoxStore(pinia)
-    const connectionStore = useConnectionStore(pinia)
+  const getPiniaStore = (store) => {
+    const globalStore = useGlobalStore()
+    const spaceStore = useSpaceStore()
+    const userStore = useUserStore()
+    const cardStore = useCardStore()
+    const boxStore = useBoxStore()
+    const connectionStore = useConnectionStore()
     if (store === 'globalStore') {
       return globalStore
     } else if (store === 'spaceStore') {
@@ -60,10 +62,10 @@ export default function webSocketPlugin () {
 
   // join
 
-  const joinSpaceRoom = (pinia, payload) => {
-    const globalStore = useGlobalStore(pinia)
-    const spaceStore = useSpaceStore(pinia)
-    const userStore = useUserStore(pinia)
+  const joinSpaceRoom = (payload) => {
+    const globalStore = useGlobalStore()
+    const spaceStore = useSpaceStore()
+    const userStore = useUserStore()
     const spaceId = spaceStore.id
     const user = userStore.getUserPublicMeta
     // check if should join
@@ -105,15 +107,15 @@ export default function webSocketPlugin () {
     globalStore.isJoiningSpace = false
   }
   // Delay reconnect to prevent rapid cycles
-  const reconnectDebounce = debounce((pinia) => {
-    const broadcastStore = useBroadcastStore(pinia)
+  const reconnectDebounce = debounce(() => {
+    const broadcastStore = useBroadcastStore()
     broadcastStore.reconnect()
   }, 1000)
 
   // leave
 
-  const closeWebsocket = (pinia) => {
-    const globalStore = useGlobalStore(pinia)
+  const closeWebsocket = () => {
+    const globalStore = useGlobalStore()
     if (!websocket) {
       return
     }
@@ -129,8 +131,8 @@ export default function webSocketPlugin () {
 
   // checks
 
-  const checkIfShouldUpdateLinkToItem = (pinia, { action, updates }) => {
-    const spaceStore = useSpaceStore(pinia)
+  const checkIfShouldUpdateLinkToItem = ({ action, updates }) => {
+    const spaceStore = useSpaceStore()
     let options
     if (action !== 'updateCard') {
       return
@@ -144,25 +146,24 @@ export default function webSocketPlugin () {
       spaceStore.updateOtherItems(options)
     }
   }
-  const checkIfShouldNotifyOffscreenCardCreated = (pinia, { action, updates }) => {
-    const globalStore = useGlobalStore(pinia)
+  const checkIfShouldNotifyOffscreenCardCreated = ({ action, updates }) => {
+    const globalStore = useGlobalStore()
     if (action === 'createCard') {
       globalStore.triggerNotifyOffscreenCardCreated(updates)
     }
   }
-  const checkIfShouldPreventBroadcast = (pinia) => {
-    const spaceStore = useSpaceStore(pinia)
+  const checkIfShouldPreventBroadcast = () => {
+    const spaceStore = useSpaceStore()
     return !spaceStore.getSpaceIsRemote
   }
 
   // init
 
-  const connectToWebsocket = (pinia) => {
-    const globalStore = useGlobalStore(pinia)
-    const spaceStore = useSpaceStore(pinia)
-    const userStore = useUserStore(pinia)
-    const broadcastStore = useBroadcastStore(pinia)
-    if (!globalStore.isSpacePage) { return }
+  const connectToWebsocket = () => {
+    const globalStore = useGlobalStore()
+    const spaceStore = useSpaceStore()
+    const userStore = useUserStore()
+    const broadcastStore = useBroadcastStore()
     // prevent duplicate connections
     if (websocket || globalStore.isConnectingToBroadcast) {
       // console.info('🌙 websocket connection already in progress or established')
@@ -203,15 +204,15 @@ export default function webSocketPlugin () {
       websocket = null
       // Only reconnect on unexpected closures
       if (event.code === 1000) { return }
-      reconnectDebounce(pinia)
+      reconnectDebounce()
     }
     websocket.onerror = (event) => {
-      const shouldPrevent = checkIfShouldPreventBroadcast(pinia)
+      const shouldPrevent = checkIfShouldPreventBroadcast()
       console.warn('🌌 websocket error', event, shouldPrevent)
       // reconnect on error
       globalStore.isConnectingToBroadcast = false
       if (shouldPrevent) { return }
-      reconnectDebounce(pinia)
+      reconnectDebounce()
     }
 
     // 🌜 Receive
@@ -227,17 +228,17 @@ export default function webSocketPlugin () {
         if (data.spaceId) {
           if (data.spaceId !== spaceStore.id) { return }
         }
-        receiveMessage(pinia, data)
+        receiveMessage(data)
       } catch (error) {
         console.error('Error processing WebSocket message:', error, data)
       }
     }
   }
 
-  const receiveMessage = (pinia, data) => {
-    const globalStore = useGlobalStore(pinia)
-    const spaceStore = useSpaceStore(pinia)
-    const userStore = useUserStore(pinia)
+  const receiveMessage = (data) => {
+    const globalStore = useGlobalStore()
+    const spaceStore = useSpaceStore()
+    const userStore = useUserStore()
     const { message, user } = data
     const { name, updates = {}, action } = message
     updates.user = user
@@ -262,12 +263,12 @@ export default function webSocketPlugin () {
       spaceStore.updateSpaceClients()
     } else if (isAction) {
       updates.isFromBroadcast = true
-      const piniaStore = getPiniaStore(store, pinia)
+      const piniaStore = getPiniaStore(store)
       if (piniaStore) {
         piniaStore[action](updates)
       }
-      checkIfShouldUpdateLinkToItem(pinia, { action, updates })
-      checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
+      checkIfShouldUpdateLinkToItem({ action, updates })
+      checkIfShouldNotifyOffscreenCardCreated({ action, updates })
     } else {
       console.warn('🌚 unhandled message', data)
     }
@@ -286,9 +287,9 @@ export default function webSocketPlugin () {
       sentActions.clear()
     }
   }, 16) // 60fps
-  const sendMessage = (pinia, message, type) => {
-    const spaceStore = useSpaceStore(pinia)
-    const userStore = useUserStore(pinia)
+  const sendMessage = (message, type) => {
+    const spaceStore = useSpaceStore()
+    const userStore = useUserStore()
     if (!websocket || !isConnected) {
       return
     }
@@ -316,16 +317,16 @@ export default function webSocketPlugin () {
 
   // watch broadcastStore
 
-  const broadcastHandler = (pinia, name, args) => {
-    const globalStore = useGlobalStore(pinia)
-    const broadcastStore = useBroadcastStore(pinia)
-    const spaceStore = useSpaceStore(pinia)
-    const userStore = useUserStore(pinia)
+  const broadcastHandler = (name, args) => {
+    const globalStore = useGlobalStore()
+    const broadcastStore = useBroadcastStore()
+    const spaceStore = useSpaceStore()
+    const userStore = useUserStore()
     if (!globalStore.isSpacePage) { return }
     const message = args[0]
     switch (name) {
       case 'connect':
-        connectToWebsocket(pinia)
+        connectToWebsocket()
         break
       case 'joinSpaceRoom':
         if (!isConnected) {
@@ -338,22 +339,22 @@ export default function webSocketPlugin () {
           }
           return
         }
-        joinSpaceRoom(pinia, message)
+        joinSpaceRoom(message)
         break
       case 'leaveSpaceRoom':
         spaceStore.clients = []
-        sendMessage(pinia, message)
+        sendMessage(message)
         break
       case 'update':
-        sendMessage(pinia, message)
+        sendMessage(message)
         break
       case 'close':
-        closeWebsocket(pinia)
+        closeWebsocket()
         break
       case 'reconnect':
         console.info('🌚 Manual reconnect requested')
         if (!globalStore.isConnectingToBroadcast) {
-          closeWebsocket(pinia)
+          closeWebsocket()
           isConnected = false
           currentSpaceRoom = null
           // Delay reconnect to prevent rapid cycles
@@ -367,17 +368,35 @@ export default function webSocketPlugin () {
     }
   }
 
-  // Return the Pinia plugin
-  return ({ pinia }) => {
-    // Get the broadcast store
-    const broadcastStore = useBroadcastStore(pinia)
-    if (!broadcastStore) {
-      console.error('🚒 broadcastStore not found')
-      return
+  // Initialize - subscribe to broadcast store actions
+  const broadcastStore = useBroadcastStore()
+  if (!broadcastStore) {
+    console.error('🚒 broadcastStore not found')
+    return
+  }
+
+  // eslint-disable-next-line prefer-const
+  broadcastUnsubscribe = broadcastStore.$onAction(({ name, args }) => {
+    broadcastHandler(name, args)
+  })
+
+  // Connect immediately
+  connectToWebsocket()
+
+  // Return controller interface
+  return {
+    close: () => {
+      console.info('🌳 SpaceWebsockets controller closing')
+      if (broadcastUnsubscribe) {
+        broadcastUnsubscribe()
+      }
+      closeWebsocket()
+      currentSpaceRoom = null
+      isConnected = false
+    },
+    reconnect: () => {
+      const broadcastStore = useBroadcastStore()
+      broadcastStore.reconnect()
     }
-    // Subscribe to broadcast store actions
-    broadcastStore.$onAction(({ name, args }) => {
-      broadcastHandler(pinia, name, args)
-    })
   }
 }
