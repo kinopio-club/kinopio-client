@@ -126,7 +126,7 @@ const changeSpaceToRoadmap = () => {
 dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
   section.title-section
     .row.title-row
-      a(href="/about")
+      router-link(to="/about")
         button.small-button About Kinopio
       .title-controls
         .segmented-buttons
