@@ -19,4 +19,10 @@
 /changelog        https://kinopio.club/changelog-6lsytK8ZfOtMl2oqG05Rj   301
 /roadmap          https://kinopio.club/-roadmap-3CBHtivu7X7nTzrcaTFQV   301
 
+# redirect logged-in users to /app
+
+/                 /app   307   Cookie=kinopio
+
+# Serve app.html instead of 404 page
+
 /*                /app.html   200
