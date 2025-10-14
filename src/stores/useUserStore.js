@@ -380,7 +380,7 @@ export const useUserStore = defineStore('users', {
 
     // update
 
-    async updateUserState (update) {
+    updateUserState (update) {
       const keys = Object.keys(update)
       for (const key of keys) {
         this[key] = update[key]
