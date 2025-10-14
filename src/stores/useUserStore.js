@@ -367,8 +367,8 @@ export const useUserStore = defineStore('users', {
         console.info('🌸 Initialize user from cache', cachedUser.id)
         this.updateUserState(cachedUser)
         themeStore.restoreTheme()
-        await this.restoreRemoteUser(cachedUser)
-        await this.restoreUserAssociatedData()
+        this.restoreRemoteUser()
+        this.restoreUserAssociatedData()
       } else {
         this.createNewUser()
         themeStore.restoreTheme()
