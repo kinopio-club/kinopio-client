@@ -21,7 +21,7 @@
 
 # redirect logged-in users to /app
 
-/                 /app   307   Cookie=kinopio,name
+/                 /app   302   Cookie=kinopio,name
 
 # Serve app.html instead of 404 page
 
