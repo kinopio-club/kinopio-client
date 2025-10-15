@@ -34,7 +34,7 @@ const loadSpaceIdsError = []
 const setCookie = () => {
   const yearSeconds = 31536000
   const millenium = yearSeconds * 1000
-  document.cookie = `name=kinopio; max-age=${millenium}; path=/;`
+  document.cookie = `kinopio=true; max-age=${millenium}; path=/;`
 }
 
 export const useSpaceStore = defineStore('space', {
