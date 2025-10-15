@@ -463,11 +463,17 @@ const cardContentWrapStyles = computed(() => {
   return updateStylesWithWidth(styles)
 })
 const addSizeClasses = (classes) => {
-  const m = 100
-  const l = 150
-  classes['s-width'] = width.value < m
-  classes['m-width'] = utils.isBetween({ value: width.value, min: m, max: l })
-  classes['l-width'] = width.value > l
+  const height = props.card.height
+  const sizes = {
+    m: 100,
+    l: 150
+  }
+  classes['s-width'] = width.value < sizes.m
+  classes['m-width'] = utils.isBetween({ value: width.value, min: sizes.m, max: sizes.l })
+  classes['l-width'] = width.value > sizes.l
+  classes['s-height'] = height < sizes.m
+  classes['m-height'] = utils.isBetween({ value: height, min: sizes.m, max: sizes.l })
+  classes['l-height'] = height > sizes.l
   return classes
 }
 const cardWrapClasses = computed(() => {

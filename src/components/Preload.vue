@@ -40,6 +40,7 @@ const updateImageUrls = () => {
     img(src="@/assets/frames/dead-to-me/spooky-eyes.png")
     img(src="@/assets/frames/lil-guys/pot-standing-side.png")
     img(src="@/assets/frames/pen-pals/icon.png")
+    img(src="@/assets/frames/book-worm/worm-top.png")
 
     //- icons
     img.icon(src="@/assets/add-invert.svg")

@@ -2,6 +2,11 @@
 
 const frames = [
   {
+    id: 7,
+    name: 'Book Worm',
+    badge: 'frames/book-worm/worm-top.png'
+  },
+  {
     id: 4,
     name: 'Dead to Me',
     badge: 'frames/dead-to-me/tombstone.png'

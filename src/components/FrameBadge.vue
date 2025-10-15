@@ -13,6 +13,8 @@
       img(src="@/assets/frames/lil-guys/pot-standing-side.png")
     template(v-else-if="frame.id === 6")
       img(src="@/assets/frames/pen-pals/icon.png")
+    template(v-else-if="frame.id === 7")
+      img(src="@/assets/frames/book-worm/worm-top.png")
 </template>
 
 <script>

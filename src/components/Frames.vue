@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 const props = defineProps({
-  visible: Boolean
+  card: Object
 })
 
 const id = computed(() => props.card?.frameId)
@@ -12,6 +12,7 @@ const isTeaTime = computed(() => Boolean(id.value === 3))
 const isDeadToMe = computed(() => Boolean(id.value === 4))
 const isLilGuys = computed(() => Boolean(id.value === 5))
 const isPenPals = computed(() => Boolean(id.value === 6))
+const isBookWorm = computed(() => Boolean(id.value === 7))
 </script>
 
 <template lang="pug">
@@ -49,6 +50,10 @@ aside.frames
     img.dog-2.m-width(src="@/assets/frames/pen-pals/dog-2.png")
     img.dog-3.l-width(src="@/assets/frames/pen-pals/dog-3.png")
 
+  .book-worm(v-if="isBookWorm")
+    img.worm-top(src="@/assets/frames/book-worm/worm-top.png")
+    img.worm-left.m-height(src="@/assets/frames/book-worm/worm-left.png")
+    img.worm-right.m-height(src="@/assets/frames/book-worm/worm-right.png")
 </template>
 
 <style lang="stylus">
@@ -60,10 +65,32 @@ aside.frames
   .l-width
     display none
 
+.card.s-height
+  .m-height,
+  .l-height
+    display none
+.card.m-height
+  .l-height
+    display none
+
 .frames
   img
     pointer-events none
     position absolute
+
+  .book-worm
+    .worm-top
+      width 25px
+      left 12%
+      top -20px
+    .worm-left
+      width 20px
+      left -15px
+      bottom 10px
+    .worm-right
+      width 30px
+      right -24px
+      bottom 20%
 
   .pen-pals
     .dog-1
