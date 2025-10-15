@@ -14,7 +14,7 @@ export const createApp = ViteSSG(
   // vue-router options
   router,
   // function to have custom setups
-  ({ app, router, isClient, initialState }) => {
+  async ({ app, router, isClient, initialState }) => {
     const pinia = createPinia()
     pinia.use(webSocketPlugin())
 
@@ -23,10 +23,8 @@ export const createApp = ViteSSG(
     app.use(pinia)
 
     if (isClient) {
-      router.beforeEach(async (to, from) => {
-        const userStore = useUserStore()
-        await userStore.initializeUser()
-      })
+      const userStore = useUserStore()
+      await userStore.initializeUser()
     }
   }
 )
