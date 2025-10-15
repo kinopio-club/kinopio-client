@@ -2,19 +2,19 @@
 .badge
   template(v-if="frameHasBadge(frame)")
     template(v-if="frame.id === 1")
-      img(src="@/assets/frames/garden-leaves/flower.png")
+      img(src="@/assets/frames/garden-leaves/flower.webp")
     template(v-else-if="frame.id === 2")
-      img(src="@/assets/frames/magical-helper/hat.png")
+      img(src="@/assets/frames/magical-helper/hat.webp")
     template(v-else-if="frame.id === 3")
-      img(src="@/assets/frames/tea-time/pot.png")
+      img(src="@/assets/frames/tea-time/pot.webp")
     template(v-else-if="frame.id === 4")
-      img(src="@/assets/frames/dead-to-me/spooky-eyes.png")
+      img(src="@/assets/frames/dead-to-me/spooky-eyes.webp")
     template(v-else-if="frame.id === 5")
-      img(src="@/assets/frames/lil-guys/pot-standing-side.png")
+      img(src="@/assets/frames/lil-guys/pot-standing-side.webp")
     template(v-else-if="frame.id === 6")
-      img(src="@/assets/frames/pen-pals/icon.png")
+      img(src="@/assets/frames/pen-pals/icon.webp")
     template(v-else-if="frame.id === 7")
-      img(src="@/assets/frames/book-worm/worm-top.png")
+      img(src="@/assets/frames/book-worm/worm-top.webp")
 </template>
 
 <script>

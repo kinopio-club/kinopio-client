@@ -18,42 +18,42 @@ const isBookWorm = computed(() => Boolean(id.value === 7))
 <template lang="pug">
 aside.frames
   .garden-leaves(v-if="isGardenLeaves")
-    img.leaves(src="@/assets/frames/garden-leaves/leaves.png")
-    img.ivy(src="@/assets/frames/garden-leaves/ivy.png")
-    img.flower(src="@/assets/frames/garden-leaves/flower.png")
+    img.leaves(src="@/assets/frames/garden-leaves/leaves.webp")
+    img.ivy(src="@/assets/frames/garden-leaves/ivy.webp")
+    img.flower(src="@/assets/frames/garden-leaves/flower.webp")
 
   .magical-helper(v-if="isMagicalHelper")
-    img.cat(src="@/assets/frames/magical-helper/cat.png")
-    img.hat(src="@/assets/frames/magical-helper/hat.png")
-    img.moon(src="@/assets/frames/magical-helper/moon.png")
+    img.cat(src="@/assets/frames/magical-helper/cat.webp")
+    img.hat(src="@/assets/frames/magical-helper/hat.webp")
+    img.moon(src="@/assets/frames/magical-helper/moon.webp")
 
   .morning-brew(v-if="isTeaTime")
-    img.cloud(src="@/assets/frames/tea-time/cloud.png")
-    img.pot(src="@/assets/frames/tea-time/pot.png")
-    img.ichigotchi(src="@/assets/frames/tea-time/ichigotchi.png")
+    img.cloud(src="@/assets/frames/tea-time/cloud.webp")
+    img.pot(src="@/assets/frames/tea-time/pot.webp")
+    img.ichigotchi(src="@/assets/frames/tea-time/ichigotchi.webp")
 
   .dead-to-me(v-if="isDeadToMe")
-    img.spooky-witch(src="@/assets/frames/dead-to-me/spooky-witch.png")
-    img.tombstone(src="@/assets/frames/dead-to-me/tombstone.png")
-    img.spooky-eyes(src="@/assets/frames/dead-to-me/spooky-eyes.png")
-    img.ghost(src="@/assets/frames/dead-to-me/ghost.png")
+    img.spooky-witch(src="@/assets/frames/dead-to-me/spooky-witch.webp")
+    img.tombstone(src="@/assets/frames/dead-to-me/tombstone.webp")
+    img.spooky-eyes(src="@/assets/frames/dead-to-me/spooky-eyes.webp")
+    img.ghost(src="@/assets/frames/dead-to-me/ghost.webp")
 
   .lil-guys(v-if="isLilGuys")
-    img.pot-sitting(src="@/assets/frames/lil-guys/pot-sitting.png")
-    img.pot-standing-side(src="@/assets/frames/lil-guys/pot-standing-side.png")
-    img.flowers-02(src="@/assets/frames/lil-guys/flowers-02.png")
-    img.pot-hanging(src="@/assets/frames/lil-guys/pot-hanging.png")
-    img.flowers-01(src="@/assets/frames/lil-guys/flowers-01.png")
+    img.pot-sitting(src="@/assets/frames/lil-guys/pot-sitting.webp")
+    img.pot-standing-side(src="@/assets/frames/lil-guys/pot-standing-side.webp")
+    img.flowers-02(src="@/assets/frames/lil-guys/flowers-02.webp")
+    img.pot-hanging(src="@/assets/frames/lil-guys/pot-hanging.webp")
+    img.flowers-01(src="@/assets/frames/lil-guys/flowers-01.webp")
 
   .pen-pals(v-if="isPenPals")
-    img.dog-1.s-width(src="@/assets/frames/pen-pals/dog-1.png")
-    img.dog-2.m-width(src="@/assets/frames/pen-pals/dog-2.png")
-    img.dog-3.l-width(src="@/assets/frames/pen-pals/dog-3.png")
+    img.dog-1.s-width(src="@/assets/frames/pen-pals/dog-1.webp")
+    img.dog-2.m-width(src="@/assets/frames/pen-pals/dog-2.webp")
+    img.dog-3.l-width(src="@/assets/frames/pen-pals/dog-3.webp")
 
   .book-worm(v-if="isBookWorm")
-    img.worm-top(src="@/assets/frames/book-worm/worm-top.png")
-    img.worm-left.m-height(src="@/assets/frames/book-worm/worm-left.png")
-    img.worm-right.m-height(src="@/assets/frames/book-worm/worm-right.png")
+    img.worm-top(src="@/assets/frames/book-worm/worm-top.webp")
+    img.worm-left.m-height(src="@/assets/frames/book-worm/worm-left.webp")
+    img.worm-right.m-height(src="@/assets/frames/book-worm/worm-right.webp")
 </template>
 
 <style lang="stylus">
@@ -179,6 +179,7 @@ aside.frames
       width 30px
       left -18px
       bottom -13px
+      z-index 2
     .flowers-02
       width 30px
       left 2px
