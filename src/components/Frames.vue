@@ -1,3 +1,19 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+const props = defineProps({
+  visible: Boolean
+})
+
+const id = computed(() => props.card?.frameId)
+const isGardenLeaves = computed(() => Boolean(id.value === 1))
+const isMagicalHelper = computed(() => Boolean(id.value === 2))
+const isTeaTime = computed(() => Boolean(id.value === 3))
+const isDeadToMe = computed(() => Boolean(id.value === 4))
+const isLilGuys = computed(() => Boolean(id.value === 5))
+const isPenPals = computed(() => Boolean(id.value === 6))
+</script>
+
 <template lang="pug">
 aside.frames
   .garden-leaves(v-if="isGardenLeaves")
@@ -35,38 +51,7 @@ aside.frames
 
 </template>
 
-<script>
-export default {
-  props: {
-    card: Object
-  },
-  computed: {
-    id () { return this.card.frameId },
-    isGardenLeaves () {
-      return Boolean(this.id === 1)
-    },
-    isMagicalHelper () {
-      return Boolean(this.id === 2)
-    },
-    isTeaTime () {
-      return Boolean(this.id === 3)
-    },
-    isDeadToMe () {
-      return Boolean(this.id === 4)
-    },
-    isLilGuys () {
-      return Boolean(this.id === 5)
-    },
-    isPenPals () {
-      return Boolean(this.id === 6)
-    }
-  }
-}
-
-</script>
-
 <style lang="stylus">
-
 .card.s-width
   .m-width,
   .l-width
