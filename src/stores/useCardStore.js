@@ -362,6 +362,10 @@ export const useCardStore = defineStore('cards', {
 
     async updateCardsState (updates) {
       const connectionStore = useConnectionStore()
+      updates = updates.map(update => { // normalize
+        delete update.user
+        return update
+      })
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
