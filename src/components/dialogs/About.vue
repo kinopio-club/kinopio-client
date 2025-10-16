@@ -199,6 +199,13 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
           button
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
+    .row
+      .button-wrap
+        a(href="https://kinopio.club/blog")
+          button
+            span Blog{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+
 </template>
 
 <style lang="stylus">
