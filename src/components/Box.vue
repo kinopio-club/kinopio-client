@@ -289,6 +289,7 @@ const isFiltered = computed(() => {
 const resizeIsVisible = computed(() => {
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
+  if (userStore.getUserIsCommentOnly) { return }
   return true
 })
 const startResizing = (event) => {
