@@ -139,7 +139,9 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
   }
 })
 const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value))
-const multipleItemsIsSelected = computed(() => Boolean(multipleItemsSelectedIds.value.length))
+const multipleItemsIsSelected = computed(() => {
+  return multipleItemsSelectedIds.value.length > 1
+})
 const itemsIsConnectedTogether = computed(() => {
   const itemIds = multipleItemsSelectedIds.value
   const connections = connectionStore.getConnectionsByItemIds(itemIds)
@@ -460,9 +462,9 @@ dialog.narrow.multiple-selected-actions(
     //- Edit Cards
     .row(v-if="cardOrBoxIsSelected")
       //- [·]
-      ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
+      ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
       //- Connect
-      button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
+      button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all" title="Connect/Disconnect Cards")
         img.connect-items.icon(src="@/assets/connect-items.svg")
       //- LINE Options
       .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
@@ -476,7 +478,7 @@ dialog.narrow.multiple-selected-actions(
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
     CardOrBoxActions(
-      :visible="cardsIsSelected"
+      :visible="cardsIsSelected && canEditAll.all"
       :cards="cards"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
@@ -484,7 +486,7 @@ dialog.narrow.multiple-selected-actions(
     )
     CardOrBoxActions(
       :labelIsVisible="true"
-      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected"
+      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected && canEditAll.all"
       :boxes="boxes"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
@@ -500,7 +502,7 @@ dialog.narrow.multiple-selected-actions(
         button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
           span Copy
           MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
-        button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.cards")
+        button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.all")
           span Move
           MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
     //- More Options
