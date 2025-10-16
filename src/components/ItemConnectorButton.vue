@@ -39,6 +39,12 @@ const backgroundColorIsDark = computed(() => {
   const color = props.currentBackgroundColor || props.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
+const canEditItem = computed(() => {
+  if (userStore.getUserIsCommentOnly) {
+    return userStore.getItemIsCreatedByUser(item.value)
+  }
+  return canEditSpace.value
+})
 
 // user
 
@@ -251,7 +257,7 @@ const currentUserIsCreatingConnectionColor = computed(() => {
 // handle events
 
 const startConnecting = (event) => {
-  if (!canEditSpace.value) { return }
+  if (!canEditItem.value) { return }
   if (utils.isMultiTouch(event)) { return }
   globalStore.closeAllDialogs()
   globalStore.preventDraggedCardFromShowingDetails = true
