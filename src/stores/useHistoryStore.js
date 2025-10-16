@@ -178,7 +178,7 @@ export const useHistoryStore = defineStore('history', {
               }
               if (this.prevCardUpdatesProcessing.has(update.id)) { return }
               const prevCard = cardStore.getCard(update.id)
-              this.prevCardUpdatesProcessing.set(prevCard.id, prevCard)
+              this.prevCardUpdatesProcessing.set(prevCard?.id, prevCard)
             })
             this.processCardUpdated(this, updates)
             break
