@@ -34,12 +34,13 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/logos/logo-active.png")
 
     //- frames
-    img(src="@/assets/frames/garden-leaves/flower.png")
-    img(src="@/assets/frames/magical-helper/hat.png")
-    img(src="@/assets/frames/tea-time/pot.png")
-    img(src="@/assets/frames/dead-to-me/spooky-eyes.png")
-    img(src="@/assets/frames/lil-guys/pot-standing-side.png")
-    img(src="@/assets/frames/pen-pals/icon.png")
+    img(src="@/assets/frames/garden-leaves/flower.webp")
+    img(src="@/assets/frames/magical-helper/hat.webp")
+    img(src="@/assets/frames/tea-time/pot.webp")
+    img(src="@/assets/frames/dead-to-me/spooky-eyes.webp")
+    img(src="@/assets/frames/lil-guys/pot-standing-side.webp")
+    img(src="@/assets/frames/pen-pals/icon.webp")
+    img(src="@/assets/frames/book-worm/worm-top.webp")
 
     //- icons
     img.icon(src="@/assets/add-invert.svg")
