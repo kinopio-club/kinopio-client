@@ -61,7 +61,6 @@ section.features
     overflow-x hidden
     max-width 100%
     p
-      display flex
       margin 0
       text-wrap nowrap
       overflow visible
@@ -80,6 +79,13 @@ section.features
       animation-duration 45s
     &.row-3
       animation-duration 40s
+    @media(max-width 500px)
+      animation-duration 30s
+      &.row-2
+        animation-duration 25s
+      &.row-3
+        animation-duration 20s
+
 @keyframes marquee
   0%
     transform translate(0px)
