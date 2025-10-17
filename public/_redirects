@@ -12,7 +12,8 @@
 
 # /help/*           https://kinopio-help.netlify.app/:splat   200
 /help/*           https://deploy-preview-58--kinopio-help.netlify.app/:splat   200 # Test with kinopio-help staging URL
-/blog/*           https://kinopio-blog.netlify.app/:splat   200
+# /blog/*           https://kinopio-blog.netlify.app/:splat   200
+/blog/*           https://deploy-preview-1--kinopio-blog.netlify.app/:splat   200
 
 /api              https://help.kinopio.club/api
 /forum            https://forum.kinopio.club
