@@ -289,6 +289,7 @@ const isFiltered = computed(() => {
 const resizeIsVisible = computed(() => {
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
+  if (userStore.getUserIsCommentOnly) { return }
   return true
 })
 const startResizing = (event) => {
@@ -607,12 +608,12 @@ const isConnectingFrom = computed(() => {
 })
 const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
+  const isMember = userStore.getUserIsSpaceMember
   let isVisible
   if (isLocked.value) { return }
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (spaceIsOpen || canEditBox.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditBox.value || connectedConnectionTypes.value.length) {
     isVisible = true
   }
   return isVisible

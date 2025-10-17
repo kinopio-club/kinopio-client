@@ -124,19 +124,17 @@ section.filters.title-section
         MoreSearchFilters(:visible="state.moreSearchFiltersVisible")
 </template>
 
-<style lang="stylus" scoped>
-.filters
+<style lang="stylus">
+section.filters
   .badge
     display inline-block
     vertical-align middle
     margin-right 0
   .user-label-inline
-    margin-top -4px
-    height 10px
-  @media(max-width 500px)
-    dialog.more-filters
-      left initial
-      right 8px
+    height 16px
+    pointer-events none
+    margin-right 0
+    vertical-align -1px
   .comment-icon
     vertical-align -2px
   .filter-is-active
@@ -160,6 +158,4 @@ section.filters.title-section
     margin-top 5px !important
   .segmented-buttons + .segmented-buttons
     margin-left 0
-  .user-label-inline
-    pointer-events none
 </style>

@@ -644,11 +644,11 @@ const currentUserIsHoveringOverUrlButton = computed(() => {
   return globalStore.currentUserIsHoveringOverUrlButtonCardId === props.card.id
 })
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
+  const isMember = userStore.getUserIsSpaceMember
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (spaceIsOpen || canEditCard.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditCard.value || connectedConnectionTypes.value.length) {
     isVisible = true
   }
   return isVisible

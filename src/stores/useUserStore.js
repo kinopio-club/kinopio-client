@@ -265,8 +265,8 @@ export const useUserStore = defineStore('users', {
       const globalStore = useGlobalStore()
       return globalStore.spaceReadOnlyKey.spaceId === space.id
     },
-    getItemIsCreatedByUser (connection) {
-      return this.id === connection.userId
+    getItemIsCreatedByUser (item) {
+      return this.id === item.userId
     },
     getUserIsSpaceUserByUser (user) {
       const spaceStore = useSpaceStore()

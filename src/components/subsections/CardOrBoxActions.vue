@@ -520,7 +520,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
         button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
       //- Fonts
-      button.toggle-fonts-button.small-button(v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
+      button.toggle-fonts-button.small-button(:disabled="!canEditAll" v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Aa
       FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
