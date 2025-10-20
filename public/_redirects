@@ -8,10 +8,10 @@
 
 /sitemap.xml      /sitemap.xml   200
 
-# help and about are currently the same site
+# Blog and Help Rewrites
 
-/help             https://help.kinopio.club   301
-/blog             https://blog.kinopio.club   301
+/help/*           https://kinopio-help.netlify.app/:splat   200
+/blog/*           https://kinopio-blog.netlify.app/:splat   200
 
 /api              https://help.kinopio.club/api
 /forum            https://forum.kinopio.club
