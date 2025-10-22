@@ -1,9 +1,8 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onBeforeUnmount, onMounted, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
-import NameSegment from '@/components/NameSegment.vue'
 
 import fonts from '@/data/fonts.js'
 import utils from '@/utils.js'
@@ -16,6 +15,9 @@ const dialogElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+})
 
 const emit = defineEmits(['selectFont', 'selectFontSize'])
 
@@ -26,7 +28,8 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
-  previewFontId: 0
+  previewFontId: 0,
+  previewItem: {}
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -53,6 +56,7 @@ const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const items = computed(() => {
   let array = props.cards.concat(props.boxes)
   array = array.filter(item => Boolean(item))
+  state.previewItem = array[0] // eslint-disable-line vue/no-side-effects-in-computed-properties
   return array
 })
 
@@ -128,39 +132,50 @@ const currentFontSizeString = computed(() => {
   return size + 'px'
 })
 
-// preview
+// font preview
 
-const previewSegments = computed(() => {
-  let preview
-  headerFonts.value.some(item => {
-    const name = utils.truncated(item.name)
-    const h1 = utils.markdown().h1Pattern.exec(name)
-    const h2 = utils.markdown().h2Pattern.exec(name)
-    const h3 = utils.markdown().h3Pattern.exec(name)
-    const match = h1 || h2 || h3
-    if (match) {
-      preview = match[2].trim()
-    }
-    return match
-  })
-  if (!preview) { return }
-  preview = utils.cardNameSegments(preview)
-  preview = preview.map(segment => {
-    segment.markdown = [{
-      type: 'h1',
-      content: segment.content
-    }]
-    return segment
-  })
-  return preview
+const preview = computed(() => {
+  // normalize name
+  let name = utils.truncated(state.previewItem.name)
+  const checkbox = utils.checkboxFromString(name)
+  if (checkbox) {
+    name = name.replace(checkbox, '')
+  }
+  const normalizedName = name
+  // get header in name
+  const h1 = utils.markdown().h1Pattern.exec(name)
+  const h2 = utils.markdown().h2Pattern.exec(name)
+  const h3 = utils.markdown().h3Pattern.exec(name)
+  name = h1 || h2 || h3
+  if (name) {
+    name = name[2].trim()
+  }
+  const value = {
+    name,
+    type: hType(normalizedName),
+    headerFontId: state.previewItem.headerFontId,
+    headerFontSize: state.previewItem.headerFontSize,
+    backgroundColor: state.previewItem.backgroundColor || state.previewItem.color
+  }
+  value.class = utils.colorClasses({ backgroundColor: value.backgroundColor })
+  value.class.push(`header-font-${state.previewItem.headerFontId}`)
+  return value
 })
+
 </script>
 
 <template lang="pug">
 dialog.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section.title-section
-    template(v-for="segment in previewSegments")
-      NameSegment(:segment="segment" :headerFontId="state.previewFontId" :backgroundColorIsDark="isThemeDark")
+  section.title-section(v-if="preview" :style="{ 'background-color': preview.backgroundColor }")
+    .name-segment(:class="preview.class")
+      .markdown
+        template(v-if="preview.type === 'h1'")
+          h1 {{preview.name}}
+        template(v-if="preview.type === 'h2'")
+          h2 {{preview.name}}
+        template(v-if="preview.type === 'h3'")
+          h3 {{preview.name}}
+
   section.font-size
     //- size
     .row
@@ -201,6 +216,17 @@ dialog.font-picker
   .is-dark-theme
     .preview-image
       filter invert()
+  .is-background-light
+    h1,
+    h2,
+    h3
+      color var(--primary-on-light-background)
+  .is-background-dark
+    h1,
+    h2,
+    h3
+      color var(--primary-on-dark-background)
+
 dialog.font-picker-preview
   top 44px
   left 215%
