@@ -56,9 +56,14 @@ const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const items = computed(() => {
   let array = props.cards.concat(props.boxes)
   array = array.filter(item => Boolean(item))
-  state.previewItem = array[0] // eslint-disable-line vue/no-side-effects-in-computed-properties
+  updatePreviewItem(array)
   return array
 })
+const updatePreviewItem = (array) => {
+  state.previewItem = array[0]
+}
+
+// state.previewItem = array[0] // eslint-disable-line vue/no-side-effects-in-computed-properties
 
 // fonts
 
