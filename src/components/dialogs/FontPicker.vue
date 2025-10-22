@@ -142,8 +142,14 @@ const preview = computed(() => {
   // normalize name
   let name = utils.truncated(state.previewItem?.name)
   const checkbox = utils.checkboxFromString(name)
+  const tagsFromString = utils.tagsFromString(name)
   if (checkbox) {
     name = name.replace(checkbox, '')
+  }
+  if (tagsFromString) {
+    tagsFromString.forEach(tag => {
+      name = name.replace(tag, '')
+    })
   }
   const normalizedName = name
   // get header in name
