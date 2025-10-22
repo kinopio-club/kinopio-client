@@ -2,27 +2,35 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
-import { useUserStore } from '@/stores/useUserStore'
-import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
-const globalStore = useGlobalStore()
-const cardStore = useCardStore()
-const userStore = useUserStore()
-const spaceStore = useSpaceStore()
+import { generate, correction } from 'lean-qr/nano'
 
-let unsubscribes
+const globalStore = useGlobalStore()
 
 const dialogElement = ref(null)
+const qrElement = ref(null)
 
 const props = defineProps({
   visible: Boolean,
   value: String
 })
 
-const themeName = computed(() => userStore.theme)
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateQR()
+  }
+})
+
+const updateQR = async () => {
+  await nextTick()
+  const code = generate(props.value)
+  code.toCanvas(qrElement.value, {
+    pad: 1
+  })
+}
+
 </script>
 
 <template lang="pug">
@@ -30,11 +38,16 @@ dialog.narrow.qr-code(v-if="props.visible" :open="props.visible" @click.left.sto
   section.title-section
     p QR Code
   section
-    p {{props.value}}
+    canvas#qr(ref="qrElement")
 </template>
 
 <style lang="stylus">
 dialog.qr-code
   p
     word-break break-word
+  canvas
+    width 200px
+    height 200px
+    image-rendering: pixelated
+    background-color var(--primary-on-dark-background)
 </style>
