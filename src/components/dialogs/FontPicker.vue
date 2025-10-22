@@ -60,10 +60,9 @@ const items = computed(() => {
   return array
 })
 const updatePreviewItem = (array) => {
-  state.previewItem = array[0]
+  const previewItems = array.filter(item => hType(item.name))
+  state.previewItem = previewItems[0]
 }
-
-// state.previewItem = array[0] // eslint-disable-line vue/no-side-effects-in-computed-properties
 
 // fonts
 
@@ -141,7 +140,7 @@ const currentFontSizeString = computed(() => {
 
 const preview = computed(() => {
   // normalize name
-  let name = utils.truncated(state.previewItem.name)
+  let name = utils.truncated(state.previewItem?.name)
   const checkbox = utils.checkboxFromString(name)
   if (checkbox) {
     name = name.replace(checkbox, '')
@@ -158,12 +157,12 @@ const preview = computed(() => {
   const value = {
     name,
     type: hType(normalizedName),
-    headerFontId: state.previewItem.headerFontId,
-    headerFontSize: state.previewItem.headerFontSize,
-    backgroundColor: state.previewItem.backgroundColor || state.previewItem.color
+    headerFontId: state.previewItem?.headerFontId,
+    headerFontSize: state.previewItem?.headerFontSize,
+    backgroundColor: state.previewItem?.backgroundColor || state.previewItem?.color
   }
   value.class = utils.colorClasses({ backgroundColor: value.backgroundColor })
-  value.class.push(`header-font-${state.previewItem.headerFontId}`)
+  value.class.push(`header-font-${state.previewItem?.headerFontId}`)
   return value
 })
 
