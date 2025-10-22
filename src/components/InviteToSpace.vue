@@ -199,7 +199,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
     .row(v-if="inviteTypeIsCommentOnly")
       .badge.info Comment Only invites are in beta, so only invite people you trust
     .row(v-if="inviteTypeIsReadOnly")
-      .badge Read Only users cannot add or edit cards or comments
+      .badge Read Only users cannot add or edit cards
     //- .row(v-if="inviteTypeIsEdit")
     //-   .badge Invite space collaborators
     .row(v-if="inviteTypeIsGroup")
