@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
+import QRCode from '@/components/dialogs/QRCode.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -40,7 +41,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
+const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible', 'childDialogIsVisible'])
 
 const props = defineProps({
   visible: Boolean,
@@ -51,6 +52,7 @@ const state = reactive({
   tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
+  QRCodeIsVisible: false,
   inviteType: 'edit' // 'group', 'edit', 'readOnly'
 })
 
@@ -108,10 +110,7 @@ const commentOnlyUrl = computed(() => {
   console.info('🍇 invite comment only url', url)
   return url
 })
-
-//  copy invite urls
-
-const copyInviteUrl = async (event) => {
+const inviteUrl = computed(() => {
   let url
   if (inviteTypeIsGroup.value) {
     url = groupStore.getGroupInviteUrl(props.group)
@@ -123,13 +122,19 @@ const copyInviteUrl = async (event) => {
   } else {
     url = commentOnlyUrl.value
   }
+  return url
+})
+
+//  copy invite urls
+
+const copyInviteUrl = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(inviteUrl.value)
     globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
-    console.warn('🚑 copyInviteUrl', error, url)
+    console.warn('🚑 copyInviteUrl', error, inviteUrl.value)
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
@@ -149,14 +154,28 @@ const inviteButtonLabel = computed(() => {
 
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
+  state.QRCodeIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
+  closeChildDialogs()
   state.emailInvitesIsVisible = value
 }
 watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
   emit('emailInvitesIsVisible', value)
 })
+
+// qr
+
+const toggleQRCodeIsVisible = () => {
+  const isVisible = state.QRCodeIsVisible
+  closeChildDialogs()
+  state.QRCodeIsVisible = !isVisible
+  emitChildDialogIsVisible(state.QRCodeIsVisible)
+}
+const emitChildDialogIsVisible = (value) => {
+  emit('childDialogIsVisible', value)
+}
 
 // tips
 
@@ -192,9 +211,13 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
       .badge.info Comment Only invites are in beta, so only invite people you trust
     //- copy invite
     .row
-      button(@click.left="copyInviteUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span {{inviteButtonLabel}}
+      .segmented-buttons
+        button(@click.left="copyInviteUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span {{inviteButtonLabel}}
+        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }")
+          span QR
+      QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
     //- email invites
     .row(v-if="inviteTypeIsEdit")
       .button-wrap

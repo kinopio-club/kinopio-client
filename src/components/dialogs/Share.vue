@@ -11,6 +11,7 @@ import InviteToSpace from '@/components/InviteToSpace.vue'
 import InviteToGroup from '@/components/InviteToGroup.vue'
 import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
+import QRCode from '@/components/dialogs/QRCode.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
@@ -52,7 +53,8 @@ const state = reactive({
   isShareInPresentationMode: false,
   emailInvitesIsVisible: false,
   childDialogIsVisible: false,
-  spaceUsersIsVisible: false
+  spaceUsersIsVisible: false,
+  QRCodeIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -83,16 +85,6 @@ const copySpaceUrl = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const webShareIsSupported = computed(() => navigator.share)
-const webShare = () => {
-  const spaceName = spaceStore.name
-  const data = {
-    title: 'Kinopio Space',
-    text: spaceName,
-    url: spaceUrl.value
-  }
-  navigator.share(data)
-}
 
 // dialog
 
@@ -113,6 +105,7 @@ const closeDialogs = () => {
   state.emailInvitesIsVisible = false
   state.childDialogIsVisible = false
   state.spaceUsersIsVisible = false
+  state.QRCodeIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
@@ -147,6 +140,11 @@ const toggleIsShareInPresentationMode = () => {
 }
 const updateEmailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
+}
+const toggleQRCodeIsVisible = () => {
+  const isVisible = state.QRCodeIsVisible
+  closeDialogs()
+  state.QRCodeIsVisible = !isVisible
 }
 
 // invites
@@ -198,8 +196,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
             span Copy Link
-          //- button(v-if="webShareIsSupported" @click="webShare")
-          //-   img.icon.share(src="@/assets/share.svg")
+          button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }")
+            span QR
+        QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
 
         .row
           //- presentation mode
@@ -208,7 +207,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon(src="@/assets/presentation.svg")
 
   //- Invite
-  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible" :group="spaceGroup")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible" :group="spaceGroup" @childDialogIsVisible="childDialogIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
