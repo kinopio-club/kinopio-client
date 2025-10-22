@@ -48,6 +48,6 @@ dialog.qr-code
   canvas
     width 200px
     height 200px
-    image-rendering: pixelated
+    image-rendering pixelated
     background-color var(--primary-on-dark-background)
 </style>
