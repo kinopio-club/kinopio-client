@@ -36,7 +36,7 @@ const updateQR = async () => {
 <template lang="pug">
 dialog.narrow.qr-code(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
   section.title-section
-    p QR Code
+    p Scan QR Code
   section
     canvas#qr(ref="qrElement")
 </template>

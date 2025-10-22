@@ -138,17 +138,6 @@ const copyInviteUrl = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const inviteButtonLabel = computed(() => {
-  if (inviteTypeIsGroup.value) {
-    return 'Copy Group Invite Link'
-  } else if (inviteTypeIsEdit.value) {
-    return 'Copy Invite to Edit Link'
-  } else if (inviteTypeIsReadOnly.value) {
-    return 'Copy Invite to Read Link'
-  } else {
-    return 'Copy Invite to Comment Link'
-  }
-})
 
 // email invites
 
@@ -199,22 +188,40 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
       button(v-if="props.group" @click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
         GroupLabel(:group="props.group")
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
-        span Can Edit
-      button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
+        span Edit
+      button(v-if="spaceIsPrivate" @click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
         span Read
-      button(@click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
+      button(v-if="spaceIsPrivate" @click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
         img.icon.comment(src="@/assets/comment.svg")
 
   section.subsection.invite-url-subsection
-    //- comment only warning
+    //- invite type info
     .row(v-if="inviteTypeIsCommentOnly")
       .badge.info Comment Only invites are in beta, so only invite people you trust
+    .row(v-if="inviteTypeIsReadOnly")
+      .badge Read Only invites cannot add or edit cards or comments
+    //- .row(v-if="inviteTypeIsEdit")
+    //-   .badge Invite space collaborators
+    .row(v-if="inviteTypeIsGroup")
+      .badge Invite others to join{{' '}}
+         GroupLabel(:group="props.group")
+
     //- copy invite
     .row
       .segmented-buttons
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span {{inviteButtonLabel}}
+          span(v-if="inviteTypeIsGroup")
+            span Copy Group Invite Link
+          span(v-else-if="inviteTypeIsEdit")
+            span Copy Invite to Edit Link
+          span(v-else-if="inviteTypeIsReadOnly")
+            span Copy Invite to Read Link
+          span(v-else)
+            span Copy Invite to{{' '}}
+              img.icon.comment(src="@/assets/comment.svg")
+              span Link
+
         button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }")
           span QR
       QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
@@ -229,7 +236,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
     //- Tips
     template(v-if="!inviteTypeIsGroup")
       .row.title-row
-        .badge Anyone with the link can view
+        .badge No account required to view
         button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
           span ?
       .row(v-if="state.tipsIsVisible")
