@@ -56,7 +56,7 @@ export default {
     const isGif = url.includes('.gif')
     if (isGif) { return url }
     if (maxDimensions) {
-      return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/${btoa(url)}`
+      return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${encodeURIComponent(url)}`
     } else {
       return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
     }
