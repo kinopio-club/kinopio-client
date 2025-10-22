@@ -96,7 +96,7 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible || state.QRCodeIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
