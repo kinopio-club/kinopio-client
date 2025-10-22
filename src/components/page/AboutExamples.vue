@@ -92,7 +92,7 @@ section.examples(ref="parentElement")
       p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them with the minimap.
 
     .example.notes(v-show="state.example === 'notes'")
-      video(autoplay loop muted playsinline aria-label="note taking space")
+      video(autoplay loop muted playsinline aria-label="note-taking space")
         source(src="@/assets/page/about/examples/notes.mp4")
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs. If you can see it on the internet, you can put it inside Kinopio.
