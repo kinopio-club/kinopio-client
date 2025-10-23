@@ -430,12 +430,14 @@ export const useCardStore = defineStore('cards', {
     removeCards (ids) {
       const connectionStore = useConnectionStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const updates = []
       const cardsToRemove = []
       const cardsToDelete = []
       const cards = ids.map(id => this.getCard(id))
       cards.forEach(card => {
         if (!card) { return }
+        spaceStore.removeTagsByCard(card)
         if (card.name) {
           cardsToRemove.push(card)
         } else {
