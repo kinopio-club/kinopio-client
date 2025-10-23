@@ -1102,18 +1102,16 @@ export const useSpaceStore = defineStore('space', {
       await cache.updateSpace('tags', this.tags, this.id)
     },
     async removeTag (tag) {
+      const apiStore = useApiStore()
       this.tags = this.tags.filter(spaceTag => spaceTag.id !== tag.id)
       await cache.updateSpace('tags', this.tags, this.id)
+      await apiStore.addToQueue({ name: 'removeTag', body: { tag } })
     },
-    async removeTags (tag) {
+    async removeTagsByName (tag) {
+      const apiStore = useApiStore()
       this.tags = this.tags.filter(spaceTag => spaceTag.name !== tag.name)
-      await cache.removeTagsByNameInAllSpaces(tag)
-    },
-    async removeTagsFromCard (card) {
-      this.tags = this.tags.filter(spaceTag => {
-        return spaceTag.cardId !== card.id
-      })
-      await cache.updateSpace('tags', this.tags, this.id)
+      await cache.removeTagsByName(tag)
+      await apiStore.addToQueue({ name: 'removeTagsByName', body: tag })
     },
     async deleteTagsFromAllRemovedCardsPermanent () {
       const cardIds = this.removedCards.map(card => card.id)

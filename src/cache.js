@@ -360,7 +360,7 @@ export default {
       await this.updateSpace('tags', newSpaceTags, space.id)
     }
   },
-  async removeTagsByNameInAllSpaces (tag) {
+  async removeTagsByName (tag) {
     const spaces = await this.getAllSpaces()
     for (const space of spaces) {
       if (!space.tags) { return }
