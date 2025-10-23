@@ -698,11 +698,12 @@ export default {
     }
     return word
   },
-  truncated (string, limit) {
+  truncated (string, limit, character) {
+    character = character || '…'
     if (!string) { return '' }
     limit = limit || 60
     if (string.length <= limit) { return string }
-    string = string.substring(0, limit) + '…'
+    string = string.substring(0, limit) + character
     return string
   },
   insertStringAtIndex (string, insert, index) {
@@ -1966,6 +1967,7 @@ export default {
   inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
     if (!spaceId) { return }
     spaceName = this.normalizeString(spaceName)
+    spaceName = this.truncated(spaceName, 20, '-')
     let invite = ''
     let comment = ''
     if (collaboratorKey) {
@@ -1982,6 +1984,7 @@ export default {
   groupInviteUrl ({ groupId, groupName, collaboratorKey }) {
     if (!groupId || !collaboratorKey) { return }
     groupName = this.normalizeString(groupName)
+    groupName = this.truncated(groupName, 20, '-')
     const invite = `collaboratorKey=${collaboratorKey}`
     const url = `${consts.kinopioDomain()}/group/invite?groupId=${groupId}&${invite}&name=${groupName}`
     return url
