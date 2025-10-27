@@ -179,9 +179,9 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .row
     span
       .users
-        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-      span Invite Collaborators
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+      span Invite
 
   .row.invite-url-segmented-buttons
     .segmented-buttons
