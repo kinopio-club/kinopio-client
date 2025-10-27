@@ -88,19 +88,17 @@ const restoreInboxCards = async () => {
 
 const removeFromCardList = (removedCard) => {
   state.cards = state.cards.filter(card => card.id !== removedCard.id)
-  // update cache
   cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
 const removeCardFromInbox = async (card) => {
   card = utils.clone(card)
   delete card.user
-  removeFromCardList(card)
   await apiStore.addToQueue({ name: 'removeCard', body: card, spaceId: card.spaceId })
 }
-const removeCard = (card) => {
-  if (card.isLoading) { return }
+const removeCard = async (card) => {
   updateCardIsLoading(card)
   removeCardFromInbox(card)
+  removeFromCardList(card)
 }
 
 // update card
@@ -131,7 +129,7 @@ const selectCard = async (card) => {
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
   cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
   globalStore.updateFocusOnCardId(newCard.id)
-  removeCardFromInbox(card)
+  removeCard(card)
 }
 const addCard = (card) => {
   state.cards.unshift(card)
