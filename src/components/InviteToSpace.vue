@@ -10,6 +10,7 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
 import QRCode from '@/components/dialogs/QRCode.vue'
+import InviteTips from '@/components/dialogs/InviteTips.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -144,6 +145,7 @@ const copyInviteUrl = async (event) => {
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
   state.QRCodeIsVisible = false
+  state.tipsIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
@@ -169,20 +171,25 @@ const emitChildDialogIsVisible = (value) => {
 // tips
 
 const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
+  const isVisible = state.tipsIsVisible
+  closeChildDialogs()
+  state.tipsIsVisible = !isVisible
+  emitChildDialogIsVisible(state.tipsIsVisible)
 }
 
 </script>
 
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
-  .row
+  .row.title-row
     span
       .users
-        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-      span Invite
-
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+    .button-wrap
+      button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+        span ?
+      InviteTips(:visible="state.tipsIsVisible")
   .row.invite-url-segmented-buttons
     .segmented-buttons
       button(v-if="props.group" @click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
@@ -232,24 +239,6 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           img.icon.mail(src="@/assets/mail.svg")
           span Email Invites
         EmailInvites(:visible="state.emailInvitesIsVisible")
-
-    //- Tips
-    template(v-if="!inviteTypeIsGroup")
-      .row.title-row
-        .badge No account required to view
-        button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-          span ?
-      .row(v-if="state.tipsIsVisible")
-        .badge.info
-          p If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
-      //- .row(v-if="currentUserIsUpgraded")
-      //-   details
-      //-     summary
-      //-       span Collaborators edit for free
-      //-     section.subsection
-      //-       p If your account is upgraded, collaborators can create cards in this space without increasing their free card count
-            //- p
-            //-   img(src="https://cdn.kinopio.club/EoczbIBOicBBBh-GNuZOE/original-3a3d20bd4be668e1dffd7a97742a501d.gif")
 </template>
 
 <style lang="stylus">
