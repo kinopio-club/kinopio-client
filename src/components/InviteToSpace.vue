@@ -222,8 +222,8 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
               img.icon.comment(src="@/assets/comment.svg")
               span Link
 
-        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }")
-          span QR
+        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="QR Code")
+          img.icon.qr-code(src="@/assets/qr-code.svg")
       QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
     //- email invites
     .row(v-if="inviteTypeIsEdit")

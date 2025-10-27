@@ -196,8 +196,8 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
             span Copy Link
-          button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }")
-            span QR
+          button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="QR Code")
+            img.icon.qr-code(src="@/assets/qr-code.svg")
         QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
 
         .row
