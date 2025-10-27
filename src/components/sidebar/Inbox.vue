@@ -59,6 +59,10 @@ const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 const updateInboxCardsLocal = async () => {
   const inboxSpace = await cache.getInboxSpace()
   if (inboxSpace) {
+    inboxSpace.cards = inboxSpace.cards.map(card => {
+      delete card.user
+      return card
+    })
     state.cards = inboxSpace.cards
     sortCards()
   }
