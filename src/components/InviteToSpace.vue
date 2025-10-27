@@ -199,11 +199,11 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
     .row(v-if="inviteTypeIsCommentOnly")
       .badge.info Comment Only invites are in beta, so only invite people you trust
     .row(v-if="inviteTypeIsReadOnly")
-      .badge Read Only users cannot add or edit cards
-    //- .row(v-if="inviteTypeIsEdit")
-    //-   .badge Invite space collaborators
+      .badge Invite others to read only
+    .row(v-if="inviteTypeIsEdit")
+      .badge Invite collaborators to edit space
     .row(v-if="inviteTypeIsGroup")
-      .badge Invite others to join{{' '}}
+      .badge Invite members to group{{' '}}
          GroupLabel(:group="props.group")
 
     //- copy invite
@@ -222,7 +222,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
               img.icon.comment(src="@/assets/comment.svg")
               span Link
 
-        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="QR Code")
+        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
           img.icon.qr-code(src="@/assets/qr-code.svg")
       QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
     //- email invites
