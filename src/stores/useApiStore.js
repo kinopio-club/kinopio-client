@@ -1227,6 +1227,7 @@ export const useApiStore = defineStore('api', {
 
     // Billing Stripe
 
+    // for lifetime plan
     async checkoutUrl (body) {
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1236,6 +1237,7 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'subscriptionUrl', error })
       }
     },
+    // for subscription plans
     async subscriptionUrl (body) {
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
