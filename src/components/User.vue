@@ -161,7 +161,7 @@ const closeChildDialogs = () => {
       border-radius var(--small-user-avatar-radius)
       .anon-avatar
         left 3px
-        top 6px
+        top 4px
         width 10.5px
   &.is-medium
     .user-avatar
