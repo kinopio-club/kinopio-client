@@ -198,6 +198,7 @@ export const useApiStore = defineStore('api', {
         }
         if (globalStore.notifyServerCouldNotSave) {
           globalStore.addNotification({ message: 'Reconnected to server', type: 'success' })
+          globalStore.notifyServerCouldNotSave = false
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)

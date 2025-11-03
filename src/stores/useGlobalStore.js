@@ -1157,6 +1157,7 @@ export const useGlobalStore = defineStore('global', {
       const disconnected = !isOnline && prevIsOnline
       if (reconnected) {
         this.addNotification({ icon: 'offline', message: 'Reconnected to server', type: 'success' })
+        this.notifyServerCouldNotSave = false
         this.isLoadingSpace = false
         this.triggerCheckIfShouldNotifySpaceOutOfSync()
       } else if (disconnected) {
