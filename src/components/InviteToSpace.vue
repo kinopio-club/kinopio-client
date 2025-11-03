@@ -186,6 +186,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
       .users
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+      span Invite Collaborators
     .button-wrap
       button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
         span ?
@@ -205,13 +206,13 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
     //- invite type info
     .row(v-if="inviteTypeIsCommentOnly")
       .badge.info Comment Only invites are in beta, so only invite people you trust
-    .row(v-if="inviteTypeIsReadOnly")
-      .badge Invite others to read only
-    .row(v-if="inviteTypeIsEdit")
-      .badge Invite collaborators to edit space
+    //- .row(v-if="inviteTypeIsReadOnly")
+    //-   .badge Invite others to read only
+    //- .row(v-if="inviteTypeIsEdit")
+    //-   .badge Invite collaborators to edit space
     .row(v-if="inviteTypeIsGroup")
-      .badge Invite members to group{{' '}}
-         GroupLabel(:group="props.group")
+      .badge Group members can edit any space in{{' '}}
+         GroupLabel(:group="props.group" :showName="true")
 
     //- copy invite
     .row
@@ -219,19 +220,18 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span(v-if="inviteTypeIsGroup")
-            span Copy Group Invite Link
+            span Copy Invite Link to Group
           span(v-else-if="inviteTypeIsEdit")
-            span Copy Invite to Edit Link
+            span Copy Invite Link to Edit
           span(v-else-if="inviteTypeIsReadOnly")
-            span Copy Invite to Read Link
+            span Copy Invite Link to Read Only
           span(v-else)
-            span Copy Invite to{{' '}}
+            span Copy Invite Link to{{' '}}
               img.icon.comment(src="@/assets/comment.svg")
-              span Link
 
-        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
-          img.icon.qr-code(src="@/assets/qr-code.svg")
-      QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
+      //-   button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
+      //-     img.icon.qr-code(src="@/assets/qr-code.svg")
+      //- QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
     //- email invites
     .row(v-if="inviteTypeIsEdit")
       .button-wrap
