@@ -180,6 +180,9 @@ const notifyServerCouldNotSave = computed(() => {
   if (isOffline) { return }
   return globalStore.notifyServerCouldNotSave
 })
+const hideNotifyServerCouldNotSave = () => {
+  globalStore.notifyServerCouldNotSave = false
+}
 const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
@@ -490,6 +493,9 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
+      .button-wrap
+        button(@click="hideNotifyServerCouldNotSave")
+          img.icon.cancel(src="@/assets/add.svg")
 
   .item.danger(v-if="notifyServerUnresponsive")
     .row
