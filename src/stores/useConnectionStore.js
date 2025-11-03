@@ -53,6 +53,14 @@ export const useConnectionStore = defineStore('connections', {
         return last(connectionTypes)
       }
     },
+    getPrevConnectionType () {
+      const id = this.prevConnectionTypeId
+      return this.typeById[id]
+    }
+  },
+
+  actions: {
+
     getAllConnectionsInViewport () {
       const elements = document.querySelectorAll('svg.connection')
       const paths = []
@@ -63,14 +71,6 @@ export const useConnectionStore = defineStore('connections', {
       })
       return paths
     },
-    getPrevConnectionType () {
-      const id = this.prevConnectionTypeId
-      return this.typeById[id]
-    }
-  },
-
-  actions: {
-
     getConnection (id) {
       return this.byId[id]
     },

@@ -219,7 +219,7 @@ const updateSelectableBoxesInViewport = () => {
   })
 }
 const updateSelectableConnectionsInViewport = () => {
-  const selectableConnections = connectionStore.getAllConnectionsInViewport
+  const selectableConnections = connectionStore.getAllConnectionsInViewport()
   if (!selectableConnections) { return }
   selectableConnectionsInViewport = selectableConnections
 }
