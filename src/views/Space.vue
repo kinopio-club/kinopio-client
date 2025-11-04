@@ -848,6 +848,7 @@ const updateMetaRSSFeed = () => {
     Connections
     #box-infos
     Cards
+    Lines
     ItemUnlockButtons
     DrawingCanvas
     BoxDetails
