@@ -72,7 +72,11 @@ nav#toolbar.toolbar(v-if="visible")
     .segmented-buttons
       //- line
       .button-wrap
-        button(@click="addLine" title="Add Line (L)")
+        button(
+          @click="addLine"
+          title="Add Line (L)"
+          :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
+        )
           img.icon(src="@/assets/line.svg")
       //- Box
       .button-wrap

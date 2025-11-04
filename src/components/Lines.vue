@@ -4,7 +4,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useLineStore } from '@/stores/useLineStore'
 
-// import Card from '@/components/Card.vue'
+import Line from '@/components/Line.vue'
 // import CardCommentPreview from '@/components/CardCommentPreview.vue'
 import utils from '@/utils.js'
 
@@ -46,15 +46,11 @@ const globalStore = useGlobalStore()
 
 <template lang="pug">
 .lines
-  .line.l1(data-id="xyz")
+  Line
+
   //- .cards
   //-   template(v-for="card in unlockedCards" :key="card.id")
   //-     Card(:card="card")
-  //-   CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="currentHoveredCard")
-  //-   //- locked cards rendered in ItemsLocked
-  //-   template(v-for="card in lockedCards" :key="card.id")
-  //-     teleport(to="#locked-cards")
-  //-       Card(:card="card")
 </template>
 
 <style lang="stylus">
@@ -62,14 +58,5 @@ const globalStore = useGlobalStore()
   position absolute
   pointer-events none
   width 100%
-  height 100vh
-  .line
-    pointer-events all
-    width 100vw
-    background-color red
-    height 1px
-    position absolute
-    top 200px
-    left 0
-    z-index var(--max-z)
+  height 100%
 </style>
