@@ -56,6 +56,8 @@ export const useLineStore = defineStore('lines', {
       line.id = id || nanoid()
       line.color = color || randomColor({ luminosity: 'dark' })
       line.userId = userStore.id
+      line.y = line.y || consts.minLineY
+      line.y = Math.max(line.y, consts.minLineY)
       return line
     },
     addLineToState (line) {
@@ -126,6 +128,7 @@ export const useLineStore = defineStore('lines', {
     //     x: delta.x * zoom,
     //     y: delta.y * zoom
     //   }
+    //       line.y = Math.max(line.y, consts.minLineY)
     //   let cards = this.getCardsSelected
     //   cards = cards.map(card => {
     //     let x = Math.round(card.x + delta.x)

@@ -26,6 +26,7 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
+import Lines from '@/components/Lines.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
