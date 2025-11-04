@@ -554,15 +554,13 @@ export const useUserStore = defineStore('users', {
 
     cycleDrawingBrushSize () {
       const prevValue = this.drawingBrushSize
+      const sizes = Object.keys(consts.drawingBrushSizeDiameter)
+      const currentIndex = sizes.indexOf(prevValue)
       let value
-      if (prevValue === 's') {
-        value = 'm'
-      }
-      if (prevValue === 'm') {
-        value = 'l'
-      }
-      if (prevValue === 'l') {
-        value = 's'
+      if (currentIndex === -1 || currentIndex === sizes.length - 1) {
+        value = sizes[0]
+      } else {
+        value = sizes[currentIndex + 1]
       }
       this.drawingBrushSize = value
     },
