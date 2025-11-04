@@ -71,6 +71,7 @@ const updateBrushSize = (value) => {
   userStore.updateUser({ drawingBrushSize: value })
 }
 const currentBrushSize = computed(() => userStore.drawingBrushSize)
+const currentBrushSizeUppercase = computed(() => currentBrushSize.value.toUpperCase())
 
 // eraser
 
@@ -100,9 +101,7 @@ const toggleEraser = () => {
       :class="{ active: state.brushSizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
       @click.left="toggleBrushSizePickerIsVisible"
     )
-      img.icon.brush-size.l(v-if="currentBrushSize === 'l'" src="@/assets/brush-size-l.svg")
-      img.icon.brush-size.m(v-if="currentBrushSize === 'm'" src="@/assets/brush-size-m.svg")
-      img.icon.brush-size.s(v-if="currentBrushSize === 's'" src="@/assets/brush-size-s.svg")
+      span {{currentBrushSizeUppercase}}
     //- eraser
     button(
       title="Eraser (E)"
@@ -121,7 +120,6 @@ const toggleEraser = () => {
   dialog
     top 23px
   .size-button
-    width 34px
     height auto
     display flex
     justify-content center
@@ -130,4 +128,6 @@ const toggleEraser = () => {
     button:first-child
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
+  .current-color
+    border-radius 100px
 </style>

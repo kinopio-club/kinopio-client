@@ -61,8 +61,6 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/brush-x.svg")
     img.icon(src="@/assets/brush.svg")
     img.icon(src="@/assets/brush-size-l.svg")
-    img.icon(src="@/assets/brush-size-m.svg")
-    img.icon(src="@/assets/brush-size-s.svg")
     img.icon(src="@/assets/camera.svg")
     img.icon(src="@/assets/cal.svg")
     img.icon(src="@/assets/card.svg")

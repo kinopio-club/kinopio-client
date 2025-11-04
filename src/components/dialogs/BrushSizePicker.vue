@@ -30,12 +30,14 @@ dialog.narrow.brush-size-picker(v-if="props.visible" :open="props.visible" @clic
   section
     .row
       .segmented-buttons
-        button(:class="{active: isCurrentBrushSize('l')}" @click="updateBrushSize('l')")
-          span L
-        button(:class="{active: isCurrentBrushSize('m')}" @click="updateBrushSize('m')")
-          span M
+        button(:class="{active: isCurrentBrushSize('xs')}" @click="updateBrushSize('xs')")
+          span XS
         button(:class="{active: isCurrentBrushSize('s')}" @click="updateBrushSize('s')")
           span S
+        button(:class="{active: isCurrentBrushSize('m')}" @click="updateBrushSize('m')")
+          span M
+        button(:class="{active: isCurrentBrushSize('l')}" @click="updateBrushSize('l')")
+          span L
     .row
       //- TODO show empty previews for other sizes in a row
       .size-preview(:style="styles")
@@ -43,8 +45,7 @@ dialog.narrow.brush-size-picker(v-if="props.visible" :open="props.visible" @clic
 
 <style lang="stylus">
 dialog.brush-size-picker
-  // width 150px
-  width 110px
+  width 146px
   .size-preview
     background-color var(--primary)
     border-radius 100px
