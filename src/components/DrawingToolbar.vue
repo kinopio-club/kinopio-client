@@ -4,13 +4,16 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
+import ClearDrawingConfirmation from '@/components/dialogs/ClearDrawingConfirmation.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribes
 
@@ -18,7 +21,7 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
-        closeAllDialogs()
+        closeDialogs()
       }
     }
   )
@@ -35,20 +38,22 @@ const props = defineProps({
 })
 const state = reactive({
   brushSizePickerIsVisible: false,
-  colorPickerIsVisible: false
+  colorPickerIsVisible: false,
+  clearDrawingConfirmationIsVisible: false
 })
 
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
-const closeAllDialogs = () => {
+const closeDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
+  state.clearDrawingConfirmationIsVisible = false
 }
 
 // color
 
 const toggleColorPickerIsVisible = () => {
   const value = !state.colorPickerIsVisible
-  closeAllDialogs()
+  closeDialogs()
   state.colorPickerIsVisible = value
   globalStore.drawingEraserIsActive = false
 }
@@ -64,7 +69,7 @@ const recentColors = computed(() => globalStore.drawingStrokeColors)
 
 const toggleBrushSizePickerIsVisible = () => {
   const value = !state.brushSizePickerIsVisible
-  closeAllDialogs()
+  closeDialogs()
   state.brushSizePickerIsVisible = value
 }
 const updateBrushSize = (value) => {
@@ -78,8 +83,22 @@ const currentBrushSizeUppercase = computed(() => currentBrushSize.value.toUpperC
 const drawingEraserIsActive = computed(() => globalStore.drawingEraserIsActive)
 const toggleEraser = () => {
   const value = !drawingEraserIsActive.value
-  closeAllDialogs()
+  closeDialogs()
   globalStore.drawingEraserIsActive = value
+}
+
+// clear drawing
+
+const toggleClearDrawingConfirmationIsVisible = () => {
+  const value = !state.clearDrawingConfirmationIsVisible
+  closeDialogs()
+  state.clearDrawingConfirmationIsVisible = value
+}
+const clearDrawing = () => {
+  closeDialogs()
+  globalStore.drawingEraserIsActive = false
+  globalStore.triggerDrawingReset()
+  apiStore.addToQueue({ name: 'clearDrawing', body: {} })
 }
 </script>
 
@@ -87,6 +106,7 @@ const toggleEraser = () => {
 .drawing-toolbar(v-if="props.visible")
   ColorPicker(:currentColor="drawingColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDrawingColor" :recentColors="recentColors" :shouldHideOpacity="true")
   BrushSizePicker(:visible="state.brushSizePickerIsVisible" @updateBrushSize="updateBrushSize" :currentBrushSize="currentBrushSize")
+  ClearDrawingConfirmation(:visible="state.clearDrawingConfirmationIsVisible" @clearDrawing="clearDrawing" @closeDialogs="closeDialogs")
   .segmented-buttons
     //- color
     button.change-color(
@@ -109,6 +129,13 @@ const toggleEraser = () => {
       @click.left="toggleEraser"
     )
       img.icon.eraser-icon(src="@/assets/eraser.svg")
+    //- clear drawing
+    button(
+      :class="{ active: state.clearDrawingConfirmationIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
+      title="Clear Drawing"
+      @click.left.stop="toggleClearDrawingConfirmationIsVisible"
+    )
+      img.icon.remove(src="@/assets/remove.svg")
 </template>
 
 <style lang="stylus">

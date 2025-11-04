@@ -45,7 +45,7 @@ dialog.narrow.brush-size-picker(v-if="props.visible" :open="props.visible" @clic
 
 <style lang="stylus">
 dialog.brush-size-picker
-  width 146px
+  width max-content
   .size-preview
     background-color var(--primary)
     border-radius 100px
