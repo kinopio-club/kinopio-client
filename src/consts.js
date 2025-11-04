@@ -87,7 +87,7 @@ export default {
     }
   },
   drawingBrushSizeDiameter: {
-    xs: 5,
+    xs: 3,
     s: 10,
     m: 20,
     l: 40
