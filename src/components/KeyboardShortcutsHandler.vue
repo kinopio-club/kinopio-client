@@ -223,6 +223,9 @@ const handleShortcuts = (event) => {
   // s
   } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
     userStore.cycleDrawingBrushSize()
+  // l
+  } else if (key === 'l' && isSpaceScope) {
+    globalStore.triggerAddLine()
   }
 }
 // on key down

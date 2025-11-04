@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
@@ -10,6 +10,24 @@ import DrawingToolbar from '@/components/DrawingToolbar.vue'
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+
+let unsubscribes
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerAddLine') {
+        addLine()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
 
 const props = defineProps({
   visible: Boolean
@@ -40,14 +58,23 @@ const toggleToolbar = (value) => {
     globalStore.updateCurrentUserToolbar(value)
   }
 }
+
+const addLine = () => {
+  console.log('🌷')
+}
+
 </script>
 
 <template lang="pug">
 nav#toolbar.toolbar(v-if="visible")
   DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
-    //- Box
     .segmented-buttons
+      //- line
+      .button-wrap
+        button(@click="addLine" title="Add Line (L)")
+          img.icon(src="@/assets/line.svg")
+      //- Box
       .button-wrap
         button(
           title="Draw Box (B)"
