@@ -13,7 +13,7 @@ const globalStore = useGlobalStore()
 
 <template lang="pug">
 .line.l1(data-id="xyz")
-//- .line-badge.l1
+//- .line-info.l1
 </template>
 
 <style lang="stylus">
@@ -24,7 +24,7 @@ const globalStore = useGlobalStore()
   position absolute
   left 0
   z-index calc(var(--max-z) - 1)
-// .line-badge
+// .line-info
 
 .l1
   top 200px

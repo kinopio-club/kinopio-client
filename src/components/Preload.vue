@@ -99,6 +99,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/json-canvas.svg")
     img.icon(src="@/assets/leave.svg")
     img.icon(src="@/assets/light.svg")
+    img.icon(src="@/assets/line.svg")
     img.icon(src="@/assets/line-break.svg")
     img.icon(src="@/assets/lock.svg")
     img.icon(src="@/assets/luck.svg")
