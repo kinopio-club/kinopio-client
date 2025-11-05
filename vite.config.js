@@ -139,8 +139,7 @@ export default defineConfig(async ({ command, mode }) => {
       Sitemap({
         hostname: 'https://kinopio.club',
         dynamicRoutes,
-        readable: true,
-        generateRobotsTxt: false
+        readable: true
       })
     ],
     preview: {
