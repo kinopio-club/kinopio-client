@@ -25,7 +25,19 @@ export const useLineStore = defineStore('lines', {
     // getters take no params, and are invoked like object properties
     // blankStore.getAllLines
     getAllLines () {
-      return this.allIds.map(id => this.byId[id])
+      // temp
+      return [
+        {
+          id: '1',
+          name: 'Line Divider 1',
+          color: 'purple',
+          y: 200
+          // userId,
+          // spaceId
+        }
+      ]
+
+      // return this.allIds.map(id => this.byId[id])
     }
   },
 

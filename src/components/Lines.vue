@@ -9,7 +9,7 @@ import Line from '@/components/Line.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
-// const cardStore = useCardStore()
+const lineStore = useLineStore()
 
 // const cards = computed(() => cardStore.getAllCards)
 // const lockedCards = computed(() => cards.value.filter(card => card.isLocked))
@@ -42,15 +42,13 @@ const globalStore = useGlobalStore()
 //   const isInteractingWithItem = globalStore.getIsInteractingWithItem
 //   return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox || isHoveringOverLinkButton
 // })
+const lines = computed(() => lineStore.getAllLines)
 </script>
 
 <template lang="pug">
 .lines
-  Line
-
-  //- .cards
-  //-   template(v-for="card in unlockedCards" :key="card.id")
-  //-     Card(:card="card")
+  template(v-for="line in lines" :key="line.id")
+    Line(:line="line")
 </template>
 
 <style lang="stylus">
