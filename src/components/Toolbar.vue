@@ -74,7 +74,7 @@ nav#toolbar.toolbar(v-if="visible")
       .button-wrap
         button(
           @click="addLine"
-          title="Add Line (L)"
+          title="Add Line Divider (L)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
           img.icon(src="@/assets/line.svg")

@@ -58,6 +58,7 @@ export const useLineStore = defineStore('lines', {
       line.userId = userStore.id
       line.y = line.y || consts.minLineY
       line.y = Math.max(line.y, consts.minLineY)
+      line.name = line.name || `Line Divider ${this.allIds.length + 1}`
       return line
     },
     addLineToState (line) {

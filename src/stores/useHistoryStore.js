@@ -5,6 +5,7 @@ import { defineStore } from 'pinia'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -351,6 +352,7 @@ export const useHistoryStore = defineStore('history', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+      const lineStore = useLineStore()
       if (globalStore.getToolbarIsDrawing) {
         globalStore.triggerDrawingUndo()
         return
@@ -365,7 +367,7 @@ export const useHistoryStore = defineStore('history', {
       for (const item of patch) {
         console.info('⏪ undo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
-        let card, connection, type, box
+        let card, connection, type, box, line
         switch (action) {
           // cards
           case 'cardUpdated':
@@ -414,6 +416,19 @@ export const useHistoryStore = defineStore('history', {
               connection.connectionTypeId = connectionStore.getNewConnectionType
             }
             connectionStore.createConnection(connection)
+            break
+          // lines
+          case 'lineUpdated':
+            line = item.prev
+            lineStore.updateLine(line)
+            break
+          case 'lineCreated':
+            line = item.new
+            lineStore.removeLine(line.id)
+            break
+          case 'lineRemoved':
+            line = item.new
+            lineStore.createLine(line.id)
             break
         }
       }

@@ -1602,6 +1602,7 @@ export default {
       connections: [],
       connectionTypes: [],
       boxes: [],
+      lines: [],
       tags: [],
       users: [],
       userId: '',

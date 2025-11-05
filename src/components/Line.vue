@@ -23,7 +23,7 @@ const globalStore = useGlobalStore()
   height 1px
   position absolute
   left 0
-  z-index var(--max-z)
+  z-index calc(var(--max-z) - 1)
 // .line-badge
 
 .l1
