@@ -87,6 +87,10 @@ export const useLineStore = defineStore('lines', {
       line = this.normalizeNewLine(line)
       this.addLineToState(line)
       globalStore.focusOnLineId = line.id
+      window.scrollTo({
+        left: 0,
+        behavior: 'smooth'
+      })
       if (line.isFromBroadcast) { return }
       broadcastStore.update({ updates: line, store: 'lineStore', action: 'addLineToState' })
       await apiStore.addToQueue({ name: 'createLine', body: line })
