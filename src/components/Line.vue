@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 const globalStore = useGlobalStore()
@@ -57,7 +58,7 @@ const lineStyles = computed(() => {
 const infoStyles = computed(() => {
   const styles = {
     backgroundColor: color.value,
-    top: props.line.y + 'px'
+    top: props.line.y - consts.lineInfoOffset + 'px'
   }
   if (globalStore.isSelectingAllBelow) {
     styles.pointerEvents = 'none'
@@ -159,7 +160,6 @@ const startLineInfoInteraction = (event) => {
   border-top-left-radius 0
   border-bottom-left-radius 0
   left 0
-  transform translateY(-11px)
   &.button-badge
     box-shadow none
   .name

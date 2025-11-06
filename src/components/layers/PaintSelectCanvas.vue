@@ -4,12 +4,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
@@ -21,6 +23,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
@@ -63,6 +66,7 @@ let selectableCardsInViewport = []
 let selectableBoxesInViewport = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
+let selectableLines = []
 
 let unsubscribes
 
@@ -222,6 +226,23 @@ const updateSelectableConnectionsInViewport = () => {
   const selectableConnections = connectionStore.getAllConnectionsInViewport()
   if (!selectableConnections) { return }
   selectableConnectionsInViewport = selectableConnections
+}
+const updateSelectableLines = () => {
+  selectableLines = []
+  const lines = lineStore.getAllLines
+  lines.forEach(line => {
+    const element = document.querySelector(`.line-info[data-line-id="${line.id}"]`)
+    if (!element) { return }
+    const rect = element.getBoundingClientRect()
+    const value = {
+      id: line.id,
+      x: 0,
+      y: line.y - consts.lineInfoOffset,
+      width: Math.round(rect.width),
+      height: Math.round(rect.height)
+    }
+    selectableLines.push(value)
+  })
 }
 
 // position
@@ -396,6 +417,10 @@ const selectItems = (points) => {
     }
   })
   globalStore.addMultipleToMultipleConnectionsSelected(connectionIds)
+  // lines
+  matches = collisionDetection.checkPointsInRects(points, selectableLines)
+  const lineIds = matches.map(match => match.id)
+  globalStore.addMultipleToMultipleLinesSelected(lineIds)
 }
 
 // Post Scrolling (for android)
@@ -468,6 +493,7 @@ const startPainting = (event) => {
   updateSelectableCardsInViewport()
   updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
+  updateSelectableLines()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
   if (utils.isMultiTouch(event)) { return }

@@ -44,6 +44,7 @@ export default {
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
+  lineInfoOffset: 11,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

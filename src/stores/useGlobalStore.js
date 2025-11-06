@@ -1017,6 +1017,25 @@ export const useGlobalStore = defineStore('global', {
       })
       this.remoteLinesSelected = this.remoteLinesSelected.concat(updates)
     },
+    addMultipleToMultipleLinesSelected (lineIds) {
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      utils.typeCheck({ value: lineIds, type: 'array' })
+      if (!lineIds.length) { return }
+      const set1 = new Set(lineIds)
+      const set2 = new Set(this.multipleLinesSelectedIds)
+      // Combine sets
+      const combinedSet = new Set([...set1, ...set2])
+      // Convert back to array
+      lineIds = [...combinedSet]
+      this.multipleLinesSelectedIds = lineIds
+      const updates = {
+        userId: userStore.id,
+        lineIds
+      }
+      broadcastStore.update({ updates, action: 'updateRemoteLinesSelected' })
+    },
 
     // Loading
 
