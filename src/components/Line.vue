@@ -42,7 +42,8 @@ const colorClasses = computed(() => {
 const lineStyles = computed(() => {
   const styles = {
     top: props.line.y + 'px',
-    backgroundColor: props.line.color
+    backgroundColor: props.line.color,
+    width: globalStore.pageWidth + 'px'
   }
   return styles
 })
@@ -142,9 +143,11 @@ const startLineInfoInteraction = (event) => {
   pointer-events all
   position absolute
   min-width 60px
+  max-width fit-content
   z-index var(--max-z)
   border-top-left-radius 0
   border-bottom-left-radius 0
+  left 0
   .name
     &.is-background-light
       color var(--primary-on-light-background)
