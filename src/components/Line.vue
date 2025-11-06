@@ -35,7 +35,7 @@ const state = reactive({
 const colorClasses = computed(() => {
   return utils.colorClasses({ backgroundColor: props.line.color })
 })
-const styles = computed(() => {
+const lineStyles = computed(() => {
   const styles = {
     top: props.line.y + 'px',
     backgroundColor: props.line.color
@@ -52,16 +52,10 @@ const infoStyles = computed(() => {
   }
   return styles
 })
-const horizontalLineStyles = computed(() => {
-  return {
-    backgroundColor: props.line.color,
-    width: globalStore.pageWidth + 'px'
-  }
-})
 </script>
 
 <template lang="pug">
-.line(:data-line-id="props.line.id" :style="styles")
+.line(:data-line-id="props.line.id" :style="lineStyles")
 .line-info.badge.button-badge(
     :data-line-id="props.line.id"
     :style="infoStyles"
