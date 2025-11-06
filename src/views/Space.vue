@@ -504,6 +504,10 @@ const dragItems = () => {
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
+  if (globalStore.currentUserIsDraggingLine) {
+    endCursor.x = 0
+    prevCursor.x = 0
+  }
   // cards
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
