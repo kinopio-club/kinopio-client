@@ -25,19 +25,7 @@ export const useLineStore = defineStore('lines', {
     // getters take no params, and are invoked like object properties
     // blankStore.getAllLines
     getAllLines () {
-      // temp
-      return [
-        {
-          id: '1',
-          name: 'Line Divider 1',
-          color: 'purple',
-          y: 200
-          // userId,
-          // spaceId
-        }
-      ]
-
-      // return this.allIds.map(id => this.byId[id])
+      return this.allIds.map(id => this.byId[id])
     },
     getLinesSelected () {
       const globalStore = useGlobalStore()
@@ -45,14 +33,9 @@ export const useLineStore = defineStore('lines', {
       if (!ids.length) {
         ids = [globalStore.currentDraggingLineId]
       }
-      console.log('🍇🍇🍇', ids)
       ids = ids.filter(id => Boolean(id))
       const lines = ids.map(id => this.byId[id])
-      // return lines
-
-      // temp
-      // next convert getAllLinestousereal created line data
-      return this.getAllLines
+      return lines
     }
   },
 
@@ -92,7 +75,7 @@ export const useLineStore = defineStore('lines', {
       this.byId[line.id] = line
       this.allIds.push(line.id)
     },
-    async createLine (line) {
+    async createLine (line = {}) {
       const apiStore = useApiStore()
       const broadcastStore = useBroadcastStore()
       line = this.normalizeNewLine(line)

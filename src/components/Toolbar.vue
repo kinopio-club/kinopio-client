@@ -4,12 +4,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useLineStore } from '@/stores/useLineStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const lineStore = useLineStore()
 
 let unsubscribes
 
@@ -60,7 +62,7 @@ const toggleToolbar = (value) => {
 }
 
 const addLine = () => {
-  console.log('🌷')
+  lineStore.createLine()
 }
 
 </script>

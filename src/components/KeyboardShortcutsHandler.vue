@@ -225,7 +225,10 @@ const handleShortcuts = (event) => {
     userStore.cycleDrawingBrushSize()
   // l
   } else if (key === 'l' && isSpaceScope) {
-    globalStore.triggerAddLine()
+    const line = { y: currentCursorPosition.y }
+    console.log('🅰️🅰️', line)
+
+    globalStore.triggerAddLine(line)
   }
 }
 // on key down
