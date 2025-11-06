@@ -157,6 +157,7 @@ export const useGlobalStore = defineStore('global', {
     userDetailsUser: {},
 
     // lines
+    focusOnLineId: '',
     lineDetailsIsVisibleForLineId: '',
     multipleLinesSelectedIds: [],
     remoteLineDetailsVisible: [],
@@ -496,7 +497,6 @@ export const useGlobalStore = defineStore('global', {
     triggerRemoveRemoteDrawingStroke (updates) {},
     triggerEndDrawing () {},
     triggetUpdateDrawingDataUrl () {},
-    triggerAddLine () {},
 
     resetPageSizes () {
       this.triggerDrawingReset()

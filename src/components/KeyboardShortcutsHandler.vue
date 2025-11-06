@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -20,6 +21,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
@@ -226,9 +228,7 @@ const handleShortcuts = (event) => {
   // l
   } else if (key === 'l' && isSpaceScope) {
     const line = { y: currentCursorPosition.y }
-    console.log('🅰️🅰️', line)
-
-    globalStore.triggerAddLine(line)
+    lineStore.createLine(line)
   }
 }
 // on key down
@@ -307,7 +307,7 @@ const handleMetaKeyShortcuts = (event) => {
       return
     }
     event.preventDefault()
-    globalStore.CenterZoomOrigin()
+    globalStore.triggerCenterZoomOrigin()
     globalStore.zoomSpace({ shouldZoomIn: true, speed: 10 })
     // Toggle Zoom Out
   } else if (keyZ && isSpaceScope) {

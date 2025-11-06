@@ -61,13 +61,16 @@ export const useLineStore = defineStore('lines', {
     // create
 
     normalizeNewLine (line) {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const { id, color } = line
+      const zoom = globalStore.getSpaceCounterZoomDecimal
+      const minY = (consts.minLineY + window.scrollY) * zoom
       line.id = id || nanoid()
       line.color = color || randomColor({ luminosity: 'dark' })
       line.userId = userStore.id
-      line.y = line.y || consts.minLineY
-      line.y = Math.max(line.y, consts.minLineY)
+      line.y = line.y || minY
+      line.y = Math.max(line.y, minY)
       line.name = line.name || `Line Divider ${this.allIds.length + 1}`
       return line
     },
@@ -76,10 +79,12 @@ export const useLineStore = defineStore('lines', {
       this.allIds.push(line.id)
     },
     async createLine (line = {}) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const broadcastStore = useBroadcastStore()
       line = this.normalizeNewLine(line)
       this.addLineToState(line)
+      globalStore.focusOnLineId = line.id
       if (line.isFromBroadcast) { return }
       broadcastStore.update({ updates: line, store: 'lineStore', action: 'addLineToState' })
       await apiStore.addToQueue({ name: 'createLine', body: line })
@@ -126,7 +131,6 @@ export const useLineStore = defineStore('lines', {
         y: delta.y * zoom
       }
       let lines = this.getLinesSelected
-      console.log('🔮', lines)
       lines = lines.map(line => {
         line.y = Math.max(line.y, consts.minLineY)
         return line

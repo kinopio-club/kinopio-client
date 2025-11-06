@@ -63,6 +63,13 @@ const selectAllBelow = () => {
   console.log('💐💐💐')
 }
 
+// card focus
+
+const isFocusing = computed(() => props.line.id === globalStore.focusOnLineId)
+const clearFocus = () => {
+  globalStore.focusOnLineId = ''
+}
+
 // line dragging
 
 const isSelected = computed(() => {
@@ -120,6 +127,7 @@ const startLineInfoInteraction = (event) => {
   button.small-button.translucent-button(@click="selectAllBelow")
     img.icon(src="@/assets/brush-y.svg")
   span.name(:class="colorClasses") {{props.line.name}}
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")
 </template>
 
 <style lang="stylus">

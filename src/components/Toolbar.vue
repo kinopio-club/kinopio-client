@@ -13,24 +13,6 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const lineStore = useLineStore()
 
-let unsubscribes
-
-onMounted(() => {
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'triggerAddLine') {
-        addLine()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  unsubscribes()
-})
-
 const props = defineProps({
   visible: Boolean
 })
@@ -52,7 +34,6 @@ const toolbarIsBox = computed(() => {
 const toolbarIsDrawing = computed(() => {
   return globalStore.getToolbarIsDrawing
 })
-
 const toggleToolbar = (value) => {
   if (value === currentUserToolbar.value) {
     globalStore.updateCurrentUserToolbar('card')
@@ -60,11 +41,9 @@ const toggleToolbar = (value) => {
     globalStore.updateCurrentUserToolbar(value)
   }
 }
-
 const addLine = () => {
   lineStore.createLine()
 }
-
 </script>
 
 <template lang="pug">
