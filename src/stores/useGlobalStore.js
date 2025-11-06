@@ -831,6 +831,18 @@ export const useGlobalStore = defineStore('global', {
       this.remoteBoxesDragging = this.remoteBoxesDragging.filter(box => box.userId !== update.userId)
     },
 
+    // Dragging Lines
+
+    addtoRemoteLinesDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.userId)
+      this.remoteLinesDragging = this.remoteLinesDragging.concat(update)
+    },
+    clearRemoteLinesDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.userId) || []
+    },
+
     // Tags
 
     async updateTags () {

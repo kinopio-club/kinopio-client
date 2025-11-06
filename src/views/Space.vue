@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -64,6 +65,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -224,6 +226,7 @@ const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
+const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -506,6 +509,8 @@ const dragItems = () => {
   // boxes
   checkShouldShowDetails()
   boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
+  // lines
+  lineStore.moveLines({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -522,6 +527,7 @@ const dragBoxes = (event) => {
   }
   dragItems()
 }
+
 // footer
 
 const footerDialogIsVisible = () => {
@@ -564,7 +570,7 @@ const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value
+  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -646,16 +652,20 @@ const interact = (event) => {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
+  } else if (isDraggingLine.value) {
+    dragItems()
   }
   prevCursor = endCursor
 }
 const checkShouldShowDetails = () => {
   const shouldShow = !utils.cursorsAreClose(state.startCursor, endCursor)
   if (!shouldShow) { return }
-  if (globalStore.currentUserIsDraggingCard) {
+  if (isDraggingCard.value) {
     globalStore.preventDraggedCardFromShowingDetails = true
-  } else if (globalStore.currentUserIsDraggingBox) {
+  } else if (isDraggingBox.value) {
     globalStore.preventDraggedBoxFromShowingDetails = true
+  } else if (isDraggingLine.value) {
+    globalStore.preventDraggedLineFromShowingDetails = true
   }
 }
 const eventIsFromTextarea = (event) => {
@@ -724,8 +734,10 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsPaintingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
+  globalStore.currentUserIsDraggingLine = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
+  globalStore.linesWereDragged = false
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   prevCursor = undefined

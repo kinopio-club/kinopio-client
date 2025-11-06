@@ -38,6 +38,21 @@ export const useLineStore = defineStore('lines', {
       ]
 
       // return this.allIds.map(id => this.byId[id])
+    },
+    getLinesSelected () {
+      const globalStore = useGlobalStore()
+      let ids = globalStore.multipleLinesSelectedIds
+      if (!ids.length) {
+        ids = [globalStore.currentDraggingLineId]
+      }
+      console.log('🍇🍇🍇', ids)
+      ids = ids.filter(id => Boolean(id))
+      const lines = ids.map(id => this.byId[id])
+      // return lines
+
+      // temp
+      // next convert getAllLinestousereal created line data
+      return this.getAllLines
     }
   },
 
@@ -97,69 +112,54 @@ export const useLineStore = defineStore('lines', {
         }
       })
     },
-    updateLines (updates) {
-      // save to server, cache, broadcast
-
-      // const apiStore = useApiStore()
-      // const userStore = useUserStore()
-      // const spaceStore = useSpaceStore()
-      // const broadcastStore = useBroadcastStore()
-      // const connectionStore = useConnectionStore()
-      // try {
-      //   this.updateCardsState(updates)
-      //   if (!userStore.getUserCanEditSpace) { return }
-      //   const ids = updates.map(update => update.id)
-      //   broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
-      //   for (const card of updates) {
-      //     await apiStore.addToQueue({ name: 'updateCard', body: card })
-      //   }
-      //   let cards = this.getAllCards
-      //   cards = utils.clone(cards)
-      //   await cache.updateSpace('cards', cards, spaceStore.id)
-      // } catch (error) {
-      //   console.error('🚒 updateCards', error, updates)
-      // }
+    async updateLines (updates) {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      this.updateLinesState(updates)
+      broadcastStore.update({ updates, store: 'lineStore', action: 'updateLinesState' })
+      for (const line of updates) {
+        await apiStore.addToQueue({ name: 'updateLine', body: line })
+      }
+      await cache.updateSpace('lines', this.getAllLines, spaceStore.id)
     },
     updateLine (update) {
       this.updateLines([update])
     },
-    // moveLines ({ endCursor, prevCursor, delta }) {
-    //   const globalStore = useGlobalStore()
-    //   const connectionStore = useConnectionStore()
-    //   const boxStore = useBoxStore()
-    //   const zoom = globalStore.getSpaceCounterZoomDecimal
-    //   if (!endCursor || !prevCursor) { return }
-    //   if (globalStore.shouldSnapToGrid) {
-    //     prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-    //     endCursor = utils.cursorPositionSnapToGrid(endCursor)
-    //   }
-    //   delta = delta || {
-    //     x: endCursor.x - prevCursor.x,
-    //     y: endCursor.y - prevCursor.y
-    //   }
-    //   delta = {
-    //     x: delta.x * zoom,
-    //     y: delta.y * zoom
-    //   }
-    //       line.y = Math.max(line.y, consts.minLineY)
-    //   let cards = this.getCardsSelected
-    //   cards = cards.map(card => {
-    //     let x = Math.round(card.x + delta.x)
-    //     x = Math.max(0, x)
-    //     let y = Math.round(card.y + delta.y)
-    //     y = Math.max(0, y)
-    //     return {
-    //       id: card.id,
-    //       x,
-    //       y
-    //     }
-    //   })
-    //   this.updatePageSize(cards[0])
-    //   this.updateCards(cards)
-    //   globalStore.cardsWereDragged = true
-    //   cards = cards.map(card => this.getCard(card.id))
-    //   boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
-    // },
+    moveLines ({ endCursor, prevCursor, delta }) {
+      const globalStore = useGlobalStore()
+      const zoom = globalStore.getSpaceCounterZoomDecimal
+      if (!endCursor || !prevCursor) { return }
+      if (globalStore.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
+      }
+      delta = delta || {
+        y: endCursor.y - prevCursor.y
+      }
+      delta = {
+        y: delta.y * zoom
+      }
+      let lines = this.getLinesSelected
+      console.log('🔮', lines)
+      lines = lines.map(line => {
+        line.y = Math.max(line.y, consts.minLineY)
+        return line
+      })
+      const updates = []
+      lines.forEach(line => {
+        let y = Math.round(line.y + delta.y)
+        y = Math.max(0, y)
+        updates.push({
+          id: line.id,
+          y
+        })
+      })
+      this.updateLines(updates)
+      globalStore.linesWereDragged = true
+    },
 
     // line details
 

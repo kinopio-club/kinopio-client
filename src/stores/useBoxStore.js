@@ -174,18 +174,18 @@ export const useBoxStore = defineStore('boxes', {
 
     // update
 
-    normalizeUpdates (updates) {
-      return updates.map(update => {
-        if (update.x) {
-          update.x = Math.max(consts.minItemXY, update.x)
-        }
-        if (update.y) {
-          update.y = Math.max(consts.minItemXY, update.y)
-        }
-        return update
-      })
-    },
-    async updateBoxesState (updates) {
+    // normalizeUpdates (updates) {
+    //   return updates.map(update => {
+    //     if (update.x) {
+    //       update.x = Math.max(consts.minItemXY, update.x)
+    //     }
+    //     if (update.y) {
+    //       update.y = Math.max(consts.minItemXY, update.y)
+    //     }
+    //     return update
+    //   })
+    // },
+    updateBoxesState (updates) {
       const connectionStore = useConnectionStore()
       updates.forEach(update => {
         this.byId[update.id] = {
@@ -206,7 +206,7 @@ export const useBoxStore = defineStore('boxes', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       if (!userStore.getUserCanEditSpace) { return }
-      updates = this.normalizeUpdates(updates)
+      // updates = this.normalizeUpdates(updates)
       this.updateBoxesState(updates)
       broadcastStore.update({ updates, store: 'boxStore', action: 'updateBoxesState' })
       for (const box of updates) {

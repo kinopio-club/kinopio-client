@@ -3,12 +3,16 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
 
 const globalStore = useGlobalStore()
 const lineStore = useLineStore()
+const userStore = useUserStore()
+const broadcastStore = useBroadcastStore()
 
 let isMultiTouch
 // locking
@@ -52,6 +56,53 @@ const infoStyles = computed(() => {
   }
   return styles
 })
+
+// select
+
+const selectAllBelow = () => {
+  console.log('💐💐💐')
+}
+
+// line dragging
+
+const isSelected = computed(() => {
+  const selectedIds = globalStore.multipleLinesSelectedIds
+  return selectedIds.includes(props.line.id)
+})
+const isDragging = computed(() => {
+  const value = globalStore.currentUserIsDraggingLine
+  const isCurrent = globalStore.currentDraggingLineId === props.line.id
+  return value && (isCurrent || isSelected.value)
+})
+const currentLineIsSelected = computed(() => {
+  const selected = globalStore.multipleLinesSelectedIds
+  return selected.find(id => props.Line.id === id)
+})
+const startLineInfoInteraction = (event) => {
+  if (!currentLineIsSelected.value) {
+    globalStore.clearMultipleSelected()
+  }
+  globalStore.currentDraggingLineId = ''
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsDraggingLine = true
+  globalStore.currentDraggingLineId = props.line.id
+  const updates = {
+    lineId: props.line.id,
+    userId: userStore.id
+  }
+  broadcastStore.update({ updates, action: 'addtoRemoteLinesDragging' })
+}
+
+// touch locking
+
+// const notifyPressAndHoldToDrag = () => {
+//   const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
+//   if (!hasNotified) {
+//     globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
+//   }
+//   globalStore.hasNotifiedPressAndHoldToDrag = true
+// }
+
 </script>
 
 <template lang="pug">
@@ -59,6 +110,12 @@ const infoStyles = computed(() => {
 .line-info.badge.button-badge(
     :data-line-id="props.line.id"
     :style="infoStyles"
+    @mousedown.left="startLineInfoInteraction"
+    @mouseup.left="endLineInfoInteraction"
+    @keyup.stop.enter="endLineInfoInteraction"
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="endLineInfoInteractionTouch"
   )
   button.small-button.translucent-button(@click="selectAllBelow")
     img.icon(src="@/assets/brush-y.svg")
