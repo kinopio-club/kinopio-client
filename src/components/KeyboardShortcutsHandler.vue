@@ -824,7 +824,12 @@ const selectAllItemsBelowCursor = (position) => {
   let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
-  selectItemIds({ position, cardIds, boxIds })
+  // lines
+  let lines = lineStore.getAllLines
+  lines = lines.filter(line => (line.y * zoom) > position.y)
+  const lineIds = lines.map(line => line.id)
+  // select
+  selectItemIds({ position, cardIds, boxIds, lineIds })
 }
 const selectAllItemsAboveCursor = (position) => {
   let zoom
@@ -843,7 +848,12 @@ const selectAllItemsAboveCursor = (position) => {
   let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) < position.y)
   const boxIds = boxes.map(box => box.id)
-  selectItemIds({ position, cardIds, boxIds })
+  // lines
+  let lines = lineStore.getAllLines
+  lines = lines.filter(line => (line.y * zoom) < position.y)
+  const lineIds = lines.map(line => line.id)
+  // select
+  selectItemIds({ position, cardIds, boxIds, lineIds })
 }
 const selectAllItemsRightOfCursor = (position) => {
   let zoom
@@ -890,17 +900,19 @@ const selectAllItemsLeftOfCursor = (position) => {
 
 // Select All Cards, Connections, and Boxes
 
-const selectItemIds = ({ position, cardIds, boxIds }) => {
+const selectItemIds = ({ position, cardIds, boxIds, lineIds }) => {
   const preventMultipleSelectedActionsIsVisible = globalStore.preventMultipleSelectedActionsIsVisible
-  const isItemIds = Boolean(cardIds.length || boxIds.length)
+  const isItemIds = Boolean(cardIds.length || boxIds.length || lineIds.length)
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     globalStore.updateMultipleCardsSelectedIds(cardIds)
     globalStore.updateMultipleBoxesSelectedIds(boxIds)
+    globalStore.updateMultipleLinesSelectedIds(lineIds)
   } else if (isItemIds) {
     globalStore.multipleSelectedActionsPosition = position
     globalStore.updateMultipleSelectedActionsIsVisible(true)
     globalStore.updateMultipleCardsSelectedIds(cardIds)
     globalStore.updateMultipleBoxesSelectedIds(boxIds)
+    globalStore.updateMultipleLinesSelectedIds(lineIds)
   } else {
     globalStore.updateMultipleSelectedActionsIsVisible(false)
   }

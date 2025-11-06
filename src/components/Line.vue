@@ -36,21 +36,28 @@ const state = reactive({
 
 // styles
 
+const color = computed(() => {
+  let color = props.line.color
+  if (isSelected.value) {
+    color = userStore.color
+  }
+  return color
+})
 const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColor: props.line.color })
+  return utils.colorClasses({ backgroundColor: color.value })
 })
 const lineStyles = computed(() => {
   const styles = {
     top: props.line.y + 'px',
-    backgroundColor: props.line.color,
+    backgroundColor: color.value,
     width: globalStore.pageWidth + 'px'
   }
   return styles
 })
 const infoStyles = computed(() => {
   const styles = {
-    backgroundColor: props.line.color,
-    top: props.line.y - 10 + 'px'
+    backgroundColor: color.value,
+    top: props.line.y + 'px'
   }
   if (globalStore.isSelectingAllBelow) {
     styles.pointerEvents = 'none'
@@ -61,7 +68,11 @@ const infoStyles = computed(() => {
 // select
 
 const selectAllBelow = () => {
-  console.log('💐💐💐')
+  const position = {
+    y: props.line.y - 1
+  }
+  globalStore.preventMultipleSelectedActionsIsVisible = true
+  globalStore.triggerSelectAllItemsBelowCursor(position)
 }
 
 // card focus
@@ -84,7 +95,7 @@ const isDragging = computed(() => {
 })
 const currentLineIsSelected = computed(() => {
   const selected = globalStore.multipleLinesSelectedIds
-  return selected.find(id => props.Line.id === id)
+  return selected.find(id => props.line.id === id)
 })
 const startLineInfoInteraction = (event) => {
   if (!currentLineIsSelected.value) {
@@ -114,7 +125,7 @@ const startLineInfoInteraction = (event) => {
 </script>
 
 <template lang="pug">
-.line(:data-line-id="props.line.id" :style="lineStyles")
+.line(:data-line-id="props.line.id" :data-line-y="props.line.y" :style="lineStyles")
 .line-info.badge.button-badge(
     :data-line-id="props.line.id"
     :style="infoStyles"
@@ -125,7 +136,7 @@ const startLineInfoInteraction = (event) => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endLineInfoInteractionTouch"
   )
-  button.small-button.translucent-button(@click="selectAllBelow")
+  button.small-button.translucent-button(@click.stop="selectAllBelow")
     img.icon(src="@/assets/brush-y.svg")
   span.name(:class="colorClasses") {{props.line.name}}
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")
@@ -148,6 +159,7 @@ const startLineInfoInteraction = (event) => {
   border-top-left-radius 0
   border-bottom-left-radius 0
   left 0
+  transform translateY(-11px)
   &.button-badge
     box-shadow none
   .name

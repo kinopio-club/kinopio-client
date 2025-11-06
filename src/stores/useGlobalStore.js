@@ -991,6 +991,33 @@ export const useGlobalStore = defineStore('global', {
       this.remoteBoxesSelected = this.remoteBoxesSelected.concat(updates)
     },
 
+    // multiple lines
+
+    previousMultipleLinesSelectedIds (lineIds) {
+      utils.typeCheck({ value: lineIds, type: 'array' })
+      this.previousMultipleLinesSelectedIds = lineIds
+    },
+    removeFromRemoteLinesSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      this.remoteLinesSelected = this.remoteLinesSelected.filter(line => {
+        const lineIsSelected = line.lineId === update.lineId
+        const selectedByUser = line.userId === update.userId
+        const lineIsUpdate = lineIsSelected && selectedByUser
+        return !lineIsUpdate
+      })
+    },
+    updateRemoteLinesSelected (update) {
+      this.remoteLinesSelected = this.remoteLinesSelected.filter(line => line.userId !== update.userId)
+      const updates = update.lineIds.map(lineId => {
+        return {
+          userId: update.userId,
+          lineId
+        }
+      })
+      this.remoteLinesSelected = this.remoteLinesSelected.concat(updates)
+    },
+
     // Loading
 
     clearSpaceCollaboratorKeys () {
@@ -1382,6 +1409,17 @@ export const useGlobalStore = defineStore('global', {
         boxIds
       }
       broadcastStore.update({ updates, action: 'updateRemoteBoxesSelected' })
+    },
+    updateMultipleLinesSelectedIds (lineIds) {
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      utils.typeCheck({ value: lineIds, type: 'array' })
+      this.multipleLinesSelectedIds = lineIds
+      const updates = {
+        userId: userStore.id,
+        lineIds
+      }
+      broadcastStore.update({ updates, action: 'updateRemoteLinesSelected' })
     },
 
     clearMultipleSelected () {

@@ -63,15 +63,17 @@ export const useLineStore = defineStore('lines', {
     normalizeNewLine (line) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const { id, color } = line
       const zoom = globalStore.getSpaceCounterZoomDecimal
       const minY = (consts.minLineY + window.scrollY) * zoom
       line.id = id || nanoid()
       line.color = color || randomColor({ luminosity: 'dark' })
-      line.userId = userStore.id
       line.y = line.y || minY
       line.y = Math.max(line.y, minY)
       line.name = line.name || `Line Divider ${this.allIds.length + 1}`
+      line.userId = userStore.id
+      line.spaceId = spaceStore.id
       return line
     },
     addLineToState (line) {
