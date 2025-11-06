@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -327,12 +328,14 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
+      const lineStore = useLineStore()
       space = utils.removeRemovedCardsFromSpace(space)
       // initialize items
       cardStore.initializeCards(space?.cards)
       boxStore.initializeBoxes(space?.boxes)
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
+      lineStore.initializeLines(space?.lines)
       this.$state = space
       console.log('🍍 restoreSpace', this.getSpaceAllState)
       globalStore.resetPageSizes()

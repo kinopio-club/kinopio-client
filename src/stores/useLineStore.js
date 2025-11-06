@@ -47,7 +47,7 @@ export const useLineStore = defineStore('lines', {
 
     // init
 
-    initializeLines (lines) {
+    initializeLines (lines = []) {
       const byId = {}
       const allIds = []
       lines.forEach(line => {
