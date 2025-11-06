@@ -148,6 +148,8 @@ const startLineInfoInteraction = (event) => {
   border-top-left-radius 0
   border-bottom-left-radius 0
   left 0
+  &.button-badge
+    box-shadow none
   .name
     &.is-background-light
       color var(--primary-on-light-background)
