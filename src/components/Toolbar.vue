@@ -42,6 +42,7 @@ const toggleToolbar = (value) => {
   }
 }
 const addLine = () => {
+  globalStore.updateCurrentUserToolbar('card')
   lineStore.createLine()
 }
 </script>

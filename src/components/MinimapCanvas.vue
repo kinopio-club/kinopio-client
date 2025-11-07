@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -17,6 +18,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -55,6 +57,11 @@ onMounted(async () => {
     'updateConnections',
     'removeConnections'
   ]
+  const lineStoreActions = [
+    'createLine',
+    'updateLines',
+    'removeLines'
+  ]
   const spaceStoreActions = [
     'loadSpace'
   ]
@@ -87,6 +94,13 @@ onMounted(async () => {
       }
     }
   )
+  const lineActionUnsubscribe = lineStore.$onAction(
+    ({ name, args }) => {
+      if (lineStoreActions.includes(name)) {
+        initThrottle()
+      }
+    }
+  )
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
@@ -99,6 +113,7 @@ onMounted(async () => {
     cardActionUnsubscribe()
     connectionActionUnsubscribe()
     boxActionUnsubscribe()
+    lineActionUnsubscribe()
     spaceActionUnsubscribe()
   }
 })
@@ -178,6 +193,7 @@ const init = async () => {
   drawBoxes()
   drawConnections()
   drawCards()
+  drawLines()
 }
 const initCanvas = async () => {
   await nextTick()
@@ -272,6 +288,25 @@ const drawBoxes = () => {
       context.fill(rect)
       context.globalAlpha = 1
     }
+  })
+}
+
+// lines
+
+const mapLines = computed(() => {
+  return props.space?.lines || lineStore.getAllLines
+})
+const drawLines = () => {
+  const lines = mapLines.value
+  lines.forEach(line => {
+    const width = Math.floor(globalStore.pageWidth * ratio.value)
+    const y = Math.floor(line.y * ratio.value)
+    context.strokeStyle = line.color
+    context.lineWidth = 1
+    context.beginPath()
+    context.moveTo(0, y)
+    context.lineTo(width, y)
+    context.stroke()
   })
 }
 
