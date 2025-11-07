@@ -120,7 +120,7 @@ dialog.narrow.minimap.is-pinnable(
           img.icon.pin.right-pin(src="@/assets/pin.svg")
   section
     .row
-      MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
+      MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
   section.boxes-section.results-section
     details(ref="detailsElement" @toggle="toggleShouldShowMinimapJumpToList")
       summary

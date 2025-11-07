@@ -13,6 +13,7 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import throttle from 'lodash-es/throttle'
+import { colord, extend } from 'colord'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -139,7 +140,8 @@ const props = defineProps({
   pageWidth: Number,
   space: Object,
   viewportIsHidden: Boolean,
-  backgroundColor: String
+  backgroundColor: String,
+  parentIsDialog: Boolean
 })
 const state = reactive({
   scrollX: 0,
@@ -172,9 +174,12 @@ const ratio = computed(() => {
     return props.size / pageHeight.value
   }
 })
-
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const styles = computed(() => {
-  const color = props.backgroundColor || globalStore.outsideSpaceBackgroundColor
+  let color = props.backgroundColor || globalStore.outsideSpaceBackgroundColor
+  if (!props.parentIsDialog && !shouldIncreaseUIContrast.value) {
+    color = colord(color).alpha(0.8).toRgbString()
+  }
   return { backgroundColor: color }
 })
 
@@ -436,7 +441,7 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   canvas#minimap-canvas(ref="canvasElement")
   .viewport.blink(v-if="viewportIsVisible" :style="viewportStyle")
 </template>
@@ -448,6 +453,8 @@ const viewportIsVisible = computed(() => {
   position relative
   margin 0
   padding 0
+  &.translucent-minimap
+    backdrop-filter blur(8px)
   .viewport
     cursor grab
     position absolute
