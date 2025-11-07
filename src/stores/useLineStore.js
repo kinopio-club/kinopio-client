@@ -25,7 +25,8 @@ export const useLineStore = defineStore('lines', {
     // getters take no params, and are invoked like object properties
     // blankStore.getAllLines
     getAllLines () {
-      return this.allIds.map(id => this.byId[id])
+      const lines = this.allIds.map(id => this.byId[id])
+      return utils.sortByY(lines)
     },
     getLinesSelected () {
       const globalStore = useGlobalStore()

@@ -37,7 +37,7 @@ const boxName = (box) => {
 </script>
 
 <template lang="pug">
-.boxes-list(v-if="props.boxes.length")
+.box-list(v-if="props.boxes.length")
   template(v-for="box in props.boxes" :key="box.id")
     .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="select(box)")
       ItemCheckboxButton(:visible="boxIsTodo(box)" :box="box" :canEditItem="canEditBox(box)" :parentIsList="true")
@@ -45,7 +45,7 @@ const boxName = (box) => {
 </template>
 
 <style lang="stylus">
-.boxes-list
+.box-list
   display flex
   flex-wrap wrap
   row-gap 10px

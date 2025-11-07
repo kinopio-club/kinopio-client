@@ -1139,6 +1139,12 @@ export default {
     return { infoWidth, infoHeight }
   },
 
+  // lines
+
+  lineElementFromId (lineId) {
+    return document.querySelector(`.line-info[data-line-id="${lineId}"]`)
+  },
+
   // rect
 
   isPointInsideRect (point, rect) {

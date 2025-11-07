@@ -231,7 +231,7 @@ const updateSelectableLines = () => {
   selectableLines = []
   const lines = lineStore.getAllLines
   lines.forEach(line => {
-    const element = document.querySelector(`.line-info[data-line-id="${line.id}"]`)
+    const element = utils.lineElementFromId(line.id)
     if (!element) { return }
     const rect = element.getBoundingClientRect()
     const value = {

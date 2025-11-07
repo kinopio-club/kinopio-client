@@ -139,7 +139,7 @@ const startLineInfoInteraction = (event) => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endLineInfoInteractionTouch"
   )
-  button.small-button.translucent-button(v-if="userIsSpaceMember" @click.stop="selectAllBelow")
+  button.small-button.translucent-button(v-if="!userIsSpaceMember" @click.stop="selectAllBelow")
     img.icon(src="@/assets/brush-y.svg")
   span.name(:class="colorClasses") {{props.line.name}}
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")

@@ -551,8 +551,7 @@ export const useGlobalStore = defineStore('global', {
       this.viewportHeight = Math.round(viewport.height)
     },
 
-    scrollElementIntoView ({ element, behavior, positionIsCenter }) {
-      behavior = behavior || 'smooth'
+    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter }) {
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const smallCardCharacterLimit = 300
@@ -1283,16 +1282,20 @@ export const useGlobalStore = defineStore('global', {
     },
     updateFocusOnCardId (cardId) {
       this.focusOnCardId = cardId
-      if (cardId) {
-        this.triggerScrollCardIntoView(cardId)
-      }
+      if (!cardId) { return }
+      this.triggerScrollCardIntoView(cardId)
     },
     updateFocusOnBoxId (boxId) {
       this.focusOnBoxId = boxId
-      if (boxId) {
-        const element = utils.boxElementFromId(boxId)
-        this.scrollElementIntoView({ element, positionIsCenter: true })
-      }
+      if (!boxId) { return }
+      const element = utils.boxElementFromId(boxId)
+      this.scrollElementIntoView({ element, positionIsCenter: true })
+    },
+    updateFocusOnLineId (lineId) {
+      this.focusOnLineId = lineId
+      if (!lineId) { return }
+      const element = utils.lineElementFromId(lineId)
+      this.scrollElementIntoView({ element, positionIsCenter: true })
     },
     checkIfItemShouldIncreasePageSize (item) {
       if (!item) { return }
