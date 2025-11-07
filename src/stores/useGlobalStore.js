@@ -1034,7 +1034,7 @@ export const useGlobalStore = defineStore('global', {
       const combinedSet = new Set([...set1, ...set2])
       // Convert back to array
       lineIds = [...combinedSet]
-      this.multipleLinesSelectedIds = lineIds
+      this.multipleLinesSelectedIds = lineIds || []
       const updates = {
         userId: userStore.id,
         lineIds
@@ -1442,7 +1442,7 @@ export const useGlobalStore = defineStore('global', {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       utils.typeCheck({ value: lineIds, type: 'array' })
-      this.multipleLinesSelectedIds = lineIds
+      this.multipleLinesSelectedIds = lineIds || []
       const updates = {
         userId: userStore.id,
         lineIds
