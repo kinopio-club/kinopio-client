@@ -115,6 +115,18 @@ const startLineInfoInteraction = (event) => {
   broadcastStore.update({ updates, action: 'addtoRemoteLinesDragging' })
 }
 
+// line details
+
+const endLineInfoInteraction = (event) => {
+  if (globalStore.linesWereDragged) { return }
+  globalStore.clearMultipleSelected()
+  if (globalStore.lineDetailsIsVisibleForLineId) {
+    globalStore.closeAllDialogs()
+  } else {
+    globalStore.updateLineDetailsIsVisibleForLineId(props.line.id)
+  }
+}
+
 // touch locking
 
 // const notifyPressAndHoldToDrag = () => {

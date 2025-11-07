@@ -19,6 +19,7 @@ import { useChangelogStore } from '@/stores/useChangelogStore'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
+import LineDetails from '@/components/dialogs/LineDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -501,6 +502,7 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
+  if (!prevCursor) { return }
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
@@ -869,6 +871,7 @@ const updateMetaRSSFeed = () => {
     ItemUnlockButtons
     DrawingCanvas
     BoxDetails
+    LineDetails
     CardDetails
     OtherCardDetails
     ConnectionDetails
