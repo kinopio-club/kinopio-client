@@ -169,6 +169,11 @@ const removeViewportObserver = () => {
 
 // styles
 
+const fillColor = computed(() => {
+  let value = color.value
+  value = colord(value).alpha(0.5).toRgbString()
+  return value
+})
 const boxStyles = computed(() => {
   const { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
   const width = resizeWidth
@@ -182,9 +187,7 @@ const boxStyles = computed(() => {
     border: `${borderWidth}px solid ${color.value}`
   }
   if (hasFill.value && !background) {
-    let fillColor = color.value
-    fillColor = colord(fillColor).alpha(0.5).toRgbString()
-    styles.backgroundColor = fillColor
+    styles.backgroundColor = fillColor.value
   }
   return styles
 })
@@ -674,13 +677,6 @@ const isInCheckedBox = computed(() => {
 // box focus
 
 const isFocusing = computed(() => props.box.id === globalStore.focusOnBoxId)
-const focusColor = computed(() => {
-  if (isFocusing.value) {
-    return currentUserColor.value
-  } else {
-    return null
-  }
-})
 const clearFocus = () => {
   globalStore.focusOnBoxId = ''
 }
@@ -705,7 +701,7 @@ const clearFocus = () => {
   :class="classes"
   ref="boxElement"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: fillColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
     .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   teleport(to="#box-infos")
