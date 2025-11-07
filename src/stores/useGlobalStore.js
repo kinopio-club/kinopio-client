@@ -318,11 +318,16 @@ export const useGlobalStore = defineStore('global', {
     getIsInteractingWithItem () {
       return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox
     },
-    getIsMultipleItemsSelected () {
-      return this.multipleCardsSelectedIds.length || this.multipleConnectionsSelectedIds.length || this.multipleBoxesSelectedIds.length
-    },
     getMultipleItemsSelected () {
-      return this.multipleCardsSelectedIds.concat(this.multipleBoxesSelectedIds)
+      return [
+        ...this.multipleCardsSelectedIds,
+        ...this.multipleConnectionsSelectedIds,
+        ...this.multipleBoxesSelectedIds,
+        ...this.multipleLinesSelectedIds
+      ]
+    },
+    getIsMultipleItemsSelected () {
+      return Boolean(this.getMultipleItemsSelected.length)
     },
     getDateImageUrl () {
       if (this.dateImageUrl) {

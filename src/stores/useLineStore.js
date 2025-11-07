@@ -83,7 +83,9 @@ export const useLineStore = defineStore('lines', {
     async createLine (line = {}) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
+      const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserIsSpaceMember) { return }
       line = this.normalizeNewLine(line)
       this.addLineToState(line)
       globalStore.focusOnLineId = line.id
@@ -123,6 +125,8 @@ export const useLineStore = defineStore('lines', {
       this.updateLines([update])
     },
     moveLines ({ endCursor, prevCursor, delta }) {
+      const userStore = useUserStore()
+      if (!userStore.getUserIsSpaceMember) { return }
       const globalStore = useGlobalStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
@@ -163,13 +167,14 @@ export const useLineStore = defineStore('lines', {
 
     // remove
 
-    async removeLines (lines) {
+    async removeLines (ids = []) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const canEditSpace = userStore.getUserCanEditSpace
+      const canEditSpace = userStore.getUserIsSpaceMember
       if (!canEditSpace) { return }
-      for (const line of lines) {
+      for (const id of ids) {
+        const line = this.getLine(id)
         const idIndex = this.allIds.indexOf(line.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[line.id]
@@ -177,8 +182,8 @@ export const useLineStore = defineStore('lines', {
       }
       await cache.updateSpace('lines', this.getAllLines, spaceStore.id)
     },
-    async removeLine (line) {
-      await this.removeLines([line])
+    async removeLine (id) {
+      await this.removeLines([id])
     }
   }
 })

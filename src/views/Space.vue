@@ -559,7 +559,7 @@ const checkIfShouldHideFooter = (event) => {
 const showMultipleSelectedActions = (event) => {
   if (spaceIsReadOnly.value) { return }
   if (globalStore.preventMultipleSelectedActionsIsVisible) { return }
-  const isMultipleSelected = globalStore.multipleCardsSelectedIds.length || globalStore.multipleConnectionsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length
+  const isMultipleSelected = globalStore.getIsMultipleItemsSelected
   if (isMultipleSelected) {
     const position = utils.cursorPositionInSpace(event)
     globalStore.multipleSelectedActionsPosition = position
