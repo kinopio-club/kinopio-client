@@ -336,8 +336,10 @@ dialog.box-details
     border-color var(--primary-border)
     &.is-dark
       color var(--primary-on-dark-background)
+      border-color var(--primary-border-on-dark-background)
     &.is-light
       color var(--primary-on-light-background)
+      border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
   .filter-button-wrap
