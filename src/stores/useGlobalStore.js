@@ -534,10 +534,19 @@ export const useGlobalStore = defineStore('global', {
     async updatePageSizes () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
+      const lineStore = useLineStore()
       const spaceStore = useSpaceStore()
       const cards = cardStore.getAllCards
       const boxes = boxStore.getAllBoxes
-      const items = cards.concat(boxes)
+      let lines = lineStore.getAllLines
+      lines = lines.map(line => {
+        return {
+          x: 0,
+          y: line.y,
+          height: 25
+        }
+      })
+      const items = cards.concat(boxes).concat(lines)
       items.push({
         x: 0, y: 0, width: 500, height: 500 // minimum page size
       })

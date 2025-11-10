@@ -305,7 +305,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
-        button.danger(@click.left="removeBox")
+        button.danger(@click.left="removeBox" title="Remove Box")
           img.icon(src="@/assets/remove.svg")
       //- [·]
       ItemDetailsCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")

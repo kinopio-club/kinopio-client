@@ -218,19 +218,18 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    .row(v-if="canEditSpace")
+    .row
       //- remove
-      .button-wrap
-        button.danger(@click.left="removeLine")
+      .button-wrap(v-if="canEditSpace")
+        button.danger(@click.left="removeLine" title="Remove Line")
           img.icon(src="@/assets/remove.svg")
       //- jump to
       .button-wrap
         .segmented-buttons
-          button(@click.left="focusLine(prevLine)" :disabled="!prevLine")
+          button(@click.left="focusLine(prevLine)" :disabled="!prevLine" title="Jump to Previous Line")
             img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
-          button(@click.left="focusLine(nextLine)" :disabled="!nextLine")
+          button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
             img.icon.down-arrow(src="@/assets/down-arrow.svg")
-
     ItemDetailsDebug(:item="currentLine" :keys="['y', 'color']")
 </template>
 

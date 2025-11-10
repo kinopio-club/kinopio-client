@@ -244,7 +244,9 @@ watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
-
+watch(() => globalStore.currentUserIsDraggingLine, (value, prevValue) => {
+  updatePageSizes(value)
+})
 const updatePageSizes = async (value) => {
   if (!value) {
     await nextTick()
