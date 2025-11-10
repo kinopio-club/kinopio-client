@@ -71,12 +71,13 @@ const handleMouseMove = (event) => {
   if (globalStore.isEmbedMode) { return }
   updateIsMetaKey(event)
   const position = utils.cursorPositionInViewport(event)
+  const pagePosition = utils.cursorPositionInSpace(event)
   // check if near line
   let isLine
   const lines = lineStore.getAllLines
   lines.forEach(line => {
     const isNearLine = utils.isBetween({
-      value: position.y,
+      value: pagePosition.y,
       min: line.y - 12,
       max: line.y + 12
     })
