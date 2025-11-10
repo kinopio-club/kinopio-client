@@ -50,6 +50,16 @@ export const useLineStore = defineStore('lines', {
     getLine (id) {
       return this.byId[id]
     },
+    getNextLine (y) {
+      const lines = this.getAllLines
+      const value = lines.find(line => line.y > y)
+      return value
+    },
+    getPrevLine (y) {
+      const lines = this.getAllLines
+      const value = lines.findLast(line => line.y < y)
+      return value
+    },
 
     // init
 

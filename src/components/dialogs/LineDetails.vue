@@ -40,12 +40,13 @@ watch(() => visible.value, async (value, prevValue) => {
     // broadcastShowBoxDetails()
     scrollIntoViewAndFocus()
     textareaSizes()
+    globalStore.preventMultipleSelectedActionsIsVisible = false
   } else {
     globalStore.currentDraggingLineId = ''
     globalStore.updateMultipleLinesSelectedIds([])
-    globalStore.preventMultipleSelectedActionsIsVisible = false
   }
 })
+const lines = computed(() => lineStore.getAllLines)
 
 // dialog state
 
@@ -177,6 +178,15 @@ const removeLine = () => {
   lineStore.removeLine(currentLine.value.id)
   globalStore.closeAllDialogs()
 }
+
+// jump to
+
+const nextLine = computed(() => lineStore.getNextLine(currentLine.value.y))
+const prevLine = computed(() => lineStore.getPrevLine(currentLine.value.y))
+const focusLine = (line) => {
+  globalStore.updateFocusOnLineId(line.id)
+  globalStore.updateLineDetailsIsVisibleForLineId(line.id)
+}
 </script>
 
 <template lang="pug">
@@ -213,10 +223,15 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
       .button-wrap
         button.danger(@click.left="removeLine")
           img.icon(src="@/assets/remove.svg")
-    //- ItemDetailsDebug(:item="currentLine" :keys="['y', 'color']")
-  section
-    p Jump to
-    //- Linelist
+      //- jump to
+      .button-wrap
+        .segmented-buttons
+          button(@click.left="focusLine(prevLine)" :disabled="!prevLine")
+            img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
+          button(@click.left="focusLine(nextLine)" :disabled="!nextLine")
+            img.icon.down-arrow(src="@/assets/down-arrow.svg")
+
+    ItemDetailsDebug(:item="currentLine" :keys="['y', 'color']")
 </template>
 
 <style lang="stylus">
@@ -236,5 +251,9 @@ dialog.link-details
       border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
-
+  .up-arrow
+    transform rotate(180deg)
+  .down-arrow
+    padding 0
+    vertical-align 3px
 </style>
