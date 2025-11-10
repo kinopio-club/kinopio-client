@@ -3,7 +3,11 @@
     "details": [
       {
         "appID": "VWRQY6FSN5.club.kinopio.app",
-        "paths": ["*"]
+        "paths": [
+            "NOT /blog/*",
+            "NOT /help/*",
+            "/*"
+        ]
       }
     ]
   },
