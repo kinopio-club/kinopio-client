@@ -42,6 +42,7 @@ const isVisible = computed(() => {
   if (globalStore.getToolbarIsDrawing) { return }
   if (globalStore.isSelectingX) { return }
   if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
+  if (globalStore.lineDetailsIsVisibleForLineId) { return }
   return state.isVisible
 })
 

@@ -150,9 +150,11 @@ export const useSpaceStore = defineStore('space', {
     getSpaceItemColors () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
+      const lineStore = useLineStore()
       const cardColors = cardStore.getCardColors
       const boxColors = boxStore.getboxColors
-      const colors = cardColors.concat(boxColors)
+      const lineColors = lineStore.getLineColors
+      const colors = cardColors.concat(boxColors).concat(lineColors)
       return uniq(colors)
     },
     getSpaceTags () {

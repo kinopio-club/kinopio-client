@@ -26,7 +26,7 @@ export const useLineStore = defineStore('lines', {
     // blankStore.getAllLines
     getAllLines () {
       const lines = this.allIds.map(id => this.byId[id])
-      return utils.sortByY(lines)
+      return utils.sortByY(lines) || []
     },
     getLinesSelected () {
       const globalStore = useGlobalStore()
@@ -37,6 +37,11 @@ export const useLineStore = defineStore('lines', {
       ids = ids.filter(id => Boolean(id))
       const lines = ids.map(id => this.byId[id])
       return lines
+    },
+    getLineColors () {
+      const lines = this.getAllLines
+      const colors = lines.map(line => line.color)
+      return colors
     }
   },
 

@@ -326,7 +326,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 </template>
 
 <style lang="stylus">
-.box-details
+dialog.box-details
   transform-origin top left
   textarea.name
     margin-left 6px
