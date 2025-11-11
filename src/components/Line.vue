@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
@@ -13,6 +14,7 @@ import postMessage from '@/postMessage.js'
 const globalStore = useGlobalStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
 let isMultiTouch
@@ -35,12 +37,59 @@ const state = reactive({
   lockingAlpha: 0
 })
 
-const userIsSpaceMember = computed(() => globalStore.getUserIsSpaceMember)
+const userIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+
+// Remote
+
+const isRemoteSelected = computed(() => {
+  const remoteLinesSelected = globalStore.remoteLinesSelected
+  const selectedLine = remoteLinesSelected.find(line => line.lineId === props.line.id)
+  return Boolean(selectedLine)
+})
+const isRemoteLineDetailsVisible = computed(() => {
+  const remoteLineDetailsVisible = globalStore.remoteLineDetailsVisible
+  const visibleLine = remoteLineDetailsVisible.find(line => line.lineId === props.line.id)
+  return Boolean(visibleLine)
+})
+const remoteLineDetailsVisibleColor = computed(() => {
+  const remoteLineDetailsVisible = globalStore.remoteLineDetailsVisible
+  const visibleLine = remoteLineDetailsVisible.find(line => line.lineId === props.line.id)
+  if (visibleLine) {
+    const user = spaceStore.getSpaceUserById(visibleLine.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteSelectedColor = computed(() => {
+  const remoteLinesSelected = globalStore.remoteLinesSelected
+  const selectedLine = remoteLinesSelected.find(line => line.lineId === props.line.id)
+  if (selectedLine) {
+    const user = spaceStore.getSpaceUserById(selectedLine.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteLineDraggingColor = computed(() => {
+  const remoteLinesDragging = globalStore.remoteLinesDragging
+  const draggingLine = remoteLinesDragging.find(line => line.lineId === props.line.id)
+  if (draggingLine) {
+    const user = spaceStore.getSpaceUserById(draggingLine.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
 
 // styles
 
 const color = computed(() => {
   let color = props.line.color
+  const remoteColor = remoteLineDetailsVisibleColor.value || remoteSelectedColor.value || remoteLineDraggingColor.value
+  if (remoteColor) {
+    color = remoteColor
+  }
   if (isSelected.value) {
     color = userStore.color
   }
@@ -106,6 +155,7 @@ const startLineInfoInteraction = (event) => {
   }
   globalStore.currentDraggingLineId = ''
   globalStore.closeAllDialogs()
+  globalStore.linesWereDragged = false
   globalStore.currentUserIsDraggingLine = true
   globalStore.currentDraggingLineId = props.line.id
   const updates = {
@@ -118,17 +168,16 @@ const startLineInfoInteraction = (event) => {
 // line details
 
 const endLineInfoInteraction = (event) => {
-  if (globalStore.linesWereDragged) { return }
   if (isMultiTouch) { return }
   globalStore.clearMultipleSelected()
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
   if (!userIsSpaceMember.value) {
     globalStore.triggerReadOnlyJiggle()
     return
   }
-  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
   if (globalStore.lineDetailsIsVisibleForLineId) {
     globalStore.closeAllDialogs()
-  } else {
+  } else if (!globalStore.linesWereDragged) {
     globalStore.updateLineDetailsIsVisibleForLineId(props.line.id)
   }
 }
@@ -223,9 +272,10 @@ const lockingAnimationFrame = (timestamp) => {
     @keyup.stop.enter="endLineInfoInteraction"
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
+
     @touchend="endLineInfoInteractionTouch"
   )
-  button.small-button.translucent-button(v-if="!userIsSpaceMember" @click.stop="selectAllBelow")
+  button.small-button.translucent-button(v-if="userIsSpaceMember" @click.stop="selectAllBelow")
     img.icon(src="@/assets/brush-y.svg")
   span.name(:class="colorClasses") {{props.line.name}}
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")

@@ -181,6 +181,7 @@ export const useGlobalStore = defineStore('global', {
     remoteCardsSelected: [], // [{ cardId, userId }, …]
     remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
+    remoteLinesSelected: [], // [{ lineId, userId }, …]
     multipleConnectionsSelectedIds: [],
     previousMultipleBoxesSelectedIds: [],
     isSelectingX: false,
@@ -972,6 +973,8 @@ export const useGlobalStore = defineStore('global', {
       this.remoteCardsSelected = this.remoteCardsSelected.filter(card => card.userId !== update.user.id)
       this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== update.user.id)
       this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== update.user.id)
+      this.remoteLinesSelected = this.remoteLinesSelected.filter(line => line.userId !== update.user.id)
+      this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.user.id)
     },
     previousMultipleConnectionsSelectedIds (connectionIds) {
       utils.typeCheck({ value: connectionIds, type: 'array' })

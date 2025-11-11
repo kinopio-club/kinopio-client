@@ -441,11 +441,11 @@ const remoteBoxDetailsVisibleColor = computed(() => {
     return undefined
   }
 })
-const isRemoteBoxDragging = computed(() => {
-  const remoteBoxesDragging = globalStore.remoteBoxesDragging
-  const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
-  return Boolean(isDragging)
-})
+// const isRemoteBoxDragging = computed(() => {
+//   const remoteBoxesDragging = globalStore.remoteBoxesDragging
+//   const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
+//   return Boolean(isDragging)
+// })
 const remoteSelectedColor = computed(() => {
   const remoteBoxesSelected = globalStore.remoteBoxesSelected
   const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)

@@ -183,19 +183,27 @@ export const useLineStore = defineStore('lines', {
 
     // remove
 
+    removeLinesState (ids) {
+      for (const id of ids) {
+        const idIndex = this.allIds.indexOf(id)
+        this.allIds.splice(idIndex, 1)
+        delete this.byId[id]
+      }
+    },
     async removeLines (ids = []) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserIsSpaceMember
       if (!canEditSpace) { return }
       for (const id of ids) {
         const line = this.getLine(id)
-        const idIndex = this.allIds.indexOf(line.id)
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[line.id]
+        console.log(line)
         await apiStore.addToQueue({ name: 'removeLine', body: line })
       }
+      this.removeLinesState(ids)
+      broadcastStore.update({ updates: ids, store: 'lineStore', action: 'removeLinesState' })
       await cache.updateSpace('lines', this.getAllLines, spaceStore.id)
     },
     async removeLine (id) {
