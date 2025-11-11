@@ -1484,7 +1484,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
         button(:class="{active: state.shareItemIsVisible}")
           span Share
-        ShareItem(:visible="state.shareItemIsVisible" :item="card" :isCard="true" :isReadOnly="!canEditCard")
+        ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
     CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")

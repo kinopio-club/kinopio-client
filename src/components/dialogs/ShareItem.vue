@@ -16,10 +16,12 @@ const props = defineProps({
   visible: Boolean,
   item: Object,
   isReadOnly: Boolean,
-  isCard: Boolean
+  // isCard: Boolean,
+  type: String
 })
 
 const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
+const capitalType = computed(() => utils.capitalizeFirstLetter(props.type))
 
 // anon user
 
@@ -67,21 +69,21 @@ const copyUrl = async (event) => {
 dialog.narrow.share-item(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
   template(v-if="canShare")
     section.title-section
-      p Share Item
+      p Share {{capitalType}}
     section
       .row
         .segmented-buttons
           button(@click.left="copyUrl")
             img.icon.copy(src="@/assets/copy.svg")
-            span Copy item Link
-      p(v-if="props.isCard")
+            span Copy {{capitalType}} Link
+      p(v-if="props.type === 'card'")
         span Share this card publically, or paste in another space
       p(v-else)
-        span Share this item publically
+        span Share this {{capitalType}} publically
       .row(v-if="spaceIsPrivate")
         .badge.danger
           img.icon.lock-icon(src="@/assets/lock.svg")
-          span Private space item links can only be viewed by space members
+          span {{capitalType}} links from private spaces can only be viewed by space members
 
   template(v-if="!canShare")
     section
