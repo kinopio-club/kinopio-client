@@ -21,9 +21,9 @@ let isMultiTouch
 const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
-const initialTouchEvent = {}
-const touchPosition = {}
-const currentTouchPosition = {}
+let initialTouchEvent = {}
+let touchPosition = {}
+let currentTouchPosition = {}
 
 const props = defineProps({
   line: Object
@@ -119,7 +119,13 @@ const startLineInfoInteraction = (event) => {
 
 const endLineInfoInteraction = (event) => {
   if (globalStore.linesWereDragged) { return }
+  if (isMultiTouch) { return }
   globalStore.clearMultipleSelected()
+  if (!userIsSpaceMember.value) {
+    globalStore.triggerReadOnlyJiggle()
+    return
+  }
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
   if (globalStore.lineDetailsIsVisibleForLineId) {
     globalStore.closeAllDialogs()
   } else {
@@ -129,13 +135,81 @@ const endLineInfoInteraction = (event) => {
 
 // touch locking
 
-// const notifyPressAndHoldToDrag = () => {
-//   const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
-//   if (!hasNotified) {
-//     globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
-//   }
-//   globalStore.hasNotifiedPressAndHoldToDrag = true
-// }
+const notifyPressAndHoldToDrag = () => {
+  const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
+  if (!hasNotified) {
+    globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
+  }
+  globalStore.hasNotifiedPressAndHoldToDrag = true
+}
+const updateTouchPosition = (event) => {
+  initialTouchEvent = event
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+    return
+  }
+  touchPosition = utils.cursorPositionInViewport(event)
+}
+const updateCurrentTouchPosition = (event) => {
+  currentTouchPosition = utils.cursorPositionInViewport(event)
+  if (isDragging.value) {
+    event.preventDefault() // allows dragging lines without scrolling
+  }
+}
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const cancelLockingAnimationFrame = () => {
+  state.isLocking = false
+  state.lockingPercent = 0
+  state.lockingAlpha = 0
+  shouldCancelLocking = false
+}
+const startLocking = (event) => {
+  console.log('startLocking', event)
+  updateTouchPosition(event)
+  updateCurrentTouchPosition(event)
+  state.isLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    if (!lockingAnimationTimer) {
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
+    }
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+    notifyPressAndHoldToDrag()
+    cancelLockingAnimationFrame()
+  }
+  if (shouldCancelLocking) {
+    cancelLockingAnimationFrame()
+  }
+  if (state.isLocking && percentComplete <= 1) {
+    const percentRemaining = Math.abs(percentComplete - 1)
+    state.lockingPercent = percentRemaining
+    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    state.lockingAlpha = alpha
+    window.requestAnimationFrame(lockingAnimationFrame)
+  } else if (state.isLocking && percentComplete > 1) {
+    console.log('🔒🐢 line lockingAnimationFrame locked')
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    state.isLocking = false
+    startLineInfoInteraction(initialTouchEvent)
+  } else {
+    window.cancelAnimationFrame(lockingAnimationTimer)
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    cancelLockingAnimationFrame()
+  }
+}
 
 </script>
 
