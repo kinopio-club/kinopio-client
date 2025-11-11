@@ -171,14 +171,28 @@ const endLineInfoInteraction = (event) => {
   if (isMultiTouch) { return }
   globalStore.clearMultipleSelected()
   broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
+  // read only
   if (!userIsSpaceMember.value) {
     globalStore.triggerReadOnlyJiggle()
     return
   }
+  // touch button fix
+  const isButton = event.target.closest('button')
+  if (isButton) {
+    selectAllBelow()
+    return
+  }
+  // toggle line details
   if (globalStore.lineDetailsIsVisibleForLineId) {
     globalStore.closeAllDialogs()
   } else if (!globalStore.linesWereDragged) {
     globalStore.updateLineDetailsIsVisibleForLineId(props.line.id)
+  }
+}
+const endLineInfoInteractionTouch = (event) => {
+  cancelLocking()
+  if (touchIsNearTouchPosition(event)) {
+    endLineInfoInteraction(event)
   }
 }
 
@@ -204,6 +218,23 @@ const updateCurrentTouchPosition = (event) => {
   currentTouchPosition = utils.cursorPositionInViewport(event)
   if (isDragging.value) {
     event.preventDefault() // allows dragging lines without scrolling
+  }
+}
+const touchIsNearTouchPosition = (event) => {
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const touchBlur = 12
+  const isTouchX = utils.isBetween({
+    value: currentPosition.x,
+    min: touchPosition.x - touchBlur,
+    max: touchPosition.x + touchBlur
+  })
+  const isTouchY = utils.isBetween({
+    value: currentPosition.y,
+    min: touchPosition.y - touchBlur,
+    max: touchPosition.y + touchBlur
+  })
+  if (isTouchX && isTouchY) {
+    return true
   }
 }
 const cancelLocking = () => {
@@ -278,7 +309,7 @@ const lockingAnimationFrame = (timestamp) => {
   button.small-button.translucent-button(v-if="userIsSpaceMember" @click.stop="selectAllBelow")
     img.icon(src="@/assets/brush-y.svg")
   span.name(:class="colorClasses") {{props.line.name}}
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")
+  .focusing-frame(v-if="isFocusing || state.isLocking" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")
 </template>
 
 <style lang="stylus">
