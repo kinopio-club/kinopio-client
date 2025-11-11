@@ -15,7 +15,6 @@ import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
@@ -36,8 +35,7 @@ let prevCards, prevBoxes
 const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
-  cardsIsConnected: false,
-  shareCardIsVisible: false
+  cardsIsConnected: false
 })
 
 const closeAllDialogs = () => {
@@ -46,7 +44,6 @@ const closeAllDialogs = () => {
 const closeDialogs = () => {
   state.copyItemsIsVisible = false
   state.moveItemsIsVisible = false
-  state.shareCardIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnectionsSelectedIds)
@@ -397,14 +394,6 @@ const toggleMoveItemsIsVisible = () => {
   closeDialogs()
   state.moveItemsIsVisible = !isVisible
 }
-
-// share
-
-// const toggleShareCardIsVisible = () => {
-//   const isVisible = state.shareCardIsVisible
-//   closeDialogs()
-//   state.shareCardIsVisible = !isVisible
-// }
 
 // more options
 

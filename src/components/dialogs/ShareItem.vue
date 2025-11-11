@@ -14,8 +14,9 @@ const dialog = ref(null)
 
 const props = defineProps({
   visible: Boolean,
-  card: Object,
-  isReadOnly: Boolean
+  item: Object,
+  isReadOnly: Boolean,
+  isCard: Boolean
 })
 
 const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
@@ -42,16 +43,16 @@ const scrollIntoView = async () => {
 
 // copy url
 
-const cardUrl = () => {
+const itemUrl = () => {
   const domain = consts.kinopioDomain()
-  const url = `${domain}/${props.card.spaceId}/${props.card.id}`
-  console.info('🍇 card url', url)
+  const url = `${domain}/${props.item.spaceId}/${props.item.id}`
+  console.info('🍇 item url', url)
   return url
 }
 const copyUrl = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
-  const url = cardUrl()
+  const url = itemUrl()
   try {
     await navigator.clipboard.writeText(url)
     globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
@@ -60,46 +61,39 @@ const copyUrl = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-
-// web share
-
-const webShareIsSupported = computed(() => navigator.share)
-const webShare = () => {
-  const data = {
-    title: props.card.name,
-    text: spaceStore.name,
-    url: cardUrl()
-  }
-  navigator.share(data)
-}
 </script>
 
 <template lang="pug">
-dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
-  section(v-if="canShare")
-    p Share this card publically, or paste it in another space
-    .row
-      .segmented-buttons
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Card Link
-        //- button(v-if="webShareIsSupported" @click="webShare")
-        //-   img.icon.share(src="@/assets/share.svg")
-    .row(v-if="canShare && spaceIsPrivate")
-      .badge.danger
-        img.icon.lock-icon(src="@/assets/lock.svg")
-        span Cards in private spaces can only be viewed by space members
+dialog.narrow.share-item(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
+  template(v-if="canShare")
+    section.title-section
+      p Share Item
+    section
+      .row
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy item Link
+      p(v-if="props.isCard")
+        span Share this card publically, or paste in another space
+      p(v-else)
+        span Share this item publically
+      .row(v-if="spaceIsPrivate")
+        .badge.danger
+          img.icon.lock-icon(src="@/assets/lock.svg")
+          span Private space item links can only be viewed by space members
 
-  section(v-if="!canShare")
-    p For your cards and spaces to have URLs, you'll need to sign up or in
-    .button-wrap
-      button(@click.left="triggerSignUpOrInIsVisible")
-        span Sign Up or In
+  template(v-if="!canShare")
+    section
+      p For your items and spaces to have URLs, you'll need to sign up or in
+      .button-wrap
+        button(@click.left="triggerSignUpOrInIsVisible")
+          span Sign Up or In
 
 </template>
 
 <style lang="stylus">
-.share-card
+.share-item
   left -100px
   &.read-only
     left 8px
