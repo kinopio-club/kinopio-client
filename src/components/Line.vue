@@ -247,9 +247,13 @@ const cancelLockingAnimationFrame = () => {
   shouldCancelLocking = false
 }
 const startLocking = (event) => {
-  console.log('startLocking', event)
   updateTouchPosition(event)
   updateCurrentTouchPosition(event)
+  if (currentLineIsSelected.value) {
+    state.isLocking = false
+    startLineInfoInteraction(event)
+    return
+  }
   state.isLocking = true
   shouldCancelLocking = false
   setTimeout(() => {
