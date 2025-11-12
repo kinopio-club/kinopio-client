@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -14,7 +15,6 @@ import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
@@ -24,6 +24,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -34,8 +35,7 @@ let prevCards, prevBoxes
 const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
-  cardsIsConnected: false,
-  shareCardIsVisible: false
+  cardsIsConnected: false
 })
 
 const closeAllDialogs = () => {
@@ -44,15 +44,15 @@ const closeAllDialogs = () => {
 const closeDialogs = () => {
   state.copyItemsIsVisible = false
   state.moveItemsIsVisible = false
-  state.shareCardIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnectionsSelectedIds)
 const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
+const multipleLinesSelectedIds = computed(() => globalStore.multipleLinesSelectedIds)
 
 const visible = computed(() => {
-  const isSelectedItems = multipleConnectionsSelectedIds.value.length || multipleCardsSelectedIds.value.length || multipleBoxesSelectedIds.value.length
+  const isSelectedItems = globalStore.getIsMultipleItemsSelected
   return globalStore.multipleSelectedActionsIsVisible && isSelectedItems
 })
 watch(() => visible.value, async (value, prevValue) => {
@@ -87,7 +87,7 @@ const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecim
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
-
+const cardBoxOrConnectionIsSelected = computed(() => cardOrBoxIsSelected.value || editableConnections.value.length)
 // items
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
@@ -101,8 +101,9 @@ const canEditAll = computed(() => {
   const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
-  const all = cards && connections && boxes
-  return { cards, connections, boxes, all }
+  const lines = userStore.getUserIsSpaceMember
+  const all = cards && connections && boxes && lines
+  return { cards, connections, boxes, lines, all }
 })
 const multipleCardOrBoxesIsSelected = computed(() => {
   const cards = multipleCardsIsSelected.value
@@ -394,14 +395,6 @@ const toggleMoveItemsIsVisible = () => {
   state.moveItemsIsVisible = !isVisible
 }
 
-// share
-
-// const toggleShareCardIsVisible = () => {
-//   const isVisible = state.shareCardIsVisible
-//   closeDialogs()
-//   state.shareCardIsVisible = !isVisible
-// }
-
 // more options
 
 const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
@@ -438,6 +431,9 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   if (!shouldRemoveCardsOnly) {
     editableBoxes.value.forEach(box => boxStore.removeBox(box.id))
   }
+  if (isSpaceMember.value) {
+    lineStore.removeLines(multipleLinesSelectedIds.value)
+  }
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
 }
@@ -457,7 +453,7 @@ dialog.narrow.multiple-selected-actions(
   .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
     button.small-button.inline-button
       img.icon.cancel(src="@/assets/add.svg")
-  section
+  section(v-if="cardBoxOrConnectionIsSelected")
 
     //- Edit Cards
     .row(v-if="cardOrBoxIsSelected")

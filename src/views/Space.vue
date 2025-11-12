@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -18,6 +19,7 @@ import { useChangelogStore } from '@/stores/useChangelogStore'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
+import LineDetails from '@/components/dialogs/LineDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -26,6 +28,7 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
+import Lines from '@/components/Lines.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
@@ -63,6 +66,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -223,6 +227,7 @@ const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
+const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -239,7 +244,9 @@ watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
-
+watch(() => globalStore.currentUserIsDraggingLine, (value, prevValue) => {
+  updatePageSizes(value)
+})
 const updatePageSizes = async (value) => {
   if (!value) {
     await nextTick()
@@ -497,14 +504,21 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
+  if (!prevCursor) { return }
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
+  if (globalStore.currentUserIsDraggingLine) {
+    endCursor.x = 0
+    prevCursor.x = 0
+  }
   // cards
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
   boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
+  // lines
+  lineStore.moveLines({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -521,6 +535,7 @@ const dragBoxes = (event) => {
   }
   dragItems()
 }
+
 // footer
 
 const footerDialogIsVisible = () => {
@@ -548,7 +563,7 @@ const checkIfShouldHideFooter = (event) => {
 const showMultipleSelectedActions = (event) => {
   if (spaceIsReadOnly.value) { return }
   if (globalStore.preventMultipleSelectedActionsIsVisible) { return }
-  const isMultipleSelected = globalStore.multipleCardsSelectedIds.length || globalStore.multipleConnectionsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length
+  const isMultipleSelected = globalStore.getIsMultipleItemsSelected
   if (isMultipleSelected) {
     const position = utils.cursorPositionInSpace(event)
     globalStore.multipleSelectedActionsPosition = position
@@ -563,7 +578,7 @@ const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value
+  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -645,16 +660,20 @@ const interact = (event) => {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
+  } else if (isDraggingLine.value) {
+    dragItems()
   }
   prevCursor = endCursor
 }
 const checkShouldShowDetails = () => {
   const shouldShow = !utils.cursorsAreClose(state.startCursor, endCursor)
   if (!shouldShow) { return }
-  if (globalStore.currentUserIsDraggingCard) {
+  if (isDraggingCard.value) {
     globalStore.preventDraggedCardFromShowingDetails = true
-  } else if (globalStore.currentUserIsDraggingBox) {
+  } else if (isDraggingBox.value) {
     globalStore.preventDraggedBoxFromShowingDetails = true
+  } else if (isDraggingLine.value) {
+    globalStore.preventDraggedLineFromShowingDetails = true
   }
 }
 const eventIsFromTextarea = (event) => {
@@ -723,8 +742,10 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsPaintingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
+  globalStore.currentUserIsDraggingLine = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
+  globalStore.linesWereDragged = false
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   prevCursor = undefined
@@ -848,9 +869,11 @@ const updateMetaRSSFeed = () => {
     Connections
     #box-infos
     Cards
+    Lines
     ItemUnlockButtons
     DrawingCanvas
     BoxDetails
+    LineDetails
     CardDetails
     OtherCardDetails
     ConnectionDetails

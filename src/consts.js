@@ -12,6 +12,7 @@ export default {
   defaultCardWidth: 58,
   defaultCardHeight: 70,
   minItemXY: 70,
+  minLineY: 150,
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
   minCardIframeWidth: 310,
@@ -43,6 +44,7 @@ export default {
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
+  lineInfoOffset: 11,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

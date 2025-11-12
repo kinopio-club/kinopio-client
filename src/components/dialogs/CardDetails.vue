@@ -22,7 +22,7 @@ import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
 import CardDetailsMeta from '@/components/CardDetailsMeta.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
+import ShareItem from '@/components/dialogs/ShareItem.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
@@ -148,7 +148,7 @@ const state = reactive({
   previousSelectedTag: {},
   currentSearchTag: {},
   newTagColor: '',
-  shareCardIsVisible: false
+  shareItemIsVisible: false
 })
 
 const cardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
@@ -179,7 +179,7 @@ const closeDialogs = (shouldSkipGlobalDialogs) => {
   globalStore.triggerCloseChildDialogs()
   state.imagePickerIsVisible = false
   state.cardTipsIsVisible = false
-  state.shareCardIsVisible = false
+  state.shareItemIsVisible = false
   hidePickers()
   if (shouldSkipGlobalDialogs === true) { return }
   hideTagDetailsIsVisible()
@@ -372,10 +372,10 @@ const toggleShouldShowItemActions = async () => {
   await nextTick()
   scrollIntoView()
 }
-const toggleShareCardIsVisible = (event) => {
-  const isVisible = state.shareCardIsVisible
+const toggleShareItemIsVisible = (event) => {
+  const isVisible = state.shareItemIsVisible
   closeDialogs()
-  state.shareCardIsVisible = !isVisible
+  state.shareItemIsVisible = !isVisible
   copyCardUrl(event)
 }
 const scrollIntoView = async (behavior) => {
@@ -441,7 +441,7 @@ const cardUrl = () => {
   return url
 }
 const copyCardUrl = async (event) => {
-  if (!state.shareCardIsVisible) { return }
+  if (!state.shareItemIsVisible) { return }
   const canShare = spaceStore.getSpaceIsRemote
   if (!canShare) { return }
   globalStore.clearNotificationsWithPosition()
@@ -1481,10 +1481,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
-      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareCardIsVisible" )
-        button(:class="{active: state.shareCardIsVisible}")
+      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
+        button(:class="{active: state.shareItemIsVisible}")
           span Share
-        ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
+        ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
     CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")

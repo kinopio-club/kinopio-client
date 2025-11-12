@@ -3,14 +3,17 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 
 import BoxList from '@/components/BoxList.vue'
+import LineList from '@/components/LineList.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 
 const dialogElement = ref(null)
@@ -64,6 +67,9 @@ const toggleShouldShowMinimapJumpToList = () => {
   const value = element.open
   userStore.updateUser({ shouldShowMinimapJumpToList: value })
 }
+const placeholderIsVisible = computed(() => {
+  return !lines.value.length && !boxes.value.length
+})
 
 // pin dialog
 
@@ -73,6 +79,16 @@ const toggleDialogIsPinned = () => {
   globalStore.minimapIsPinned = isPinned
 }
 
+// lines
+
+const lines = computed(() => {
+  const items = lineStore.getAllLines
+  return items
+})
+const focusLine = (line) => {
+  globalStore.updateFocusOnLineId(line.id)
+}
+
 // boxes
 
 const boxes = computed(() => {
@@ -80,9 +96,10 @@ const boxes = computed(() => {
   items = utils.sortByDistanceFromOrigin(items)
   return items
 })
-const scrollIntoView = (box) => {
+const focusBox = (box) => {
   globalStore.updateFocusOnBoxId(box.id)
 }
+
 </script>
 
 <template lang="pug">
@@ -103,18 +120,19 @@ dialog.narrow.minimap.is-pinnable(
           img.icon.pin.right-pin(src="@/assets/pin.svg")
   section
     .row
-      MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
+      MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
   section.boxes-section.results-section
     details(ref="detailsElement" @toggle="toggleShouldShowMinimapJumpToList")
       summary
         //- .row
-        span Jump to Box
+        span Jump to
       section.subsection
-        BoxList(:boxes="boxes" @selectBox="scrollIntoView")
-        .row(v-if="!boxes.length")
+        LineList(:lines="lines" @selectLine="focusLine")
+        BoxList(:boxes="boxes" @selectBox="focusBox")
+        .row(v-if="placeholderIsVisible")
           p
             img.icon.box-icon(src="@/assets/box.svg")
-            span No boxes in this space yet
+            span No lines or boxes in this space yet
 </template>
 
 <style lang="stylus">
@@ -136,4 +154,6 @@ dialog.minimap
     border-radius 0
   summary
     text-align left
+  .line-list + .box-list
+    margin-top 10px
 </style>

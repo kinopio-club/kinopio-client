@@ -4,12 +4,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 
 let unsubscribes
 const threshold = 50
@@ -108,6 +110,8 @@ const currentUserIsPainting = computed(() => globalStore.currentUserIsPainting)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
+const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
+const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 
 // position
 
@@ -239,9 +243,7 @@ const scrollBy = (delta) => {
     zoom = viewport.scale
   }
   const currentUserIsBoxSelecting = globalStore.currentUserIsBoxSelecting
-  const isDraggingCard = globalStore.currentUserIsDraggingCard
-  const isDraggingBox = globalStore.currentUserIsDraggingBox
-  const isDraggingItem = isDraggingCard || isDraggingBox
+  const isDraggingItem = isDraggingCard.value || isDraggingBox.value || isDraggingLine.value
   delta = {
     left: Math.round(delta.x * zoom),
     top: Math.round(delta.y * zoom)
@@ -252,10 +254,9 @@ const scrollBy = (delta) => {
       x: delta.left * slowMultiplier,
       y: delta.top * slowMultiplier
     }
-    if (isDraggingCard || isDraggingBox) {
-      cardStore.moveCards({ endCursor, prevCursor, delta: itemDelta })
-      boxStore.moveBoxes({ endCursor, prevCursor, delta: itemDelta })
-    }
+    cardStore.moveCards({ endCursor, prevCursor, delta: itemDelta })
+    boxStore.moveBoxes({ endCursor, prevCursor, delta: itemDelta })
+    lineStore.moveLines({ endCursor, prevCursor, delta: itemDelta })
   }
   if (isDrawingConnection.value) {
     globalStore.triggerDrawConnectionFrame(currentEvent)

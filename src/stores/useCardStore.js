@@ -361,7 +361,6 @@ export const useCardStore = defineStore('cards', {
     // update
 
     async updateCardsState (updates) {
-      const connectionStore = useConnectionStore()
       updates = updates.map(update => { // normalize
         delete update.user
         return update

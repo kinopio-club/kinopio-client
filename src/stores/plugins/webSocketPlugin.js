@@ -19,6 +19,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
@@ -41,6 +42,7 @@ export default function webSocketPlugin () {
     const cardStore = useCardStore(pinia)
     const boxStore = useBoxStore(pinia)
     const connectionStore = useConnectionStore(pinia)
+    const lineStore = useLineStore(pinia)
     if (store === 'globalStore') {
       return globalStore
     } else if (store === 'spaceStore') {
@@ -53,6 +55,8 @@ export default function webSocketPlugin () {
       return boxStore
     } else if (store === 'connectionStore') {
       return connectionStore
+    } else if (store === 'lineStore') {
+      return lineStore
     } else {
       return globalStore
     }

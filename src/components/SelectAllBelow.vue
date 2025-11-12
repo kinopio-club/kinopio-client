@@ -4,12 +4,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useLineStore } from '@/stores/useLineStore'
 
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const lineStore = useLineStore()
 
 onMounted(() => {
   window.addEventListener('mousedown', updateIsMetaKey)
@@ -40,6 +42,7 @@ const isVisible = computed(() => {
   if (globalStore.getToolbarIsDrawing) { return }
   if (globalStore.isSelectingX) { return }
   if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
+  if (globalStore.lineDetailsIsVisibleForLineId) { return }
   return state.isVisible
 })
 
@@ -67,6 +70,26 @@ const handleMouseMove = (event) => {
   if (globalStore.currentUserIsDraggingBox) { return }
   if (globalStore.isEmbedMode) { return }
   updateIsMetaKey(event)
+  const position = utils.cursorPositionInViewport(event)
+  const pagePosition = utils.cursorPositionInSpace(event)
+  // check if near line
+  let isLine
+  const lines = lineStore.getAllLines
+  lines.forEach(line => {
+    const isNearLine = utils.isBetween({
+      value: pagePosition.y,
+      min: line.y - 12,
+      max: line.y + 12
+    })
+    if (isNearLine) {
+      isLine = true
+    }
+  })
+  if (isLine) {
+    state.isVisible = false
+    return
+  }
+  // check if between controls
   const edgeThreshold = 30
   const toolbar = document.querySelector('#toolbar')?.getBoundingClientRect()
   if (!toolbar) { return }
@@ -76,7 +99,6 @@ const handleMouseMove = (event) => {
   } else {
     footer = 0
   }
-  const position = utils.cursorPositionInViewport(event)
   const viewport = utils.visualViewport()
   const isInThreshold = position.x <= edgeThreshold
   const isBetweenControls = utils.isBetween({
