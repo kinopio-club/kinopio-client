@@ -139,6 +139,11 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.box-icon(src="@/assets/line.svg")
+            span Insert Line Divider
+          .badge.keyboard-shortcut L
+        .row
+          .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Box Mode
           .badge.keyboard-shortcut B
@@ -150,12 +155,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .row
           .badge.title
             img.icon.brush-size(src="@/assets/brush-size-l.svg")
-            span Cycle Brush Size
+            span Drawing: Cycle Brush Size
           .badge.keyboard-shortcut S
         .row
           .badge.title
             img.icon.eraser(src="@/assets/eraser.svg")
-            span Toggle Eraser
+            span Drawing: Toggle Eraser
           .badge.keyboard-shortcut E
 
     //- Navigate
