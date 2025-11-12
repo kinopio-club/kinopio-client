@@ -120,6 +120,7 @@ const infoStyles = computed(() => {
 // select
 
 const selectAllBelow = () => {
+  if (globalStore.linesWereDragged) { return }
   const position = {
     y: props.line.y - 1
   }
