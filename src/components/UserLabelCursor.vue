@@ -161,6 +161,7 @@ const userLabelVisibleFrame = () => {
   z-index calc(var(--max-z) - 50)
   display inline-block
   border-radius var(--small-entity-radius)
+  width max-width
   .pointer
     width 15px
     height 15px
