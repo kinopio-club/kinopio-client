@@ -122,7 +122,7 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  const scroll = globalStore.getWindowScrollWithSpaceOffset
+  const scroll = globalStore.getWindowScrollWithSpaceOffset()
   delete card.user
   let newCard = utils.clone(card)
   newCard.id = nanoid()

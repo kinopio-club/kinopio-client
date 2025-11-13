@@ -747,7 +747,7 @@ const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
   for (const tagName of addTagsNames) {
-    const tag = globalStore.newTag({
+    const tag = globalStore.getNewTag({
       name: tagName,
       defaultColor: state.newTagColor || userStore.color,
       cardId: card.value.id,
@@ -945,7 +945,7 @@ const otherCardIsVisible = computed(() => {
   return isCardLink && hasUrls.value
 })
 const otherCard = computed(() => {
-  const item = globalStore.otherCardById(card.value.linkToCardId)
+  const item = globalStore.getOtherCardById(card.value.linkToCardId)
   return item
 })
 const otherCardUrl = computed(() => utils.urlFromSpaceAndItem({ itemId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))

@@ -335,7 +335,7 @@ const groupInviteUrl = computed(() => {
 
 const otherCardUrl = computed(() => utils.urlFromSpaceAndItem({ itemId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
 const otherCard = computed(() => {
-  const card = globalStore.otherCardById(props.card.linkToCardId)
+  const card = globalStore.getOtherCardById(props.card.linkToCardId)
   return card
 })
 const otherCardIsVisible = computed(() => {
@@ -953,7 +953,7 @@ const nameSegments = computed(() => {
     } else if (segment.isLink) {
       const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
       segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
-      segment.otherCard = globalStore.otherCardById(cardId)
+      segment.otherCard = globalStore.getOtherCardById(cardId)
     // text
     } else if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)

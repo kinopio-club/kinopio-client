@@ -861,7 +861,7 @@ export const useSpaceStore = defineStore('space', {
         if (spaceId) {
           const space = globalStore.getOtherSpaceById(spaceId)
         } else if (cardId) {
-          const card = globalStore.otherCardById(cardId)
+          const card = globalStore.getOtherCardById(cardId)
         }
         if (space || card) { return }
         // add options to items to fetch

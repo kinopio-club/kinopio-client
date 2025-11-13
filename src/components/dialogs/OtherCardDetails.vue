@@ -27,7 +27,7 @@ onMounted(() => {
       if (name === 'updateOtherItems') {
         if (!visible.value) { return }
         const parentCard = cardStore.getCard(parentCardId.value)
-        let otherCard = globalStore.otherCardById(parentCard.linkToCardId)
+        let otherCard = globalStore.getOtherCardById(parentCard.linkToCardId)
         otherCard = utils.clone(otherCard)
         globalStore.currentSelectedOtherItem = otherCard
       }

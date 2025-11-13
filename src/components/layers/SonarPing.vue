@@ -51,7 +51,7 @@ const state = reactive({
 })
 
 const updateScroll = () => {
-  state.scroll = globalStore.getWindowScrollWithSpaceOffset
+  state.scroll = globalStore.getWindowScrollWithSpaceOffset()
 }
 
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)

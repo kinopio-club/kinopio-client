@@ -815,7 +815,7 @@ export const useCardStore = defineStore('cards', {
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
         tags.forEach(tag => {
-          tag = globalStore.newTag({
+          tag = globalStore.getNewTag({
             name: tag,
             defaultColor: userStore.color,
             cardId: card.id,

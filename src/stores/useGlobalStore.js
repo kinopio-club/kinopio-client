@@ -312,10 +312,6 @@ export const useGlobalStore = defineStore('global', {
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    getWindowScrollWithSpaceOffset () {
-      const scroll = { x: window.scrollX, y: window.scrollY }
-      return utils.updatePositionWithSpaceOffset(scroll)
-    },
     getIsInteractingWithItem () {
       return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox
     },
@@ -353,17 +349,9 @@ export const useGlobalStore = defineStore('global', {
   },
 
   actions: {
-    updateSpaceBorderRadiusStyles (styles) {
-      const isZoomed = this.spaceZoomPercent !== 100
-      const isMobile = consts.isSecureAppContext || utils.isMobile()
-      const radius = parseInt(utils.cssVariable('entity-radius'))
-      if (isZoomed) {
-        styles.borderRadius = `${radius}px`
-      }
-      if (isMobile) {
-        styles.borderRadius = `${radius * 2}px`
-      }
-      return styles
+    getWindowScrollWithSpaceOffset () {
+      const scroll = { x: window.scrollX, y: window.scrollY }
+      return utils.updatePositionWithSpaceOffset(scroll)
     },
     getShouldScrollAtEdges (event) {
       if (window.visualViewport.scale > 1) { return }
@@ -387,14 +375,12 @@ export const useGlobalStore = defineStore('global', {
       const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
     },
-    // getOtherCardById
-    otherCardById (cardId) {
+    getOtherCardById (cardId) {
       const otherCards = this.otherItems.cards.filter(Boolean)
       const card = otherCards.find(otherCard => otherCard.id === cardId)
       return card
     },
-    // getNewTag
-    newTag ({ name, defaultColor, cardId, spaceId }) {
+    getNewTag ({ name, defaultColor, cardId, spaceId }) {
       let color
       const allTags = this.tags
       const existingTag = allTags.find(tag => tag.name === name)
@@ -408,6 +394,18 @@ export const useGlobalStore = defineStore('global', {
         cardId,
         spaceId
       }
+    },
+    updateSpaceBorderRadiusStyles (styles) {
+      const isZoomed = this.spaceZoomPercent !== 100
+      const isMobile = consts.isSecureAppContext || utils.isMobile()
+      const radius = parseInt(utils.cssVariable('entity-radius'))
+      if (isZoomed) {
+        styles.borderRadius = `${radius}px`
+      }
+      if (isMobile) {
+        styles.borderRadius = `${radius * 2}px`
+      }
+      return styles
     },
 
     // subscribe triggers
