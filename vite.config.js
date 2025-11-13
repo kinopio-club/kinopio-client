@@ -110,6 +110,7 @@ export default defineConfig(async ({ command, mode }) => {
           navigateFallback: '/app.html',
           navigateFallbackDenylist: [
             // Exclude exact route only
+            /^\/security\.txt$/,
             /^\/robots\.txt$/,
             /^\/sitemap\.xml$/,
             /^\/changelog$/,
