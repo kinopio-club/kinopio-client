@@ -29,7 +29,7 @@ export const useCardStore = defineStore('cards', {
   getters: {
     getAllCards () {
       let cards = this.allIds.map(id => this.byId[id])
-      cards = cards.filter(card => !card.isRemoved)
+      cards = cards.filter(card => Boolean(card) && !card.isRemoved)
       return cards
     },
     getAllCardsSortedByX () {
@@ -70,11 +70,11 @@ export const useCardStore = defineStore('cards', {
     },
     getCardsIsLocked () {
       const cards = this.allIds.map(id => this.byId[id])
-      return cards.filter(card => card.isLocked && !card.isRemoved)
+      return cards.filter(card => Boolean(card) && card.isLocked && !card.isRemoved)
     },
     getCardsIsNotLocked () {
       const cards = this.allIds.map(id => this.byId[id])
-      return cards.filter(card => !card.isLocked && !card.isRemoved)
+      return cards.filter(card => Boolean(card) && !card.isLocked && !card.isRemoved)
     },
     getCardsSelected () {
       const globalStore = useGlobalStore()
@@ -417,10 +417,12 @@ export const useCardStore = defineStore('cards', {
     async deleteCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const card of cards) {
         this.removeCardFromState(card)
+        broadcastStore.update({ updates: card, store: 'cardStore', action: 'removeCardFromState' })
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
       }
     },
