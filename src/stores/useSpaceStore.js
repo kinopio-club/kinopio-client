@@ -417,6 +417,7 @@ export const useSpaceStore = defineStore('space', {
       return space
     },
     async restoreSpaceRemote (space) {
+      const globalStore = useGlobalStore()
       const historyStore = useHistoryStore()
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
@@ -431,6 +432,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
       connectionStore.initializeRemoteConnections(space.connections)
       lineStore.initializeRemoteLines(space.lines)
+      globalStore.updatePageSizes()
       // init space
       historyStore.redoLocalUpdates()
       this.$state = space
