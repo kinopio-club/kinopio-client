@@ -128,6 +128,7 @@ export const useBoxStore = defineStore('boxes', {
     initializeRemoteBoxes (remoteBoxes) {
       const localBoxes = utils.clone(this.getAllBoxes)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteBoxes, localBoxes)
+      console.info('🎑 remote boxes', { updateItems, addItems, removeItems })
       this.updateBoxesState(updateItems)
       addItems.forEach(box => this.addBoxToState(box))
       removeItems.forEach(box => this.removeBoxFromState(box.id))

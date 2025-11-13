@@ -277,6 +277,7 @@ export const useCardStore = defineStore('cards', {
     initializeRemoteCards (remoteCards) {
       const localCards = utils.clone(this.getAllCards)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteCards, localCards)
+      console.info('🎑 remote cards', { updateItems, addItems, removeItems })
       this.updateCardsState(updateItems)
       addItems.forEach(card => this.addCardToState(card))
       removeItems.forEach(card => this.removeCardFromState(card))

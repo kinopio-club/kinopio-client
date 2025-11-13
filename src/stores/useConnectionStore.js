@@ -188,6 +188,7 @@ export const useConnectionStore = defineStore('connections', {
     initializeRemoteConnections (remoteConnections) {
       const localConnections = utils.clone(this.getAllConnections)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteConnections, localConnections)
+      console.info('🎑 remote connections', { updateItems, addItems, removeItems })
       this.updateConnectionsState(updateItems)
       addItems.forEach(connection => this.addConnectionToState(connection))
       const ids = removeItems.map(connection => connection.id)
@@ -196,6 +197,7 @@ export const useConnectionStore = defineStore('connections', {
     initializeRemoteConnectionTypes (remoteTypes) {
       const localTypes = utils.clone(this.getAllConnectionTypes)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteTypes, localTypes)
+      console.info('🎑 remote connectionTypes', { updateItems, addItems, removeItems })
       updateItems.forEach(type => this.updateConnectionTypeState(type))
       addItems.forEach(type => this.addConnectionTypeToState(type))
       removeItems.forEach(type => this.removeConnectionTypeFromState(type))
