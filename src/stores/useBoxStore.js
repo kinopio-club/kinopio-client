@@ -125,6 +125,13 @@ export const useBoxStore = defineStore('boxes', {
       this.byId = byId
       this.allIds = allIds
     },
+    initializeRemoteBoxes (remoteBoxes) {
+      const localBoxes = utils.clone(this.getAllBoxes)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteBoxes, localBoxes)
+      this.updateBoxesState(updateItems)
+      addItems.forEach(box => this.addBoxToState(box))
+      removeItems.forEach(box => this.removeBoxFromState(box.id))
+    },
 
     // create
 
@@ -208,6 +215,11 @@ export const useBoxStore = defineStore('boxes', {
 
     // remove
 
+    removeBoxFromState (id) {
+      const idIndex = this.allIds.indexOf(id)
+      this.allIds.splice(idIndex, 1)
+      delete this.byId[id]
+    },
     removeBoxesRemote (ids) {
       for (const id of ids) {
         const idIndex = this.allIds.indexOf(id)
@@ -224,9 +236,7 @@ export const useBoxStore = defineStore('boxes', {
       if (!canEditSpace) { return }
       const updates = []
       for (const id of ids) {
-        const idIndex = this.allIds.indexOf(id)
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[id]
+        this.removeBoxFromState(id)
         await apiStore.addToQueue({ name: 'removeBox', body: { id } })
         broadcastStore.update({ updates: ids, store: 'boxStore', action: 'removeBoxesRemote' })
       }

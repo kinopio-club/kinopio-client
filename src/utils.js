@@ -1514,71 +1514,51 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
-  // mergeSpaceItems({ prevItems, newItems, selectedItemIds = [] }) {
-  //   const filteredPrevItems = prevItems.filter(Boolean)
-  //   const filteredNewItems = newItems.filter(Boolean)
-  //   const prevIds = filteredPrevItems.map(({ id }) => id)
-  //   const newIds = filteredNewItems.map(({ id }) => id)
-  //   const normalizedNew = this.normalizeItems(filteredNewItems)
-  //   const normalizedPrev = this.normalizeItems(filteredPrevItems)
-  //   const items = normalizedNew // [ id: {object } ]
-  //   const threshold = 30 * 1000 // 30 seconds
-  //   const now = Date.now()
+  spaceWithoutItems (space) {
+    const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
+    itemKeys.forEach(key => {
+      delete space[key]
+    })
+    return space
+  },
 
-  //   // const addItems = []
-  //   // const updateItems = []
-  //   // const removeItems = []
+  // sync
 
-  //   newIds.forEach(id => {
-  //     const isSelected = selectedItemIds.includes(id)
-  //     const isUpdated = prevIds.includes(id)
-  //     const prevItem = normalizedPrev[id]
-  //     const newItem = normalizedNew[id]
-  //     const threshold = 30 * 1000 // 30 seconds
-  //     const now = Date.now()
-  //     // const isNewUpdate = dayjs(now).diff(prevItem.updatedAt) >= threshold
-
-  //     // add prev to new
-
-  //     // merge prev updates
-
-  //     // use selected prev positions to avoid ppsition jumping while dragging
-  //     if (isSelected) {
-  //       const { x, y } = prevItem
-  //       items[id].x = x
-  //       items[id].y = y
-  //     }
-
-  //     prevIds.filter(prevId => {
-  //       // .filter(id => {
-  //       // const isNew = !newIds.includes(prevId)
-  //         const isNotInNewItems = !newIds.includes(id)
-  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
-  //         return isNotInNewItems && isOldUpdate
-  //       // })
-  //     })
-
-  //     if (isUpdated) {
-  //       items[id] = { ...prevItem, ...newItem}
-  //     } else {
-  //       items.push()
-  //       addItems.push(normalizedNew[id])
-  //     }
-  //   })
-  //   // Handle removals
-  //   removeItems.push(
-  //     ...prevIds
-  //       .filter(id => {
-  //         const isNotInNewItems = !newIds.includes(id)
-  //         const isNotSelected = !selectedItemIds.includes(id)
-  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
-  //         return isNotInNewItems && isNotSelected && isOldUpdate
-  //       })
-  //       .map(id => normalizedPrev[id])
-  //   )
-  //   // return items , denomarlized
-  //   return { addItems, updateItems, removeItems }
-  // },
+  isSyncItemUpdated (remoteItem, localItem) {
+    let keys = Object.keys(remoteItem)
+    keys = keys.filter(key => key !== 'updatedAt')
+    return Boolean(keys.find(key => {
+      const isChanged = localItem[key] !== remoteItem[key]
+      if (isChanged) {
+        return true
+      }
+    }))
+  },
+  syncItems (remoteItems, localItems) {
+    const updateItems = []
+    const addItems = []
+    const removeItems = []
+    remoteItems.forEach(remoteItem => {
+      const localItem = localItems.find(item => item.id === remoteItem.id)
+      // update changed items
+      if (localItem) {
+        if (this.isSyncItemUpdated(remoteItem, localItem)) {
+          updateItems.push(remoteItem)
+        }
+      // add items not in local
+      } else {
+        addItems.push(remoteItem)
+      }
+    })
+    // remove items not in remote
+    localItems.forEach(localItem => {
+      const remoteItem = remoteItems.find(item => item.id === localItem.id)
+      if (!remoteItem) {
+        removeItems.push(localItem)
+      }
+    })
+    return { updateItems, addItems, removeItems }
+  },
   newSpaceBackground (space, user) {
     if (user.defaultSpaceBackgroundGradient) {
       space.backgroundGradient = user.defaultSpaceBackgroundGradient

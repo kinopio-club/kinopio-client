@@ -338,6 +338,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
       lineStore.initializeLines(space?.lines)
+      // initialize space
       this.$state = space
       console.log('🍍 restoreSpace', this.getSpaceAllState)
       globalStore.resetPageSizes()
@@ -418,11 +419,21 @@ export const useSpaceStore = defineStore('space', {
     async restoreSpaceRemote (space) {
       const historyStore = useHistoryStore()
       const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const connectionStore = useConnectionStore()
+      const lineStore = useLineStore()
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
+      // init items
+      cardStore.initializeRemoteCards(space.cards)
+      boxStore.initializeRemoteBoxes(space.boxes)
+      connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
+      connectionStore.initializeRemoteConnections(space.connections)
+      lineStore.initializeRemoteLines(space.lines)
+      // init space
       historyStore.redoLocalUpdates()
-      this.restoreSpace(space)
+      this.$state = utils.spaceWithoutItems(space)
       historyStore.reset()
     },
     async loadSpace (space) {

@@ -274,6 +274,13 @@ export const useCardStore = defineStore('cards', {
         globalStore.multipleCardsSelectedIds = []
       }, 100)
     },
+    initializeRemoteCards (remoteCards) {
+      const localCards = utils.clone(this.getAllCards)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteCards, localCards)
+      this.updateCardsState(updateItems)
+      addItems.forEach(card => this.addCardToState(card))
+      removeItems.forEach(card => this.removeCardFromState(card))
+    },
 
     // create
 
@@ -400,6 +407,12 @@ export const useCardStore = defineStore('cards', {
 
     // remove
 
+    removeCardFromState (card) {
+      const idIndex = this.allIds.indexOf(card.id)
+      if (utils.isNullish(idIndex)) { return }
+      this.allIds.splice(idIndex, 1)
+      delete this.byId[card.id]
+    },
     async deleteCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()

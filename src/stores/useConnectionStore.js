@@ -183,6 +183,24 @@ export const useConnectionStore = defineStore('connections', {
       return types
     },
 
+    // init remote
+
+    initializeRemoteConnections (remoteConnections) {
+      const localConnections = utils.clone(this.getAllConnections)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteConnections, localConnections)
+      this.updateConnectionsState(updateItems)
+      addItems.forEach(connection => this.addConnectionToState(connection))
+      const ids = removeItems.map(connection => connection.id)
+      this.removeConnectionsFromState(ids)
+    },
+    initializeRemoteConnectionTypes (remoteTypes) {
+      const localTypes = utils.clone(this.getAllConnectionTypes)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteTypes, localTypes)
+      updateItems.forEach(type => this.updateConnectionTypeState(type))
+      addItems.forEach(type => this.addConnectionTypeToState(type))
+      removeItems.forEach(type => this.removeConnectionTypeFromState(type))
+    },
+
     // indexes
 
     removeFromIndexes (connection) {
@@ -354,7 +372,7 @@ export const useConnectionStore = defineStore('connections', {
 
     // remove
 
-    removeConnectionsState (ids) {
+    removeConnectionsFromState (ids) {
       for (const id of ids) {
         // remove from indexes
         const connection = this.getConnection(id)
@@ -379,11 +397,11 @@ export const useConnectionStore = defineStore('connections', {
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
-      this.removeConnectionsState(ids)
+      this.removeConnectionsFromState(ids)
       for (const id of ids) {
         await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
       }
-      broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
+      broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsFromState' })
     },
     async removeConnection (id) {
       await this.removeConnections([id])
@@ -395,6 +413,11 @@ export const useConnectionStore = defineStore('connections', {
         delete this.typeById[type.id]
       }
     },
+    removeConnectionTypeFromState (type) {
+      const idIndex = this.typeAllIds.indexOf(type.id)
+      this.typeAllIds.splice(idIndex, 1)
+      delete this.typeById[type.id]
+    },
     async removeAllUnusedConnectionTypes () {
       const apiStore = useApiStore()
       const broadcastStore = useBroadcastStore()
@@ -405,9 +428,7 @@ export const useConnectionStore = defineStore('connections', {
       types = types.filter(type => Boolean(type))
       const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
       for (const type of typesToRemove) {
-        const idIndex = this.typeAllIds.indexOf(type.id)
-        this.typeAllIds.splice(idIndex, 1)
-        delete this.typeById[type.id]
+        this.removeConnectionTypeFromState(type)
         await apiStore.addToQueue({ name: 'removeConnectionType', body: type })
       }
       broadcastStore.update({ updates: typesToRemove, store: 'connectionStore', action: 'removeConnectionTypesRemote' })

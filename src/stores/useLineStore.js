@@ -73,6 +73,14 @@ export const useLineStore = defineStore('lines', {
       this.byId = byId
       this.allIds = allIds
     },
+    initializeRemoteLines (remoteLines) {
+      const localLines = utils.clone(this.getAllLines)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteLines, localLines)
+      this.updateLinesState(updateItems)
+      addItems.forEach(line => this.addLineToState(line))
+      const ids = removeItems.map(line => line.id)
+      this.removeLinesState(ids)
+    },
 
     // create
 
