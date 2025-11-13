@@ -80,7 +80,7 @@ export const useLineStore = defineStore('lines', {
       this.updateLinesState(updateItems)
       addItems.forEach(line => this.addLineToState(line))
       const ids = removeItems.map(line => line.id)
-      this.removeLinesState(ids)
+      this.removeLinesFromState(ids)
     },
 
     // create
@@ -192,7 +192,7 @@ export const useLineStore = defineStore('lines', {
 
     // remove
 
-    removeLinesState (ids) {
+    removeLinesFromState (ids) {
       for (const id of ids) {
         const idIndex = this.allIds.indexOf(id)
         this.allIds.splice(idIndex, 1)
@@ -211,8 +211,8 @@ export const useLineStore = defineStore('lines', {
         console.log(line)
         await apiStore.addToQueue({ name: 'removeLine', body: line })
       }
-      this.removeLinesState(ids)
-      broadcastStore.update({ updates: ids, store: 'lineStore', action: 'removeLinesState' })
+      this.removeLinesFromState(ids)
+      broadcastStore.update({ updates: ids, store: 'lineStore', action: 'removeLinesFromState' })
       await cache.updateSpace('lines', this.getAllLines, spaceStore.id)
     },
     async removeLine (id) {
