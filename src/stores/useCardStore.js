@@ -420,10 +420,7 @@ export const useCardStore = defineStore('cards', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const card of cards) {
-        const idIndex = this.allIds.indexOf(card.id)
-        if (utils.isNullish(idIndex)) { continue }
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[card.id]
+        this.removeCardFromState(card)
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
       }
     },
