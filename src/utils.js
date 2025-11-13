@@ -1514,13 +1514,6 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
-  spaceWithoutItems (space) {
-    const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
-    itemKeys.forEach(key => {
-      delete space[key]
-    })
-    return space
-  },
 
   // sync
 

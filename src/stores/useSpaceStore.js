@@ -433,8 +433,13 @@ export const useSpaceStore = defineStore('space', {
       lineStore.initializeRemoteLines(space.lines)
       // init space
       historyStore.redoLocalUpdates()
-      this.$state = utils.spaceWithoutItems(space)
+      this.$state = space
       historyStore.reset()
+      // clean up unused keys
+      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
+      itemKeys.forEach(key => {
+        delete this[key]
+      })
     },
     async loadSpace (space) {
       const globalStore = useGlobalStore()
