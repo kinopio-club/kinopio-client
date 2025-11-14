@@ -768,7 +768,7 @@ export const useSpaceStore = defineStore('space', {
       })
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       if (shouldCreateWithoutLoading) {
-        space.users = [userStore]
+        space.users = [userStore.getUserAllState]
         const nullCardUsers = true
         await cache.updateIdsInSpace(space, nullCardUsers) // saves space
       } else {
