@@ -126,7 +126,7 @@ const updateSize = (space) => {
 const isThemeDark = computed(() => userStore.theme === 'dark')
 const updateBackground = () => {
   let images = backgroundImagesJSON
-  images = images.filter(image => !image.isArchived || !image.shouldSkipInGenerateSpace || !image.isDebug)
+  images = images.filter(image => !image.isArchived || !image.shouldSkipInGenerateSpace)
   const image = sample(images)
   let url = image.url
   if (isThemeDark.value) {

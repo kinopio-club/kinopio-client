@@ -32,6 +32,9 @@
     "thumbnailUrl": "https://bk.kinopio.club/grid-thumbnail-5.svg"
   },
   {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/debug-grid-2x.webp"
+  },
+  {
     "url": "https://bk.kinopio.club/circular-2x.webp",
     "previewUrl": "https://bk.kinopio.club/circular-thumbnail.webp",
     "thumbnailUrl": "https://bk.kinopio.club/circular-thumbnail.webp",
@@ -205,9 +208,5 @@
   },
   {
     "url": "https://bk.kinopio.club/scatter-classic-2x.png"
-  },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/debug-grid-2x.webp",
-    "isDebug": true
   }
 ]
