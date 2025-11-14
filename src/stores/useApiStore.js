@@ -1406,18 +1406,6 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'pdf', error })
       }
     },
-    async generateSpace (prompt) {
-      try {
-        const body = { prompt }
-        const options = await this.requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${consts.apiHost()}/services/generate-space`, options)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 generateSpace', error)
-        throw new Error(error)
-      }
-    },
 
     // Downloads
 

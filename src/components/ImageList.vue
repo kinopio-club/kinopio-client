@@ -1,7 +1,9 @@
 <script setup>
-// import utils from '@/utils.js'
-
 import { reactive, computed, onMounted } from 'vue'
+
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 
 const props = defineProps({
   images: Array,
@@ -15,13 +17,21 @@ const selectImage = (image) => {
 const isActiveUrl = (image) => {
   return image.url === props.activeUrl
 }
+const previewUrl = (image) => {
+  const isThemeDark = userStore.theme === 'dark'
+  let url = image.previewUrl || image.url
+  if (isThemeDark) {
+    url = image.darkPreviewUrl || image.previewUrl || image.url
+  }
+  return url
+}
 </script>
 
 <template lang="pug">
 ul.results-list.image-list
   template(v-for="image in images" :key="image.url")
     li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isActiveUrl(image), 'is-small': props.isSmall}")
-      img(:src="image.previewUrl || image.url")
+      img(:src="previewUrl(image)")
       a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
 </template>
 
