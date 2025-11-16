@@ -851,6 +851,7 @@ const updateMetaRSSFeed = () => {
   OutsideSpaceBackground
   //- user presence cursors
   template(v-for="user in users")
+    //- p {{user.position.y}} {{user.name}}
     UserLabelCursor(:user="user")
   //- space
   main#space.space(
