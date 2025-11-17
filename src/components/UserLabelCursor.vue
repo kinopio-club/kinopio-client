@@ -18,9 +18,11 @@ onMounted(() => {
         let cursor = args[0]
         if (cursor.userId !== props.user.id) { return }
         cursor = updateRemotePosition(cursor)
-        state.x = Math.round(cursor.x)
-        state.y = Math.round(cursor.y)
-        state.color = props.user.color
+        Object.assign(state, {
+          x: Math.round(cursor.x),
+          y: Math.round(cursor.y),
+          color: props.user.color
+        })
         currentIteration = 0
         userLabelVisibleTimer()
         updateIsOnscreen()
