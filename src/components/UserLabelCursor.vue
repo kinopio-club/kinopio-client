@@ -5,8 +5,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
-import debounce from 'lodash-es/debounce'
-
 const globalStore = useGlobalStore()
 
 const maxIterations = 200 // 👀 PaintSelectCanvas maxIterations
@@ -20,12 +18,17 @@ onMounted(() => {
         let cursor = args[0]
         if (cursor.userId !== props.user.id) { return }
         cursor = updateRemotePosition(cursor)
-        debouncedUpdatePosition(cursor)
+        state.x = Math.round(cursor.x)
+        state.y = Math.round(cursor.y)
+        state.color = props.user.color
+        currentIteration = 0
+        userLabelVisibleTimer()
+        updateIsOnscreen()
+        updateOffscreenLabelPosition()
       }
     }
   )
   unsubscribes = () => {
-    debouncedUpdatePosition.cancel()
     globalActionUnsubscribe()
   }
 })
@@ -75,18 +78,6 @@ const position = computed(() => {
     top: state.y + 'px'
   }
 })
-const debouncedUpdatePosition = debounce((cursor) => {
-  Object.assign(state, {
-    x: Math.round(cursor.x),
-    y: Math.round(cursor.y),
-    color: props.user.color
-  })
-
-  currentIteration = 0
-  userLabelVisibleTimer()
-  updateIsOnscreen()
-  updateOffscreenLabelPosition()
-}, 16) // 60fps
 
 // offscreen position
 
