@@ -29,7 +29,7 @@ let redoStrokes = []
 
 let unsubscribes
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('pointerup', endDrawing)
   window.addEventListener('mouseup', endDrawing)
   window.addEventListener('touchend', endDrawing)
@@ -101,6 +101,7 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
+const spaceComponentIsMounted = computed(() => globalStore.spaceComponentIsMounted)
 
 // clear
 const clearDrawing = () => {
@@ -372,11 +373,61 @@ svg.drawing-strokes(
         stroke-linecap="round"
         stroke-linejoin="round"
       )
+
+//- duplicate ^ into Space.vue
+teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
+  svg.drawing-strokes(
+    ref="svgElement"
+    :width="pageWidth"
+    :height="pageHeight"
+  )
+    defs
+      mask#eraserMask
+        rect(:width="pageWidth" :height="pageHeight" fill="white")
+        //- Add eraser strokes as black shapes to create cutouts
+        template(v-for="eraser in state.eraserMasks" :key="eraser.id")
+          circle(
+            v-if="eraser.type === 'circle'"
+            :cx="eraser.x"
+            :cy="eraser.y"
+            :r="eraser.r"
+            fill="black"
+          )
+          path(
+            v-else
+            :d="eraser.d"
+            stroke="black"
+            :stroke-width="eraser.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          )
+
+    //- Main drawing group with mask applied
+    g(:mask="'url(#eraserMask)'")
+      //- Render all drawing paths (non-eraser)
+      template(v-for="path in state.paths" :key="path.id")
+        circle(
+          v-if="path.type === 'circle'"
+          :cx="path.x"
+          :cy="path.y"
+          :r="path.r"
+          :fill="path.color"
+        )
+        path(
+          v-else
+          :d="path.d"
+          :stroke="path.color"
+          :stroke-width="path.width"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        )
+
 </template>
 
 <style lang="stylus">
 svg.drawing-strokes
-  background-color pink
   position absolute
   transform-origin top left
   background transparent
