@@ -33,7 +33,6 @@ onMounted(() => {
   window.addEventListener('pointerup', endDrawing)
   window.addEventListener('mouseup', endDrawing)
   window.addEventListener('touchend', endDrawing)
-  updatePrevScroll()
   clearDrawing()
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
@@ -92,9 +91,8 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  prevScroll: { x: 0, y: 0 },
-  paths: [], // Store all rendered paths
-  eraserMasks: [] // Store eraser paths separately
+  paths: [],
+  eraserMasks: []
 })
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
@@ -151,22 +149,14 @@ const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
 }
 
 // render
-const viewportPosition = (point) => {
-  return {
-    x: point.x - state.prevScroll.x,
-    y: point.y - state.prevScroll.y
-  }
-}
 
 const createPathFromStroke = (stroke) => {
   if (!stroke || stroke.length === 0) return null
-
   // For a single point, create a circle
   if (stroke.length === 1) {
     const point = stroke[0]
-    const { x, y } = viewportPosition(point)
+    const { x, y } = point
     const radius = point.diameter / 2
-
     return {
       id: point.id,
       type: 'circle',
@@ -177,18 +167,16 @@ const createPathFromStroke = (stroke) => {
       isEraser: point.isEraser
     }
   }
-
   // For multiple points, create a path
   let pathData = ''
   stroke.forEach((point, index) => {
-    const { x, y } = viewportPosition(point)
+    const { x, y } = point
     if (index === 0) {
       pathData = `M ${x} ${y}`
     } else {
       pathData += ` L ${x} ${y}`
     }
   })
-
   return {
     id: stroke[0].id,
     type: 'path',
@@ -198,11 +186,9 @@ const createPathFromStroke = (stroke) => {
     isEraser: stroke[0].isEraser
   }
 }
-
 const renderStroke = (stroke, shouldPreventBroadcast) => {
   const path = createPathFromStroke(stroke)
   if (path) {
-    // Add to appropriate array based on whether it's an eraser stroke
     if (path.isEraser) {
       state.eraserMasks.push(path)
     } else {
@@ -211,7 +197,7 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
     broadcastAddStroke(stroke, shouldPreventBroadcast)
   }
 }
-
+// for minimap
 const updateDrawingDataUrl = async () => {
   await nextTick()
   const element = svgElement.value
@@ -224,6 +210,7 @@ const updateDrawingDataUrl = async () => {
 }
 
 // start
+
 const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
   globalStore.closeAllDialogs()
@@ -237,6 +224,7 @@ const startDrawing = (event) => {
 }
 
 // draw
+
 const allStrokes = () => {
   return spaceStrokes.concat(remoteStrokes)
 }
@@ -250,18 +238,16 @@ const draw = (event) => {
 const redrawStrokes = async () => {
   state.paths = []
   state.eraserMasks = []
-
-  // Process all strokes and separate into drawing and eraser strokes
   const allStrokes = [...spaceStrokes, ...remoteStrokes]
   allStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
-
   globalStore.triggerUpdateDrawingBackground()
   updatePageSizes()
 }
 
 // stop
+
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = allStrokes()
   await updateDrawingDataUrl()
@@ -292,6 +278,7 @@ const endDrawing = async (event) => {
 }
 
 // undo redo
+
 const undo = () => {
   const prevStroke = spaceStrokes.pop() // remove last stroke
   redoStrokes.push(prevStroke) // append to redo stack
@@ -308,14 +295,8 @@ const redo = () => {
   broadcastAddStroke(prevStroke)
 }
 
-// scroll and resize
-const updatePrevScroll = () => {
-  const zoom = globalStore.getSpaceZoomDecimal
-  state.prevScroll = {
-    x: window.scrollX * zoom,
-    y: window.scrollY * zoom
-  }
-}
+// page size
+
 const updatePageSizes = () => {
   const strokes = allStrokes()
   let x = 0
@@ -341,7 +322,6 @@ const updatePageSizes = () => {
   }
   globalStore.updatePageSizesFromRect(rect)
 }
-
 </script>
 
 <template lang="pug">
