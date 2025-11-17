@@ -35,7 +35,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
-import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
+import DrawingStrokes from '@/components/layers/DrawingStrokes.vue'
 import DrawingCanvasBackground from '@/components/layers/DrawingCanvasBackground.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
@@ -862,7 +862,7 @@ const updateMetaRSSFeed = () => {
   )
     SpaceBackground
     SpaceBackgroundTint
-    DrawingCanvasBackground
+    //- DrawingCanvasBackground
     ItemsLocked
     #box-backgrounds
     Boxes
@@ -871,7 +871,7 @@ const updateMetaRSSFeed = () => {
     Cards
     Lines
     ItemUnlockButtons
-    DrawingCanvas
+    DrawingStrokes
     BoxDetails
     LineDetails
     CardDetails
