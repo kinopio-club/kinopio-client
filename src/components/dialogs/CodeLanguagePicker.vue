@@ -157,6 +157,7 @@ dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.st
 dialog.code-language-picker
   width 200px
   min-height 150px
+  max-height 250px
   padding 4px
   position absolute
   top 0
