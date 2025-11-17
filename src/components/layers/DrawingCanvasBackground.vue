@@ -14,7 +14,6 @@ let canvas, context
 let unsubscribes
 
 onMounted(() => {
-  window.addEventListener('scroll', updatePrevScroll)
   canvas = canvasElement.value
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -33,13 +32,9 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', updatePrevScroll)
   unsubscribes()
 })
 
-watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
-  updateCanvasSize()
-})
 watch(() => globalStore.currentUserToolbar, (value, prevValue) => {
   update()
 })
@@ -58,8 +53,8 @@ const state = reactive({
   prevScroll: { x: 0, y: 0 }
 })
 
-const viewportHeight = computed(() => globalStore.viewportHeight)
-const viewportWidth = computed(() => globalStore.viewportWidth)
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 
 const clear = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
@@ -70,14 +65,6 @@ const update = () => {
   context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height)
 }
 
-const styles = computed(() => {
-  const value = {
-    top: state.prevScroll.y + 'px',
-    left: state.prevScroll.x + 'px'
-  }
-  return value
-})
-
 // scroll and resize
 
 const updatePrevScroll = () => {
@@ -87,20 +74,14 @@ const updatePrevScroll = () => {
     y: window.scrollY * zoom
   }
 }
-const updateCanvasSize = debounce(() => {
-  const zoom = globalStore.getSpaceCounterZoomDecimal
-  canvas.width = viewportWidth.value * zoom
-  canvas.height = viewportHeight.value * zoom
-}, 20)
 
 </script>
 
 <template lang="pug">
 canvas.drawing-background(
   ref="canvasElement"
-  :width="viewportWidth"
-  :height="viewportHeight"
-  :style="styles"
+  :width="pageWidth"
+  :height="pageHeight"
 )
 </template>
 
