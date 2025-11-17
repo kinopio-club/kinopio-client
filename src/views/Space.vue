@@ -36,7 +36,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
 import DrawingStrokes from '@/components/layers/DrawingStrokes.vue'
-import DrawingCanvasBackground from '@/components/layers/DrawingCanvasBackground.vue'
+import DrawingStrokesBackground from '@/components/layers/DrawingStrokesBackground.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
@@ -862,7 +862,7 @@ const updateMetaRSSFeed = () => {
   )
     SpaceBackground
     SpaceBackgroundTint
-    //- DrawingCanvasBackground
+    //- DrawingStrokesBackground
     ItemsLocked
     #box-backgrounds
     Boxes
