@@ -62,11 +62,11 @@ onMounted(() => {
         spaceStrokes.reverse()
         spaceStore.drawingStrokes = []
         redrawStrokes()
-        await updateDrawingSvgString()
+        await updateDrawingDataUrl()
       } else if (name === 'triggerDrawingReset') {
         clearDrawing()
-      } else if (name === 'triggetUpdateDrawingDataUrl') {
-        await updateDrawingSvgString()
+      } else if (name === 'triggerUpdateDrawingDataUrl') {
+        await updateDrawingDataUrl()
         globalStore.triggerEndDrawing()
       }
     }
@@ -106,7 +106,7 @@ const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
 
 // clear
 const clearDrawing = () => {
-  globalStore.drawingImageUrl = ''
+  globalStore.drawingDataUrl = ''
   globalStore.drawingStrokeColors = []
   globalStore.drawingEraserIsActive = false
   redoStrokes = []
@@ -212,52 +212,14 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   }
 }
 
-const updateDrawingSvgString = async () => {
-  const strokes = allStrokes()
-  // Create SVG string from all strokes
-  let svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${pageWidth.value}" height="${pageHeight.value}">
-  <defs>
-    <mask id="eraserMask">
-      <rect width="${pageWidth.value}" height="${pageHeight.value}" fill="white"/>`
-
-  // Add all eraser strokes to the mask
-  state.eraserMasks.forEach(path => {
-    if (path.type === 'circle') {
-      svgString += `<circle cx="${path.x}" cy="${path.y}" r="${path.r}" fill="black"/>`
-    } else {
-      svgString += `<path d="${path.d}" stroke="black" stroke-width="${path.width}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
-    }
-  })
-
-  svgString += `</mask>
-  </defs>
-
-  <g mask="url(#eraserMask)">`
-
-  // Add all drawing strokes
-  strokes.forEach(stroke => {
-    // Skip eraser strokes for the main drawing content
-    if (stroke[0].isEraser) return
-
-    const path = createPathFromStroke(stroke)
-    if (!path) return
-
-    if (path.type === 'circle') {
-      svgString += `<circle cx="${path.x}" cy="${path.y}" r="${path.r}" fill="${path.color}"/>`
-    } else {
-      svgString += `<path d="${path.d}" stroke="${path.color}" stroke-width="${path.width}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
-    }
-  })
-
-  svgString += `</g>
-</svg>`
-
-  // Convert SVG string to data URL
+const updateDrawingDataUrl = async () => {
+  await nextTick()
+  const element = svgElement.value
+  const svgString = new XMLSerializer().serializeToString(element)
   const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
-  globalStore.drawingImageUrl = dataUrl
-
+  globalStore.drawingDataUrl = dataUrl
   broadcastStore.update({
-    action: 'triggetUpdateDrawingDataUrl'
+    action: 'triggerUpdateDrawingDataUrl'
   })
 }
 
@@ -302,7 +264,7 @@ const redrawStrokes = async () => {
 // stop
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = allStrokes()
-  await updateDrawingSvgString()
+  await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
   updatePageSizes()
   if (isRemovedStroke) {

@@ -98,7 +98,7 @@ export const useGlobalStore = defineStore('global', {
     // drawing
     drawingEraserIsActive: false,
     drawingStrokeColors: [],
-    drawingImageUrl: '',
+    drawingDataUrl: '',
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -501,7 +501,7 @@ export const useGlobalStore = defineStore('global', {
     triggerAddRemoteDrawingStroke (updates) {},
     triggerRemoveRemoteDrawingStroke (updates) {},
     triggerEndDrawing () {},
-    triggetUpdateDrawingDataUrl () {},
+    triggerUpdateDrawingDataUrl () {},
 
     resetPageSizes () {
       this.triggerDrawingReset()
