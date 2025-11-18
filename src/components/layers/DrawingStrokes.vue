@@ -44,7 +44,6 @@ onMounted(async () => {
         const stroke = args[0]
         remoteStrokes.push(stroke)
         renderStroke(stroke, true)
-        globalStore.triggerUpdateDrawingBackground()
       } else if (name === 'triggerRemoveRemoteDrawingStroke') {
         const stroke = args[0].stroke
         remoteStrokes = remoteStrokes.filter(points => {
@@ -221,7 +220,6 @@ const startDrawing = (event) => {
   const point = createPoint(event)
   currentStroke.push(point)
   renderStroke([point])
-  globalStore.triggerUpdateDrawingBackground()
 }
 
 // draw
@@ -234,7 +232,6 @@ const draw = (event) => {
   if (!isDrawing) { return }
   currentStroke.push(createPoint(event))
   renderStroke(currentStroke)
-  globalStore.triggerUpdateDrawingBackground()
 }
 const redrawStrokes = async () => {
   state.paths = []
@@ -243,7 +240,6 @@ const redrawStrokes = async () => {
   allStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
-  globalStore.triggerUpdateDrawingBackground()
   updatePageSizes()
 }
 
