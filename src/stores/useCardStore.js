@@ -29,7 +29,7 @@ export const useCardStore = defineStore('cards', {
   getters: {
     getAllCards () {
       let cards = this.allIds.map(id => this.byId[id])
-      cards = cards.filter(card => !card.isRemoved)
+      cards = cards.filter(card => Boolean(card) && !card.isRemoved)
       return cards
     },
     getAllCardsSortedByX () {
@@ -70,11 +70,11 @@ export const useCardStore = defineStore('cards', {
     },
     getCardsIsLocked () {
       const cards = this.allIds.map(id => this.byId[id])
-      return cards.filter(card => card.isLocked && !card.isRemoved)
+      return cards.filter(card => Boolean(card) && card.isLocked && !card.isRemoved)
     },
     getCardsIsNotLocked () {
       const cards = this.allIds.map(id => this.byId[id])
-      return cards.filter(card => !card.isLocked && !card.isRemoved)
+      return cards.filter(card => Boolean(card) && !card.isLocked && !card.isRemoved)
     },
     getCardsSelected () {
       const globalStore = useGlobalStore()
@@ -274,6 +274,14 @@ export const useCardStore = defineStore('cards', {
         globalStore.multipleCardsSelectedIds = []
       }, 100)
     },
+    initializeRemoteCards (remoteCards) {
+      const localCards = utils.clone(this.getAllCards)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteCards, localCards)
+      console.info('🎑 remote cards', { updateItems, addItems, removeItems })
+      this.updateCardsState(updateItems)
+      addItems.forEach(card => this.addCardToState(card))
+      removeItems.forEach(card => this.removeCardFromState(card))
+    },
 
     // create
 
@@ -400,16 +408,21 @@ export const useCardStore = defineStore('cards', {
 
     // remove
 
+    removeCardFromState (card) {
+      const idIndex = this.allIds.indexOf(card.id)
+      if (utils.isNullish(idIndex)) { return }
+      this.allIds.splice(idIndex, 1)
+      delete this.byId[card.id]
+    },
     async deleteCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const card of cards) {
-        const idIndex = this.allIds.indexOf(card.id)
-        if (utils.isNullish(idIndex)) { continue }
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[card.id]
+        this.removeCardFromState(card)
+        broadcastStore.update({ updates: card, store: 'cardStore', action: 'removeCardFromState' })
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
       }
     },
