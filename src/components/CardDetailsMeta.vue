@@ -107,11 +107,10 @@ const userDetailsIsUser = (user) => {
 
 // card settings
 
-const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const cardSettingsTitle = computed(() => {
   let title = 'Card Settings'
   let shortcut = '( Shift-Enter: Line Break)'
-  if (shiftEnterShouldAddChildCard.value) {
+  if (userStore.cardSettingsShiftEnterShouldAddChildCard) {
     shortcut = '(Shift-Enter: Child Card)'
   }
   title = `${title} ${shortcut}`
@@ -128,7 +127,6 @@ const toggleCardsSettingsIsVisible = () => {
   .button-wrap
     button.small-button.settings-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
       img.settings.icon(src="@/assets/settings.svg")
-      span.button-indicator(:class="{ right: !shiftEnterShouldAddChildCard }")
     UserSettingsCards(:visible="state.cardsSettingsIsVisible")
   //- comment
   .badge.info.is-comment-badge(v-if="isComment")
@@ -164,15 +162,4 @@ const toggleCardsSettingsIsVisible = () => {
     flex-shrink 0
   .settings-button
     margin-right 5px
-  .button-indicator
-    position absolute
-    background-color var(--primary)
-    left 0
-    bottom 0px
-    width 6px
-    height 1px
-    border-radius var(--entity-radius)
-    &.right
-      left initial
-      right 10px
 </style>
