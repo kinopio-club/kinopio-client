@@ -40,7 +40,7 @@ dialog.narrow.invite-tips(v-if="props.visible" :open="props.visible" @click.left
   section
     p Invitees don't need an account to view a space, but will need to sign up to edit.
     p
-      .badge.info If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
+      span.badge.info If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
 </template>
 
 <style lang="stylus">
