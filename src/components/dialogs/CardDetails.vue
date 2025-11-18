@@ -21,7 +21,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
-import CardDetailsMeta from '@/components/CardDetailsMeta.vue'
+import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareItem from '@/components/dialogs/ShareItem.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
@@ -1487,7 +1487,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
-    CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible && canEditCard")
       //- Split by Line Breaks
@@ -1535,7 +1535,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
     //- Read Only
     template(v-if="!canEditCard")
-      CardDetailsMeta(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
       .row.edit-message
         template(v-if="spacePrivacyIsOpen")
           span.badge.info
