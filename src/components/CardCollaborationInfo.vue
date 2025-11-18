@@ -125,14 +125,14 @@ const toggleCardsSettingsIsVisible = () => {
 .row.card-collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
   //- settings
   .button-wrap
-    button.small-button.settings-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
+    button.small-button.settings-button.inline-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
       img.settings.icon(src="@/assets/settings.svg")
     UserSettingsCards(:visible="state.cardsSettingsIsVisible")
   //- comment
   .badge.info.is-comment-badge(v-if="isComment")
     img.icon.comment(src="@/assets/comment.svg")
   //- date
-  .badge.status.button-badge(v-if="shouldShowItemActions" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+  .badge.status.button-badge.time-badge(v-if="shouldShowItemActions" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
   .users(v-if="shouldShowItemActions")
@@ -162,4 +162,8 @@ const toggleCardsSettingsIsVisible = () => {
     flex-shrink 0
   .settings-button
     margin-right 5px
+    cursor pointer
+  .time-badge
+    display flex
+    align-items center
 </style>
