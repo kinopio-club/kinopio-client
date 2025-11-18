@@ -219,14 +219,14 @@ const initCanvas = async () => {
 // drawing
 
 const drawDrawing = async () => {
-  if (!globalStore.drawingImageUrl) { return }
+  if (!globalStore.drawingDataUrl) { return }
   const image = new Image()
   image.onload = () => {
     const width = image.width * ratio.value
     const height = image.height * ratio.value
     context.drawImage(image, 0, 0, width, height)
   }
-  image.src = globalStore.drawingImageUrl
+  image.src = globalStore.drawingDataUrl
 }
 
 // connections

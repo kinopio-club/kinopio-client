@@ -54,6 +54,7 @@ export const useGlobalStore = defineStore('global', {
     dateImageUrl: null,
     currentSpaceIsUnavailableOffline: false,
     cardVotes: new Map(),
+    spaceComponentIsMounted: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -98,7 +99,7 @@ export const useGlobalStore = defineStore('global', {
     // drawing
     drawingEraserIsActive: false,
     drawingStrokeColors: [],
-    drawingImageUrl: '',
+    drawingDataUrl: '',
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -481,7 +482,6 @@ export const useGlobalStore = defineStore('global', {
     triggerPanningStart () {},
     triggerClearUserNotifications () {},
     triggerAddBox (event) {},
-    triggerUpdateDrawingBackground () {},
     // select all below
     triggerSelectAllItemsBelowCursor (position) {},
     triggerSelectAllItemsAboveCursor (position) {},
@@ -501,7 +501,7 @@ export const useGlobalStore = defineStore('global', {
     triggerAddRemoteDrawingStroke (updates) {},
     triggerRemoveRemoteDrawingStroke (updates) {},
     triggerEndDrawing () {},
-    triggetUpdateDrawingDataUrl () {},
+    triggerUpdateDrawingDataUrl () {},
 
     resetPageSizes () {
       this.triggerDrawingReset()

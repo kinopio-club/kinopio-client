@@ -35,8 +35,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
-import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
-import DrawingCanvasBackground from '@/components/layers/DrawingCanvasBackground.vue'
+import DrawingStrokes from '@/components/layers/DrawingStrokes.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
@@ -116,6 +115,7 @@ const init = async () => {
 onMounted(async () => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
+  globalStore.spaceComponentIsMounted = true
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
@@ -862,7 +862,7 @@ const updateMetaRSSFeed = () => {
   )
     SpaceBackground
     SpaceBackgroundTint
-    DrawingCanvasBackground
+    #drawing-strokes-background
     ItemsLocked
     #box-backgrounds
     Boxes
@@ -871,7 +871,7 @@ const updateMetaRSSFeed = () => {
     Cards
     Lines
     ItemUnlockButtons
-    DrawingCanvas
+    DrawingStrokes
     BoxDetails
     LineDetails
     CardDetails

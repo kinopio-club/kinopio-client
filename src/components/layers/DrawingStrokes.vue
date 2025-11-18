@@ -19,8 +19,7 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const broadcastStore = useBroadcastStore()
 
-const canvasElement = ref(null)
-let canvas, context
+const svgElement = ref(null)
 let isDrawing = false
 let currentStroke = []
 let currentStrokeId = ''
@@ -30,17 +29,10 @@ let redoStrokes = []
 
 let unsubscribes
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('pointerup', endDrawing)
   window.addEventListener('mouseup', endDrawing)
   window.addEventListener('touchend', endDrawing)
-  window.addEventListener('scroll', scroll)
-  window.addEventListener('resize', resize)
-  canvas = canvasElement.value
-  context = canvas.getContext('2d')
-  context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  updatePrevScroll()
-  clearCanvas()
   clearDrawing()
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
@@ -52,7 +44,6 @@ onMounted(() => {
         const stroke = args[0]
         remoteStrokes.push(stroke)
         renderStroke(stroke, true)
-        globalStore.triggerUpdateDrawingBackground()
       } else if (name === 'triggerRemoveRemoteDrawingStroke') {
         const stroke = args[0].stroke
         remoteStrokes = remoteStrokes.filter(points => {
@@ -72,7 +63,7 @@ onMounted(() => {
         await updateDrawingDataUrl()
       } else if (name === 'triggerDrawingReset') {
         clearDrawing()
-      } else if (name === 'triggetUpdateDrawingDataUrl') {
+      } else if (name === 'triggerUpdateDrawingDataUrl') {
         await updateDrawingDataUrl()
         globalStore.triggerEndDrawing()
       }
@@ -95,28 +86,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('mouseup', endDrawing)
   window.removeEventListener('touchend', endDrawing)
-  window.removeEventListener('scroll', scroll)
-  window.removeEventListener('resize', resize)
   unsubscribes()
 })
 
-watch(() => globalStore.currentUserToolbar, async (value, prevValue) => {
-  updatePrevScroll()
-  redrawStrokes()
-})
-watch(
-  [
-    () => globalStore.spaceZoomPercent,
-    () => globalStore.zoomOrigin
-  ],
-  async () => {
-    await nextTick()
-    scroll()
-  }
-)
-
 const state = reactive({
-  prevScroll: { x: 0, y: 0 }
+  paths: [],
+  eraserMasks: []
 })
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
@@ -125,24 +100,21 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
+const spaceComponentIsMounted = computed(() => globalStore.spaceComponentIsMounted)
 
 // clear
-
-const clearCanvas = () => {
-  context.clearRect(0, 0, canvas.width, canvas.height)
-}
 const clearDrawing = () => {
-  globalStore.drawingImageUrl = ''
+  globalStore.drawingDataUrl = ''
   globalStore.drawingStrokeColors = []
   globalStore.drawingEraserIsActive = false
   redoStrokes = []
   spaceStrokes = []
   remoteStrokes = []
-  clearCanvas()
+  state.paths = []
+  state.eraserMasks = []
 }
 
 // points
-
 const strokeColor = computed(() => userStore.getUserDrawingColor)
 const strokeDiameter = computed(() => {
   const diameter = userStore.drawingBrushSize
@@ -161,7 +133,6 @@ const createPoint = (event) => {
 }
 
 // broadcast
-
 const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   broadcastStore.update({
@@ -179,92 +150,62 @@ const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
 
 // render
 
-const viewportPosition = (point) => {
+const createPathFromStroke = (stroke) => {
+  if (!stroke || stroke.length === 0) return null
+  // For a single point, create a circle
+  if (stroke.length === 1) {
+    const point = stroke[0]
+    const { x, y } = point
+    const radius = point.diameter / 2
+    return {
+      id: point.id,
+      type: 'circle',
+      x,
+      y,
+      r: radius,
+      color: point.color,
+      isEraser: point.isEraser
+    }
+  }
+  // For multiple points, create a path
+  let pathData = ''
+  stroke.forEach((point, index) => {
+    const { x, y } = point
+    if (index === 0) {
+      pathData = `M ${x} ${y}`
+    } else {
+      pathData += ` L ${x} ${y}`
+    }
+  })
   return {
-    x: point.x - state.prevScroll.x,
-    y: point.y - state.prevScroll.y
+    id: stroke[0].id,
+    type: 'path',
+    d: pathData,
+    color: stroke[0].color,
+    width: stroke[0].diameter,
+    isEraser: stroke[0].isEraser
   }
-}
-const renderPoint = (point, shouldPreventBroadcast) => {
-  context.lineCap = context.lineJoin = 'round'
-  const { x, y } = viewportPosition(point)
-  context.globalCompositeOperation = 'source-over'
-  if (point.isEraser) {
-    context.globalCompositeOperation = 'destination-out'
-  }
-  const radius = point.diameter / 2
-  context.beginPath()
-  context.arc(x, y, radius, 0, 2 * Math.PI)
-  context.closePath()
-  context.fillStyle = point.color
-  context.fill()
-  broadcastAddStroke([point], shouldPreventBroadcast)
 }
 const renderStroke = (stroke, shouldPreventBroadcast) => {
-  context.lineCap = context.lineJoin = 'round'
-  if (stroke.length === 1) {
-    renderPoint(stroke[0], shouldPreventBroadcast)
-    return
+  const path = createPathFromStroke(stroke)
+  if (path) {
+    if (path.isEraser) {
+      state.eraserMasks.push(path)
+    } else {
+      state.paths.push(path)
+    }
+    broadcastAddStroke(stroke, shouldPreventBroadcast)
   }
-  const { x: x0, y: y0 } = viewportPosition(stroke[0])
-  context.globalCompositeOperation = 'source-over'
-  if (stroke[0].isEraser) {
-    context.globalCompositeOperation = 'destination-out'
-  }
-  context.strokeStyle = stroke[0].color
-  context.lineWidth = stroke[0].diameter
-  context.beginPath()
-  context.moveTo(x0, y0)
-  stroke.forEach((point) => {
-    const { x, y } = viewportPosition(point)
-    context.lineTo(x, y)
-  })
-  context.stroke()
-  broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
-const dataUrlFromOffscreenCanvas = (offscreenCanvas) => {
-  return new Promise((resolve, reject) => {
-    offscreenCanvas.convertToBlob()
-      .then(blob => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result)
-        reader.onerror = () => reject(reader.error)
-        reader.readAsDataURL(blob)
-      })
-      .catch(reject)
-  })
-}
+// for minimap
 const updateDrawingDataUrl = async () => {
-  const strokes = allStrokes()
-  const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
-  const offscreenContext = offscreenCanvas.getContext('2d')
-  offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  // render strokes
-  strokes.forEach(stroke => {
-    if (!stroke || stroke.length === 0) { return }
-    stroke.forEach((point, index) => {
-      offscreenContext.globalCompositeOperation = 'source-over'
-      if (point.isEraser) {
-        offscreenContext.globalCompositeOperation = 'destination-out'
-      }
-      if (index === 0) {
-        offscreenContext.beginPath()
-        offscreenContext.moveTo(point.x, point.y)
-        return
-      }
-      offscreenContext.lineTo(point.x, point.y)
-      offscreenContext.strokeStyle = point.color
-      offscreenContext.lineWidth = point.diameter
-      offscreenContext.lineCap = 'round'
-      offscreenContext.lineJoin = 'round'
-      offscreenContext.stroke()
-      offscreenContext.moveTo(point.x, point.y)
-    })
-  })
-  const dataUrl = await dataUrlFromOffscreenCanvas(offscreenCanvas)
-  globalStore.drawingImageUrl = dataUrl
+  await nextTick()
+  const element = svgElement.value
+  const svgString = new XMLSerializer().serializeToString(element)
+  const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
+  globalStore.drawingDataUrl = dataUrl
   broadcastStore.update({
-    action: 'triggetUpdateDrawingDataUrl'
+    action: 'triggerUpdateDrawingDataUrl'
   })
 }
 
@@ -277,9 +218,8 @@ const startDrawing = (event) => {
   currentStrokeId = nanoid()
   currentStroke = []
   const point = createPoint(event)
-  renderStroke([point])
   currentStroke.push(point)
-  globalStore.triggerUpdateDrawingBackground()
+  renderStroke([point])
 }
 
 // draw
@@ -292,18 +232,14 @@ const draw = (event) => {
   if (!isDrawing) { return }
   currentStroke.push(createPoint(event))
   renderStroke(currentStroke)
-  globalStore.triggerUpdateDrawingBackground()
 }
 const redrawStrokes = async () => {
-  clearCanvas()
-  context.globalCompositeOperation = 'source-over'
-  spaceStrokes.forEach(stroke => {
+  state.paths = []
+  state.eraserMasks = []
+  const allStrokes = [...spaceStrokes, ...remoteStrokes]
+  allStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
-  remoteStrokes.forEach(stroke => {
-    renderStroke(stroke, true)
-  })
-  globalStore.triggerUpdateDrawingBackground()
   updatePageSizes()
 }
 
@@ -327,7 +263,10 @@ const endDrawing = async (event) => {
     isDrawing = false
     return
   }
-  globalStore.addToDrawingStrokeColors(currentStroke[0].color)
+  // Only add to stroke colors if it's not an eraser
+  if (!globalStore.drawingEraserIsActive) {
+    globalStore.addToDrawingStrokeColors(currentStroke[0].color)
+  }
   spaceStrokes.push(currentStroke)
   saveStroke({ stroke: currentStroke })
   currentStroke = []
@@ -353,26 +292,8 @@ const redo = () => {
   broadcastAddStroke(prevStroke)
 }
 
-// scroll and resize
+// page size
 
-const updatePrevScroll = () => {
-  const zoom = globalStore.getSpaceZoomDecimal
-  state.prevScroll = {
-    x: window.scrollX * zoom,
-    y: window.scrollY * zoom
-  }
-}
-const scroll = () => {
-  updatePrevScroll()
-  redrawStrokes() // todo redraw from drawingImageUrl
-}
-const resize = async () => {
-  await nextTick()
-  await nextTick()
-  setTimeout(() => {
-    scroll()
-  }, 10)
-}
 const updatePageSizes = () => {
   const strokes = allStrokes()
   let x = 0
@@ -398,31 +319,111 @@ const updatePageSizes = () => {
   }
   globalStore.updatePageSizesFromRect(rect)
 }
-
-const styles = computed(() => {
-  const value = {
-    top: state.prevScroll.y + 'px',
-    left: state.prevScroll.x + 'px'
-  }
-  return value
-})
-
-const spaceWidth = computed(() => globalStore.viewportWidth * globalStore.getSpaceCounterZoomDecimal)
-const spaceHeight = computed(() => globalStore.viewportHeight * globalStore.getSpaceCounterZoomDecimal)
-
 </script>
 
 <template lang="pug">
-canvas#drawing-canvas.drawing-canvas(
-  ref="canvasElement"
-  :width="spaceWidth"
-  :height="spaceHeight"
-  :style="styles"
+svg.drawing-strokes(
+  ref="svgElement"
+  :width="pageWidth"
+  :height="pageHeight"
 )
+  defs
+    mask#eraserMask
+      rect(:width="pageWidth" :height="pageHeight" fill="white")
+      //- Add eraser strokes as black shapes to create cutouts
+      template(v-for="eraser in state.eraserMasks" :key="eraser.id")
+        circle(
+          v-if="eraser.type === 'circle'"
+          :cx="eraser.x"
+          :cy="eraser.y"
+          :r="eraser.r"
+          fill="black"
+        )
+        path(
+          v-else
+          :d="eraser.d"
+          stroke="black"
+          :stroke-width="eraser.width"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        )
+
+  //- Main drawing group with mask applied
+  g(:mask="'url(#eraserMask)'")
+    //- Render all drawing paths (non-eraser)
+    template(v-for="path in state.paths" :key="path.id")
+      circle(
+        v-if="path.type === 'circle'"
+        :cx="path.x"
+        :cy="path.y"
+        :r="path.r"
+        :fill="path.color"
+      )
+      path(
+        v-else
+        :d="path.d"
+        :stroke="path.color"
+        :stroke-width="path.width"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      )
+
+//- duplicate ^ into Space.vue
+teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
+  svg.drawing-strokes(
+    ref="svgElement"
+    :width="pageWidth"
+    :height="pageHeight"
+  )
+    defs
+      mask#eraserMask
+        rect(:width="pageWidth" :height="pageHeight" fill="white")
+        //- Add eraser strokes as black shapes to create cutouts
+        template(v-for="eraser in state.eraserMasks" :key="eraser.id")
+          circle(
+            v-if="eraser.type === 'circle'"
+            :cx="eraser.x"
+            :cy="eraser.y"
+            :r="eraser.r"
+            fill="black"
+          )
+          path(
+            v-else
+            :d="eraser.d"
+            stroke="black"
+            :stroke-width="eraser.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          )
+
+    //- Main drawing group with mask applied
+    g(:mask="'url(#eraserMask)'")
+      //- Render all drawing paths (non-eraser)
+      template(v-for="path in state.paths" :key="path.id")
+        circle(
+          v-if="path.type === 'circle'"
+          :cx="path.x"
+          :cy="path.y"
+          :r="path.r"
+          :fill="path.color"
+        )
+        path(
+          v-else
+          :d="path.d"
+          :stroke="path.color"
+          :stroke-width="path.width"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        )
+
 </template>
 
 <style lang="stylus">
-canvas.drawing-canvas
+svg.drawing-strokes
   position absolute
   transform-origin top left
   background transparent
@@ -430,6 +431,6 @@ canvas.drawing-canvas
   left 0
   opacity 1
   pointer-events none
-  z-index var(--max-z) // because card z
+  z-index var(--max-z)
   mix-blend-mode hard-light
 </style>
