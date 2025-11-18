@@ -11,18 +11,11 @@ export default {
     }
   },
 
-  updateRectWithPadding (rect, itemType) {
-    let padding
-    let offset = 0
-    if (itemType === 'card') {
-      padding = 12
-    } else if (itemType === 'box') {
-      padding = 2
-      offset = 1
-    }
+  updateRectWithPadding (rect) {
+    const padding = 2
     return {
-      left: rect.left + padding + offset,
-      right: rect.right - padding - offset,
+      left: rect.left + padding,
+      right: rect.right - padding,
       top: rect.top + padding,
       bottom: rect.bottom - padding,
       width: rect.width - (padding * 2)
@@ -30,10 +23,11 @@ export default {
   },
 
   getPoints (rect) {
-    // topLeft is prioritized when distances are equal
     return [
-      { name: 'topLeft', x: rect.left, y: rect.top },
-      { name: 'topRight', x: rect.right, y: rect.top }
+      { name: 'north', x: rect.left + (rect.width / 2), y: rect.top },
+      { name: 'east', x: rect.right, y: rect.top + ((rect.bottom - rect.top) / 2) },
+      { name: 'south', x: rect.left + (rect.width / 2), y: rect.bottom },
+      { name: 'west', x: rect.left, y: rect.top + ((rect.bottom - rect.top) / 2) }
     ]
   },
 
@@ -49,31 +43,51 @@ export default {
   },
 
   findClosestPoints (item1, item2) {
-    // Normalize and add padding to rectangles
     let rect1 = this.normalizeRect(item1)
-    let rect2 = this.normalizeRect(item2)
-    rect1 = this.updateRectWithPadding(rect1, item1.itemType)
-    rect2 = this.updateRectWithPadding(rect2, item2.itemType)
+    rect1 = this.updateRectWithPadding(rect1)
     const points1 = this.getPoints(rect1)
+    let rect2 = this.normalizeRect(item2)
+    rect2 = this.updateRectWithPadding(rect2)
     const points2 = this.getPoints(rect2)
-    // Find the pair of points with minimum distance
-    const minDistance = Infinity
-    let closestPair = { point1: null, point2: null }
     // handle left aligned and distributed cards
     if (this.rectsIsAligned(item1, item2)) {
-      closestPair = { point1: points1[1], point2: points2[1] }
+      const isItem1Above = item1.y < item2.y
+      const closestPair = {
+        point1: this.pointByName(points1, isItem1Above ? 'south' : 'north'),
+        point2: this.pointByName(points2, isItem1Above ? 'north' : 'south')
+      }
       return closestPair
     }
-    // or, compare the center points of both rectangles
-    // if rect1Center is left of rect2Center → rect1Center uses topRight, rect2Center uses topLeft
-    // if rect1Center is right of rect2Center → rect1Center uses topLeft, rect2Center uses topRight
+    // Determine relative positions
     const rect1Center = { x: item1.x + item1.width / 2, y: item1.y + item1.height / 2 }
     const rect2Center = { x: item2.x + item2.width / 2, y: item2.y + item2.height / 2 }
-    const rect1Name = rect1Center.x < rect2Center.x ? 'topRight' : 'topLeft'
-    const rect2Name = rect2Center.x < rect1Center.x ? 'topRight' : 'topLeft'
-    closestPair = {
-      point1: this.pointByName(points1, rect1Name),
-      point2: this.pointByName(points2, rect2Name)
+    // Calculate horizontal and vertical differences
+    const xDiff = rect2Center.x - rect1Center.x
+    const yDiff = rect2Center.y - rect1Center.y
+    let point1Name, point2Name
+    // Determine which cardinal points to use based on relative positions
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+      // Horizontal relationship is stronger
+      if (xDiff > 0) {
+        point1Name = 'east'
+        point2Name = 'west'
+      } else {
+        point1Name = 'west'
+        point2Name = 'east'
+      }
+    } else {
+      // Vertical relationship is stronger
+      if (yDiff > 0) {
+        point1Name = 'south'
+        point2Name = 'north'
+      } else {
+        point1Name = 'north'
+        point2Name = 'south'
+      }
+    }
+    const closestPair = {
+      point1: this.pointByName(points1, point1Name),
+      point2: this.pointByName(points2, point2Name)
     }
     return closestPair
   }

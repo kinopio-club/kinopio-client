@@ -125,8 +125,14 @@ export const useConnectionStore = defineStore('connections', {
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
     getshortestConnectionPathBetweenItems (startItem, endItem, controlPoint) {
-      const points = closestPoints.findClosestPoints(startItem, endItem)
-      return this.getConnectionPathBetweenCoords(points.point1, points.point2, controlPoint)
+      let { point1, point2 } = closestPoints.findClosestPoints(startItem, endItem)
+      if (startItem.itemType === 'box') {
+        point1 = utils.estimatedItemConnectorPosition(startItem)
+      }
+      if (endItem.itemType === 'box') {
+        point2 = utils.estimatedItemConnectorPosition(endItem)
+      }
+      return this.getConnectionPathBetweenCoords(point1, point2, controlPoint)
     },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
       const spaceStore = useSpaceStore()
