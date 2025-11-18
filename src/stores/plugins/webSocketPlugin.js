@@ -348,7 +348,7 @@ export default function webSocketPlugin () {
       spaceId: spaceStore.id,
       user: userStore.getUserPublicMeta
     }
-    if (message.action) {
+    if (message?.action) {
       // only send unique actions per frame
       if (sentActions.has(message.action)) { return }
       sentActions.add(message.action)
