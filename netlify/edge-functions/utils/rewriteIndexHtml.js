@@ -1,4 +1,4 @@
-import { HTMLRewriter } from '../libs/html-rewriter.ts'
+import { HTMLRewriter } from './html-rewriter.ts'
 
 const cacheExpiry = 3600 // 3600s = 1 hour
 

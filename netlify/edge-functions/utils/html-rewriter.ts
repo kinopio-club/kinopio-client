@@ -1,3 +1,5 @@
+// from https://ghuc.cc/worker-tools/html-rewriter/index.ts
+
 // FIXME: replace multiple 1 import from skypack!?
 import type {
   HTMLRewriter as BaseHTMLRewriter,
