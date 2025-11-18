@@ -122,35 +122,40 @@ const toggleCardsSettingsIsVisible = () => {
 </script>
 
 <template lang="pug">
-.row.card-collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
+.row.card-collaboration-info.title-row(v-if="visible" @click.left.stop="closeDialogs")
+  .row
+    //- comment
+    .badge.info.is-comment-badge(v-if="isComment")
+      img.icon.comment(src="@/assets/comment.svg")
+    //- date
+    .badge.status.button-badge.time-badge(v-if="shouldShowItemActions" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+      img.icon.time(src="@/assets/time.svg")
+      span.name {{dateUpdatedAt}}
+    .users(v-if="shouldShowItemActions")
+      //- created by
+      template(v-if="createdByUserIsNotEmpty")
+        UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true" :truncateNameToLength="15")
+      //- updated by
+      template(v-if="isUpdatedByDifferentUser")
+        UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true" :truncateNameToLength="15")
+      //- created through api
+      .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
+        img.icon.system(src="@/assets/system.svg")
+    .badge.info(v-if="card.counterIsVisible")
+      span {{card.counterValue || 0}}
+
   //- settings
   .button-wrap
     button.small-button.settings-button.inline-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
       img.settings.icon(src="@/assets/settings.svg")
     UserSettingsCards(:visible="state.cardsSettingsIsVisible")
-  //- comment
-  .badge.info.is-comment-badge(v-if="isComment")
-    img.icon.comment(src="@/assets/comment.svg")
-  //- date
-  .badge.status.button-badge.time-badge(v-if="shouldShowItemActions" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
-    img.icon.time(src="@/assets/time.svg")
-    span.name {{dateUpdatedAt}}
-  .users(v-if="shouldShowItemActions")
-    //- created by
-    template(v-if="createdByUserIsNotEmpty")
-      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true" :truncateNameToLength="15")
-    //- updated by
-    template(v-if="isUpdatedByDifferentUser")
-      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true" :truncateNameToLength="15")
-    //- created through api
-    .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
-      img.icon.system(src="@/assets/system.svg")
-  .badge.info(v-if="card.counterIsVisible")
-    span {{card.counterValue || 0}}
+
 </template>
 
 <style lang="stylus">
 .card-collaboration-info
+  > .row
+    margin 0
   .users
     display flex
     flex-wrap wrap
@@ -164,6 +169,5 @@ const toggleCardsSettingsIsVisible = () => {
     margin-right 5px
     cursor pointer
   .time-badge
-    display flex
-    align-items center
+    width fit-content
 </style>

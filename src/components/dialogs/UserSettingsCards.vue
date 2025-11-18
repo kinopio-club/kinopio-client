@@ -21,14 +21,16 @@ const props = defineProps({
 </script>
 
 <template lang="pug">
-dialog.narrow.cards-settings-dialog(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
+dialog.narrow.user-settings-cards-dialog(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
   //- section.title-section
   //-   p Card Settings
   UserSettingsCards(:visible="props.visible")
 </template>
 
 <style lang="stylus">
-.cards-settings-dialog
+.user-settings-cards-dialog
+  left initial
+  right 8px
   &.narrow
     width 200px
   // .title-section
