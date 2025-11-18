@@ -399,7 +399,7 @@ export const useGlobalStore = defineStore('global', {
     updateSpaceBorderRadiusStyles (styles) {
       const isZoomed = this.spaceZoomPercent !== 100
       const isMobile = consts.isSecureAppContext || utils.isMobile()
-      const radius = parseInt(utils.cssVariable('entity-radius'))
+      const radius = parseInt(utils.cssVariable('entity-radius')) * 3
       if (isZoomed) {
         styles.borderRadius = `${radius}px`
       }

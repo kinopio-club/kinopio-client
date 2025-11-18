@@ -1,6 +1,7 @@
 [
   {
     "url": "https://bk.kinopio.club/blank.png",
+    "darkUrl": "https://bk.kinopio.club/blank-dark.png",
     "previewUrl": "https://bk.kinopio.club/blank-preview-2.svg",
     "thumbnailUrl": "https://bk.kinopio.club/blank-thumbnail-5.svg",
     "isArchived": true,
