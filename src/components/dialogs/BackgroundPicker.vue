@@ -238,9 +238,6 @@ const currentBackgroundUrl = computed(() => {
 const backgroundImages = computed(() => {
   let images = backgroundImagesJSON
   images = images.filter(image => !image.isArchived)
-  if (!consts.isDevelopment()) {
-    images = images.filter(image => !image.isDebug)
-  }
   return images
 })
 const updateCommunityBackgroundImages = async () => {
@@ -259,6 +256,14 @@ const updateCommunityBackgroundImages = async () => {
   })
   state.communityBackgroundImages = images
   state.communityBackgroundsIsLoading = false
+}
+const previewUrl = (image) => {
+  const isThemeDark = userStore.theme === 'dark'
+  let url = image.previewUrl
+  if (isThemeDark) {
+    url = image.darkPreviewUrl || image.previewUrl
+  }
+  return url
 }
 
 // update background
@@ -632,7 +637,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         ul.results-list.image-list
           template(v-for="image in state.images" :key="image.id")
             li(@click.left="updateBackground(image.url)" tabindex="0" v-on:keydown.enter="updateBackground(image.url)" :class="{ active: isCurrentBackground(image)}")
-              img(:src="image.previewUrl")
+              img(:src="previewUrl(image)")
 </template>
 
 <style lang="stylus">
