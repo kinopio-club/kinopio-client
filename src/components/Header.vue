@@ -39,7 +39,6 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUsersHeader from '@/components/SpaceUsersHeader.vue'
 import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
-import CommentButton from '@/components/CommentButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
@@ -595,8 +594,14 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
-    .right
-      SpaceUsers(:userDetailsIsInline="true")
+      .label-badge-row.row
+        .label-badge
+          span(:class="{'invisible': state.readOnlyJiggle}")
+            span Read Only
+          span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+            span Read Only
+    //- .right
+    //-   SpaceUsers(:userDetailsIsInline="true")
 
   //- standard
   nav(v-if="!isEmbedMode")
@@ -756,20 +761,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
             img.icon.sidebar(src="@/assets/sidebar.svg")
           Sidebar(:visible="state.sidebarIsVisible")
-
-    //- 3rd row
-    //- .row
-    //-   .left
-    //-   .right
-        //- Donate
-        //- .button-wrap
-        //-   .segmented-buttons
-        //-     button Donate
-        //-     button
-        //-       img.icon.cancel(src="@/assets/add.svg")
-
-        //- comments
-        //- CommentButton
 
   Toolbar(:visible="toolbarIsVisible")
   SelectAllBelow

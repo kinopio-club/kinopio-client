@@ -114,9 +114,9 @@ export const useUserStore = defineStore('users', {
       return Boolean(this.apiKey)
     },
     getUserCardsCreatedIsOverLimit () {
-      const cardsCreatedLimit = consts.cardsCreatedLimit
+      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
       if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount >= cardsCreatedLimit) { return true }
+      if (this.cardsCreatedCount >= freeCardsCreatedLimit) { return true }
     },
     getShouldPreventCardsCreatedCountUpdate () {
       const spaceStore = useSpaceStore()
@@ -174,7 +174,9 @@ export const useUserStore = defineStore('users', {
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     getUserCanEditSpace () {
+      const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
+      if (globalStore.isEmbedMode) { return }
       const spaceIsOpen = spaceStore.privacy === 'open'
       const currentUserIsSignedIn = this.getUserIsSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
@@ -263,8 +265,8 @@ export const useUserStore = defineStore('users', {
       const globalStore = useGlobalStore()
       return globalStore.spaceReadOnlyKey.spaceId === space.id
     },
-    getItemIsCreatedByUser (connection) {
-      return this.id === connection.userId
+    getItemIsCreatedByUser (item) {
+      return this.id === item.userId
     },
     getUserIsSpaceUserByUser (user) {
       const spaceStore = useSpaceStore()
@@ -365,8 +367,8 @@ export const useUserStore = defineStore('users', {
         console.info('🌸 Initialize user from cache', cachedUser.id)
         this.updateUserState(cachedUser)
         themeStore.restoreTheme()
-        await this.restoreRemoteUser(cachedUser)
-        await this.restoreUserAssociatedData()
+        this.restoreRemoteUser()
+        this.restoreUserAssociatedData()
       } else {
         this.createNewUser()
         themeStore.restoreTheme()
@@ -378,7 +380,7 @@ export const useUserStore = defineStore('users', {
 
     // update
 
-    async updateUserState (update) {
+    updateUserState (update) {
       const keys = Object.keys(update)
       for (const key of keys) {
         this[key] = update[key]
@@ -465,14 +467,16 @@ export const useUserStore = defineStore('users', {
 
     async addToDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts.push(value)
+      const disabled = utils.clone(this.disabledKeyboardShortcuts)
       await cache.updateUser({
-        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+        disabledKeyboardShortcuts: disabled
       })
     },
     async removeFromDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts = this.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
+      const disabled = utils.clone(this.disabledKeyboardShortcuts)
       await cache.updateUser({
-        disabledKeyboardShortcuts: this.disabledKeyboardShortcuts
+        disabledKeyboardShortcuts: disabled
       })
     },
 
@@ -510,7 +514,7 @@ export const useUserStore = defineStore('users', {
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount + count >= consts.cardsCreatedLimit) { return true }
+      if (this.cardsCreatedCount + count >= consts.freeCardsCreatedLimit) { return true }
     },
 
     // inbox
@@ -550,15 +554,13 @@ export const useUserStore = defineStore('users', {
 
     cycleDrawingBrushSize () {
       const prevValue = this.drawingBrushSize
+      const sizes = Object.keys(consts.drawingBrushSizeDiameter)
+      const currentIndex = sizes.indexOf(prevValue)
       let value
-      if (prevValue === 's') {
-        value = 'm'
-      }
-      if (prevValue === 'm') {
-        value = 'l'
-      }
-      if (prevValue === 'l') {
-        value = 's'
+      if (currentIndex === -1 || currentIndex === sizes.length - 1) {
+        value = sizes[0]
+      } else {
+        value = sizes[currentIndex + 1]
       }
       this.drawingBrushSize = value
     },

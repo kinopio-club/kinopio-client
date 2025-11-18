@@ -113,9 +113,9 @@ const privacyState = computed(() => {
   })
 })
 const cardsCreatedCountFromLimit = computed(() => {
-  const cardsCreatedLimit = consts.cardsCreatedLimit
+  const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
   const cardsCreatedCount = userStore.cardsCreatedCount
-  return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
+  return Math.max(freeCardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
   if (globalStore.isLoadingSpace) { return }
@@ -180,6 +180,11 @@ const notifyServerCouldNotSave = computed(() => {
   if (isOffline) { return }
   return globalStore.notifyServerCouldNotSave
 })
+const hideNotifyServerCouldNotSave = () => {
+  globalStore.notifyServerCouldNotSave = false
+  state.notifiyCouldNotSave = false
+}
+const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
@@ -481,6 +486,9 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
+      .button-wrap
+        button(@click="hideNotifyServerCouldNotSave")
+          img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server
@@ -489,6 +497,20 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
+      .button-wrap
+        button(@click="hideNotifyServerCouldNotSave")
+          img.icon.cancel(src="@/assets/add.svg")
+
+  .item.danger(v-if="notifyServerUnresponsive")
+    .row
+      p
+        img.icon.offline(src="@/assets/offline.svg")
+        span The server is unresponsive, but you can use Kinopio offline until it's back up.
+    .row
+      .button-wrap
+        a(href="mailto:support@kinopio.club?subject=Server Unresponsive")
+          button
+            span Email Support
 
   .persistent-item.danger(v-if="state.notifySpaceOutOfSync")
     p Space is out of sync, please refresh

@@ -21,8 +21,8 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
-import CardDetailsMeta from '@/components/CardDetailsMeta.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
+import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import ShareItem from '@/components/dialogs/ShareItem.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
@@ -87,8 +87,21 @@ onMounted(() => {
       }
     }
   )
+  const cardActionUnsubscribe = cardStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'updateCardsState' && visible.value) {
+        const updates = args[0]
+        const isCurrentCard = updates.some(update => {
+          const isId = update.id === card.value.id
+          return update.name && isId
+        })
+        textareaSizes()
+      }
+    }
+  )
   unsubscribes = () => {
     globalActionUnsubscribe()
+    cardActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -135,7 +148,7 @@ const state = reactive({
   previousSelectedTag: {},
   currentSearchTag: {},
   newTagColor: '',
-  shareCardIsVisible: false
+  shareItemIsVisible: false
 })
 
 const cardId = computed(() => globalStore.cardDetailsIsVisibleForCardId)
@@ -143,6 +156,7 @@ const card = computed(() => {
   return cardStore.getCard(cardId.value) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     globalStore.preventMultipleSelectedActionsIsVisible = false
@@ -165,7 +179,7 @@ const closeDialogs = (shouldSkipGlobalDialogs) => {
   globalStore.triggerCloseChildDialogs()
   state.imagePickerIsVisible = false
   state.cardTipsIsVisible = false
-  state.shareCardIsVisible = false
+  state.shareItemIsVisible = false
   hidePickers()
   if (shouldSkipGlobalDialogs === true) { return }
   hideTagDetailsIsVisible()
@@ -358,10 +372,10 @@ const toggleShouldShowItemActions = async () => {
   await nextTick()
   scrollIntoView()
 }
-const toggleShareCardIsVisible = (event) => {
-  const isVisible = state.shareCardIsVisible
+const toggleShareItemIsVisible = (event) => {
+  const isVisible = state.shareItemIsVisible
   closeDialogs()
-  state.shareCardIsVisible = !isVisible
+  state.shareItemIsVisible = !isVisible
   copyCardUrl(event)
 }
 const scrollIntoView = async (behavior) => {
@@ -427,7 +441,7 @@ const cardUrl = () => {
   return url
 }
 const copyCardUrl = async (event) => {
-  if (!state.shareCardIsVisible) { return }
+  if (!state.shareItemIsVisible) { return }
   const canShare = spaceStore.getSpaceIsRemote
   if (!canShare) { return }
   globalStore.clearNotificationsWithPosition()
@@ -450,11 +464,8 @@ const textareaSizes = async () => {
   await nextTick()
   const element = nameElement.value
   if (!element) { return }
-  let modifier = 0
-  if (canEditCard.value) {
-    modifier = 1
-  }
-  element.style.height = element.scrollHeight + modifier + 'px'
+  element.style.height = 'auto'
+  element.style.height = element.scrollHeight + 2 + 'px' // +2 for chromium scrollbar fix
 }
 const resetTextareaHeight = () => {
   if (!visible.value) { return }
@@ -495,7 +506,6 @@ const name = computed({
       state.pastedName = ''
     }
     updateNameSplitIntoCardsCount()
-    textareaSizes()
   }
 })
 const updateCardName = async (newName) => {
@@ -737,7 +747,7 @@ const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
   for (const tagName of addTagsNames) {
-    const tag = globalStore.newTag({
+    const tag = globalStore.getNewTag({
       name: tagName,
       defaultColor: state.newTagColor || userStore.color,
       cardId: card.value.id,
@@ -935,10 +945,10 @@ const otherCardIsVisible = computed(() => {
   return isCardLink && hasUrls.value
 })
 const otherCard = computed(() => {
-  const item = globalStore.otherCardById(card.value.linkToCardId)
+  const item = globalStore.getOtherCardById(card.value.linkToCardId)
   return item
 })
-const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
+const otherCardUrl = computed(() => utils.urlFromSpaceAndItem({ itemId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
 
 // other space
 
@@ -1471,17 +1481,17 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
-      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareCardIsVisible" )
-        button(:class="{active: state.shareCardIsVisible}")
+      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
+        button(:class="{active: state.shareItemIsVisible}")
           span Share
-        ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
+        ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
-    CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
-    .row(v-if="nameMetaRowIsVisible")
+    .row(v-if="nameMetaRowIsVisible && canEditCard")
       //- Split by Line Breaks
-      .button-wrap(v-if="state.nameSplitIntoCardsCount && canEditCard")
+      .button-wrap(v-if="state.nameSplitIntoCardsCount")
         button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split.svg")
           span Split Card
@@ -1525,7 +1535,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
     //- Read Only
     template(v-if="!canEditCard")
-      CardDetailsMeta(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
       .row.edit-message
         template(v-if="spacePrivacyIsOpen")
           span.badge.info
@@ -1567,12 +1577,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
-        span To upload files over 5mb,
+        span To upload files over {{freeUploadSizeLimit}}mb,
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'width', 'height']")
+    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'backgroundColor']")
 </template>
 
 <style lang="stylus">

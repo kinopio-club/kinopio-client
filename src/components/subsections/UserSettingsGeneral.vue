@@ -12,6 +12,7 @@ import UserDeveloperInfo from '@/components/dialogs/UserDeveloperInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import User from '@/components/User.vue'
@@ -47,6 +48,7 @@ const props = defineProps({
 const isSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isUpgraded = computed(() => userStore.isUpgraded)
 const currentUser = computed(() => userStore.getUserAllState)
+const isModerator = computed(() => userStore.isModerator)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const state = reactive({
@@ -54,6 +56,7 @@ const state = reactive({
   userAccountSettingsIsVisible: false,
   deleteAllConfirmationVisible: false,
   userDeveloperInfoIsVisible: false,
+  moderatorActionsSettingsIsVisible: false,
   loading: {
     deleteUserPermanent: false
   },
@@ -69,6 +72,7 @@ const closeDialogs = () => {
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
   state.userDeveloperInfoIsVisible = false
+  state.moderatorActionsSettingsIsVisible = false
 }
 
 // child dialog state
@@ -108,6 +112,12 @@ const toggleUserDeveloperInfoIsVisible = () => {
   closeDialogs()
   closeConfirmations()
   state.userDeveloperInfoIsVisible = !isVisible
+}
+const toggleModeratorActionsSettingsIsVisible = () => {
+  const isVisible = state.moderatorActionsSettingsIsVisible
+  closeDialogs()
+  closeConfirmations()
+  state.moderatorActionsSettingsIsVisible = !isVisible
 }
 
 // delete user
@@ -163,7 +173,11 @@ const deleteUserPermanent = async () => {
           img.icon.key(src="@/assets/key.svg")
           span Developer
         UserDeveloperInfo(:visible="state.userDeveloperInfoIsVisible")
-
+      //- Moderator Actions
+      .button-wrap(v-if="isModerator")
+        button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
+          span Moderator
+        ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
   //- Delete Account
   section.delete-account
     .row

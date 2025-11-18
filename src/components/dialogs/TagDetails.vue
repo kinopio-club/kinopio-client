@@ -264,7 +264,7 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
 const removeTag = () => {
-  spaceStore.removeTags(currentTag.value)
+  spaceStore.removeTagsByName(currentTag.value)
 }
 
 // cards list
@@ -447,7 +447,7 @@ const changeSpace = (spaceId) => {
 </script>
 
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogElement" @click.left.stop="closeDialogs")
+dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogElement" @click.left.stop="closeDialogs" :data-id="currentTag.id")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails")
       span Edit Card

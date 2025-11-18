@@ -231,19 +231,35 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 const updateDefaultBackgroundColor = (color) => {
   state.defaultBackgroundColor = color
 }
-const currentBackgroundColor = computed(() => {
-  return selectedColor.value || remoteSelectedColor.value || props.card.backgroundColor
+const cardBackgroundColor = computed(() => {
+  let color = props.card.backgroundColor
+  if (color) {
+    const hexColor = colord(color).toHex()
+    let defaultOtherThemeColor = '#262626'
+    if (isThemeDark.value) {
+      defaultOtherThemeColor = '#e3e3e3'
+    }
+    const colorIsDefault = hexColor === defaultOtherThemeColor
+    if (colorIsDefault) {
+      color = state.defaultBackgroundColor
+    }
+  }
+  return color
 })
+const currentBackgroundColor = computed(() => {
+  return selectedColor.value || remoteSelectedColor.value || cardBackgroundColor.value
+})
+
 const backgroundColor = computed(() => {
   let nameColor
   if (nameIsColor.value) {
     nameColor = props.card.name.trim()
   }
-  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
+  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || cardBackgroundColor.value
   return color
 })
 const backgroundColorIsDark = computed(() => {
-  const color = props.card.backgroundColor || state.defaultBackgroundColor
+  const color = cardBackgroundColor.value || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 const nameIsColor = computed(() => {
@@ -251,7 +267,7 @@ const nameIsColor = computed(() => {
   return colord(name).isValid()
 })
 const currentBackgroundColorIsDark = computed(() => {
-  const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
+  const color = backgroundColor.value || cardBackgroundColor.value || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 
@@ -333,9 +349,9 @@ const groupInviteUrl = computed(() => {
 
 // other card
 
-const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
+const otherCardUrl = computed(() => utils.urlFromSpaceAndItem({ itemId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
 const otherCard = computed(() => {
-  const card = globalStore.otherCardById(props.card.linkToCardId)
+  const card = globalStore.getOtherCardById(props.card.linkToCardId)
   return card
 })
 const otherCardIsVisible = computed(() => {
@@ -423,7 +439,7 @@ const cardWrapStyle = computed(() => {
 })
 const cardStyle = computed(() => {
   let nameColor
-  const backgroundColor = props.card.backgroundColor
+  const backgroundColor = cardBackgroundColor.value
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
@@ -437,6 +453,9 @@ const cardStyle = computed(() => {
   }
   if (props.card.tilt) {
     styles.transform = `rotate(${props.card.tilt}deg)`
+  }
+  if (isImageCard.value) {
+    styles.background = 'transparent'
   }
   if (isImageCard.value && isSelectedOrDragging.value) {
     color = safeColor(color)
@@ -460,11 +479,17 @@ const cardContentWrapStyles = computed(() => {
   return updateStylesWithWidth(styles)
 })
 const addSizeClasses = (classes) => {
-  const m = 100
-  const l = 150
-  classes['s-width'] = width.value < m
-  classes['m-width'] = utils.isBetween({ value: width.value, min: m, max: l })
-  classes['l-width'] = width.value > l
+  const height = props.card.height
+  const sizes = {
+    m: 100,
+    l: 150
+  }
+  classes['s-width'] = width.value < sizes.m
+  classes['m-width'] = utils.isBetween({ value: width.value, min: sizes.m, max: sizes.l })
+  classes['l-width'] = width.value > sizes.l
+  classes['s-height'] = height < sizes.m
+  classes['m-height'] = utils.isBetween({ value: height, min: sizes.m, max: sizes.l })
+  classes['l-height'] = height > sizes.l
   return classes
 }
 const cardWrapClasses = computed(() => {
@@ -635,11 +660,11 @@ const currentUserIsHoveringOverUrlButton = computed(() => {
   return globalStore.currentUserIsHoveringOverUrlButtonCardId === props.card.id
 })
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
+  const isMember = userStore.getUserIsSpaceMember
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (spaceIsOpen || canEditCard.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditCard.value || connectedConnectionTypes.value.length) {
     isVisible = true
   }
   return isVisible
@@ -944,7 +969,7 @@ const nameSegments = computed(() => {
     } else if (segment.isLink) {
       const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
       segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
-      segment.otherCard = globalStore.otherCardById(cardId)
+      segment.otherCard = globalStore.getOtherCardById(cardId)
     // text
     } else if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)
@@ -1197,9 +1222,12 @@ const startDraggingCard = (event) => {
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPanningReady) { return }
-  if (!canEditCard.value) { return }
   if (utils.isMultiTouch(event)) {
     isMultiTouch = true
+    return
+  }
+  if (!canEditCard.value) {
+    cardStore.incrementCardZ(props.card.id)
     return
   }
   event.preventDefault()
@@ -1503,6 +1531,8 @@ const isFilteredByBox = computed(() => {
   return isInBox
 })
 const isFiltered = computed(() => {
+  if (isSelectedOrDragging.value) { return }
+  if (currentCardIsBeingDragged.value) { return }
   if (!filtersIsActive.value) { return }
   const isInFilter = isFilteredByTags.value || isFilteredByConnectionType.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
   return !isInFilter
@@ -1917,6 +1947,9 @@ const focusColor = computed(() => {
     return null
   }
 })
+const clearFocus = () => {
+  globalStore.focusOnCardId = ''
+}
 </script>
 
 <template lang="pug">
@@ -1941,7 +1974,7 @@ const focusColor = computed(() => {
   ref="cardElement"
   :class="cardWrapClasses"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
@@ -2160,7 +2193,7 @@ const focusColor = computed(() => {
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
-    transform-origin top right
+    transform-origin: calc(100% - 16px) calc(0% + 16px)
     .name
       color var(--primary-on-light-background)
     &:hover,

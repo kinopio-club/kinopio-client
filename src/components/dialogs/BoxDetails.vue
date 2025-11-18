@@ -305,7 +305,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
-        button.danger(@click.left="removeBox")
+        button.danger(@click.left="removeBox" title="Remove Box")
           img.icon(src="@/assets/remove.svg")
       //- [·]
       ItemDetailsCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")
@@ -326,7 +326,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 </template>
 
 <style lang="stylus">
-.box-details
+dialog.box-details
   transform-origin top left
   textarea.name
     margin-left 6px
@@ -336,8 +336,10 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
     border-color var(--primary-border)
     &.is-dark
       color var(--primary-on-dark-background)
+      border-color var(--primary-border-on-dark-background)
     &.is-light
       color var(--primary-on-light-background)
+      border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
   .filter-button-wrap

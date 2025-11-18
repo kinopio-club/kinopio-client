@@ -12,10 +12,12 @@ export default {
   defaultCardWidth: 58,
   defaultCardHeight: 70,
   minItemXY: 70,
+  minLineY: 150,
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
-  minCardIframeWidth: 260,
-  cardsCreatedLimit: 100,
+  minCardIframeWidth: 310,
+  freeCardsCreatedLimit: 100,
+  freeUploadSizeLimit: 5, // 5mb
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },
@@ -23,11 +25,11 @@ export default {
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,
-  boxSnapGuideWaitingDuration: 200,
+  boxSnapGuideWaitingDuration: 100,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   straightLineConnectionPathControlPoint: 'q00,00',
-  defaultTimeout: 40000,
+  requestTimeout: 40000, // 40s
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
@@ -41,6 +43,8 @@ export default {
   itemTypesWithPositions: ['boxes', 'cards'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   itemDetailsDebugIsVisible: true,
+  isStaticPrerenderingPage: env.SSR,
+  lineInfoOffset: 11,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
@@ -69,6 +73,13 @@ export default {
     }
     return host
   },
+  helperServerHost () {
+    let host = 'https://helper.kinopio.club'
+    if (this.isDevelopment()) {
+      host = 'https://kinopio.local:8082'
+    }
+    return host
+  },
   userPrefersReducedMotion () {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     if (query.matches) {
@@ -78,9 +89,10 @@ export default {
     }
   },
   drawingBrushSizeDiameter: {
-    l: 40,
+    xs: 3,
+    s: 10,
     m: 20,
-    s: 10
+    l: 40
   },
 
   // about
@@ -102,30 +114,94 @@ export default {
 
   // price
 
+  prices: {
+    standard: {
+      mo: {
+        price: 8,
+        priceId: 'price_1S2cymDFIr5ywhwoxYQpjwwx',
+        devPriceId: 'price_1S2YjKDFIr5ywhwo9bTroXjb'
+      },
+      yr: {
+        price: 80,
+        priceId: 'price_1S2czcDFIr5ywhwoCiJ3UJFl',
+        devPriceId: 'price_1S2YkjDFIr5ywhworJlITrlm'
+      },
+      life: {
+        price: 250,
+        priceId: 'price_1S2dCuDFIr5ywhwouB7Mpatd',
+        devPriceId: 'price_1S2dahDFIr5ywhwoasGBlzaH'
+      }
+    },
+    education: {
+      mo: {
+        price: 4,
+        priceId: 'price_1S2d01DFIr5ywhwom6FcmrBE',
+        devPriceId: 'price_1S2dWBDFIr5ywhwowrCrnKpt'
+      },
+      yr: {
+        price: 40,
+        priceId: 'price_1S2d0XDFIr5ywhwoDHendW1U',
+        devPriceId: 'price_1S2dWKDFIr5ywhwoioe6WQAo'
+      }
+    },
+    apple: {
+      mo: {
+        price: 9,
+        priceId: 'apple_monthly_2025'
+      },
+      yr: {
+        price: 90,
+        priceId: 'apple_yearly_2025'
+      }
+    }
+  },
   price (period, isStudentDiscount) {
     if (period === 'month') {
-      return this.monthlyPrice()
+      return this.monthlyPrice(isStudentDiscount)
     } else if (period === 'year') {
       return this.yearlyPrice(isStudentDiscount)
     } else if (period === 'life') {
-      return this.lifePrice()
+      return this.lifetimePrice()
     }
   },
-  monthlyPrice () {
+  // mo
+  monthlyPrice (isStudentDiscount) {
+    if (isStudentDiscount) {
+      return this.monthlyStudentPrice()
+    } else {
+      return this.monthlyStandardPrice()
+    }
+  },
+  monthlyStudentPrice () {
+    if (this.isSecureAppContextIOS) {
+      return this.monthlyStandardPrice()
+    }
     const price = {
-      amount: 6,
-      period: 'month',
-      stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
-      applePriceId: 'apple_monthly_2023'
+      amount: this.prices.education.mo.price,
+      period: 'year',
+      stripePriceId: this.prices.education.mo.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
-    }
-    if (this.isSecureAppContextIOS) {
-      price.amount = 7
+      price.stripePriceId = this.prices.education.mo.devPriceId
     }
     return price
   },
+  monthlyStandardPrice () {
+    const price = {
+      amount: this.prices.standard.mo.price,
+      period: 'month',
+      stripePriceId: this.prices.standard.mo.priceId,
+      applePriceId: this.prices.apple.mo.priceId
+    }
+    if (this.isDevelopment()) {
+      price.stripePriceId = this.prices.standard.mo.devPriceId
+    }
+    if (this.isSecureAppContextIOS) {
+      price.amount = this.prices.apple.mo.price
+    }
+    return price
+  },
+  // yr
   yearlyPrice (isStudentDiscount) {
     if (isStudentDiscount) {
       return this.yearlyStudentPrice()
@@ -135,16 +211,16 @@ export default {
   },
   yearlyStandardPrice () {
     const price = {
-      amount: 60,
+      amount: this.prices.standard.yr.price,
       period: 'year',
-      stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
-      applePriceId: 'apple_yearly_2023'
+      stripePriceId: this.prices.standard.yr.priceId,
+      applePriceId: this.prices.apple.yr.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
+      price.stripePriceId = this.prices.standard.yr.devPriceId
     }
     if (this.isSecureAppContextIOS) {
-      price.amount = 70
+      price.amount = this.prices.apple.yr.price
     }
     return price
   },
@@ -153,23 +229,23 @@ export default {
       return this.yearlyStandardPrice()
     }
     const price = {
-      amount: 30,
+      amount: this.prices.education.yr.price,
       period: 'year',
-      stripePriceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP'
+      stripePriceId: this.prices.education.yr.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1Nie0DDFIr5ywhwoesLtHpVu'
+      price.stripePriceId = this.prices.education.yr.devPriceId
     }
     return price
   },
-  lifePrice () {
+  lifetimePrice () {
     const price = {
-      amount: 200,
+      amount: this.prices.standard.life.price,
       period: 'life',
-      stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'
+      stripePriceId: this.prices.standard.life.priceId
     }
     if (this.isDevelopment()) {
-      price.stripePriceId = 'price_1O6k10DFIr5ywhwoXF87uKcl'
+      price.stripePriceId = this.prices.standard.life.devPriceId
     }
     return price
   }

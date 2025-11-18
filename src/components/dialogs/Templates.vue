@@ -95,7 +95,7 @@ dialog.templates.narrow(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
-  section
+  section.title-section
     p Templates
   section.results-section.results-section-border-top(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(

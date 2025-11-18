@@ -59,6 +59,10 @@ const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 const updateInboxCardsLocal = async () => {
   const inboxSpace = await cache.getInboxSpace()
   if (inboxSpace) {
+    inboxSpace.cards = inboxSpace.cards.map(card => {
+      delete card.user
+      return card
+    })
     state.cards = inboxSpace.cards
     sortCards()
   }
@@ -88,19 +92,17 @@ const restoreInboxCards = async () => {
 
 const removeFromCardList = (removedCard) => {
   state.cards = state.cards.filter(card => card.id !== removedCard.id)
-  // update cache
   cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
 const removeCardFromInbox = async (card) => {
   card = utils.clone(card)
   delete card.user
-  removeFromCardList(card)
   await apiStore.addToQueue({ name: 'removeCard', body: card, spaceId: card.spaceId })
 }
-const removeCard = (card) => {
-  if (card.isLoading) { return }
+const removeCard = async (card) => {
   updateCardIsLoading(card)
   removeCardFromInbox(card)
+  removeFromCardList(card)
 }
 
 // update card
@@ -120,7 +122,8 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  const scroll = globalStore.getWindowScrollWithSpaceOffset
+  const scroll = globalStore.getWindowScrollWithSpaceOffset()
+  delete card.user
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = spaceStore.id
@@ -128,10 +131,9 @@ const selectCard = async (card) => {
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  delete newCard.user
   cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
   globalStore.updateFocusOnCardId(newCard.id)
-  removeCardFromInbox(card)
+  removeCard(card)
 }
 const addCard = (card) => {
   state.cards.unshift(card)

@@ -204,7 +204,7 @@ const updateAddToExplore = async (space) => {
 
 <template lang="pug">
 dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight -50 + 'px'}")
-  section
+  section.title-section
     .row.title-row
       div
         span Notifications
@@ -340,6 +340,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     margin-right 3px
   .space-name-wrap
     display inline
+    white-space normal
   .new-unread-badge
     position absolute
     top 0

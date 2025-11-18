@@ -45,7 +45,7 @@ const copyUrl = async (event, url) => {
 
 <template lang="pug">
 dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
-  section
+  section.title-section
     p RSS Feeds
   section
     .row

@@ -71,9 +71,11 @@ const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const spaceFrames = computed(() => {
   const cards = cardStore.getAllCards
-  let framesInUse = cards.map(card => card.frameId)
-  framesInUse = uniq(framesInUse.filter(frame => frame))
-  return framesInUse.map(frame => frames[frame])
+  let framesIdsInUse = cards.map(card => card.frameId)
+  framesIdsInUse = uniq(framesIdsInUse.filter(frame => frame))
+  return framesIdsInUse.map(frameId => {
+    return frames.find(frame => frame.id === frameId)
+  })
 })
 const tags = computed(() => spaceStore.getSpaceTags)
 const boxes = computed(() => boxStore.getAllBoxes)

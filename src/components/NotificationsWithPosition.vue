@@ -60,6 +60,7 @@ aside.notifications-with-position
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+    width max-content
   .checkmark
     vertical-align 2px
 </style>

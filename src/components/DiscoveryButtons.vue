@@ -11,6 +11,7 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -23,8 +24,10 @@ const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
   // update spaces
-  window.addEventListener('online', updateLiveSpaces)
-  window.addEventListener('online', updateSpaces)
+  if (!consts.isStaticPrerenderingPage) {
+    window.addEventListener('online', updateLiveSpaces)
+    window.addEventListener('online', updateSpaces)
+  }
   updateLiveSpaces()
   updateSpaces()
   updateLiveSpacesIntervalTimer = setInterval(() => {
@@ -50,8 +53,10 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('online', updateLiveSpaces)
-  window.removeEventListener('online', updateSpaces)
+  if (!consts.isStaticPrerenderingPage) {
+    window.removeEventListener('online', updateLiveSpaces)
+    window.removeEventListener('online', updateSpaces)
+  }
   clearInterval(updateLiveSpacesIntervalTimer)
   clearInterval(updateSpacesIntervalTimer)
   unsubscribes()
@@ -214,7 +219,7 @@ const liveSpacesCount = computed(() => {
     //- Explore
     .button-wrap
       button.small-button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible" title="Explore Spaces")
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        img.icon.sunglasses(src="@/assets/sunglasses.svg" alt="explore icon")
         span(v-if="state.unreadSpacesCount") {{state.unreadSpacesCount}}
       Explore(
         :visible="state.exploreIsVisible"
@@ -230,10 +235,32 @@ const liveSpacesCount = computed(() => {
     //- Live
     .button-wrap
       button.small-button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Live Spaces")
-        img.icon.camera(src="@/assets/camera.svg")
+        img.icon.camera(src="@/assets/camera.svg" alt="live icon")
         span(v-if="liveSpacesCount") {{ liveSpacesCount }}
       Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
 </template>
 
 <style lang="stylus">
+.discovery-buttons
+  .space-functions-row
+    > .segmented-buttons,
+    &.segmented-buttons
+      display inline-block
+      > .button-wrap
+        > button
+          border-radius 0
+          border-right 0
+          .loader
+            margin 0
+        &:first-child
+          > button
+            border-top-left-radius var(--entity-radius)
+            border-bottom-left-radius var(--entity-radius)
+            border-right 0
+        &:last-child
+          > button
+            border-top-right-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
+            border-right 1px solid var(--primary-border)
+
 </style>

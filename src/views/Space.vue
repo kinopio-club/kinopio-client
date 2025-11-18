@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -18,6 +19,7 @@ import { useChangelogStore } from '@/stores/useChangelogStore'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
+import LineDetails from '@/components/dialogs/LineDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -26,14 +28,14 @@ import NotificationsWithPosition from '@/components/NotificationsWithPosition.vu
 import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
+import Lines from '@/components/Lines.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
-import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
-import DrawingCanvasBackground from '@/components/layers/DrawingCanvasBackground.vue'
+import DrawingStrokes from '@/components/layers/DrawingStrokes.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
@@ -63,6 +65,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -71,11 +74,13 @@ const analyticsStore = useAnalyticsStore()
 const broadcastStore = useBroadcastStore()
 const historyStore = useHistoryStore()
 const changelogStore = useChangelogStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
-let prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
+let statusRetryCount = 0
 
 // expose pinia stores to browser console for developers
 window.globalStore = useGlobalStore()
@@ -108,6 +113,19 @@ const init = async () => {
 }
 
 onMounted(async () => {
+  console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
+  console.info('🐸 kinopio-server URL', consts.apiHost())
+  globalStore.spaceComponentIsMounted = true
+  if (utils.isLinux()) {
+    utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
+  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
+  updateIsOnline()
+  window.addEventListener('online', updateIsOnline)
+  window.addEventListener('offline', updateIsOnline)
+
+  // Space initialization
   setTimeout(() => { // move async init out of vue rendering cycle, to fix race condition
     init()
   }, 0)
@@ -153,14 +171,29 @@ onMounted(async () => {
         const event = args[0]
         addBox(event)
       }
+      if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
+    }
+  )
+  const broadcastActionUnsubscribe = broadcastStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'joinSpaceRoom') {
+        updateMetaRSSFeed()
+      }
     }
   )
   unsubscribes = () => {
+    broadcastActionUnsubscribe()
     globalActionUnsubscribe()
   }
 })
 
 onBeforeUnmount(() => {
+  // App cleanup
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', updateSystemTheme)
+  window.removeEventListener('online', updateIsOnline)
+  window.removeEventListener('offline', updateIsOnline)
+  // Space cleanup
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
@@ -194,6 +227,7 @@ const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
+const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -210,7 +244,9 @@ watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
 watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
-
+watch(() => globalStore.currentUserIsDraggingLine, (value, prevValue) => {
+  updatePageSizes(value)
+})
 const updatePageSizes = async (value) => {
   if (!value) {
     await nextTick()
@@ -224,14 +260,41 @@ const updateViewportSizes = () => {
 // user
 
 const currentUser = computed(() => userStore.getUserAllState)
+const currentUserId = computed(() => userStore.id)
 const users = computed(() => {
   let users = spaceStore.getSpaceAllUsers
   users = utils.excludeCurrentUser(users, userStore.id)
   return users
 })
 
-// styles
+const spaceName = computed(() => spaceStore.name)
+const isSpacePage = computed(() => globalStore.isSpacePage)
 
+// styles and position
+
+const appPageWidth = computed(() => {
+  if (!isSpacePage.value) { return }
+  const size = Math.max(globalStore.pageWidth, globalStore.viewportWidth)
+  return size + 'px'
+})
+const appPageHeight = computed(() => {
+  if (!isSpacePage.value) { return }
+  const size = Math.max(globalStore.pageHeight, globalStore.viewportHeight)
+  return size + 'px'
+})
+const pageCursor = computed(() => {
+  const isPanning = globalStore.currentUserIsPanning
+  const isPanningReady = globalStore.currentUserIsPanningReady
+  const toolbarIsBox = globalStore.getToolbarIsBox
+  if (isPanning) {
+    return 'grabbing'
+  } else if (isPanningReady) {
+    return 'grab'
+  } else if (toolbarIsBox) {
+    return 'crosshair'
+  }
+  return undefined
+})
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
@@ -254,6 +317,7 @@ const loadSpaceOnBackOrForward = (event) => {
   spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
+  broadcastStore.leaveSpaceRoom()
   broadcastStore.close()
   spaceStore.removeEmptyCards()
   globalStore.triggerUnloadPage()
@@ -308,7 +372,10 @@ const tiltCards = (event) => {
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
-  if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
+  const isMovementX = Math.abs(endCursor.x - prevCursor.x) > Math.abs(endCursor.y - prevCursor.y)
+  const directionIsRight = endCursor.x > prevCursor.x && isMovementX
+  const directionIsUp = endCursor.y > prevCursor.y && !isMovementX
+  if (directionIsRight || directionIsUp) {
     delta = -delta
   }
   cardStore.tiltCards(cardIds, delta)
@@ -402,7 +469,6 @@ const checkIfShouldExpandBoxes = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.notifyBoxSnappingIsReady) { return }
-    console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
@@ -439,14 +505,21 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
+  if (!prevCursor) { return }
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
+  if (globalStore.currentUserIsDraggingLine) {
+    endCursor.x = 0
+    prevCursor.x = 0
+  }
   // cards
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
-  boxStore.moveBoxes({ endCursor, prevCursor })
+  boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
+  // lines
+  lineStore.moveLines({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -463,6 +536,7 @@ const dragBoxes = (event) => {
   }
   dragItems()
 }
+
 // footer
 
 const footerDialogIsVisible = () => {
@@ -490,7 +564,7 @@ const checkIfShouldHideFooter = (event) => {
 const showMultipleSelectedActions = (event) => {
   if (spaceIsReadOnly.value) { return }
   if (globalStore.preventMultipleSelectedActionsIsVisible) { return }
-  const isMultipleSelected = globalStore.multipleCardsSelectedIds.length || globalStore.multipleConnectionsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length
+  const isMultipleSelected = globalStore.getIsMultipleItemsSelected
   if (isMultipleSelected) {
     const position = utils.cursorPositionInSpace(event)
     globalStore.multipleSelectedActionsPosition = position
@@ -505,7 +579,7 @@ const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value
+  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -574,6 +648,7 @@ const updateShouldSnapToGrid = (event) => {
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
+  endSpaceCursor = utils.cursorPositionInSpace(event)
   updateShouldSnapToGrid(event)
   if (isDraggingCard.value) {
     dragItems()
@@ -586,16 +661,20 @@ const interact = (event) => {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
+  } else if (isDraggingLine.value) {
+    dragItems()
   }
   prevCursor = endCursor
 }
 const checkShouldShowDetails = () => {
   const shouldShow = !utils.cursorsAreClose(state.startCursor, endCursor)
   if (!shouldShow) { return }
-  if (globalStore.currentUserIsDraggingCard) {
+  if (isDraggingCard.value) {
     globalStore.preventDraggedCardFromShowingDetails = true
-  } else if (globalStore.currentUserIsDraggingBox) {
+  } else if (isDraggingBox.value) {
     globalStore.preventDraggedBoxFromShowingDetails = true
+  } else if (isDraggingLine.value) {
+    globalStore.preventDraggedLineFromShowingDetails = true
   }
 }
 const eventIsFromTextarea = (event) => {
@@ -646,6 +725,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
+  boxStore.boxSnapGuides = []
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
@@ -663,8 +743,11 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsPaintingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
+  globalStore.currentUserIsDraggingLine = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
+  globalStore.linesWereDragged = false
+  globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   prevCursor = undefined
   globalStore.clearDraggingItems()
@@ -674,63 +757,153 @@ const stopInteractions = async (event) => {
   globalStore.shouldSnapToGrid = false
   spaceStore.updateSpaceEditedAt()
 }
+
+// online
+
+const updateIsOnline = () => {
+  const clientStatus = window.navigator.onLine
+  if (!clientStatus) {
+    globalStore.updateIsOnline(false)
+    return
+  }
+  updateServerIsOnline()
+}
+const updateServerIsOnline = async () => {
+  const maxIterations = 10
+  const initialDelay = 1000 // 1 second
+  const serverStatus = await apiStore.getStatus()
+  if (serverStatus) {
+    globalStore.updateIsOnline(true)
+  // error offline
+  } else {
+    console.info('server online status', serverStatus)
+    globalStore.updateIsOnline(false)
+  }
+  // retry
+  let delay // delay increases up to ~15 minutes
+  if (statusRetryCount < maxIterations) {
+    statusRetryCount++
+    delay = Math.pow(2, statusRetryCount) * initialDelay
+  }
+  delay = delay || 15 * 60 * 1000 // 15 minutes
+  setTimeout(updateServerIsOnline, delay)
+}
+
+// theme
+
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const logSystemThemeChange = (event) => {
+  const themeIsSystem = userStore.themeIsSystem
+  console.warn('🌓 logSystemThemeChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
+}
+const updateSystemTheme = () => {
+  themeStore.updateSystemTheme()
+}
+
+// remote
+
+const broadcastUserLabelCursor = (event) => {
+  if (!globalStore.isSpacePage) { return }
+  const updates = utils.cursorPositionInSpace(event)
+  if (!updates) { return }
+  updates.userId = userStore.id
+  updates.zoom = spaceZoomDecimal.value
+  broadcastStore.update({ updates, action: 'triggerUpdateRemoteUserCursor' })
+}
+const isTouchDevice = () => {
+  globalStore.isTouchDevice = true
+}
+
+// rss
+
+const clearMetaRSSFeed = () => {
+  const link = document.querySelector("link[type='application/rss+xml']")
+  if (link) {
+    link.remove()
+  }
+}
+const updateMetaRSSFeed = () => {
+  const spaceIsPrivate = spaceStore.privacy === 'private'
+  const spaceIsRemote = spaceStore.getSpaceIsRemote
+  clearMetaRSSFeed()
+  if (!spaceIsRemote) { return }
+  if (spaceIsPrivate) { return }
+  const head = document.querySelector('head')
+  const spaceId = spaceStore.id
+  const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
+  const link = document.createElement('link')
+  link.rel = 'alternative'
+  link.type = 'application/rss+xml'
+  link.title = 'JSON Feed'
+  link.href = url
+  head.appendChild(link)
+}
 </script>
 
 <template lang="pug">
-//- page
-OutsideSpaceBackground
-//- user presence cursors
-template(v-for="user in users")
-  UserLabelCursor(:user="user")
-//- space
-main#space.space(
-  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
-  @mousedown.left="initInteractions"
-  @touchstart="initInteractions"
-  :style="styles"
-  :data-zoom="spaceZoomDecimal"
+.app(
+  @pointermove="broadcastUserLabelCursor"
+  @touchstart="isTouchDevice"
+  :style="{ width: appPageWidth + 'px', height: appPageHeight + 'px', cursor: pageCursor }"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
+  :data-current-user-id="currentUserId"
 )
-  SpaceBackground
-  SpaceBackgroundTint
-  DrawingCanvasBackground
-  ItemsLocked
-  #box-backgrounds
-  Boxes
-  Connections
-  #box-infos
-  Cards
-  ItemUnlockButtons
-  DrawingCanvas
-  BoxDetails
-  CardDetails
-  OtherCardDetails
-  ConnectionDetails
-  CodeLanguagePicker
-  MultipleSelectedActions
-  ScrollAtEdgesHandler
-  NotificationsWithPosition(layer="space")
-  BoxSelecting
-  SnapGuideLines
-aside
-  PaintSelectCanvas
-  DrawingHandler
-  SonarPing
-//- page ui, dialogs
-Header
-Footer
-TagDetails
-UserDetails
-#space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
-  MinimapCanvas(:visible="true" :size="200")
-//- handlers
-WindowHistoryHandler
-KeyboardShortcutsHandler
-ScrollAndTouchHandler
-Panning
-NotificationsWithPosition(layer="app")
-Preload
-.badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
-  span DEV
+  //- page
+  OutsideSpaceBackground
+  //- user presence cursors
+  template(v-for="user in users")
+    UserLabelCursor(:user="user")
+  //- space
+  main#space.space(
+    :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
+    @mousedown.left="initInteractions"
+    @touchstart="initInteractions"
+    :style="styles"
+    :data-zoom="spaceZoomDecimal"
+  )
+    SpaceBackground
+    SpaceBackgroundTint
+    #drawing-strokes-background
+    ItemsLocked
+    #box-backgrounds
+    Boxes
+    Connections
+    #box-infos
+    Cards
+    Lines
+    ItemUnlockButtons
+    DrawingStrokes
+    BoxDetails
+    LineDetails
+    CardDetails
+    OtherCardDetails
+    ConnectionDetails
+    CodeLanguagePicker
+    MultipleSelectedActions
+    ScrollAtEdgesHandler
+    NotificationsWithPosition(layer="space")
+    BoxSelecting
+    SnapGuideLines
+  aside
+    PaintSelectCanvas
+    DrawingHandler
+    SonarPing
+  //- page ui, dialogs
+  Header
+  Footer
+  TagDetails
+  UserDetails
+  #space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
+    MinimapCanvas(:visible="true" :size="200")
+  //- handlers
+  WindowHistoryHandler
+  KeyboardShortcutsHandler
+  ScrollAndTouchHandler
+  Panning
+  NotificationsWithPosition(layer="app")
+  Preload
+  .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+    span DEV
 </template>
 
 <style lang="stylus">

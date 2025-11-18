@@ -9,6 +9,8 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
+import QRCode from '@/components/dialogs/QRCode.vue'
+import InviteTips from '@/components/dialogs/InviteTips.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -40,7 +42,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
+const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible', 'childDialogIsVisible'])
 
 const props = defineProps({
   visible: Boolean,
@@ -51,6 +53,7 @@ const state = reactive({
   tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
+  QRCodeIsVisible: false,
   inviteType: 'edit' // 'group', 'edit', 'readOnly'
 })
 
@@ -108,10 +111,7 @@ const commentOnlyUrl = computed(() => {
   console.info('🍇 invite comment only url', url)
   return url
 })
-
-//  copy invite urls
-
-const copyInviteUrl = async (event) => {
+const inviteUrl = computed(() => {
   let url
   if (inviteTypeIsGroup.value) {
     url = groupStore.getGroupInviteUrl(props.group)
@@ -123,78 +123,115 @@ const copyInviteUrl = async (event) => {
   } else {
     url = commentOnlyUrl.value
   }
+  return url
+})
+
+//  copy invite urls
+
+const copyInviteUrl = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(inviteUrl.value)
     globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
-    console.warn('🚑 copyInviteUrl', error, url)
+    console.warn('🚑 copyInviteUrl', error, inviteUrl.value)
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const inviteButtonLabel = computed(() => {
-  if (inviteTypeIsGroup.value) {
-    return 'Copy Group Invite Link'
-  } else if (inviteTypeIsEdit.value) {
-    return 'Copy Invite to Edit Link'
-  } else if (inviteTypeIsReadOnly.value) {
-    return 'Copy Invite to Read Link'
-  } else {
-    return 'Copy Invite to Comment Link'
-  }
-})
 
 // email invites
 
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
+  state.QRCodeIsVisible = false
+  state.tipsIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
+  closeChildDialogs()
   state.emailInvitesIsVisible = value
 }
 watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
   emit('emailInvitesIsVisible', value)
 })
 
+// qr
+
+const toggleQRCodeIsVisible = () => {
+  const isVisible = state.QRCodeIsVisible
+  closeChildDialogs()
+  state.QRCodeIsVisible = !isVisible
+  emitChildDialogIsVisible(state.QRCodeIsVisible)
+}
+const emitChildDialogIsVisible = (value) => {
+  emit('childDialogIsVisible', value)
+}
+
 // tips
 
 const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
+  const isVisible = state.tipsIsVisible
+  closeChildDialogs()
+  state.tipsIsVisible = !isVisible
+  emitChildDialogIsVisible(state.tipsIsVisible)
 }
 
 </script>
 
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
-  .row
+  .row.title-row
     span
       .users
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
       span Invite Collaborators
-
+    .button-wrap
+      button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+        span ?
+      InviteTips(:visible="state.tipsIsVisible")
   .row.invite-url-segmented-buttons
     .segmented-buttons
       button(v-if="props.group" @click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
         GroupLabel(:group="props.group")
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
-        span Can Edit
-      button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
+        span Edit
+      button(v-if="spaceIsPrivate" @click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
         span Read
-      button(@click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
+      button(v-if="spaceIsPrivate" @click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
         img.icon.comment(src="@/assets/comment.svg")
 
   section.subsection.invite-url-subsection
-    //- comment only warning
+    //- invite type info
     .row(v-if="inviteTypeIsCommentOnly")
       .badge.info Comment Only invites are in beta, so only invite people you trust
+    //- .row(v-if="inviteTypeIsReadOnly")
+    //-   .badge Invite others to read only
+    //- .row(v-if="inviteTypeIsEdit")
+    //-   .badge Invite collaborators to edit space
+    .row(v-if="inviteTypeIsGroup")
+      .badge Group members can edit any space in{{' '}}
+         GroupLabel(:group="props.group" :showName="true")
+
     //- copy invite
     .row
-      button(@click.left="copyInviteUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span {{inviteButtonLabel}}
+      .segmented-buttons
+        button(@click.left="copyInviteUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          span(v-if="inviteTypeIsGroup")
+            span Copy Invite Link to Group
+          span(v-else-if="inviteTypeIsEdit")
+            span Copy Invite Link to Edit
+          span(v-else-if="inviteTypeIsReadOnly")
+            span Copy Invite Link to Read Only
+          span(v-else)
+            span Copy Invite Link to{{' '}}
+              img.icon.comment(src="@/assets/comment.svg")
+
+      //-   button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
+      //-     img.icon.qr-code(src="@/assets/qr-code.svg")
+      //- QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
     //- email invites
     .row(v-if="inviteTypeIsEdit")
       .button-wrap
@@ -202,24 +239,6 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           img.icon.mail(src="@/assets/mail.svg")
           span Email Invites
         EmailInvites(:visible="state.emailInvitesIsVisible")
-
-    //- Tips
-    template(v-if="!inviteTypeIsGroup")
-      .row.title-row
-        .badge Anyone with the link can view
-        button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-          span ?
-      .row(v-if="state.tipsIsVisible")
-        .badge.info
-          p If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
-      //- .row(v-if="currentUserIsUpgraded")
-      //-   details
-      //-     summary
-      //-       span Collaborators edit for free
-      //-     section.subsection
-      //-       p If your account is upgraded, collaborators can create cards in this space without increasing their free card count
-            //- p
-            //-   img(src="https://cdn.kinopio.club/EoczbIBOicBBBh-GNuZOE/original-3a3d20bd4be668e1dffd7a97742a501d.gif")
 </template>
 
 <style lang="stylus">

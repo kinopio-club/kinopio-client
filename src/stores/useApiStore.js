@@ -12,7 +12,6 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
-import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
@@ -38,6 +37,31 @@ clearOtherItemsQueue()
 
 // request handlers
 
+const updateServerUnresponsive = (value) => {
+  const globalStore = useGlobalStore()
+  globalStore.notifyServerUnresponsive = value
+  globalStore.updateIsOnline(!value)
+}
+const fetchWithTimeout = async (url, options = {}) => {
+  const controller = new AbortController()
+  const { signal } = controller
+  const timeout = setTimeout(() => {
+    controller.abort()
+  }, consts.requestTimeout)
+  try {
+    const response = await fetch(url, { ...options, signal })
+    clearTimeout(timeout)
+    updateServerUnresponsive(false)
+    return response
+  } catch (error) {
+    clearTimeout(timeout)
+    console.error('🚒 fetchWithTimeout', url, error)
+    if (error.name === 'AbortError') { // timeout
+      updateServerUnresponsive(true)
+    }
+    throw error
+  }
+}
 const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
   if (utils.isUndefinedOrNull(isOnline)) {
     isOnline = true
@@ -119,10 +143,10 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    async handleServerOperationsError ({ error, response }) {
+    async handleServerOperationsError ({ error, response, queue }) {
       const globalStore = useGlobalStore()
       if (!response) {
-        console.error('🚒 handleServerOperationsError', error, response)
+        console.error('🚒 handleServerOperationsError', error, response, queue)
         globalStore.updateNotifyServerCouldNotSave(true)
         return
       }
@@ -174,10 +198,11 @@ export const useApiStore = defineStore('api', {
         }
         if (globalStore.notifyServerCouldNotSave) {
           globalStore.addNotification({ message: 'Reconnected to server', type: 'success' })
+          globalStore.notifyServerCouldNotSave = false
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)
-        this.handleServerOperationsError({ error, response })
+        this.handleServerOperationsError({ error, response, queue })
       } finally {
         globalStore.clearSendingQueue()
         cache.clearQueueBackup()
@@ -235,7 +260,7 @@ export const useApiStore = defineStore('api', {
 
     async getStatus () {
       try {
-        const response = await fetch(`${consts.apiHost()}/`)
+        const response = await fetchWithTimeout(`${consts.apiHost()}/`)
         return normalizeResponse(response)
       } catch (error) {
         console.info('🚒 getStatus', error)
@@ -254,8 +279,7 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      const isSpacePage = globalStore.getIsSpacePage
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         const response = await fetch(`${consts.apiHost()}/meta/changelog`)
         return normalizeResponse(response)
@@ -335,7 +359,7 @@ export const useApiStore = defineStore('api', {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await fetch(`${consts.apiHost()}/user`, options)
+        const response = await fetchWithTimeout(`${consts.apiHost()}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getUser', error })
@@ -401,10 +425,9 @@ export const useApiStore = defineStore('api', {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting following users spaces')
         const options = await this.requestOptions({ method: 'GET' })
@@ -582,7 +605,7 @@ export const useApiStore = defineStore('api', {
         if (!userIds) { return }
         console.info('🛬🛬 getting remote public users', userIds)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options)
         // notifyConnectionError
         return normalizeResponse(response)
       } catch (error) {
@@ -617,14 +640,12 @@ export const useApiStore = defineStore('api', {
 
     async getExploreSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!isSpacePage) { return }
       try {
         console.info('🛬 getting explore spaces')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/explore-spaces`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/explore-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getExploreSpaces', error })
@@ -633,14 +654,13 @@ export const useApiStore = defineStore('api', {
 
     async getEveryoneSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!isSpacePage) { return }
+      if (!globalStore.isSpacePage) { return }
       try {
         console.info('🛬 getting everyone spaces')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/everyone-spaces`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/everyone-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getEveryoneSpaces', error })
@@ -648,14 +668,12 @@ export const useApiStore = defineStore('api', {
     },
     async getLiveSpaces () {
       const globalStore = useGlobalStore()
-      const isSpacePage = globalStore.getIsSpacePage
       const isOnline = globalStore.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      if (!isSpacePage) { return }
       try {
         console.info('🛬 getting live spaces')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/live-spaces`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/live-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getLiveSpaces', error })
@@ -672,7 +690,7 @@ export const useApiStore = defineStore('api', {
         const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
         console.info('🛬 getting remote space', space.id)
         const options = await this.requestOptions({ method: 'GET', space, spaceReadOnlyKey })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpace', error })
@@ -685,7 +703,7 @@ export const useApiStore = defineStore('api', {
         if (!isOnline) { return }
         // console.info('🛬 getting remote space updatedAt', space.id)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/updated-at/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpace', error })
@@ -700,7 +718,7 @@ export const useApiStore = defineStore('api', {
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space favorites', spaceId)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${spaceId}/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpaceFavorites', error })
@@ -715,7 +733,7 @@ export const useApiStore = defineStore('api', {
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space history', spaceId)
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${spaceId}/history`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpaceFavorites', error })
@@ -733,7 +751,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
         const options = await this.requestOptions({ method: 'GET', space, spaceReadOnlyKey })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getSpaceAnonymously', error })
@@ -743,7 +761,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬 getting inbox space')
         const options = await this.requestOptions({ method: 'GET' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/inbox`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/space/inbox`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getInboxSpace', error })
@@ -967,7 +985,7 @@ export const useApiStore = defineStore('api', {
       try {
         console.info('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
         const options = await this.requestOptions({ body, method: 'POST' })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
+        const response = await fetchWithTimeout(`${consts.apiHost()}/item/multiple`, options)
         const data = await normalizeResponse(response)
         globalStore.updateOtherItems(data)
       } catch (error) {
@@ -1210,6 +1228,7 @@ export const useApiStore = defineStore('api', {
 
     // Billing Stripe
 
+    // for lifetime plan
     async checkoutUrl (body) {
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1219,6 +1238,7 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'subscriptionUrl', error })
       }
     },
+    // for subscription plans
     async subscriptionUrl (body) {
       try {
         const options = await this.requestOptions({ body, method: 'POST' })
@@ -1386,18 +1406,6 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'pdf', error })
       }
     },
-    async generateSpace (prompt) {
-      try {
-        const body = { prompt }
-        const options = await this.requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${consts.apiHost()}/services/generate-space`, options)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 generateSpace', error)
-        throw new Error(error)
-      }
-    },
 
     // Downloads
 
@@ -1519,6 +1527,20 @@ export const useApiStore = defineStore('api', {
       } catch (error) {
         console.error('🚒 sendAnalyticsEvent', error)
       }
+    },
+
+    // Moderator
+
+    async moderatorRestartServer () {
+      try {
+        const options = await this.requestOptions({ method: 'POST' })
+        const response = await fetch(`${consts.helperServerHost()}/restart-server`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 moderatorRestartServer', error)
+        throw new Error(error)
+      }
     }
+
   }
 })

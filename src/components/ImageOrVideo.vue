@@ -67,6 +67,8 @@ const state = reactive({
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
 const isInteracting = computed(() => {
+  const isResizing = globalStore.currentUserIsResizingCardIds.includes(props.cardId)
+  if (isResizing) { return }
   const isInteractingWithItem = globalStore.getIsInteractingWithItem
   const isPainting = globalStore.currentUserIsPainting
   const isPanning = globalStore.currentUserIsPanningReady
@@ -124,6 +126,7 @@ const imageIsGif = computed(() => {
 const pauseGif = () => {
   // adapted from https://stackoverflow.com/a/24707088
   // create canvas element from first frame of video
+  if (globalStore.disableViewportOptimizations) { return }
   if (!imageIsGif.value) { return }
   const image = imageElement.value
   const width = image.width
@@ -153,8 +156,10 @@ const canvasElement = () => {
 }
 const playGif = () => {
   // remove pause canvas
+  if (globalStore.disableViewportOptimizations) { return }
   if (!imageIsGif.value) { return }
   const canvas = canvasElement()
+  if (!canvas) { return }
   canvas.remove()
   imageElement.value.style.opacity = 1
 }

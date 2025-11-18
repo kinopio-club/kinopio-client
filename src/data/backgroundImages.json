@@ -1,10 +1,10 @@
 [
   {
     "url": "https://bk.kinopio.club/blank.png",
+    "darkUrl": "https://bk.kinopio.club/blank-dark.png",
     "previewUrl": "https://bk.kinopio.club/blank-preview-2.svg",
     "thumbnailUrl": "https://bk.kinopio.club/blank-thumbnail-5.svg",
     "isArchived": true,
-    "shouldSkipInGenerateSpace": true,
     "isBlank": true
   },
   {
@@ -207,7 +207,10 @@
     "url": "https://bk.kinopio.club/scatter-classic-2x.png"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/debug-grid-2x.webp",
-    "isDebug": true
-  }
+    "url": "https://bk.kinopio.club/debug-grid-2x.webp",
+    "darkUrl": "https://bk.kinopio.club/debug-grid-dark-2x.webp",
+    "previewUrl": "https://bk.kinopio.club/debug-grid-preview-light-2x.webp",
+    "darkPreviewUrl": "https://bk.kinopio.club/debug-grid-preview-dark-2x.webp",
+    "thumbnailUrl": "https://bk.kinopio.club/grid-debug-preview-3.png"
+  }  
 ]

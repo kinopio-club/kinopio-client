@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -25,13 +26,17 @@ import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
-import defer from 'lodash-es/defer'
 import throttle from 'lodash-es/throttle'
 import dayjs from 'dayjs'
 
 const idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 const loadSpaceIdsError = []
+const setCookie = () => {
+  const yearSeconds = 31536000
+  const millenium = yearSeconds * 1000
+  document.cookie = `kinopio=true; max-age=${millenium}; path=/;`
+}
 
 export const useSpaceStore = defineStore('space', {
   state: () => (utils.clone(newSpace)),
@@ -145,9 +150,11 @@ export const useSpaceStore = defineStore('space', {
     getSpaceItemColors () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
+      const lineStore = useLineStore()
       const cardColors = cardStore.getCardColors
       const boxColors = boxStore.getboxColors
-      const colors = cardColors.concat(boxColors)
+      const lineColors = lineStore.getLineColors
+      const colors = cardColors.concat(boxColors).concat(lineColors)
       return uniq(colors)
     },
     getSpaceTags () {
@@ -275,8 +282,10 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       globalStore.isLoadingSpace = true
+      globalStore.isSpacePage = true
       const spaceUrl = globalStore.spaceUrlToLoad
       const cachedSpaces = await cache.getAllSpaces()
+      setCookie()
       // restore from url
       if (spaceUrl) {
         console.info('🚃 Restore space from url', spaceUrl)
@@ -337,12 +346,15 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
+      const lineStore = useLineStore()
       space = utils.removeRemovedCardsFromSpace(space)
       // initialize items
       cardStore.initializeCards(space?.cards)
       boxStore.initializeBoxes(space?.boxes)
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
+      lineStore.initializeLines(space?.lines)
+      // initialize space
       this.$state = space
       console.log('🍍 restoreSpace', this.getSpaceAllState)
       globalStore.resetPageSizes()
@@ -421,21 +433,41 @@ export const useSpaceStore = defineStore('space', {
       return space
     },
     async restoreSpaceRemote (space) {
+      const globalStore = useGlobalStore()
       const historyStore = useHistoryStore()
       const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const connectionStore = useConnectionStore()
+      const lineStore = useLineStore()
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
+      // init items
+      cardStore.initializeRemoteCards(space.cards)
+      boxStore.initializeRemoteBoxes(space.boxes)
+      connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
+      connectionStore.initializeRemoteConnections(space.connections)
+      lineStore.initializeRemoteLines(space.lines)
+      globalStore.updatePageSizes()
+      // init space
       historyStore.redoLocalUpdates()
-      this.restoreSpace(space)
+      this.$state = space
       historyStore.reset()
+      // clean up unused keys
+      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
+      itemKeys.forEach(key => {
+        delete this[key]
+      })
     },
     async loadSpace (space) {
       const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
+      const cardStore = useCardStore()
       isLoadingRemoteSpace = false
       space.connections = utils.migrationConnections(space.connections)
-      globalStore.spaceZoomPercent = 100
+      if (!globalStore.isEmbedMode) {
+        globalStore.spaceZoomPercent = 100
+      }
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
@@ -448,6 +480,7 @@ export const useSpaceStore = defineStore('space', {
           this.restoreSpaceLocal(space),
           this.loadRemoteSpace(space)
         ])
+        window.scrollTo(0, 0)
         // restore remote space
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
@@ -474,6 +507,7 @@ export const useSpaceStore = defineStore('space', {
       if (cardId) {
         globalStore.triggerScrollCardIntoView(cardId)
       }
+      cardStore.alignLeftAddedCardsInInbox()
     },
     async loadInboxSpace () {
       const apiStore = useApiStore()
@@ -525,6 +559,10 @@ export const useSpaceStore = defineStore('space', {
         const globalStore = useGlobalStore()
         const apiStore = useApiStore()
         const userStore = useUserStore()
+        if (!globalStore.isSpacePage) {
+          window.location = utils.urlFromSpaceAndItem({ spaceId: space.id })
+          return
+        }
         globalStore.updatePrevSpaceIdInSession(this.id)
         globalStore.updatePrevSpaceIdInSessionPagePosition()
         globalStore.clearAllInteractingWithAndSelected()
@@ -764,7 +802,7 @@ export const useSpaceStore = defineStore('space', {
       })
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       if (shouldCreateWithoutLoading) {
-        space.users = [userStore]
+        space.users = [userStore.getUserAllState]
         const nullCardUsers = true
         await cache.updateIdsInSpace(space, nullCardUsers) // saves space
       } else {
@@ -790,14 +828,14 @@ export const useSpaceStore = defineStore('space', {
     // update
 
     updateSpacePreviewImage: throttle(async function () {
+      const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace
-      const isPrivate = this.getSpaceIsPrivate
+      if (!globalStore.isSpacePage) { return }
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
-      if (isPrivate) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)
       console.info('🙈 updated space preview image', response?.urls)
     }, 10 * 1000), // 10 seconds
@@ -857,7 +895,7 @@ export const useSpaceStore = defineStore('space', {
         if (spaceId) {
           const space = globalStore.getOtherSpaceById(spaceId)
         } else if (cardId) {
-          const card = globalStore.otherCardById(cardId)
+          const card = globalStore.getOtherCardById(cardId)
         }
         if (space || card) { return }
         // add options to items to fetch
@@ -1071,8 +1109,8 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       if (this.getSpaceCreatorIsUpgraded) { return }
       if (userStore.isUpgraded) { return }
-      const cardsCreatedLimit = consts.cardsCreatedLimit
-      const value = cardsCreatedLimit - userStore.cardsCreatedCount
+      const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
+      const value = freeCardsCreatedLimit - userStore.cardsCreatedCount
       if (utils.isBetween({ value, min: 0, max: 15 })) {
         globalStore.notifyCardsCreatedIsNearLimit = true
       }
@@ -1103,18 +1141,16 @@ export const useSpaceStore = defineStore('space', {
       await cache.updateSpace('tags', this.tags, this.id)
     },
     async removeTag (tag) {
+      const apiStore = useApiStore()
       this.tags = this.tags.filter(spaceTag => spaceTag.id !== tag.id)
       await cache.updateSpace('tags', this.tags, this.id)
+      await apiStore.addToQueue({ name: 'removeTag', body: tag })
     },
-    async removeTags (tag) {
+    async removeTagsByName (tag) {
+      const apiStore = useApiStore()
       this.tags = this.tags.filter(spaceTag => spaceTag.name !== tag.name)
-      await cache.removeTagsByNameInAllSpaces(tag)
-    },
-    async removeTagsFromCard (card) {
-      this.tags = this.tags.filter(spaceTag => {
-        return spaceTag.cardId !== card.id
-      })
-      await cache.updateSpace('tags', this.tags, this.id)
+      await cache.removeTagsByName(tag)
+      await apiStore.addToQueue({ name: 'removeTagsByName', body: tag })
     },
     async deleteTagsFromAllRemovedCardsPermanent () {
       const cardIds = this.removedCards.map(card => card.id)
@@ -1133,6 +1169,13 @@ export const useSpaceStore = defineStore('space', {
       })
       await cache.updateTagColorInAllSpaces(updatedTag)
       await apiStore.addToQueue({ name: 'updateTagColorByName', body: { tag: updatedTag } })
+    },
+    async removeTagsByCard (card) {
+      if (!card) { return }
+      const tagsInCard = this.getSpaceTagsInCard({ id: card.id })
+      for (const tag of tagsInCard) {
+        await this.removeTag(tag)
+      }
     },
     async removeUnusedTagsFromCard (cardId) {
       const cardStore = useCardStore()

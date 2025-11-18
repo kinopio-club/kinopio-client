@@ -30,16 +30,17 @@ const updateImageUrls = () => {
 
   .icons.hidden
     //- logo
-    img.icon(src="@/assets/logo-hover.png")
-    img.icon(src="@/assets/logo-active.png")
+    img.icon(src="@/assets/logos/logo-hover.png")
+    img.icon(src="@/assets/logos/logo-active.png")
 
     //- frames
-    img(src="@/assets/frames/garden-leaves/flower.png")
-    img(src="@/assets/frames/magical-helper/hat.png")
-    img(src="@/assets/frames/tea-time/pot.png")
-    img(src="@/assets/frames/dead-to-me/spooky-eyes.png")
-    img(src="@/assets/frames/lil-guys/pot-standing-side.png")
-    img(src="@/assets/frames/pen-pals/icon.png")
+    img(src="@/assets/frames/garden-leaves/flower.webp")
+    img(src="@/assets/frames/magical-helper/hat.webp")
+    img(src="@/assets/frames/tea-time/pot.webp")
+    img(src="@/assets/frames/dead-to-me/spooky-eyes.webp")
+    img(src="@/assets/frames/lil-guys/pot-standing-side.webp")
+    img(src="@/assets/frames/pen-pals/icon.webp")
+    img(src="@/assets/frames/book-worm/worm-top.webp")
 
     //- icons
     img.icon(src="@/assets/add-invert.svg")
@@ -60,8 +61,6 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/brush-x.svg")
     img.icon(src="@/assets/brush.svg")
     img.icon(src="@/assets/brush-size-l.svg")
-    img.icon(src="@/assets/brush-size-m.svg")
-    img.icon(src="@/assets/brush-size-s.svg")
     img.icon(src="@/assets/camera.svg")
     img.icon(src="@/assets/cal.svg")
     img.icon(src="@/assets/card.svg")
@@ -100,6 +99,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/json-canvas.svg")
     img.icon(src="@/assets/leave.svg")
     img.icon(src="@/assets/light.svg")
+    img.icon(src="@/assets/line.svg")
     img.icon(src="@/assets/line-break.svg")
     img.icon(src="@/assets/lock.svg")
     img.icon(src="@/assets/luck.svg")
@@ -127,6 +127,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/resize-corner.svg")
     img.icon(src="@/assets/resize.svg")
     img.icon(src="@/assets/right-arrow.svg")
+    img.icon(src="@/assets/right-arrow-invert.svg")
     img.icon(src="@/assets/rss.svg")
     img.icon(src="@/assets/search.svg")
     img.icon(src="@/assets/settings.svg")
@@ -145,6 +146,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/system.svg")
     img.icon(src="@/assets/templates.svg")
     img.icon(src="@/assets/group.svg")
+    img.icon(src="@/assets/qr-code.svg")
     img.icon(src="@/assets/time.svg")
     img.icon(src="@/assets/today.svg")
     img.icon(src="@/assets/transparent.svg")

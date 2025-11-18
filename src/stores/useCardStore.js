@@ -29,7 +29,7 @@ export const useCardStore = defineStore('cards', {
   getters: {
     getAllCards () {
       let cards = this.allIds.map(id => this.byId[id])
-      cards = cards.filter(card => !card.isRemoved)
+      cards = cards.filter(card => Boolean(card) && !card.isRemoved)
       return cards
     },
     getAllCardsSortedByX () {
@@ -70,11 +70,11 @@ export const useCardStore = defineStore('cards', {
     },
     getCardsIsLocked () {
       const cards = this.allIds.map(id => this.byId[id])
-      return cards.filter(card => card.isLocked && !card.isRemoved)
+      return cards.filter(card => Boolean(card) && card.isLocked && !card.isRemoved)
     },
     getCardsIsNotLocked () {
       const cards = this.allIds.map(id => this.byId[id])
-      return cards.filter(card => !card.isLocked && !card.isRemoved)
+      return cards.filter(card => Boolean(card) && !card.isLocked && !card.isRemoved)
     },
     getCardsSelected () {
       const globalStore = useGlobalStore()
@@ -260,6 +260,28 @@ export const useCardStore = defineStore('cards', {
       this.allIds = allIds
       tallestCardHeight = 0
     },
+    async alignLeftAddedCardsInInbox () {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      if (spaceStore.name !== 'Inbox') { return }
+      let cards = this.getAllCardsSortedByY
+      cards = cards.filter(card => card.x === consts.minItemXY)
+      const selectedCardIds = cards.map(card => card.id)
+      await this.updateCardsDimensions(selectedCardIds)
+      setTimeout(() => {
+        globalStore.multipleCardsSelectedIds = selectedCardIds
+        this.distributeCardsVertically(cards)
+        globalStore.multipleCardsSelectedIds = []
+      }, 100)
+    },
+    initializeRemoteCards (remoteCards) {
+      const localCards = utils.clone(this.getAllCards)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteCards, localCards)
+      console.info('🎑 remote cards', { updateItems, addItems, removeItems })
+      this.updateCardsState(updateItems)
+      addItems.forEach(card => this.addCardToState(card))
+      removeItems.forEach(card => this.removeCardFromState(card))
+    },
 
     // create
 
@@ -347,7 +369,10 @@ export const useCardStore = defineStore('cards', {
     // update
 
     async updateCardsState (updates) {
-      const connectionStore = useConnectionStore()
+      updates = updates.map(update => { // normalize
+        delete update.user
+        return update
+      })
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
@@ -362,8 +387,8 @@ export const useCardStore = defineStore('cards', {
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
       try {
-        if (!userStore.getUserCanEditSpace) { return }
         this.updateCardsState(updates)
+        if (!userStore.getUserCanEditSpace) { return }
         const ids = updates.map(update => update.id)
         connectionStore.updateConnectionPathsByItemIds(ids)
         broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
@@ -374,7 +399,7 @@ export const useCardStore = defineStore('cards', {
         cards = utils.clone(cards)
         await cache.updateSpace('cards', cards, spaceStore.id)
       } catch (error) {
-        console.error('🚒 updateCards', error)
+        console.error('🚒 updateCards', error, updates)
       }
     },
     updateCard (update) {
@@ -383,16 +408,21 @@ export const useCardStore = defineStore('cards', {
 
     // remove
 
+    removeCardFromState (card) {
+      const idIndex = this.allIds.indexOf(card.id)
+      if (utils.isNullish(idIndex)) { return }
+      this.allIds.splice(idIndex, 1)
+      delete this.byId[card.id]
+    },
     async deleteCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const card of cards) {
-        const idIndex = this.allIds.indexOf(card.id)
-        if (utils.isNullish(idIndex)) { continue }
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[card.id]
+        this.removeCardFromState(card)
+        broadcastStore.update({ updates: card, store: 'cardStore', action: 'removeCardFromState' })
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
       }
     },
@@ -412,12 +442,14 @@ export const useCardStore = defineStore('cards', {
     removeCards (ids) {
       const connectionStore = useConnectionStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const updates = []
       const cardsToRemove = []
       const cardsToDelete = []
       const cards = ids.map(id => this.getCard(id))
       cards.forEach(card => {
         if (!card) { return }
+        spaceStore.removeTagsByCard(card)
         if (card.name) {
           cardsToRemove.push(card)
         } else {
@@ -474,7 +506,6 @@ export const useCardStore = defineStore('cards', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      const cursorDirection = utils.cursorDirection(endCursor, prevCursor)
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -503,7 +534,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursorDirection })
+      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -568,7 +599,8 @@ export const useCardStore = defineStore('cards', {
         } else {
           const prevCardElement = utils.cardElement(prevCard)
           const prevCardRect = prevCardElement.getBoundingClientRect()
-          card.y = prevCard.y + (prevCardRect.height * zoom) + consts.spaceBetweenCards
+          const prevCardHeight = prevCardRect.height || prevCard.height
+          card.y = prevCard.y + (prevCardHeight * zoom) + consts.spaceBetweenCards
           prevCard = card
         }
         const rect = utils.cardRectFromId(card.id)
@@ -576,7 +608,7 @@ export const useCardStore = defineStore('cards', {
           id: card.id,
           y: card.y,
           width: rect.width,
-          height: rect.height
+          height: rect.height || card.height
         }
         await this.updateCard(update)
         index += 1
@@ -623,7 +655,9 @@ export const useCardStore = defineStore('cards', {
           card = {
             id: card.id,
             width: Math.round(rect.width * zoom),
-            height: Math.round(rect.height * zoom)
+            height: Math.round(rect.height * zoom),
+            prevWidth: card.prevWidth,
+            prevHeight: card.prevHeight
           }
         } else {
           card = utils.cardElementDimensions(card)
@@ -646,7 +680,7 @@ export const useCardStore = defineStore('cards', {
       await this.updateBelowCardsPosition(updates)
     },
     async updateCardDimensions (id) {
-      this.updateCardsDimensions([id])
+      await this.updateCardsDimensions([id])
     },
 
     // card details
@@ -693,7 +727,7 @@ export const useCardStore = defineStore('cards', {
     // tilt
 
     tiltCards (ids, delta) {
-      const maxDegrees = 25
+      const maxDegrees = 90
       const updates = []
       ids.forEach(id => {
         const card = this.getCard(id)
@@ -794,7 +828,7 @@ export const useCardStore = defineStore('cards', {
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
         tags.forEach(tag => {
-          tag = globalStore.newTag({
+          tag = globalStore.getNewTag({
             name: tag,
             defaultColor: userStore.color,
             cardId: card.id,

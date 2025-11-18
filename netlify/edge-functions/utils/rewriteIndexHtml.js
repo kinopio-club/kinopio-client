@@ -1,4 +1,4 @@
-import { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts'
+import { HTMLRewriter } from '@worker-tools/html-rewriter'
 
 const cacheExpiry = 3600 // 3600s = 1 hour
 

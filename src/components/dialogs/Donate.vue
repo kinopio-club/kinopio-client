@@ -79,11 +79,13 @@ const toggleCustomAmountIsVisible = async (value) => {
   if (!value) { return }
   await nextTick()
   const element = inputElement.value
+  if (!element) { return }
   const length = state.currentAmount.toString().length
   element.focus()
   element.setSelectionRange(0, length)
 }
 const updateAmount = (value) => {
+  state.customAmountIsVisible = false
   state.currentAmount = value
   clearErrors()
 }
@@ -121,7 +123,7 @@ const donate = async () => {
 
 <template lang="pug">
 dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       p Donate
       .badge.secondary(v-if="currentUserIsDonor") Repeat Donor
@@ -134,7 +136,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
         span Donor
       span badge on your profile. And possibly other perks in the future.
 
-    .segmented-buttons
+    .row.segmented-buttons
       button(@click="updateAmount(5)" :class="{ active: state.currentAmount === 5 }")
         span $5
       button(@click="updateAmount(20)" :class="{ active: state.currentAmount === 20 }")
@@ -144,21 +146,20 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
       button(@click="toggleCustomAmountIsVisible" :class="{ active: state.customAmountIsVisible }")
         span Custom
 
-    div(v-if="state.customAmountIsVisible")
-      .row
-        span $
-        input.name.user-details-name(placeholder="100" v-model="customAmount" ref="inputElement" type="number" @keydown.enter="donate")
+    .row(v-if="state.customAmountIsVisible")
+      span $
+      input.name.user-details-name(placeholder="100" v-model="customAmount" ref="inputElement" type="number" @keydown.enter="donate" rows="1")
 
     template(v-if="state.currentAmount")
-      div
-        .row
-          User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
-          .badge.info
-            span ${{state.currentAmount}}
-            span /one time
-      button(@click="donate" :class="{ active: state.isLoading }")
-        span Donation Checkout
-        Loader(:visible="state.isLoading")
+      .row
+        User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
+        .badge.info
+          span ${{state.currentAmount}}
+          span /one time
+      .row
+        button(@click="donate" :class="{ active: state.isLoading }")
+          span Donation Checkout
+          Loader(:visible="state.isLoading")
 
       div(v-if="state.error.unknownServerError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support

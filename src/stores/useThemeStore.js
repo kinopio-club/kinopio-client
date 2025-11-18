@@ -40,7 +40,9 @@ const themes = {
       'code-keyword': '#00119e',
       // user badges
       'badge-donor': '#ff9dff',
-      'badge-upgraded': 'springgreen'
+      'badge-upgraded': 'springgreen',
+      // pages
+      'example-background': '#889e9a'
     }
   },
   dark: {
@@ -57,7 +59,7 @@ const themes = {
       'secondary-background': '#262626',
       'secondary-hover-background': '#555',
       'secondary-active-background': '#333',
-      'tertiary-hover-background': '444',
+      'tertiary-hover-background': '#444',
       'danger-background': '#732b26',
       'danger-hover-background': '#8f3832',
       'danger-active-background': '#a83730',
@@ -78,7 +80,10 @@ const themes = {
       'badge-donor': 'blueviolet',
       'badge-upgraded': 'green',
       'badge-moderator': 'olive',
-      'badge-ambassador': '#0f9189'
+      'badge-ambassador': '#0f9189',
+      // pages
+      'example-background': '#14292d'
+
     }
   }
 }

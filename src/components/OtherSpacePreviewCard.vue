@@ -98,7 +98,7 @@ const handleMouseLeaveUrlButton = () => {
   if (globalStore.currentUserIsDraggingCard) { return }
   globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
-const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: props.otherSpace?.url || props.otherSpace?.id }))
+const url = computed(() => utils.urlFromSpaceAndItem({ spaceId: props.otherSpace?.url || props.otherSpace?.id }))
 const openUrl = async (event) => {
   const prevIsActive = state.isActive
   state.isActive = false

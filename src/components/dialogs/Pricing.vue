@@ -8,7 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
-import AboutMe from '@/components/AboutMe.vue'
+import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
@@ -19,7 +19,8 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  parentIsPage: Boolean
 })
 const dialog = ref(null)
 
@@ -72,7 +73,7 @@ const yearlyPrice = computed(() => {
   const isStudentDiscount = userStore.studentDiscountIsAvailable
   return consts.price('year', isStudentDiscount).amount
 })
-const lifePrice = computed(() => consts.price('life').amount)
+const lifetimePrice = computed(() => consts.price('life').amount)
 
 // child dialogs
 
@@ -98,18 +99,22 @@ const closeChildDialogs = () => {
 
 const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
 const spaceUser = computed(() => spaceStore.users[0])
+const freeCardsCreatedLimit = computed(() => consts.freeCardsCreatedLimit)
+const freeUploadSizeLimit = computed(() => consts.freeUploadSizeLimit)
 
 </script>
 
 <template lang="pug">
 dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+  section.title-section
+    p Pricing
   section
     .row.title-row
       //- price
       template(v-if="isSecureAppContextIOS")
-        p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year
+        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year.
       template(v-else)
-        p Kinopio is free for 100 cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifePrice}}/life
+        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifetimePrice}}/life.
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?
@@ -124,10 +129,10 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             span.badge.success Upgraded
         tr
-          td 100 cards
+          td {{freeCardsCreatedLimit}} cards
           td Unlimited cards
         tr
-          td 5mb file upload size limit
+          td {{freeUploadSizeLimit}}mb file upload size limit
           td No upload limit
         tr
           td Can only join Groups
@@ -137,19 +142,19 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
               button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
                 span ?
                 AboutGroups(:visible="state.aboutGroupsIsVisible")
-    CardsCreatedProgress
-    //- free cards from space member
-    section.subsection(v-if="spaceCreatorIsUpgraded")
-      p
-        UserLabelInline(:user="spaceUser")
-        span is upgraded, so cards you create in this space won't increase your free card count
+    template(v-if="!props.parentIsPage")
+      CardsCreatedProgress
+      //- free cards from space member
+      section.subsection(v-if="spaceCreatorIsUpgraded")
+        p
+          UserLabelInline(:user="spaceUser")
+          span is upgraded, so cards you create in this space won't increase your free card count
   section
-    AboutMe
+    WhoMakesKinopio
 </template>
 
 <style lang="stylus">
 dialog.pricing
-  overflow auto
   left initial
   right 8px
   max-height calc(100vh - 25px)
@@ -168,5 +173,6 @@ dialog.pricing
     .small-button
       margin-top 0
   dialog.about-groups
-    max-height 150px !important
+    top -100px
+    right 16px
 </style>

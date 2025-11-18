@@ -98,8 +98,8 @@ const boxes = computed(() => {
       Loader(:visible="!spaceIsLoaded" :isSmall="true")
     section.subsection(v-if="!cards.length")
       p Prepend cards with
-        .badge.info [ ]
-        span to create checkbox cards
+        span.badge.info [ ]
+        span to create checkbox cards that you can track here.
   section.results-section(v-if="cards.length || boxes.length")
     BoxList(
       :boxes="boxes"

@@ -9,7 +9,6 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import UserList from '@/components/UserList.vue'
 import User from '@/components/User.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import InviteToGroup from '@/components/InviteToGroup.vue'
@@ -150,12 +149,12 @@ const deleteGroupPermanent = async () => {
 <template lang="pug">
 dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   //- group info
-  section
+  section(:style="{backgroundColor: props.group.color}")
     .row
       template(v-if="currentUserIsGroupAdmin")
-        GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible")
+        GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible" :isBackgroundColor="true")
       template(v-else)
-        GroupLabel(:group="props.group" :showName="true")
+        p {{props.group.emoji}} {{props.group.name}}
   InviteToGroup(:visible="isGroupUser" :group="props.group" @closeDialogs="closeDialogs")
 
   UserList(

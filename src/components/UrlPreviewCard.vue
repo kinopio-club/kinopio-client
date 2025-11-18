@@ -98,9 +98,9 @@ const toggleShouldDisplayIframe = (event) => {
   value = !value
   if (value) {
     globalStore.iframeIsVisibleForCardId = props.card.id
-    // addAutoplay()
+    addAutoplay()
   } else {
-    // removeAutoplay()
+    removeAutoplay()
     globalStore.iframeIsVisibleForCardId = ''
   }
 }
@@ -115,6 +115,8 @@ const iframeHeight = computed(() => {
   let aspectRatio = 2 / 3
   if (utils.urlIsYoutube(url)) {
     aspectRatio = 9 / 15
+  } else if (utils.urlIsSpotify(url)) {
+    aspectRatio = 1 / 2
   }
   const height = Math.round(width * aspectRatio)
   return height
@@ -122,20 +124,20 @@ const iframeHeight = computed(() => {
 
 // autoplay
 
-// const addAutoplay = async () => {
-//   await nextTick()
-//   document.querySelector('.url-preview-card iframe').addEventListener('load', autoplay)
-// }
-// const removeAutoplay = () => {
-//   document.querySelector('.url-preview-card iframe').removeEventListener('load', autoplay)
-// }
-// const autoplay = async (event) => {
-//   await nextTick()
-//   // spotify
-//   setTimeout(() => {
-//     document.querySelector('.url-preview-card iframe').contentWindow.postMessage({ command: 'play' }, '*')
-//   }, '300')
-// }
+const addAutoplay = async () => {
+  await nextTick()
+  document.querySelector('.url-preview-card iframe').addEventListener('load', autoplay)
+}
+const removeAutoplay = () => {
+  document.querySelector('.url-preview-card iframe').removeEventListener('load', autoplay)
+}
+const autoplay = async (event) => {
+  await nextTick()
+  // spotify
+  setTimeout(() => {
+    document.querySelector('.url-preview-card iframe').contentWindow.postMessage({ command: 'play' }, '*')
+  }, '500') // delay used because iframe onload happens before spotify's js is fully ready
+}
 
 // twitter
 

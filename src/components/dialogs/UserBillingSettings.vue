@@ -30,6 +30,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
+    state.billingFAQIsVisible = false
   }
 })
 
@@ -38,7 +39,8 @@ const state = reactive({
   loading: false,
   error: {
     unknownServerError: false
-  }
+  },
+  billingFAQIsVisible: false
 })
 
 const triggerUpgradeUserIsVisible = () => {
@@ -83,13 +85,16 @@ const customerPortal = async () => {
   }
 }
 
+const toggleBillingFAQIsVisible = () => {
+  state.billingFAQIsVisible = !state.billingFAQIsVisible
+}
 </script>
 
 <template lang="pug">
 dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    p Billing
-
+  section.title-section
+    .row.title-row
+      span Billing
   //- free
   section(v-if="subscriptionIsFree")
     p Your subscription has been set to free
@@ -102,6 +107,15 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
       Loader(:visible="state.loading")
     p.badge.danger(v-if="state.error.unknownServerError")
       span (シ_ _)シ Something went wrong. Please try again or contact support.
+    //- faq
+    button(@click="toggleBillingFAQIsVisible" :class="{ active: state.billingFAQIsVisible }")
+        span FAQ
+    section.subsection.section-faq(v-if="state.billingFAQIsVisible")
+      details
+        summary(@click="closeOtherDetails") Can I change from a subscription to a one-time purchase?
+        section.subsection
+          p Stripe doesn't provide a built-in way to do this, so you'll need to first cancel your subscription from the Customer Portal, and wait for your plan to cancel. Then you can then re-upgrade using the lifetime purchase option.
+
   //- stripe lifetime
   section(v-else-if="stripePlanIsPurchased")
     p You've purchased a lifetime plan. If you need a new receipt please contact support.
@@ -130,4 +144,6 @@ dialog.user-billing
   left initial
   right 6px
   overflow auto
+  .section-faq
+    margin-top 10px
 </style>

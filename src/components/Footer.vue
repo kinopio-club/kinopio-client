@@ -7,7 +7,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
-import Loader from '@/components/Loader.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
@@ -240,15 +239,16 @@ const updatePositionInVisualViewport = () => {
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
-    //- presentation mode
-    .button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
-        img.icon.settings(src="@/assets/presentation.svg")
     //- minimap
     .button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: state.minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
         img.icon.minimap(src="@/assets/minimap.svg")
+    //- presentation mode
+    .button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
+        img.icon.settings(src="@/assets/presentation.svg")
       Minimap(:visible="state.minimapIsVisible")
+
 </template>
 
 <style lang="stylus">
@@ -276,7 +276,7 @@ const updatePositionInVisualViewport = () => {
     transition 0.2s opacity
     &.is-embed
       position absolute
-      right 0
+      right 8px
   &.is-mobile
     margin-bottom 10px
   &.is-mobile-standalone
@@ -306,7 +306,7 @@ const updatePositionInVisualViewport = () => {
     padding-right 0
     translate 0px 3px
     display inline-block
-    button
+    > button
       font-size 1rem
       padding-left 6px
       padding-right 6px
@@ -322,6 +322,9 @@ const updatePositionInVisualViewport = () => {
     left 8px
     img.icon
       filter invert(1)
+
+  dialog
+    top initial !important
 
 footer
   .is-mobile-icon
@@ -358,26 +361,5 @@ footer
     vertical-align 0px
     width 13px
     margin-left 6px
-
-  .space-functions-row
-    > .segmented-buttons,
-    &.segmented-buttons
-      display inline-block
-      > .button-wrap
-        > button
-          border-radius 0
-          border-right 0
-          .loader
-            margin 0
-        &:first-child
-          > button
-            border-top-left-radius var(--entity-radius)
-            border-bottom-left-radius var(--entity-radius)
-            border-right 0
-        &:last-child
-          > button
-            border-top-right-radius var(--entity-radius)
-            border-bottom-right-radius var(--entity-radius)
-            border-right 1px solid var(--primary-border)
 
   </style>

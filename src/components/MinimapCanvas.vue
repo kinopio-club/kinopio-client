@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -12,11 +13,13 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import throttle from 'lodash-es/throttle'
+import { colord, extend } from 'colord'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -55,6 +58,11 @@ onMounted(async () => {
     'updateConnections',
     'removeConnections'
   ]
+  const lineStoreActions = [
+    'createLine',
+    'updateLines',
+    'removeLines'
+  ]
   const spaceStoreActions = [
     'loadSpace'
   ]
@@ -87,6 +95,13 @@ onMounted(async () => {
       }
     }
   )
+  const lineActionUnsubscribe = lineStore.$onAction(
+    ({ name, args }) => {
+      if (lineStoreActions.includes(name)) {
+        initThrottle()
+      }
+    }
+  )
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
@@ -99,6 +114,7 @@ onMounted(async () => {
     cardActionUnsubscribe()
     connectionActionUnsubscribe()
     boxActionUnsubscribe()
+    lineActionUnsubscribe()
     spaceActionUnsubscribe()
   }
 })
@@ -124,7 +140,8 @@ const props = defineProps({
   pageWidth: Number,
   space: Object,
   viewportIsHidden: Boolean,
-  backgroundColor: String
+  backgroundColor: String,
+  parentIsDialog: Boolean
 })
 const state = reactive({
   scrollX: 0,
@@ -157,9 +174,12 @@ const ratio = computed(() => {
     return props.size / pageHeight.value
   }
 })
-
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const styles = computed(() => {
-  const color = props.backgroundColor || globalStore.outsideSpaceBackgroundColor
+  let color = props.backgroundColor || globalStore.outsideSpaceBackgroundColor
+  if (!props.parentIsDialog && !shouldIncreaseUIContrast.value) {
+    color = colord(color).alpha(0.8).toRgbString()
+  }
   return { backgroundColor: color }
 })
 
@@ -178,6 +198,7 @@ const init = async () => {
   drawBoxes()
   drawConnections()
   drawCards()
+  drawLines()
 }
 const initCanvas = async () => {
   await nextTick()
@@ -198,14 +219,14 @@ const initCanvas = async () => {
 // drawing
 
 const drawDrawing = async () => {
-  if (!globalStore.drawingImageUrl) { return }
+  if (!globalStore.drawingDataUrl) { return }
   const image = new Image()
   image.onload = () => {
     const width = image.width * ratio.value
     const height = image.height * ratio.value
     context.drawImage(image, 0, 0, width, height)
   }
-  image.src = globalStore.drawingImageUrl
+  image.src = globalStore.drawingDataUrl
 }
 
 // connections
@@ -272,6 +293,25 @@ const drawBoxes = () => {
       context.fill(rect)
       context.globalAlpha = 1
     }
+  })
+}
+
+// lines
+
+const mapLines = computed(() => {
+  return props.space?.lines || lineStore.getAllLines
+})
+const drawLines = () => {
+  const lines = mapLines.value
+  lines.forEach(line => {
+    const width = Math.floor(globalStore.pageWidth * ratio.value)
+    const y = Math.floor(line.y * ratio.value)
+    context.strokeStyle = line.color
+    context.lineWidth = 1
+    context.beginPath()
+    context.moveTo(0, y)
+    context.lineTo(width, y)
+    context.stroke()
   })
 }
 
@@ -401,7 +441,7 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   canvas#minimap-canvas(ref="canvasElement")
   .viewport.blink(v-if="viewportIsVisible" :style="viewportStyle")
 </template>
@@ -413,6 +453,8 @@ const viewportIsVisible = computed(() => {
   position relative
   margin 0
   padding 0
+  &.translucent-minimap
+    backdrop-filter blur(8px)
   .viewport
     cursor grab
     position absolute

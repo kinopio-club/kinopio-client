@@ -51,10 +51,17 @@ const backgroundStyles = computed(() => {
 // Image Url
 
 const kinopioBackgroundImageData = computed(() => {
-  const data = backgroundImages.find(item => {
-    const background = spaceStore.background
-    return background === item.url
-  })
+  let data
+  if (spaceStore.background) {
+    data = backgroundImages.find(item => {
+      const background = spaceStore.background
+      return background === item.url
+    })
+  } else {
+    data = backgroundImages.find(item => {
+      return item.isBlank
+    })
+  }
   return data
 })
 const backgroundUrl = computed(() => {

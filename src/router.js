@@ -1,14 +1,13 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
-import Space from '@/views/Space.vue'
 import consts from './consts.js'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+const router = {
+  history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
   // server level redirects in _redirects
 
@@ -29,18 +28,25 @@ const router = createRouter({
       }
     }, {
       path: '/',
+      alias: '/about',
+      name: 'about',
+      component: () => import('./views/About.vue')
+    }, {
+      path: '/app',
       name: 'space',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        if (!consts.isStaticPrerenderingPage) {
+          const globalStore = useGlobalStore()
+          const urlParams = new URLSearchParams(window.location.search)
+          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        }
         next()
       }
     }, {
       path: '/reset-password',
       name: 'reset-password',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -49,13 +55,13 @@ const router = createRouter({
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
         }
-        next()
         history.replaceState({}, document.title, window.location.origin)
+        next()
       }
     }, {
       path: '/update-arena-access-token',
       name: 'update-arena-access-token',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         const arenaReturnedCode = urlParams.get('code')
@@ -66,7 +72,7 @@ const router = createRouter({
       }
     }, {
       path: '/explore',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.shouldShowExploreOnLoad = true
@@ -74,7 +80,7 @@ const router = createRouter({
       }
     }, {
       path: '/new',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadNewSpace = true
@@ -82,7 +88,7 @@ const router = createRouter({
       }
     }, {
       path: '/inbox', // used by /add
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.loadInboxSpace = true
@@ -90,7 +96,7 @@ const router = createRouter({
       }
     }, {
       path: '/:space/:card',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
@@ -106,7 +112,7 @@ const router = createRouter({
       }
     }, {
       path: '/embed',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -118,7 +124,7 @@ const router = createRouter({
         let zoom = urlParams.get('zoom')
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
-        globalStore.spaceUrlToLoad = spaceId
+        globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
         globalStore.spaceZoomPercent = zoom
         globalStore.isEmbedMode = true
         next()
@@ -126,7 +132,7 @@ const router = createRouter({
     }, {
       path: '/donation-success',
       name: 'donation-success',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         globalStore.notifyThanksForDonating = true
@@ -135,7 +141,7 @@ const router = createRouter({
     }, {
       path: '/subscription-success',
       name: 'subscription-success',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -148,7 +154,7 @@ const router = createRouter({
     }, {
       path: '/group/invite',
       name: 'groupInvite',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -161,8 +167,8 @@ const router = createRouter({
     }, {
       path: '/invite',
       name: 'invite',
-      component: Space,
-      beforeEnter: (to, from, next) => {
+      component: () => import('./views/Space.vue'),
+      beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
         const urlParams = new URLSearchParams(window.location.search)
@@ -178,7 +184,7 @@ const router = createRouter({
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
-        userStore.initializeUser()
+        await userStore.restoreRemoteUser()
         globalStore.isLoadingSpace = true
         if (!spaceId) {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
@@ -200,7 +206,7 @@ const router = createRouter({
       }
     }, {
       path: '/:space',
-      component: Space,
+      component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
@@ -213,12 +219,7 @@ const router = createRouter({
       }
     }
   ]
-})
-
-router.beforeEach(async (to, from) => {
-  const userStore = useUserStore()
-  await userStore.initializeUser()
-})
+}
 
 export default router
 
@@ -228,7 +229,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   const apiStore = useApiStore()
   const apiKey = userStore.apiKey
   if (!apiKey) {
-    globalStore.spaceUrlToLoad = spaceId
+    globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
     next()
     return
@@ -236,7 +237,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   // join
   try {
     await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey })
-    globalStore.spaceUrlToLoad = spaceId
+    globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
     globalStore.addNotification({ message: 'You can now edit this space', type: 'success' })
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
   } catch (error) {
@@ -253,7 +254,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
 
 const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
   const globalStore = useGlobalStore()
-  globalStore.spaceUrlToLoad = spaceId
+  globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
   globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }
   next()
 }

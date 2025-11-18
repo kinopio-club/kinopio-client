@@ -19,6 +19,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
@@ -27,6 +28,8 @@ import debounce from 'lodash-es/debounce'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
+const debouncedStoreActions = new Map()
 
 export default function webSocketPlugin () {
   let websocket, currentSpaceRoom, isConnected
@@ -41,6 +44,7 @@ export default function webSocketPlugin () {
     const cardStore = useCardStore(pinia)
     const boxStore = useBoxStore(pinia)
     const connectionStore = useConnectionStore(pinia)
+    const lineStore = useLineStore(pinia)
     if (store === 'globalStore') {
       return globalStore
     } else if (store === 'spaceStore') {
@@ -53,6 +57,8 @@ export default function webSocketPlugin () {
       return boxStore
     } else if (store === 'connectionStore') {
       return connectionStore
+    } else if (store === 'lineStore') {
+      return lineStore
     } else {
       return globalStore
     }
@@ -122,6 +128,7 @@ export default function webSocketPlugin () {
     try {
       websocket.close()
       websocket = null
+      cleanupDebouncedActions()
     } catch (error) {
       console.error('🚒 closeWebsocket', error)
     }
@@ -162,6 +169,7 @@ export default function webSocketPlugin () {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     const broadcastStore = useBroadcastStore(pinia)
+    if (!globalStore.isSpacePage) { return }
     // prevent duplicate connections
     if (websocket || globalStore.isConnectingToBroadcast) {
       // console.info('🌙 websocket connection already in progress or established')
@@ -233,6 +241,47 @@ export default function webSocketPlugin () {
     }
   }
 
+  const cleanupDebouncedActions = () => {
+    debouncedStoreActions.forEach((actionKey) => {
+      actionKey.cancel()
+    })
+    debouncedStoreActions.clear()
+  }
+  const actionDelay = (actionKey) => {
+    actionKey = actionKey.toLowerCase()
+    const criticalActionTypes = ['create', 'add', 'delete', 'remove']
+    let isCritical
+    criticalActionTypes.find(actionTypes => {
+      if (actionKey.includes(actionTypes)) {
+        isCritical = true
+        return true
+      }
+    })
+    if (isCritical) {
+      return 0 // immediate
+    } else {
+      return 16 // 60fps
+    }
+  }
+  const debouncedAction = (store, pinia, action, updates) => {
+    const userId = updates?.userId || updates?.user?.id
+    const actionKey = `${userId}:${action}`
+    if (!debouncedStoreActions.has(actionKey)) {
+      const delay = actionDelay(actionKey)
+      debouncedStoreActions.set(
+        actionKey,
+        debounce((store, pinia, action, updates) => {
+          const piniaStore = getPiniaStore(store, pinia)
+          piniaStore[action](updates)
+          checkIfShouldUpdateLinkToItem(pinia, { action, updates })
+          checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
+        }, delay)
+      )
+    } else {
+      const debouncedAction = debouncedStoreActions.get(actionKey)
+      debouncedAction(store, pinia, action, updates)
+    }
+  }
   const receiveMessage = (pinia, data) => {
     const globalStore = useGlobalStore(pinia)
     const spaceStore = useSpaceStore(pinia)
@@ -240,6 +289,7 @@ export default function webSocketPlugin () {
     const { message, user } = data
     const { name, updates = {}, action } = message
     updates.user = user
+    updates.isFromBroadcast = true
     const store = message.store || 'globalStore'
     const isAction = Boolean(action)
     if (name === 'connected') {
@@ -260,13 +310,10 @@ export default function webSocketPlugin () {
     } else if (name === 'updateSpaceClients') {
       spaceStore.updateSpaceClients()
     } else if (isAction) {
-      updates.isFromBroadcast = true
       const piniaStore = getPiniaStore(store, pinia)
       if (piniaStore) {
-        piniaStore[action](updates)
+        debouncedAction(store, pinia, action, updates)
       }
-      checkIfShouldUpdateLinkToItem(pinia, { action, updates })
-      checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
     } else {
       console.warn('🌚 unhandled message', data)
     }
@@ -320,6 +367,7 @@ export default function webSocketPlugin () {
     const broadcastStore = useBroadcastStore(pinia)
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
+    if (!globalStore.isSpacePage) { return }
     const message = args[0]
     switch (name) {
       case 'connect':

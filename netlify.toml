@@ -1,5 +1,9 @@
 [dev]
-  targetPort = 8080
+ framework = "#static"
+ publish = "dist"
+ [dev.https]
+   certFile = ".cert/cert.pem"
+   keyFile = ".cert/key.pem"
 
 [[edge_functions]]
   path = "/*"

@@ -53,8 +53,10 @@ export default {
     if (!this.isKinopioUploadUrl(url)) {
       return url
     }
+    const isGif = url.includes('.gif')
+    if (isGif) { return url }
     if (maxDimensions) {
-      return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${url}`
+      return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${encodeURIComponent(url)}`
     } else {
       return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
     }
@@ -211,8 +213,6 @@ export default {
       x: position.x - spaceRect.x,
       y: position.y - spaceRect.y
     }
-    // console.log('space',position, spaceRect)
-
     // #app
     const app = document.getElementById('app')
     const appRect = app.getBoundingClientRect()
@@ -235,23 +235,6 @@ export default {
       x: this.roundToNearest(position.x, gridSpacing),
       y: this.roundToNearest(position.y, gridSpacing)
     }
-  },
-  cursorDirection (currentCursor, prevCursor) {
-    const xDelta = currentCursor.x - prevCursor.x
-    const yDelta = currentCursor.y - prevCursor.y
-    const noMovement = xDelta === 0 && yDelta === 0
-    const directions = {
-      left: xDelta < 0,
-      right: xDelta > 0,
-      up: yDelta < 0,
-      down: yDelta > 0,
-      noMovement
-    }
-    directions.leftDrag = directions.left || noMovement
-    directions.rightDrag = directions.right || noMovement
-    directions.upDrag = directions.up || noMovement
-    directions.downDrag = directions.down || noMovement
-    return directions
   },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
@@ -709,35 +692,18 @@ export default {
       return object[key]
     }
   },
-  timeout (ms, promise) {
-    // https://github.com/github/fetch/issues/175#issuecomment-216791333
-    return new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        reject(new Error('promise timeout'))
-      }, ms)
-      promise.then(
-        (res) => {
-          clearTimeout(timeoutId)
-          resolve(res)
-        },
-        (err) => {
-          clearTimeout(timeoutId)
-          reject(err)
-        }
-      )
-    })
-  },
   pluralize (word, condition) {
     if (condition || condition === 0) {
       word = word + 's'
     }
     return word
   },
-  truncated (string, limit) {
+  truncated (string, limit, character) {
+    character = character || '…'
     if (!string) { return '' }
     limit = limit || 60
     if (string.length <= limit) { return string }
-    string = string.substring(0, limit) + '…'
+    string = string.substring(0, limit) + character
     return string
   },
   insertStringAtIndex (string, insert, index) {
@@ -1173,6 +1139,12 @@ export default {
     return { infoWidth, infoHeight }
   },
 
+  // lines
+
+  lineElementFromId (lineId) {
+    return document.querySelector(`.line-info[data-line-id="${lineId}"]`)
+  },
+
   // rect
 
   isPointInsideRect (point, rect) {
@@ -1542,71 +1514,44 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
-  // mergeSpaceItems({ prevItems, newItems, selectedItemIds = [] }) {
-  //   const filteredPrevItems = prevItems.filter(Boolean)
-  //   const filteredNewItems = newItems.filter(Boolean)
-  //   const prevIds = filteredPrevItems.map(({ id }) => id)
-  //   const newIds = filteredNewItems.map(({ id }) => id)
-  //   const normalizedNew = this.normalizeItems(filteredNewItems)
-  //   const normalizedPrev = this.normalizeItems(filteredPrevItems)
-  //   const items = normalizedNew // [ id: {object } ]
-  //   const threshold = 30 * 1000 // 30 seconds
-  //   const now = Date.now()
 
-  //   // const addItems = []
-  //   // const updateItems = []
-  //   // const removeItems = []
+  // sync
 
-  //   newIds.forEach(id => {
-  //     const isSelected = selectedItemIds.includes(id)
-  //     const isUpdated = prevIds.includes(id)
-  //     const prevItem = normalizedPrev[id]
-  //     const newItem = normalizedNew[id]
-  //     const threshold = 30 * 1000 // 30 seconds
-  //     const now = Date.now()
-  //     // const isNewUpdate = dayjs(now).diff(prevItem.updatedAt) >= threshold
-
-  //     // add prev to new
-
-  //     // merge prev updates
-
-  //     // use selected prev positions to avoid ppsition jumping while dragging
-  //     if (isSelected) {
-  //       const { x, y } = prevItem
-  //       items[id].x = x
-  //       items[id].y = y
-  //     }
-
-  //     prevIds.filter(prevId => {
-  //       // .filter(id => {
-  //       // const isNew = !newIds.includes(prevId)
-  //         const isNotInNewItems = !newIds.includes(id)
-  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
-  //         return isNotInNewItems && isOldUpdate
-  //       // })
-  //     })
-
-  //     if (isUpdated) {
-  //       items[id] = { ...prevItem, ...newItem}
-  //     } else {
-  //       items.push()
-  //       addItems.push(normalizedNew[id])
-  //     }
-  //   })
-  //   // Handle removals
-  //   removeItems.push(
-  //     ...prevIds
-  //       .filter(id => {
-  //         const isNotInNewItems = !newIds.includes(id)
-  //         const isNotSelected = !selectedItemIds.includes(id)
-  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
-  //         return isNotInNewItems && isNotSelected && isOldUpdate
-  //       })
-  //       .map(id => normalizedPrev[id])
-  //   )
-  //   // return items , denomarlized
-  //   return { addItems, updateItems, removeItems }
-  // },
+  isSyncItemUpdated (remoteItem, localItem) {
+    let keys = Object.keys(remoteItem)
+    keys = keys.filter(key => key !== 'updatedAt')
+    return Boolean(keys.find(key => {
+      const isChanged = localItem[key] !== remoteItem[key]
+      if (isChanged) {
+        return true
+      }
+    }))
+  },
+  syncItems (remoteItems, localItems) {
+    const updateItems = []
+    const addItems = []
+    const removeItems = []
+    remoteItems.forEach(remoteItem => {
+      const localItem = localItems.find(item => item.id === remoteItem.id)
+      // update changed items
+      if (localItem) {
+        if (this.isSyncItemUpdated(remoteItem, localItem)) {
+          updateItems.push(remoteItem)
+        }
+      // add items not in local
+      } else {
+        addItems.push(remoteItem)
+      }
+    })
+    // remove items not in remote
+    localItems.forEach(localItem => {
+      const remoteItem = remoteItems.find(item => item.id === localItem.id)
+      if (!remoteItem) {
+        removeItems.push(localItem)
+      }
+    })
+    return { updateItems, addItems, removeItems }
+  },
   newSpaceBackground (space, user) {
     if (user.defaultSpaceBackgroundGradient) {
       space.backgroundGradient = user.defaultSpaceBackgroundGradient
@@ -1636,6 +1581,7 @@ export default {
       connections: [],
       connectionTypes: [],
       boxes: [],
+      lines: [],
       tags: [],
       users: [],
       userId: '',
@@ -1971,6 +1917,13 @@ export default {
       return id
     }
   },
+  newUrl (url) {
+    try {
+      return new URL(url)
+    } catch (error) {
+      return undefined
+    }
+  },
   spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     let url
     if (collaboratorKey || readOnlyKey) {
@@ -1984,16 +1937,17 @@ export default {
     url = new URL(url)
     return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
   },
-  urlFromSpaceAndCard ({ spaceId, cardId }) {
+  urlFromSpaceAndItem ({ spaceId, itemId }) {
     let url = `${consts.kinopioDomain()}/${spaceId}`
-    if (cardId) {
-      url = `${url}/${cardId}`
+    if (itemId) {
+      url = `${url}/${itemId}`
     }
     return url
   },
   inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
     if (!spaceId) { return }
     spaceName = this.normalizeString(spaceName)
+    spaceName = this.truncated(spaceName, 20, '-')
     let invite = ''
     let comment = ''
     if (collaboratorKey) {
@@ -2010,6 +1964,7 @@ export default {
   groupInviteUrl ({ groupId, groupName, collaboratorKey }) {
     if (!groupId || !collaboratorKey) { return }
     groupName = this.normalizeString(groupName)
+    groupName = this.truncated(groupName, 20, '-')
     const invite = `collaboratorKey=${collaboratorKey}`
     const url = `${consts.kinopioDomain()}/group/invite?groupId=${groupId}&${invite}&name=${groupName}`
     return url
@@ -2046,8 +2001,10 @@ export default {
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
-    url = url.replaceAll('?hidden=true', '')
-    const id = url.substring(url.length - uuidLength, url.length)
+    url = this.newUrl(url)
+    if (!url) { return }
+    const path = url.pathname
+    const id = path.substring(path.length - uuidLength, path.length)
     if (this.idIsValid(id)) { return id }
   },
   idIsValid (id) {
@@ -2310,6 +2267,9 @@ export default {
     })
     return isVideo
   },
+  urlIsSpotify (url) {
+    return url.includes('https://open.spotify.com')
+  },
   fileNameFromUrl (url) {
     if (!url) { return }
     if (!this.urlIsFile(url)) { return }
@@ -2340,7 +2300,12 @@ export default {
     if (split.length <= 1) {
       return undefined
     } else {
-      return split[1]
+      const splitFragment = split[1].split('#')
+      if (split.length <= 1) {
+        return split[1]
+      } else {
+        return splitFragment[0]
+      }
     }
   },
   urlType (url) {
@@ -2386,25 +2351,27 @@ export default {
   },
   addHiddenQueryStringToURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
-      url = url.trim()
-      url = this.clearTrailingSlash(url)
-      if (!this.urlIsWebsite(url)) { return }
-      const queryString = this.queryString(url) || ''
-      const domain = this.urlWithoutQueryString(url)
-      let queryObject = {}
-      if (queryString) {
-        queryObject = qs.decode(queryString)
+      const prevUrl = url.trim()
+      if (!this.urlIsWebsite(prevUrl)) { return }
+
+      url = this.newUrl(prevUrl)
+      if (!url) { return }
+
+      url.searchParams.set('hidden', 'true')
+      let newUrl = url.toString()
+      if (url.pathname === '/') {
+        newUrl = newUrl.replace(`${url.host}/`, url.host)
       }
-      queryObject.hidden = 'true'
-      const newUrl = qs.encode(domain, queryObject)
-      name = name.replace(url, newUrl)
+      name = name.replace(prevUrl, newUrl)
     })
     return name
   },
   removeHiddenQueryStringFromURLs (name) {
     const urls = this.urlsFromString(name)
+    if (!urls) { return name }
     urls.forEach(url => {
       const prevUrl = url
       url = url.replace('?hidden=true', '')
@@ -2498,7 +2465,7 @@ export default {
   // Upload
 
   isFileTooBig ({ file, userIsUpgraded }) {
-    const sizeLimit = 1024 * 1024 * 5 // 5mb
+    const sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
     }

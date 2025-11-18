@@ -64,7 +64,7 @@ const copy = async (event, type) => {
 
 <template lang="pug">
 dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .row.title-row
       span Developer
       .button-wrap
@@ -88,14 +88,14 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
     .row
       p
         img.icon.key(src="@/assets/key.svg")
-        span Keep your API Key secret
+        span API Key
     .row
       .badge.danger.copy-api-keys
         .button-wrap
           button(@click.left="copy($event, 'apiKey')")
             img.icon.copy(src="@/assets/copy.svg")
             span Copy API Key
-        p Anyone with your key can read, edit, and remove your cards and spaces
+        p Anyone with your key can read, edit, and remove your cards and spaces. So keep it private.
 </template>
 
 <style lang="stylus">

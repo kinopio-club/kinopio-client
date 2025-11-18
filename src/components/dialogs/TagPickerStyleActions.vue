@@ -58,11 +58,12 @@ const scrollIntoView = async () => {
 
 // tags
 
+const tags = computed(() => globalStore.getTags)
 const currentTags = computed(() => {
   if (props.tagNamesInCard.length) {
     return props.tagNamesInCard
   } else {
-    return globalStore.getTags
+    return []
   }
 })
 
@@ -144,8 +145,8 @@ const updateResultsSectionHeight = async () => {
 
 <template lang="pug">
 dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialogElement" @click.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section.results-section(v-if="currentTags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-    TagList(:tags="currentTags" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
+  section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    TagList(:tags="tags" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
 </template>
 
 <style lang="stylus">

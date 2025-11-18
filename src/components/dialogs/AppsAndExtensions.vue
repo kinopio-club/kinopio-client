@@ -101,7 +101,7 @@ const updateDialogHeight = async () => {
 
 <template lang="pug">
 dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .segmented-buttons
       button(:class="{active: state.isDesktop}" @click="toggleIsDesktop(true)")
         span Desktop
@@ -115,7 +115,7 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
       span.arrow.icon →
       img.icon(src="@/assets/computer.svg")
     .row
-      p App for Mac, Windows, and Linux
+      p Mac, Windows, and Linux
     .row
       a(href="https://dl.todesktop.com/201223j48l03cxi" download)
         button

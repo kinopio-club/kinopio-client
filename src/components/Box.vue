@@ -133,6 +133,8 @@ const updateShouldRenderParent = (value) => {
   state.shouldRenderParent = value
 }
 const shouldRender = computed(() => {
+  if (globalStore.disableViewportOptimizations) { return true }
+  // if (isConnectingFrom.value) { return true }
   return state.isVisibleInViewport || state.shouldRenderParent
 })
 
@@ -167,6 +169,11 @@ const removeViewportObserver = () => {
 
 // styles
 
+const fillColor = computed(() => {
+  let value = color.value
+  value = colord(value).alpha(0.5).toRgbString()
+  return value
+})
 const boxStyles = computed(() => {
   const { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
   const width = resizeWidth
@@ -180,9 +187,7 @@ const boxStyles = computed(() => {
     border: `${borderWidth}px solid ${color.value}`
   }
   if (hasFill.value && !background) {
-    let fillColor = color.value
-    fillColor = colord(fillColor).alpha(0.5).toRgbString()
-    styles.backgroundColor = fillColor
+    styles.backgroundColor = fillColor.value
   }
   return styles
 })
@@ -287,6 +292,7 @@ const isFiltered = computed(() => {
 const resizeIsVisible = computed(() => {
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
+  if (userStore.getUserIsCommentOnly) { return }
   return true
 })
 const startResizing = (event) => {
@@ -435,11 +441,11 @@ const remoteBoxDetailsVisibleColor = computed(() => {
     return undefined
   }
 })
-const isRemoteBoxDragging = computed(() => {
-  const remoteBoxesDragging = globalStore.remoteBoxesDragging
-  const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
-  return Boolean(isDragging)
-})
+// const isRemoteBoxDragging = computed(() => {
+//   const remoteBoxesDragging = globalStore.remoteBoxesDragging
+//   const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
+//   return Boolean(isDragging)
+// })
 const remoteSelectedColor = computed(() => {
   const remoteBoxesSelected = globalStore.remoteBoxesSelected
   const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
@@ -605,12 +611,12 @@ const isConnectingFrom = computed(() => {
 })
 const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
+  const isMember = userStore.getUserIsSpaceMember
   let isVisible
   if (isLocked.value) { return }
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (spaceIsOpen || canEditBox.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditBox.value || connectedConnectionTypes.value.length) {
     isVisible = true
   }
   return isVisible
@@ -671,13 +677,9 @@ const isInCheckedBox = computed(() => {
 // box focus
 
 const isFocusing = computed(() => props.box.id === globalStore.focusOnBoxId)
-const focusColor = computed(() => {
-  if (isFocusing.value) {
-    return currentUserColor.value
-  } else {
-    return null
-  }
-})
+const clearFocus = () => {
+  globalStore.focusOnBoxId = ''
+}
 </script>
 
 <template lang="pug">
@@ -699,7 +701,7 @@ const focusColor = computed(() => {
   :class="classes"
   ref="boxElement"
 )
-  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: fillColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
     .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   teleport(to="#box-infos")

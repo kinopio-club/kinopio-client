@@ -53,6 +53,14 @@ export const useConnectionStore = defineStore('connections', {
         return last(connectionTypes)
       }
     },
+    getPrevConnectionType () {
+      const id = this.prevConnectionTypeId
+      return this.typeById[id]
+    }
+  },
+
+  actions: {
+
     getAllConnectionsInViewport () {
       const elements = document.querySelectorAll('svg.connection')
       const paths = []
@@ -63,14 +71,6 @@ export const useConnectionStore = defineStore('connections', {
       })
       return paths
     },
-    getPrevConnectionType () {
-      const id = this.prevConnectionTypeId
-      return this.typeById[id]
-    }
-  },
-
-  actions: {
-
     getConnection (id) {
       return this.byId[id]
     },
@@ -190,6 +190,26 @@ export const useConnectionStore = defineStore('connections', {
       types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
       types.reverse()
       return types
+    },
+
+    // init remote
+
+    initializeRemoteConnections (remoteConnections) {
+      const localConnections = utils.clone(this.getAllConnections)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteConnections, localConnections)
+      console.info('🎑 remote connections', { updateItems, addItems, removeItems })
+      this.updateConnectionsState(updateItems)
+      addItems.forEach(connection => this.addConnectionToState(connection))
+      const ids = removeItems.map(connection => connection.id)
+      this.removeConnectionsFromState(ids)
+    },
+    initializeRemoteConnectionTypes (remoteTypes) {
+      const localTypes = utils.clone(this.getAllConnectionTypes)
+      const { updateItems, addItems, removeItems } = utils.syncItems(remoteTypes, localTypes)
+      console.info('🎑 remote connectionTypes', { updateItems, addItems, removeItems })
+      updateItems.forEach(type => this.updateConnectionTypeState(type))
+      addItems.forEach(type => this.addConnectionTypeToState(type))
+      removeItems.forEach(type => this.removeConnectionTypeFromState(type))
     },
 
     // indexes
@@ -363,7 +383,7 @@ export const useConnectionStore = defineStore('connections', {
 
     // remove
 
-    removeConnectionsState (ids) {
+    removeConnectionsFromState (ids) {
       for (const id of ids) {
         // remove from indexes
         const connection = this.getConnection(id)
@@ -388,11 +408,11 @@ export const useConnectionStore = defineStore('connections', {
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
-      this.removeConnectionsState(ids)
+      this.removeConnectionsFromState(ids)
       for (const id of ids) {
         await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
       }
-      broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsState' })
+      broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsFromState' })
     },
     async removeConnection (id) {
       await this.removeConnections([id])
@@ -404,6 +424,11 @@ export const useConnectionStore = defineStore('connections', {
         delete this.typeById[type.id]
       }
     },
+    removeConnectionTypeFromState (type) {
+      const idIndex = this.typeAllIds.indexOf(type.id)
+      this.typeAllIds.splice(idIndex, 1)
+      delete this.typeById[type.id]
+    },
     async removeAllUnusedConnectionTypes () {
       const apiStore = useApiStore()
       const broadcastStore = useBroadcastStore()
@@ -414,9 +439,7 @@ export const useConnectionStore = defineStore('connections', {
       types = types.filter(type => Boolean(type))
       const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
       for (const type of typesToRemove) {
-        const idIndex = this.typeAllIds.indexOf(type.id)
-        this.typeAllIds.splice(idIndex, 1)
-        delete this.typeById[type.id]
+        this.removeConnectionTypeFromState(type)
         await apiStore.addToQueue({ name: 'removeConnectionType', body: type })
       }
       broadcastStore.update({ updates: typesToRemove, store: 'connectionStore', action: 'removeConnectionTypesRemote' })
@@ -433,36 +456,42 @@ export const useConnectionStore = defineStore('connections', {
     // path
 
     async updateConnectionPathsByItemIds (itemIds) {
-      await nextTick()
-      const globalStore = useGlobalStore()
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      if (!itemIds.length) { return }
-      const connections = this.getConnectionsByItemIds(itemIds)
-      const updates = []
-      connections.forEach(connection => {
-        let startItem = utils.itemElementDimensions({ id: connection.startItemId })
-        let endItem = utils.itemElementDimensions({ id: connection.endItemId })
-        startItem = spaceStore.updateItemWithItemType(startItem)
-        endItem = spaceStore.updateItemWithItemType(endItem)
-        const path = this.getConnectionPathBetweenItems({
-          startItem,
-          endItem,
-          controlPoint: connection.controlPoint
+      try {
+        await nextTick()
+        const globalStore = useGlobalStore()
+        const userStore = useUserStore()
+        const spaceStore = useSpaceStore()
+        if (!itemIds.length) { return }
+        const connections = this.getConnectionsByItemIds(itemIds) || []
+        const updates = []
+        connections.forEach(connection => {
+          // perf: use dom lookup bc faster than getting state item
+          let startItem = utils.itemElementDimensions({ id: connection.startItemId })
+          let endItem = utils.itemElementDimensions({ id: connection.endItemId })
+          startItem = spaceStore.updateItemWithItemType(startItem)
+          endItem = spaceStore.updateItemWithItemType(endItem)
+
+          const path = this.getConnectionPathBetweenItems({
+            startItem,
+            endItem,
+            controlPoint: connection.controlPoint
+          })
+          if (!path) { return }
+          const update = {
+            id: connection.id,
+            path
+          }
+          updates.push(update)
         })
-        if (!path) { return }
-        const update = {
-          id: connection.id,
-          path
+        if (userStore.getUserCanEditSpace) {
+          this.updateConnections(updates)
+        } else {
+          this.updateConnectionsState(updates)
         }
-        updates.push(update)
-      })
-      if (userStore.getUserCanEditSpace) {
-        this.updateConnections(updates)
-      } else {
-        this.updateConnectionsState(updates)
+        globalStore.clearShouldExplicitlyRenderCardIds()
+      } catch (error) {
+        console.error('🚒 updateConnectionPathsByItemIds', error, itemIds)
       }
-      globalStore.clearShouldExplicitlyRenderCardIds()
     },
     updateConnectionPathByItemId (itemId) {
       this.updateConnectionPathsByItemIds([itemId])
