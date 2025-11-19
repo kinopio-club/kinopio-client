@@ -591,8 +591,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
-        span {{currentSpaceName}}{{' '}}
-        img.icon.visit(src="@/assets/visit.svg")
+        span {{currentSpaceName}}
       .label-badge-row.row
         .label-badge.group-label-badge(v-if="spaceGroup")
           GroupLabel(:group="spaceGroup")

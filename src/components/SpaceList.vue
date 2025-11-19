@@ -531,7 +531,6 @@ span.space-list-wrap
       margin-top 6px
     .icon.group
       width initial
-      height 10px
 
     .user
       margin-right 6px
