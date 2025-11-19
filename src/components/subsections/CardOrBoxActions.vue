@@ -126,16 +126,11 @@ const items = computed(() => {
   return cards.concat(boxes)
 })
 const label = computed(() => {
-  let label, cardLabel, boxLabel
-  if (isCards.value) {
-    cardLabel = 'card'
-  }
+  let value = 'card'
   if (isBoxes.value) {
-    boxLabel = 'box'
-  } else {
-    label = cardLabel || boxLabel
+    value = 'box'
   }
-  return label?.toUpperCase()
+  return value.toUpperCase()
 })
 const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBoxId))
 const cardIds = computed(() => props.cards.map(card => card.id))

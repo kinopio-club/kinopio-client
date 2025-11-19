@@ -169,14 +169,6 @@ const styles = computed(() => {
 
 // cards
 
-const moreCardOptionsLabel = computed(() => {
-  if (multipleCardsSelectedIds.value.length > 1) {
-    return 'CARDS'
-  } else {
-    return 'CARD'
-  }
-})
-
 const cardCanBeSplit = computed(() => {
   if (!oneCardIsSelected.value) { return }
   if (!cards.value.length) { return }
