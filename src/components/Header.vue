@@ -591,10 +591,11 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
-        GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
       .label-badge-row.row
+        .label-badge.group-label-badge(v-if="spaceGroup")
+          GroupLabel(:group="spaceGroup")
         .label-badge
           span(:class="{'invisible': state.readOnlyJiggle}")
             span Read Only
@@ -682,7 +683,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .space-name-wrap(:class="{'space-is-hidden': currentSpaceIsHidden}")
-                  GroupLabel(:group="spaceGroup")
                   img.icon.inbox-icon(v-if="currentSpaceIsInbox" src="@/assets/inbox.svg")
 
                   //- span(v-if="currentSpaceIsTemplate")
@@ -709,6 +709,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 //- .label-badge
                 //-   //- (v-if="currentSpaceIsTemplate")
                 //-   img.icon.templates(src="@/assets/templates.svg")
+
+                .label-badge.group-label-badge(v-if="spaceGroup")
+                  GroupLabel(:group="spaceGroup")
 
                 //- read only badge
                 .label-badge(v-if="!userCanEditSpace")
@@ -934,6 +937,19 @@ header
         background-color var(--success-background)
       &.secondary
         background-color var(--secondary-background)
+    .group-label-badge
+      background-color transparent
+      padding 0
+      .group-badge
+        padding 0 5px
+        font-size 12px
+        vertical-align 0
+      .icon.group
+        height 9px
+      .emoji
+        font-size 11px
+        vertical-align 0px
+        margin-right 3px
 
   .invisible
     visibility hidden
