@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -21,6 +22,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         const userStore = useUserStore()
         const spaceStore = useSpaceStore()
         const groupStore = useGroupStore()
+        const cardStore = useCardStore()
         const currentUserId = userStore.id
         const spaceIsOpen = spaceStore.privacy === 'open'
         // space members
@@ -30,7 +32,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         let recipients = members
         if (spaceIsOpen) {
           let contributors = []
-          contributors = spaceStore.cards.map(card => card.userId)
+          contributors = cardStore.getAllCards.map(card => card.userId)
           recipients = members.concat(contributors)
         }
         // group users who added cards
