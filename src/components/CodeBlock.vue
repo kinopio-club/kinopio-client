@@ -125,7 +125,7 @@ const copy = async (event) => {
   width calc(100% - 8px)
   .code-buttons
     position absolute
-    right 0
+    right -13px
     bottom -6px
     width max-content
     .button-wrap
@@ -152,9 +152,9 @@ const copy = async (event) => {
         span
           color var(--primary)
   pre
-    width 100%
+    width 108%
     max-height 300px
-    overflow scroll !important
+    overflow-x auto
     white-space pre !important
     padding 4px
     padding-right 60px
