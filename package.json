@@ -15,7 +15,6 @@
   "dependencies": {
     "@aguezz/qs-parse": "^2.0.0",
     "@nozbe/microfuzz": "^1.0.0",
-    "@worker-tools/html-rewriter": "^0.1.0-pre.19",
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
     "dayjs": "^1.9.1",
