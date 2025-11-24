@@ -374,7 +374,7 @@ export const useUserStore = defineStore('users', {
         this.restoreRemoteUser()
         this.restoreUserAssociatedData()
       } else {
-        this.createNewUser()
+        await this.createNewUser()
         themeStore.restoreTheme()
       }
       globalStore.triggerUserIsLoaded()
