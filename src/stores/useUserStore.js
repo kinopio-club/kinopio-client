@@ -295,8 +295,12 @@ export const useUserStore = defineStore('users', {
       console.info('🌸 Create new user')
       this.themeIsSystem = true
       this.appleAppAccountToken = uuidv4()
-      const allState = { ...this.$state }
-      cache.saveUser(allState)
+      this.isAnon = true
+      this.color = randomColor({ luminosity: 'light', seed: this.id })
+      const apiStore = useApiStore()
+      const response = await apiStore.createAnonymousUser(this.getUserAllState)
+      const user = await response.json()
+      await this.initializeUserState(user)
     },
     async restoreRemoteUser () {
       const apiStore = useApiStore()

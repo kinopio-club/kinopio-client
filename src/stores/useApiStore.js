@@ -307,6 +307,13 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+    // Anonymous User
+
+    async createAnonymousUser (user) {
+      const options = await this.requestOptions({ method: 'POST', body: user })
+      return fetch(`${consts.apiHost()}/user/create-anonymous`, options)
+    },
+
     // Session Token (sign up spam mitigation)
 
     async createSessionToken (token) {
