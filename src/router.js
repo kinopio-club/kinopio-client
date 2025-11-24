@@ -36,6 +36,7 @@ const router = {
       name: 'space',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
+        console.log('🍇🍇🍇🍇 APP')
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
           const urlParams = new URLSearchParams(window.location.search)
@@ -208,6 +209,7 @@ const router = {
       path: '/:space',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
+        console.log('🍇🍇🍇🍇 SPACE', new URLSearchParams(window.location.search))
         const globalStore = useGlobalStore()
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
