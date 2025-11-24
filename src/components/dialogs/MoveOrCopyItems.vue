@@ -253,9 +253,9 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true" :shouldExcludeCurrentSpace="true")
     //- recent spaces
-    .row.recent-spaces-row(v-if="recentSpaces.length")
-      .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
-        span {{recentSpace.name}}
+    //- .row.recent-spaces-row(v-if="recentSpaces.length")
+    //-   .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
+    //-     span {{recentSpace.name}}
     //- submit button
     button(@click.left="moveOrCopyToSpace" :class="{active: state.loading}")
       img.icon.cut(v-if="actionIsMove" src="@/assets/cut.svg")
