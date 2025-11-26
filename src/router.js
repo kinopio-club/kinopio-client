@@ -184,7 +184,7 @@ const router = {
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
-        await userStore.restoreRemoteUser()
+        await userStore.initializeUser()
         globalStore.isLoadingSpace = true
         if (!spaceId) {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
@@ -194,15 +194,16 @@ const router = {
         globalStore.isPresentationMode = isPresentationMode
         // edit
         if (collaboratorKey) {
-          inviteToEdit({ next, spaceId, collaboratorKey })
+          await inviteToEdit({ spaceId, collaboratorKey })
         // read only
         } else if (readOnlyKey) {
           inviteToReadOnly({ next, spaceId, readOnlyKey })
         // error
         } else {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
-          next()
         }
+        // load space
+        next()
       }
     }, {
       path: '/:space',
@@ -227,11 +228,11 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   const globalStore = useGlobalStore()
   const userStore = useUserStore()
   const apiStore = useApiStore()
-  const apiKey = userStore.apiKey
-  if (!apiKey) {
+  const isSignedIn = userStore.getUserIsSignedIn
+  if (!isSignedIn) {
     globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
-    next()
+    globalStore.currentUserIsInvitedButCannotEditCurrentSpace = true
     return
   }
   // join
@@ -248,13 +249,10 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
       globalStore.addNotification({ message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
     }
   }
-  // load
-  next()
 }
 
 const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
   const globalStore = useGlobalStore()
   globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
   globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }
-  next()
 }

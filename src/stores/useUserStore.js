@@ -21,7 +21,7 @@ import dayjs from 'dayjs'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support, 2014
 import uniqBy from 'lodash-es/uniqBy'
 
-export const useUserStore = defineStore('users', {
+export const useUserStore = defineStore('user', {
   state: () => ({
     id: nanoid(),
     lastSpaceId: '',

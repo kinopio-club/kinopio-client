@@ -384,17 +384,19 @@ export const useSpaceStore = defineStore('space', {
           globalStore.updateNotifySpaceNotFound(true)
           return
         }
+        // space not found
         if (error.status === 404) {
           globalStore.updateNotifySpaceNotFound(true)
-          this.loadLastSpace(space) //
+          this.loadLastSpace(space)
         }
+        // space unauthorized
         if (error.status === 401) {
           globalStore.updateNotifySpaceNotFound(true)
-          this.removeLocalSpaceIfUserIsRemoved(space) //
-          this.loadLastSpace(space) //
+          this.loadLastSpace(space)
           cache.removeInvitedSpace(space)
           userStore.updateUserFavoriteSpace(space, false)
         }
+        // server error
         if (error.status === 500) {
           globalStore.updateNotifyConnectionError(true)
         }
