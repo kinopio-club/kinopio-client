@@ -205,12 +205,6 @@ const signUp = async (event) => {
     globalStore.clearAllNotifications()
     // update user
     userStore.initializeUserState(newUser)
-    // update and save spaces
-    await backupLocalSpaces()
-    await migrationSpacesConnections()
-    await updateLocalSpacesUser()
-    updateCurrentSpaceWithNewUser(currentUser, newUser)
-    await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
     userStore.checkIfShouldJoinGroup()
@@ -285,11 +279,6 @@ const notifyIsJoiningGroup = () => {
 }
 
 // update spaces on success
-
-const backupLocalSpaces = async () => {
-  const spaces = await cache.getAllSpaces()
-  await cache.saveLocal('spacesBackup', spaces)
-}
 const migrationSpacesConnections = async () => {
   const spaces = await cache.getAllSpaces()
   const newSpaces = spaces.map(space => {
@@ -307,13 +296,6 @@ const updateLocalSpacesUser = async () => {
   for (const space of newSpaces) {
     await cache.saveSpace(space)
   }
-}
-const updateCurrentSpaceWithNewUser = (previousUser, newUser) => {
-  const userIsSpaceUser = userStore.getUserIsSpaceUserByUser(previousUser)
-  if (!userIsSpaceUser) { return }
-  spaceStore.removeUserFromSpace(previousUser)
-  spaceStore.addUserToSpace(newUser)
-  spaceStore.spectators = []
 }
 const removeUneditedSpace = async (spaceName) => {
   const currentSpace = await cache.getSpaceByName(spaceName)
