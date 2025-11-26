@@ -218,8 +218,7 @@ export const useApiStore = defineStore('api', {
       body.spaceId = spaceId || spaceStore.id
       body.userId = userStore.id
       body.clientCreatedAt = new Date()
-      const isSignedIn = userStore.getUserIsSignedIn
-      if (!isSignedIn) { return }
+      if (!userStore.getUserHasAPIKey) { return }
       const newItem = {
         name,
         body

@@ -114,6 +114,9 @@ export const useUserStore = defineStore('user', {
     getUserIsSignedIn () {
       return Boolean(this.apiKey) && !this.isAnonymous
     },
+    getUserHasAPIKey () {
+      return Boolean(this.apiKey)
+    },
     getUserCardsCreatedIsOverLimit () {
       const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
       if (this.isUpgraded) { return }
