@@ -101,6 +101,7 @@ const router = {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
+        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         if (urlParams.get('present')) {
           globalStore.isPresentationMode = true
         }
@@ -215,6 +216,7 @@ const router = {
         if (urlParams.get('present')) {
           globalStore.isPresentationMode = true
         }
+        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
