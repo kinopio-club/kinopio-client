@@ -39,6 +39,7 @@ export const useUserStore = defineStore('users', {
     cardsCreatedCountRaw: 0,
     isUpgraded: false,
     isModerator: false,
+    isAnonymous: false,
     filterShowUsers: false,
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
@@ -295,7 +296,7 @@ export const useUserStore = defineStore('users', {
       console.info('🌸 Create new user')
       this.themeIsSystem = true
       this.appleAppAccountToken = uuidv4()
-      this.isAnon = true
+      this.isAnonymous = true
       this.color = randomColor({ luminosity: 'light', seed: this.id })
       const apiStore = useApiStore()
       const response = await apiStore.createAnonymousUser(this.getUserAllState)
