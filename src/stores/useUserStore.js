@@ -112,7 +112,7 @@ export const useUserStore = defineStore('users', {
       return utils.userMeta(this.getUserAllState, spaceStore.getSpaceAllState)
     },
     getUserIsSignedIn () {
-      return Boolean(this.apiKey)
+      return Boolean(this.apiKey) && !this.isAnonymous
     },
     getUserCardsCreatedIsOverLimit () {
       const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
