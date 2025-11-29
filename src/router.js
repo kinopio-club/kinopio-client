@@ -101,6 +101,7 @@ const router = {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
+        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         if (urlParams.get('present')) {
           globalStore.isPresentationMode = true
         }
@@ -171,6 +172,7 @@ const router = {
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
+        const spaceStore = useSpaceStore()
         const urlParams = new URLSearchParams(window.location.search)
         const spaceId = urlParams.get('spaceId')
         globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
@@ -191,14 +193,12 @@ const router = {
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
         globalStore.isPresentationMode = isPresentationMode
         await userStore.restoreRemoteUser()
-        globalStore.isLoadingSpace = true
+        await spaceStore.updateSpaceCollaborator()
         const isInvalid = !globalStore.collaboratorKey && !globalStore.spaceReadOnlyKey
-        if (!spaceId) {
+        if (isInvalid || !spaceId) {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
         }
-        if (isInvalid) {
-          globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
-        }
+        globalStore.isLoadingSpace = true
         next()
       }
     }, {
@@ -211,6 +211,7 @@ const router = {
         if (urlParams.get('present')) {
           globalStore.isPresentationMode = true
         }
+        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }

@@ -629,6 +629,7 @@ const remove = () => {
   const selectedConnectionIds = globalStore.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
   const boxes = boxStore.getBoxesSelected
+  const lines = lineStore.getLinesSelected
   selectedConnectionIds.forEach(connectionId => {
     if (canEditConnectionById(connectionId)) {
       connectionStore.removeConnection(connectionId)
@@ -643,6 +644,12 @@ const remove = () => {
     const canEditBox = userStore.getUserCanEditBox(box)
     if (canEditBox) {
       boxStore.removeBox(box.id)
+    }
+  })
+  lines.forEach(line => {
+    const canEditLines = userStore.getUserIsSpaceMember
+    if (canEditLines) {
+      lineStore.removeLine(line.id)
     }
   })
   connectionStore.removeAllUnusedConnectionTypes()
