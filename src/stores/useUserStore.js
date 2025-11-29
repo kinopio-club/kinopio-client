@@ -367,6 +367,7 @@ export const useUserStore = defineStore('users', {
     async initializeUser () {
       const globalStore = useGlobalStore()
       const themeStore = useThemeStore()
+      const spaceStore = useSpaceStore()
       const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.info('🌸 Initialize user from cache', cachedUser.id)
@@ -380,6 +381,7 @@ export const useUserStore = defineStore('users', {
       }
       globalStore.triggerUserIsLoaded()
       this.checkIfShouldJoinGroup()
+      await spaceStore.updateSpaceCollaborator()
       console.log('🍍 initializeUser', this.getUserAllState)
     },
 
