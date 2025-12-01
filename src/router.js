@@ -192,7 +192,6 @@ const router = {
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
         globalStore.isPresentationMode = isPresentationMode
-        await userStore.initializeUser()
         await spaceStore.updateSpaceCollaborator()
         const isInvalid = !globalStore.collaboratorKey && !globalStore.spaceReadOnlyKey
         if (isInvalid || !spaceId) {
