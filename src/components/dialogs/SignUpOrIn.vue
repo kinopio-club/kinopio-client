@@ -231,12 +231,6 @@ const signIn = async (event) => {
     globalStore.isLoadingSpace = true
     globalStore.addNotification({ message: 'Signing In…' })
     userStore.initializeUserState(result)
-    // update edited local spaces to remote user
-    await removeUneditedSpace('Hello Kinopio')
-    await removeUneditedSpace('Inbox')
-    await migrationSpacesConnections()
-    await updateLocalSpacesUser()
-    await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
     userStore.checkIfShouldJoinGroup()
@@ -276,57 +270,6 @@ const notifySignedIn = () => {
 const notifyIsJoiningGroup = () => {
   if (!globalStore.shouldNotifyIsJoiningGroup) { return }
   globalStore.updateNotifyIsJoiningGroup(true)
-}
-
-// update spaces on success
-const migrationSpacesConnections = async () => {
-  const spaces = await cache.getAllSpaces()
-  const newSpaces = spaces.map(space => {
-    space.connections = utils.migrationConnections(space.connections)
-    return space
-  })
-  newSpaces.forEach(space => {
-    cache.saveSpace(space)
-  })
-}
-const updateLocalSpacesUser = async () => {
-  const user = userStore.getUserPublicMeta
-  const spaces = await cache.getAllSpaces()
-  const newSpaces = utils.updateSpacesUser(user, spaces)
-  for (const space of newSpaces) {
-    await cache.saveSpace(space)
-  }
-}
-const removeUneditedSpace = async (spaceName) => {
-  const currentSpace = await cache.getSpaceByName(spaceName)
-  if (!currentSpace) { return }
-  let isInvitedSpaces = await cache.invitedSpaces()
-  isInvitedSpaces = Boolean(isInvitedSpaces.length)
-  let space
-  if (spaceName === 'Hello Kinopio') {
-    space = helloSpace
-  } else if (spaceName === 'Inbox') {
-    space = inboxSpace
-  }
-  const cardNames = space.cards.map(card => card.name)
-  let spaceIsEdited
-  const cards = currentSpace?.cards || []
-  cards.forEach(card => {
-    if (!card.name.trim()) { return }
-    const cardIsNew = !cardNames.includes(card.name)
-    if (cardIsNew) {
-      spaceIsEdited = true
-    }
-  })
-  if (!spaceIsEdited) {
-    console.info('🌹 signIn removeUneditedSpace', spaceName)
-    await cache.deleteSpace(currentSpace)
-    if (!isInvitedSpaces) {
-      shouldLoadLastSpace = true
-    }
-  } else {
-    console.info('🌹 signIn removeUneditedSpace isEdited: keep space', spaceName, spaceIsEdited, cardNames, currentSpace?.cards)
-  }
 }
 
 // update user on success
