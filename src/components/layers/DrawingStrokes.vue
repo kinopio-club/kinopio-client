@@ -91,8 +91,7 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  paths: [],
-  eraserMasks: []
+  paths: []
 })
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
@@ -112,7 +111,6 @@ const clearDrawing = () => {
   spaceStrokes = []
   remoteStrokes = []
   state.paths = []
-  state.eraserMasks = []
 }
 
 // points
@@ -201,11 +199,7 @@ const createPathFromStroke = (stroke) => {
 const renderStroke = (stroke, shouldPreventBroadcast) => {
   const path = createPathFromStroke(stroke)
   if (path) {
-    if (path.isEraser) {
-      state.eraserMasks.push(path)
-    } else {
-      state.paths.push(path)
-    }
+    state.paths.push(path)
     broadcastAddStroke(stroke, shouldPreventBroadcast)
   }
 }
@@ -248,7 +242,6 @@ const draw = (event) => {
 }
 const redrawStrokes = async () => {
   state.paths = []
-  state.eraserMasks = []
   const allStrokes = [...spaceStrokes, ...remoteStrokes]
   allStrokes.forEach(stroke => {
     renderStroke(stroke, true)
@@ -345,78 +338,30 @@ svg.drawing-strokes(
     mask#eraserMask
       rect(:width="pageWidth" :height="pageHeight" fill="white")
       //- Add eraser strokes as black shapes to create cutouts
-      template(v-for="eraser in state.eraserMasks" :key="eraser.id")
-        circle(
-          v-if="eraser.type === 'circle'"
-          :cx="eraser.x"
-          :cy="eraser.y"
-          :r="eraser.r"
-          fill="black"
-        )
-        path(
-          v-else
-          :d="eraser.d"
-          stroke="black"
-          :stroke-width="eraser.width"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        )
-
-  //- Main drawing group with mask applied
-  g(:mask="'url(#eraserMask)'")
-    //- Render all drawing paths (non-eraser)
-    template(v-for="path in state.paths" :key="path.id")
-      circle(
-        v-if="path.type === 'circle'"
-        :cx="path.x"
-        :cy="path.y"
-        :r="path.r"
-        :fill="path.color"
-      )
-      path(
-        v-else
-        :d="path.d"
-        :stroke="path.color"
-        :stroke-width="path.width"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      )
-
-//- duplicate ^ into Space.vue
-teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
-  svg.drawing-strokes(
-    ref="svgElement"
-    :width="pageWidth"
-    :height="pageHeight"
-  )
-    defs
-      mask#eraserMask
-        rect(:width="pageWidth" :height="pageHeight" fill="white")
-        //- Add eraser strokes as black shapes to create cutouts
-        template(v-for="eraser in state.eraserMasks" :key="eraser.id")
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="path.isEraser")
           circle(
-            v-if="eraser.type === 'circle'"
-            :cx="eraser.x"
-            :cy="eraser.y"
-            :r="eraser.r"
+            v-if="path.type === 'circle'"
+            :cx="path.x"
+            :cy="path.y"
+            :r="path.r"
             fill="black"
           )
           path(
             v-else
-            :d="eraser.d"
+            :d="path.d"
             stroke="black"
-            :stroke-width="eraser.width"
+            :stroke-width="path.width"
             fill="none"
             stroke-linecap="round"
             stroke-linejoin="round"
           )
 
-    //- Main drawing group with mask applied
-    g(:mask="'url(#eraserMask)'")
-      //- Render all drawing paths (non-eraser)
-      template(v-for="path in state.paths" :key="path.id")
+  //- Main drawing group with mask applied
+  g(:mask="'url(#eraserMask)'")
+    //- Render all drawing paths (non-eraser)
+    template(v-for="path in state.paths" :key="path.id")
+      template(v-if="!path.isEraser")
         circle(
           v-if="path.type === 'circle'"
           :cx="path.x"
@@ -433,6 +378,58 @@ teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
           stroke-linecap="round"
           stroke-linejoin="round"
         )
+
+//- duplicate ^ into Space.vue
+teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
+  svg.drawing-strokes(
+    ref="svgElement"
+    :width="pageWidth"
+    :height="pageHeight"
+  )
+    defs
+      mask#eraserMask
+        rect(:width="pageWidth" :height="pageHeight" fill="white")
+        //- Add eraser strokes as black shapes to create cutouts
+        template(v-for="path in state.paths" :key="path.id")
+          template(v-if="path.isEraser")
+            circle(
+              v-if="path.type === 'circle'"
+              :cx="path.x"
+              :cy="path.y"
+              :r="path.r"
+              fill="black"
+            )
+            path(
+              v-else
+              :d="path.d"
+              stroke="black"
+              :stroke-width="path.width"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            )
+
+    //- Main drawing group with mask applied
+    g(:mask="'url(#eraserMask)'")
+      //- Render all drawing paths (non-eraser)
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="!path.isEraser")
+          circle(
+            v-if="path.type === 'circle'"
+            :cx="path.x"
+            :cy="path.y"
+            :r="path.r"
+            :fill="path.color"
+          )
+          path(
+            v-else
+            :d="path.d"
+            :stroke="path.color"
+            :stroke-width="path.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          )
 
 </template>
 
