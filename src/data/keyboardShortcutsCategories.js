@@ -14,6 +14,10 @@ const categories = [
     color: '#88cefa'
   },
   {
+    name: 'Drawing',
+    color: 'khaki'
+  },
+  {
     name: 'Navigate',
     color: '#ffbfcb'
   },

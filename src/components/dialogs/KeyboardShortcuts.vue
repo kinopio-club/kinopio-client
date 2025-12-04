@@ -152,16 +152,27 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon.pencil(src="@/assets/pencil.svg")
             span Drawing Mode
           .badge.keyboard-shortcut D
+
+    //- Drawing
+    template(v-if="categoryIsVisible('Drawing')")
+      .section-title
+        .badge.info(:style="{ 'background-color': categoryColor('Drawing') }") Drawing
+      article
         .row
           .badge.title
             img.icon.brush-size(src="@/assets/brush-size-l.svg")
-            span Drawing: Cycle Brush Size
+            span Cycle Brush Size
           .badge.keyboard-shortcut S
         .row
           .badge.title
             img.icon.eraser(src="@/assets/eraser.svg")
-            span Drawing: Toggle Eraser
+            span Toggle Eraser
           .badge.keyboard-shortcut E
+        .row
+          .badge.title
+            img.icon(src="@/assets/constrain-axis.svg")
+            span Straight Lines
+          .badge.keyboard-shortcut Shift-Drag
 
     //- Navigate
     template(v-if="categoryIsVisible('Navigate')")

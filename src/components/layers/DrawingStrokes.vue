@@ -21,6 +21,7 @@ const broadcastStore = useBroadcastStore()
 
 const svgElement = ref(null)
 let isDrawing = false
+let startPoint
 let currentStroke = []
 let currentStrokeId = ''
 let spaceStrokes = []
@@ -122,7 +123,7 @@ const strokeDiameter = computed(() => {
 })
 const createPoint = (event) => {
   const { x, y } = utils.cursorPositionInSpace(event)
-  return {
+  const point = {
     id: currentStrokeId,
     x,
     y,
@@ -130,6 +131,17 @@ const createPoint = (event) => {
     diameter: strokeDiameter.value,
     isEraser: globalStore.drawingEraserIsActive
   }
+  const isStraightLine = startPoint && event.shiftKey
+  if (isStraightLine) {
+    const xDelta = Math.abs(startPoint.x - point.x)
+    const yDelta = Math.abs(startPoint.y - point.y)
+    if (yDelta > xDelta) {
+      point.x = startPoint.x
+    } else {
+      point.y = startPoint.y
+    }
+  }
+  return point
 }
 
 // broadcast
@@ -218,6 +230,7 @@ const startDrawing = (event) => {
   currentStrokeId = nanoid()
   currentStroke = []
   const point = createPoint(event)
+  startPoint = point
   currentStroke.push(point)
   renderStroke([point])
 }
@@ -261,6 +274,7 @@ const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
   if (!currentStroke.length) {
     isDrawing = false
+    startPoint = null
     return
   }
   // Only add to stroke colors if it's not an eraser
