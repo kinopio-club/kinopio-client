@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import drawingStrokesDOM from '@/components/layers/drawingStrokesDOM.vue'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -19,7 +20,6 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const broadcastStore = useBroadcastStore()
 
-const svgElement = ref(null)
 let isDrawing = false
 let startPoint
 let currentStroke = []
@@ -96,8 +96,6 @@ const state = reactive({
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
-const pageHeight = computed(() => globalStore.pageHeight)
-const pageWidth = computed(() => globalStore.pageWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
 const spaceComponentIsMounted = computed(() => globalStore.spaceComponentIsMounted)
@@ -206,7 +204,7 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
 // for minimap
 const updateDrawingDataUrl = async () => {
   await nextTick()
-  const element = svgElement.value
+  const element = document.querySelector('svg.drawing-strokes')
   const svgString = new XMLSerializer().serializeToString(element)
   const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
   globalStore.drawingDataUrl = dataUrl
@@ -329,123 +327,12 @@ const updatePageSizes = () => {
 </script>
 
 <template lang="pug">
-svg.drawing-strokes(
-  ref="svgElement"
-  :width="pageWidth"
-  :height="pageHeight"
-)
-  defs
-    mask#eraserMask
-      rect(:width="pageWidth" :height="pageHeight" fill="white")
-      //- Add eraser strokes as black shapes to create cutouts
-      template(v-for="path in state.paths" :key="path.id")
-        template(v-if="path.isEraser")
-          circle(
-            v-if="path.type === 'circle'"
-            :cx="path.x"
-            :cy="path.y"
-            :r="path.r"
-            fill="black"
-          )
-          path(
-            v-else
-            :d="path.d"
-            stroke="black"
-            :stroke-width="path.width"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          )
-
-  //- Main drawing group with mask applied
-  g(:mask="'url(#eraserMask)'")
-    //- Render all drawing paths (non-eraser)
-    template(v-for="path in state.paths" :key="path.id")
-      template(v-if="!path.isEraser")
-        circle(
-          v-if="path.type === 'circle'"
-          :cx="path.x"
-          :cy="path.y"
-          :r="path.r"
-          :fill="path.color"
-        )
-        path(
-          v-else
-          :d="path.d"
-          :stroke="path.color"
-          :stroke-width="path.width"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        )
+drawingStrokesDOM(:paths="state.paths")
 
 //- duplicate ^ into Space.vue
 teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
-  svg.drawing-strokes(
-    ref="svgElement"
-    :width="pageWidth"
-    :height="pageHeight"
-  )
-    defs
-      mask#eraserMask
-        rect(:width="pageWidth" :height="pageHeight" fill="white")
-        //- Add eraser strokes as black shapes to create cutouts
-        template(v-for="path in state.paths" :key="path.id")
-          template(v-if="path.isEraser")
-            circle(
-              v-if="path.type === 'circle'"
-              :cx="path.x"
-              :cy="path.y"
-              :r="path.r"
-              fill="black"
-            )
-            path(
-              v-else
-              :d="path.d"
-              stroke="black"
-              :stroke-width="path.width"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            )
-
-    //- Main drawing group with mask applied
-    g(:mask="'url(#eraserMask)'")
-      //- Render all drawing paths (non-eraser)
-      template(v-for="path in state.paths" :key="path.id")
-        template(v-if="!path.isEraser")
-          circle(
-            v-if="path.type === 'circle'"
-            :cx="path.x"
-            :cy="path.y"
-            :r="path.r"
-            :fill="path.color"
-          )
-          path(
-            v-else
-            :d="path.d"
-            :stroke="path.color"
-            :stroke-width="path.width"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          )
-
+  drawingStrokesDOM(:paths="state.paths")
 </template>
 
 <style lang="stylus">
-svg.drawing-strokes
-  position absolute
-  transform-origin top left
-  background transparent
-  top 0
-  left 0
-  opacity 1
-  pointer-events none
-  z-index var(--max-z)
-  mix-blend-mode hard-light
-#drawing-strokes-background
-  svg.drawing-strokes
-    mix-blend-mode normal
-    z-index 0
 </style>
