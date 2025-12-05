@@ -444,4 +444,8 @@ svg.drawing-strokes
   pointer-events none
   z-index var(--max-z)
   mix-blend-mode hard-light
+#drawing-strokes-background
+  svg.drawing-strokes
+    mix-blend-mode normal
+    z-index 0
 </style>
