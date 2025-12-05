@@ -342,7 +342,6 @@ export const useGlobalStore = defineStore('global', {
       return this.currentUserToolbar === 'box'
     },
     getTags () {
-      const apiStore = useApiStore()
       const spaceStore = useSpaceStore()
       const tags = spaceStore.tags.concat(this.tags)
       return uniqBy(tags, 'name')

@@ -152,7 +152,7 @@ const copy = async (event) => {
         span
           color var(--primary)
   pre
-    width 108%
+    width calc(100% + 20px)
     max-height 300px
     overflow-x auto
     white-space pre !important
