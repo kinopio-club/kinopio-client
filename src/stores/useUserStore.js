@@ -300,12 +300,14 @@ export const useUserStore = defineStore('user', {
     },
     async restoreRemoteUser () {
       const apiStore = useApiStore()
+      const themeStore = useThemeStore()
       if (!this.getUserIsSignedIn) { return }
       const user = await apiStore.getUser()
       if (!user) { return }
       user.updatedAt = utils.unixTime(user.updatedAt)
       console.info('🌸 Initialize user from remote', user)
       this.initializeUserState(user)
+      themeStore.restoreTheme()
     },
     async restoreUserAssociatedData () {
       const globalStore = useGlobalStore()
