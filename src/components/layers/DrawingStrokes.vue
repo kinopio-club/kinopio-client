@@ -160,32 +160,16 @@ const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
 
 const createPathFromStroke = (stroke) => {
   if (!stroke || stroke.length === 0) return null
-  // For a single point, create a circle
-  if (stroke.length === 1) {
-    const point = stroke[0]
-    const { x, y } = point
-    const radius = point.diameter / 2
-    return {
-      id: point.id,
-      type: 'circle',
-      x,
-      y,
-      r: radius,
-      color: point.color,
-      isEraser: point.isEraser
-    }
-  }
-  // For multiple points, create a path
   let pathData = ''
   stroke.forEach((point, index) => {
     const { x, y } = point
     if (index === 0) {
-      pathData = `M ${x} ${y}`
+      pathData = `M ${x} ${y}` // Move point to
     } else {
-      pathData += ` L ${x} ${y}`
+      pathData += ` L ${x} ${y}` // draw Line to
     }
   })
-  return {
+  const path = {
     id: stroke[0].id,
     type: 'path',
     d: pathData,
@@ -193,6 +177,12 @@ const createPathFromStroke = (stroke) => {
     width: stroke[0].diameter,
     isEraser: stroke[0].isEraser
   }
+  // For a single point, complete the path by adding a line to the start point
+  if (stroke.length === 1) {
+    const line = path.d.replace('M', 'L')
+    path.d = `${path.d} ${line}`
+  }
+  return path
 }
 const renderStroke = (stroke, shouldPreventBroadcast) => {
   const path = createPathFromStroke(stroke)

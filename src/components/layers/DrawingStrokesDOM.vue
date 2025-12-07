@@ -24,15 +24,7 @@ svg.drawing-strokes(
       //- Add eraser strokes as black shapes to create cutouts
       template(v-for="path in props.paths" :key="path.id")
         template(v-if="path.isEraser")
-          circle(
-            v-if="path.type === 'circle'"
-            :cx="path.x"
-            :cy="path.y"
-            :r="path.r"
-            fill="black"
-          )
           path(
-            v-else
             :d="path.d"
             stroke="black"
             :stroke-width="path.width"
@@ -46,15 +38,7 @@ svg.drawing-strokes(
     //- Render all drawing paths (non-eraser)
     template(v-for="path in props.paths" :key="path.id")
       template(v-if="!path.isEraser")
-        circle(
-          v-if="path.type === 'circle'"
-          :cx="path.x"
-          :cy="path.y"
-          :r="path.r"
-          :fill="path.color"
-        )
         path(
-          v-else
           :d="path.d"
           :stroke="path.color"
           :stroke-width="path.width"
