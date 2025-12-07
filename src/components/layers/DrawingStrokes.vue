@@ -185,6 +185,7 @@ const createPathFromStroke = (stroke) => {
   return path
 }
 const updatePaths = (path) => {
+  path.rect = utils.rectFromDrawingStrokePath(path)
   const index = state.paths.findIndex(prevPath => prevPath.id === path.id)
   if (index !== -1) {
     state.paths[index] = path

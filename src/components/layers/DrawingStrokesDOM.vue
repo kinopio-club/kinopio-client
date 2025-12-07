@@ -45,6 +45,10 @@ svg.drawing-strokes(
           fill="none"
           stroke-linecap="round"
           stroke-linejoin="round"
+          :data-rect-x="path.rect.x"
+          :data-rect-y="path.rect.y"
+          :data-rect-width="path.rect.width"
+          :data-rect-height="path.rect.height"
         )
 </template>
 

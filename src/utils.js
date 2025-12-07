@@ -1457,6 +1457,21 @@ export default {
     rect.height = rect.height + controlPointMax.y
     return rect
   },
+  rectFromDrawingStrokePath (path) {
+    const coords = path.d.match(/[-\d.]+/g).map(Number)
+    const xs = coords.filter((_, i) => i % 2 === 0)
+    const ys = coords.filter((_, i) => i % 2 === 1)
+    const minX = Math.min(...xs)
+    const maxX = Math.max(...xs)
+    const minY = Math.min(...ys)
+    const maxY = Math.max(...ys)
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY
+    }
+  },
   integerCoords (coords) {
     return {
       x: parseInt(coords.x),
