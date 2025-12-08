@@ -14,10 +14,11 @@ const pageWidth = computed(() => globalStore.pageWidth)
 </script>
 
 <template lang="pug">
-svg.drawing-strokes(
-  :width="pageWidth"
-  :height="pageHeight"
-)
+p hi
+//- svg.drawing-strokes(
+//-   :width="pageWidth"
+//-   :height="pageHeight"
+//- )
   //- defs
   //-   mask#eraserMask
   //-     rect(:width="pageWidth" :height="pageHeight" fill="white")
