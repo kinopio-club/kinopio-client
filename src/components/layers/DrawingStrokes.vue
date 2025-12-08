@@ -1,4 +1,7 @@
 <script setup>
+
+// stroke → paths [{ id, x, y, color }]
+
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -279,7 +282,7 @@ const saveStroke = async ({ stroke, isUndoStroke }) => {
   }
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
 }
-const removedStroke = async () => {
+const removeStrokes = async () => {
   erasedStrokes.forEach(stroke => {
     apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
     spaceStrokes = spaceStrokes.filter(path => path.id !== stroke.id)
@@ -287,9 +290,6 @@ const removedStroke = async () => {
   await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
-  currentStroke = []
-  erasedStrokes = []
-  redoStrokes = []
 }
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
@@ -297,7 +297,10 @@ const endDrawing = async (event) => {
   // erase
   if (globalStore.drawingEraserIsActive) {
     startPoint = null
-    removedStroke()
+    removeStrokes()
+    currentStroke = []
+    erasedStrokes = []
+    redoStrokes = []
   // no stroke
   } else if (!currentStroke.length) {
     startPoint = null
