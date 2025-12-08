@@ -32,65 +32,65 @@ let redoStrokes = []
 
 let unsubscribes
 
-onMounted(async () => {
-  window.addEventListener('pointerup', endDrawing)
-  window.addEventListener('mouseup', endDrawing)
-  window.addEventListener('touchend', endDrawing)
-  clearDrawing()
-  const globalActionUnsubscribe = globalStore.$onAction(
-    async ({ name, args }) => {
-      if (name === 'triggerStartDrawing') {
-        startDrawing(args[0])
-      } else if (name === 'triggerDraw') {
-        draw(args[0])
-      } else if (name === 'triggerAddRemoteDrawingStroke') {
-        const stroke = args[0]
-        remoteStrokes.push(stroke)
-        renderStroke(stroke, true)
-      } else if (name === 'triggerRemoveRemoteDrawingStroke') {
-        const stroke = args[0].stroke
-        remoteStrokes = remoteStrokes.filter(points => {
-          return points[0].id !== stroke[0].id
-        })
-        redrawStrokes()
-      } else if (name === 'triggerDrawingUndo') {
-        undo()
-      } else if (name === 'triggerDrawingRedo') {
-        redo()
-      } else if (name === 'triggerDrawingInitialize') {
-        // perf: save spaceStore.drawingStrokes to var, and clear state
-        spaceStrokes = utils.clone(spaceStore.drawingStrokes)
-        spaceStrokes.reverse()
-        spaceStore.drawingStrokes = []
-        redrawStrokes()
-        await updateDrawingDataUrl()
-      } else if (name === 'triggerDrawingReset') {
-        clearDrawing()
-      } else if (name === 'triggerUpdateDrawingDataUrl') {
-        await updateDrawingDataUrl()
-        globalStore.triggerEndDrawing()
-      }
-    }
-  )
-  const spaceActionUnsubscribe = spaceStore.$onAction(
-    ({ name, args }) => {
-      const actions = ['loadSpace', 'changeSpace', 'createSpace']
-      if (actions.includes(name)) {
-        clearDrawing()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-    spaceActionUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('pointerup', endDrawing)
-  window.removeEventListener('mouseup', endDrawing)
-  window.removeEventListener('touchend', endDrawing)
-  unsubscribes()
-})
+// onMounted(async () => {
+//   window.addEventListener('pointerup', endDrawing)
+//   window.addEventListener('mouseup', endDrawing)
+//   window.addEventListener('touchend', endDrawing)
+//   clearDrawing()
+//   const globalActionUnsubscribe = globalStore.$onAction(
+//     async ({ name, args }) => {
+//       if (name === 'triggerStartDrawing') {
+//         startDrawing(args[0])
+//       } else if (name === 'triggerDraw') {
+//         draw(args[0])
+//       } else if (name === 'triggerAddRemoteDrawingStroke') {
+//         const stroke = args[0]
+//         remoteStrokes.push(stroke)
+//         renderStroke(stroke, true)
+//       } else if (name === 'triggerRemoveRemoteDrawingStroke') {
+//         const stroke = args[0].stroke
+//         remoteStrokes = remoteStrokes.filter(points => {
+//           return points[0].id !== stroke[0].id
+//         })
+//         redrawStrokes()
+//       } else if (name === 'triggerDrawingUndo') {
+//         undo()
+//       } else if (name === 'triggerDrawingRedo') {
+//         redo()
+//       } else if (name === 'triggerDrawingInitialize') {
+//         // perf: save spaceStore.drawingStrokes to var, and clear state
+//         spaceStrokes = utils.clone(spaceStore.drawingStrokes)
+//         spaceStrokes.reverse()
+//         spaceStore.drawingStrokes = []
+//         redrawStrokes()
+//         await updateDrawingDataUrl()
+//       } else if (name === 'triggerDrawingReset') {
+//         clearDrawing()
+//       } else if (name === 'triggerUpdateDrawingDataUrl') {
+//         await updateDrawingDataUrl()
+//         globalStore.triggerEndDrawing()
+//       }
+//     }
+//   )
+//   const spaceActionUnsubscribe = spaceStore.$onAction(
+//     ({ name, args }) => {
+//       const actions = ['loadSpace', 'changeSpace', 'createSpace']
+//       if (actions.includes(name)) {
+//         clearDrawing()
+//       }
+//     }
+//   )
+//   unsubscribes = () => {
+//     globalActionUnsubscribe()
+//     spaceActionUnsubscribe()
+//   }
+// })
+// onBeforeUnmount(() => {
+//   window.removeEventListener('pointerup', endDrawing)
+//   window.removeEventListener('mouseup', endDrawing)
+//   window.removeEventListener('touchend', endDrawing)
+//   unsubscribes()
+// })
 
 const state = reactive({
   paths: []
