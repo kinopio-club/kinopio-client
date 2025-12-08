@@ -255,7 +255,6 @@ const draw = (event) => {
     erase(event)
   } else {
     currentStroke.push(createPoint(event))
-    console.log('🔮🔮🔮', currentStroke)
     renderStroke(currentStroke)
   }
 }
@@ -280,7 +279,7 @@ const saveStroke = async ({ stroke, isUndoStroke }) => {
   }
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
 }
-const saveRemovedStroke = async () => {
+const removedStroke = async () => {
   erasedStrokes.forEach(stroke => {
     apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
     spaceStrokes = spaceStrokes.filter(path => path.id !== stroke.id)
@@ -294,12 +293,11 @@ const saveRemovedStroke = async () => {
 }
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
-  console.log('🅰️🅰️🅰️END', erasedStrokes)
   isDrawing = false
   // erase
   if (globalStore.drawingEraserIsActive) {
     startPoint = null
-    saveRemovedStroke()
+    removedStroke()
   // no stroke
   } else if (!currentStroke.length) {
     startPoint = null
