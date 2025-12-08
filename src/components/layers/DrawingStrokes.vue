@@ -227,7 +227,7 @@ const startDrawing = (event) => {
 
 // erase
 
-const removePathById = (id) => {
+const erasePath = (id) => {
   state.paths = state.paths.filter(path => path.id !== id)
   const stroke = spaceStrokes.find(path => path.id !== id)
   erasedStrokes.push(stroke)
@@ -243,7 +243,7 @@ const erase = (event) => {
     const element = document.querySelector(`.drawing-strokes path[data-id="${path.id}"]`)
     const data = element.dataset
     if (element.isPointInStroke(svgPoint)) {
-      removePathById(path.id)
+      erasePath(path.id)
     }
   })
 }
@@ -282,7 +282,7 @@ const saveStroke = async ({ stroke, isUndoStroke }) => {
   }
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
 }
-const saveErasedStroke = async () => {
+const saveRemovedStroke = async () => {
   erasedStrokes.forEach(stroke => {
     apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
     spaceStrokes = spaceStrokes.filter(path => path.id !== stroke.id)
@@ -290,19 +290,20 @@ const saveErasedStroke = async () => {
   await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
+  currentStroke = []
   erasedStrokes = []
+  redoStrokes = []
 }
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
-  console.log('🅰️🅰️🅰️END', globalStore.drawingEraserIsActive, erasedStrokes)
+  console.log('🅰️🅰️🅰️END', erasedStrokes)
+  isDrawing = false
   // erase
   if (globalStore.drawingEraserIsActive) {
-    isDrawing = false
     startPoint = null
-    saveErasedStroke()
+    saveRemovedStroke()
   // no stroke
   } else if (!currentStroke.length) {
-    isDrawing = false
     startPoint = null
   } else {
   // stroke
@@ -310,8 +311,8 @@ const endDrawing = async (event) => {
     spaceStrokes.push(currentStroke)
     saveStroke({ stroke: currentStroke })
     currentStroke = []
+    erasedStrokes = []
     redoStrokes = []
-    isDrawing = false
   }
 }
 
