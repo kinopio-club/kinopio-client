@@ -34,8 +34,9 @@ let redoStack = []
 let unsubscribes
 
 onMounted(async () => {
-  if (consts.isStaticPrerenderingPage) { return }
-  window.addEventListener('pointerup', endDrawing)
+  if (!consts.isStaticPrerenderingPage) {
+    window.addEventListener('pointerup', endDrawing)
+  }
   clearDrawing()
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
@@ -83,9 +84,11 @@ onMounted(async () => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('pointerup', endDrawing)
-  window.removeEventListener('mouseup', endDrawing)
-  window.removeEventListener('touchend', endDrawing)
+  if (!consts.isStaticPrerenderingPage) {
+    window.removeEventListener('pointerup', endDrawing)
+    window.removeEventListener('mouseup', endDrawing)
+    window.removeEventListener('touchend', endDrawing)
+  }
   unsubscribes()
 })
 
