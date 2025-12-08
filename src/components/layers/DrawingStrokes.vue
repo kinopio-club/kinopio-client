@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import drawingStrokesDOM from '@/components/drawingStrokesDOM.vue'
+// import drawingStrokesDOM from '@/components/drawingStrokesDOM.vue'
 
 // noop
 
@@ -95,6 +95,9 @@ let unsubscribes
 const state = reactive({
   paths: []
 })
+
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
@@ -330,6 +333,54 @@ const updatePageSizes = () => {
 
 <template lang="pug">
 //- drawingStrokesDOM(:paths="state.paths")
+svg.drawing-strokes(
+  :width="pageWidth"
+  :height="pageHeight"
+)
+  defs
+    mask#eraserMask
+      rect(:width="pageWidth" :height="pageHeight" fill="white")
+      //- Add eraser strokes as black shapes to create cutouts
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="path.isEraser")
+          circle(
+            v-if="path.type === 'circle'"
+            :cx="path.x"
+            :cy="path.y"
+            :r="path.r"
+            fill="black"
+          )
+          path(
+            v-else
+            :d="path.d"
+            stroke="black"
+            :stroke-width="path.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          )
+
+  //- Main drawing group with mask applied
+  g(:mask="'url(#eraserMask)'")
+    //- Render all drawing paths (non-eraser)
+    template(v-for="path in state.paths" :key="path.id")
+      template(v-if="!path.isEraser")
+        circle(
+          v-if="path.type === 'circle'"
+          :cx="path.x"
+          :cy="path.y"
+          :r="path.r"
+          :fill="path.color"
+        )
+        path(
+          v-else
+          :d="path.d"
+          :stroke="path.color"
+          :stroke-width="path.width"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        )
 
 //- //- duplicate ^ into Space.vue
 //- teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
@@ -337,4 +388,19 @@ const updatePageSizes = () => {
 </template>
 
 <style lang="stylus">
+svg.drawing-strokes
+  position absolute
+  transform-origin top left
+  background transparent
+  top 0
+  left 0
+  opacity 1
+  pointer-events none
+  z-index var(--max-z)
+  mix-blend-mode hard-light
+#drawing-strokes-background
+  svg.drawing-strokes
+    mix-blend-mode normal
+    z-index 0
+
 </style>
