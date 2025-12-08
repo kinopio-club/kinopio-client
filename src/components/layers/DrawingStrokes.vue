@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-// import drawingStrokesDOM from '@/components/layers/drawingStrokesDOM.vue'
+import drawingStrokesDOM from '@/components/layers/drawingStrokesDOM.vue'
 
 // noop
 
