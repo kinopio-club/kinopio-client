@@ -203,6 +203,7 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
 }
 // for minimap
 const updateDrawingDataUrl = async () => {
+  if (consts.isStaticPrerenderingPage) { return }
   await nextTick()
   const element = document.querySelector('svg.drawing-strokes')
   const svgString = new XMLSerializer().serializeToString(element)
@@ -241,6 +242,7 @@ const erasePath = (id) => {
   broadcastRemoveStroke({ id })
 }
 const erase = (event) => {
+  if (consts.isStaticPrerenderingPage) { return }
   const point = utils.cursorPositionInSpace(event)
   const svg = document.querySelector('svg.drawing-strokes')
   const svgPoint = svg.createSVGPoint()
