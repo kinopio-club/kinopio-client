@@ -32,8 +32,6 @@ let unsubscribes
 
 onMounted(async () => {
   window.addEventListener('pointerup', endDrawing)
-  window.addEventListener('mouseup', endDrawing)
-  window.addEventListener('touchend', endDrawing)
   clearDrawing()
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
