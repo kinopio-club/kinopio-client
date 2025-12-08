@@ -5,9 +5,9 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 const globalStore = useGlobalStore()
 
-const props = defineProps({
-  paths: Array
-})
+// const props = defineProps({
+//   paths: Array
+// })
 
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
