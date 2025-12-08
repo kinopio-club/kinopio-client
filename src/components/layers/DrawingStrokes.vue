@@ -26,7 +26,6 @@ const broadcastStore = useBroadcastStore()
 let isDrawing = false
 let startPoint
 let currentStroke = []
-let erasedStrokes = []
 let currentStrokeId = ''
 let spaceStrokes = []
 let redoStrokes = []
@@ -214,24 +213,22 @@ const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
   globalStore.closeAllDialogs()
   isDrawing = true
-  if (globalStore.drawingEraserIsActive) {
-    erasedStrokes = []
-  } else {
-    currentStrokeId = nanoid()
-    currentStroke = []
-    const point = createPoint(event)
-    startPoint = point
-    currentStroke.push(point)
-    renderStroke([point])
-  }
+  if (globalStore.drawingEraserIsActive) { return }
+  currentStrokeId = nanoid()
+  currentStroke = []
+  const point = createPoint(event)
+  startPoint = point
+  currentStroke.push(point)
+  renderStroke([point])
 }
 
 // erase
 
 const erasePath = (id) => {
   state.paths = state.paths.filter(path => path.id !== id)
-  const stroke = spaceStrokes.find(path => path.id !== id)
-  erasedStrokes.push(stroke)
+  const stroke = spaceStrokes.find(stroke => stroke[0].id === id)
+  apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
+  spaceStrokes = spaceStrokes.filter(stroke => stroke[0].id !== id)
   broadcastRemoveStroke({ id })
 }
 const erase = (event) => {
@@ -282,24 +279,16 @@ const saveStroke = async ({ stroke, isUndoStroke }) => {
   }
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
 }
-const removeStrokes = async () => {
-  erasedStrokes.forEach(stroke => {
-    apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
-    spaceStrokes = spaceStrokes.filter(path => path.id !== stroke.id)
-  })
-  await updateDrawingDataUrl()
-  globalStore.triggerEndDrawing()
-  await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
-}
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
   isDrawing = false
   // erase
   if (globalStore.drawingEraserIsActive) {
+    await updateDrawingDataUrl()
+    globalStore.triggerEndDrawing()
+    await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
     startPoint = null
-    removeStrokes()
     currentStroke = []
-    erasedStrokes = []
     redoStrokes = []
   // no stroke
   } else if (!currentStroke.length) {
@@ -310,7 +299,6 @@ const endDrawing = async (event) => {
     spaceStrokes.push(currentStroke)
     saveStroke({ stroke: currentStroke })
     currentStroke = []
-    erasedStrokes = []
     redoStrokes = []
   }
 }
