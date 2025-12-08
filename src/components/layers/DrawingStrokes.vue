@@ -23,7 +23,7 @@ const broadcastStore = useBroadcastStore()
 let isDrawing = false
 let startPoint
 let currentStroke = []
-let erasedStrokeIds = []
+let erasedStrokes = []
 let currentStrokeId = ''
 let spaceStrokes = []
 let redoStrokes = []
@@ -214,7 +214,7 @@ const startDrawing = (event) => {
   globalStore.closeAllDialogs()
   isDrawing = true
   if (globalStore.drawingEraserIsActive) {
-    erasedStrokeIds = []
+    erasedStrokes = []
   } else {
     currentStrokeId = nanoid()
     currentStroke = []
@@ -229,10 +229,9 @@ const startDrawing = (event) => {
 
 const removePathById = (id) => {
   state.paths = state.paths.filter(path => path.id !== id)
-  erasedStrokeIds.push(id)
-  apiStore.addToQueue({ name: 'eraseDrawingStrokes', body: { erasedStrokeIds } })
+  const stroke = spaceStrokes.find(path => path.id !== id)
+  erasedStrokes.push(stroke)
   broadcastRemoveStroke({ id })
-  console.log('🍇 removed Path', id, erasedStrokeIds)
 }
 const erase = (event) => {
   const point = utils.cursorPositionInSpace(event)
@@ -284,20 +283,18 @@ const saveStroke = async ({ stroke, isUndoStroke }) => {
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
 }
 const saveErasedStroke = async () => {
-  // TODO prevErasedStrokeIds = erasedStrokeIds
-  // undo() uses prevErasedStrokeIds
-
-  erasedStrokeIds.forEach(id => {
-    spaceStrokes = spaceStrokes.filter(path => path.id !== id)
+  erasedStrokes.forEach(stroke => {
+    apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
+    spaceStrokes = spaceStrokes.filter(path => path.id !== stroke.id)
   })
   await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
   await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
-  erasedStrokeIds = []
+  erasedStrokes = []
 }
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
-  console.log('🅰️🅰️🅰️END', globalStore.drawingEraserIsActive, erasedStrokeIds)
+  console.log('🅰️🅰️🅰️END', globalStore.drawingEraserIsActive, erasedStrokes)
   // erase
   if (globalStore.drawingEraserIsActive) {
     isDrawing = false
