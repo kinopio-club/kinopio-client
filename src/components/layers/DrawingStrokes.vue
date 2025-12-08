@@ -206,13 +206,13 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
 // for minimap
 const updateDrawingDataUrl = async () => {
   await nextTick()
-  const element = document.querySelector('svg.drawing-strokes')
-  const svgString = new XMLSerializer().serializeToString(element)
-  const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
-  globalStore.drawingDataUrl = dataUrl
-  broadcastStore.update({
-    action: 'triggerUpdateDrawingDataUrl'
-  })
+  // const element = document.querySelector('svg.drawing-strokes')
+  // const svgString = new XMLSerializer().serializeToString(element)
+  // const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
+  // globalStore.drawingDataUrl = dataUrl
+  // broadcastStore.update({
+  //   action: 'triggerUpdateDrawingDataUrl'
+  // })
 }
 
 // start
