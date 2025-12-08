@@ -329,11 +329,11 @@ const updatePageSizes = () => {
 </script>
 
 <template lang="pug">
-drawingStrokesDOM(:paths="state.paths")
+//- drawingStrokesDOM(:paths="state.paths")
 
-//- duplicate ^ into Space.vue
-teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
-  drawingStrokesDOM(:paths="state.paths")
+//- //- duplicate ^ into Space.vue
+//- teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
+//-   drawingStrokesDOM(:paths="state.paths")
 </template>
 
 <style lang="stylus">
