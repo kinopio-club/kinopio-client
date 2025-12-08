@@ -124,6 +124,4 @@ export default {
     })
     return pathsInsidePoints
   }
-  // checkPointInsideDrawingPath (point, path)
-
 }
