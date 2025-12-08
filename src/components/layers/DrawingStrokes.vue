@@ -8,6 +8,8 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import drawingStrokesDOM from '@/components/layers/drawingStrokesDOM.vue'
 
+// noop
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
