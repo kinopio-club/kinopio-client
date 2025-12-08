@@ -34,6 +34,7 @@ let redoStack = []
 let unsubscribes
 
 onMounted(async () => {
+  if (consts.isStaticPrerenderingPage) { return }
   window.addEventListener('pointerup', endDrawing)
   clearDrawing()
   const globalActionUnsubscribe = globalStore.$onAction(
