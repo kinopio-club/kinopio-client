@@ -19,9 +19,10 @@ svg.drawing-strokes(
   :height="pageHeight"
 )
   defs
+    //- eraserMask is legacy
+    //- current version does not have isEraser strokes
     mask#eraserMask
       rect(:width="pageWidth" :height="pageHeight" fill="white")
-      //- Add eraser strokes as black shapes to create cutouts
       template(v-for="path in props.paths" :key="path.id")
         template(v-if="path.isEraser")
           path(
@@ -31,11 +32,14 @@ svg.drawing-strokes(
             fill="none"
             stroke-linecap="round"
             stroke-linejoin="round"
+            :data-id="path.id"
+            :data-rect-x="path.rect.x"
+            :data-rect-y="path.rect.y"
+            :data-rect-width="path.rect.width"
+            :data-rect-height="path.rect.height"
           )
-
-  //- Main drawing group with mask applied
+  //- drawing strokes
   g(:mask="'url(#eraserMask)'")
-    //- Render all drawing paths (non-eraser)
     template(v-for="path in props.paths" :key="path.id")
       template(v-if="!path.isEraser")
         path(
@@ -45,6 +49,7 @@ svg.drawing-strokes(
           fill="none"
           stroke-linecap="round"
           stroke-linejoin="round"
+          :data-id="path.id"
           :data-rect-x="path.rect.x"
           :data-rect-y="path.rect.y"
           :data-rect-width="path.rect.width"
