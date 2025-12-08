@@ -7,6 +7,8 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
+// noop
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
