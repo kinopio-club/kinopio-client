@@ -28,7 +28,8 @@ let startPoint
 let currentStroke = []
 let currentStrokeId = ''
 let spaceStrokes = []
-let redoStrokes = []
+let undoStack = [] // [{ type: 'add'|'remove', stroke }]
+let redoStack = []
 
 let unsubscribes
 
@@ -102,7 +103,8 @@ const clearDrawing = () => {
   globalStore.drawingDataUrl = ''
   globalStore.drawingStrokeColors = []
   globalStore.drawingEraserIsActive = false
-  redoStrokes = []
+  redoStack = []
+  undoStack = []
   spaceStrokes = []
   state.paths = []
 }
@@ -227,6 +229,9 @@ const startDrawing = (event) => {
 const erasePath = (id) => {
   state.paths = state.paths.filter(path => path.id !== id)
   const stroke = spaceStrokes.find(stroke => stroke[0].id === id)
+  if (!stroke) { return }
+  undoStack.push({ type: 'remove', stroke })
+  redoStack = []
   apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   spaceStrokes = spaceStrokes.filter(stroke => stroke[0].id !== id)
   broadcastRemoveStroke({ id })
@@ -289,7 +294,6 @@ const endDrawing = async (event) => {
     await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
     startPoint = null
     currentStroke = []
-    redoStrokes = []
   // no stroke
   } else if (!currentStroke.length) {
     startPoint = null
@@ -297,28 +301,57 @@ const endDrawing = async (event) => {
   // stroke
     globalStore.addToDrawingStrokeColors(currentStroke[0].color)
     spaceStrokes.push(currentStroke)
+    undoStack.push({ type: 'add', stroke: currentStroke })
+    redoStack = []
     saveStroke({ stroke: currentStroke })
     currentStroke = []
-    redoStrokes = []
   }
 }
 
 // undo redo
 
 const undo = () => {
-  const prevStroke = spaceStrokes.pop() // remove last stroke
-  redoStrokes.push(prevStroke) // append to redo stack
+  if (!undoStack.length) { return }
+  const operation = undoStack.pop()
+  redoStack.push(operation)
+  if (operation.type === 'add') {
+    // undo an add operation (remove the stroke)
+    const stroke = operation.stroke
+    spaceStrokes = spaceStrokes.filter(s => s[0].id !== stroke[0].id)
+    state.paths = state.paths.filter(path => path.id !== stroke[0].id)
+    saveStroke({ stroke, isUndoStroke: true })
+    broadcastRemoveStroke(stroke)
+  } else if (operation.type === 'remove') {
+    // undo a remove operation (restore the stroke)
+    const stroke = operation.stroke
+    spaceStrokes.push(stroke)
+    renderStroke(stroke, false)
+    saveStroke({ stroke, isUndoStroke: false })
+    broadcastAddStroke(stroke)
+  }
   redrawStrokes()
-  saveStroke({ stroke: prevStroke, isUndoStroke: true })
-  broadcastRemoveStroke(prevStroke)
 }
+
 const redo = () => {
-  if (!redoStrokes.length) { return }
-  const prevStroke = redoStrokes.pop()
-  spaceStrokes.push(prevStroke)
+  if (!redoStack.length) { return }
+  const operation = redoStack.pop()
+  undoStack.push(operation)
+  if (operation.type === 'add') {
+    // redo an add operation (restore the stroke)
+    const stroke = operation.stroke
+    spaceStrokes.push(stroke)
+    renderStroke(stroke, false)
+    saveStroke({ stroke, isUndoStroke: false })
+    broadcastAddStroke(stroke)
+  } else if (operation.type === 'remove') {
+    // redo a remove operation (remove the stroke again)
+    const stroke = operation.stroke
+    spaceStrokes = spaceStrokes.filter(s => s[0].id !== stroke[0].id)
+    state.paths = state.paths.filter(path => path.id !== stroke[0].id)
+    saveStroke({ stroke, isUndoStroke: true })
+    broadcastRemoveStroke(stroke)
+  }
   redrawStrokes()
-  saveStroke({ stroke: prevStroke })
-  broadcastAddStroke(prevStroke)
 }
 
 // page size
