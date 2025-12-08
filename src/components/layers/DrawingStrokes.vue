@@ -10,7 +10,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
-import drawingStrokesDOM from '@/components/layers/drawingStrokesDOM.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
@@ -92,6 +91,8 @@ const state = reactive({
   paths: []
 })
 
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
@@ -383,12 +384,106 @@ const updatePageSizes = () => {
 </script>
 
 <template lang="pug">
-drawingStrokesDOM(:paths="state.paths")
+svg.drawing-strokes(
+  :width="pageWidth"
+  :height="pageHeight"
+)
+  defs
+    //- eraserMask is legacy
+    //- current version does not have isEraser strokes
+    mask#eraserMask
+      rect(:width="pageWidth" :height="pageHeight" fill="white")
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="path.isEraser")
+          path(
+            :d="path.d"
+            stroke="black"
+            :stroke-width="path.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            :data-id="path.id"
+            :data-rect-x="path.rect.x"
+            :data-rect-y="path.rect.y"
+            :data-rect-width="path.rect.width"
+            :data-rect-height="path.rect.height"
+          )
+  //- drawing strokes
+  g(:mask="'url(#eraserMask)'")
+    template(v-for="path in state.paths" :key="path.id")
+      template(v-if="!path.isEraser")
+        path(
+          :d="path.d"
+          :stroke="path.color"
+          :stroke-width="path.width"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          :data-id="path.id"
+          :data-rect-x="path.rect.x"
+          :data-rect-y="path.rect.y"
+          :data-rect-width="path.rect.width"
+          :data-rect-height="path.rect.height"
+        )
 
 //- duplicate ^ into Space.vue
 teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
-  drawingStrokesDOM(:paths="state.paths")
+  svg.drawing-strokes(
+    :width="pageWidth"
+    :height="pageHeight"
+  )
+    defs
+      //- eraserMask is legacy
+      //- current version does not have isEraser strokes
+      mask#eraserMask
+        rect(:width="pageWidth" :height="pageHeight" fill="white")
+        template(v-for="path in state.paths" :key="path.id")
+          template(v-if="path.isEraser")
+            path(
+              :d="path.d"
+              stroke="black"
+              :stroke-width="path.width"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              :data-id="path.id"
+              :data-rect-x="path.rect.x"
+              :data-rect-y="path.rect.y"
+              :data-rect-width="path.rect.width"
+              :data-rect-height="path.rect.height"
+            )
+    //- drawing strokes
+    g(:mask="'url(#eraserMask)'")
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="!path.isEraser")
+          path(
+            :d="path.d"
+            :stroke="path.color"
+            :stroke-width="path.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            :data-id="path.id"
+            :data-rect-x="path.rect.x"
+            :data-rect-y="path.rect.y"
+            :data-rect-width="path.rect.width"
+            :data-rect-height="path.rect.height"
+          )
 </template>
 
 <style lang="stylus">
+svg.drawing-strokes
+  position absolute
+  transform-origin top left
+  background transparent
+  top 0
+  left 0
+  opacity 1
+  pointer-events none
+  z-index var(--max-z)
+  mix-blend-mode hard-light
+#drawing-strokes-background
+  svg.drawing-strokes
+    mix-blend-mode normal
+    z-index 0
 </style>
