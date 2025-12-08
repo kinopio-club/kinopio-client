@@ -45,6 +45,13 @@ const addLine = () => {
   globalStore.updateCurrentUserToolbar('card')
   lineStore.createLine()
 }
+const DrawingLabel = computed(() => {
+  if (globalStore.drawingEraserIsActive) {
+    return 'Eraser (E)'
+  } else {
+    return 'Drawing (D)'
+  }
+})
 </script>
 
 <template lang="pug">
@@ -80,7 +87,7 @@ nav#toolbar.toolbar(v-if="visible")
         )
           img.icon.pencil-icon(src="@/assets/pencil.svg")
         .label-badge.toolbar-badge-wrap.jiggle(v-if="toolbarIsDrawing")
-          span Drawing (D)
+          span {{DrawingLabel}}
 </template>
 
 <style lang="stylus">
