@@ -47,7 +47,8 @@ onMounted(async () => {
         renderStroke(stroke, true)
       } else if (name === 'triggerRemoveDrawingStroke') {
         const id = args[0].id
-        spaceStrokes = spaceStrokes.filter(path => path.id !== id)
+        state.paths = state.paths.filter(path => path.id !== id)
+        spaceStrokes = spaceStrokes.filter(stroke => stroke[0].id !== id)
       } else if (name === 'triggerDrawingUndo') {
         undo()
       } else if (name === 'triggerDrawingRedo') {
