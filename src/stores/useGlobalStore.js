@@ -497,8 +497,8 @@ export const useGlobalStore = defineStore('global', {
     triggerDraw (event) {},
     triggerDrawingUndo () {},
     triggerDrawingRedo () {},
-    triggerAddRemoteDrawingStroke (updates) {},
-    triggerRemoveRemoteDrawingStroke (updates) {},
+    triggerAddDrawingStroke (updates) {},
+    triggerRemoveDrawingStroke (updates) {},
     triggerEndDrawing () {},
     triggerUpdateDrawingDataUrl () {},
 

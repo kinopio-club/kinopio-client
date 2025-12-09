@@ -1,4 +1,7 @@
 <script setup>
+
+// stroke → paths [{ id, x, y, color }]
+
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -6,7 +9,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import drawingStrokesDOM from '@/components/layers/drawingStrokesDOM.vue'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -25,15 +27,13 @@ let startPoint
 let currentStroke = []
 let currentStrokeId = ''
 let spaceStrokes = []
-let remoteStrokes = []
-let redoStrokes = []
+let undoStack = [] // [{ type: 'add'|'remove', stroke }]
+let redoStack = []
 
 let unsubscribes
 
 onMounted(async () => {
   window.addEventListener('pointerup', endDrawing)
-  window.addEventListener('mouseup', endDrawing)
-  window.addEventListener('touchend', endDrawing)
   clearDrawing()
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
@@ -41,16 +41,14 @@ onMounted(async () => {
         startDrawing(args[0])
       } else if (name === 'triggerDraw') {
         draw(args[0])
-      } else if (name === 'triggerAddRemoteDrawingStroke') {
+      } else if (name === 'triggerAddDrawingStroke') {
         const stroke = args[0]
-        remoteStrokes.push(stroke)
+        spaceStrokes.push(stroke)
         renderStroke(stroke, true)
-      } else if (name === 'triggerRemoveRemoteDrawingStroke') {
-        const stroke = args[0].stroke
-        remoteStrokes = remoteStrokes.filter(points => {
-          return points[0].id !== stroke[0].id
-        })
-        redrawStrokes()
+      } else if (name === 'triggerRemoveDrawingStroke') {
+        const id = args[0].id
+        state.paths = state.paths.filter(path => path.id !== id)
+        spaceStrokes = spaceStrokes.filter(stroke => stroke[0].id !== id)
       } else if (name === 'triggerDrawingUndo') {
         undo()
       } else if (name === 'triggerDrawingRedo') {
@@ -94,6 +92,8 @@ const state = reactive({
   paths: []
 })
 
+const pageHeight = computed(() => globalStore.pageHeight)
+const pageWidth = computed(() => globalStore.pageWidth)
 const viewportHeight = computed(() => globalStore.viewportHeight)
 const viewportWidth = computed(() => globalStore.viewportWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
@@ -105,9 +105,9 @@ const clearDrawing = () => {
   globalStore.drawingDataUrl = ''
   globalStore.drawingStrokeColors = []
   globalStore.drawingEraserIsActive = false
-  redoStrokes = []
+  redoStack = []
+  undoStack = []
   spaceStrokes = []
-  remoteStrokes = []
   state.paths = []
 }
 
@@ -124,8 +124,7 @@ const createPoint = (event) => {
     x,
     y,
     color: strokeColor.value,
-    diameter: strokeDiameter.value,
-    isEraser: globalStore.drawingEraserIsActive
+    diameter: strokeDiameter.value
   }
   const isStraightLine = startPoint && event.shiftKey
   if (isStraightLine) {
@@ -145,14 +144,14 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   broadcastStore.update({
     updates: stroke,
-    action: 'triggerAddRemoteDrawingStroke'
+    action: 'triggerAddDrawingStroke'
   })
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   broadcastStore.update({
     updates: stroke,
-    action: 'triggerRemoveRemoteDrawingStroke'
+    action: 'triggerRemoveDrawingStroke'
   })
 }
 
@@ -218,6 +217,7 @@ const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
   globalStore.closeAllDialogs()
   isDrawing = true
+  if (globalStore.drawingEraserIsActive) { return }
   currentStrokeId = nanoid()
   currentStroke = []
   const point = createPoint(event)
@@ -226,21 +226,48 @@ const startDrawing = (event) => {
   renderStroke([point])
 }
 
+// erase
+
+const erasePath = (id) => {
+  state.paths = state.paths.filter(path => path.id !== id)
+  const stroke = spaceStrokes.find(stroke => stroke[0].id === id)
+  if (!stroke) { return }
+  undoStack.push({ type: 'remove', stroke })
+  redoStack = []
+  apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
+  spaceStrokes = spaceStrokes.filter(stroke => stroke[0].id !== id)
+  broadcastRemoveStroke({ id })
+}
+const erase = (event) => {
+  const point = utils.cursorPositionInSpace(event)
+  const svg = document.querySelector('svg.drawing-strokes')
+  const svgPoint = svg.createSVGPoint()
+  svgPoint.x = point.x
+  svgPoint.y = point.y
+  state.paths.forEach(path => {
+    const element = document.querySelector(`.drawing-strokes path[data-id="${path.id}"]`)
+    const data = element.dataset
+    if (element.isPointInStroke(svgPoint)) {
+      erasePath(path.id)
+    }
+  })
+}
+
 // draw
 
-const allStrokes = () => {
-  return spaceStrokes.concat(remoteStrokes)
-}
 const draw = (event) => {
   if (utils.isMultiTouch(event)) { return }
   if (!isDrawing) { return }
-  currentStroke.push(createPoint(event))
-  renderStroke(currentStroke)
+  if (globalStore.drawingEraserIsActive) {
+    erase(event)
+  } else {
+    currentStroke.push(createPoint(event))
+    renderStroke(currentStroke)
+  }
 }
 const redrawStrokes = async () => {
   state.paths = []
-  const allStrokes = [...spaceStrokes, ...remoteStrokes]
-  allStrokes.forEach(stroke => {
+  spaceStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
   updatePageSizes()
@@ -248,62 +275,94 @@ const redrawStrokes = async () => {
 
 // stop
 
-const saveStroke = async ({ stroke, isRemovedStroke }) => {
-  const strokes = allStrokes()
+const saveStroke = async ({ stroke, isUndoStroke }) => {
   await updateDrawingDataUrl()
   globalStore.triggerEndDrawing()
   updatePageSizes()
-  if (isRemovedStroke) {
+  if (isUndoStroke) {
     await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   } else {
     await apiStore.addToQueue({ name: 'createDrawingStroke', body: { stroke } })
   }
-  await cache.updateSpace('drawingStrokes', strokes, spaceStore.id)
+  await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
 }
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
-  if (!currentStroke.length) {
-    isDrawing = false
-    startPoint = null
-    return
-  }
-  // Only add to stroke colors if it's not an eraser
-  if (!globalStore.drawingEraserIsActive) {
-    globalStore.addToDrawingStrokeColors(currentStroke[0].color)
-  }
-  spaceStrokes.push(currentStroke)
-  saveStroke({ stroke: currentStroke })
-  currentStroke = []
-  redoStrokes = []
   isDrawing = false
+  // erase
+  if (globalStore.drawingEraserIsActive) {
+    await updateDrawingDataUrl()
+    globalStore.triggerEndDrawing()
+    await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
+    startPoint = null
+    currentStroke = []
+  // no stroke
+  } else if (!currentStroke.length) {
+    startPoint = null
+  } else {
+  // stroke
+    globalStore.addToDrawingStrokeColors(currentStroke[0].color)
+    spaceStrokes.push(currentStroke)
+    undoStack.push({ type: 'add', stroke: currentStroke })
+    redoStack = []
+    saveStroke({ stroke: currentStroke })
+    currentStroke = []
+  }
 }
 
 // undo redo
 
 const undo = () => {
-  const prevStroke = spaceStrokes.pop() // remove last stroke
-  redoStrokes.push(prevStroke) // append to redo stack
+  if (!undoStack.length) { return }
+  const operation = undoStack.pop()
+  redoStack.push(operation)
+  if (operation.type === 'add') {
+    // undo an add operation (remove the stroke)
+    const stroke = operation.stroke
+    spaceStrokes = spaceStrokes.filter(s => s[0].id !== stroke[0].id)
+    state.paths = state.paths.filter(path => path.id !== stroke[0].id)
+    saveStroke({ stroke, isUndoStroke: true })
+    broadcastRemoveStroke(stroke)
+  } else if (operation.type === 'remove') {
+    // undo a remove operation (restore the stroke)
+    const stroke = operation.stroke
+    spaceStrokes.push(stroke)
+    renderStroke(stroke, false)
+    saveStroke({ stroke, isUndoStroke: false })
+    broadcastAddStroke(stroke)
+  }
   redrawStrokes()
-  saveStroke({ stroke: prevStroke, isRemovedStroke: true })
-  broadcastRemoveStroke(prevStroke)
 }
+
 const redo = () => {
-  if (!redoStrokes.length) { return }
-  const prevStroke = redoStrokes.pop()
-  spaceStrokes.push(prevStroke)
+  if (!redoStack.length) { return }
+  const operation = redoStack.pop()
+  undoStack.push(operation)
+  if (operation.type === 'add') {
+    // redo an add operation (restore the stroke)
+    const stroke = operation.stroke
+    spaceStrokes.push(stroke)
+    renderStroke(stroke, false)
+    saveStroke({ stroke, isUndoStroke: false })
+    broadcastAddStroke(stroke)
+  } else if (operation.type === 'remove') {
+    // redo a remove operation (remove the stroke again)
+    const stroke = operation.stroke
+    spaceStrokes = spaceStrokes.filter(s => s[0].id !== stroke[0].id)
+    state.paths = state.paths.filter(path => path.id !== stroke[0].id)
+    saveStroke({ stroke, isUndoStroke: true })
+    broadcastRemoveStroke(stroke)
+  }
   redrawStrokes()
-  saveStroke({ stroke: prevStroke })
-  broadcastAddStroke(prevStroke)
 }
 
 // page size
 
 const updatePageSizes = () => {
-  const strokes = allStrokes()
   let x = 0
   let y = 0
   const drawingBrushSizeDiameter = consts.drawingBrushSizeDiameter.l // 40
-  strokes.forEach(points => {
+  spaceStrokes.forEach(points => {
     points.forEach(point => {
       if (point.x > x) {
         x = point.x
@@ -326,12 +385,106 @@ const updatePageSizes = () => {
 </script>
 
 <template lang="pug">
-drawingStrokesDOM(:paths="state.paths")
+svg.drawing-strokes(
+  :width="pageWidth"
+  :height="pageHeight"
+)
+  defs
+    //- eraserMask is legacy
+    //- current version does not have isEraser strokes
+    mask#eraserMask
+      rect(:width="pageWidth" :height="pageHeight" fill="white")
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="path.isEraser")
+          path(
+            :d="path.d"
+            stroke="black"
+            :stroke-width="path.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            :data-id="path.id"
+            :data-rect-x="path.rect.x"
+            :data-rect-y="path.rect.y"
+            :data-rect-width="path.rect.width"
+            :data-rect-height="path.rect.height"
+          )
+  //- drawing strokes
+  g(:mask="'url(#eraserMask)'")
+    template(v-for="path in state.paths" :key="path.id")
+      template(v-if="!path.isEraser")
+        path(
+          :d="path.d"
+          :stroke="path.color"
+          :stroke-width="path.width"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          :data-id="path.id"
+          :data-rect-x="path.rect.x"
+          :data-rect-y="path.rect.y"
+          :data-rect-width="path.rect.width"
+          :data-rect-height="path.rect.height"
+        )
 
 //- duplicate ^ into Space.vue
 teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
-  drawingStrokesDOM(:paths="state.paths")
+  svg.drawing-strokes(
+    :width="pageWidth"
+    :height="pageHeight"
+  )
+    defs
+      //- eraserMask is legacy
+      //- current version does not have isEraser strokes
+      mask#eraserMask
+        rect(:width="pageWidth" :height="pageHeight" fill="white")
+        template(v-for="path in state.paths" :key="path.id")
+          template(v-if="path.isEraser")
+            path(
+              :d="path.d"
+              stroke="black"
+              :stroke-width="path.width"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              :data-id="path.id"
+              :data-rect-x="path.rect.x"
+              :data-rect-y="path.rect.y"
+              :data-rect-width="path.rect.width"
+              :data-rect-height="path.rect.height"
+            )
+    //- drawing strokes
+    g(:mask="'url(#eraserMask)'")
+      template(v-for="path in state.paths" :key="path.id")
+        template(v-if="!path.isEraser")
+          path(
+            :d="path.d"
+            :stroke="path.color"
+            :stroke-width="path.width"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            :data-id="path.id"
+            :data-rect-x="path.rect.x"
+            :data-rect-y="path.rect.y"
+            :data-rect-width="path.rect.width"
+            :data-rect-height="path.rect.height"
+          )
 </template>
 
 <style lang="stylus">
+svg.drawing-strokes
+  position absolute
+  transform-origin top left
+  background transparent
+  top 0
+  left 0
+  opacity 1
+  pointer-events none
+  z-index var(--max-z)
+  mix-blend-mode hard-light
+#drawing-strokes-background
+  svg.drawing-strokes
+    mix-blend-mode normal
+    z-index 0
 </style>
