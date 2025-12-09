@@ -317,7 +317,8 @@ const loadSpaceOnBackOrForward = (event) => {
   spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
-  broadcastStore.leaveSpaceRoom()
+  const user = userStore.id
+  broadcastStore.leaveSpaceRoom({ user, type: 'userLeftRoom' })
   broadcastStore.close()
   spaceStore.removeEmptyCards()
   globalStore.triggerUnloadPage()

@@ -388,6 +388,7 @@ export default function webSocketPlugin () {
         break
       case 'leaveSpaceRoom':
         spaceStore.clients = []
+        message.name = 'userLeftRoom'
         sendMessage(pinia, message)
         break
       case 'update':
