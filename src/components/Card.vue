@@ -2282,7 +2282,7 @@ const clearFocus = () => {
     .url-wrap
       padding 0
       margin 0
-      padding-left 8px
+      padding-left 6px
       vertical-align -1px
       .url
         display inline-block
