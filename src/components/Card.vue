@@ -231,35 +231,19 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 const updateDefaultBackgroundColor = (color) => {
   state.defaultBackgroundColor = color
 }
-const cardBackgroundColor = computed(() => {
-  let color = props.card.backgroundColor
-  if (color) {
-    const hexColor = colord(color).toHex()
-    let defaultOtherThemeColor = '#262626'
-    if (isThemeDark.value) {
-      defaultOtherThemeColor = '#e3e3e3'
-    }
-    const colorIsDefault = hexColor === defaultOtherThemeColor
-    if (colorIsDefault) {
-      color = state.defaultBackgroundColor
-    }
-  }
-  return color
-})
 const currentBackgroundColor = computed(() => {
-  return selectedColor.value || remoteSelectedColor.value || cardBackgroundColor.value
+  return selectedColor.value || remoteSelectedColor.value || props.card.backgroundColor
 })
-
 const backgroundColor = computed(() => {
   let nameColor
   if (nameIsColor.value) {
     nameColor = props.card.name.trim()
   }
-  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || cardBackgroundColor.value
+  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
   return color
 })
 const backgroundColorIsDark = computed(() => {
-  const color = cardBackgroundColor.value || state.defaultBackgroundColor
+  const color = props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 const nameIsColor = computed(() => {
@@ -267,7 +251,7 @@ const nameIsColor = computed(() => {
   return colord(name).isValid()
 })
 const currentBackgroundColorIsDark = computed(() => {
-  const color = backgroundColor.value || cardBackgroundColor.value || state.defaultBackgroundColor
+  const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 
@@ -439,7 +423,7 @@ const cardWrapStyle = computed(() => {
 })
 const cardStyle = computed(() => {
   let nameColor
-  const backgroundColor = cardBackgroundColor.value
+  const backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
     nameColor = props.card.name
   }

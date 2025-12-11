@@ -113,8 +113,14 @@ export const useThemeStore = defineStore('theme', {
     getThemeColors () {
       const themeName = this.getThemeName
       return themes[themeName].colors
+    },
+    getThemeCardBackgroundColor () {
+      let color = '#e3e3e3'
+      if (this.getIsThemeDark) {
+        color = '#262626'
+      }
+      return color
     }
-
   },
 
   actions: {

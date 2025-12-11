@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -17,6 +18,7 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
+import { colord } from 'colord'
 
 let tallestCardHeight = 0
 
@@ -253,6 +255,7 @@ export const useCardStore = defineStore('cards', {
       const byId = {}
       const allIds = []
       cards.forEach(card => {
+        card.backgroundColor = this.normalizeCardBackgroundColor(card.backgroundColor)
         byId[card.id] = card
         allIds.push(card.id)
       })
@@ -282,6 +285,18 @@ export const useCardStore = defineStore('cards', {
       addItems.forEach(card => this.addCardToState(card))
       removeItems.forEach(card => this.removeCardFromState(card))
     },
+    normalizeCardBackgroundColor (color) {
+      const themeStore = useThemeStore()
+      if (color) {
+        const hexColor = colord(color).toHex()
+        const defaultOtherThemeColor = themeStore.getThemeCardBackgroundColor
+        const colorIsDefault = hexColor === defaultOtherThemeColor
+        if (colorIsDefault) {
+          color = null
+        }
+      }
+      return color
+    },
 
     // create
 
@@ -307,6 +322,7 @@ export const useCardStore = defineStore('cards', {
       card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
+      card.backgroundColor = this.normalizeCardBackgroundColor(card.backgroundColor)
       card.isRemoved = false
       card.headerFontId = userStore.prevHeaderFontId || 0
       card.maxWidth = Math.round(card.maxWidth) || userStore.cardSettingsMaxCardWidth
@@ -370,6 +386,9 @@ export const useCardStore = defineStore('cards', {
 
     async updateCardsState (updates) {
       updates = updates.map(update => { // normalize
+        if (update.backgroundColor) {
+          update.backgroundColor = this.normalizeCardBackgroundColor(update.backgroundColor)
+        }
         delete update.user
         return update
       })
