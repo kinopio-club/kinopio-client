@@ -905,7 +905,8 @@ const normalizedName = computed(() => {
   if (markdownLinks) {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
-  } else if (link?.includes('hidden=true')) {
+  }
+  if (props.card.urlIsHidden) {
     isHidden = true
   }
   if (isHidden) {
@@ -924,7 +925,7 @@ const nameIsOnlySpaceLink = computed(() => {
   if (!state.formats.link) { return }
   const urlIsSpace = utils.urlIsSpace(state.formats.link)
   const nameIsOnlyUrl = normalizedName.value.trim() === state.formats.link
-  return nameIsOnlyUrl
+  return urlIsSpace && nameIsOnlyUrl
 })
 const isNormalizedNameOrHiddenUrl = computed(() => {
   const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
@@ -1096,7 +1097,7 @@ const updateUrlPreview = () => {
 const updateUrlPreviewOnline = async () => {
   globalStore.addUrlPreviewLoadingForCardIds(props.card.id)
   const cardId = props.card.id
-  let url = webUrl.value
+  const url = webUrl.value
   if (!url) {
     globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
@@ -1107,7 +1108,6 @@ const updateUrlPreviewOnline = async () => {
     return
   }
   try {
-    url = utils.removeHiddenQueryStringFromURLs(url)
     const response = await apiStore.urlPreview({ url, card: props.card })
     if (!response) { throw 'urlPreview request failed' }
     const { data, host } = response
@@ -1121,14 +1121,12 @@ const updateUrlPreviewOnline = async () => {
 const updateUrlPreviewSuccess = async (url, data) => {
   if (!nameIncludesUrl(url)) { return }
   const cardId = data.id || props.card.id
+  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   if (!cardId) {
     console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
-    globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
-  data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   cardStore.updateCard(data)
-  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025

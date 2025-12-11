@@ -25,8 +25,7 @@ const props = defineProps({
   loading: Boolean,
   card: Object,
   isSelected: Boolean,
-  user: Object,
-  urlsIsVisibleInName: Boolean
+  user: Object
 })
 const state = reactive({
   imageCanLoad: false,
@@ -154,9 +153,9 @@ const showNone = async () => {
         .row
           //- hide url
           .button-wrap(v-if="state.moreOptionsIsVisible")
-            button.small-button(@click="toggleUrlsIsVisible" :class="{active: urlsIsVisibleInName}")
-              img.icon(v-if="urlsIsVisibleInName" src="@/assets/view-hidden.svg")
-              img.icon(v-else src="@/assets/view.svg")
+            button.small-button(@click="toggleUrlsIsVisible" :class="{active: props.card.urlIsHidden}")
+              img.icon(v-if="props.card.urlIsHidden" src="@/assets/view.svg")
+              img.icon(v-else src="@/assets/view-hidden.svg")
               span Hide URL
           .button-wrap
             button.small-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")

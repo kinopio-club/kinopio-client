@@ -2364,37 +2364,6 @@ export default {
     })
     return name
   },
-  addHiddenQueryStringToURLs (name) {
-    const urls = this.urlsFromString(name)
-    if (!urls) { return name }
-    urls.forEach(url => {
-      if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
-      const prevUrl = url.trim()
-      if (!this.urlIsWebsite(prevUrl)) { return }
-
-      url = this.newUrl(prevUrl)
-      if (!url) { return }
-
-      url.searchParams.set('hidden', 'true')
-      let newUrl = url.toString()
-      if (url.pathname === '/') {
-        newUrl = newUrl.replace(`${url.host}/`, url.host)
-      }
-      name = name.replace(prevUrl, newUrl)
-    })
-    return name
-  },
-  removeHiddenQueryStringFromURLs (name) {
-    const urls = this.urlsFromString(name)
-    if (!urls) { return name }
-    urls.forEach(url => {
-      const prevUrl = url
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
-      name = name.replace(prevUrl, url)
-    })
-    return name
-  },
 
   // Checkbox ✅
 

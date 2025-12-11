@@ -314,6 +314,7 @@ export const useCardStore = defineStore('cards', {
       card.name = name || ''
       card.frameId = 0
       card.userId = userStore.id
+      card.urlIsHidden = true
       card.urlPreviewIsVisible = true
       card.width = Math.round(width) || consts.emptyCard().width
       card.height = Math.round(height) || consts.emptyCard().height
