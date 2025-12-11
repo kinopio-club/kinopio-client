@@ -113,13 +113,6 @@ export const useThemeStore = defineStore('theme', {
     getThemeColors () {
       const themeName = this.getThemeName
       return themes[themeName].colors
-    },
-    getThemeCardBackgroundColor () {
-      let color = '#e3e3e3'
-      if (this.getIsThemeDark) {
-        color = '#262626'
-      }
-      return color
     }
   },
 
@@ -132,6 +125,11 @@ export const useThemeStore = defineStore('theme', {
         this.systemTheme = 'light'
       }
       this.restoreTheme()
+    },
+    isCardColorThemeDefault (color) {
+      const lightThemeColor = '#e3e3e3'
+      const darkThemeColor = '#262626'
+      return color === lightThemeColor || color === darkThemeColor
     },
 
     // theme is system

@@ -289,8 +289,7 @@ export const useCardStore = defineStore('cards', {
       const themeStore = useThemeStore()
       if (color) {
         const hexColor = colord(color).toHex()
-        const defaultOtherThemeColor = themeStore.getThemeCardBackgroundColor
-        const colorIsDefault = hexColor === defaultOtherThemeColor
+        const colorIsDefault = themeStore.isCardColorThemeDefault(hexColor)
         if (colorIsDefault) {
           color = null
         }
