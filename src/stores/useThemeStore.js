@@ -6,6 +6,8 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
+import { colord } from 'colord'
+
 const themes = {
   light: {
     name: 'light',
@@ -127,6 +129,7 @@ export const useThemeStore = defineStore('theme', {
       this.restoreTheme()
     },
     isCardColorThemeDefault (color) {
+      color = colord(color).toHex()
       const lightThemeColor = '#e3e3e3'
       const darkThemeColor = '#262626'
       return color === lightThemeColor || color === darkThemeColor

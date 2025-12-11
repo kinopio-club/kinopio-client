@@ -18,7 +18,6 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
-import { colord } from 'colord'
 
 let tallestCardHeight = 0
 
@@ -288,8 +287,7 @@ export const useCardStore = defineStore('cards', {
     normalizeCardBackgroundColor (color) {
       const themeStore = useThemeStore()
       if (color) {
-        const hexColor = colord(color).toHex()
-        const colorIsDefault = themeStore.isCardColorThemeDefault(hexColor)
+        const colorIsDefault = themeStore.isCardColorThemeDefault(color)
         if (colorIsDefault) {
           color = null
         }
