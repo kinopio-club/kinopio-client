@@ -285,7 +285,7 @@ export const useCardStore = defineStore('cards', {
 
     // create
 
-    normailzeNewCard (card) {
+    normalizeNewCard (card) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -330,7 +330,7 @@ export const useCardStore = defineStore('cards', {
         globalStore.updateNotifyCardsCreatedIsOverLimit(true)
         return
       }
-      card = this.normailzeNewCard(card)
+      card = this.normalizeNewCard(card)
       this.addCardToState(card)
       if (card.isFromBroadcast) { return }
       if (!skipCardDetailsIsVisible) {
@@ -356,7 +356,7 @@ export const useCardStore = defineStore('cards', {
           x += offset
           y += offset
         }
-        card = this.normailzeNewCard(card)
+        card = this.normalizeNewCard(card)
         card.shouldUpdateUrlPreview = true
         card.urlPreviewIsVisible = true
         return card
