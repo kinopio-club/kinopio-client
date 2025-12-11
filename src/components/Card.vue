@@ -920,11 +920,15 @@ const normalizedName = computed(() => {
   newName = removeCommentBrackets(newName)
   return newName.trim()
 })
-const isNormalizedNameOrHiddenUrl = computed(() => {
-  const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
+const nameIsOnlySpaceLink = computed(() => {
+  if (!state.formats.link) { return }
   const urlIsSpace = utils.urlIsSpace(state.formats.link)
   const nameIsOnlyUrl = normalizedName.value.trim() === state.formats.link
-  if (nameIsOnlyUrl) { return }
+  return nameIsOnlyUrl
+})
+const isNormalizedNameOrHiddenUrl = computed(() => {
+  const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
+  if (nameIsOnlySpaceLink.value) { return }
   if (urlPreviewIsHidden) { return true }
   return normalizedName.value
 })
