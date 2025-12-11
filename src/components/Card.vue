@@ -674,7 +674,7 @@ const urlButtonIsVisible = computed(() => {
   if (state.formats.file) { return true }
   const isPreviewImageOnly = props.card.urlPreviewIsVisible && props.card.shouldHideUrlPreviewInfo
   if (isPreviewImageOnly) { return true }
-  return !props.card.urlPreviewIsVisible
+  return true
 })
 const cardButtonUrl = computed(() => {
   const link = state.formats.link
@@ -888,8 +888,8 @@ const uploadFile = async (event) => {
 const hasTextSegments = computed(() => {
   return nameSegments.value.find(segment => segment.isText && segment.content)
 })
+// name without urls, checkbox text, and hidden urls
 const normalizedName = computed(() => {
-  // name without urls and checkbox text
   let newName = props.card.name
   if (!newName) { return }
   if (newName === ' ') { return }
@@ -922,6 +922,9 @@ const normalizedName = computed(() => {
 })
 const isNormalizedNameOrHiddenUrl = computed(() => {
   const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
+  const nameIsOnlyUrl = normalizedName.value.trim() === state.formats.link
+  if (nameIsOnlyUrl) { return }
   if (urlPreviewIsHidden) { return true }
   return normalizedName.value
 })
