@@ -11,6 +11,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -53,6 +54,7 @@ const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const broadcastStore = useBroadcastStore()
 const uploadStore = useUploadStore()
+const themeStore = useThemeStore()
 
 const cardElement = ref(null)
 
@@ -976,9 +978,8 @@ const nameSegments = computed(() => {
 // tags
 
 const newTagColor = () => {
-  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
-  if (isThemeDark) {
+  if (themeStore.getIsThemeDark) {
     color = randomColor({ luminosity: 'dark' })
   }
   return color
