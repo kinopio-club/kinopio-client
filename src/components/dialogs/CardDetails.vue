@@ -32,7 +32,6 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
-import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
 const globalStore = useGlobalStore()
@@ -1000,16 +999,7 @@ const hasUrls = computed(() => {
   return Boolean(validUrls.value.length)
 })
 const urlsIsVisible = computed(() => {
-  const urlsVisible = validUrls.value.filter(url => {
-    const queryString = utils.queryString(url)
-    if (queryString) {
-      const queryObject = qs.decode(queryString)
-      return queryObject.hidden || queryObject.kinopio
-    } else {
-      return false
-    }
-  })
-  return urlsVisible.length === validUrls.value.length
+  return !card.value.urlIsHidden
 })
 const cardUrlPreviewIsVisible = computed(() => {
   const isErrorUrl = card.value.urlPreviewErrorUrl && card.value.urlPreviewUrl === card.value.urlPreviewErrorUrl
@@ -1029,16 +1019,6 @@ const isLoadingUrlPreview = computed(() => {
   const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
   return Boolean(isLoading)
 })
-const toggleUrlsIsVisible = () => {
-  const isVisible = !urlsIsVisible.value
-  let newName
-  if (isVisible) {
-    newName = utils.addHiddenQueryStringToURLs(name.value)
-  } else {
-    newName = utils.removeHiddenQueryStringFromURLs(name.value)
-  }
-  updateCardName(newName)
-}
 const removeUrlPreview = async () => {
   const cardId = card.value.id || prevCardId
   const update = {
@@ -1521,8 +1501,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :visible="true"
         :loading="isLoadingUrlPreview"
         :card="card"
-        :urlsIsVisibleInName="urlsIsVisible"
-        @toggleUrlsIsVisible="toggleUrlsIsVisible"
+        @toggleUrlIsVisible="toggleUrlIsVisible"
       )
 
     //- other space
@@ -1582,7 +1561,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'backgroundColor']")
+    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'urlIsVisible']")
 </template>
 
 <style lang="stylus">

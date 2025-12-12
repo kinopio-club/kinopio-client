@@ -11,6 +11,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -53,6 +54,7 @@ const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const broadcastStore = useBroadcastStore()
 const uploadStore = useUploadStore()
+const themeStore = useThemeStore()
 
 const cardElement = ref(null)
 
@@ -231,35 +233,19 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 const updateDefaultBackgroundColor = (color) => {
   state.defaultBackgroundColor = color
 }
-const cardBackgroundColor = computed(() => {
-  let color = props.card.backgroundColor
-  if (color) {
-    const hexColor = colord(color).toHex()
-    let defaultOtherThemeColor = '#262626'
-    if (isThemeDark.value) {
-      defaultOtherThemeColor = '#e3e3e3'
-    }
-    const colorIsDefault = hexColor === defaultOtherThemeColor
-    if (colorIsDefault) {
-      color = state.defaultBackgroundColor
-    }
-  }
-  return color
-})
 const currentBackgroundColor = computed(() => {
-  return selectedColor.value || remoteSelectedColor.value || cardBackgroundColor.value
+  return selectedColor.value || remoteSelectedColor.value || props.card.backgroundColor
 })
-
 const backgroundColor = computed(() => {
   let nameColor
   if (nameIsColor.value) {
     nameColor = props.card.name.trim()
   }
-  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || cardBackgroundColor.value
+  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
   return color
 })
 const backgroundColorIsDark = computed(() => {
-  const color = cardBackgroundColor.value || state.defaultBackgroundColor
+  const color = props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 const nameIsColor = computed(() => {
@@ -267,7 +253,7 @@ const nameIsColor = computed(() => {
   return colord(name).isValid()
 })
 const currentBackgroundColorIsDark = computed(() => {
-  const color = backgroundColor.value || cardBackgroundColor.value || state.defaultBackgroundColor
+  const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 
@@ -439,7 +425,7 @@ const cardWrapStyle = computed(() => {
 })
 const cardStyle = computed(() => {
   let nameColor
-  const backgroundColor = cardBackgroundColor.value
+  const backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
@@ -690,6 +676,8 @@ const urlButtonIsVisible = computed(() => {
   if (state.formats.file) { return true }
   const isPreviewImageOnly = props.card.urlPreviewIsVisible && props.card.shouldHideUrlPreviewInfo
   if (isPreviewImageOnly) { return true }
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
+  if (urlIsSpace) { return true }
   return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
@@ -904,8 +892,8 @@ const uploadFile = async (event) => {
 const hasTextSegments = computed(() => {
   return nameSegments.value.find(segment => segment.isText && segment.content)
 })
+// name without urls, checkbox text, and hidden urls
 const normalizedName = computed(() => {
-  // name without urls and checkbox text
   let newName = props.card.name
   if (!newName) { return }
   if (newName === ' ') { return }
@@ -921,7 +909,8 @@ const normalizedName = computed(() => {
   if (markdownLinks) {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
-  } else if (link?.includes('hidden=true')) {
+  }
+  if (!props.card.urlIsVisible) {
     isHidden = true
   }
   if (isHidden) {
@@ -936,8 +925,15 @@ const normalizedName = computed(() => {
   newName = removeCommentBrackets(newName)
   return newName.trim()
 })
+const nameIsOnlySpaceLink = computed(() => {
+  if (!state.formats.link) { return }
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
+  const nameIsOnlyUrl = normalizedName.value.trim() === state.formats.link
+  return urlIsSpace && nameIsOnlyUrl
+})
 const isNormalizedNameOrHiddenUrl = computed(() => {
   const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
+  if (nameIsOnlySpaceLink.value) { return }
   if (urlPreviewIsHidden) { return true }
   return normalizedName.value
 })
@@ -982,9 +978,8 @@ const nameSegments = computed(() => {
 // tags
 
 const newTagColor = () => {
-  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
-  if (isThemeDark) {
+  if (themeStore.getIsThemeDark) {
     color = randomColor({ luminosity: 'dark' })
   }
   return color
@@ -1105,7 +1100,7 @@ const updateUrlPreview = () => {
 const updateUrlPreviewOnline = async () => {
   globalStore.addUrlPreviewLoadingForCardIds(props.card.id)
   const cardId = props.card.id
-  let url = webUrl.value
+  const url = webUrl.value
   if (!url) {
     globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
@@ -1116,7 +1111,6 @@ const updateUrlPreviewOnline = async () => {
     return
   }
   try {
-    url = utils.removeHiddenQueryStringFromURLs(url)
     const response = await apiStore.urlPreview({ url, card: props.card })
     if (!response) { throw 'urlPreview request failed' }
     const { data, host } = response
@@ -1130,14 +1124,12 @@ const updateUrlPreviewOnline = async () => {
 const updateUrlPreviewSuccess = async (url, data) => {
   if (!nameIncludesUrl(url)) { return }
   const cardId = data.id || props.card.id
+  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   if (!cardId) {
     console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
-    globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
-  data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   cardStore.updateCard(data)
-  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025
@@ -2291,7 +2283,7 @@ const clearFocus = () => {
     .url-wrap
       padding 0
       margin 0
-      padding-left 8px
+      padding-left 6px
       vertical-align -1px
       .url
         display inline-block

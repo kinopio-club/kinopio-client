@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
@@ -13,6 +14,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
@@ -45,6 +47,9 @@ const updateDefaultColor = () => {
 }
 const newCardColor = computed(() => {
   const userDefault = userStore.defaultCardBackgroundColor
+  if (themeStore.isCardColorThemeDefault(userDefault)) {
+    return state.defaultColor
+  }
   return userDefault || state.defaultColor
 })
 

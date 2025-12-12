@@ -376,8 +376,12 @@ export const useGlobalStore = defineStore('global', {
       return space
     },
     getOtherCardById (cardId) {
+      const cardStore = useCardStore()
       const otherCards = this.otherItems.cards.filter(Boolean)
       const card = otherCards.find(otherCard => otherCard.id === cardId)
+      if (card?.backgroundColor) {
+        card.backgroundColor = cardStore.normalizeCardBackgroundColor(card.backgroundColor)
+      }
       return card
     },
     getNewTag ({ name, defaultColor, cardId, spaceId }) {
