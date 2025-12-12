@@ -404,16 +404,23 @@ export const useCardStore = defineStore('cards', {
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
       try {
+        console.error('🌺 TEMP debug: updatecards', updates)
         this.updateCardsState(updates)
+        console.log('🌺🌺')
         if (!userStore.getUserCanEditSpace) { return }
         const ids = updates.map(update => update.id)
         connectionStore.updateConnectionPathsByItemIds(ids)
+        console.log('🌺🌺🌺')
         broadcastStore.update({ updates, store: 'cardStore', action: 'updateCardsState' })
         for (const card of updates) {
           await apiStore.addToQueue({ name: 'updateCard', body: card })
         }
+        console.log('🌺🌺🌺🌺')
+
         let cards = this.getAllCards
         cards = utils.clone(cards)
+        console.log('🌺🌺🌺🌺🌺')
+
         await cache.updateSpace('cards', cards, spaceStore.id)
       } catch (error) {
         console.error('🚒 updateCards', error, updates)

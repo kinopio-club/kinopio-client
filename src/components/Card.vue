@@ -1002,7 +1002,6 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   if (isMultiTouch) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
-  cardStore.incrementCardZ(props.card.id)
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingCard = false
   const tagRect = event.target.getBoundingClientRect()
