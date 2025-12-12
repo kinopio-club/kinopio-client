@@ -936,7 +936,8 @@ export const useCardStore = defineStore('cards', {
       this.updateCard(update)
     },
     getCardsWithTagName (tagName) {
-      const cards = this.getAllCards
+      let cards = this.getAllCards
+      cards = utils.clone(cards)
       return cards.filter(card => {
         const tags = utils.tagsFromStringWithoutBrackets(card.name)
         if (tags) {
