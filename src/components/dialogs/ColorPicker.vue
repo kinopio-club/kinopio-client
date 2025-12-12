@@ -258,10 +258,13 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       button.small-button.remove-button(v-if="props.removeIsVisible" title="remove" @click="removeColor")
         img.icon.cancel(src="@/assets/add.svg")
   section
-    //- Colors
+    //- recent colors
     .recent-colors(v-if="uniqueRecentColors")
       template(v-for="color in uniqueRecentColors")
-        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
+        button.color(:class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
+          .transparent-background
+          .color-background(:style="{backgroundColor: color}")
+    //- colors
     .colors
       template(v-for="color in state.colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
@@ -307,7 +310,9 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       img.icon(v-if="currentColorIsFavorite" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
-      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')" :title="color")
+      button.color(:class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')" :title="color")
+        .transparent-background
+        .color-background(:style="{backgroundColor: color}")
 </template>
 
 <style lang="stylus">
@@ -323,13 +328,23 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
   .recent-colors
     margin-bottom 8px
     margin-left 2px
-  .color
+  button.color
     width 17%
     max-width 30px
     height 22px
     margin-bottom 5px
     margin-right 5px
     position relative
+    .color-background,
+    .transparent-background
+      position absolute
+      width 100%
+      height 100%
+      top 0
+      left 0
+      border-radius 5px
+    .transparent-background
+      background-image url('https://bk.kinopio.club/transparent-background.webp')
   button.color + button.color
     margin 0
     margin-bottom 5px
