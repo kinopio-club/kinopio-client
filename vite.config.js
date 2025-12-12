@@ -160,6 +160,8 @@ export default defineConfig(async ({ command, mode }) => {
       }
     },
     build: {
+      // generates and deploys .map files
+      sourcemap: true,
       // skip non-important build warnings
       rollupOptions: {
         onwarn (warning, warn) {
