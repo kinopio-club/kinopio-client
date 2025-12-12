@@ -906,11 +906,12 @@ const normalizedName = computed(() => {
   const link = state.formats.link
   let isHidden
   const markdownLinks = newName.match(utils.markdown().linkPattern)
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
   if (markdownLinks) {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
   }
-  if (!props.card.urlIsVisible) {
+  if (!props.card.urlIsVisible && !urlIsSpace) {
     isHidden = true
   }
   if (isHidden) {
