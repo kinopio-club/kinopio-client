@@ -674,7 +674,9 @@ const urlButtonIsVisible = computed(() => {
   if (state.formats.file) { return true }
   const isPreviewImageOnly = props.card.urlPreviewIsVisible && props.card.shouldHideUrlPreviewInfo
   if (isPreviewImageOnly) { return true }
-  return true
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
+  if (urlIsSpace) { return true }
+  return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
   const link = state.formats.link
