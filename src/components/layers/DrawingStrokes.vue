@@ -74,6 +74,9 @@ onMounted(async () => {
       if (actions.includes(name)) {
         clearDrawing()
       }
+      if (name === 'duplicateSpace') {
+        spaceStore.drawingStrokes = spaceStrokes
+      }
     }
   )
   unsubscribes = () => {

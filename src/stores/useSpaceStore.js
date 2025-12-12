@@ -57,6 +57,7 @@ export const useSpaceStore = defineStore('space', {
       space.connectionTypes = connectionStore.getAllConnectionTypes
       space.boxes = boxStore.getAllBoxes
       space.lines = lineStore.getAllLines
+      space.drawingStrokes = this.drawingStrokes || []
       return space
     },
     getSpaceIsPrivate () {
@@ -594,6 +595,7 @@ export const useSpaceStore = defineStore('space', {
       this.incrementCardsCreatedCountFromSpace(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
+      globalStore.triggerDrawingInitialize()
       await apiStore.addToQueue({
         name: 'createSpace',
         body: space

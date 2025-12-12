@@ -1661,7 +1661,8 @@ export default {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = await cache.user()
-    let { cards, connections, connectionTypes, boxes, tags, lines } = items
+    let { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes } = items
+    drawingStrokes = drawingStrokes || []
     lines = lines || []
     tags = tags || []
     boxes = boxes || []
@@ -1690,13 +1691,19 @@ export default {
     lines = lines.map(line => {
       const userId = this.itemUserId(user, line, nullItemUsers)
       const newId = nanoid()
-      itemIdDeltas.push({
-        prevId: line.id,
-        newId
-      })
       line.id = newId
       line.userId = userId
       return line
+    })
+    drawingStrokes = drawingStrokes.map(strokes => {
+      strokes = strokes.map(point => {
+        const userId = this.itemUserId(user, point, nullItemUsers)
+        const newId = nanoid()
+        point.id = newId
+        point.userId = userId
+        return point
+      })
+      return strokes
     })
     connectionTypes = uniqBy(connectionTypes, 'id')
     connectionTypes = connectionTypes.map(type => {
@@ -1726,7 +1733,7 @@ export default {
       tag.userId = userId
       return tag
     })
-    items = { cards, connections, connectionTypes, boxes, tags, lines }
+    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1783,7 +1790,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines']
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {
