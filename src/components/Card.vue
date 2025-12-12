@@ -906,7 +906,7 @@ const normalizedName = computed(() => {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
   }
-  if (props.card.urlIsHidden) {
+  if (!props.card.urlIsVisible) {
     isHidden = true
   }
   if (isHidden) {

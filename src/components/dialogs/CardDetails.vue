@@ -1019,14 +1019,6 @@ const isLoadingUrlPreview = computed(() => {
   const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
   return Boolean(isLoading)
 })
-const toggleUrlsIsVisible = () => {
-  const value = card.value.urlIsHidden
-  const update = {
-    id: card.value.id,
-    urlIsHidden: !value
-  }
-  cardStore.updateCard(update)
-}
 const removeUrlPreview = async () => {
   const cardId = card.value.id || prevCardId
   const update = {
@@ -1509,7 +1501,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :visible="true"
         :loading="isLoadingUrlPreview"
         :card="card"
-        @toggleUrlsIsVisible="toggleUrlsIsVisible"
+        @toggleUrlIsVisible="toggleUrlIsVisible"
       )
 
     //- other space

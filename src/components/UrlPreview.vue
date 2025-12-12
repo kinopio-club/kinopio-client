@@ -18,8 +18,6 @@ const spaceStore = useSpaceStore()
 
 let position
 
-const emit = defineEmits(['toggleUrlsIsVisible'])
-
 const props = defineProps({
   visible: Boolean,
   loading: Boolean,
@@ -82,8 +80,13 @@ const previewImageHover = (value) => {
 
 // show options
 
-const toggleUrlsIsVisible = () => {
-  emit('toggleUrlsIsVisible')
+const toggleUrlIsVisible = () => {
+  const value = props.card.urlIsVisible
+  const update = {
+    id: props.card.id,
+    urlIsVisible: !value
+  }
+  cardStore.updateCard(update)
 }
 const toggleMoreOptionsIsVisible = () => {
   const value = !state.moreOptionsIsVisible
@@ -153,10 +156,9 @@ const showNone = async () => {
         .row
           //- hide url
           .button-wrap(v-if="state.moreOptionsIsVisible")
-            button.small-button(@click="toggleUrlsIsVisible" :class="{active: props.card.urlIsHidden}")
-              img.icon(v-if="props.card.urlIsHidden" src="@/assets/view.svg")
-              img.icon(v-else src="@/assets/view-hidden.svg")
-              span Hide URL
+            button.small-button(@click="toggleUrlIsVisible" :class="{active: props.card.urlIsVisible}")
+              img.icon(src="@/assets/view.svg")
+              span Show URL
           .button-wrap
             button.small-button(@click.stop="toggleMoreOptionsIsVisible" :class="{active: state.moreOptionsIsVisible}")
               img.icon.down-arrow(src="@/assets/down-arrow.svg")
