@@ -418,6 +418,8 @@ export const useCardStore = defineStore('cards', {
         console.log('🌺🌺🌺🌺')
 
         let cards = this.getAllCards
+        console.log('🌺🌺🌺🌺🌺🌱', cards)
+
         cards = utils.clone(cards)
         console.log('🌺🌺🌺🌺🌺')
 
