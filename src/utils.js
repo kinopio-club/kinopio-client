@@ -468,11 +468,15 @@ export default {
     return object
   },
   objectPickKeys (object, keys) {
-    const result = {}
-    keys.forEach(key => {
-      result[key] = object[key]
-    })
-    return result
+    try {
+      const result = {}
+      keys.forEach(key => {
+        result[key] = object[key]
+      })
+      return result
+    } catch (error) {
+      console.error('🚒 objectPickKeys', error, object, keys)
+    }
   },
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color', 'description', 'website']
@@ -1657,7 +1661,8 @@ export default {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = await cache.user()
-    let { cards, connections, connectionTypes, boxes, tags } = items
+    let { cards, connections, connectionTypes, boxes, tags, lines } = items
+    lines = lines || []
     tags = tags || []
     boxes = boxes || []
     cards = cards.map(card => {
@@ -1681,6 +1686,17 @@ export default {
       box.id = newId
       box.userId = userId
       return box
+    })
+    lines = lines.map(line => {
+      const userId = this.itemUserId(user, line, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: line.id,
+        newId
+      })
+      line.id = newId
+      line.userId = userId
+      return line
     })
     connectionTypes = uniqBy(connectionTypes, 'id')
     connectionTypes = connectionTypes.map(type => {
@@ -1710,7 +1726,7 @@ export default {
       tag.userId = userId
       return tag
     })
-    items = { cards, connections, connectionTypes, boxes, tags }
+    items = { cards, connections, connectionTypes, boxes, tags, lines }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1767,7 +1783,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes']
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {

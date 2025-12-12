@@ -49,12 +49,14 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+      const lineStore = useLineStore()
       const space = this.getSpaceAllState
       if (!space) { return }
       space.cards = cardStore.getAllCards
       space.connections = connectionStore.getAllConnections
       space.connectionTypes = connectionStore.getAllConnectionTypes
       space.boxes = boxStore.getAllBoxes
+      space.lines = lineStore.getAllLines
       return space
     },
     getSpaceIsPrivate () {
