@@ -565,6 +565,7 @@ export const useCardStore = defineStore('cards', {
     },
     incrementCardZ (id) {
       const globalStore = useGlobalStore()
+      if (!id) { return }
       // highest z
       const cards = this.getAllCards
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
@@ -586,6 +587,7 @@ export const useCardStore = defineStore('cards', {
         }
         updates.push(update)
       })
+      console.error('🚒🚒🚒TEMP DEBUG', updates, id, highestZ)
       this.updateCards(updates)
     },
     async updateTallestCardHeight (card) {
