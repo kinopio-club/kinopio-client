@@ -1675,6 +1675,7 @@ export default {
       boxes = [],
       tags = [],
       lines = [],
+      lists = [],
       drawingStrokes = []
     } = items
     cards = cards.map(card => {
@@ -1698,6 +1699,17 @@ export default {
       box.id = newId
       box.userId = userId
       return box
+    })
+    lists = lists.map(list => {
+      const userId = this.itemUserId(user, list, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: list.id,
+        newId
+      })
+      list.id = newId
+      list.userId = userId
+      return list
     })
     lines = lines.map(line => {
       const userId = this.itemUserId(user, line, nullItemUsers)
@@ -1744,7 +1756,11 @@ export default {
       tag.userId = userId
       return tag
     })
-    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes }
+    cards = cards.map(card => {
+      card.listId = this.updateAllIds(card, 'listId', itemIdDeltas)
+      return card
+    })
+    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes, lists }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1801,7 +1817,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes']
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes', 'lists']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {
