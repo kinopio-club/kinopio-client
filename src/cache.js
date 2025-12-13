@@ -248,7 +248,8 @@ export default {
       tags: space.tags,
       boxes: space.boxes,
       lines: space.lines,
-      drawingStrokes: space.drawingStrokes
+      drawingStrokes: space.drawingStrokes,
+      lists: space.lists
     }
     const uniqueItems = await utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards.map(card => {
@@ -264,6 +265,7 @@ export default {
     space.boxes = uniqueItems.boxes
     space.lines = uniqueItems.lines
     space.drawingStrokes = uniqueItems.drawingStrokes
+    space.lists = uniqueItems.lists
     await this.saveSpace(space)
     return space
   },
