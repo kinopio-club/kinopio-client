@@ -453,18 +453,8 @@ const stopResizingBoxes = () => {
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
   // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
-const checkIfShouldSnapBoxes = (event) => {
-  if (!globalStore.boxesWereDragged) { return }
-  if (event.shiftKey) { return }
-  const snapGuides = boxStore.boxSnapGuides
-  if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => {
-    if (!globalStore.notifyBoxSnappingIsReady) { return }
-    boxStore.updateBoxSnapToPosition(snapGuide)
-  })
-}
 const checkIfShouldExpandBoxes = (event) => {
-  if (!globalStore.cardsWereDragged) { return }
+  if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
@@ -724,7 +714,6 @@ const stopInteractions = async (event) => {
     globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
   boxStore.boxSnapGuides = []
   if (shouldCancelInteraction(event)) { return }
