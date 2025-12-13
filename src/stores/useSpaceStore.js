@@ -58,6 +58,7 @@ export const useSpaceStore = defineStore('space', {
       space.boxes = boxStore.getAllBoxes
       space.lines = lineStore.getAllLines
       space.drawingStrokes = this.drawingStrokes || []
+      space.lists = this.lists || []
       return space
     },
     getSpaceIsPrivate () {
