@@ -575,35 +575,6 @@ export const useBoxStore = defineStore('boxes', {
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       this.boxSnapGuides = snapGuides
     },
-    async updateBoxSnapToPosition (snapGuide) {
-      let { side, item, target } = snapGuide
-      const borderWidth = 2
-      const update = { id: item.id }
-      item = this.byId[item.id]
-      if (!item) { return }
-      const alignWithItemY = side === 'right' || side === 'left'
-      // size
-      if (alignWithItemY) {
-        update.y = target.y
-        update.resizeHeight = target.resizeHeight
-      } else {
-        update.x = target.x
-        update.resizeWidth = target.resizeWidth
-      }
-      // position
-      if (side === 'right') {
-        update.x = target.x + target.resizeWidth - borderWidth
-      } else if (side === 'left') {
-        update.x = target.x - item.resizeWidth + borderWidth
-      } else if (side === 'top') {
-        update.y = target.y - item.resizeHeight + borderWidth
-      } else if (side === 'bottom') {
-        update.y = target.y + target.resizeHeight - borderWidth
-      }
-      this.boxSnapGuides = []
-      await nextTick()
-      this.updateBox(update)
-    },
     async updateBoxSnapToSize (snapGuide) {
       const { side, item, target, sizeOutside } = snapGuide
       const padding = consts.spaceBetweenCards * 2
