@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible', 'childDialogIsVisible'])
+const emit = defineEmits(['closeDialogs', 'childDialogIsVisible'])
 
 const props = defineProps({
   visible: Boolean,
@@ -50,7 +50,7 @@ const props = defineProps({
 })
 
 const state = reactive({
-  tipsIsVisible: false,
+  // tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
   invitePickerIsVisible: false,
@@ -66,6 +66,11 @@ const closeDialogs = () => {
 const emitChildDialogIsVisible = (value) => {
   emit('childDialogIsVisible', value)
 }
+const closeChildDialogs = () => {
+  state.emailInvitesIsVisible = false
+  state.invitePickerIsVisible = false
+  // state.tipsIsVisible = false
+}
 
 // invite types
 
@@ -78,9 +83,9 @@ const updateDefaultInviteType = () => {
     // state.inviteType = 'group'
   }
 }
-const toggleInviteType = (type) => {
+const updateInviteType = (type) => {
   state.inviteType = type
-  state.tipsIsVisible = false
+  // state.tipsIsVisible = false
 }
 
 // urls
@@ -109,11 +114,14 @@ const readUrl = computed(() => {
 // })
 const inviteUrl = computed(() => {
   let url
+  // group
   if (inviteTypeIsGroup.value) {
     url = groupStore.getGroupInviteUrl(props.group)
     console.info('🍇 group invite url', url)
+  // edit
   } else if (inviteTypeIsEdit.value) {
     url = editUrl.value
+  // read
   } else if (inviteTypeIsRead.value) {
     url = readUrl.value
   }
@@ -125,33 +133,29 @@ const inviteUrl = computed(() => {
 
 //  copy invite urls
 
-const copyInviteUrl = async (event) => {
+const copyInviteLink = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(inviteUrl.value)
     globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
-    console.warn('🚑 copyInviteUrl', error, inviteUrl.value)
+    console.warn('🚑 copyInviteLink', error, inviteUrl.value)
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 
 // email invites
 
-const closeChildDialogs = () => {
-  state.emailInvitesIsVisible = false
-  state.invitePickerIsVisible = false
-  state.tipsIsVisible = false
-}
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
   closeChildDialogs()
   state.emailInvitesIsVisible = value
+  emitChildDialogIsVisible(state.emailInvitesIsVisible)
 }
-watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
-  emit('emailInvitesIsVisible', value)
-})
+// watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
+//   emit('emailInvitesIsVisible', value)
+// })
 
 // qr
 
@@ -164,12 +168,12 @@ const toggleInvitePickerIsVisible = () => {
 
 // tips
 
-const toggleTipsIsVisible = () => {
-  const isVisible = state.tipsIsVisible
-  closeChildDialogs()
-  state.tipsIsVisible = !isVisible
-  emitChildDialogIsVisible(state.tipsIsVisible)
-}
+// const toggleTipsIsVisible = () => {
+//   const isVisible = state.tipsIsVisible
+//   closeChildDialogs()
+//   state.tipsIsVisible = !isVisible
+//   emitChildDialogIsVisible(state.tipsIsVisible)
+// }
 
 </script>
 
@@ -179,7 +183,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .button-wrap.invite-button
     button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
       InviteLabel(:inviteType="state.inviteType" :group="props.group")
-      InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType")
+      InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" @select="updateInviteType")
 
   section.subsection
     .row.title-row
@@ -197,7 +201,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
           EmailInvites(:visible="state.emailInvitesIsVisible")
 
         .button-wrap
-          button(@click.left="copyInviteUrl")
+          button(@click.left="copyInviteLink")
             img.icon.copy(src="@/assets/copy.svg")
             span
               span Copy Invite Link

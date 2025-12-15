@@ -23,7 +23,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['closeDialogs'])
+const emit = defineEmits(['closeDialogs', 'select'])
 
 const props = defineProps({
   visible: Boolean,
