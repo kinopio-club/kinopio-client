@@ -40,7 +40,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const inviteStates = computed(() => invite.states())
+const inviteStates = computed(() => {
+  let value = invite.states()
+  if (!props.group) {
+    value = value.filter(item => item.type !== 'group')
+  }
+  return value
+})
 const isActive = (inviteState) => {
   return inviteState.type === props.inviteType
 }
@@ -57,7 +63,7 @@ dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.le
       template(v-for="(inviteState in inviteStates")
         li(:class="{ active: isActive(inviteState) }" @click.left="select(inviteState)")
           InviteLabel(:inviteType="inviteState.type" :group="props.group" :randomUser="randomUser")
-          .row.description
+          .row.description(v-if="inviteState.description")
             span {{ inviteState.description }}
   section
     p Invitees don't need an account to view spaces.
