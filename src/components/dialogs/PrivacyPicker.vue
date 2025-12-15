@@ -89,13 +89,13 @@ dialog.narrow.privacy-picker(v-if="props.visible" :open="props.visible" @click.l
 
 <style lang="stylus" scoped>
 .privacy-picker
+  .results-section
+    padding-top 4px
+    max-height calc(92vh - 120px)
   .badge
     display inline-block
   li
     display block
-  .results-section
-    padding-top 4px
-    max-height calc(92vh - 120px)
   .description
     margin-top 3px
 </style>

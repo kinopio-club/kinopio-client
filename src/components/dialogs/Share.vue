@@ -51,7 +51,6 @@ const state = reactive({
   rssFeedsIsVisible: false,
   embedIsVisible: false,
   isShareInPresentationMode: false,
-  emailInvitesIsVisible: false,
   childDialogIsVisible: false,
   spaceUsersIsVisible: false,
   QRCodeIsVisible: false
@@ -96,13 +95,12 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible || state.QRCodeIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible || state.QRCodeIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
   state.rssFeedsIsVisible = false
   state.embedIsVisible = false
-  state.emailInvitesIsVisible = false
   state.childDialogIsVisible = false
   state.spaceUsersIsVisible = false
   state.QRCodeIsVisible = false
@@ -137,9 +135,6 @@ const toggleEmbedIsVisible = () => {
 const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
-}
-const updateEmailInvitesIsVisible = (value) => {
-  state.emailInvitesIsVisible = value
 }
 const toggleQRCodeIsVisible = () => {
   const isVisible = state.QRCodeIsVisible
@@ -195,7 +190,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon.copy(src="@/assets/copy.svg")
             .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
-            span Copy Link
+            span Copy URL
           button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
             img.icon.qr-code(src="@/assets/qr-code.svg")
         QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
@@ -207,7 +202,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon(src="@/assets/presentation.svg")
 
   //- Invite
-  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="updateEmailInvitesIsVisible" :group="spaceGroup" @childDialogIsVisible="childDialogIsVisible")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" :group="spaceGroup" @childDialogIsVisible="childDialogIsVisible")
 
   section(v-if="!spaceIsRemote")
     p

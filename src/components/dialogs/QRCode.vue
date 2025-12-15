@@ -39,6 +39,8 @@ dialog.narrow.qr-code(v-if="props.visible" :open="props.visible" @click.left.sto
     p Scan QR Code
   section
     canvas#qr(ref="qrElement")
+    section.subsection
+      code {{value}}
 </template>
 
 <style lang="stylus">
@@ -50,4 +52,6 @@ dialog.qr-code
     height 200px
     image-rendering pixelated
     background-color var(--primary-on-dark-background)
+  code
+    padding-left 0
 </style>
