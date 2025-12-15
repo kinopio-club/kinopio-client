@@ -8,10 +8,9 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import InviteLabel from '@/components/InviteLabel.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
-import QRCode from '@/components/dialogs/QRCode.vue'
-import InviteTips from '@/components/dialogs/InviteTips.vue'
-import GroupLabel from '@/components/GroupLabel.vue'
+// import InviteTips from '@/components/dialogs/InviteTips.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -53,33 +52,29 @@ const state = reactive({
   tipsIsVisible: false,
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
-  QRCodeIsVisible: false,
-  inviteType: 'edit' // 'group', 'edit', 'readOnly'
+  invitePickerIsVisible: false,
+  inviteType: 'edit' // 'group', 'edit', 'read'
 })
 
-const currentUser = computed(() => userStore.getUserAllState)
-const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const spaceName = computed(() => spaceStore.name)
-const randomUser = computed(() => {
-  const luminosity = userStore.theme
-  const color = randomColor({ luminosity })
-  return { color }
-})
 const collaboratorKey = computed(() => spaceStore.collaboratorKey)
-const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
+// const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 const closeDialogs = () => {
   emit('closeDialogs')
 }
+const emitChildDialogIsVisible = (value) => {
+  emit('childDialogIsVisible', value)
+}
+
 // invite types
 
 const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
-const inviteTypeIsReadOnly = computed(() => state.inviteType === 'readOnly')
-const inviteTypeIsCommentOnly = computed(() => state.inviteType === 'commentOnly')
+const inviteTypeIsRead = computed(() => state.inviteType === 'read')
+// const inviteTypeIsCommentOnly = computed(() => state.inviteType === 'commentOnly')
 const updateDefaultInviteType = () => {
   if (props.group) {
-    state.inviteType = 'group'
+    // state.inviteType = 'group'
   }
 }
 const toggleInviteType = (type) => {
@@ -96,7 +91,7 @@ const editUrl = computed(() => {
   console.info('🍇 invite edit url', url)
   return url
 })
-const readOnlyUrl = computed(() => {
+const readUrl = computed(() => {
   const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
@@ -104,13 +99,13 @@ const readOnlyUrl = computed(() => {
   console.info('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
   return url
 })
-const commentOnlyUrl = computed(() => {
-  const currentSpace = spaceStore.getSpaceAllState
-  const spaceId = currentSpace.id
-  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: true })
-  console.info('🍇 invite comment only url', url)
-  return url
-})
+// const commentOnlyUrl = computed(() => {
+//   const currentSpace = spaceStore.getSpaceAllState
+//   const spaceId = currentSpace.id
+//   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: true })
+//   console.info('🍇 invite comment only url', url)
+//   return url
+// })
 const inviteUrl = computed(() => {
   let url
   if (inviteTypeIsGroup.value) {
@@ -118,11 +113,12 @@ const inviteUrl = computed(() => {
     console.info('🍇 group invite url', url)
   } else if (inviteTypeIsEdit.value) {
     url = editUrl.value
-  } else if (inviteTypeIsReadOnly.value) {
-    url = readOnlyUrl.value
-  } else {
-    url = commentOnlyUrl.value
+  } else if (inviteTypeIsRead.value) {
+    url = readUrl.value
   }
+  // else {
+  //   url = commentOnlyUrl.value
+  // }
   return url
 })
 
@@ -144,7 +140,7 @@ const copyInviteUrl = async (event) => {
 
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
-  state.QRCodeIsVisible = false
+  state.invitePickerIsVisible = false
   state.tipsIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
@@ -158,14 +154,11 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 
 // qr
 
-const toggleQRCodeIsVisible = () => {
-  const isVisible = state.QRCodeIsVisible
+const toggleInvitePickerIsVisible = () => {
+  const isVisible = state.invitePickerIsVisible
   closeChildDialogs()
-  state.QRCodeIsVisible = !isVisible
-  emitChildDialogIsVisible(state.QRCodeIsVisible)
-}
-const emitChildDialogIsVisible = (value) => {
-  emit('childDialogIsVisible', value)
+  state.invitePickerIsVisible = !isVisible
+  emitChildDialogIsVisible(state.invitePickerIsVisible)
 }
 
 // tips
@@ -181,91 +174,138 @@ const toggleTipsIsVisible = () => {
 
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
-  .row.title-row
-    span
-      .users
-        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-      span Invite Collaborators
-    .button-wrap
-      button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-        span ?
-      InviteTips(:visible="state.tipsIsVisible")
-  .row.invite-url-segmented-buttons
-    .segmented-buttons
-      button(v-if="props.group" @click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
-        GroupLabel(:group="props.group")
-      button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
-        span Edit
-      button(v-if="spaceIsPrivate" @click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
-        span Read
-      button(v-if="spaceIsPrivate" @click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
-        img.icon.comment(src="@/assets/comment.svg")
 
-  section.subsection.invite-url-subsection
+  //- TODO component invitelabel
+  button.invite-button(@click="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
+    InviteLabel(:inviteType="state.inviteType" :group="props.group")
+    //- .invite-label
+    //-   .users
+    //-     User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+    //-     User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+    //-   span.name Invite to Collaborate
+
+  section.subsection
+    .row.title-row
+      div
+        //- .button-wrap
+        //-   button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
+        //-     img.icon.mail(src="@/assets/mail.svg")
+        //-     span Email
+        //-   EmailInvites(:visible="state.emailInvitesIsVisible")
+
+        .button-wrap(v-if="inviteTypeIsEdit")
+          button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
+            img.icon.mail(src="@/assets/mail.svg")
+            span Email
+          EmailInvites(:visible="state.emailInvitesIsVisible")
+
+        .button-wrap
+          button(@click.left="copyInviteUrl")
+            img.icon.copy(src="@/assets/copy.svg")
+            span
+              span Copy Invite Link
+
+      //- .button-wrap
+      //-   button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+      //-     span ?
+      //-   InviteTips(:visible="state.tipsIsVisible")
+    //- .row
+    //-   //- (v-if="inviteTypeIsEdit")
+    //-   .button-wrap
+    //-     button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
+    //-       img.icon.mail(src="@/assets/mail.svg")
+    //-       span Email
+    //-     EmailInvites(:visible="state.emailInvitesIsVisible")
+
+  //- TODO integrate tips into invitepicker , remove InviteTips dialog
+
+  //- TODO old, replace
+  //- .row.title-row
+    //- span
+    //-   .users
+    //-     User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+    //-     User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+    //-   span Invite Collaborators
+    //- .button-wrap
+    //-   button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+    //-     span ?
+    //-   InviteTips(:visible="state.tipsIsVisible")
+  //- .row.invite-url-segmented-buttons
+  //-   .segmented-buttons
+  //-     button(v-if="props.group" @click="toggleInviteType('group')" :class="{active: inviteTypeIsGroup}")
+  //-       GroupLabel(:group="props.group")
+  //-     button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
+  //-       span Edit
+  //-     button(v-if="spaceIsPrivate" @click="toggleInviteType('read')" :class="{active: inviteTypeIsRead}")
+  //-       span Read
+
+      //- button(v-if="spaceIsPrivate" @click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
+      //-   img.icon.comment(src="@/assets/comment.svg")
+
+  //- section.subsection
+    //- .invite-url-subsection
     //- invite type info
-    .row(v-if="inviteTypeIsCommentOnly")
-      .badge.info Comment Only invites are in beta, so only invite people you trust
-    //- .row(v-if="inviteTypeIsReadOnly")
+    //- .row(v-if="inviteTypeIsCommentOnly")
+    //- //-   .badge.info Comment Only invites are in beta, so only invite people you trust
+    //- .row(v-if="inviteTypeIsRead")
     //-   .badge Invite others to read only
     //- .row(v-if="inviteTypeIsEdit")
     //-   .badge Invite collaborators to edit space
-    .row(v-if="inviteTypeIsGroup")
-      .badge Group members can edit any space in{{' '}}
-         GroupLabel(:group="props.group" :showName="true")
+    //- .row(v-if="inviteTypeIsGroup")
+    //-   .badge Group members can edit any space in{{' '}}
+    //-      GroupLabel(:group="props.group" :showName="true")
 
     //- copy invite
-    .row
-      .segmented-buttons
-        button(@click.left="copyInviteUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span(v-if="inviteTypeIsGroup")
-            span Copy Invite Link to Group
-          span(v-else-if="inviteTypeIsEdit")
-            span Copy Invite Link to Edit
-          span(v-else-if="inviteTypeIsReadOnly")
-            span Copy Invite Link to Read Only
-          span(v-else)
-            span Copy Invite Link to{{' '}}
-              img.icon.comment(src="@/assets/comment.svg")
+    //- .row
+      //- .segmented-buttons
+      //-   button(@click.left="copyInviteUrl")
+      //-     img.icon.copy(src="@/assets/copy.svg")
+      //-     span(v-if="inviteTypeIsGroup")
+      //-       span Copy Invite Link to Group
+      //-     span(v-else-if="inviteTypeIsEdit")
+      //-       span Copy Invite Link to Edit
+      //-     span(v-else-if="inviteTypeIsRead")
+      //-       span Copy Invite Link to Read Only
+      //-     span(v-else)
+      //-       span Copy Invite Link to{{' '}}
+              //- img.icon.comment(src="@/assets/comment.svg")
 
-      //-   button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
+      //-   button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }" title="Scan QR Code")
       //-     img.icon.qr-code(src="@/assets/qr-code.svg")
-      //- QRCode(:visible="state.QRCodeIsVisible" :value="inviteUrl")
+      //- QRCode(:visible="state.invitePickerIsVisible" :value="inviteUrl")
     //- email invites
-    .row(v-if="inviteTypeIsEdit")
-      .button-wrap
-        button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
-          img.icon.mail(src="@/assets/mail.svg")
-          span Email Invites
-        EmailInvites(:visible="state.emailInvitesIsVisible")
 </template>
 
 <style lang="stylus">
 section.invite-to-space
-  user-select text
-  .badge
-    margin 0
-    color var(--primary)
-    vertical-align 0
-  .users
-    margin-right 5px
-    .user
-      vertical-align -3px
-      &:first-child
-        .user-avatar
-          border-top-right-radius 0
-          border-bottom-right-radius 0
-      &:last-child
-        .user-avatar
-          border-top-left-radius 0
-          border-bottom-left-radius 0
-  .invite-url-segmented-buttons
-    margin-bottom 0
-    button
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
-    + .invite-url-subsection
-      border-top-left-radius 0
-      // border-top-right-radius 0
+  // user-select text
+  // .badge
+  //   margin 0
+  //   color var(--primary)
+  //   vertical-align 0
+
+  // .invite-url-segmented-buttons
+  //   margin-bottom 0
+  //   button
+  //     border-bottom-left-radius 0
+  //     border-bottom-right-radius 0
+  //   + .invite-url-subsection
+  //     border-top-left-radius 0
+  //     // border-top-right-radius 0
+
+  // .invite-button-wrap
+  width 100%
+  button.invite-button
+    width 100%
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+    // display flex
+    // align-items center
+    // display flex
+
+  section.subsection
+    margin-top 0
+    border-top-left-radius 0
+    border-top-right-radius 0
+
 </style>
