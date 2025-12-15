@@ -1,18 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-// import { useGlobalStore } from '@/stores/useGlobalStore'
-// import { useCardStore } from '@/stores/useCardStore'
-// import { useUserStore } from '@/stores/useUserStore'
-// import { useSpaceStore } from '@/stores/useSpaceStore'
-
+import InviteLabel from '@/components/InviteLabel.vue'
 import utils from '@/utils.js'
 import invite from '@/data/invite.js'
-
-// const globalStore = useGlobalStore()
-// const cardStore = useCardStore()
-// const userStore = useUserStore()
-// const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -27,7 +18,9 @@ const emit = defineEmits(['closeDialogs', 'select'])
 
 const props = defineProps({
   visible: Boolean,
-  inviteType: String
+  inviteType: String,
+  group: Object,
+  randomUser: Object
 })
 
 const state = reactive({
@@ -47,19 +40,34 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const inviteState = computed(() => {
-  return invite.states().find(item => item.type === props.inviteType)
-})
-const friendlyName = computed(() => inviteState.value.friendlyName)
-
+const inviteStates = computed(() => invite.states())
+const isActive = (inviteState) => {
+  return inviteState.type === props.inviteType
+}
+const select = (inviteState) => {
+  emit('select', inviteState.type)
+  emit('closeDialogs')
+}
 </script>
 
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    p alsdkfj
+dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+  section.results-section
+    ul.results-list
+      template(v-for="(inviteState in inviteStates")
+        li(:class="{ active: isActive(inviteState) }" @click.left="select(inviteState)")
+          InviteLabel(:inviteType="inviteState.type" :group="props.group" :randomUser="randomUser")
+          .row.description
+            span {{ inviteState.description }}
+  //- TODO section add tips
+  //- TODO delete InviteTips dialog
 </template>
 
 <style lang="stylus">
-// dialog.dialog-name
+dialog.invite-picker
+  .results-section
+    padding-top 4px
+    max-height calc(92vh - 120px)
+  li
+    display block
 </style>

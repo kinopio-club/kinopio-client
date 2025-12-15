@@ -13,7 +13,8 @@ const userStore = useUserStore()
 
 const props = defineProps({
   inviteType: String, // 'group', 'edit', 'read'
-  group: Object
+  group: Object,
+  randomUser: Object
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
@@ -21,11 +22,11 @@ const inviteState = computed(() => {
   return invite.states().find(item => item.type === props.inviteType)
 })
 const friendlyName = computed(() => inviteState.value.friendlyName)
-const randomUser = computed(() => {
-  const luminosity = userStore.theme
-  const color = randomColor({ luminosity })
-  return { color }
-})
+// const randomUser = computed(() => {
+//   const luminosity = userStore.theme
+//   const color = randomColor({ luminosity })
+//   return { color }
+// })
 </script>
 
 <template lang="pug">
@@ -40,7 +41,7 @@ const randomUser = computed(() => {
   template(v-if="props.inviteType === 'edit'")
     .symbols
       User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-      User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+      User(:user="props.randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
 
   //- read
   template(v-if="props.inviteType === 'read'")

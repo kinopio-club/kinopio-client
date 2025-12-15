@@ -175,6 +175,12 @@ const toggleInvitePickerIsVisible = () => {
 //   emitChildDialogIsVisible(state.tipsIsVisible)
 // }
 
+const randomUser = computed(() => {
+  const luminosity = userStore.theme
+  const color = randomColor({ luminosity })
+  return { color }
+})
+
 </script>
 
 <template lang="pug">
@@ -182,8 +188,8 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
 
   .button-wrap.invite-button
     button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
-      InviteLabel(:inviteType="state.inviteType" :group="props.group")
-      InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" @select="updateInviteType")
+      InviteLabel(:inviteType="state.inviteType" :group="props.group" :randomUser="randomUser")
+      InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="props.group" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
 
   section.subsection
     .row.title-row
