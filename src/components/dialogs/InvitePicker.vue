@@ -59,12 +59,15 @@ dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.le
           InviteLabel(:inviteType="inviteState.type" :group="props.group" :randomUser="randomUser")
           .row.description
             span {{ inviteState.description }}
-  //- TODO section add tips
-  //- TODO delete InviteTips dialog
+  section
+    p Invitees don't need an account to view spaces.
+    p
+      span.badge.info If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
 </template>
 
 <style lang="stylus">
 dialog.invite-picker
+  overflow auto
   .results-section
     padding-top 4px
     max-height calc(92vh - 120px)
