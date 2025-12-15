@@ -65,6 +65,7 @@ dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.le
           InviteLabel(:inviteType="inviteState.type" :group="props.group" :randomUser="randomUser")
           .row.description(v-if="inviteState.description")
             span {{ inviteState.description }}
+  //- tips
   section
     p Invitees don't need an account to view spaces.
     p

@@ -22,11 +22,6 @@ const inviteState = computed(() => {
   return invite.states().find(item => item.type === props.inviteType)
 })
 const friendlyName = computed(() => inviteState.value.friendlyName)
-// const randomUser = computed(() => {
-//   const luminosity = userStore.theme
-//   const color = randomColor({ luminosity })
-//   return { color }
-// })
 </script>
 
 <template lang="pug">

@@ -67,7 +67,6 @@ const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
   state.invitePickerIsVisible = false
 }
-
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
   closeChildDialogs()
@@ -150,7 +149,6 @@ const copyInviteLink = async (event) => {
 
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
-
   .button-wrap.invite-button
     button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
       InviteLabel(:inviteType="state.inviteType" :group="props.group" :randomUser="randomUser")
