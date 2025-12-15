@@ -1,48 +1,36 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
-import { useUserStore } from '@/stores/useUserStore'
-import { useSpaceStore } from '@/stores/useSpaceStore'
+// import { useGlobalStore } from '@/stores/useGlobalStore'
+// import { useCardStore } from '@/stores/useCardStore'
+// import { useUserStore } from '@/stores/useUserStore'
+// import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import invite from '@/data/invite.js'
 
-const globalStore = useGlobalStore()
-const cardStore = useCardStore()
-const userStore = useUserStore()
-const spaceStore = useSpaceStore()
-
-let unsubscribes
+// const globalStore = useGlobalStore()
+// const cardStore = useCardStore()
+// const userStore = useUserStore()
+// const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'clearDraggingItems') {
-        console.log('clearDraggingItems')
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
-  unsubscribes()
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['closeDialogs'])
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  inviteType: String
 })
+
 const state = reactive({
-  count: 0,
   dialogHeight: null
 })
 
@@ -50,9 +38,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
   }
-  console.error('🐸🐸🐸🐸🐸🐸🐸🐸🐸🐸', value)
 })
-// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -61,20 +47,17 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const themeName = computed(() => userStore.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // themeStore.updateThemeIsSystem(false)
-}
+const inviteState = computed(() => {
+  return invite.states().find(item => item.type === props.inviteType)
+})
+const friendlyName = computed(() => inviteState.value.friendlyName)
+
 </script>
 
 <template lang="pug">
 dialog.narrow.dialog-name(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+    p alsdkfj
 </template>
 
 <style lang="stylus">

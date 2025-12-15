@@ -179,7 +179,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .button-wrap.invite-button
     button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
       InviteLabel(:inviteType="state.inviteType" :group="props.group")
-      InvitePicker(:visible="state.invitePickerIsVisible")
+      InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType")
 
   section.subsection
     .row.title-row
