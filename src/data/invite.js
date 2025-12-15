@@ -15,7 +15,7 @@ export default {
       {
         type: 'read',
         friendlyName: 'Invite to Read Only',
-        description: 'Viewers can only view this space.'
+        description: ''
       }
     ]
   }
