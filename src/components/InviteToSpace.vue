@@ -10,6 +10,7 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import InviteLabel from '@/components/InviteLabel.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
+import InvitePicker from '@/components/dialogs/InvitePicker.vue'
 // import InviteTips from '@/components/dialogs/InviteTips.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -175,14 +176,10 @@ const toggleTipsIsVisible = () => {
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
 
-  //- TODO component invitelabel
-  button.invite-button(@click="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
-    InviteLabel(:inviteType="state.inviteType" :group="props.group")
-    //- .invite-label
-    //-   .users
-    //-     User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-    //-     User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-    //-   span.name Invite to Collaborate
+  .button-wrap.invite-button
+    button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
+      InviteLabel(:inviteType="state.inviteType" :group="props.group")
+      InvitePicker(:visible="state.invitePickerIsVisible")
 
   section.subsection
     .row.title-row
@@ -294,11 +291,14 @@ section.invite-to-space
   //     // border-top-right-radius 0
 
   // .invite-button-wrap
-  width 100%
-  button.invite-button
+  // width 100%
+  .button-wrap.invite-button
     width 100%
-    border-bottom-left-radius 0
-    border-bottom-right-radius 0
+
+    > button
+      width 100%
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
     // display flex
     // align-items center
     // display flex
