@@ -62,7 +62,6 @@ export const useUserStore = defineStore('user', {
     defaultSpaceBackgroundTint: undefined,
     defaultCardBackgroundColor: undefined,
     defaultConnectionControlPoint: consts.straightLineConnectionPathControlPoint,
-    downgradeAt: null,
     shouldUseStickyCards: true,
     shouldIncreaseUIContrast: false,
     shouldPauseConnectionDirections: false,
@@ -72,8 +71,6 @@ export const useUserStore = defineStore('user', {
     themeIsSystem: false,
     outsideSpaceBackgroundIsStatic: false,
     shouldDisableHapticFeedback: false,
-    appleAppAccountToken: null,
-    appleSubscriptionIsActive: null,
     studentDiscountIsAvailable: false,
     lastSidebarSection: '',
     prevInviteEmails: '',
@@ -83,6 +80,14 @@ export const useUserStore = defineStore('user', {
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
     shouldShowMinimapJumpToList: true,
+
+    // billing
+
+    downgradeAt: null,
+    appleAppAccountToken: null,
+    appleSubscriptionIsActive: null,
+    stripePlanIsPurchased: null,
+    stripeSubscriptionId: null,
 
     // space filters
 
