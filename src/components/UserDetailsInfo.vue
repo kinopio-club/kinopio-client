@@ -139,7 +139,7 @@ const updateUserColor = (newValue) => {
       //- badges
       UserBadges(:user="user" :isCurrentUser="isCurrentUser")
 
-  ItemDetailsDebug(:item="props.user")
+  ItemDetailsDebug(:item="props.user" :keys="['isAnonymous']")
 </template>
 
 <style lang="stylus">
