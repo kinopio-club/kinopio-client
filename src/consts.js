@@ -21,7 +21,7 @@ export default {
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },
-
+  defaultDialogWidth: 250,
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,

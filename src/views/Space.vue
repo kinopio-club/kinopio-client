@@ -223,6 +223,7 @@ const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
+const isResizingCardDetails = computed(() => globalStore.currentUserIsResizingCardDetails)
 const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
@@ -351,6 +352,9 @@ const addOrCloseCard = (event) => {
     }
     // add card
     addCard(event)
+  // don't close if resizing card details dialog
+  } else if (isResizingCardDetails.value) {
+
   // close item details
   } else if ((globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
     globalStore.closeAllDialogs()
@@ -567,10 +571,24 @@ const showMultipleSelectedActions = (event) => {
 
 const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
 
+// resize dialog
+
+const updateCardDetailsWidth = (event) => {
+  if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
+  const dialogElement = document.querySelector('dialog.card-details')
+  if (!dialogElement) { return }
+  const rect = dialogElement.getBoundingClientRect()
+  const rectInSpace = utils.cursorPositionInSpace(event, rect)
+  let width = endCursor.x - rect.x
+  width = Math.max(width, consts.defaultDialogWidth)
+  userStore.updateUser({ cardDetailsResizeWidth: width })
+}
+
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value
+  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value || isResizingCardDetails.value
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -654,6 +672,8 @@ const interact = (event) => {
     resizeBoxes()
   } else if (isDraggingLine.value) {
     dragItems()
+  } else if (isResizingCardDetails.value) {
+    updateCardDetailsWidth(event)
   }
   prevCursor = endCursor
 }
@@ -716,7 +736,10 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldExpandBoxes(event)
   boxStore.boxSnapGuides = []
-  if (shouldCancelInteraction(event)) { return }
+  if (shouldCancelInteraction(event)) {
+    globalStore.currentUserIsResizingCardDetails = false
+    return
+  }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
   showMultipleSelectedActions(event)
@@ -739,6 +762,7 @@ const stopInteractions = async (event) => {
   globalStore.linesWereDragged = false
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
+  globalStore.currentUserIsResizingCardDetails = false
   prevCursor = undefined
   globalStore.clearDraggingItems()
   await nextTick()

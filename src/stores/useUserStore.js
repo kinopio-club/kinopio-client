@@ -80,6 +80,7 @@ export const useUserStore = defineStore('user', {
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
     shouldShowMinimapJumpToList: true,
+    cardDetailsResizeWidth: null,
 
     // billing
 
