@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -8,6 +9,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -35,16 +37,19 @@ const updateDialogHeight = async () => {
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentSpaceIsInGroup = computed(() => spaceStore.groupId)
+const triggerSignUpOrInIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
+}
 
 // privacy states
 
 const privacyStates = computed(() => {
-  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const privacyStates = privacy.states()
-  if (currentUserIsSignedIn) {
+  if (currentUserIsSignedIn.value) {
     return privacyStates
   } else {
-    return privacyStates.slice(1, 3)
+    return privacyStates.filter(privacy => privacy.name === 'private')
   }
 })
 const privacyStateName = (privacyState) => {
@@ -85,6 +90,10 @@ dialog.narrow.privacy-picker(v-if="props.visible" :open="props.visible" @click.l
             PrivacyIcon(:privacy="privacyState.name")
             span {{ privacyStateName(privacyState) }}
           p.description {{ privacyStateDescription(privacyState) }}
+  section(v-if="!currentUserIsSignedIn")
+    p.badge.info
+      span Sign Up or In to make your spaces public
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 </template>
 
 <style lang="stylus" scoped>
