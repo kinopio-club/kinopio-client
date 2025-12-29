@@ -66,7 +66,7 @@ nav#toolbar.toolbar(v-if="visible")
           title="Add Line Divider (L)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
-          img.icon(src="@/assets/line.svg")
+          img.icon.line-icon(src="@/assets/line.svg")
       //- Box
       .button-wrap
         button(
@@ -110,21 +110,24 @@ nav.toolbar
       display flex
       flex-flow column
       > .button-wrap
-        button
+        > button
           border-radius 0
-          width 32px
+          width 30px
           z-index -1
+          padding 5px 8px
         &:first-child
-          button
+          > button
             border-radius 0
             border-top-left-radius var(--entity-radius)
             border-top-right-radius var(--entity-radius)
         &:last-child
-          button
+          > button
             border-radius 0
             border-bottom-left-radius var(--entity-radius)
             border-bottom-right-radius var(--entity-radius)
       > .button-wrap + .button-wrap
         margin 0
         margin-top -1px
+      .icon.line-icon
+        vertical-align -2px
 </style>

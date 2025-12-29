@@ -142,7 +142,7 @@ const clearDrawing = () => {
 .drawing-toolbar
   position absolute
   top 58px
-  left 31px
+  left 29px
   display block
   dialog
     top 23px
