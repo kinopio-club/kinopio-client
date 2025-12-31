@@ -14,7 +14,6 @@ const isResizing = computed(() => globalStore.currentUserIsResizingCardDetails)
 const start = (event) => {
   if (utils.isMultiTouch(event)) { return }
   globalStore.preventDraggedCardFromShowingDetails = true
-  console.log('📧📧📧📧', event)
   globalStore.currentUserIsResizingCardDetails = true
 }
 
