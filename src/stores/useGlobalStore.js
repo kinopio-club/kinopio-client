@@ -95,6 +95,7 @@ export const useGlobalStore = defineStore('global', {
     clipboardData: {}, // for copy paste kinopio items
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
+    currentUserIsResizingCardDetails: false,
 
     // drawing
     drawingEraserIsActive: false,

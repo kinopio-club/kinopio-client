@@ -83,7 +83,7 @@ dialog.narrow.share-item(v-if="visible" :open="visible" @click.left.stop ref="di
       .row(v-if="spaceIsPrivate")
         .badge.danger
           img.icon.lock-icon(src="@/assets/lock.svg")
-          span {{capitalType}} links from private spaces can only be viewed by space members
+          span {{capitalType}} links from private spaces can only be viewed by collaborators
 
   template(v-if="!canShare")
     section

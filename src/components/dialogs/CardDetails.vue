@@ -28,6 +28,7 @@ import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import CardDetailsResize from '@/components/CardDetailsResize.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -163,6 +164,9 @@ watch(() => visible.value, (value, prevValue) => {
     closeCard()
   }
 })
+watch(() => userStore.cardDetailsResizeWidth, (value, prevValue) => {
+  textareaSizes()
+})
 
 const parentElement = computed(() => dialogElement.value)
 const closeCardAndFocus = (event) => {
@@ -222,11 +226,15 @@ const styles = computed(() => {
     // on iOS, keyboard focus zooms
     zoom = 1
   }
+  const minWidth = consts.defaultDialogWidth
+  let width = userStore.cardDetailsResizeWidth || minWidth
+  width = Math.max(width, minWidth)
+  width = `${width}px`
   const transform = `scale(${zoom})`
   const offset = 8
   const left = `${card.value.x + offset}px`
   const top = `${card.value.y + offset}px`
-  return { transform, left, top }
+  return { transform, left, top, width }
 })
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
@@ -1562,6 +1570,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
     template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
     ItemDetailsDebug(:item="card" :keys="['x', 'y', 'urlIsVisible']")
+    CardDetailsResize
 </template>
 
 <style lang="stylus">
