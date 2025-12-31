@@ -354,7 +354,6 @@ const addOrCloseCard = (event) => {
     addCard(event)
   // don't close if resizing card details dialog
   } else if (isResizingCardDetails.value) {
-
   // close item details
   } else if ((globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
     globalStore.closeAllDialogs()
