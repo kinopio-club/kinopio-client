@@ -116,11 +116,15 @@ const unlockCard = (event) => {
   position absolute
   button
     cursor pointer
+  &:hover
+    .lock-icon
+      opacity 1
   .lock-icon
     position absolute
     left 5.5px
     top 2px
     height 10px
+    opacity 0.3
   // from Card.vue
   .connected-colors
     position absolute
