@@ -42,6 +42,7 @@ const select = (line) => {
     text-align left
     margin 0
     z-index 1
+    max-width 90%
   .badge-horizontal-line
     position absolute
     left 0
