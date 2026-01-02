@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -10,6 +11,7 @@ import { colord } from 'colord'
 
 const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
+const userStore = useUserStore()
 
 // adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
 let canvas, context
@@ -69,6 +71,7 @@ const styles = computed(() => {
 // init and draw
 
 const createRipples = (ping) => {
+  if (!userStore.getUserIsSpaceMember) { return }
   const rippleCount = 4
   const { x, y } = ping
   const color = colord(ping.color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
