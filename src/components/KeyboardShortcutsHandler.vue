@@ -171,6 +171,7 @@ const handleShortcuts = (event) => {
   } else if (key === 'escape') {
     globalStore.closeAllDialogs()
     globalStore.updateCurrentUserToolbar('card')
+    boxStore.boxSnapGuides = []
   } else if (key === '1' && isSpaceScope) {
     let value = userStore.filterShowUsers
     value = !value
