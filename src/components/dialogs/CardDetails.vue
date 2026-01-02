@@ -1445,131 +1445,132 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           span ?
       CardTips(:visible="state.cardTipsIsVisible")
 
-    .row(v-if="cardPendingUpload")
-      .badge.info
-        Loader(:visible="true")
-        span {{cardPendingUpload.percentComplete}}%
+    .rows
+      .row(v-if="cardPendingUpload")
+        .badge.info
+          Loader(:visible="true")
+          span {{cardPendingUpload.percentComplete}}%
 
-    .row
-      template(v-if="canEditCard")
-        //- Remove
-        .button-wrap
-          button.danger(@click.left="removeCard" title="Remove Card")
-            img.icon.remove(src="@/assets/remove.svg")
-            //- span Remove
-        //- [·]
-        ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
-        //- Image
-        .button-wrap
-          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
-            img.icon.flower(src="@/assets/flower.svg")
-          ImagePicker(:visible="state.imagePickerIsVisible" :initialSearch="state.initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
-        //- Toggle Style Actions
-        .button-wrap
-          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
-            img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-      //- Share
-      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
-        button(:class="{active: state.shareItemIsVisible}")
-          span Share
-        ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
-
-    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
-    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
-
-    .row(v-if="nameMetaRowIsVisible && canEditCard")
-      //- Split by Line Breaks
-      .button-wrap(v-if="state.nameSplitIntoCardsCount")
-        button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
-          img.icon(src="@/assets/split.svg")
-          span Split Card
-          span.badge.secondary.badge-in-button.small-button-text.badge-split-card-count {{state.nameSplitIntoCardsCount}}
-
-    .row.badges-row(v-if="badgesRowIsVisible")
-      //- Search result
-      span.badge.search(v-if="isInSearchResultsCards")
-        img.icon.search(src="@/assets/search.svg")
-      //- Tags
-      template(v-for="tag in tagsInCard")
-        Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-
-    .row.badges-row.other-items-row(v-if="otherCardIsVisible")
-      OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
-
-    MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
-
-    template(v-if="groupInviteUrl")
-      GroupInvitePreview(
-        :card="card"
-        :groupInviteUrl="groupInviteUrl"
-        :parentIsCardDetails="true"
-      )
-    template(v-else-if="urlPreviewIsVisible")
-      UrlPreview(
-        :visible="true"
-        :loading="isLoadingUrlPreview"
-        :card="card"
-        @toggleUrlIsVisible="toggleUrlIsVisible"
-      )
-
-    //- other space
-    template(v-if="otherSpaceIsVisible")
-      OtherSpacePreview(
-        :otherSpace="otherSpace"
-        :url="otherSpaceUrl"
-        :card="card"
-      )
-
-    //- Read Only
-    template(v-if="!canEditCard")
-      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
-      .row.edit-message
-        template(v-if="spacePrivacyIsOpen")
-          span.badge.info
-            img.icon.open(src="@/assets/open.svg")
-            span In open spaces, you can only move and edit cards you created
-        template(v-else-if="isInvitedButCannotEditSpace")
-          span.badge.info
-            img.icon(src="@/assets/unlock.svg")
-            span To edit spaces you've been invited to, you'll need to sign up or in
-          .row
-            .button-wrap
-              button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-        template(v-else-if="spacePrivacyIsClosed")
-          span.badge.info
-            img.icon(src="@/assets/unlock.svg")
-            span Read Only
-
-    //- Info
-    template(v-if="showCharacterCount")
       .row
-        span.badge.secondary-on-dark-background
-          span {{currentCardLength}} / {{maxCardCharacterLimit}}
+        template(v-if="canEditCard")
+          //- Remove
+          .button-wrap
+            button.danger(@click.left="removeCard" title="Remove Card")
+              img.icon.remove(src="@/assets/remove.svg")
+              //- span Remove
+          //- [·]
+          ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
+          //- Image
+          .button-wrap
+            button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
+              img.icon.flower(src="@/assets/flower.svg")
+            ImagePicker(:visible="state.imagePickerIsVisible" :initialSearch="state.initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
+          //- Toggle Style Actions
+          .button-wrap
+            button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
+              img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+        //- Share
+        .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
+          button(:class="{active: state.shareItemIsVisible}")
+            span Share
+          ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
-    //- Errors
-    template(v-if="errorMaxCharacterLimit")
-      .row
-        span.badge.danger
-          img.icon.cancel(src="@/assets/add.svg")
-          span Max Length
-      p Cards can't be longer than {{maxCardCharacterLimit}} characters
-    template(v-if="state.error.signUpToUpload")
-      p
-        span To upload files,
-        span.badge.info you need to Sign Up or In
-      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    template(v-if="state.error.sizeLimit")
-      p
-        span.badge.danger
-          img.icon.cancel(src="@/assets/add.svg")
-          span Too Big
-      p
-        span To upload files over {{freeUploadSizeLimit}}mb,
-        span.badge.info upgrade for unlimited
-      button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-    template(v-if="state.error.unknownUploadError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'urlIsVisible']")
+      CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
+      CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+
+      .row(v-if="nameMetaRowIsVisible && canEditCard")
+        //- Split by Line Breaks
+        .button-wrap(v-if="state.nameSplitIntoCardsCount")
+          button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
+            img.icon(src="@/assets/split.svg")
+            span Split Card
+            span.badge.secondary.badge-in-button.small-button-text.badge-split-card-count {{state.nameSplitIntoCardsCount}}
+
+      .row.badges-row(v-if="badgesRowIsVisible")
+        //- Search result
+        span.badge.search(v-if="isInSearchResultsCards")
+          img.icon.search(src="@/assets/search.svg")
+        //- Tags
+        template(v-for="tag in tagsInCard")
+          Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
+
+      .row.badges-row.other-items-row(v-if="otherCardIsVisible")
+        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
+
+      MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
+
+      template(v-if="groupInviteUrl")
+        GroupInvitePreview(
+          :card="card"
+          :groupInviteUrl="groupInviteUrl"
+          :parentIsCardDetails="true"
+        )
+      template(v-else-if="urlPreviewIsVisible")
+        UrlPreview(
+          :visible="true"
+          :loading="isLoadingUrlPreview"
+          :card="card"
+          @toggleUrlIsVisible="toggleUrlIsVisible"
+        )
+
+      //- other space
+      template(v-if="otherSpaceIsVisible")
+        OtherSpacePreview(
+          :otherSpace="otherSpace"
+          :url="otherSpaceUrl"
+          :card="card"
+        )
+
+      //- Read Only
+      template(v-if="!canEditCard")
+        CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+        .row.edit-message
+          template(v-if="spacePrivacyIsOpen")
+            span.badge.info
+              img.icon.open(src="@/assets/open.svg")
+              span In open spaces, you can only move and edit cards you created
+          template(v-else-if="isInvitedButCannotEditSpace")
+            span.badge.info
+              img.icon(src="@/assets/unlock.svg")
+              span To edit spaces you've been invited to, you'll need to sign up or in
+            .row
+              .button-wrap
+                button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+          template(v-else-if="spacePrivacyIsClosed")
+            span.badge.info
+              img.icon(src="@/assets/unlock.svg")
+              span Read Only
+
+      //- Info
+      template(v-if="showCharacterCount")
+        .row
+          span.badge.secondary-on-dark-background
+            span {{currentCardLength}} / {{maxCardCharacterLimit}}
+
+      //- Errors
+      template(v-if="errorMaxCharacterLimit")
+        .row
+          span.badge.danger
+            img.icon.cancel(src="@/assets/add.svg")
+            span Max Length
+        p Cards can't be longer than {{maxCardCharacterLimit}} characters
+      template(v-if="state.error.signUpToUpload")
+        p
+          span To upload files,
+          span.badge.info you need to Sign Up or In
+        button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+      template(v-if="state.error.sizeLimit")
+        p
+          span.badge.danger
+            img.icon.cancel(src="@/assets/add.svg")
+            span Too Big
+        p
+          span To upload files over {{freeUploadSizeLimit}}mb,
+          span.badge.info upgrade for unlimited
+        button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      template(v-if="state.error.unknownUploadError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      ItemDetailsDebug(:item="card" :keys="['x', 'y', 'urlIsVisible']")
     CardDetailsResize
 </template>
 
