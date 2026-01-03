@@ -2035,11 +2035,6 @@ const clearFocus = () => {
           img.icon.view(src="@/assets/comment.svg")
           //- User
           UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
-          //- Url →
-        a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-          .url.inline-button-wrap
-            button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
@@ -2054,13 +2049,14 @@ const clearFocus = () => {
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
-          //- Url →
-          a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-            .url.inline-button-wrap
-              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
+        //- Url →
+        a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+          .url.inline-button-wrap
+            button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+
         //- Lock
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
