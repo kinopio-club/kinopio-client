@@ -670,6 +670,7 @@ const isUrlPreviewError = computed(() => {
   return props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl
 })
 const urlButtonIsVisible = computed(() => {
+  if (isLocked.value) { return }
   if (!cardButtonUrl.value) { return }
   if (isComment.value) { return true }
   if (isUrlPreviewError.value) { return true }
