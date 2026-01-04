@@ -250,7 +250,7 @@ const toggleOpacity = () => {
 
 <template lang="pug">
 dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section(v-if="props.dialogTitle")
+  section.title-section(v-if="props.dialogTitle")
     p {{props.dialogTitle}}
   section(:style="{backgroundColor: props.currentColor}")
     .row
