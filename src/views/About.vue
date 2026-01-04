@@ -124,19 +124,19 @@ const updateSystemTheme = () => {
                 tbody
                   tr
                     td Figjam
-                    td $1,400,000,000, Series F
+                    td $1,400,000,000 Series F
                   tr
                     td Miro
-                    td $476,300,000, Series C
+                    td $476,300,000 Series C
                   tr
                     td Milanote
                     td $780,000
                   tr
                     td Mural
-                    td $196,600,000, Series C
+                    td $196,600,000 Series C
                   tr
                     td Whimsical
-                    td $30,000,000, Series A
+                    td $30,000,000 Series A
                   tr
                     td.badge.info Kinopio
                     td.badge.info $0
