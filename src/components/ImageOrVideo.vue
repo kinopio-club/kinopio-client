@@ -66,22 +66,6 @@ const state = reactive({
 })
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
-const isInteracting = computed(() => {
-  const isResizing = globalStore.currentUserIsResizingCardIds.includes(props.cardId)
-  if (isResizing) { return }
-  const isInteractingWithItem = globalStore.getIsInteractingWithItem
-  const isPainting = globalStore.currentUserIsPainting
-  const isPanning = globalStore.currentUserIsPanningReady
-  const isDrawing = globalStore.currentUserIsDrawing
-  return isInteractingWithItem || isPainting || isPanning || isDrawing
-})
-watch(() => isInteracting.value, (value) => {
-  if (value) {
-    pause()
-  } else {
-    play()
-  }
-})
 watch(() => isTouching.value, (value) => {
   if (value) {
     pause()
