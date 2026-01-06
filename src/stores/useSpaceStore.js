@@ -411,12 +411,13 @@ export const useSpaceStore = defineStore('space', {
       if (remoteSpace.id !== this.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
-    restorePrevPagePosition (space) {
+    async restorePrevPagePosition (space) {
       const globalStore = useGlobalStore()
       const position = globalStore.prevSpacePagePosition[space?.id]
       if (position) {
         globalStore.pageHeight = position.pageHeight
         globalStore.pageWidth = position.pageWidth
+        await nextTick()
         window.scroll({
           left: position.x,
           top: position.y,
