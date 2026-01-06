@@ -319,20 +319,12 @@ export const useSpaceStore = defineStore('space', {
       const globalStore = useGlobalStore()
       const prevSpaceIdInSession = globalStore.prevSpaceIdInSession
       if (!prevSpaceIdInSession) { return }
-      const prevSpacePosition = globalStore.prevSpacePagePosition[prevSpaceIdInSession]
       let space = await cache.space(prevSpaceIdInSession)
       if (space.id) {
         await this.changeSpace(space)
       } else if (prevSpaceIdInSession) {
         space = { id: prevSpaceIdInSession }
         await this.changeSpace(space)
-      }
-      if (prevSpacePosition) {
-        window.scroll({
-          left: prevSpacePosition.x,
-          top: prevSpacePosition.y,
-          behavior: 'instant'
-        })
       }
     },
     restoreSpace (space) {
@@ -419,6 +411,19 @@ export const useSpaceStore = defineStore('space', {
       if (remoteSpace.id !== this.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
+    restorePrevPagePosition (space) {
+      const globalStore = useGlobalStore()
+      const position = globalStore.prevSpacePagePosition[space?.id]
+      if (position) {
+        window.scroll({
+          left: position.x,
+          top: position.y,
+          behavior: 'instant'
+        })
+      } else {
+        window.scrollTo(0, 0)
+      }
+    },
     restoreSpaceLocal (space) {
       const historyStore = useHistoryStore()
       const emptySpace = utils.emptySpace(space.id)
@@ -476,7 +481,7 @@ export const useSpaceStore = defineStore('space', {
           this.restoreSpaceLocal(space),
           this.loadRemoteSpace(space)
         ])
-        window.scrollTo(0, 0)
+        this.restorePrevPagePosition(space)
         // restore remote space
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
