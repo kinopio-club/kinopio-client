@@ -415,6 +415,8 @@ export const useSpaceStore = defineStore('space', {
       const globalStore = useGlobalStore()
       const position = globalStore.prevSpacePagePosition[space?.id]
       if (position) {
+        globalStore.pageHeight = position.pageHeight
+        globalStore.pageWidth = position.pageWidth
         window.scroll({
           left: position.x,
           top: position.y,
@@ -430,6 +432,7 @@ export const useSpaceStore = defineStore('space', {
       this.restoreSpace(emptySpace)
       historyStore.reset()
       this.restoreSpace(space)
+      this.restorePrevPagePosition(space)
       console.info('🎑 local space', space)
       return space
     },
@@ -481,7 +484,6 @@ export const useSpaceStore = defineStore('space', {
           this.restoreSpaceLocal(space),
           this.loadRemoteSpace(space)
         ])
-        this.restorePrevPagePosition(space)
         // restore remote space
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)

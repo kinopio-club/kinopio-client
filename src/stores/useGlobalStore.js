@@ -616,7 +616,9 @@ export const useGlobalStore = defineStore('global', {
     updatePrevSpacePagePosition (spaceId) {
       const position = {
         x: window.scrollX,
-        y: window.scrollY
+        y: window.scrollY,
+        pageHeight: this.pageHeight,
+        pageWidth: this.pageWidth
       }
       this.prevSpacePagePosition[spaceId] = position
     },
