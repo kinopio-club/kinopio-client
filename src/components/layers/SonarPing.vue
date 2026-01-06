@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
@@ -12,6 +13,7 @@ import { colord } from 'colord'
 const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 // adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
 let canvas, context
@@ -70,8 +72,22 @@ const styles = computed(() => {
 
 // init and draw
 
+const shouldPreventPing = (ping) => {
+  console.log(ping)
+  let user
+  // check remote user
+  if (ping.isFromBroadcast) {
+    user = spaceStore.getSpaceCollaboratorById(ping.user.id)
+  // check current user
+  } else {
+    user = userStore.getUserIsSpaceMember
+  }
+  if (!user) {
+    return true
+  }
+}
 const createRipples = (ping) => {
-  if (!userStore.getUserIsSpaceMember) { return }
+  if (shouldPreventPing(ping)) { return }
   const rippleCount = 4
   const { x, y } = ping
   const color = colord(ping.color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }

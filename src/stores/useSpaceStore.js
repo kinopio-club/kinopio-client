@@ -72,7 +72,7 @@ export const useSpaceStore = defineStore('space', {
       return `${domain}/${spaceUrl}`
     },
     getSpaceCreator () {
-      return this.getSpaceMemberById(this.userId) || this.users[0]
+      return this.getSpaceCollaboratorById(this.userId) || this.users[0]
     },
     getSpaceCreatorIsUpgraded () {
       const creatorUser = this.getSpaceCreator
@@ -226,9 +226,17 @@ export const useSpaceStore = defineStore('space', {
 
     // user getters
 
-    getSpaceMemberById (userId) {
+    getSpaceCollaboratorById (userId) {
+      const groupStore = useGroupStore()
       const members = this.getSpaceMembers
-      return members.find(member => member.id === userId)
+      // in space
+      const member = members.find(member => member.id === userId)
+      if (member) {
+        return member
+      }
+      // in group
+      const groupUser = groupStore.getGroupUser({ userId })
+      return groupUser
     },
     getSpaceUserById (userId) {
       const globalStore = useGlobalStore()
@@ -238,19 +246,16 @@ export const useSpaceStore = defineStore('space', {
       if (userStore.id === userId) {
         return userStore
       }
-      // collaborators
-      const user = this.getSpaceMemberById(userId)
+      // space or group members
+      const user = this.getSpaceCollaboratorById(userId)
       if (user?.id === userId) {
         return user
       }
-      // commenters
+      // commenters and readonly
       const otherUser = globalStore.getOtherUserById(userId)
       if (otherUser) {
         return otherUser
       }
-      // group user
-      const groupUser = groupStore.getGroupUser({ userId })
-      return groupUser
     },
     getSpaceReadOnlyKey (space) {
       const globalStore = useGlobalStore()
@@ -1026,7 +1031,7 @@ export const useSpaceStore = defineStore('space', {
     },
     updateUserPresence (update) {
       const newUser = update.user || update
-      const member = this.getSpaceMemberById(newUser.id)
+      const member = this.getSpaceCollaboratorById(newUser.id)
       if (member) {
         this.updateSpaceClients([newUser])
       } else {
