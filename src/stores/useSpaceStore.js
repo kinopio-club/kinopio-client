@@ -318,8 +318,8 @@ export const useSpaceStore = defineStore('space', {
     async loadPrevSpaceInSession () {
       const globalStore = useGlobalStore()
       const prevSpaceIdInSession = globalStore.prevSpaceIdInSession
-      const prevSpacePosition = globalStore.prevSpaceIdInSessionPagePosition
       if (!prevSpaceIdInSession) { return }
+      const prevSpacePosition = globalStore.prevSpacePagePosition[prevSpaceIdInSession]
       let space = await cache.space(prevSpaceIdInSession)
       if (space.id) {
         await this.changeSpace(space)
@@ -327,11 +327,13 @@ export const useSpaceStore = defineStore('space', {
         space = { id: prevSpaceIdInSession }
         await this.changeSpace(space)
       }
-      window.scroll({
-        left: prevSpacePosition.x,
-        top: prevSpacePosition.y,
-        behavior: 'instant'
-      })
+      if (prevSpacePosition) {
+        window.scroll({
+          left: prevSpacePosition.x,
+          top: prevSpacePosition.y,
+          behavior: 'instant'
+        })
+      }
     },
     restoreSpace (space) {
       const globalStore = useGlobalStore()
@@ -558,7 +560,7 @@ export const useSpaceStore = defineStore('space', {
           return
         }
         globalStore.updatePrevSpaceIdInSession(this.id)
-        globalStore.updatePrevSpaceIdInSessionPagePosition()
+        globalStore.updatePrevSpacePagePosition(this.id)
         globalStore.clearAllInteractingWithAndSelected()
         console.info('🚟 Change space', space)
         globalStore.isLoadingSpace = true

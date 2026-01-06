@@ -48,7 +48,7 @@ export const useGlobalStore = defineStore('global', {
     offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
-    prevSpaceIdInSessionPagePosition: {},
+    prevSpacePagePosition: {},
     outsideSpaceBackgroundColor: '',
     groupsIsVisible: false,
     dateImageUrl: null,
@@ -613,12 +613,12 @@ export const useGlobalStore = defineStore('global', {
         this.prevSpaceIdInSession = value
       }
     },
-    updatePrevSpaceIdInSessionPagePosition (position) {
-      position = {
+    updatePrevSpacePagePosition (spaceId) {
+      const position = {
         x: window.scrollX,
         y: window.scrollY
       }
-      const prevSpaceIdInSessionPagePosition = position
+      this.prevSpacePagePosition[spaceId] = position
     },
     clearSearch () {
       if (this.searchIsVisible) { return }
