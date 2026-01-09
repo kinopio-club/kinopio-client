@@ -1661,11 +1661,15 @@ export default {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = await cache.user()
-    let { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes } = items
-    drawingStrokes = drawingStrokes || []
-    lines = lines || []
-    tags = tags || []
-    boxes = boxes || []
+    let {
+      cards = [],
+      connections = [],
+      connectionTypes = [],
+      boxes = [],
+      tags = [],
+      lines = [],
+      drawingStrokes = []
+    } = items
     cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
