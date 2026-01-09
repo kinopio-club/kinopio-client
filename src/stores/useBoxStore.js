@@ -442,9 +442,9 @@ export const useBoxStore = defineStore('boxes', {
       })
       return { cards, boxes }
     },
-    selectItemsInSelectedBoxes () {
+    selectItemsInSelectedBoxes (selectedBox) {
       const globalStore = useGlobalStore()
-      const { boxes, cards } = this.getItemsContainedInSelectedBoxes()
+      const { boxes, cards } = this.getItemsContainedInSelectedBoxes(selectedBox)
       // boxes
       const boxIds = boxes.map(box => box.id)
       globalStore.updateMultipleBoxesSelectedIds(boxIds)
