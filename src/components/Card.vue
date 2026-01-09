@@ -1233,15 +1233,14 @@ const startDraggingDuplicateItems = async (event) => {
     return box
   })
   const newCurrentCard = newCards[index]
-  // select new items
   newCards.forEach(card => cardStore.createCard(card, true))
-  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
   newBoxes.forEach(box => boxStore.createBox(box, true))
+  // select new items
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
   globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
   globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
   return newCurrentCard.id
 }
-
 const startDraggingCard = async (event) => {
   isMultiTouch = false
   let cardId = props.card.id

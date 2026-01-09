@@ -19,6 +19,7 @@ import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { colord, extend } from 'colord'
+import uniq from 'lodash-es/uniq'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -365,7 +366,37 @@ const isResizing = computed(() => {
   const isCurrent = globalStore.currentUserIsResizingBoxIds.includes(props.box.id)
   return isResizing && isCurrent
 })
-const startBoxInfoInteraction = (event) => {
+const startDraggingDuplicateItems = async (event) => {
+  let boxIds = globalStore.multipleBoxesSelectedIds.concat([props.box.id])
+  boxIds = uniq(boxIds)
+  const boxes = boxIds.map(id => boxStore.getBox(id))
+  const index = boxIds.findIndex(id => id === props.box.id) || 0
+
+  const cards = globalStore.multipleCardsSelectedIds.map(id => cardStore.getCard(id))
+  globalStore.clearMultipleSelected()
+  // create new items
+  const newItems = await utils.uniqueSpaceItems({
+    cards: utils.clone(cards),
+    boxes: utils.clone(boxes)
+  })
+  const newCards = newItems.cards.map(card => {
+    card.z += 1
+    return card
+  })
+  const newBoxes = newItems.boxes.map(box => {
+    box.z += 1
+    return box
+  })
+  const newCurrentBox = newBoxes[index]
+  newCards.forEach(card => cardStore.createCard(card, true))
+  newBoxes.forEach(box => boxStore.createBox(box, true))
+  // select new items
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  return newCurrentBox.id
+}
+const startBoxInfoInteraction = async (event) => {
   if (event.target.closest('.connector')) {
     return
   }
@@ -376,8 +407,12 @@ const startBoxInfoInteraction = (event) => {
   globalStore.currentDraggingBoxId = ''
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingBox = true
-  globalStore.currentDraggingBoxId = props.box.id
-  boxStore.incrementBoxZ(props.box.id)
+  let boxId = props.box.id
+  if (event.altKey) {
+    boxId = await startDraggingDuplicateItems(event)
+  }
+  globalStore.currentDraggingBoxId = boxId
+  boxStore.incrementBoxZ(boxId)
 }
 const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingBox) { return }
