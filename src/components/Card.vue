@@ -40,6 +40,7 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
+import uniq from 'lodash-es/uniq'
 
 dayjs.extend(isToday)
 extend([namesPlugin])
@@ -1202,16 +1203,48 @@ const remoteCardDraggingColor = computed(() => {
     return undefined
   }
 })
-const checkIfShouldDragMultipleCards = (event) => {
+const checkIfShouldDragMultipleCards = (event, cardId = props.card.id) => {
   if (event.shiftKey) { return }
   // if the current dragging card is not already selected then clear selection
   const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
-  if (!multipleCardsSelectedIds.includes(props.card.id)) {
+  if (!multipleCardsSelectedIds.includes(cardId)) {
     globalStore.clearMultipleSelected()
   }
 }
-const startDraggingCard = (event) => {
+const startDraggingDuplicateItems = async (event) => {
+  checkIfShouldDragMultipleCards(event)
+  let cardIds = globalStore.multipleCardsSelectedIds.concat([props.card.id])
+  cardIds = uniq(cardIds)
+  const cards = cardIds.map(id => cardStore.getCard(id))
+  const index = cardIds.findIndex(id => id === props.card.id) || 0
+  const boxes = globalStore.multipleBoxesSelectedIds.map(id => boxStore.getBox(id))
+  globalStore.clearMultipleSelected()
+  // create new items
+  const newItems = await utils.uniqueSpaceItems({
+    cards: utils.clone(cards),
+    boxes: utils.clone(boxes)
+  })
+  const newCards = newItems.cards.map(card => {
+    card.z += 1
+    return card
+  })
+  const newBoxes = newItems.boxes.map(box => {
+    box.z += 1
+    return box
+  })
+  const newCurrentCard = newCards[index]
+  // select new items
+  newCards.forEach(card => cardStore.createCard(card, true))
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  newBoxes.forEach(box => boxStore.createBox(box, true))
+  globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  return newCurrentCard.id
+}
+
+const startDraggingCard = async (event) => {
   isMultiTouch = false
+  let cardId = props.card.id
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPanningReady) { return }
@@ -1220,25 +1253,28 @@ const startDraggingCard = (event) => {
     return
   }
   if (!canEditCard.value) {
-    cardStore.incrementCardZ(props.card.id)
+    await cardStore.incrementCardZ(cardId)
     return
   }
   event.preventDefault()
   if (globalStore.currentUserIsDrawingConnection) { return }
   globalStore.closeAllDialogs()
   globalStore.clearDraggingItems()
+  if (event.altKey) {
+    cardId = await startDraggingDuplicateItems(event)
+  }
   globalStore.currentUserIsDraggingCard = true
-  globalStore.currentDraggingCardId = props.card.id
+  globalStore.currentDraggingCardId = cardId
   postMessage.sendHaptics({ name: 'softImpact' })
   const updates = {
-    cardId: props.card.id,
+    cardId,
     userId: userStore.id
   }
   broadcastStore.update({ updates, action: 'addToRemoteCardsDragging' })
-  globalStore.parentCardId = props.card.id
+  globalStore.parentCardId = cardId
   globalStore.childCardId = ''
-  checkIfShouldDragMultipleCards(event)
-  cardStore.incrementCardZ(props.card.id)
+  checkIfShouldDragMultipleCards(event, cardId)
+  cardStore.incrementCardZ(cardId)
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
