@@ -735,13 +735,13 @@ export const useSpaceStore = defineStore('space', {
       isLoadingRemoteSpace = false
       await this.restoreSpace(uniqueNewSpace)
     },
-    async createSpace () {
+    async createSpace (name) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const user = { id: userStore.id }
       broadcastStore.leaveSpaceRoom({ user: { id: user.id }, type: 'userLeftRoom' })
-      await this.createNewSpace()
+      await this.createNewSpace(name)
       await this.saveSpace()
       this.updateUserLastSpaceId()
       globalStore.notifySignUpToEditSpace = false
