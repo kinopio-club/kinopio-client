@@ -229,10 +229,6 @@ export const useGlobalStore = defineStore('global', {
     // loading
     isLoadingSpace: false,
     isLoadingOtherItems: false,
-    spaceUrlToLoad: '',
-    groupToJoinOnLoad: null, // { groupId, collaboratorKey }
-    spaceReadOnlyKey: {}, //  { spaceId, key }
-    spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
     loadSpaceFocusOnCardId: '',
@@ -242,6 +238,12 @@ export const useGlobalStore = defineStore('global', {
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
+    // loading invite
+    spaceUrlToLoad: '',
+    groupToJoinOnLoad: null, // { groupId, collaboratorKey }
+    spaceReadOnlyKey: {}, //  { spaceId, key }
+    spaceCollaboratorKey: {}, // { spaceId, key }
+    spaceCollaboratorKeys: [],
     // loading broadcast
     isConnectingToBroadcast: false,
     isJoiningSpace: false,
