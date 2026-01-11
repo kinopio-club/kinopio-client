@@ -150,9 +150,9 @@ template(v-if="props.visible")
         Loader(:visible="state.isLoading" :isSmall="true")
       div
         .button-wrap(v-if="!state.isLoading")
-          button.small-button(@click="refreshOperations")
+          button.small-button(@click="refreshOperations" title="Refresh")
             img.icon(src="@/assets/refresh.svg")
-        .button-wrap(v-if="!state.isLoading")
+        .button-wrap(v-if="!state.isLoading" title="Copy All JSON")
           button.small-button(@click="copyOperations")
             img.icon(src="@/assets/copy.svg")
     .row
