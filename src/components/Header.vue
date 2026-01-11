@@ -834,7 +834,7 @@ header
       @media(max-width 550px)
         display none
     .label-badge
-      transform translateY(10px)
+      transform translateY(3px)
     &:active,
     &.active
       .down-arrow
