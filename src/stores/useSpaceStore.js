@@ -346,10 +346,15 @@ export const useSpaceStore = defineStore('space', {
       globalStore.resetPageSizes()
       globalStore.updatePageSizes()
     },
+
     async getRemoteSpace (space) {
       const userStore = useUserStore()
       const apiStore = useApiStore()
       const globalStore = useGlobalStore()
+
+      // const spaceIsNotRemote =
+      // user is not signed in && user is space user
+      console.log('✉️✉️✉️✉️✉️')
       const collaboratorKey = globalStore.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       if (collaboratorKey) {
         space.collaboratorKey = collaboratorKey.collaboratorKey
@@ -357,13 +362,18 @@ export const useSpaceStore = defineStore('space', {
       let remoteSpace
       try {
         if (userStore.getUserIsSignedIn) {
+          console.log('📮📮📮1')
+
           remoteSpace = await apiStore.getSpace({ space })
         } else if (collaboratorKey) {
+          console.log('📮📮📮2')
+
           space.collaboratorKey = collaboratorKey
           remoteSpace = await apiStore.getSpaceAnonymously(space)
           cache.saveInvitedSpace(remoteSpace)
           globalStore.clearSpaceCollaboratorKeys()
         } else if (this.getSpaceIsRemote) {
+          console.log('📮📮📮3')
           remoteSpace = await apiStore.getSpaceAnonymously(space)
         }
         return remoteSpace
@@ -483,6 +493,7 @@ export const useSpaceStore = defineStore('space', {
       try {
         const [localData, remoteData] = await Promise.all([
           this.restoreSpaceLocal(space),
+
           this.loadRemoteSpace(space)
         ])
         // restore remote space
