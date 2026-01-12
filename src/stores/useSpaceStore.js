@@ -268,6 +268,29 @@ export const useSpaceStore = defineStore('space', {
 
     // init
 
+    async updateSpaceCollaborator () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiStore = useApiStore()
+      try {
+        const isCollaborator = utils.objectHasKeys(globalStore.spaceCollaboratorKey)
+        const isReadOnly = utils.objectHasKeys(globalStore.spaceReadOnlyKey)
+        if (isCollaborator) {
+          const { spaceId, key } = globalStore.spaceCollaboratorKey
+          globalStore.addNotification({ message: 'You can now edit this space', type: 'success' })
+          globalStore.addToSpaceCollaboratorKeys({ spaceId, key })
+          await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey: key })
+        }
+      } catch (error) {
+        console.error('🚒 updateSpaceCollaborator', error, globalStore.spaceCollaboratorKey, globalStore.spaceReadOnlyKey)
+        if (error.status === 401) {
+          globalStore.addNotification({ message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+        } else {
+          globalStore.addNotification({ message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+        }
+      }
+    },
+
     async initializeSpace () {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
