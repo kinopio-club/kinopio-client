@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.currentUserIsPainting, (value, prevValue) => {
+watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
   if (value) {
     addReadOnlyJiggle()
   }
@@ -94,7 +94,7 @@ const closeAllDialogs = () => {
 
 // user
 
-const currentUserIsPaintingLocked = computed(() => globalStore.currentUserIsPaintingLocked)
+const currentUserIsPaintSelectingLocked = computed(() => globalStore.currentUserIsPaintSelectingLocked)
 const currentUserIsResizingCard = computed(() => globalStore.currentUserIsResizingCard)
 const currentUserIsResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const currentUserIsTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
@@ -371,7 +371,7 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Tilt
 
-  .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
+  .persistent-item.info(v-if="currentUserIsPaintSelectingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
     span Drag to Paint
 

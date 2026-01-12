@@ -148,7 +148,7 @@ const playGif = () => {
   imageElement.value.style.opacity = 1
 }
 const updateCanvasSelectedClass = () => {
-  if (!globalStore.currentUserIsPainting) { return }
+  if (!globalStore.currentUserIsPaintSelecting) { return }
   const canvas = canvasElement()
   if (!canvas) { return }
   const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds

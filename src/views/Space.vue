@@ -216,7 +216,7 @@ const state = reactive({
 })
 
 const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
-const isPainting = computed(() => globalStore.currentUserIsPainting)
+const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
 const isPanningReady = computed(() => globalStore.currentUserIsPanningReady)
 const isPanning = computed(() => globalStore.currentUserIsPanning)
 const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace)
@@ -751,8 +751,8 @@ const stopInteractions = async (event) => {
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
-  globalStore.currentUserIsPainting = false
-  globalStore.currentUserIsPaintingLocked = false
+  globalStore.currentUserIsPaintSelecting = false
+  globalStore.currentUserIsPaintSelectingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
@@ -868,7 +868,7 @@ const updateMetaRSSFeed = () => {
     UserLabelCursor(:user="user")
   //- space
   main#space.space(
-    :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
+    :class="{'is-interacting': isInteracting, 'is-not-interacting': isPaintSelecting || isPanningReady}"
     @mousedown.left="initInteractions"
     @touchstart="initInteractions"
     :style="styles"

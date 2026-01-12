@@ -54,7 +54,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.currentUserIsPaintingLocked, (value, prevValue) => {
+watch(() => globalStore.currentUserIsPaintSelectingLocked, (value, prevValue) => {
   if (value) {
     stopScrollTimer()
   }
@@ -106,7 +106,7 @@ const stopInteractions = () => {
 
 // user
 
-const currentUserIsPainting = computed(() => globalStore.currentUserIsPainting)
+const currentUserIsPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
@@ -128,7 +128,7 @@ const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
-const shouldPreventResize = computed(() => currentUserIsPainting.value || isDrawingConnection.value || isResizingCard.value)
+const shouldPreventResize = computed(() => currentUserIsPaintSelecting.value || isDrawingConnection.value || isResizingCard.value)
 
 // scroll
 
@@ -261,7 +261,7 @@ const scrollBy = (delta) => {
   if (isDrawingConnection.value) {
     globalStore.triggerDrawConnectionFrame(currentEvent)
   }
-  if (currentUserIsPainting.value && !currentUserIsBoxSelecting) {
+  if (currentUserIsPaintSelecting.value && !currentUserIsBoxSelecting) {
     globalStore.triggerPaintFramePosition(currentEvent)
   }
   window.scrollBy(delta)

@@ -239,7 +239,7 @@ const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
   const classList = []
-  if (isPainting.value) {
+  if (isPaintSelecting.value) {
     classList.push('unselectable')
   }
   if (colorIsDark.value) {
@@ -354,7 +354,7 @@ const isLocked = computed(() => props.box.isLocked)
 
 // interacting
 
-const isPainting = computed(() => globalStore.currentUserIsPainting)
+const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentBoxIsBeingDragged = computed(() => {
   const isDragging = globalStore.currentUserIsDraggingBox
@@ -417,7 +417,7 @@ const startBoxInfoInteraction = async (event) => {
 }
 const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingBox) { return }
-  if (isPainting.value) { return }
+  if (isPaintSelecting.value) { return }
   state.isHover = value
   if (value) {
     globalStore.currentUserIsHoveringOverBoxId = props.box.id
@@ -429,7 +429,7 @@ const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
-  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (!canEditBox.value) { globalStore.triggerReadOnlyJiggle() }
@@ -803,7 +803,7 @@ const clearFocus = () => {
       )
 
   //- resize
-  .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
+  .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
     .inline-button-wrap(
         @pointerover="updateIsHover(true)"
         @pointerleave="updateIsHover(false)"

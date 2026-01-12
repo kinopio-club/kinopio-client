@@ -82,7 +82,7 @@ const isBetweenControls = (event) => {
 const handleMouseMove = (event) => {
   if (!event.target.closest) { return }
   if (!canEditSpace.value) { return }
-  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsPaintSelecting) { return }
   if (globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.currentUserIsDraggingBox) { return }
   if (globalStore.isEmbedMode) { return }

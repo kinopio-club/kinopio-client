@@ -1455,7 +1455,7 @@ const remoteCardDetailsVisibleColor = computed(() => {
 const showCardDetails = (event) => {
   if (globalStore.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
-  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsPaintSelecting) { return }
   if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }

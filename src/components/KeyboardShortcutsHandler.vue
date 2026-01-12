@@ -421,7 +421,7 @@ const handleScrollEvents = (event) => {
 }
 // on native right-click context menu
 const handleContextMenuEvents = (event) => {
-  if (disableContextMenu || globalStore.currentUserIsPaintingLocked) {
+  if (disableContextMenu || globalStore.currentUserIsPaintSelectingLocked) {
     disableContextMenu = false
     event.preventDefault()
   }

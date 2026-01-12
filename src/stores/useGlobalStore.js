@@ -79,8 +79,8 @@ export const useGlobalStore = defineStore('global', {
 
     // current user state
     currentUserIsDrawingConnection: false,
-    currentUserIsPainting: false,
-    currentUserIsPaintingLocked: false,
+    currentUserIsPaintSelecting: false,
+    currentUserIsPaintSelectingLocked: false,
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
@@ -356,17 +356,17 @@ export const useGlobalStore = defineStore('global', {
     },
     getShouldScrollAtEdges (event) {
       if (window.visualViewport.scale > 1) { return }
-      let isPainting
+      let isPaintSelecting
       if (event.touches) {
-        isPainting = this.currentUserIsPaintingLocked
+        isPaintSelecting = this.currentUserIsPaintSelectingLocked
       } else {
-        isPainting = this.currentUserIsPainting
+        isPaintSelecting = this.currentUserIsPaintSelecting
       }
       const isDrawingConnection = this.currentUserIsDrawingConnection
       const isDraggingCard = this.currentUserIsDraggingCard
       const isDraggingBox = this.currentUserIsDraggingBox
       const isDraggingLine = this.currentUserIsDraggingLine
-      return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox || isDraggingLine
+      return isPaintSelecting || isDrawingConnection || isDraggingCard || isDraggingBox || isDraggingLine
     },
     getOtherUserById (userId) {
       return this.otherUsers[userId]

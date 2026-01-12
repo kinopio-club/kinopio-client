@@ -10,13 +10,13 @@ import BoxSnapGuide from '@/components/BoxSnapGuide.vue'
 const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 
-const isPainting = computed(() => globalStore.currentUserIsPainting)
+const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
 const unlockedBoxes = computed(() => boxStore.getBoxesIsNotLocked)
 const lockedBoxes = computed(() => boxStore.getBoxesIsLocked)
 </script>
 
 <template lang="pug">
-.boxes(:class="{unselectable: isPainting}")
+.boxes(:class="{unselectable: isPaintSelecting}")
   template(v-for="box in unlockedBoxes" :key="box.id")
     Box(:box="box")
     BoxSnapGuide(:box="box")

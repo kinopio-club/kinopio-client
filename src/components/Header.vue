@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.currentUserIsPainting, (value, prevValue) => {
+watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
   if (value) {
     addReadOnlyJiggle()
   }
