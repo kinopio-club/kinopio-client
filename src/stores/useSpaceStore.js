@@ -93,6 +93,7 @@ export const useSpaceStore = defineStore('space', {
       const isSpaceMember = userStore.getUserIsSpaceMember
       const isOtherSpace = !isSpaceMember
       const isSignedIn = userStore.getUserIsSignedIn
+      console.error('🥀🥀🥀🥀🥀', isOtherSpace, isSignedIn)
       return isOtherSpace || isSignedIn
     },
     getSpaceAllUsers () {
