@@ -209,10 +209,10 @@ export const useApiStore = defineStore('api', {
       }
     }, 500),
 
-    async addToQueue ({ name, body, spaceId }) {
+    async addToQueue ({ name, body, spaceId, allowNonMember }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      if (!userStore.getUserCanEditSpace) { return }
+      if (!allowNonMember && !userStore.getUserCanEditSpace) { return }
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || spaceStore.id

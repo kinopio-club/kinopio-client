@@ -194,7 +194,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         spaceId,
         recipientUserIds
       }
-      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification, allowNonMember: true })
     }
 
   }
