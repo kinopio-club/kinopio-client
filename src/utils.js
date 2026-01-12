@@ -2695,6 +2695,9 @@ export default {
       h2Pattern: /^## ()(.+$)/gmi,
       h3Pattern: /^### ()(.+$)/gmi,
       h4Pattern: /^#### ()(.+$)/gmi,
+      // https://regexr.com/65i1l
+      // matches > text
+      blockquotePattern: /^> ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -2740,6 +2743,9 @@ export default {
         }, {
           type: 'h4',
           result: markdown.h4Pattern.exec(text)
+        }, {
+          type: 'blockquote',
+          result: markdown.blockquotePattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)

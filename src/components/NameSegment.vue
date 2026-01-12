@@ -157,6 +157,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
           h3 {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'h4'")
           h4 {{markdown.content}}
+        template(v-else-if="markdown.type === 'blockquote'")
+          blockquote {{markdown.content}}
         template(v-else-if="markdown.type === 'emphasis'")
           em {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'strikethrough'")
@@ -270,6 +272,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       font-family var(--glyphs-font)
       font-size 44px
       margin 0
+    blockquote
+      padding-left 8px
+      margin 0
+      border-left 1px solid var(--primary)
     &.is-background-light
       > span,
       h1,
@@ -281,6 +287,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
        color var(--primary-on-light-background)
       a
         color var(--text-link-on-light-background)
+      blockquote
+        border-color var(--primary-border-on-light-background)
     &.is-background-dark
       > span,
       h1,
@@ -292,6 +300,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
        color var(--primary-on-dark-background)
       a
         color var(--text-link-on-dark-background)
+      blockquote
+        border-color var(--primary-border-on-dark-background)
 
   .strikethrough
     text-decoration line-through
