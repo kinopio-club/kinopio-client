@@ -13,6 +13,24 @@ const userNotificationStore = useUserNotificationStore()
 
 const emit = defineEmits(['updateDialogHeight'])
 
+let unsubscribes
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'loadSpace') {
+        state.isAsked = false
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
+
 const state = reactive({
   error: {
     userNeedsToSignUpOrIn: false
