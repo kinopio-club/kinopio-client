@@ -2324,6 +2324,8 @@ const clearFocus = () => {
         padding-right 0
         button
           cursor pointer
+      &:only-child
+        padding-right 6px
     span + .url-wrap,
     p + .url-wrap,
     .badge + .url-wrap
