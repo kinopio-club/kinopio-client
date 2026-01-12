@@ -80,7 +80,13 @@ const colorClasses = computed(() => {
 // preivew image
 
 const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePreviewImage)
-const previewImage = computed(() => props.otherSpace?.previewImage)
+const previewImage = computed(() => {
+  let url = props.otherSpace?.previewImage
+  if (url) {
+    url = url + `?date=${utils.unixTime()}` // cache bust
+  }
+  return url
+})
 const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImage.value)
 
 // url
