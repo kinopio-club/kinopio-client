@@ -339,7 +339,7 @@ const shrink = () => {
   }
   const rect = utils.boundaryRectFromItems(items)
   const padding = consts.spaceBetweenCards * 2
-  const paddingTop = 30 + padding
+  const paddingTop = 25 + padding
   const update = { id: props.box.id }
   update.x = rect.x - padding
   update.y = rect.y - paddingTop
