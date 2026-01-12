@@ -447,7 +447,7 @@ export const useGlobalStore = defineStore('global', {
     triggerShowNextSearchCard () {},
     triggerShowPreviousSearchCard () {},
     triggerMoreFiltersIsNotVisible () {},
-    triggerConnectionDetailsIsVisible (connectionId) {},
+    triggerConnectionDetailsIsVisible (options) {},
     triggerUpdateWindowHistory (options) {},
     triggerAddCard (options) {},
     triggerAddChildCard (options) {},

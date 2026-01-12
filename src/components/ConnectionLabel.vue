@@ -109,7 +109,7 @@ const toggleConnectionDetails = (event) => {
     wasDragged = false
     globalStore.closeAllDialogs()
   } else {
-    globalStore.triggerConnectionDetailsIsVisible(id.value)
+    globalStore.triggerConnectionDetailsIsVisible({ id: id.value, event })
   }
 }
 const items = computed(() => {

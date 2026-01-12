@@ -36,14 +36,14 @@ onMounted(() => {
         const selected = selectedIds.includes(props.connection.id) || globalStore.connectionDetailsIsVisibleForConnectionId === props.connection.id
         if (!selected) {
           cancelAnimation()
-        } else if (name === 'triggerConnectionDetailsIsVisible') {
-          const connectionId = args[0]
-          if (connectionId !== props.connection.id) { return }
-          const isFromStore = true
-          showConnectionDetails(args[0].event, isFromStore)
-        } else if (name === 'closeAllDialogs') {
-          updatePathWhileDragging(null)
         }
+      } else if (name === 'triggerConnectionDetailsIsVisible') {
+        const { id, event } = args[0]
+        if (id !== props.connection.id) { return }
+        const isFromStore = true
+        showConnectionDetails(event, isFromStore)
+      } else if (name === 'closeAllDialogs') {
+        updatePathWhileDragging(null)
       }
     }
   )
