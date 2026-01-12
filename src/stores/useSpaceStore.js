@@ -90,11 +90,8 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceIsRemote () {
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember // but user is a member of this space
-      // const isOtherSpace =
-
+      const isSpaceMember = userStore.getUserIsSpaceMember
       const isSignedIn = userStore.getUserIsSignedIn
-      console.error('🥀🥀🥀🥀🥀', !isSpaceMember, isSignedIn)
       return !isSpaceMember || isSignedIn
     },
     getSpaceAllUsers () {

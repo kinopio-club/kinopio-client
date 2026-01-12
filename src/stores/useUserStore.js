@@ -159,7 +159,6 @@ export const useUserStore = defineStore('user', {
         return user.id === this.id
       }))
       userIsInSpace = userIsInSpace || space.userId === this.id
-      console.error('🔮🔮🔮🔮getUserIsSpaceUser', spaceStore, space, space.users, userIsInSpace, this.id, space.userId)
       return userIsInSpace
     },
     getUserIsSpaceCollaborator () {
@@ -179,7 +178,6 @@ export const useUserStore = defineStore('user', {
       const isSpaceUser = this.getUserIsSpaceUser
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const isGroupMember = groupStore.getIsCurrentSpaceGroupUser
-      console.log('💐💐💐getUserIsSpaceMember', isSpaceUser, isSpaceCollaborator, isGroupMember)
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     getUserCanEditSpace () {
