@@ -154,11 +154,12 @@ export const useUserStore = defineStore('user', {
     },
     getUserIsSpaceUser () {
       const spaceStore = useSpaceStore()
-      let userIsInSpace = Boolean(spaceStore.users?.find(user => {
+      const space = spaceStore.getSpaceAllState
+      let userIsInSpace = Boolean(space.users?.find(user => {
         return user.id === this.id
       }))
-      userIsInSpace = userIsInSpace || spaceStore.userId === this.id
-      console.error('🔮🔮🔮🔮getUserIsSpaceUser', spaceStore, spaceStore.users, userIsInSpace, this.id, spaceStore.userId)
+      userIsInSpace = userIsInSpace || space.userId === this.id
+      console.error('🔮🔮🔮🔮getUserIsSpaceUser', spaceStore, space, space.users, userIsInSpace, this.id, space.userId)
       return userIsInSpace
     },
     getUserIsSpaceCollaborator () {
