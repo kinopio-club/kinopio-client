@@ -102,10 +102,11 @@ const toggleAppsAndExtensionsIsVisible = () => {
 </template>
 
 <style lang="stylus">
-header
-  dialog.apps
-    left initial
-    right 8px
+.page
+  header
+    dialog.apps
+      left initial
+      right 8px
 
 // same as components/Header.vue
 header
