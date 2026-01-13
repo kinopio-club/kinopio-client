@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -50,6 +51,7 @@ export const useSpaceStore = defineStore('space', {
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       const space = this.getSpaceAllState
       if (!space) { return }
       space.cards = cardStore.getAllCards
@@ -57,6 +59,7 @@ export const useSpaceStore = defineStore('space', {
       space.connectionTypes = connectionStore.getAllConnectionTypes
       space.boxes = boxStore.getAllBoxes
       space.lines = lineStore.getAllLines
+      space.lists = listStore.getAllLists
       space.drawingStrokes = this.drawingStrokes || []
       return space
     },
@@ -153,10 +156,12 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       const cardColors = cardStore.getCardColors
       const boxColors = boxStore.getboxColors
       const lineColors = lineStore.getLineColors
-      const colors = cardColors.concat(boxColors).concat(lineColors)
+      const listColors = listStore.getListColors
+      const colors = cardColors.concat(boxColors).concat(lineColors).concat(listColors)
       return uniq(colors)
     },
     getSpaceTags () {
@@ -332,6 +337,7 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       space = utils.removeRemovedCardsFromSpace(space)
       // initialize items
       cardStore.initializeCards(space?.cards)
@@ -339,6 +345,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
       lineStore.initializeLines(space?.lines)
+      listStore.initializeLists(space?.lists)
       // initialize space
       this.$state = space
       console.log('🍍 restoreSpace', this.getSpaceAllState)
