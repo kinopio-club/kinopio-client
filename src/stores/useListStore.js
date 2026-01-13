@@ -85,6 +85,7 @@ export const useListStore = defineStore('lists', {
       list.y = list.y || min
       list.y = Math.max(list.y, min)
       list.name = list.name || ''
+      list.resizeWidth = list.resizeWidth || null
       list.userId = userStore.id
       list.spaceId = spaceStore.id
       return list
