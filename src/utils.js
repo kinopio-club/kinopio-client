@@ -1149,6 +1149,12 @@ export default {
     return document.querySelector(`.line-info[data-line-id="${lineId}"]`)
   },
 
+  // lists
+
+  listElementFromId (listId) {
+    return document.querySelector(`.list-info[data-list-id="${listId}"]`)
+  },
+
   // rect
 
   isPointInsideRect (point, rect) {
@@ -1601,6 +1607,7 @@ export default {
       connectionTypes: [],
       boxes: [],
       lines: [],
+      lists: [],
       tags: [],
       users: [],
       userId: '',
