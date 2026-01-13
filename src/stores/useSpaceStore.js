@@ -792,6 +792,7 @@ export const useSpaceStore = defineStore('space', {
         await cache.updateIdsInSpace(space, nullCardUsers)
       }
       globalStore.triggerUpdateWindowTitle()
+      globalStore.triggerDrawingInitialize()
     },
     async createNewInboxSpace (shouldCreateWithoutLoading) {
       const globalStore = useGlobalStore()
