@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -353,6 +354,7 @@ export const useHistoryStore = defineStore('history', {
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       if (globalStore.getToolbarIsDrawing) {
         globalStore.triggerDrawingUndo()
         return
@@ -367,7 +369,7 @@ export const useHistoryStore = defineStore('history', {
       for (const item of patch) {
         console.info('⏪ undo', item, { pointer: this.pointer, totalPatches: this.patches.length })
         const { action } = item
-        let card, connection, type, box, line
+        let card, connection, type, box, line, list
         switch (action) {
           // cards
           case 'cardUpdated':
@@ -429,6 +431,19 @@ export const useHistoryStore = defineStore('history', {
           case 'lineRemoved':
             line = item.new
             lineStore.createLine(line.id)
+            break
+          // lists
+          case 'listUpdated':
+            list = item.prev
+            listStore.updateList(list)
+            break
+          case 'listCreated':
+            list = item.new
+            listStore.removeList(list.id)
+            break
+          case 'listRemoved':
+            list = item.new
+            listStore.createList(list.id)
             break
         }
       }
