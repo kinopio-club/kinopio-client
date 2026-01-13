@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -20,6 +21,7 @@ import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import LineDetails from '@/components/dialogs/LineDetails.vue'
+// import ListDetails from '@/components/dialogs/ListDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -29,6 +31,7 @@ import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Lines from '@/components/Lines.vue'
+// import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
@@ -66,6 +69,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -229,6 +233,7 @@ const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
+const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -246,6 +251,9 @@ watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsDraggingLine, (value, prevValue) => {
+  updatePageSizes(value)
+})
+watch(() => globalStore.currentUserIsDraggingList, (value, prevValue) => {
   updatePageSizes(value)
 })
 const updatePageSizes = async (value) => {
@@ -514,6 +522,8 @@ const dragItems = () => {
   boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
   // lines
   lineStore.moveLines({ endCursor, prevCursor })
+  // lists
+  listStore.moveLists({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -587,7 +597,16 @@ const updateCardDetailsWidth = (event) => {
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value || isResizingCardDetails.value
+  return (
+    isDraggingCard.value ||
+    isDrawingConnection.value ||
+    isResizingCard.value ||
+    isResizingBox.value ||
+    isDraggingBox.value ||
+    isDraggingLine.value ||
+    isDraggingList.value ||
+    isResizingCardDetails.value
+  )
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -669,7 +688,7 @@ const interact = (event) => {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
-  } else if (isDraggingLine.value) {
+  } else if (isDraggingLine.value || isDraggingList.value) {
     dragItems()
   } else if (isResizingCardDetails.value) {
     updateCardDetailsWidth(event)
@@ -685,6 +704,8 @@ const checkShouldShowDetails = () => {
     globalStore.preventDraggedBoxFromShowingDetails = true
   } else if (isDraggingLine.value) {
     globalStore.preventDraggedLineFromShowingDetails = true
+  } else if (isDraggingList.value) {
+    globalStore.preventDraggedListFromShowingDetails = true
   }
 }
 const eventIsFromTextarea = (event) => {
@@ -756,9 +777,11 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
+  globalStore.currentUserIsDraggingList = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false
+  globalStore.listsWereDragged = false
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   globalStore.currentUserIsResizingCardDetails = false
@@ -884,10 +907,12 @@ const updateMetaRSSFeed = () => {
     #box-infos
     Cards
     Lines
+    //- Lists
     ItemUnlockButtons
     DrawingStrokes
     BoxDetails
     LineDetails
+    //- ListDetails
     CardDetails
     OtherCardDetails
     ConnectionDetails
