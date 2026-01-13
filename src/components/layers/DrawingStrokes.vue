@@ -65,6 +65,8 @@ onMounted(async () => {
       } else if (name === 'triggerUpdateDrawingDataUrl') {
         await updateDrawingDataUrl()
         globalStore.triggerEndDrawing()
+      } else if (name === 'triggerUpdateDrawingStrokes') {
+        spaceStore.drawingStrokes = spaceStrokes
       }
     }
   )

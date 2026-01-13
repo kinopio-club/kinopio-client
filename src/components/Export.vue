@@ -59,6 +59,7 @@ const copyText = async (event) => {
   }
 }
 const downloadLocalJson = () => {
+  globalStore.triggerUpdateDrawingStrokes()
   const space = utils.clone(currentSpace.value)
   delete space.clients
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(space))
