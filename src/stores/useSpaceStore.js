@@ -487,7 +487,10 @@ export const useSpaceStore = defineStore('space', {
         // restore remote space
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
-        if (!remoteSpace) { return }
+        if (!remoteSpace) {
+          globalStore.triggerDrawingInitialize()
+          return
+        }
         globalStore.triggerUpdateWindowTitle()
         groupStore.loadGroup(remoteSpace)
         this.updateSpacePreviewImage()
