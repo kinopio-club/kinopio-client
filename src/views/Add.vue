@@ -294,14 +294,9 @@ main.add-page
       //- buttons
       .row
         .button-wrap
-          a(:href="inboxUrl")
-            button(:disabled="state.error.isMissingInboxSpace")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
-              span Inbox
-        .button-wrap
           button.success(@pointerup="addCard" :disabled="state.error.maxLength || state.error.isMissingInboxSpace")
             img.icon.add-icon(src="@/assets/add.svg")
-            span Add
+            span Add to Inbox
           .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
       Transition(name="fadeIn")
