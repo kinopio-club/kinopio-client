@@ -228,6 +228,9 @@ const handleShortcuts = (event) => {
     userStore.cycleDrawingBrushSize()
   // l
   } else if (key === 'l' && isSpaceScope) {
+    // TODO toggle add list mode
+  // -
+  } else if ((key === '-' || key === '–') && isSpaceScope) {
     const line = { y: currentCursorPosition.y }
     lineStore.createLine(line)
   }

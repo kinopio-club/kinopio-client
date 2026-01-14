@@ -59,11 +59,11 @@ nav#toolbar.toolbar(v-if="visible")
   DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
     .segmented-buttons
-      //- line
+      //- Line
       .button-wrap
         button(
           @click="addLine"
-          title="Add Line Divider (L)"
+          title="Add Line Divider (-)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
           img.icon.line-icon(src="@/assets/line.svg")
