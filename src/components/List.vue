@@ -24,13 +24,13 @@ const broadcastStore = useBroadcastStore()
 const borderWidth = 2
 // locking
 // long press to touch drag
-// const lockingPreDuration = 100 // ms
-// const lockingDuration = 100 // ms
-// let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+const lockingPreDuration = 100 // ms
+const lockingDuration = 100 // ms
+let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 let isMultiTouch
 let initialTouchEvent = {}
 let touchPosition = {}
-const currentTouchPosition = {}
+let currentTouchPosition = {}
 
 // onMounted(() => {
 //   console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
@@ -191,6 +191,83 @@ const remoteListDraggingColor = computed(() => {
 
 // touch locking
 
+const lockingFrameStyle = computed(() => {
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
+  const initialBorderRadius = 50
+  const padding = initialPadding * state.lockingPercent
+  const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
+  const size = `calc(100% + ${padding}px)`
+  const position = -(padding / 2) + 'px'
+  return {
+    width: size,
+    height: size,
+    left: position,
+    top: position,
+    background: userColor.value,
+    opacity: state.lockingAlpha,
+    borderRadius
+  }
+})
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const cancelLockingAnimationFrame = () => {
+  state.isLocking = false
+  state.lockingPercent = 0
+  state.lockingAlpha = 0
+  shouldCancelLocking = false
+}
+const startLocking = (event) => {
+  console.info('startLocking', event)
+  updateTouchPosition(event)
+  updateCurrentTouchPosition(event)
+  state.isLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    if (!lockingAnimationTimer) {
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
+    }
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+    notifyPressAndHoldToDrag()
+    cancelLockingAnimationFrame()
+  }
+  if (shouldCancelLocking) {
+    cancelLockingAnimationFrame()
+  }
+  if (state.isLocking && percentComplete <= 1) {
+    const percentRemaining = Math.abs(percentComplete - 1)
+    state.lockingPercent = percentRemaining
+    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    state.lockingAlpha = alpha
+    window.requestAnimationFrame(lockingAnimationFrame)
+  } else if (state.isLocking && percentComplete > 1) {
+    console.info('🔒🐢 box lockingAnimationFrame locked')
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    state.isLocking = false
+    startListInfoInteraction(initialTouchEvent)
+  } else {
+    window.cancelAnimationFrame(lockingAnimationTimer)
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    cancelLockingAnimationFrame()
+  }
+}
+const notifyPressAndHoldToDrag = () => {
+  const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
+  if (!hasNotified) {
+    globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
+  }
+  globalStore.hasNotifiedPressAndHoldToDrag = true
+}
 const updateTouchPosition = (event) => {
   initialTouchEvent = event
   isMultiTouch = false
@@ -199,6 +276,35 @@ const updateTouchPosition = (event) => {
     return
   }
   touchPosition = utils.cursorPositionInViewport(event)
+}
+const updateCurrentTouchPosition = (event) => {
+  currentTouchPosition = utils.cursorPositionInViewport(event)
+  if (currentListIsBeingDragged.value || isResizing.value) {
+    event.preventDefault() // allows dragging boxes without scrolling
+  }
+}
+const touchIsNearTouchPosition = (event) => {
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const touchBlur = 12
+  const isTouchX = utils.isBetween({
+    value: currentPosition.x,
+    min: touchPosition.x - touchBlur,
+    max: touchPosition.x + touchBlur
+  })
+  const isTouchY = utils.isBetween({
+    value: currentPosition.y,
+    min: touchPosition.y - touchBlur,
+    max: touchPosition.y + touchBlur
+  })
+  if (isTouchX && isTouchY) {
+    return true
+  }
+}
+const endListInfoInteractionTouch = (event) => {
+  cancelLocking()
+  if (touchIsNearTouchPosition(event)) {
+    endListInfoInteraction(event)
+  }
 }
 
 // styles
@@ -314,7 +420,11 @@ const buttonClasses = computed(() => {
     @mouseup.left="endListInfoInteraction"
     @keyup.stop.enter="endListInfoInteraction"
 
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="endListInfoInteractionTouch"
   )
+    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- collapse/expand
       .inline-button-wrap
@@ -399,4 +509,10 @@ const buttonClasses = computed(() => {
       background transparent
     .inline-button-wrap + .inline-button-wrap
       padding-left 0
+
+    .locking-frame
+      position absolute
+      z-index -1
+      pointer-events none
+
 </style>
