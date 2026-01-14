@@ -8,8 +8,8 @@ const imageType = (previewImage) => {
   return `image/${extension}`
 }
 
-export default async ({ context, title, description, previewImage, jsonLD }) => {
-  console.log('🔮 rewriteIndexHtml', { title, description, previewImage })
+export default async ({ context, title, description, previewImage, jsonLD, canonicalUrl }) => {
+  console.log('🔮 rewriteIndexHtml', { title, description, previewImage, canonicalUrl })
   try {
     const response = await context.next()
     // check if response is valid HTML
@@ -82,6 +82,13 @@ export default async ({ context, title, description, previewImage, jsonLD }) => 
       transformations.push({
         selector: 'script[type="application/ld+json"]',
         transform: element => element.setAttribute('text', jsonLD)
+      })
+    }
+    // canonical
+    if (canonicalUrl) {
+      transformations.push({
+        selector: 'link[rel="canonical"]',
+        transform: element => element.setAttribute('href', canonicalUrl)
       })
     }
     const rewriter = transformations.reduce((rewriter, { selector, transform }) => {
