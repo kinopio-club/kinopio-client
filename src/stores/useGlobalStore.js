@@ -91,7 +91,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsHoveringOverUrlButtonCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
-    currentUserToolbar: 'card', // card, box, drawing
+    currentUserToolbar: 'card', // card, box, drawing, line, list
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for copy paste kinopio items
     shouldCancelNextMouseUpInteraction: false,
@@ -183,6 +183,10 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsDraggingListIds: [],
     remoteListsDragging: [],
     preventDraggedListFromShowingDetails: false,
+    // resizing lists
+    currentUserIsResizingList: false,
+    currentUserIsResizingListIds: [],
+    remoteUserResizingLists: [],
 
     // draggingItems
     shouldSnapToGrid: false,
@@ -329,7 +333,7 @@ export const useGlobalStore = defineStore('global', {
       return transform
     },
     getIsInteractingWithItem () {
-      return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox
+      return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox || this.currentUserIsResizingList || this.currentUserIsDraggingList
     },
     getMultipleItemsSelected () {
       return [
@@ -356,6 +360,9 @@ export const useGlobalStore = defineStore('global', {
     },
     getToolbarIsBox () {
       return this.currentUserToolbar === 'box'
+    },
+    getToolbarIsList () {
+      return this.currentUserToolbar === 'list'
     },
     getTags () {
       const spaceStore = useSpaceStore()
@@ -1226,6 +1233,8 @@ export const useGlobalStore = defineStore('global', {
       this.currentUserIsResizingCard = false
       this.currentUserIsResizingBox = false
       this.currentUserIsDraggingBox = false
+      this.currentUserIsResizingList = false
+      this.currentUserIsDraggingList = false
       this.multipleCardsSelectedIds = []
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []
