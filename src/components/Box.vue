@@ -86,10 +86,7 @@ const state = reactive({
   remoteConnectionColor: ''
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
-const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserColor = computed(() => userStore.color)
 const name = computed(() => props.box.name)
 const currentBoxIsSelected = computed(() => {
   const selected = globalStore.multipleBoxesSelectedIds
@@ -99,17 +96,15 @@ const currentBoxIsSelected = computed(() => {
 // normalize
 
 const normalizedBox = computed(() => {
-  return normalizeBox(props.box)
-})
-const normalizeBox = (box) => {
+  const box = props.box
   box.resizeWidth = box.resizeWidth || consts.minItemXY
   box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
-  box.color = box.color || randomColor({ luminosity: 'light' })
+  box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
   return box
-}
+})
 const normalizedName = computed(() => {
   // name without checkbox text
   let newName = name.value
