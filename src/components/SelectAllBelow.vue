@@ -43,6 +43,7 @@ const isVisible = computed(() => {
   if (globalStore.isSelectingX) { return }
   if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
   if (globalStore.lineDetailsIsVisibleForLineId) { return }
+  if (globalStore.listDetailsIsVisibleForListId) { return }
   return state.isVisible
 })
 
@@ -72,7 +73,7 @@ const handleMouseMove = (event) => {
   updateIsMetaKey(event)
   const position = utils.cursorPositionInViewport(event)
   const pagePosition = utils.cursorPositionInSpace(event)
-  // check if near line
+  // hide if near line
   let isLine
   const lines = lineStore.getAllLines
   lines.forEach(line => {
@@ -89,7 +90,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
     return
   }
-  // check if between controls
+  // show if between controls
   const edgeThreshold = 30
   const toolbar = document.querySelector('#toolbar')?.getBoundingClientRect()
   if (!toolbar) { return }
