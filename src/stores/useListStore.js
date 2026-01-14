@@ -52,6 +52,22 @@ export const useListStore = defineStore('lists', {
     // init
 
     initializeLists (lists = []) {
+      // stubbed list data
+      lists = [
+        {
+          id: '123xyz',
+          name: '',
+          color: 'teal',
+          x: 300,
+          y: 200,
+          z: 0,
+          width: consts.normalCardMaxWidth
+          // resizeWidth: null
+          // spaceId
+          // userId
+        }
+      ]
+
       const byId = {}
       const allIds = []
       lists.forEach(list => {
@@ -132,7 +148,6 @@ export const useListStore = defineStore('lists', {
     updateList (update) {
       this.updatedLists([update])
     },
-
     moveLists ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
@@ -157,6 +172,7 @@ export const useListStore = defineStore('lists', {
         x = Math.max(0, x)
         let y = Math.round(list.y + delta.y)
         y = Math.max(0, y)
+        // TODO update list z
         return {
           id: list.id,
           x,

@@ -31,7 +31,7 @@ import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Lines from '@/components/Lines.vue'
-// import Lists from '@/components/Lists.vue'
+import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
@@ -91,6 +91,8 @@ window.globalStore = useGlobalStore()
 window.cardStore = useCardStore()
 window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
+window.lineStore = useLineStore()
+window.listStore = useListStore()
 window.spaceStore = useSpaceStore()
 window.changelogStore = useChangelogStore()
 window.themeStore = useThemeStore()
