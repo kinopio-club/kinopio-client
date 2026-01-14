@@ -53,6 +53,14 @@ const state = reactive({
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const userColor = computed(() => userStore.color)
 
+// cards
+
+const listCards = computed(() => {
+  let cards = cardStore.getAllCards
+  cards = cards.filter(card => card.listId === props.list.id)
+  return cards
+})
+
 // interacting
 
 const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
@@ -70,6 +78,11 @@ const currentListIsSelected = computed(() => {
   const selected = globalStore.multipleListsSelectedIds
   return selected.find(id => props.list.id === id)
 })
+const updateIsHover = (value) => {
+  if (globalStore.currentUserIsDraggingList) { return }
+  if (isPaintSelecting.value) { return }
+  state.isHover = value
+}
 
 // Remote
 
@@ -187,6 +200,13 @@ const classes = computed(() => {
     // transition: !globalStore.currentListIsNew || !globalStore.currentUserIsResizingList
   }
 })
+const infoClasses = computed(() => {
+  const classes = utils.colorClasses({ backgroundColor: props.list.color })
+  if (state.isHover) {
+    classes.push('hover')
+  }
+  return classes
+})
 </script>
 
 <template lang="pug">
@@ -203,13 +223,20 @@ const classes = computed(() => {
     //- .list-background
 
   //- teleport(to="#list-infos")
-  .list-info
+  .list-info(
+    :data-list-id="list.id"
+    :class="infoClasses"
+    tabindex="0"
+
+    @mouseover="updateIsHover(true)"
+    @mouseleave="updateIsHover(false)"
+  )
     .row
       //- collapse/expand
       .inline-button-wrap
         button.small-button.inline-button(title="Collapse/Expand")
           img.icon.left-arrow(src="@/assets/right-arrow.svg")
-          span 0
+          span {{ listCards.length }}
       //- add card
       .inline-button-wrap
         button.small-button.inline-button(title="Add Card")
@@ -236,9 +263,14 @@ const classes = computed(() => {
 .list
   position absolute
   border-radius var(--entity-radius)
-
   min-width 70px
   min-height 200px
+  &.hover
+    box-shadow var(--hover-shadow)
+  &.active
+    box-shadow var(--active-shadow)
+    transition none
+    z-index 1
 
   .list-info
     pointer-events all
@@ -247,6 +279,11 @@ const classes = computed(() => {
     border-bottom-left-radius 0
     border-bottom-right-radius 0
     cursor pointer
+    &:hover
+      box-shadow var(--hover-shadow)
+    &:active
+      box-shadow var(--active-shadow)
+
     .inline-button-wrap
       display inline-block
       button.inline-button
