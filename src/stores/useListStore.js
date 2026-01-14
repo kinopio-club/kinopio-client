@@ -56,7 +56,7 @@ export const useListStore = defineStore('lists', {
       lists = [
         {
           id: '123xyz',
-          name: 'List 0',
+          name: 'List 0 laksdjflksa jdfklajsd flksajdklf jsaldf',
           color: 'teal',
           x: 300,
           y: 100,

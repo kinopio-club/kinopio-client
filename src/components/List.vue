@@ -442,7 +442,7 @@ const buttonClasses = computed(() => {
         .inline-button-wrap
           button.small-button.inline-button(title="Add Card")
             img.icon.add(src="@/assets/add.svg")
-        span.name {{ props.list.name }}
+        span.name(:title="props.list.name") {{ props.list.name }}
 
   .list-contents(
     :style="listStyles"
@@ -529,7 +529,6 @@ const buttonClasses = computed(() => {
   button
     width initial
     min-width 20px
-    // background transparent
     cursor pointer
     .icon.left-arrow
       vertical-align 0
@@ -538,9 +537,18 @@ const buttonClasses = computed(() => {
       width 8px
       margin-left 1px
   .inline-button
-    background transparent
+    background transparent !important // :hover and :active are transparent too
   .inline-button-wrap + .inline-button-wrap
     padding-left 0
+  .row
+    width 100%
+    .name
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+      display inline-block
+      width calc(100% - 75px)
+      vertical-align -2px
 
   .locking-frame
     position absolute
