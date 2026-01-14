@@ -6,6 +6,7 @@ import { useListStore } from '@/stores/useListStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
@@ -16,10 +17,20 @@ const listStore = useListStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 // let unsubscribes
 
 const borderWidth = 2
+// locking
+// long press to touch drag
+// const lockingPreDuration = 100 // ms
+// const lockingDuration = 100 // ms
+// let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+let isMultiTouch
+let initialTouchEvent = {}
+let touchPosition = {}
+const currentTouchPosition = {}
 
 // onMounted(() => {
 //   console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
@@ -83,6 +94,46 @@ const updateIsHover = (value) => {
   if (isPaintSelecting.value) { return }
   state.isHover = value
 }
+const startListInfoInteraction = async (event) => {
+  if (!currentListIsSelected.value) {
+    globalStore.clearMultipleSelected()
+  }
+  if (!canEditSpace.value) { return }
+  globalStore.currentDraggingListId = ''
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsDraggingList = true
+  const list = props.list.id
+  // if (event.altKey) {
+  //   list = await startDraggingDuplicateItems(event)
+  // }
+  globalStore.currentDraggingListId = list
+  // listStore.incrementListZ(list)
+}
+const endListInfoInteraction = (event) => {
+  // const isMeta = event.metaKey || event.ctrlKey
+  const userId = userStore.id
+  if (globalStore.currentUserIsPaintSelecting) { return }
+  if (isMultiTouch) { return }
+  if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteListsDragging' })
+  globalStore.closeAllDialogs()
+  // if (isMeta) {
+  //   globalStore.updateMultipleListsSelectedIds([props.list.id])
+  //   listStore.selectItemsInSelectedLists()
+  //   globalStore.updateMultipleListsSelectedIds([])
+  //   globalStore.currentUserIsDraggingList = false
+  //   globalStore.shouldCancelNextMouseUpInteraction = true
+  // } else {
+  globalStore.clearMultipleSelected()
+  // }
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
+  // if (isMeta) { return }
+  globalStore.updateListDetailsIsVisibleForListId(props.list.id)
+  event.stopPropagation() // prevent stopInteractions() from closing listDetails
+  globalStore.currentUserIsDraggingList = false
+  globalStore.listsWereDragged = false
+}
 
 // Remote
 
@@ -137,6 +188,18 @@ const remoteListDraggingColor = computed(() => {
     return undefined
   }
 })
+
+// touch locking
+
+const updateTouchPosition = (event) => {
+  initialTouchEvent = event
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+    return
+  }
+  touchPosition = utils.cursorPositionInViewport(event)
+}
 
 // styles
 
@@ -246,6 +309,11 @@ const buttonClasses = computed(() => {
 
     @mouseover="updateIsHover(true)"
     @mouseleave="updateIsHover(false)"
+    @mousedown.left="startListInfoInteraction"
+
+    @mouseup.left="endListInfoInteraction"
+    @keyup.stop.enter="endListInfoInteraction"
+
   )
     .row
       //- collapse/expand
