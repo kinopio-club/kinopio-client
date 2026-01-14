@@ -149,6 +149,11 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut B
         .row
           .badge.title
+            //- TODO img.icon.box-icon(src="@/assets/box.svg")
+            span Line Mode
+          .badge.keyboard-shortcut L
+        .row
+          .badge.title
             img.icon.pencil(src="@/assets/pencil.svg")
             span Drawing Mode
           .badge.keyboard-shortcut D
