@@ -59,7 +59,7 @@ export const useListStore = defineStore('lists', {
           name: 'List 0',
           color: 'teal',
           x: 300,
-          y: 200,
+          y: 100,
           z: 0,
           width: consts.normalCardMaxWidth,
           isCollapsed: false

@@ -199,9 +199,34 @@ const classes = computed(() => {
   :class="classes"
   ref="listElement"
 )
-  //- .list-info
-    //- collapse btn ?and count
-    //- ?name
+  //- teleport(to="#list-backgrounds")
+    //- .list-background
+
+  //- teleport(to="#list-infos")
+  .list-info
+    .row
+      .inline-button-wrap
+        button.inline-button
+          span x
+      .inline-button-wrap
+        button.inline-button
+          span +
+      span.name {{ props.list.name }}
+
+  //- resize
+  //- .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+  //-   .inline-button-wrap(
+  //-       @pointerover="updateIsHover(true)"
+  //-       @pointerleave="updateIsHover(false)"
+  //-       @mousedown.left="startResizing"
+  //-       @touchstart="startResizing"
+  //-       @dblclick="shrink"
+  //-     )
+  //-     button.inline-button(
+  //-       tabindex="-1"
+  //-     )
+  //-       img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+
 </template>
 
 <style lang="stylus">
@@ -212,5 +237,16 @@ const classes = computed(() => {
   min-width 70px
   min-height 200px
 
-  pointer-events all // TODO move to list-info, allow painting inside box
+  pointer-events all // TODO move to list-info only, allow painting inside list
+  .list-info
+    pointer-events all
+    background-color pink !important
+    border-radius var(--entity-radius)
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+    cursor pointer
+    .inline-button-wrap
+      display inline-block
+    .inline-button-wrap + .inline-button-wrap
+      padding-left 0
 </style>
