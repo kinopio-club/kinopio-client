@@ -325,8 +325,7 @@ const color = computed(() => {
   }
 })
 const colorIsDark = computed(() => {
-  const color = props.list.color
-  return utils.colorIsDark(color)
+  return utils.colorIsDark(color.value)
 })
 // const fillColor = computed(() => {
 //   let value = color.value
@@ -346,7 +345,6 @@ const listStyles = computed(() => {
     // ?border: `${borderWidth}px solid ${color.value}`,
     backgroundColor: color.value
   }
-  console.log('💐💐💐💐', styles, props.list)
   return styles
 })
 // const infoStyles = computed(() => {
@@ -371,7 +369,7 @@ const classes = computed(() => {
   }
 })
 const infoClasses = computed(() => {
-  const classes = utils.colorClasses({ backgroundColor: props.list.color })
+  const classes = utils.colorClasses({ backgroundColor: color.value })
   if (state.isHover) {
     classes.push('hover')
   }
@@ -380,8 +378,6 @@ const infoClasses = computed(() => {
 const infoStyles = computed(() => {
   const { x, y } = props.list
   const width = props.list.resizeWidth || props.list.width
-
-  // x, y
   const styles = {
     left: x + 'px',
     top: y + 'px',
@@ -448,6 +444,13 @@ const buttonClasses = computed(() => {
             img.icon.add(src="@/assets/add.svg")
         span.name {{ props.list.name }}
 
+  .list-contents(
+    :style="listStyles"
+    :class="classes"
+  )
+    .placeholder
+      span -------
+
   //- resize
   //- .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
   //-   .inline-button-wrap(
@@ -469,13 +472,28 @@ const buttonClasses = computed(() => {
   position absolute
   border-radius var(--entity-radius)
   min-width 70px
-  min-height 200px
+  // min-height 200px
   &.hover
     box-shadow var(--hover-shadow)
   &.active
     box-shadow var(--active-shadow)
     transition none
     z-index 1
+
+  .list-contents
+    margin-top 34px
+    // background-color pink !important
+    padding 8px
+    padding-top 0
+    border-radius var(--entity-radius)
+    .placeholder
+      background-color var(--light-shadow)
+      border-radius var(--entity-radius)
+      box-shadow var(--button-active-inset-shadow)
+      padding 8px
+      span
+        pointer-events all
+        color white
 
 .list-info
   pointer-events all

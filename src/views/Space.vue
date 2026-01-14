@@ -771,6 +771,7 @@ const stopInteractions = async (event) => {
   globalStore.shouldAddCard = false
   globalStore.preventDraggedCardFromShowingDetails = false
   globalStore.preventDraggedBoxFromShowingDetails = false
+  globalStore.preventDraggedListFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
@@ -780,6 +781,7 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
   globalStore.currentUserIsDraggingList = false
+  console.log('🍇🍇🍇')
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false
@@ -904,7 +906,7 @@ const updateMetaRSSFeed = () => {
     #drawing-strokes-background
     ItemsLocked
     #box-backgrounds
-    //- #list-backgrounds
+    //- #list-contents
     Boxes
     Connections
     #box-infos
@@ -977,12 +979,11 @@ const updateMetaRSSFeed = () => {
     position absolute
     z-index 0 !important
 
-#list-backgrounds,
 #list-infos
   position absolute
-  .list-background
-    border-radius var(--entity-radius)
-    position absolute
-    z-index 0 !important
+  // .list-contents
+  //   border-radius var(--entity-radius)
+  //   position absolute
+  //   z-index 0 !important
 
 </style>
