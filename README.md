@@ -99,21 +99,25 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
     mkcert -install
 	mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem "kinopio.local" "localhost" "127.0.0.1"
 
-## Testing page-meta
-
-`page-meta.js` is an [edge function](https://www.netlify.com/platform/core/functions/) that runs in an isolated server-side container before page requests. It writes `index.html` metatags for title, description etc. for crawlers.
-
-I couldn't figure out how to run the netlify-cli locally, so instead I test this in staging using PR deploy URLs. 
-
-To view the logs: 
-
-Netlify website → Deploys → Edge Functions
-
 ## Pre-rendered Pages (Static-Site Generation, SSG)
 
 During the deploy/build process (`npm run build`), [`vite-ssg`](https://github.com/antfu-collective/vite-ssg) generates static HTML pages of routes defined in `vite.config.js` in `ssgOptions.includedRoutes`. Static pages (compiled from vue router into `/dist`) are served to the client directly. The client only goes through vue router for non-static routes like `/app`.
 
 To test pre-rendered page routes use `npm run build-dev`.
+
+## Testing page-meta
+
+`/edge-functions/page-meta.js` is an [edge function](https://www.netlify.com/platform/core/functions/) that runs in an isolated server-side container before page requests. It writes `index.html` metatags for title, description etc. for crawlers.
+
+I couldn't figure out how to run the netlify-cli locally, so instead I test this in staging using PR deploy URLs.
+
+To view the logs:
+
+Netlify website → Deploys → Edge Functions
+
+## Netlify Prerender
+
+The prerender extension in Netlify compiles space URLs into static html, so that they're scannable by search engines which can't run client js.
 
 ## See Also
 
