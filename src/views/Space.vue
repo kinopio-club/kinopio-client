@@ -907,7 +907,7 @@ const updateMetaRSSFeed = () => {
     #box-infos
     Cards
     Lines
-    //- Lists
+    Lists
     ItemUnlockButtons
     DrawingStrokes
     BoxDetails
