@@ -155,6 +155,10 @@ const color = computed(() => {
     return props.list.color
   }
 })
+const colorIsDark = computed(() => {
+  const color = props.list.color
+  return utils.colorIsDark(color)
+})
 // const fillColor = computed(() => {
 //   let value = color.value
 //   value = colord(value).alpha(0.5).toRgbString()
@@ -206,6 +210,18 @@ const infoClasses = computed(() => {
     classes.push('hover')
   }
   return classes
+})
+const buttonClasses = computed(() => {
+  const classes = []
+  if (colorIsDark.value) {
+    classes.push('is-dark')
+  } else {
+    classes.push('is-light')
+  }
+  // if ()
+  console.log(classes)
+  return classes
+// :class="{'is-light': isLightInDarkTheme, 'is-dark': isDarkInLightTheme}")
 })
 </script>
 
@@ -274,11 +290,25 @@ const infoClasses = computed(() => {
 
   .list-info
     pointer-events all
-    background-color pink !important
+    // background-color pink !important
     border-radius var(--entity-radius)
     border-bottom-left-radius 0
     border-bottom-right-radius 0
     cursor pointer
+    &.is-background-light
+      color var(--primary-on-light-background)
+      button
+        border-color var(--primary-border-on-light-background)
+        color var(--primary-on-light-background)
+        .icon
+          filter none
+    &.is-background-dark
+      color var(--primary-on-dark-background)
+      button
+        border-color var(--primary-border-on-dark-background)
+        color var(--primary-on-dark-background)
+        .icon
+          filter invert()
     &:hover
       box-shadow var(--hover-shadow)
     &:active
@@ -286,16 +316,19 @@ const infoClasses = computed(() => {
 
     .inline-button-wrap
       display inline-block
-      button.inline-button
-        width initial
-        background transparent
-        cursor pointer
-        .icon.left-arrow
-          vertical-align 0
-          margin-left 3px
-        .icon.add
-          width 8px
-          margin-left 1px
+    button
+      width initial
+      min-width 20px
+      // background transparent
+      cursor pointer
+      .icon.left-arrow
+        vertical-align 0
+        margin-left 3px
+      .icon.add
+        width 8px
+        margin-left 1px
+    .inline-button
+      background transparent
     .inline-button-wrap + .inline-button-wrap
       padding-left 0
 </style>
