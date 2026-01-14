@@ -358,9 +358,6 @@ const listStyles = computed(() => {
 //     maxWidth: resizeWidth + 'px',
 //     backgroundColor: color.value
 //   }
-//   if (isLocked.value) {
-//     styles.pointerEvents = 'none'
-//   }
 //   return styles
 // })
 const classes = computed(() => {
@@ -379,6 +376,19 @@ const infoClasses = computed(() => {
     classes.push('hover')
   }
   return classes
+})
+const infoStyles = computed(() => {
+  const { x, y } = props.list
+  const width = props.list.resizeWidth || props.list.width
+
+  // x, y
+  const styles = {
+    left: x + 'px',
+    top: y + 'px',
+    width: width + 'px',
+    backgroundColor: color.value
+  }
+  return styles
 })
 const buttonClasses = computed(() => {
   const classes = []
@@ -407,35 +417,36 @@ const buttonClasses = computed(() => {
   //- teleport(to="#list-backgrounds")
     //- .list-background
 
-  //- teleport(to="#list-infos")
-  .list-info(
-    :data-list-id="list.id"
-    :class="infoClasses"
-    tabindex="0"
+  teleport(to="#list-infos")
+    .list-info(
+      :data-list-id="list.id"
+      :class="infoClasses"
+      :style="infoStyles"
+      tabindex="0"
 
-    @mouseover="updateIsHover(true)"
-    @mouseleave="updateIsHover(false)"
-    @mousedown.left="startListInfoInteraction"
+      @mouseover="updateIsHover(true)"
+      @mouseleave="updateIsHover(false)"
+      @mousedown.left="startListInfoInteraction"
 
-    @mouseup.left="endListInfoInteraction"
-    @keyup.stop.enter="endListInfoInteraction"
+      @mouseup.left="endListInfoInteraction"
+      @keyup.stop.enter="endListInfoInteraction"
 
-    @touchstart="startLocking"
-    @touchmove="updateCurrentTouchPosition"
-    @touchend="endListInfoInteractionTouch"
-  )
-    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    .row
-      //- collapse/expand
-      .inline-button-wrap
-        button.small-button.inline-button(title="Collapse/Expand")
-          img.icon.left-arrow(src="@/assets/right-arrow.svg")
-          span {{ listCards.length }}
-      //- add card
-      .inline-button-wrap
-        button.small-button.inline-button(title="Add Card")
-          img.icon.add(src="@/assets/add.svg")
-      span.name {{ props.list.name }}
+      @touchstart="startLocking"
+      @touchmove="updateCurrentTouchPosition"
+      @touchend="endListInfoInteractionTouch"
+    )
+      .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
+      .row
+        //- collapse/expand
+        .inline-button-wrap
+          button.small-button.inline-button(title="Collapse/Expand")
+            img.icon.left-arrow(src="@/assets/right-arrow.svg")
+            span {{ listCards.length }}
+        //- add card
+        .inline-button-wrap
+          button.small-button.inline-button(title="Add Card")
+            img.icon.add(src="@/assets/add.svg")
+        span.name {{ props.list.name }}
 
   //- resize
   //- .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
@@ -466,53 +477,56 @@ const buttonClasses = computed(() => {
     transition none
     z-index 1
 
-  .list-info
-    pointer-events all
-    // background-color pink !important
-    border-radius var(--entity-radius)
-    border-bottom-left-radius 0
-    border-bottom-right-radius 0
-    cursor pointer
-    &.is-background-light
-      color var(--primary-on-light-background)
-      button
-        border-color var(--primary-border-on-light-background)
-        color var(--primary-on-light-background)
-        .icon
-          filter none
-    &.is-background-dark
-      color var(--primary-on-dark-background)
-      button
-        border-color var(--primary-border-on-dark-background)
-        color var(--primary-on-dark-background)
-        .icon
-          filter invert()
-    &:hover
-      box-shadow var(--hover-shadow)
-    &:active
-      box-shadow var(--active-shadow)
-
-    .inline-button-wrap
-      display inline-block
+.list-info
+  pointer-events all
+  border-radius var(--entity-radius)
+  cursor pointer
+  z-index 1
+  border-radius 4px
+  display flex
+  align-items center
+  width max-content
+  position absolute
+  &.is-background-light
+    color var(--primary-on-light-background)
     button
-      width initial
-      min-width 20px
-      // background transparent
-      cursor pointer
-      .icon.left-arrow
-        vertical-align 0
-        margin-left 3px
-      .icon.add
-        width 8px
-        margin-left 1px
-    .inline-button
-      background transparent
-    .inline-button-wrap + .inline-button-wrap
-      padding-left 0
+      border-color var(--primary-border-on-light-background)
+      color var(--primary-on-light-background) !important
+      .icon
+        filter none
+  &.is-background-dark
+    color var(--primary-on-dark-background)
+    button
+      border-color var(--primary-border-on-dark-background)
+      color var(--primary-on-dark-background) !important
+      .icon
+        filter invert()
+  &:hover
+    box-shadow var(--hover-shadow)
+  &:active
+    box-shadow var(--active-shadow)
+  // buttons
+  .inline-button-wrap
+    display inline-block
+  button
+    width initial
+    min-width 20px
+    // background transparent
+    cursor pointer
+    .icon.left-arrow
+      vertical-align 0
+      margin-left 3px
+    .icon.add
+      width 8px
+      margin-left 1px
+  .inline-button
+    background transparent
+  .inline-button-wrap + .inline-button-wrap
+    padding-left 0
 
-    .locking-frame
-      position absolute
-      z-index -1
-      pointer-events none
+  .locking-frame
+    position absolute
+    z-index -1
+    pointer-events none
 
 </style>

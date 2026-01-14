@@ -855,9 +855,15 @@ const clearFocus = () => {
   --header-font var(--header-font-0)
   z-index 1
   border-radius 4px
+  border-bottom-right-radius var(--entity-radius)
   display flex
   align-items center
   width max-content
+  pointer-events all
+  position absolute
+  cursor pointer
+  word-break break-word
+  color var(--primary-on-light-background)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2
@@ -895,12 +901,6 @@ const clearFocus = () => {
       font-size 52px
     h3
       font-size 36px
-  pointer-events all
-  position absolute
-  cursor pointer
-  border-bottom-right-radius var(--entity-radius)
-  word-break break-word
-  color var(--primary-on-light-background)
   &:hover
     box-shadow var(--hover-shadow)
   &:active

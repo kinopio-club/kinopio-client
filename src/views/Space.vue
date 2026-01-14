@@ -904,9 +904,11 @@ const updateMetaRSSFeed = () => {
     #drawing-strokes-background
     ItemsLocked
     #box-backgrounds
+    //- #list-backgrounds
     Boxes
     Connections
     #box-infos
+    #list-infos
     Cards
     Lines
     Lists
@@ -974,4 +976,13 @@ const updateMetaRSSFeed = () => {
     border-radius var(--entity-radius)
     position absolute
     z-index 0 !important
+
+#list-backgrounds,
+#list-infos
+  position absolute
+  .list-background
+    border-radius var(--entity-radius)
+    position absolute
+    z-index 0 !important
+
 </style>
