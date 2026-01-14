@@ -51,7 +51,7 @@ export const useListStore = defineStore('lists', {
 
     // init
 
-    initializeLists (lists) {
+    initializeLists (lists = []) {
       const byId = {}
       const allIds = []
       lists.forEach(list => {
@@ -61,7 +61,7 @@ export const useListStore = defineStore('lists', {
       this.byId = byId
       this.allIds = allIds
     },
-    initializeRemoteLists (remoteLists) {
+    initializeRemoteLists (remoteLists = []) {
       const localLists = utils.clone(this.getAllLists)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteLists, localLists)
       console.info('🎑 remote lists', { updateItems, addItems, removeItems })
