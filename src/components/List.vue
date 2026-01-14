@@ -205,12 +205,15 @@ const classes = computed(() => {
   //- teleport(to="#list-infos")
   .list-info
     .row
+      //- collapse/expand
       .inline-button-wrap
-        button.inline-button
-          span x
+        button.small-button.inline-button(title="Collapse/Expand")
+          img.icon.left-arrow(src="@/assets/right-arrow.svg")
+          span 0
+      //- add card
       .inline-button-wrap
-        button.inline-button
-          span +
+        button.small-button.inline-button(title="Add Card")
+          img.icon.add(src="@/assets/add.svg")
       span.name {{ props.list.name }}
 
   //- resize
@@ -237,7 +240,6 @@ const classes = computed(() => {
   min-width 70px
   min-height 200px
 
-  pointer-events all // TODO move to list-info only, allow painting inside list
   .list-info
     pointer-events all
     background-color pink !important
@@ -247,6 +249,16 @@ const classes = computed(() => {
     cursor pointer
     .inline-button-wrap
       display inline-block
+      button.inline-button
+        width initial
+        background transparent
+        cursor pointer
+        .icon.left-arrow
+          vertical-align 0
+          margin-left 3px
+        .icon.add
+          width 8px
+          margin-left 1px
     .inline-button-wrap + .inline-button-wrap
       padding-left 0
 </style>
