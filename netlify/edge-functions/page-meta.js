@@ -60,15 +60,12 @@ const pageTitle = (context, space) => {
 
 const pageJsonLD = (context, space) => {
   let items = space.cards.concat(space.boxes)
+  // sort by y then x for reading order (top-to-bottom, left-to-right)
+  items.sort((a, b) => a.y - b.y || a.x - b.x)
   items = items.map(item => {
     return {
       '@type': 'CreativeWork',
-      name: item.name,
-      position: {
-        '@type': 'Place',
-        x: item.x,
-        y: item.y
-      }
+      name: item.name
     }
   })
   let jsonLD = {
@@ -76,12 +73,9 @@ const pageJsonLD = (context, space) => {
     '@type': 'CreativeWork',
     name: pageTitle(context, space),
     description: space.description,
+    thumbnailUrl: space.previewImage,
     dateCreated: space.createdAt,
-    contentUrl: space.previewImage,
-    hasPart: {
-      '@type': 'ItemList',
-      itemListElement: items
-    }
+    hasPart: items
   }
   jsonLD = JSON.stringify(jsonLD)
   return jsonLD

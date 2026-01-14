@@ -81,7 +81,7 @@ export default async ({ context, title, description, previewImage, jsonLD, canon
     if (jsonLD) {
       transformations.push({
         selector: 'script[type="application/ld+json"]',
-        transform: element => element.setAttribute('text', jsonLD)
+        transform: element => element.setInnerContent(jsonLD)
       })
     }
     // canonical
