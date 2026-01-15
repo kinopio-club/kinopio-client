@@ -310,7 +310,7 @@ const startResizing = (event) => {
   broadcastStore.update({ updates, action: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
-const resizeColorClass = computed(() => {
+const resizeButtonColorClass = computed(() => {
   const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
   return [colorClass]
 })
@@ -809,7 +809,7 @@ const clearFocus = () => {
       button.inline-button(
         tabindex="-1"
       )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 </template>
 
 <style lang="stylus">
