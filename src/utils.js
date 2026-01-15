@@ -1043,6 +1043,16 @@ export default {
     box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
+  listElementDimensions (list) {
+    if (!list) { return }
+    const element = this.listElementFromId(list.id)
+    if (!element) { return }
+    // list.shouldRender = element.dataset.shouldRender
+    list.x = parseInt(element.dataset.x)
+    list.y = parseInt(element.dataset.y)
+    list.width = parseInt(element.dataset.width)
+    return list
+  },
   clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
@@ -1152,7 +1162,7 @@ export default {
   // lists
 
   listElementFromId (listId) {
-    return document.querySelector(`.list-info[data-list-id="${listId}"]`)
+    return document.querySelector(`.list[data-list-id="${listId}"]`)
   },
 
   // rect

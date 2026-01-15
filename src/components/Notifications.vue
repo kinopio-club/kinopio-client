@@ -322,7 +322,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   globalStore.multipleSelectedItemsToLoad(items)
   changeSpace(spaceId)
 }
-const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
 const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle

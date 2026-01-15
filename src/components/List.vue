@@ -21,7 +21,7 @@ const broadcastStore = useBroadcastStore()
 
 // let unsubscribes
 
-const borderWidth = 2
+const minListSize = 200
 // locking
 // long press to touch drag
 const lockingPreDuration = 100 // ms
@@ -334,7 +334,7 @@ const colorIsDark = computed(() => {
 // })
 const listStyles = computed(() => {
   const { x, y, z } = props.list
-  const width = props.list.resizeWidth || props.list.width
+  const width = props.list.resizeWidth
   const styles = {
     left: x + 'px',
     top: y + 'px',
@@ -377,7 +377,7 @@ const infoClasses = computed(() => {
 })
 const infoStyles = computed(() => {
   const { x, y } = props.list
-  const width = props.list.resizeWidth || props.list.width
+  const width = props.list.resizeWidth
   const styles = {
     left: x + 'px',
     top: y + 'px',
@@ -403,7 +403,6 @@ const buttonClasses = computed(() => {
 
 const toggleIsCollapsed = () => {
   const value = !props.list.isCollapsed
-  console.log('toggleIsCollapsed', value)
   listStore.updateList({
     id: props.list.id,
     isCollapsed: value
@@ -445,6 +444,13 @@ const resizeButtonColorClass = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: color.value })
   return [classes]
 })
+const resetWidth = () => {
+  listStore.updateList({
+    id: props.list.id,
+    resizeWidth: minListSize
+  })
+  // ??? TODO update computed height
+}
 
 </script>
 
@@ -454,6 +460,8 @@ const resizeButtonColorClass = computed(() => {
   :data-list-id="list.id"
   :data-x="list.x"
   :data-y="list.y"
+  :data-width="list.resizeWidth"
+  :data-is-collapsed="list.isCollapsed"
   :style="listStyles"
   :class="classes"
   ref="listElement"
@@ -496,6 +504,7 @@ const resizeButtonColorClass = computed(() => {
               @pointerleave="updateIsHover(false)"
               @mousedown.left="startResizing"
               @touchstart="startResizing"
+              @dblclick="resetWidth"
             )
             button.inline-button(
               tabindex="-1"
@@ -503,8 +512,9 @@ const resizeButtonColorClass = computed(() => {
               img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 
   teleport(to="#list-contents")
-    .list-contents(
+    .list-content(
       v-if="!props.list.isCollapsed"
+      :data-list-id="list.id"
       :style="listStyles"
       :class="classes"
     )
@@ -516,6 +526,7 @@ const resizeButtonColorClass = computed(() => {
             @pointerleave="updateIsHover(false)"
             @mousedown.left="startResizing"
             @touchstart="startResizing"
+            @dblclick="resetWidth"
           )
           button.inline-button(
             tabindex="-1"
@@ -525,10 +536,13 @@ const resizeButtonColorClass = computed(() => {
 </template>
 
 <style lang="stylus">
+:root
+  --min-list-size 200px // matches minListSize var
+
 .list
   position absolute
   border-radius var(--entity-radius)
-  min-width 70px
+  min-width var(--min-list-size)
   // resize
   .bottom-button-wrap
     .inline-button-wrap
@@ -539,7 +553,8 @@ const resizeButtonColorClass = computed(() => {
         top 0
         left 0
 
-.list-contents
+.list-content
+  min-width var(--min-list-size)
   position absolute
   margin-top 34px
   padding 8px
@@ -564,6 +579,7 @@ const resizeButtonColorClass = computed(() => {
     z-index 1
 
 .list-info
+  min-width var(--min-list-size)
   pointer-events all
   border-radius var(--entity-radius)
   cursor pointer
@@ -624,12 +640,11 @@ const resizeButtonColorClass = computed(() => {
       display inline-block
       width calc(100% - 85px)
       vertical-align -2px
-  .bottom-button-wrap // resizer when list is collapsed
+  .bottom-button-wrap // resize when list is collapsed
     right -12px
 
   .locking-frame
     position absolute
     z-index -1
     pointer-events none
-
 </style>

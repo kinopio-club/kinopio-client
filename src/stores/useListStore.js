@@ -40,6 +40,12 @@ export const useListStore = defineStore('lists', {
       const lists = this.getAllLists
       const colors = lists.map(list => list.color)
       return colors
+    },
+    getListsResizing () {
+      const globalStore = useGlobalStore()
+      const ids = globalStore.currentUserIsResizingListIds
+      const lists = ids.map(id => this.byId[id])
+      return lists
     }
   },
 
@@ -61,9 +67,8 @@ export const useListStore = defineStore('lists', {
           x: 300,
           y: 100,
           z: 0,
-          width: consts.normalCardMaxWidth,
+          resizeWidth: consts.normalCardMaxWidth,
           isCollapsed: false
-          // resizeWidth: null
           // spaceId
           // userId
         }
@@ -112,7 +117,8 @@ export const useListStore = defineStore('lists', {
       this.byId[list.id] = list
       this.allIds.push(list.id)
     },
-    async createList (list = {}) {
+    async createList (list = {}, isResizing) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
@@ -121,6 +127,10 @@ export const useListStore = defineStore('lists', {
       this.addListToState(list)
       if (list.isFromBroadcast) { return }
       broadcastStore.update({ updates: list, store: 'listStore', action: 'addListToState' })
+      if (isResizing) {
+        globalStore.currentUserIsResizingList = true
+        globalStore.currentUserIsResizingListIds = [list.id]
+      }
       await apiStore.addToQueue({ name: 'createList', body: list })
     },
 
@@ -153,7 +163,6 @@ export const useListStore = defineStore('lists', {
     moveLists ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
-      // const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       if (globalStore.shouldSnapToGrid) {
@@ -186,6 +195,53 @@ export const useListStore = defineStore('lists', {
       globalStore.listsWereDragged = true
       // lists = lists.map(list => this.getList(list.id))
       // boxStore.updateBoxSnapGuides({ items: lists, isLists: true, cursor: endCursor })
+    },
+
+    // position
+
+    // clearAllListsZ () {
+    //   const lists = this.getAllLists
+    //   const updates = lists.map(list => {
+    //     return {
+    //       id: list.id,
+    //       z: 0
+    //     }
+    //   })
+    //   this.updateLists(updates)
+    // },
+    // incrementListZ (id) {
+    //   // highest z
+    //   const lists = this.getAllLists
+    //   const maxInt = Number.MAX_SAFE_INTEGER - 1000
+    //   let highestZ = utils.highestItemZ(lists)
+    //   if (highestZ > maxInt) {
+    //     this.clearAllListsZ()
+    //     highestZ = 1
+    //   }
+    //   const update = {
+    //     id,
+    //     z: highestZ + 1
+    //   }
+    //   this.updateList(update)
+    // },
+    resizeLists (ids, delta) {
+      const globalStore = useGlobalStore()
+      const updates = []
+      ids.forEach(id => {
+        const rect = utils.listElementDimensions({ id })
+        let width = rect.width
+        width = width + delta.x
+        const list = { id, resizeWidth: width }
+        console.log(width)
+        updates.push(list)
+        // this.updatePageSize(list)
+        globalStore.currentUserIsResizingList = true
+        globalStore.currentUserIsResizingListIds = [list.id]
+        // ??needed? update list computed height
+      })
+      const connectionStore = useConnectionStore()
+      connectionStore.updateConnectionPathsByItemIds(ids)
+      this.updateLists(updates)
     },
 
     // list details

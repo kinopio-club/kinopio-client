@@ -236,6 +236,7 @@ const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
+const isResizingList = computed(() => globalStore.currentUserIsResizingList)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -502,6 +503,87 @@ const updateSizeForNewBox = (boxId) => {
   boxStore.updateBox(update)
 }
 
+// lists
+
+// const addList = (event) => {
+//   let position = utils.cursorPositionInSpace(event)
+//   if (utils.isPositionOutsideOfSpace(position)) {
+//     position = utils.cursorPositionInPage(event)
+//     globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+//     return
+//   }
+//   userStore.notifyReadOnly(position)
+//   const shouldPrevent = !userStore.getUserCanEditSpace
+//   if (shouldPrevent) {
+//     globalStore.updateCurrentUserToolbar('card')
+//     return
+//   }
+//   const isResizing = true
+//   listStore.createList(position, isResizing)
+//   globalStore.currentListIsNew = true
+//   event.preventDefault() // allows dragging lists without scrolling on touch
+// }
+const resizeLists = async () => {
+  if (!prevCursor) { return }
+  const lists = listStore.getListsResizing
+  const ids = lists.map(list => list.id)
+
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  let delta = {
+    x: endCursor.x - prevCursor.x,
+    y: endCursor.y - prevCursor.y
+  }
+  delta = {
+    x: Math.round(delta.x * zoom),
+    y: Math.round(delta.y * zoom)
+  }
+  listStore.resizeLists(ids, delta)
+  await nextTick()
+  globalStore.updatePageSizes()
+}
+const stopResizingLists = () => {
+  if (!globalStore.currentUserIsResizingList) { return }
+  globalStore.currentUserIsResizingList = false
+  globalStore.updateCurrentUserToolbar('card')
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingLists' })
+  // globalStore.checkIfItemShouldIncreasePageSize(lists[0])
+}
+const checkIfShouldExpandLists = (event) => {
+  if (!globalStore.cardsWereDragged && !globalStore.listsWereDragged) { return }
+  if (event.shiftKey) { return }
+  const snapGuides = listStore.listSnapGuides
+  if (!snapGuides.length) { return }
+  snapGuides.forEach(snapGuide => {
+    if (!globalStore.notifyListSnappingIsReady) { return }
+    listStore.updateListSnapToSize(snapGuide)
+  })
+}
+const unselectCardsInDraggedList = () => {
+  if (!globalStore.currentDraggingListId) { return }
+  if (globalStore.multipleListsSelectedIds.length) { return }
+  globalStore.clearMultipleSelected()
+}
+const showListDetails = async (event) => {
+  if (!globalStore.currentListIsNew) { return }
+  if (utils.isMobile()) { return }
+  const listId = globalStore.currentUserIsResizingListIds[0]
+  await nextTick()
+  await nextTick()
+  updateSizeForNewList(listId)
+  globalStore.updateListDetailsIsVisibleForListId(listId)
+}
+const updateSizeForNewList = (listId) => {
+  const list = listStore.getList(listId)
+  const isMinSize = list.resizeWidth === consts.minListSize && list.resizeHeight === consts.minListSize
+  if (!isMinSize) { return }
+  const update = {
+    id: list.id,
+    resizeWidth: consts.defaultListWidth,
+    resizeHeight: consts.defaultListHeight
+  }
+  listStore.updateList(update)
+}
+
 // drag items
 
 const dragItemsOnNextTick = async () => {
@@ -690,6 +772,8 @@ const interact = (event) => {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
+  } else if (isResizingList.value) {
+    resizeLists()
   } else if (isDraggingLine.value || isDraggingList.value) {
     dragItems()
   } else if (isResizingCardDetails.value) {
@@ -775,13 +859,13 @@ const stopInteractions = async (event) => {
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
+  stopResizingLists()
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
   globalStore.currentUserIsDraggingList = false
-  console.log('🍇🍇🍇')
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false

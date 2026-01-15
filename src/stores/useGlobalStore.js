@@ -176,6 +176,7 @@ export const useGlobalStore = defineStore('global', {
     listDetailsIsVisibleForListId: '',
     multipleListsSelectedIds: [],
     remoteListDetailsVisible: [],
+    currentListIsNew: false,
     // dragging lists
     currentDraggingListId: '',
     listsWereDragged: false,
