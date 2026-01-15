@@ -398,6 +398,22 @@ const buttonClasses = computed(() => {
   return classes
 // :class="{'is-light': isLightInDarkTheme, 'is-dark': isDarkInLightTheme}")
 })
+
+// actions
+
+const toggleIsCollapsed = () => {
+  const value = !props.list.isCollapsed
+  console.log('toggleIsCollapsed', value)
+  listStore.updateList({
+    id: props.list.id,
+    isCollapsed: value
+  })
+}
+const addCard = () => {
+  // TODO get prepended list pos
+  // create card w listId and listPosition
+  console.log('addCard', props.list.id)
+}
 </script>
 
 <template lang="pug">
@@ -433,7 +449,8 @@ const buttonClasses = computed(() => {
         //- collapse/expand
         .inline-button-wrap
           button.small-button.inline-button(title="Collapse/Expand" @click.left.stop="toggleIsCollapsed")
-            img.icon.left-arrow(src="@/assets/right-arrow.svg")
+            img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
+            img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
             span {{ listCards.length }}
         //- add card
         .inline-button-wrap
@@ -443,6 +460,7 @@ const buttonClasses = computed(() => {
 
   teleport(to="#list-contents")
     .list-contents(
+      v-if="!props.list.isCollapsed"
       :style="listStyles"
       :class="classes"
     )
@@ -533,9 +551,14 @@ const buttonClasses = computed(() => {
     width initial
     min-width 20px
     cursor pointer
-    .icon.left-arrow
-      vertical-align 0
-      margin-left 3px
+    .icon.down-arrow
+      vertical-align 1px
+      margin 0
+    .icon.right-arrow
+      transform none
+      vertical-align 1px
+      margin-left 5px
+      margin-right 1px
     .icon.add
       width 8px
       margin-left 1px
@@ -550,7 +573,7 @@ const buttonClasses = computed(() => {
       overflow hidden
       text-overflow ellipsis
       display inline-block
-      width calc(100% - 75px)
+      width calc(100% - 85px)
       vertical-align -2px
 
   .locking-frame

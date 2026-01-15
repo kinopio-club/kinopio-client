@@ -148,7 +148,7 @@ export const useListStore = defineStore('lists', {
       await cache.updateSpace('lists', this.getAllLists, spaceStore.id)
     },
     updateList (update) {
-      this.updatedLists([update])
+      this.updateLists([update])
     },
     moveLists ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
