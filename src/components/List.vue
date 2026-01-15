@@ -414,6 +414,38 @@ const addCard = () => {
   // create card w listId and listPosition
   console.log('addCard', props.list.id)
 }
+
+// resize
+
+const resizeIsVisible = computed(() => {
+  if (!canEditSpace.value) { return }
+  if (userStore.getUserIsCommentOnly) { return }
+  return true
+})
+const startResizing = (event) => {
+  if (!canEditSpace.value) { return }
+  if (utils.isMultiTouch(event)) { return }
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsResizingList = true
+  globalStore.preventMultipleSelectedActionsIsVisible = true
+  let listIds = [props.list.id]
+  const multipleListsSelectedIds = globalStore.multipleListsSelectedIds
+  if (multipleListsSelectedIds.length) {
+    listIds = multipleListsSelectedIds
+  }
+  globalStore.currentUserIsResizingListIds = listIds
+  const updates = {
+    userId: userStore.id,
+    listIds
+  }
+  broadcastStore.update({ updates, action: 'updateRemoteUserResizingLists' })
+  event.preventDefault() // allows resizing list without scrolling on mobile
+}
+const resizeButtonColorClass = computed(() => {
+  const classes = utils.colorClasses({ backgroundColor: color.value })
+  return [classes]
+})
+
 </script>
 
 <template lang="pug">
@@ -446,9 +478,9 @@ const addCard = () => {
     )
       .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
       .row
-        //- collapse/expand
+        //- toggle collapse
         .inline-button-wrap
-          button.small-button.inline-button(title="Collapse/Expand" @click.left.stop="toggleIsCollapsed")
+          button.small-button.inline-button(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
             img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
             span {{ listCards.length }}
@@ -457,6 +489,18 @@ const addCard = () => {
           button.small-button.inline-button(title="Add Card" @click.left.stop="addCard")
             img.icon.add(src="@/assets/add.svg")
         span.name(:title="props.list.name") {{ props.list.name }}
+        //- resize when list is collapsed
+        .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+          .inline-button-wrap(
+              @pointerover="updateIsHover(true)"
+              @pointerleave="updateIsHover(false)"
+              @mousedown.left="startResizing"
+              @touchstart="startResizing"
+            )
+            button.inline-button(
+              tabindex="-1"
+            )
+              img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 
   teleport(to="#list-contents")
     .list-contents(
@@ -465,20 +509,18 @@ const addCard = () => {
       :class="classes"
     )
       .placeholder(v-if="!listCards.length")
-
-  //- resize
-  //- .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
-  //-   .inline-button-wrap(
-  //-       @pointerover="updateIsHover(true)"
-  //-       @pointerleave="updateIsHover(false)"
-  //-       @mousedown.left="startResizing"
-  //-       @touchstart="startResizing"
-  //-       @dblclick="shrink"
-  //-     )
-  //-     button.inline-button(
-  //-       tabindex="-1"
-  //-     )
-  //-       img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+      //- resize when list is not collapsed
+      .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+        .inline-button-wrap(
+            @pointerover="updateIsHover(true)"
+            @pointerleave="updateIsHover(false)"
+            @mousedown.left="startResizing"
+            @touchstart="startResizing"
+          )
+          button.inline-button(
+            tabindex="-1"
+          )
+            img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 
 </template>
 
@@ -487,12 +529,19 @@ const addCard = () => {
   position absolute
   border-radius var(--entity-radius)
   min-width 70px
-  // min-height 200px
+  // resize
+  .bottom-button-wrap
+    .inline-button-wrap
+      cursor nwse-resize
+      button
+        cursor nwse-resize
+      .resize-icon
+        top 0
+        left 0
 
 .list-contents
   position absolute
   margin-top 34px
-  // background-color pink !important
   padding 8px
   padding-top 0
   border-radius var(--entity-radius)
@@ -575,6 +624,8 @@ const addCard = () => {
       display inline-block
       width calc(100% - 85px)
       vertical-align -2px
+  .bottom-button-wrap // resizer when list is collapsed
+    right -12px
 
   .locking-frame
     position absolute
