@@ -906,7 +906,7 @@ const updateMetaRSSFeed = () => {
     #drawing-strokes-background
     ItemsLocked
     #box-backgrounds
-    //- #list-contents
+    #list-contents
     Boxes
     Connections
     #box-infos
@@ -979,11 +979,9 @@ const updateMetaRSSFeed = () => {
     position absolute
     z-index 0 !important
 
-#list-infos
+#list-infos,
+#list-contents
   position absolute
-  // .list-contents
-  //   border-radius var(--entity-radius)
-  //   position absolute
-  //   z-index 0 !important
-
+#list-contents
+  z-index 0
 </style>

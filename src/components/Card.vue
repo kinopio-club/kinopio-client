@@ -1662,7 +1662,21 @@ const shouldNotStick = computed(() => {
   if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
-  return userIsConnecting || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard || isLocked.value
+  return (
+    userIsConnecting ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsResizingBox ||
+    currentUserIsPanning ||
+    currentCardDetailsIsVisible.value ||
+    isRemoteCardDetailsVisible.value ||
+    isRemoteCardDragging.value ||
+    currentCardIsBeingDragged.value ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsTiltingCard ||
+    isLocked.value ||
+    globalStore.currentUserIsDraggingList ||
+    globalStore.currentUserIsResizingList
+  )
 })
 const updateShouldNotStickMap = () => {
   stickyMap = []

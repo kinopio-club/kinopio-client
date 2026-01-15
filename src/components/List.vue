@@ -410,9 +410,6 @@ const buttonClasses = computed(() => {
   :class="classes"
   ref="listElement"
 )
-  //- teleport(to="#list-backgrounds")
-    //- .list-background
-
   teleport(to="#list-infos")
     .list-info(
       :data-list-id="list.id"
@@ -435,21 +432,22 @@ const buttonClasses = computed(() => {
       .row
         //- collapse/expand
         .inline-button-wrap
-          button.small-button.inline-button(title="Collapse/Expand")
+          button.small-button.inline-button(title="Collapse/Expand" @click.left.stop="toggleIsCollapsed")
             img.icon.left-arrow(src="@/assets/right-arrow.svg")
             span {{ listCards.length }}
         //- add card
         .inline-button-wrap
-          button.small-button.inline-button(title="Add Card")
+          button.small-button.inline-button(title="Add Card" @click.left.stop="addCard")
             img.icon.add(src="@/assets/add.svg")
         span.name(:title="props.list.name") {{ props.list.name }}
 
-  .list-contents(
-    :style="listStyles"
-    :class="classes"
-  )
-    .placeholder
-      span -------
+  teleport(to="#list-contents")
+    .list-contents(
+      :style="listStyles"
+      :class="classes"
+    )
+      .placeholder
+        span -------
 
   //- resize
   //- .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
@@ -473,6 +471,24 @@ const buttonClasses = computed(() => {
   border-radius var(--entity-radius)
   min-width 70px
   // min-height 200px
+
+.list-contents
+  position absolute
+  margin-top 34px
+  // background-color pink !important
+  padding 8px
+  padding-top 0
+  border-radius var(--entity-radius)
+  border-top-left-radius 0
+  border-top-right-radius 0
+  .placeholder
+    background-color var(--light-shadow)
+    border-radius var(--entity-radius)
+    box-shadow var(--button-active-inset-shadow)
+    padding 8px
+    span
+      pointer-events all
+      color white
   &.hover
     box-shadow var(--hover-shadow)
   &.active
@@ -480,31 +496,18 @@ const buttonClasses = computed(() => {
     transition none
     z-index 1
 
-  .list-contents
-    margin-top 34px
-    // background-color pink !important
-    padding 8px
-    padding-top 0
-    border-radius var(--entity-radius)
-    .placeholder
-      background-color var(--light-shadow)
-      border-radius var(--entity-radius)
-      box-shadow var(--button-active-inset-shadow)
-      padding 8px
-      span
-        pointer-events all
-        color white
-
 .list-info
   pointer-events all
   border-radius var(--entity-radius)
   cursor pointer
   z-index 1
-  border-radius 4px
   display flex
   align-items center
   width max-content
   position absolute
+  border-radius var(--entity-radius)
+  border-bottom-left-radius 0
+  border-bottom-right-radius 0
   &.is-background-light
     color var(--primary-on-light-background)
     button
