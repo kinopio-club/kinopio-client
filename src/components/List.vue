@@ -639,7 +639,7 @@ const resetWidth = () => {
       text-overflow ellipsis
       display inline-block
       width calc(100% - 85px)
-      vertical-align -2px
+      vertical-align -3px
   .bottom-button-wrap // resize when list is collapsed
     right -12px
 
