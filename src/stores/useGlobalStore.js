@@ -312,7 +312,7 @@ export const useGlobalStore = defineStore('global', {
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    snapGuideLinesOrigin: {}
+    axisGuideLinesOrigin: {}
   }),
   getters: {
     getGlobalAllState () {

@@ -34,7 +34,7 @@ import Lines from '@/components/Lines.vue'
 import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
-import SnapGuideLines from '@/components/SnapGuideLines.vue'
+import AxisGuideLines from '@/components/AxisGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
@@ -749,7 +749,7 @@ const updateShouldSnapToGrid = (event) => {
   // update snap guide line origin
   if (!globalStore.shouldSnapToGrid && shouldSnap) {
     const item = state.currentInteractingItem
-    globalStore.snapGuideLinesOrigin = {
+    globalStore.axisGuideLinesOrigin = {
       x: item.x,
       y: item.y
     }
@@ -1011,7 +1011,7 @@ const updateMetaRSSFeed = () => {
     ScrollAtEdgesHandler
     NotificationsWithPosition(layer="space")
     BoxSelecting
-    SnapGuideLines
+    AxisGuideLines
   aside
     PaintSelectCanvas
     DrawingHandler

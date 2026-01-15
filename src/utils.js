@@ -912,11 +912,14 @@ export default {
     if (!item) { return }
     const card = this.cardElementFromId(item.id)
     const box = this.boxElementFromId(item.id)
+    const list = this.listElementFromId(item.id)
     let rect
     if (card) {
       rect = this.cardElementDimensions(item)
     } else if (box) {
       rect = this.boxElementDimensions(item)
+    } else if (list) {
+      rect = this.listElementDimensions(item)
     }
     return rect
   },
