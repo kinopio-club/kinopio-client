@@ -446,8 +446,7 @@ const buttonClasses = computed(() => {
       :style="listStyles"
       :class="classes"
     )
-      .placeholder
-        span -------
+      .placeholder(v-if="!listCards.length")
 
   //- resize
   //- .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
@@ -486,6 +485,7 @@ const buttonClasses = computed(() => {
     border-radius var(--entity-radius)
     box-shadow var(--button-active-inset-shadow)
     padding 8px
+    height 33px // shortest card height
     span
       pointer-events all
       color white
