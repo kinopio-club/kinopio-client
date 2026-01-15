@@ -491,7 +491,9 @@ aside.notifications(@click.left="closeAllDialogs")
           img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
-    p Error saving changes to server
+    p
+      img.icon.offline(src="@/assets/offline.svg")
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
