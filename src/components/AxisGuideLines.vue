@@ -12,20 +12,20 @@ const spaceStore = useSpaceStore()
 const isVisible = computed(() => globalStore.shouldSnapToGrid)
 const origin = computed(() => {
   return {
-    x: globalStore.snapGuideLinesOrigin.x + 'px',
-    y: globalStore.snapGuideLinesOrigin.y + 'px'
+    x: globalStore.axisGuideLinesOrigin.x + 'px',
+    y: globalStore.axisGuideLinesOrigin.y + 'px'
   }
 })
 const color = computed(() => userStore.color)
 </script>
 
 <template lang="pug">
-.snap-guide-lines.x-line(v-if="isVisible" :style="{ top: origin.y, background: color }")
-.snap-guide-lines.y-line(v-if="isVisible" :style="{ left: origin.x, background: color }")
+.axis-guide-lines.x-line(v-if="isVisible" :style="{ top: origin.y, background: color }")
+.axis-guide-lines.y-line(v-if="isVisible" :style="{ left: origin.x, background: color }")
 </template>
 
 <style lang="stylus">
-.snap-guide-lines
+.axis-guide-lines
   pointer-events none
   position absolute
   &.x-line

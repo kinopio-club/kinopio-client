@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -10,6 +11,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
+const cardStore = useCardStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -37,7 +39,9 @@ onBeforeUnmount(() => {
 })
 
 const props = defineProps({
-  box: Object
+  box: Object,
+  card: Object,
+  list: Object
 })
 
 const state = reactive({
@@ -52,31 +56,31 @@ watch(() => state.snapStatus, (value, prevValue) => {
   }
 })
 
-const currentBoxIsSelected = computed(() => {
-  const selected = globalStore.multipleBoxesSelectedIds
-  return selected.find(id => props.box.id === id)
-})
-const currentBoxIsBeingDragged = computed(() => {
-  const isDragging = globalStore.currentUserIsDraggingBox
-  const isCurrent = globalStore.currentDraggingBoxId === props.box.id
-  return isDragging && (isCurrent || currentBoxIsSelected.value)
-})
-const otherBoxes = computed(() => {
-  return boxStore.getBoxesSelectableInViewport()
-})
+const item = computed(() => props.box || props.card || props.list)
 
 // is snapping
 
-const currentBoxSnapGuide = computed(() => {
-  const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
-  if (isMultipleBoxesSelectedIds) { return }
-  const guides = boxStore.boxSnapGuides
+const currentSnapGuide = computed(() => {
+  let guides
+  // dragging box
+  if (props.box) {
+    if (cardStore.cardSnapGuides.length) { return }
+    const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
+    if (isMultipleBoxesSelectedIds) { return }
+    guides = boxStore.boxSnapGuides
+  // dragging card
+  } else if (props.card) {
+    const isMultipleCardsSelectedIds = globalStore.multipleCardsSelectedIds.length > 1
+    if (isMultipleCardsSelectedIds) { return }
+    guides = cardStore.cardSnapGuides
+  }
+  // ?? else if (props.list) remove all list mentions if/bc lists are only targets, not dragged items
   return guides.find(guide => {
-    const isTargetBox = guide.target.id === props.box.id
-    return isTargetBox
+    const isTargetItem = guide.target.id === item.value.id
+    return isTargetItem
   })
 })
-watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
+watch(() => currentSnapGuide.value, (value, prevValue) => {
   if (!value) {
     state.snapStatus = null
   }
@@ -84,15 +88,14 @@ watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
 
 // styles
 
-const userColor = computed(() => userStore.color)
 const snapGuideSide = computed(() => {
   const isDraggingItem = globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingCard
   if (!isDraggingItem) { return }
-  const snapGuide = currentBoxSnapGuide.value
+  const snapGuide = currentSnapGuide.value
   if (!snapGuide) { return null }
-  if (snapGuide?.target.id === props.box.id) {
+  if (snapGuide?.target.id === item.value.id) {
     return snapGuide.side
-  } else if (snapGuide?.origin.id === props.box.id) {
+  } else if (snapGuide?.origin.id === item.value.id) {
     return oppositeSide(snapGuide.side)
   } else {
     return null
@@ -113,13 +116,19 @@ const oppositeSide = (side) => {
   }
 }
 const updateRect = () => {
-  state.rect = utils.boxElementDimensions({ id: props.box.id })
+  if (props.card) {
+    state.rect = utils.cardElementDimensions(props.card)
+  } else if (props.box) {
+    state.rect = utils.boxElementDimensions(props.box)
+  } else if (props.list) {
+    state.rect = utils.listElementDimensions(props.list)
+  }
 }
 const snapGuideStyles = computed(() => {
   const offset = 4
   const styles = {}
   const rect = state.rect
-  styles.background = props.box.color
+  styles.background = item.value.color || item.value.backgroundColor || userStore.color
   // left
   if (snapGuideSide.value === 'left') {
     styles.height = rect.height + 'px'
@@ -146,6 +155,17 @@ const snapGuideStyles = computed(() => {
   }
   return styles
 })
+const snapGuideClasses = computed(() => {
+  const value = [state.snapStatus]
+  if (props.box) {
+    value.push('is-box')
+  } else if (props.card) {
+    value.push('is-card')
+  } else if (props.list) {
+    value.push('is-list')
+  }
+  return value
+})
 
 // waiting to snap
 
@@ -168,13 +188,13 @@ const waitingAnimationFrame = (timestamp) => {
   if (!waitingStartTime) {
     waitingStartTime = timestamp
   }
-  const snapGuide = currentBoxSnapGuide.value
+  const snapGuide = currentSnapGuide.value
   if (!snapGuide) {
     cancelWaitingAnimationFrame()
     return
   }
   const elaspedTime = timestamp - waitingStartTime
-  const percentComplete = (elaspedTime / consts.boxSnapGuideWaitingDuration) // between 0 and 1
+  const percentComplete = (elaspedTime / consts.itemSnapGuideWaitingDuration) // between 0 and 1
   updateRect()
   // waiting
   if (percentComplete < 1) {
@@ -182,7 +202,7 @@ const waitingAnimationFrame = (timestamp) => {
     window.requestAnimationFrame(waitingAnimationFrame)
   // complete
   } else {
-    console.info('🔒🐢 boxSnapGuide waitingAnimationFrame ready')
+    console.info('🔒🐢 itemSnapGuide waitingAnimationFrame ready')
     state.snapStatus = 'ready'
     window.requestAnimationFrame(waitingAnimationFrame)
   }
@@ -194,17 +214,19 @@ const waitingAnimationFrame = (timestamp) => {
 </script>
 
 <template lang="pug">
-.box-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="state.snapStatus")
-.box-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="state.snapStatus")
-.box-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="state.snapStatus")
-.box-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="state.snapStatus")
+.item-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="snapGuideClasses")
+.item-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="snapGuideClasses")
+.item-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="snapGuideClasses")
+.item-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="snapGuideClasses")
 </template>
 
 <style lang="stylus">
-.box-snap-guide
+.item-snap-guide
   --snap-guide-width 6px
-  --snap-guide-waiting-duration 0.1s // same as consts.boxSnapGuideWaitingDuration ms
+  --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
   --snap-guide-ready-duration 0.4s
+  &.is-card
+    --snap-guide-width 10px
   position absolute
   &.left
     left calc(-1 * var(--snap-guide-width))

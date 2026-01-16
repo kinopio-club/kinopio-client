@@ -1460,6 +1460,7 @@ const showCardDetails = (event) => {
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
   if (globalStore.shouldSnapToGrid) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
@@ -1662,7 +1663,21 @@ const shouldNotStick = computed(() => {
   if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
-  return userIsConnecting || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard || isLocked.value
+  return (
+    userIsConnecting ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsResizingBox ||
+    currentUserIsPanning ||
+    currentCardDetailsIsVisible.value ||
+    isRemoteCardDetailsVisible.value ||
+    isRemoteCardDragging.value ||
+    currentCardIsBeingDragged.value ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsTiltingCard ||
+    isLocked.value ||
+    globalStore.currentUserIsDraggingList ||
+    globalStore.currentUserIsResizingList
+  )
 })
 const updateShouldNotStickMap = () => {
   stickyMap = []

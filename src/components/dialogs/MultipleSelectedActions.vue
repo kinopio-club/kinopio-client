@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -25,6 +26,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -50,6 +52,7 @@ const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnec
 const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
 const multipleLinesSelectedIds = computed(() => globalStore.multipleLinesSelectedIds)
+const multipleListsSelectedIds = computed(() => globalStore.multipleListsSelectedIds)
 
 const visible = computed(() => {
   const isSelectedItems = globalStore.getIsMultipleItemsSelected
@@ -102,8 +105,9 @@ const canEditAll = computed(() => {
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
   const lines = userStore.getUserIsSpaceMember
-  const all = cards && connections && boxes && lines
-  return { cards, connections, boxes, lines, all }
+  const lists = userStore.getUserIsSpaceMember
+  const all = cards && connections && boxes && lines && lists
+  return { cards, connections, boxes, lines, lists, all }
 })
 const multipleCardOrBoxesIsSelected = computed(() => {
   const cards = multipleCardsIsSelected.value
@@ -425,6 +429,7 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   }
   if (isSpaceMember.value) {
     lineStore.removeLines(multipleLinesSelectedIds.value)
+    listStore.removeLists(multipleListsSelectedIds.value)
   }
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()

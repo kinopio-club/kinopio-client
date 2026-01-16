@@ -504,16 +504,6 @@ export const useBoxStore = defineStore('boxes', {
           if (targetBox.id === item.id) { return }
           targetBox.width = targetBox.resizeWidth
           targetBox.height = targetBox.resizeHeight
-          const isBetweenTargetBoxPointsX = utils.isBetween({
-            value: item.x,
-            min: targetBox.x + snapThreshold,
-            max: targetBox.x + targetBox.width - snapThreshold
-          })
-          const isBetweenTargetBoxPointsY = utils.isBetween({
-            value: item.y,
-            min: targetBox.y + snapThreshold,
-            max: targetBox.y + targetBox.height - snapThreshold
-          })
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width

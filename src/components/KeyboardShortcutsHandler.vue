@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -22,6 +23,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
@@ -228,6 +230,11 @@ const handleShortcuts = (event) => {
     userStore.cycleDrawingBrushSize()
   // l
   } else if (key === 'l' && isSpaceScope) {
+    if (!canEditSpace) { return }
+    globalStore.toggleCurrentUserToolbar('list')
+  // -
+  } else if ((key === '-' || key === '–') && isSpaceScope) {
+    if (!canEditSpace) { return }
     const line = { y: currentCursorPosition.y }
     lineStore.createLine(line)
   }
@@ -343,7 +350,7 @@ const handleMouseDownEvents = (event) => {
   const isPanScope = checkIsPanScope(event)
   const toolbarIsBox = globalStore.getToolbarIsBox
   const isNotConnecting = !globalStore.currentUserIsDrawingConnection
-  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !globalStore.currentUserIsResizingBox
+  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !globalStore.currentUserIsResizingBox && globalStore.currentUserIsResizingList
   const userDisablePan = userStore.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
@@ -836,8 +843,12 @@ const selectAllItemsBelowCursor = (position) => {
   let lines = lineStore.getAllLines
   lines = lines.filter(line => (line.y * zoom) > position.y)
   const lineIds = lines.map(line => line.id)
+  // lists
+  let lists = listStore.getAllLists
+  lists = lists.filter(list => (list.y * zoom) > position.y)
+  const listIds = lists.map(list => list.id)
   // select
-  selectItemIds({ position, cardIds, boxIds, lineIds })
+  selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
 }
 const selectAllItemsAboveCursor = (position) => {
   let zoom
@@ -860,8 +871,12 @@ const selectAllItemsAboveCursor = (position) => {
   let lines = lineStore.getAllLines
   lines = lines.filter(line => (line.y * zoom) < position.y)
   const lineIds = lines.map(line => line.id)
+  // lists
+  let lists = listStore.getAllLists
+  lists = lists.filter(list => (list.y * zoom) < position.y)
+  const listIds = lists.map(list => list.id)
   // select
-  selectItemIds({ position, cardIds, boxIds, lineIds })
+  selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
 }
 const selectAllItemsRightOfCursor = (position) => {
   let zoom
@@ -882,7 +897,13 @@ const selectAllItemsRightOfCursor = (position) => {
     return (box.x * zoom) >= position.x
   })
   const boxIds = boxes.map(box => box.id)
-  selectItemIds({ position, cardIds, boxIds })
+  // lists
+  let lists = boxStore.getAllLists
+  lists = lists.filter(list => {
+    return (list.x * zoom) >= position.x
+  })
+  const listIds = lists.map(list => list.id)
+  selectItemIds({ position, cardIds, boxIds, listIds })
 }
 const selectAllItemsLeftOfCursor = (position) => {
   let zoom
@@ -903,24 +924,32 @@ const selectAllItemsLeftOfCursor = (position) => {
     return (box.x * zoom) <= position.x
   })
   const boxIds = boxes.map(box => box.id)
-  selectItemIds({ position, cardIds, boxIds })
+  // lists
+  let lists = boxStore.getAllLists
+  lists = lists.filter(list => {
+    return (list.x * zoom) <= position.x
+  })
+  const listIds = lists.map(list => list.id)
+  selectItemIds({ position, cardIds, boxIds, listIds })
 }
 
 // Select All Cards, Connections, and Boxes
 
-const selectItemIds = ({ position, cardIds, boxIds, lineIds }) => {
+const selectItemIds = ({ position, cardIds, boxIds, lineIds, listIds }) => {
   const preventMultipleSelectedActionsIsVisible = globalStore.preventMultipleSelectedActionsIsVisible
-  const isItemIds = Boolean(cardIds.length || boxIds.length || lineIds.length)
+  const isItemIds = Boolean(cardIds.length || boxIds.length || lineIds.length || listIds.length)
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     globalStore.updateMultipleCardsSelectedIds(cardIds)
     globalStore.updateMultipleBoxesSelectedIds(boxIds)
     globalStore.updateMultipleLinesSelectedIds(lineIds)
+    globalStore.updateMultipleListsSelectedIds(listIds)
   } else if (isItemIds) {
     globalStore.multipleSelectedActionsPosition = position
     globalStore.updateMultipleSelectedActionsIsVisible(true)
     globalStore.updateMultipleCardsSelectedIds(cardIds)
     globalStore.updateMultipleBoxesSelectedIds(boxIds)
     globalStore.updateMultipleLinesSelectedIds(lineIds)
+    globalStore.updateMultipleListsSelectedIds(listIds)
   } else {
     globalStore.updateMultipleSelectedActionsIsVisible(false)
   }

@@ -141,12 +141,17 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.box-icon(src="@/assets/line.svg")
             span Insert Line Divider
-          .badge.keyboard-shortcut L
+          .badge.keyboard-shortcut –
         .row
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Box Mode
           .badge.keyboard-shortcut B
+        .row
+          .badge.title
+            //- TODO img.icon.box-icon(src="@/assets/box.svg")
+            span Line Mode
+          .badge.keyboard-shortcut L
         .row
           .badge.title
             img.icon.pencil(src="@/assets/pencil.svg")

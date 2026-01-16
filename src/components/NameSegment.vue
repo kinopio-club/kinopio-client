@@ -282,6 +282,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       h2,
       h3,
       h4,
+      blockquote,
       em,
       strong
        color var(--primary-on-light-background)
@@ -295,6 +296,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       h2,
       h3,
       h4,
+      blockquote,
       em,
       strong
        color var(--primary-on-dark-background)

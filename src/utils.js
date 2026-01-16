@@ -912,11 +912,14 @@ export default {
     if (!item) { return }
     const card = this.cardElementFromId(item.id)
     const box = this.boxElementFromId(item.id)
+    const list = this.listElementFromId(item.id)
     let rect
     if (card) {
       rect = this.cardElementDimensions(item)
     } else if (box) {
       rect = this.boxElementDimensions(item)
+    } else if (list) {
+      rect = this.listElementDimensions(item)
     }
     return rect
   },
@@ -1043,6 +1046,16 @@ export default {
     box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
+  listElementDimensions (list) {
+    if (!list) { return }
+    const element = this.listElementFromId(list.id)
+    if (!element) { return }
+    // list.shouldRender = element.dataset.shouldRender
+    list.x = parseInt(element.dataset.x)
+    list.y = parseInt(element.dataset.y)
+    list.width = parseInt(element.dataset.width)
+    return list
+  },
   clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
@@ -1147,6 +1160,12 @@ export default {
 
   lineElementFromId (lineId) {
     return document.querySelector(`.line-info[data-line-id="${lineId}"]`)
+  },
+
+  // lists
+
+  listElementFromId (listId) {
+    return document.querySelector(`.list[data-list-id="${listId}"]`)
   },
 
   // rect
@@ -1601,6 +1620,7 @@ export default {
       connectionTypes: [],
       boxes: [],
       lines: [],
+      lists: [],
       tags: [],
       users: [],
       userId: '',
@@ -1668,6 +1688,7 @@ export default {
       boxes = [],
       tags = [],
       lines = [],
+      lists = [],
       drawingStrokes = []
     } = items
     cards = cards.map(card => {
@@ -1691,6 +1712,17 @@ export default {
       box.id = newId
       box.userId = userId
       return box
+    })
+    lists = lists.map(list => {
+      const userId = this.itemUserId(user, list, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: list.id,
+        newId
+      })
+      list.id = newId
+      list.userId = userId
+      return list
     })
     lines = lines.map(line => {
       const userId = this.itemUserId(user, line, nullItemUsers)
@@ -1737,7 +1769,11 @@ export default {
       tag.userId = userId
       return tag
     })
-    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes }
+    cards = cards.map(card => {
+      card.listId = this.updateAllIds(card, 'listId', itemIdDeltas)
+      return card
+    })
+    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes, lists }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1794,7 +1830,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes']
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes', 'lists']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {

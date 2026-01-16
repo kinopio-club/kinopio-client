@@ -322,7 +322,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   globalStore.multipleSelectedItemsToLoad(items)
   changeSpace(spaceId)
 }
-const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
 const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle
@@ -491,7 +491,9 @@ aside.notifications(@click.left="closeAllDialogs")
           img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
-    p Error saving changes to server
+    p
+      img.icon.offline(src="@/assets/offline.svg")
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
