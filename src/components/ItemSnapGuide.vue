@@ -50,9 +50,9 @@ const state = reactive({
 })
 watch(() => state.snapStatus, (value, prevValue) => {
   if (value === 'ready') {
-    globalStore.notifyBoxSnappingIsReady = true
+    globalStore.itemSnappingIsReady = true
   } else {
-    globalStore.notifyBoxSnappingIsReady = false
+    globalStore.itemSnappingIsReady = false
   }
 })
 

@@ -287,7 +287,7 @@ export const useGlobalStore = defineStore('global', {
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
     notifyIsDuplicatingSpace: false,
-    notifyBoxSnappingIsReady: false,
+    itemSnappingIsReady: false,
 
     // notifications with position
     notificationsWithPosition: [],

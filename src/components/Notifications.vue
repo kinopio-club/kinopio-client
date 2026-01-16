@@ -201,7 +201,6 @@ const notifySpaceIsUnavailableOffline = computed(() => globalStore.currentSpaceI
 const notifyIsJoiningGroup = computed(() => globalStore.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => globalStore.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => globalStore.notifyIsDuplicatingSpace)
-const notifyBoxSnappingIsReady = computed(() => globalStore.notifyBoxSnappingIsReady)
 const notifificationClasses = (item) => {
   const classes = {
     danger: item.type === 'danger',
@@ -382,10 +381,6 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
     span Snap to Grid
-
-  .persistent-item.info(v-if="notifyBoxSnappingIsReady")
-    img.icon(src="@/assets/box-snap.svg")
-    span Snap to Box
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
