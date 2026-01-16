@@ -88,6 +88,18 @@ export const useCardStore = defineStore('cards', {
       const cards = ids.map(id => this.byId[id])
       return cards
     },
+    getCardIdsGroupedByList () {
+      const cards = this.getAllCards
+      const result = {}
+      for (const card of cards) {
+        if (!card.listId) continue
+        if (!result[card.listId]) {
+          result[card.listId] = []
+        }
+        result[card.listId].push(card.id)
+      }
+      return result // { listId: [id1, id2], .. }
+    },
     getCommentCards () {
       const cards = this.getAllCards.filter(card => {
         return card.isComment || utils.isNameComment(card.name)
@@ -159,6 +171,12 @@ export const useCardStore = defineStore('cards', {
 
     getCard (id) {
       return this.byId[id]
+    },
+    getCardsByList (listId) {
+      const cardsByList = this.getCardIdsGroupedByList
+      const cardIds = cardsByList[listId]
+      if (!cardIds) { return [] }
+      return cardIds.map(id => this.getCard(id))
     },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)

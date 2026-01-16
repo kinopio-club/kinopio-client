@@ -58,7 +58,7 @@ export const useListStore = defineStore('lists', {
     // init
 
     initializeLists (lists = []) {
-      // stubbed list data
+      // TEMP stubbed list data
       lists = [
         {
           id: '123xyz',
