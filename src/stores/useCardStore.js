@@ -24,7 +24,8 @@ let tallestCardHeight = 0
 export const useCardStore = defineStore('cards', {
   state: () => ({
     byId: {},
-    allIds: []
+    allIds: [],
+    cardSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
   getters: {
@@ -552,6 +553,7 @@ export const useCardStore = defineStore('cards', {
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
+      this.updateCardSnapGuides({ items: cards, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -933,7 +935,98 @@ export const useCardStore = defineStore('cards', {
           return tags.includes(tagName)
         }
       })
-    }
+    },
 
+    // snap guides
+
+    createCardSnapGuide ({ side, item, targetCard, cursor }) {
+      let time = Date.now()
+      const prevGuide = this.cardSnapGuides.find(guide => guide.side === side)
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      let distance, sizeOutside
+      // can only snap to target card top or bottom
+      if (side === 'top') {
+        distance = Math.abs(cursor.y - targetCard.y)
+        sizeOutside = Math.abs(targetCard.y - item.y)
+      } else if (side === 'bottom') {
+        distance = Math.abs(cursor.y - (targetCard.y + targetCard.height))
+        sizeOutside = Math.abs((targetCard.y + targetCard.height) - (item.y + item.height))
+      } else {
+        return
+      }
+      return { side, item, target: targetCard, time, distance, sizeOutside }
+    },
+    updateCardSnapGuides ({ items, cursor }) {
+      const globalStore = useGlobalStore()
+      if (!items.length) { return }
+      if (globalStore.shouldSnapToGrid) { return }
+      const snapThreshold = 6 // 10?
+      const spaceEdgeThreshold = 100
+      const targetCards = this.getCardsSelectableInViewport()
+      const prevSnapGuides = globalStore.snapGuides
+      let snapGuides = []
+      items = items.map(item => {
+        item.width = item.resizeWidth || item.width
+        item.height = item.resizeHeight || item.height
+        return item
+      })
+      // find
+      items.forEach(item => {
+        targetCards.forEach(targetCard => {
+          if (targetCard.id === item.id) { return }
+          // item sides
+          const itemLeft = item.x
+          const itemRight = item.x + item.width
+          const itemTop = item.y
+          const itemBottom = item.y + item.height
+          // target sides
+          const targetCardLeft = targetCard.x
+          const targetCardRight = targetCard.x + targetCard.width
+          const targetCardTop = targetCard.y
+          const targetCardBottom = targetCard.y + targetCard.height
+          const targetCardIsMinX = targetCard.x <= spaceEdgeThreshold
+          const targetCardIsMinY = targetCard.y <= spaceEdgeThreshold
+          // item side is on target edge
+          const itemIsOverTargetCardTop = utils.isBetween({ value: targetCardTop, min: itemTop, max: itemBottom })
+          const itemIsOverTargetCardBottom = utils.isBetween({ value: targetCardBottom, min: itemTop, max: itemBottom })
+          const itemIsOverTargetCardLeft = utils.isBetween({ value: targetCardLeft, min: itemLeft, max: itemRight })
+          const itemIsOverTargetCardRight = utils.isBetween({ value: targetCardRight, min: itemLeft, max: itemRight })
+          // item inside target
+          const itemLeftIsInsideTargetCard = utils.isBetween({ value: itemLeft, min: targetCardLeft, max: targetCardRight })
+          const itemRightIsInsideTargetCard = utils.isBetween({ value: itemRight, min: targetCardLeft, max: targetCardRight })
+          const itemTopIsInsideTargetCard = utils.isBetween({ value: itemTop, min: targetCardTop, max: targetCardBottom })
+          const itemBottomIsInsideTargetCard = utils.isBetween({ value: itemBottom, min: targetCardTop, max: targetCardBottom })
+          // snap top
+          if (itemIsOverTargetCardTop && (itemLeftIsInsideTargetCard || itemRightIsInsideTargetCard)) {
+            const snapGuide = this.createCardSnapGuide({ side: 'top', item, targetCard, cursor })
+            snapGuides.push(snapGuide)
+          }
+          // snap bottom
+          if (itemIsOverTargetCardBottom && (itemLeftIsInsideTargetCard || itemRightIsInsideTargetCard)) {
+            const snapGuide = this.createCardSnapGuide({ side: 'bottom', item, targetCard, cursor })
+            snapGuides.push(snapGuide)
+          }
+        })
+        snapGuides = sortBy(snapGuides, ['distance'])
+      })
+      // limit each origin item to it's closest target
+      const normalizedGuides = {}
+      snapGuides.forEach(snapGuide => {
+        const itemGuide = normalizedGuides[snapGuide.item.id]
+        if (itemGuide) {
+          if (snapGuide.distance < itemGuide.distance) {
+            normalizedGuides[snapGuide.item.id] = snapGuide
+          }
+        } else {
+          normalizedGuides[snapGuide.item.id] = snapGuide
+        }
+      })
+      const normalizedGuideKeys = Object.keys(normalizedGuides)
+      snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
+      this.cardSnapGuides = snapGuides
+      console.log('☎️☎️☎️', this.cardSnapGuides)
+    }
   }
 })
