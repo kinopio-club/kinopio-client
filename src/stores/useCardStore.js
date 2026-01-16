@@ -962,7 +962,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
-      const snapThreshold = 6 // 10?
+      const snapThreshold = 10
       const spaceEdgeThreshold = 100
       const targetCards = this.getCardsSelectableInViewport()
       const prevSnapGuides = globalStore.snapGuides
@@ -1026,7 +1026,6 @@ export const useCardStore = defineStore('cards', {
       const normalizedGuideKeys = Object.keys(normalizedGuides)
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       this.cardSnapGuides = snapGuides
-      console.log('☎️☎️☎️', this.cardSnapGuides)
     }
   }
 })

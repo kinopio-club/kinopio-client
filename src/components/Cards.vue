@@ -6,7 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 
 import Card from '@/components/Card.vue'
 import CardCommentPreview from '@/components/CardCommentPreview.vue'
-import utils from '@/utils.js'
+import ItemSnapGuide from '@/components/ItemSnapGuide.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -48,6 +48,7 @@ const shouldPrevent = computed(() => {
 .cards
   template(v-for="card in unlockedCards" :key="card.id")
     Card(:card="card")
+    ItemSnapGuide(:card="card")
   CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="currentHoveredCard")
   //- locked cards rendered in ItemsLocked
   template(v-for="card in lockedCards" :key="card.id")

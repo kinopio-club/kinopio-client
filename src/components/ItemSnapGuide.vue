@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -10,6 +11,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
+const cardStore = useCardStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -60,17 +62,22 @@ const item = computed(() => props.box || props.card || props.list)
 
 const currentSnapGuide = computed(() => {
   let guides
+  // dragging box
   if (props.box) {
+    if (cardStore.cardSnapGuides.length) { return }
     const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
     if (isMultipleBoxesSelectedIds) { return }
     guides = boxStore.boxSnapGuides
+  // dragging card
+  } else if (props.card) {
+    const isMultipleCardsSelectedIds = globalStore.multipleCardsSelectedIds.length > 1
+    if (isMultipleCardsSelectedIds) { return }
+    guides = cardStore.cardSnapGuides
   }
-  // TODO
-  // else if (props.card)
-  // else if (props.list)
+  // ?? else if (props.list) remove all list mentions if/bc lists are only targets, not dragged items
   return guides.find(guide => {
-    const isTargetBox = guide.target.id === item.value.id
-    return isTargetBox
+    const isTargetItem = guide.target.id === item.value.id
+    return isTargetItem
   })
 })
 watch(() => currentSnapGuide.value, (value, prevValue) => {
@@ -81,7 +88,6 @@ watch(() => currentSnapGuide.value, (value, prevValue) => {
 
 // styles
 
-const userColor = computed(() => userStore.color)
 const snapGuideSide = computed(() => {
   const isDraggingItem = globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingCard
   if (!isDraggingItem) { return }
@@ -122,7 +128,7 @@ const snapGuideStyles = computed(() => {
   const offset = 4
   const styles = {}
   const rect = state.rect
-  styles.background = item.value.color || item.value.backgroundColor
+  styles.background = item.value.color || item.value.backgroundColor || userStore.color
   // left
   if (snapGuideSide.value === 'left') {
     styles.height = rect.height + 'px'
@@ -148,6 +154,17 @@ const snapGuideStyles = computed(() => {
     startWaiting()
   }
   return styles
+})
+const snapGuideClasses = computed(() => {
+  const value = [state.snapStatus]
+  if (props.box) {
+    value.push('is-box')
+  } else if (props.card) {
+    value.push('is-card')
+  } else if (props.list) {
+    value.push('is-list')
+  }
+  return value
 })
 
 // waiting to snap
@@ -197,10 +214,10 @@ const waitingAnimationFrame = (timestamp) => {
 </script>
 
 <template lang="pug">
-.item-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="state.snapStatus")
-.item-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="state.snapStatus")
-.item-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="state.snapStatus")
-.item-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="state.snapStatus")
+.item-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="snapGuideClasses")
+.item-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="snapGuideClasses")
+.item-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="snapGuideClasses")
+.item-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="snapGuideClasses")
 </template>
 
 <style lang="stylus">
@@ -208,6 +225,8 @@ const waitingAnimationFrame = (timestamp) => {
   --snap-guide-width 6px
   --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
   --snap-guide-ready-duration 0.4s
+  &.is-card
+    --snap-guide-width 10px
   position absolute
   &.left
     left calc(-1 * var(--snap-guide-width))
