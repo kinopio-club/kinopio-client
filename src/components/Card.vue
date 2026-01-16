@@ -258,6 +258,10 @@ const currentBackgroundColorIsDark = computed(() => {
   return utils.colorIsDark(color)
 })
 
+// list
+
+const isInList = computed(() => Boolean(props.card.listId))
+
 // comment
 
 const isComment = computed(() => cardStore.getIsCommentCard(props.card))
@@ -579,6 +583,7 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
+  if (isInList.value) { return }
   if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
