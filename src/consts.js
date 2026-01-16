@@ -45,6 +45,8 @@ export default {
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
   lineInfoOffset: 11,
+  listPadding: 8,
+  listInfoHeight: 34,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

@@ -539,12 +539,10 @@ const checkIfShouldSnapToList = async (event) => {
     console.log('📮📮📮📮prev LIST', list)
   } else {
     // create new list
-    const listInfoHeight = 34
-    const listPadding = 8
     list = {
       id: nanoid(),
-      y: target.y - listInfoHeight,
-      x: target.x - listPadding
+      y: target.y - consts.listInfoHeight,
+      x: target.x - consts.listPadding
     }
     listStore.createList({ list })
     await nextTick()
