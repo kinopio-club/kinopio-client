@@ -64,6 +64,7 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -530,24 +531,45 @@ const checkIfShouldSnapToList = async (event) => {
   const { target, side, item } = cardStore.cardSnapGuides[0]
   let cards = cardStore.getCardsSelected
   cards = sortBy(cards, 'y')
-  const listInfoHeight = 34
-  const listPadding = 8
-  const list = {
-    id: nanoid(),
-    y: target.y - listInfoHeight,
-    x: target.x - listPadding
+  const firstPosition = generateKeyBetween(null, null) // "a0"
+  let list, listPositions
+  if (target.listId) {
+    // TODO handle: if target is already in list, skip creating new list, move cards into list
+    list = listStore.getList(target.listId)
+    console.log('📮📮📮📮prev LIST', list)
+  } else {
+    // create new list
+    const listInfoHeight = 34
+    const listPadding = 8
+    list = {
+      id: nanoid(),
+      y: target.y - listInfoHeight,
+      x: target.x - listPadding
+    }
+    listStore.createList({ list })
+    await nextTick()
+    // add target to list
+    cardStore.updateCard({
+      id: target.id,
+      listId: list.id,
+      listPositionIndex: firstPosition
+    })
   }
-  listStore.createList({ list })
-  await nextTick()
-
+  // add cards to list
   if (side === 'top') {
-
-    // TODO selected cards prepend above target
+    listPositions = generateNKeysBetween(null, firstPosition, cards.length)
   } else if (side === 'bottom') {
-    // TODO selected cards append below target
+    listPositions = generateNKeysBetween(firstPosition, null, cards.length)
   }
-
-  console.log('🔮🔮🔮', target, side, item, '☎️', cardStore.cardSnapGuides, cards, list)
+  const updates = cards.map((card, index) => {
+    return {
+      id: card.id,
+      listId: list.id,
+      listPositionIndex: listPositions[index]
+    }
+  })
+  console.log('🥀🥀🥀🥀', listPositions, updates, listPositions.sort())
+  cardStore.updateCards(updates)
 }
 const resizeLists = async () => {
   if (!prevCursor) { return }
