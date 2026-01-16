@@ -32,7 +32,6 @@ import CardVote from '@/components/CardVote.vue'
 import TiltResize from '@/components/TiltResize.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
-import CardCommentPreview from '@/components/CardCommentPreview.vue'
 
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
@@ -274,22 +273,6 @@ const removeCommentBrackets = (name) => {
   })
   return name
 }
-
-// card comment preview
-
-const cardCommentPreviewIsVisible = computed(() => {
-  if (!isComment.value) { return }
-  if (shouldPrevent.value) { return }
-  if (currentCardDetailsIsVisible.value) { return }
-  return globalStore.currentUserIsHoveringOverCardId === props.card.id
-})
-const shouldPrevent = computed(() => {
-  const isHoveringOverConnector = globalStore.currentUserIsHoveringOverConnectorItemId
-  const isHoveringOverCheckbox = globalStore.currentUserIsHoveringOverCheckboxCardId
-  const isHoveringOverLinkButton = globalStore.currentUserIsHoveringOverUrlButtonCardId
-  const isInteractingWithItem = globalStore.getIsInteractingWithItem
-  return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox || isHoveringOverLinkButton
-})
 
 // checkbox
 
@@ -2228,7 +2211,7 @@ const clearFocus = () => {
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
       img.icon.time(src="@/assets/time.svg")
       .name {{dateUpdatedAt}}
-CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="props.card")
+
 </template>
 
 <style lang="stylus">
