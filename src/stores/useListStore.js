@@ -99,25 +99,24 @@ export const useListStore = defineStore('lists', {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const { id, color } = list
+      const { id, color, x, y, name, resizeWidth, spaceId } = list
       const zoom = globalStore.getSpaceCounterZoomDecimal
-      const min = consts.minItemXY
       const count = this.allIds.length
       list.id = id || nanoid()
       list.color = color || randomColor({ luminosity: 'dark' })
-      list.y = list.y || min
-      list.y = Math.max(list.y, min)
-      list.name = list.name || `List ${count}`
-      list.resizeWidth = list.resizeWidth || null
+      list.y = Math.max(y, consts.minItemXY)
+      list.resizeWidth = resizeWidth || consts.normalCardMaxWidth
+      list.isCollapsed = false
+      list.name = name || `List ${count}`
       list.userId = userStore.id
-      list.spaceId = spaceStore.id
+      list.spaceId = spaceId || spaceStore.id
       return list
     },
     addListToState (list) {
       this.byId[list.id] = list
       this.allIds.push(list.id)
     },
-    async createList (list = {}, isResizing) {
+    async createList ({ list = {}, isResizing }) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()

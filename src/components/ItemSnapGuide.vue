@@ -70,8 +70,6 @@ const currentSnapGuide = computed(() => {
     guides = boxStore.boxSnapGuides
   // dragging card
   } else if (props.card) {
-    const isMultipleCardsSelectedIds = globalStore.multipleCardsSelectedIds.length > 1
-    if (isMultipleCardsSelectedIds) { return }
     guides = cardStore.cardSnapGuides
   }
   // ?? else if (props.list) remove all list mentions if/bc lists are only targets, not dragged items

@@ -63,6 +63,7 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+import { nanoid } from 'nanoid'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -519,10 +520,35 @@ const updateSizeForNewBox = (boxId) => {
 //     return
 //   }
 //   const isResizing = true
-//   listStore.createList(position, isResizing)
+//   listStore.createList({ position, isResizing })
 //   globalStore.currentListIsNew = true
 //   event.preventDefault() // allows dragging lists without scrolling on touch
 // }
+const checkIfShouldSnapToList = async (event) => {
+  if (!cardStore.cardSnapGuides.length) { return }
+  if (event.shiftKey) { return }
+  const { target, side, item } = cardStore.cardSnapGuides[0]
+  let cards = cardStore.getCardsSelected
+  cards = sortBy(cards, 'y')
+  const listInfoHeight = 34
+  const listPadding = 8
+  const list = {
+    id: nanoid(),
+    y: target.y - listInfoHeight,
+    x: target.x - listPadding
+  }
+  listStore.createList({ list })
+  await nextTick()
+
+  if (side === 'top') {
+
+    // TODO selected cards prepend above target
+  } else if (side === 'bottom') {
+    // TODO selected cards append below target
+  }
+
+  console.log('🔮🔮🔮', target, side, item, '☎️', cardStore.cardSnapGuides, cards, list)
+}
 const resizeLists = async () => {
   if (!prevCursor) { return }
   const lists = listStore.getListsResizing
@@ -841,7 +867,9 @@ const stopInteractions = async (event) => {
   }
   checkIfShouldHideFooter(event)
   checkIfShouldExpandBoxes(event)
+  checkIfShouldSnapToList(event)
   boxStore.boxSnapGuides = []
+  cardStore.cardSnapGuides = []
   if (shouldCancelInteraction(event)) {
     globalStore.currentUserIsResizingCardDetails = false
     return
