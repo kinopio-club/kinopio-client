@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -13,6 +14,7 @@ import consts from '@/consts.js'
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -60,6 +62,7 @@ const item = computed(() => props.box || props.card)
 // is snapping
 
 const currentSnapGuide = computed(() => {
+  if (listStore.listSnapGuides.listId) { return }
   let guides
   // snap to box
   if (props.box) {
