@@ -497,7 +497,7 @@ const resetWidth = () => {
           button.small-button.inline-button(title="Add Card" @click.left.stop="addCard")
             img.icon.add(src="@/assets/add.svg")
         span.name(:title="props.list.name") {{ props.list.name }}
-        //- resize when list is collapsed
+        //- resize collapsed
         .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
           .inline-button-wrap(
               @pointerover="updateIsHover(true)"
@@ -518,8 +518,16 @@ const resetWidth = () => {
       :style="listStyles"
       :class="classes"
     )
-      .placeholder(v-if="!listCards.length")
-      //- resize when list is not collapsed
+
+      .list-snap-guide(v-if="!listCards.length")
+      template(v-for="card in listCards" :key="card.id")
+        .list-snap-guide(v-if="!listCards.length")
+      //- at 0 + for each card , render a listSnapGuide
+      //- (replaces) placeholder?
+
+      //- .placeholder(v-if="!listCards.length")
+
+      //- resize
       .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
             @pointerover="updateIsHover(true)"
@@ -554,6 +562,7 @@ const resetWidth = () => {
         left 0
 
 .list-content
+  pointer-events all
   min-width var(--min-list-width)
   position absolute
   margin-top 34px
@@ -562,21 +571,25 @@ const resetWidth = () => {
   border-radius var(--entity-radius)
   border-top-left-radius 0
   border-top-right-radius 0
-  .placeholder
-    background-color var(--light-shadow)
-    border-radius var(--entity-radius)
-    box-shadow var(--button-active-inset-shadow)
-    padding 8px
-    height 33px // shortest card height
-    span
-      pointer-events all
-      color white
   &.hover
     box-shadow var(--hover-shadow)
   &.active
     box-shadow var(--active-shadow)
     transition none
     z-index 1
+  .list-snap-guide
+    height var(--snap-guide-width)
+    border-radius var(--entity-radius)
+    background-color var(--light-shadow)
+    box-shadow var(--button-active-inset-shadow)
+    &.active
+      animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
+  // .placeholder
+  //   background-color var(--light-shadow)
+  //   border-radius var(--entity-radius)
+  //   box-shadow var(--button-active-inset-shadow)
+  //   padding 8px
+  //   height 33px // shortest card height
 
 .list-info
   min-width var(--min-list-width)
@@ -647,4 +660,8 @@ const resetWidth = () => {
     position absolute
     z-index -1
     pointer-events none
+
+@keyframes listSnapGuide
+  50%
+    transform translateY(2px)
 </style>
