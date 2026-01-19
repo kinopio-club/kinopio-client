@@ -107,7 +107,7 @@ const startListInfoInteraction = async (event) => {
   //   list = await startDraggingDuplicateItems(event)
   // }
   globalStore.currentDraggingListId = list
-  // listStore.incrementListZ(list)
+  listStore.incrementListZ(list.id)
 }
 const endListInfoInteraction = (event) => {
   // const isMeta = event.metaKey || event.ctrlKey

@@ -216,7 +216,6 @@ export const useListStore = defineStore('lists', {
         x = Math.max(0, x)
         let y = Math.round(list.y + delta.y)
         y = Math.max(0, y)
-        // TODO update list z
         return {
           id: list.id,
           x,
@@ -232,31 +231,31 @@ export const useListStore = defineStore('lists', {
 
     // position
 
-    // clearAllListsZ () {
-    //   const lists = this.getAllLists
-    //   const updates = lists.map(list => {
-    //     return {
-    //       id: list.id,
-    //       z: 0
-    //     }
-    //   })
-    //   this.updateLists(updates)
-    // },
-    // incrementListZ (id) {
-    //   // highest z
-    //   const lists = this.getAllLists
-    //   const maxInt = Number.MAX_SAFE_INTEGER - 1000
-    //   let highestZ = utils.highestItemZ(lists)
-    //   if (highestZ > maxInt) {
-    //     this.clearAllListsZ()
-    //     highestZ = 1
-    //   }
-    //   const update = {
-    //     id,
-    //     z: highestZ + 1
-    //   }
-    //   this.updateList(update)
-    // },
+    clearAllListsZ () {
+      const lists = this.getAllLists
+      const updates = lists.map(list => {
+        return {
+          id: list.id,
+          z: 0
+        }
+      })
+      this.updateLists(updates)
+    },
+    incrementListZ (id) {
+      // highest z
+      const lists = this.getAllLists
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestZ = utils.highestItemZ(lists)
+      if (highestZ > maxInt) {
+        this.clearAllListsZ()
+        highestZ = 1
+      }
+      const update = {
+        id,
+        z: highestZ + 1
+      }
+      this.updateList(update)
+    },
     resizeLists (ids, delta) {
       const globalStore = useGlobalStore()
       const updates = []
