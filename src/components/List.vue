@@ -582,12 +582,9 @@ watch(() => globalStore.currentUserIsDraggingCardOverListPosition, (value, prevV
   min-width var(--min-list-width)
   min-height 14px
   position absolute
-  margin-top 34px
-  padding 8px
-  padding-top 0
+  padding 8px // consts.listPadding
+  padding-top 34px // consts.listInfoHeight
   border-radius var(--entity-radius)
-  border-top-left-radius 0
-  border-top-right-radius 0
   &.hover
     box-shadow var(--hover-shadow)
   &.active

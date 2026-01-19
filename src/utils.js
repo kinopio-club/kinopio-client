@@ -1202,17 +1202,23 @@ export default {
     }
     return this.isRectAInsideRectB(rect, viewportRect)
   },
-  isRectAInsideRectB (rectA, rectB) {
-    // udpate rects to support space zoom
-    rectA = this.rectDimensions(rectA)
-    rectB = this.rectDimensions(rectB)
+  isNormalizedRectAInsideRectB (rectA, rectB) {
     // Check if any part of rectA intersects with rectB
+    rectA.width = rectA.width || rectA.resizeWidth
+    rectB.width = rectB.width || rectB.resizeWidth
     return (
       rectA.x < rectB.x + rectB.width &&
       rectA.x + rectA.width > rectB.x &&
       rectA.y < rectB.y + rectB.height &&
       rectA.y + rectA.height > rectB.y
     )
+  },
+  isRectAInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // Check if any part of rectA intersects with rectB
+    return this.isNormalizedRectAInsideRectB(rectA, rectB)
   },
   isRectACompletelyInsideRectB (rectA, rectB) {
     // udpate rects to support space zoom

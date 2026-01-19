@@ -137,28 +137,32 @@ export const useListStore = defineStore('lists', {
 
     // cards
 
-    updateListSnapGuides ({ cards, cursor }) {
+    updateListSnapGuides () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       if (!globalStore.currentUserIsDraggingCard) { return }
-      const currentCard = cardStore.getCard(globalStore.currentDraggingCardId)
+      const card = cardStore.getCard(globalStore.currentDraggingCardId)
+
       const lists = this.getAllLists
-      const list = lists.find(rect => utils.isPointInsideRect(cursor, rect))
+      const list = lists.find(list => utils.isNormalizedRectAInsideRectB(card, list))
+
+      // no snap
       if (!list || list.isCollapsed) {
         globalStore.currentUserIsDraggingCardOverListPosition = {}
         return
       }
-      const listCards = cardStore.getCardsByList(list.id)
-      const infoRect = utils.listInfoRectFromId(list.id)
-      const isHoveredOverListInfo = utils.isPointInsideRect(cursor, infoRect)
+      const listInfo = utils.listInfoRectFromId(list.id)
+      const isListInfo = utils.isNormalizedRectAInsideRectB(card, listInfo)
       // snap to list
-      if (isHoveredOverListInfo) { // ?TODO or top of first card
+      if (isListInfo) {
         globalStore.currentUserIsDraggingCardOverListPosition = { listId: list.id }
       // snap to list card
-      } else if (listCards.length) {
-        console.log('🌿🌿🌿🌿🌿listCards', listCards)
+      } else {
+        const listCards = cardStore.getCardsByList(list.id)
+        console.log(listCards)
+        globalStore.currentUserIsDraggingCardOverListPosition = { listId: list.id }
+
         // assign to globalStore. currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
-      // no snap
       }
       // console.log('🔮🔮🔮', currentCard.id, cards, cursor, list, '🥀', listCards)
     },

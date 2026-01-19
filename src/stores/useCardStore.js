@@ -574,7 +574,7 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(card => this.getCard(card.id))
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
       this.updateCardSnapGuides({ items: cards, cursor: endCursor })
-      listStore.updateListSnapGuides({ cards, cursor: endCursor })
+      listStore.updateListSnapGuides()
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
