@@ -960,6 +960,7 @@ export const useGlobalStore = defineStore('global', {
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''
       this.currentDraggingListId = ''
+      this.currentUserIsDraggingCardOverListPosition = {}
     },
     multipleSelectedItemsToLoad (items) {
       utils.typeCheck({ value: items, type: 'object' })

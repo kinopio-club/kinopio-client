@@ -54,6 +54,7 @@ const props = defineProps({
 })
 const state = reactive({
   isHover: false,
+  isDraggingCardOverList: false,
   isLocking: false,
   lockingPercent: 0,
   lockingAlpha: 0
@@ -451,6 +452,18 @@ const resetWidth = () => {
   // ??? TODO update computed height
 }
 
+// snapping
+
+watch(() => globalStore.currentUserIsDraggingCardOverListPosition, (value, prevValue) => {
+  const { listId, listPositionIndex } = value
+  if (listId === props.list.id) {
+    state.isHover = true
+    state.isDraggingCardOverList = true
+  } else {
+    state.isHover = false
+    state.isDraggingCardOverList = false
+  }
+})
 </script>
 
 <template lang="pug">
@@ -519,13 +532,16 @@ const resetWidth = () => {
       :class="classes"
     )
 
-      .list-snap-guide(v-if="!listCards.length")
-         //- :class="{ active: currentUserIsDraggingCardOverList }"
-         //- active has user color, like item snap
-      template(v-for="card in listCards" :key="card.id")
-        //- after for each card , render a placeholder and a hidden listSnapGuide
-        //- .placeholder(v-if="!listCards.length")
-        //- .list-snap-guide(v-if="!listCards.length")
+      .list-snap-guide(v-if="!listCards.length" :class="{ active: state.isDraggingCardOverList }")
+        //- style
+         //-  has user color, like item snap
+         //- positioned at target listPositionIndex
+      template(v-if="listCards.length")
+        template(v-if="card in listCards" :key="card.id")
+          //- after for each card , render a placeholder
+          //- active/visible if state.isDraggingCardOverList(card.listPositionIndex)
+          //- .placeholder(v-if="!listCards.length")
+          //- .list-snap-guide(v-if="!listCards.length")
 
       //- resize
       .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
@@ -564,6 +580,7 @@ const resetWidth = () => {
 .list-content
   pointer-events all
   min-width var(--min-list-width)
+  min-height 14px
   position absolute
   margin-top 34px
   padding 8px
@@ -618,9 +635,11 @@ const resetWidth = () => {
       color var(--primary-on-dark-background) !important
       .icon
         filter invert()
-  &:hover
+  &:hover,
+  &.hover
     box-shadow var(--hover-shadow)
-  &:active
+  &:active,
+  &.active
     box-shadow var(--active-shadow)
   // buttons
   .inline-button-wrap
