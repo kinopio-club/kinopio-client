@@ -104,6 +104,7 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
 const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
+const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
 // space
 
@@ -381,6 +382,10 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
     span Snap to Grid
+
+  .persistent-item.info(v-if="itemSnappingIsReady")
+    img.icon(src="@/assets/merge.svg")
+    span Release to Snap
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a

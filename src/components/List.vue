@@ -456,12 +456,16 @@ const resetWidth = () => {
 
 watch(() => listStore.listSnapGuides, (value, prevValue) => {
   const { listId, listPositionIndex } = value
-  if (listId === props.list.id) {
+  const shouldSnap = listId === props.list.id
+  const shouldCancel = listId !== prevValue.listId
+  if (shouldSnap) {
     state.isHover = true
     state.isDraggingCardOverList = true
-  } else {
+    globalStore.itemSnappingIsReady = true
+  } else if (shouldCancel) {
     state.isHover = false
     state.isDraggingCardOverList = false
+    globalStore.itemSnappingIsReady = false
   }
 })
 </script>
@@ -536,8 +540,8 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
         //- style
          //-  has user color, like item snap
          //- positioned at target listPositionIndex
-      template(v-if="listCards.length")
-        template(v-if="card in listCards" :key="card.id")
+      //- template(v-if="listCards.length")
+      //-   template(v-if="card in listCards" :key="card.id")
           //- after for each card , render a placeholder
           //- active/visible if state.isDraggingCardOverList(card.listPositionIndex)
           //- .placeholder(v-if="!listCards.length")
