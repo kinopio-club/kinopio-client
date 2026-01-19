@@ -574,7 +574,7 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(card => this.getCard(card.id))
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
       this.updateCardSnapGuides({ items: cards, cursor: endCursor })
-      listStore.updateListSnapGuides()
+      listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -981,6 +981,7 @@ export const useCardStore = defineStore('cards', {
     },
     updateCardSnapGuides ({ items, cursor }) {
       const globalStore = useGlobalStore()
+      if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
       const snapThreshold = 10

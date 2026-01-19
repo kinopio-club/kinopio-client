@@ -454,7 +454,7 @@ const resetWidth = () => {
 
 // snapping
 
-watch(() => globalStore.currentUserIsDraggingCardOverListPosition, (value, prevValue) => {
+watch(() => listStore.listSnapGuides, (value, prevValue) => {
   const { listId, listPositionIndex } = value
   if (listId === props.list.id) {
     state.isHover = true

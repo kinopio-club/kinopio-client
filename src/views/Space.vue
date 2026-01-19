@@ -469,7 +469,8 @@ const stopResizingBoxes = () => {
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
   // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
-const checkIfShouldExpandBoxes = (event) => {
+const checkIfShouldSnapToBox = (event) => {
+  if (globalStore.preventItemSnapping) { return }
   if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
@@ -526,6 +527,7 @@ const updateSizeForNewBox = (boxId) => {
 //   event.preventDefault() // allows dragging lists without scrolling on touch
 // }
 const checkIfShouldSnapToList = async (event) => {
+  if (globalStore.preventItemSnapping) { return }
   if (!cardStore.cardSnapGuides.length) { return }
   if (event.shiftKey) { return }
   const { target, side, item } = cardStore.cardSnapGuides[0]
@@ -886,10 +888,10 @@ const stopInteractions = async (event) => {
     globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldExpandBoxes(event)
+  checkIfShouldSnapToBox(event)
   checkIfShouldSnapToList(event)
-  boxStore.boxSnapGuides = []
-  cardStore.cardSnapGuides = []
+  globalStore.clearSnapGuides()
+  globalStore.preventItemSnapping = false
   if (shouldCancelInteraction(event)) {
     globalStore.currentUserIsResizingCardDetails = false
     return

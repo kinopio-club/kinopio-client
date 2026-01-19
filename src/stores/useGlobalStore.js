@@ -83,7 +83,6 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsPaintSelecting: false,
     currentUserIsPaintSelectingLocked: false,
     currentUserIsDraggingCard: false,
-    currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
     currentUserIsHoveringOverBoxId: '',
@@ -192,6 +191,7 @@ export const useGlobalStore = defineStore('global', {
 
     // draggingItems
     shouldSnapToGrid: false,
+    preventItemSnapping: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -960,7 +960,6 @@ export const useGlobalStore = defineStore('global', {
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''
       this.currentDraggingListId = ''
-      this.currentUserIsDraggingCardOverListPosition = {}
     },
     multipleSelectedItemsToLoad (items) {
       utils.typeCheck({ value: items, type: 'object' })
@@ -1232,7 +1231,6 @@ export const useGlobalStore = defineStore('global', {
     },
     clearAllInteractingWithAndSelected () {
       this.currentUserIsDraggingCard = false
-      this.currentUserIsDraggingCardOverListPosition = {}
       this.currentUserIsDrawingConnection = false
       this.currentUserIsResizingCard = false
       this.currentUserIsResizingBox = false
@@ -1242,6 +1240,14 @@ export const useGlobalStore = defineStore('global', {
       this.multipleCardsSelectedIds = []
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []
+    },
+    clearSnapGuides () {
+      const boxStore = useBoxStore()
+      const cardStore = useCardStore()
+      const listStore = useListStore()
+      boxStore.boxSnapGuides = []
+      cardStore.cardSnapGuides = []
+      listStore.listSnapGuides = {}
     },
     updateNotifySpaceNotFound (value) {
       utils.typeCheck({ value, type: 'boolean' })

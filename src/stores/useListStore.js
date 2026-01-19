@@ -18,7 +18,8 @@ import randomColor from 'randomcolor'
 export const useListStore = defineStore('lists', {
   state: () => ({
     byId: {},
-    allIds: []
+    allIds: [],
+    listSnapGuides: {} // { listId, listPositionIndex, cards }
   }),
 
   getters: {
@@ -135,11 +136,12 @@ export const useListStore = defineStore('lists', {
       await apiStore.addToQueue({ name: 'createList', body: list })
     },
 
-    // cards
+    // snap
 
-    updateListSnapGuides () {
+    updateListSnapGuides (cards) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
+      if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
       const card = cardStore.getCard(globalStore.currentDraggingCardId)
 
@@ -148,21 +150,19 @@ export const useListStore = defineStore('lists', {
 
       // no snap
       if (!list || list.isCollapsed) {
-        globalStore.currentUserIsDraggingCardOverListPosition = {}
+        this.listSnapGuides = {}
         return
       }
       const listInfo = utils.listInfoRectFromId(list.id)
       const isListInfo = utils.isNormalizedRectAInsideRectB(card, listInfo)
       // snap to list
       if (isListInfo) {
-        globalStore.currentUserIsDraggingCardOverListPosition = { listId: list.id }
+        this.listSnapGuides = { listId: list.id, cards }
       // snap to list card
       } else {
         const listCards = cardStore.getCardsByList(list.id)
         console.log(listCards)
-        globalStore.currentUserIsDraggingCardOverListPosition = { listId: list.id }
-
-        // assign to globalStore. currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
+        this.listSnapGuides = { listId: list.id, cards } // TODO assign listPositionIndex
       }
       // console.log('🔮🔮🔮', currentCard.id, cards, cursor, list, '🥀', listCards)
     },
