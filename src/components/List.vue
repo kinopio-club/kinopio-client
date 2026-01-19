@@ -21,7 +21,7 @@ const broadcastStore = useBroadcastStore()
 
 // let unsubscribes
 
-const minListSize = 200
+const minListWidth = 200
 // locking
 // long press to touch drag
 const lockingPreDuration = 100 // ms
@@ -447,7 +447,7 @@ const resizeButtonColorClass = computed(() => {
 const resetWidth = () => {
   listStore.updateList({
     id: props.list.id,
-    resizeWidth: minListSize
+    resizeWidth: minListWidth
   })
   // ??? TODO update computed height
 }
@@ -537,12 +537,12 @@ const resetWidth = () => {
 
 <style lang="stylus">
 :root
-  --min-list-size 200px // matches minListSize var
+  --min-list-width 200px // matches minListWidth var
 
 .list
   position absolute
   border-radius var(--entity-radius)
-  min-width var(--min-list-size)
+  min-width var(--min-list-width)
   // resize
   .bottom-button-wrap
     .inline-button-wrap
@@ -554,7 +554,7 @@ const resetWidth = () => {
         left 0
 
 .list-content
-  min-width var(--min-list-size)
+  min-width var(--min-list-width)
   position absolute
   margin-top 34px
   padding 8px
@@ -579,7 +579,7 @@ const resetWidth = () => {
     z-index 1
 
 .list-info
-  min-width var(--min-list-size)
+  min-width var(--min-list-width)
   pointer-events all
   border-radius var(--entity-radius)
   cursor pointer
