@@ -1054,6 +1054,10 @@ export default {
     list.x = parseInt(element.dataset.x)
     list.y = parseInt(element.dataset.y)
     list.width = parseInt(element.dataset.width)
+    list.height = parseInt(element.dataset.height)
+    if (element.dataset.isCollapsed === 'true') {
+      list.height = consts.listInfoHeight
+    }
     return list
   },
   clearAllCardDimensions (card) {

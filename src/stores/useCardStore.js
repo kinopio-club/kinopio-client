@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -540,6 +541,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+      const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       if (globalStore.shouldSnapToGrid) {
@@ -572,6 +574,7 @@ export const useCardStore = defineStore('cards', {
       cards = cards.map(card => this.getCard(card.id))
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
       this.updateCardSnapGuides({ items: cards, cursor: endCursor })
+      listStore.updateListSnapGuides({ cards, cursor: endCursor })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards

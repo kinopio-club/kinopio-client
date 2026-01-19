@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -68,7 +69,8 @@ export const useListStore = defineStore('lists', {
           y: 100,
           z: 0,
           resizeWidth: consts.normalCardMaxWidth,
-          isCollapsed: false
+          isCollapsed: false,
+          height: 200
           // spaceId
           // userId
         }
@@ -131,6 +133,24 @@ export const useListStore = defineStore('lists', {
         globalStore.currentUserIsResizingListIds = [list.id]
       }
       await apiStore.addToQueue({ name: 'createList', body: list })
+    },
+
+    // cards
+
+    updateListSnapGuides ({ cards, cursor }) {
+      const globalStore = useGlobalStore()
+      const cardStore = useCardStore()
+      if (!globalStore.currentUserIsDraggingCard) { return }
+      const currentCard = cardStore.getCard(globalStore.currentDraggingCardId)
+      const lists = this.getAllLists
+
+      // list rect(space or page, not viewport)
+      // cursor pos (space or page, not viewport)
+
+      // assign to globalStore. currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
+
+      console.log('🔮🔮🔮', currentCard.id, cards, cursor, lists)
+      return false
     },
 
     // update

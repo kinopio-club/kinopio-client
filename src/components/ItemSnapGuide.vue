@@ -40,8 +40,7 @@ onBeforeUnmount(() => {
 
 const props = defineProps({
   box: Object,
-  card: Object,
-  list: Object
+  card: Object
 })
 
 const state = reactive({
@@ -56,7 +55,7 @@ watch(() => state.snapStatus, (value, prevValue) => {
   }
 })
 
-const item = computed(() => props.box || props.card || props.list)
+const item = computed(() => props.box || props.card)
 
 // is snapping
 
@@ -72,7 +71,6 @@ const currentSnapGuide = computed(() => {
   } else if (props.card) {
     guides = cardStore.cardSnapGuides
   }
-  // ?? else if (props.list) remove all list mentions if/bc lists are only targets, not dragged items
   return guides.find(guide => {
     const isTargetItem = guide.target.id === item.value.id
     return isTargetItem
@@ -118,8 +116,6 @@ const updateRect = () => {
     state.rect = utils.cardElementDimensions(props.card)
   } else if (props.box) {
     state.rect = utils.boxElementDimensions(props.box)
-  } else if (props.list) {
-    state.rect = utils.listElementDimensions(props.list)
   }
 }
 const snapGuideStyles = computed(() => {
@@ -159,8 +155,6 @@ const snapGuideClasses = computed(() => {
     value.push('is-box')
   } else if (props.card) {
     value.push('is-card')
-  } else if (props.list) {
-    value.push('is-list')
   }
   return value
 })

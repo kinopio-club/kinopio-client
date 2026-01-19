@@ -58,7 +58,6 @@ const state = reactive({
   lockingPercent: 0,
   lockingAlpha: 0
   // isVisibleInViewport: false,
-  // shouldRenderParent: false,
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
@@ -461,6 +460,7 @@ const resetWidth = () => {
   :data-x="list.x"
   :data-y="list.y"
   :data-width="list.resizeWidth"
+  :data-height="list.height"
   :data-is-collapsed="list.isCollapsed"
   :style="listStyles"
   :class="classes"
@@ -520,12 +520,12 @@ const resetWidth = () => {
     )
 
       .list-snap-guide(v-if="!listCards.length")
+         //- :class="{ active: currentUserIsDraggingCardOverList }"
+         //- active has user color, like item snap
       template(v-for="card in listCards" :key="card.id")
-        .list-snap-guide(v-if="!listCards.length")
-      //- at 0 + for each card , render a listSnapGuide
-      //- (replaces) placeholder?
-
-      //- .placeholder(v-if="!listCards.length")
+        //- after for each card , render a placeholder and a hidden listSnapGuide
+        //- .placeholder(v-if="!listCards.length")
+        //- .list-snap-guide(v-if="!listCards.length")
 
       //- resize
       .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")

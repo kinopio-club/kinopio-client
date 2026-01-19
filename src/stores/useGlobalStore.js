@@ -83,6 +83,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsPaintSelecting: false,
     currentUserIsPaintSelectingLocked: false,
     currentUserIsDraggingCard: false,
+    currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
     currentUserIsHoveringOverBoxId: '',
@@ -1230,6 +1231,7 @@ export const useGlobalStore = defineStore('global', {
     },
     clearAllInteractingWithAndSelected () {
       this.currentUserIsDraggingCard = false
+      this.currentUserIsDraggingCardOverListPosition = {}
       this.currentUserIsDrawingConnection = false
       this.currentUserIsResizingCard = false
       this.currentUserIsResizingBox = false
