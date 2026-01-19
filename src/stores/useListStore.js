@@ -70,7 +70,7 @@ export const useListStore = defineStore('lists', {
           z: 0,
           resizeWidth: consts.normalCardMaxWidth,
           isCollapsed: false,
-          height: 200
+          height: 100
           // spaceId
           // userId
         }
@@ -143,13 +143,19 @@ export const useListStore = defineStore('lists', {
       if (!globalStore.currentUserIsDraggingCard) { return }
       const currentCard = cardStore.getCard(globalStore.currentDraggingCardId)
       const lists = this.getAllLists
-
-      // list rect(space or page, not viewport)
-      // cursor pos (space or page, not viewport)
-
-      // assign to globalStore. currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
-
-      console.log('🔮🔮🔮', currentCard.id, cards, cursor, lists)
+      const list = lists.find(rect => utils.isPointInsideRect(cursor, rect))
+      if (!list) { return }
+      const listCards = cardStore.getCardsByList(list.id)
+      const infoRect = utils.listInfoRectFromId(list.id)
+      const isHoveredOverListInfo = utils.isPointInsideRect(cursor, infoRect)
+      // first position
+      if (isHoveredOverListInfo || !listCards.length) {
+        globalStore.currentUserIsDraggingCardOverListPosition = { listId: list.id }
+      // indexed positions
+      } else {
+        // assign to globalStore. currentUserIsDraggingCardOverListPosition: {}, // listId, listPositionIndex
+      }
+      // console.log('🔮🔮🔮', currentCard.id, cards, cursor, list, '🥀', listCards)
       return false
     },
 

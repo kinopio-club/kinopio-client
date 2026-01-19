@@ -1171,6 +1171,11 @@ export default {
   listElementFromId (listId) {
     return document.querySelector(`.list[data-list-id="${listId}"]`)
   },
+  listInfoRectFromId (listId) {
+    const element = document.querySelector(`.list-info[data-list-id="${listId}"]`)
+    const rect = element.getBoundingClientRect()
+    return this.rectDimensions(rect)
+  },
 
   // rect
 
@@ -1178,7 +1183,7 @@ export default {
     const xIsInside = this.isBetween({
       value: point.x,
       min: rect.x,
-      max: rect.x + rect.width
+      max: rect.x + (rect.width || rect.resizeWidth)
     })
     const yIsInside = this.isBetween({
       value: point.y,
