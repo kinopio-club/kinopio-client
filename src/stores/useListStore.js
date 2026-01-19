@@ -161,8 +161,8 @@ export const useListStore = defineStore('lists', {
       // snap to list card
       } else {
         const listCards = cardStore.getCardsByList(list.id)
-        console.log(listCards)
-        this.listSnapGuides = { listId: list.id, cards } // TODO assign listPositionIndex
+        // TODO assign listPositionIndex
+        this.listSnapGuides = { listId: list.id, cards }
       }
       // console.log('🔮🔮🔮', currentCard.id, cards, cursor, list, '🥀', listCards)
     },

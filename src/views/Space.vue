@@ -528,6 +528,12 @@ const updateSizeForNewBox = (boxId) => {
 // }
 const checkIfShouldSnapToList = async (event) => {
   if (globalStore.preventItemSnapping) { return }
+  if (!listStore.listSnapGuides.listId) { return }
+  if (event.shiftKey) { return }
+  console.log('🌺🌺🌺', listStore.listSnapGuides)
+}
+const checkIfShouldSnapToCard = async (event) => {
+  if (globalStore.preventItemSnapping) { return }
   if (!cardStore.cardSnapGuides.length) { return }
   if (event.shiftKey) { return }
   const { target, side, item } = cardStore.cardSnapGuides[0]
@@ -889,6 +895,7 @@ const stopInteractions = async (event) => {
   }
   checkIfShouldHideFooter(event)
   checkIfShouldSnapToBox(event)
+  checkIfShouldSnapToCard(event)
   checkIfShouldSnapToList(event)
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
