@@ -275,6 +275,11 @@ export const useListStore = defineStore('lists', {
       connectionStore.updateConnectionPathsByItemIds(ids)
       this.updateLists(updates)
     },
+    updateListDimensions (list) {
+      // TODO
+      // gets cards in list
+      // then updates list height based on last card
+    },
 
     // list details
 

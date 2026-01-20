@@ -178,7 +178,9 @@ export const useCardStore = defineStore('cards', {
       const cardsByList = this.getCardIdsGroupedByList
       const cardIds = cardsByList[listId]
       if (!cardIds) { return [] }
-      return cardIds.map(id => this.getCard(id))
+      let cards = cardIds.map(id => this.getCard(id))
+      cards = sortBy(cards, 'listPositionIndex')
+      return cards
     },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
@@ -961,43 +963,56 @@ export const useCardStore = defineStore('cards', {
 
     // list
 
+    async updateCardPositionsInList (list) {
+      const listStore = useListStore()
+      const cards = this.getCardsByList(list.id)
+      const updates = []
+      const originY = list.y + consts.listInfoHeight + consts.listPadding
+      cards.forEach((card, index) => {
+        const update = {
+          id: card.id,
+          x: list.x + consts.listPadding,
+          y: originY,
+          height: card.height
+        }
+        if (index > 0) {
+          const prevCard = updates[index - 1]
+          update.y = prevCard.y + prevCard.height + consts.listPadding
+        }
+        updates.push(update)
+      })
+      this.updateCards(updates)
+
+      // TODO
+      listStore.updateListDimensions(list)
+      // gets cards in list
+      // then updates list size based on last card
+    },
     async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
       try {
         const ids = cards.map(card => card.id)
         await this.updateCardsDimensions(ids)
-        // get list positions
-        let listPositions
+        // get positions
+        let targetPositionIndexes
         if (shouldPrepend) {
-          listPositions = generateNKeysBetween(null, targetPositionIndex, cards.length)
+          targetPositionIndexes = generateNKeysBetween(null, targetPositionIndex, cards.length)
         } else {
-          listPositions = generateNKeysBetween(targetPositionIndex, null, cards.length)
+          targetPositionIndexes = generateNKeysBetween(targetPositionIndex, null, cards.length)
         }
-        // get target card
-        let target = this.getCardsByList(list.id)
-        target = target.find(card => card.listPositionIndex === targetPositionIndex)
-
-        // TODO add cards to list w listId, listPositionIndex
-        // THEN sort and position cards in list
-
+        // add cards to list
         const updates = cards.map((card, index) => {
-          // y from target card
-          let y = list.y + consts.listInfoHeight + consts.listPadding
-          if (target) {
-            y = target.y + target.height + consts.listPadding
-          }
-          // position cards inside list
           return {
             id: card.id,
             listId: list.id,
-            listPositionIndex: listPositions[index],
-            resizeWidth: list.resizeWidth - (consts.listPadding * 2),
-            x: list.x + consts.listPadding,
-            y
+            listPositionIndex: targetPositionIndexes[index],
+            tilt: 0,
+            resizeWidth: list.resizeWidth - (consts.listPadding * 2)
           }
         })
         this.updateCards(updates)
         await nextTick()
         await this.updateCardsDimensions(ids)
+        this.updateCardPositionsInList(list)
       } catch (error) {
         console.error('🚒 addCardsToList', error)
       }

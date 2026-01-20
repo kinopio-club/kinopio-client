@@ -549,8 +549,9 @@ const checkIfShouldSnapToCard = async (event) => {
 
   // TODO block drag card out of list
   // const isRemovedFromList = target.listId && !listStore.listSnapGuides.listId
-  // if (target.listId) { return } // checkIfShouldSnapToList instead
-  // if (isRemovedFromList) {
+  if (target.listId) { return } // ?? use checkIfShouldSnapToList instead?
+
+  // if (isRemovedFromList) { or remove dragged items from list calling checkIfShouldSnapToCard()
   //   // TODO remove listId, listPos if cards previously was in list, and now !listStore.listSnapGuides
   //   // cardStore.removeCardsFromList(cards)
   // reset resizeWidth
