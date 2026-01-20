@@ -665,6 +665,7 @@ const dragItems = () => {
   listStore.moveLists({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
+  const isMeta = event.metaKey || event.ctrlKey
   const isInitialDrag = !globalStore.boxesWereDragged
   if (isInitialDrag) {
     const updates = {
@@ -672,8 +673,8 @@ const dragBoxes = (event) => {
       userId: userStore.id
     }
     broadcastStore.update({ updates, action: 'addToRemoteBoxesDragging' })
-    // alt-drag box to move without selecting items inside
-    if (!event.altKey) {
+    // meta-key-drag box to move without selecting items inside
+    if (!isMeta) {
       boxStore.selectItemsInSelectedBoxes()
     }
   }
