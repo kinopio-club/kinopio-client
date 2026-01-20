@@ -425,8 +425,8 @@ const cardWrapStyle = computed(() => {
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
-  if (globalStore.itemSnappingIsReady && currentCardIsBeingDragged.value) {
-    styles.opacity = 0.8
+  if ((globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value) {
+    styles.opacity = 0.7
   }
   styles = updateStylesWithWidth(styles)
   return styles
@@ -2229,6 +2229,7 @@ const clearFocus = () => {
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
+  transition opacity 0.1s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-resizing,
   &.is-tilting
     *

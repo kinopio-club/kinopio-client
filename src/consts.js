@@ -25,7 +25,7 @@ export default {
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,
-  itemSnapGuideWaitingDuration: 200,
+  itemSnapGuideWaitingDuration: 100,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   straightLineConnectionPathControlPoint: 'q00,00',

@@ -52,8 +52,13 @@ const state = reactive({
 watch(() => state.snapStatus, (value, prevValue) => {
   if (value === 'ready') {
     globalStore.itemSnappingIsReady = true
+    globalStore.itemSnappingIsWaiting = false
+  } else if (value === 'waiting') {
+    globalStore.itemSnappingIsReady = false
+    globalStore.itemSnappingIsWaiting = true
   } else {
     globalStore.itemSnappingIsReady = false
+    globalStore.itemSnappingIsWaiting = false
   }
 })
 
@@ -217,7 +222,7 @@ const waitingAnimationFrame = (timestamp) => {
 
 <style lang="stylus">
 .item-snap-guide
-  --snap-guide-waiting-duration 0.2s // same as consts.itemSnapGuideWaitingDuration ms
+  --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-card
     --snap-guide-width 10px
   position absolute
