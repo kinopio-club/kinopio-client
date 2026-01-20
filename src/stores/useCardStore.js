@@ -968,7 +968,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       const cards = this.getCardsByList(list.id)
       const updates = []
-      const originY = list.y + consts.listInfoHeight + consts.listPadding
+      const originY = list.y + consts.listInfoHeight
       cards.forEach((card, index) => {
         const update = {
           id: card.id,
