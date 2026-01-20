@@ -71,7 +71,7 @@ export const useListStore = defineStore('lists', {
           z: 0,
           resizeWidth: consts.normalCardMaxWidth,
           isCollapsed: false,
-          height: 100
+          height: 56
           // spaceId
           // userId
         }

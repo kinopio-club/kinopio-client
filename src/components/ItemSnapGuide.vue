@@ -217,7 +217,7 @@ const waitingAnimationFrame = (timestamp) => {
 
 <style lang="stylus">
 .item-snap-guide
-  --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
+  --snap-guide-waiting-duration 0.2s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-card
     --snap-guide-width 10px
   position absolute

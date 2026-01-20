@@ -536,6 +536,7 @@ const checkIfShouldSnapToCard = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.preventItemSnapping) { return }
   if (!cardStore.cardSnapGuides.length) { return }
+  if (!globalStore.itemSnappingIsReady) { return }
   if (event.shiftKey) { return }
   const { target, side, item } = cardStore.cardSnapGuides[0]
   let cards = cardStore.getCardsSelected
