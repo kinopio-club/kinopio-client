@@ -144,10 +144,8 @@ export const useListStore = defineStore('lists', {
       if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
       const card = cardStore.getCard(globalStore.currentDraggingCardId)
-
       const lists = this.getAllLists
       const list = lists.find(list => utils.isNormalizedRectAInsideRectB(card, list))
-
       // no snap
       if (!list || list.isCollapsed) {
         this.listSnapGuides = {}

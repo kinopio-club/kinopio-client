@@ -1046,32 +1046,29 @@ export const useCardStore = defineStore('cards', {
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       this.cardSnapGuides = snapGuides
     }
-  }
+  },
 
   // list
 
-  // async addCardsToList (updates) {
-  //   const apiStore = useApiStore()
+  // position/update/normalize cards snapped into new list
+  async addCardsToList (updates) {
   //   const userStore = useUserStore()
   //   const spaceStore = useSpaceStore()
-  //   const broadcastStore = useBroadcastStore()
-  //   const connectionStore = useConnectionStore()
-  //   try {
-  //     // id: card.id,
-  //     // listId: list.id,
-  //     // listPositionIndex: listPositions[index]
+    try {
+      // [] id: card.id,
+      // listId: list.id,
+      // listPositionIndex: listPositions[index]
 
-  //     // change resizeWidth to list
-  //     // update x and y
+      //     // change resizeWidth to list
+      //     // update x and y
 
-  //     this.updateCards(updates)
+      this.updateCards(updates)
 
-  //     // recalc card size
-
-  //   } catch (error) {
-  //     console.error('🚒 cardsToList', error, updates)
-  //   }
-  // },
+      //     // recalc card size
+    } catch (error) {
+      console.error('🚒 addCardsToList', error, updates)
+    }
+  }
 
   // addCardToList (update) {
   //   this.addCardsToList([update])

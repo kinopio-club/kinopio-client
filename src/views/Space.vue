@@ -578,9 +578,10 @@ const checkIfShouldSnapToCard = async (event) => {
       listPositionIndex: listPositions[index]
     }
   })
+  cardStore.addCardsToList(updates)
   // listStore.addCards(updates)
   // listStore.removeCards(updates) // TODO after drag complete if card is not in list, but was previously
-  cardStore.updateCards(updates)
+  // cardStore.updateCards(updates)
 }
 const resizeLists = async () => {
   if (!prevCursor) { return }
