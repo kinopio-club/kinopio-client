@@ -211,6 +211,7 @@ export const useListStore = defineStore('lists', {
         y: delta.y * zoom
       }
       let lists = this.getListsSelected
+      // TODO move abs cards in list by the same delta (cardStore.getCardsInList or cardStore.moveCards)
       lists = lists.map(list => {
         let x = Math.round(list.x + delta.x)
         x = Math.max(0, x)
@@ -264,6 +265,7 @@ export const useListStore = defineStore('lists', {
         let width = rect.width
         width = width + delta.x
         const list = { id, resizeWidth: width }
+        // TODO recalc height from dom, include in list update
         console.log(width)
         updates.push(list)
         // this.updatePageSize(list)

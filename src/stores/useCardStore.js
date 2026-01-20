@@ -990,40 +990,42 @@ export const useCardStore = defineStore('cards', {
       const prevSnapGuides = globalStore.snapGuides
       let snapGuides = []
       // find
-      const card = this.getCard(globalStore.currentDraggingCardId)
-      if (!card) { return } // only current dragging card can snap
-      targetCards.forEach(targetCard => {
-        if (targetCard.id === card.id) { return }
-        // card sides
+      const card = this.getCard(globalStore.currentDraggingCardId) // only current dragging card can snap
+      if (!card) { return }
+      targetCards.forEach(target => {
+        if (target.id === card.id) { return }
+        const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
+        if (isTargetSelected) { return }
+        // assign card sides
         const cardLeft = card.x
         const cardRight = card.x + card.width
         const cardTop = card.y
         const cardBottom = card.y + card.height
-        // target sides
-        const targetCardLeft = targetCard.x
-        const targetCardRight = targetCard.x + targetCard.width
-        const targetCardTop = targetCard.y
-        const targetCardBottom = targetCard.y + targetCard.height
-        const targetCardIsMinX = targetCard.x <= spaceEdgeThreshold
-        const targetCardIsMinY = targetCard.y <= spaceEdgeThreshold
+        // assign target sides
+        const targetLeft = target.x
+        const targetRight = target.x + target.width
+        const targetTop = target.y
+        const targetBottom = target.y + target.height
+        const targetIsMinX = target.x <= spaceEdgeThreshold
+        const targetIsMinY = target.y <= spaceEdgeThreshold
         // card side is on target edge
-        const cardIsOverTargetCardTop = utils.isBetween({ value: targetCardTop, min: cardTop, max: cardBottom })
-        const cardIsOverTargetCardBottom = utils.isBetween({ value: targetCardBottom, min: cardTop, max: cardBottom })
-        const cardIsOverTargetCardLeft = utils.isBetween({ value: targetCardLeft, min: cardLeft, max: cardRight })
-        const cardIsOverTargetCardRight = utils.isBetween({ value: targetCardRight, min: cardLeft, max: cardRight })
+        const cardIsOverTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
+        const cardIsOverTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })
+        const cardIsOverTargetLeft = utils.isBetween({ value: targetLeft, min: cardLeft, max: cardRight })
+        const cardIsOverTargetRight = utils.isBetween({ value: targetRight, min: cardLeft, max: cardRight })
         // card inside target
-        const cardLeftIsInsideTargetCard = utils.isBetween({ value: cardLeft, min: targetCardLeft, max: targetCardRight })
-        const cardRightIsInsideTargetCard = utils.isBetween({ value: cardRight, min: targetCardLeft, max: targetCardRight })
-        const cardTopIsInsideTargetCard = utils.isBetween({ value: cardTop, min: targetCardTop, max: targetCardBottom })
-        const cardBottomIsInsideTargetCard = utils.isBetween({ value: cardBottom, min: targetCardTop, max: targetCardBottom })
+        const cardLeftIsInsideTarget = utils.isBetween({ value: cardLeft, min: targetLeft, max: targetRight })
+        const cardRightIsInsideTarget = utils.isBetween({ value: cardRight, min: targetLeft, max: targetRight })
+        const cardTopIsInsideTarget = utils.isBetween({ value: cardTop, min: targetTop, max: targetBottom })
+        const cardBottomIsInsideTarget = utils.isBetween({ value: cardBottom, min: targetTop, max: targetBottom })
         // snap top
-        if (cardIsOverTargetCardTop && (cardLeftIsInsideTargetCard || cardRightIsInsideTargetCard)) {
-          const snapGuide = this.createCardSnapGuide({ side: 'top', item: card, targetCard, cursor })
+        if (cardIsOverTargetTop && (cardLeftIsInsideTarget || cardRightIsInsideTarget)) {
+          const snapGuide = this.createCardSnapGuide({ side: 'top', item: card, targetCard: target, cursor })
           snapGuides.push(snapGuide)
         }
         // snap bottom
-        if (cardIsOverTargetCardBottom && (cardLeftIsInsideTargetCard || cardRightIsInsideTargetCard)) {
-          const snapGuide = this.createCardSnapGuide({ side: 'bottom', item: card, targetCard, cursor })
+        if (cardIsOverTargetBottom && (cardLeftIsInsideTarget || cardRightIsInsideTarget)) {
+          const snapGuide = this.createCardSnapGuide({ side: 'bottom', item: card, targetCard: target, cursor })
           snapGuides.push(snapGuide)
         }
       })
@@ -1045,4 +1047,35 @@ export const useCardStore = defineStore('cards', {
       this.cardSnapGuides = snapGuides
     }
   }
+
+  // list
+
+  // async addCardsToList (updates) {
+  //   const apiStore = useApiStore()
+  //   const userStore = useUserStore()
+  //   const spaceStore = useSpaceStore()
+  //   const broadcastStore = useBroadcastStore()
+  //   const connectionStore = useConnectionStore()
+  //   try {
+  //     // id: card.id,
+  //     // listId: list.id,
+  //     // listPositionIndex: listPositions[index]
+
+  //     // change resizeWidth to list
+  //     // update x and y
+
+  //     this.updateCards(updates)
+
+  //     // recalc card size
+
+  //   } catch (error) {
+  //     console.error('🚒 cardsToList', error, updates)
+  //   }
+  // },
+
+  // addCardToList (update) {
+  //   this.addCardsToList([update])
+  // },
+
+  // async removeCardsFromList
 })

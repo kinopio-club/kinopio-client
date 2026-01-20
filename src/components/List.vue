@@ -691,5 +691,5 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
 
 @keyframes listSnapGuide
   50%
-    transform scaleY(150%)
+    transform scaleY(175%)
 </style>

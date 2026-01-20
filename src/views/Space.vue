@@ -527,10 +527,17 @@ const updateSizeForNewBox = (boxId) => {
 //   event.preventDefault() // allows dragging lists without scrolling on touch
 // }
 const checkIfShouldSnapToList = async (event) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.preventItemSnapping) { return }
   if (!listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
-  console.log('🌺🌺🌺', listStore.listSnapGuides)
+
+  // ?? should use card snap guides for middle list snap?
+  // const { target, side, item } = cardStore.cardSnapGuides[0]
+
+  // OR use listStore.listSnapGuides.listPositionIndex
+
+  console.log('🌺🌺🌺checkIfShouldSnapToList', listStore.listSnapGuides)
 }
 const checkIfShouldSnapToCard = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
@@ -542,28 +549,23 @@ const checkIfShouldSnapToCard = async (event) => {
   let cards = cardStore.getCardsSelected
   cards = sortBy(cards, 'y')
   const firstPosition = generateKeyBetween(null, null) // "a0"
-  let list, listPositions
-  if (target.listId) {
-    // TODO handle: if target is already in list, skip creating new list, move cards into list
-    list = listStore.getList(target.listId)
-    console.log('📮📮📮📮prev LIST', list)
-  } else {
-    // create new list
-    list = {
-      id: nanoid(),
-      y: target.y - consts.listInfoHeight,
-      x: target.x - consts.listPadding
-    }
-    listStore.createList({ list })
-    await nextTick()
-    // add target to list
-    cardStore.updateCard({
-      id: target.id,
-      listId: list.id,
-      listPositionIndex: firstPosition
-    })
+  if (target.listId) { return }
+  // create new list
+  const list = {
+    id: nanoid(),
+    y: target.y - consts.listInfoHeight,
+    x: target.x - consts.listPadding
   }
+  listStore.createList({ list })
+  await nextTick()
+  // add target to list
+  cardStore.updateCard({
+    id: target.id,
+    listId: list.id,
+    listPositionIndex: firstPosition
+  })
   // add cards to list
+  let listPositions
   if (side === 'top') {
     listPositions = generateNKeysBetween(null, firstPosition, cards.length)
   } else if (side === 'bottom') {
@@ -576,7 +578,8 @@ const checkIfShouldSnapToCard = async (event) => {
       listPositionIndex: listPositions[index]
     }
   })
-  console.log('🥀🥀🥀🥀', listPositions, updates, listPositions.sort())
+  // listStore.addCards(updates)
+  // listStore.removeCards(updates) // TODO after drag complete if card is not in list, but was previously
   cardStore.updateCards(updates)
 }
 const resizeLists = async () => {
@@ -1054,8 +1057,8 @@ const updateMetaRSSFeed = () => {
     Boxes
     Connections
     #box-infos
-    #list-infos
     Cards
+    #list-infos
     Lines
     Lists
     ItemUnlockButtons
