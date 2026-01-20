@@ -333,16 +333,14 @@ const colorIsDark = computed(() => {
 //   return value
 // })
 const listStyles = computed(() => {
-  const { x, y, z } = props.list
+  const { x, y, z, height } = props.list
   const width = props.list.resizeWidth
   const styles = {
     left: x + 'px',
     top: y + 'px',
     zIndex: z || 1,
     width: width + 'px',
-
-    // todo move to box bk
-    // ?border: `${borderWidth}px solid ${color.value}`,
+    height: height + 'px',
     backgroundColor: color.value
   }
   return styles

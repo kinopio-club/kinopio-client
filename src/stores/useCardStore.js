@@ -965,6 +965,7 @@ export const useCardStore = defineStore('cards', {
 
     async updateCardPositionsInList (list) {
       const listStore = useListStore()
+      const globalStore = useGlobalStore()
       const cards = this.getCardsByList(list.id)
       const updates = []
       const originY = list.y + consts.listInfoHeight + consts.listPadding
@@ -982,11 +983,9 @@ export const useCardStore = defineStore('cards', {
         updates.push(update)
       })
       this.updateCards(updates)
-
-      // TODO
       listStore.updateListDimensions(list)
-      // gets cards in list
-      // then updates list size based on last card
+      globalStore.clearDraggingItems()
+      globalStore.clearMultipleSelected()
     },
     async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
       try {

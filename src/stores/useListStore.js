@@ -14,6 +14,7 @@ import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
+import last from 'lodash-es/last'
 
 export const useListStore = defineStore('lists', {
   state: () => ({
@@ -275,10 +276,15 @@ export const useListStore = defineStore('lists', {
       connectionStore.updateConnectionPathsByItemIds(ids)
       this.updateLists(updates)
     },
-    updateListDimensions (list) {
-      // TODO
-      // gets cards in list
-      // then updates list height based on last card
+    updateListDimensions (list, cards) {
+      const cardStore = useCardStore()
+      cards = cards || cardStore.getCardsByList(list.id)
+      const card = last(cards)
+      const listHeight = (card.y - list.y) + card.height + consts.listPadding
+      this.updateList({
+        id: list.id,
+        height: listHeight
+      })
     },
 
     // list details
