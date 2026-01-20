@@ -323,7 +323,8 @@ const updateItem = (item, type) => {
 }
 const updateCardDimensions = async () => {
   await nextTick()
-  cardStore.updateCardsDimensions(props.cards)
+  const ids = props.cards.map(card => card.id)
+  await cardStore.updateCardsDimensions(ids)
   await nextTick()
   await nextTick()
 }

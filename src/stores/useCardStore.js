@@ -19,6 +19,7 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 
 let tallestCardHeight = 0
 
@@ -817,7 +818,7 @@ export const useCardStore = defineStore('cards', {
         utils.clearAllCardDimensions({ id })
       })
       this.updateCards(updates)
-      this.updateCardsDimensions(ids)
+      await this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
       connectionStore.updateConnectionPathsByItemIds(ids)
@@ -958,6 +959,51 @@ export const useCardStore = defineStore('cards', {
       })
     },
 
+    // list
+
+    async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
+      try {
+        const ids = cards.map(card => card.id)
+        await this.updateCardsDimensions(ids)
+        // get list positions
+        let listPositions
+        if (shouldPrepend) {
+          listPositions = generateNKeysBetween(null, targetPositionIndex, cards.length)
+        } else {
+          listPositions = generateNKeysBetween(targetPositionIndex, null, cards.length)
+        }
+        // get target card
+        let target = this.getCardsByList(list.id)
+        target = target.find(card => card.listPositionIndex === targetPositionIndex)
+
+        // TODO add cards to list w listId, listPositionIndex
+        // THEN sort and position cards in list
+
+        const updates = cards.map((card, index) => {
+          // y from target card
+          let y = list.y + consts.listInfoHeight + consts.listPadding
+          if (target) {
+            y = target.y + target.height + consts.listPadding
+          }
+          // position cards inside list
+          return {
+            id: card.id,
+            listId: list.id,
+            listPositionIndex: listPositions[index],
+            resizeWidth: list.resizeWidth - (consts.listPadding * 2),
+            x: list.x + consts.listPadding,
+            y
+          }
+        })
+        this.updateCards(updates)
+        await nextTick()
+        await this.updateCardsDimensions(ids)
+      } catch (error) {
+        console.error('🚒 addCardsToList', error)
+      }
+    },
+    // async removeCardsFromList (cards)
+
     // snap guides
 
     createCardSnapGuide ({ side, item, targetCard, cursor }) {
@@ -1046,33 +1092,6 @@ export const useCardStore = defineStore('cards', {
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       this.cardSnapGuides = snapGuides
     }
-  },
-
-  // list
-
-  // position/update/normalize cards snapped into new list
-  async addCardsToList (updates) {
-  //   const userStore = useUserStore()
-  //   const spaceStore = useSpaceStore()
-    try {
-      // [] id: card.id,
-      // listId: list.id,
-      // listPositionIndex: listPositions[index]
-
-      //     // change resizeWidth to list
-      //     // update x and y
-
-      this.updateCards(updates)
-
-      //     // recalc card size
-    } catch (error) {
-      console.error('🚒 addCardsToList', error, updates)
-    }
   }
 
-  // addCardToList (update) {
-  //   this.addCardsToList([update])
-  // },
-
-  // async removeCardsFromList
 })

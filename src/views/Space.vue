@@ -545,11 +545,19 @@ const checkIfShouldSnapToCard = async (event) => {
   if (!cardStore.cardSnapGuides.length) { return }
   if (!globalStore.itemSnappingIsReady) { return }
   if (event.shiftKey) { return }
-  const { target, side, item } = cardStore.cardSnapGuides[0]
+  let { target, side, item } = cardStore.cardSnapGuides[0]
+
+  // TODO block drag card out of list
+  // const isRemovedFromList = target.listId && !listStore.listSnapGuides.listId
+  // if (target.listId) { return } // checkIfShouldSnapToList instead
+  // if (isRemovedFromList) {
+  //   // TODO remove listId, listPos if cards previously was in list, and now !listStore.listSnapGuides
+  //   // cardStore.removeCardsFromList(cards)
+  // reset resizeWidth
+  //   return
+  // }
+
   let cards = cardStore.getCardsSelected
-  cards = sortBy(cards, 'y')
-  const firstPosition = generateKeyBetween(null, null) // "a0"
-  if (target.listId) { return }
   // create new list
   const list = {
     id: nanoid(),
@@ -557,31 +565,16 @@ const checkIfShouldSnapToCard = async (event) => {
     x: target.x - consts.listPadding
   }
   listStore.createList({ list })
-  await nextTick()
   // add target to list
-  cardStore.updateCard({
-    id: target.id,
-    listId: list.id,
-    listPositionIndex: firstPosition
-  })
-  // add cards to list
-  let listPositions
-  if (side === 'top') {
-    listPositions = generateNKeysBetween(null, firstPosition, cards.length)
-  } else if (side === 'bottom') {
-    listPositions = generateNKeysBetween(firstPosition, null, cards.length)
-  }
-  const updates = cards.map((card, index) => {
-    return {
-      id: card.id,
-      listId: list.id,
-      listPositionIndex: listPositions[index]
-    }
-  })
-  cardStore.addCardsToList(updates)
-  // listStore.addCards(updates)
-  // listStore.removeCards(updates) // TODO after drag complete if card is not in list, but was previously
-  // cardStore.updateCards(updates)
+  await nextTick()
+  await cardStore.addCardsToList({ cards: [target], list, targetPositionIndex: null })
+  await nextTick()
+  // add dragging cards to list
+  cards = sortBy(cards, 'y')
+  target = cardStore.getCard(target.id)
+  const targetPositionIndex = target.listPositionIndex
+  const shouldPrepend = side === 'top'
+  await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
 }
 const resizeLists = async () => {
   if (!prevCursor) { return }
