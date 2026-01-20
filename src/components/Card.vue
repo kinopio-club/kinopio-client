@@ -425,6 +425,9 @@ const cardWrapStyle = computed(() => {
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
+  if (globalStore.itemSnappingIsReady && currentCardIsBeingDragged.value) {
+    styles.opacity = 0.8
+  }
   styles = updateStylesWithWidth(styles)
   return styles
 })

@@ -358,6 +358,14 @@ const listStyles = computed(() => {
 //   }
 //   return styles
 // })
+// const listSnapGuideStyles = computed(() => {
+//   // if (!state.isDraggingCardOverList) { return }
+//   const isDark = utils.colorIsDark(props.list.color)
+//   const color = utils.alternateColor(props.list.color, isDark, 0.075)
+//   return {
+//     backgroundColor: color
+//   }
+// })
 const classes = computed(() => {
   return {
     hover: state.isHover,
@@ -459,11 +467,9 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   const shouldSnap = listId === props.list.id
   const shouldCancel = listId !== prevValue.listId
   if (shouldSnap) {
-    state.isHover = true
     state.isDraggingCardOverList = true
     globalStore.itemSnappingIsReady = true
   } else if (shouldCancel) {
-    state.isHover = false
     state.isDraggingCardOverList = false
     globalStore.itemSnappingIsReady = false
   }
@@ -537,8 +543,8 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     )
 
       .list-snap-guide(v-if="!listCards.length" :class="{ active: state.isDraggingCardOverList }")
-        //- style
-         //-  has user color, like item snap
+         //- :style="listSnapGuideStyles"
+
          //- positioned at target listPositionIndex
       //- template(v-if="listCards.length")
       //-   template(v-if="card in listCards" :key="card.id")
@@ -587,7 +593,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   min-height 14px
   position absolute
   padding 8px // consts.listPadding
-  padding-top 34px // consts.listInfoHeight
+  padding-top 42px // consts.listInfoHeight + consts.listPadding
   border-radius var(--entity-radius)
   &.hover
     box-shadow var(--hover-shadow)
@@ -600,6 +606,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     border-radius var(--entity-radius)
     background-color var(--light-shadow)
     box-shadow var(--button-active-inset-shadow)
+    transform-origin center
     &.active
       animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
   // .placeholder
@@ -683,5 +690,5 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
 
 @keyframes listSnapGuide
   50%
-    transform translateY(2px)
+    transform scaleY(150%)
 </style>
