@@ -463,6 +463,7 @@ const resetWidth = () => {
 // snapping
 
 watch(() => listStore.listSnapGuides, (value, prevValue) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
   const { listId, listPositionIndex } = value
   const shouldSnap = listId === props.list.id
   const shouldCancel = listId !== prevValue.listId

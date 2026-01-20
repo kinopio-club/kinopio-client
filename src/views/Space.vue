@@ -533,6 +533,7 @@ const checkIfShouldSnapToList = async (event) => {
   console.log('🌺🌺🌺', listStore.listSnapGuides)
 }
 const checkIfShouldSnapToCard = async (event) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.preventItemSnapping) { return }
   if (!cardStore.cardSnapGuides.length) { return }
   if (event.shiftKey) { return }
