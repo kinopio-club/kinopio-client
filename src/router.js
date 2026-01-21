@@ -172,38 +172,32 @@ const router = {
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
+        const spaceStore = useSpaceStore()
         const urlParams = new URLSearchParams(window.location.search)
+        const spaceId = urlParams.get('spaceId')
+        globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
         if (urlParams.get('present')) {
           globalStore.isPresentationMode = true
         }
         if (urlParams.get('comment')) {
           globalStore.isCommentMode = true
         }
-        const spaceId = urlParams.get('spaceId')
-        const collaboratorKey = urlParams.get('collaboratorKey')
-        const readOnlyKey = urlParams.get('readOnlyKey')
+        if (urlParams.get('collaboratorKey')) {
+          globalStore.spaceCollaboratorKey = { spaceId, key: urlParams.get('collaboratorKey') }
+        }
+        if (urlParams.get('readOnlyKey')) {
+          globalStore.spaceReadOnlyKey = { spaceId, key: urlParams.get('readOnlyKey') }
+        }
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
-        await userStore.initializeUser()
-        globalStore.isLoadingSpace = true
-        if (!spaceId) {
-          globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
-          next()
-          return
-        }
         globalStore.isPresentationMode = isPresentationMode
-        // edit
-        if (collaboratorKey) {
-          await inviteToEdit({ spaceId, collaboratorKey })
-        // read only
-        } else if (readOnlyKey) {
-          inviteToReadOnly({ next, spaceId, readOnlyKey })
-        // error
-        } else {
+        await spaceStore.updateSpaceCollaborator()
+        const isInvalid = !globalStore.collaboratorKey && !globalStore.spaceReadOnlyKey
+        if (isInvalid || !spaceId) {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
         }
-        // load space
+        globalStore.isLoadingSpace = true
         next()
       }
     }, {
@@ -225,36 +219,3 @@ const router = {
 }
 
 export default router
-
-const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
-  const globalStore = useGlobalStore()
-  const userStore = useUserStore()
-  const apiStore = useApiStore()
-  const isSignedIn = userStore.getUserIsSignedIn
-  if (!isSignedIn) {
-    globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
-    globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
-    globalStore.currentUserIsInvitedButCannotEditCurrentSpace = true
-    return
-  }
-  // join
-  try {
-    await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey })
-    globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
-    globalStore.addNotification({ message: 'You can now edit this space', type: 'success' })
-    globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
-  } catch (error) {
-    console.error('🚒 inviteToEdit', error)
-    if (error.status === 401) {
-      globalStore.addNotification({ message: 'Space could not be found, or your invite was invalid', type: 'danger' })
-    } else {
-      globalStore.addNotification({ message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
-    }
-  }
-}
-
-const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
-  const globalStore = useGlobalStore()
-  globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
-  globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }
-}
