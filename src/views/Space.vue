@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -20,6 +21,7 @@ import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import LineDetails from '@/components/dialogs/LineDetails.vue'
+// import ListDetails from '@/components/dialogs/ListDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -29,9 +31,10 @@ import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Lines from '@/components/Lines.vue'
+import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
-import SnapGuideLines from '@/components/SnapGuideLines.vue'
+import AxisGuideLines from '@/components/AxisGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
@@ -60,12 +63,15 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+import { nanoid } from 'nanoid'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -87,6 +93,8 @@ window.globalStore = useGlobalStore()
 window.cardStore = useCardStore()
 window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
+window.lineStore = useLineStore()
+window.listStore = useListStore()
 window.spaceStore = useSpaceStore()
 window.changelogStore = useChangelogStore()
 window.themeStore = useThemeStore()
@@ -229,6 +237,8 @@ const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
+const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
+const isResizingList = computed(() => globalStore.currentUserIsResizingList)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -246,6 +256,9 @@ watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsDraggingLine, (value, prevValue) => {
+  updatePageSizes(value)
+})
+watch(() => globalStore.currentUserIsDraggingList, (value, prevValue) => {
   updatePageSizes(value)
 })
 const updatePageSizes = async (value) => {
@@ -456,13 +469,14 @@ const stopResizingBoxes = () => {
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
   // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
-const checkIfShouldExpandBoxes = (event) => {
+const checkIfShouldSnapToBox = (event) => {
+  if (globalStore.preventItemSnapping) { return }
   if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    if (!globalStore.notifyBoxSnappingIsReady) { return }
+    if (!globalStore.itemSnappingIsReady) { return }
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
@@ -492,6 +506,138 @@ const updateSizeForNewBox = (boxId) => {
   boxStore.updateBox(update)
 }
 
+// lists
+
+// const addList = (event) => {
+//   let position = utils.cursorPositionInSpace(event)
+//   if (utils.isPositionOutsideOfSpace(position)) {
+//     position = utils.cursorPositionInPage(event)
+//     globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+//     return
+//   }
+//   userStore.notifyReadOnly(position)
+//   const shouldPrevent = !userStore.getUserCanEditSpace
+//   if (shouldPrevent) {
+//     globalStore.updateCurrentUserToolbar('card')
+//     return
+//   }
+//   const isResizing = true
+//   listStore.createList({ position, isResizing })
+//   globalStore.currentListIsNew = true
+//   event.preventDefault() // allows dragging lists without scrolling on touch
+// }
+const checkIfShouldSnapToList = async (event) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.preventItemSnapping) { return }
+  if (!listStore.listSnapGuides.listId) { return }
+  if (event.shiftKey) { return }
+
+  // ?? should use card snap guides for middle list snap?
+  // const { target, side, item } = cardStore.cardSnapGuides[0]
+
+  // OR use listStore.listSnapGuides.listPositionIndex
+
+  console.log('🌺🌺🌺checkIfShouldSnapToList', listStore.listSnapGuides)
+}
+const checkIfShouldSnapToCard = async (event) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.preventItemSnapping) { return }
+  if (!cardStore.cardSnapGuides.length) { return }
+  if (!globalStore.itemSnappingIsReady) { return }
+  if (event.shiftKey) { return }
+  let { target, side, item } = cardStore.cardSnapGuides[0]
+
+  // TODO block drag card out of list
+  // const isRemovedFromList = target.listId && !listStore.listSnapGuides.listId
+  if (target.listId) { return } // ?? use checkIfShouldSnapToList instead?
+
+  // if (isRemovedFromList) { or remove dragged items from list calling checkIfShouldSnapToCard()
+  //   // TODO remove listId, listPos if cards previously was in list, and now !listStore.listSnapGuides
+  //   // cardStore.removeCardsFromList(cards)
+  // reset resizeWidth
+  //   return
+  // }
+
+  let cards = cardStore.getCardsSelected
+  // create new list
+  const list = {
+    id: nanoid(),
+    y: target.y - consts.listInfoHeight,
+    x: target.x - consts.listPadding
+  }
+  listStore.createList({ list })
+  // add target to list
+  await nextTick()
+  await cardStore.addCardsToList({ cards: [target], list, targetPositionIndex: null })
+  await nextTick()
+  // add dragging cards to list
+  cards = sortBy(cards, 'y')
+  target = cardStore.getCard(target.id)
+  const targetPositionIndex = target.listPositionIndex
+  const shouldPrepend = side === 'top'
+  await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
+}
+const resizeLists = async () => {
+  if (!prevCursor) { return }
+  const lists = listStore.getListsResizing
+  const ids = lists.map(list => list.id)
+
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  let delta = {
+    x: endCursor.x - prevCursor.x,
+    y: endCursor.y - prevCursor.y
+  }
+  delta = {
+    x: Math.round(delta.x * zoom),
+    y: Math.round(delta.y * zoom)
+  }
+  listStore.resizeLists(ids, delta)
+  await nextTick()
+  globalStore.updatePageSizes()
+}
+const stopResizingLists = () => {
+  if (!globalStore.currentUserIsResizingList) { return }
+  globalStore.currentUserIsResizingList = false
+  globalStore.updateCurrentUserToolbar('card')
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingLists' })
+  // globalStore.checkIfItemShouldIncreasePageSize(lists[0])
+}
+const checkIfShouldExpandLists = (event) => {
+  if (!globalStore.cardsWereDragged && !globalStore.listsWereDragged) { return }
+  if (event.shiftKey) { return }
+  const snapGuides = listStore.listSnapGuides
+  if (!snapGuides.length) { return }
+  snapGuides.forEach(snapGuide => {
+    if (!globalStore.notifyListSnappingIsReady) { return }
+    listStore.updateListSnapToSize(snapGuide)
+  })
+}
+const unselectCardsInDraggedList = () => {
+  if (!globalStore.currentDraggingListId) { return }
+  if (globalStore.multipleListsSelectedIds.length) { return }
+  globalStore.clearMultipleSelected()
+}
+const showListDetails = async (event) => {
+  if (!globalStore.currentListIsNew) { return }
+  if (utils.isMobile()) { return }
+  const listId = globalStore.currentUserIsResizingListIds[0]
+  await nextTick()
+  await nextTick()
+  updateSizeForNewList(listId)
+  globalStore.updateListDetailsIsVisibleForListId(listId)
+}
+const updateSizeForNewList = (listId) => {
+  const list = listStore.getList(listId)
+  const isMinSize = list.resizeWidth === consts.minListSize && list.resizeHeight === consts.minListSize
+  if (!isMinSize) { return }
+  const update = {
+    id: list.id,
+    resizeWidth: consts.defaultListWidth,
+    resizeHeight: consts.defaultListHeight
+  }
+  listStore.updateList(update)
+}
+
 // drag items
 
 const dragItemsOnNextTick = async () => {
@@ -514,8 +660,11 @@ const dragItems = () => {
   boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
   // lines
   lineStore.moveLines({ endCursor, prevCursor })
+  // lists
+  listStore.moveLists({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
+  const isMeta = event.metaKey || event.ctrlKey
   const isInitialDrag = !globalStore.boxesWereDragged
   if (isInitialDrag) {
     const updates = {
@@ -523,8 +672,8 @@ const dragBoxes = (event) => {
       userId: userStore.id
     }
     broadcastStore.update({ updates, action: 'addToRemoteBoxesDragging' })
-    // alt-drag box to move without selecting items inside
-    if (!event.altKey) {
+    // meta-key-drag box to move without selecting items inside
+    if (!isMeta) {
       boxStore.selectItemsInSelectedBoxes()
     }
   }
@@ -587,7 +736,16 @@ const updateCardDetailsWidth = (event) => {
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value || isResizingCardDetails.value
+  return (
+    isDraggingCard.value ||
+    isDrawingConnection.value ||
+    isResizingCard.value ||
+    isResizingBox.value ||
+    isDraggingBox.value ||
+    isDraggingLine.value ||
+    isDraggingList.value ||
+    isResizingCardDetails.value
+  )
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -646,7 +804,7 @@ const updateShouldSnapToGrid = (event) => {
   // update snap guide line origin
   if (!globalStore.shouldSnapToGrid && shouldSnap) {
     const item = state.currentInteractingItem
-    globalStore.snapGuideLinesOrigin = {
+    globalStore.axisGuideLinesOrigin = {
       x: item.x,
       y: item.y
     }
@@ -669,7 +827,9 @@ const interact = (event) => {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
-  } else if (isDraggingLine.value) {
+  } else if (isResizingList.value) {
+    resizeLists()
+  } else if (isDraggingLine.value || isDraggingList.value) {
     dragItems()
   } else if (isResizingCardDetails.value) {
     updateCardDetailsWidth(event)
@@ -685,6 +845,8 @@ const checkShouldShowDetails = () => {
     globalStore.preventDraggedBoxFromShowingDetails = true
   } else if (isDraggingLine.value) {
     globalStore.preventDraggedLineFromShowingDetails = true
+  } else if (isDraggingList.value) {
+    globalStore.preventDraggedListFromShowingDetails = true
   }
 }
 const eventIsFromTextarea = (event) => {
@@ -733,8 +895,11 @@ const stopInteractions = async (event) => {
     globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldExpandBoxes(event)
-  boxStore.boxSnapGuides = []
+  checkIfShouldSnapToBox(event)
+  checkIfShouldSnapToCard(event)
+  checkIfShouldSnapToList(event)
+  globalStore.clearSnapGuides()
+  globalStore.preventItemSnapping = false
   if (shouldCancelInteraction(event)) {
     globalStore.currentUserIsResizingCardDetails = false
     return
@@ -748,17 +913,21 @@ const stopInteractions = async (event) => {
   globalStore.shouldAddCard = false
   globalStore.preventDraggedCardFromShowingDetails = false
   globalStore.preventDraggedBoxFromShowingDetails = false
+  globalStore.preventDraggedListFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
+  stopResizingLists()
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
+  globalStore.currentUserIsDraggingList = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false
+  globalStore.listsWereDragged = false
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   globalStore.currentUserIsResizingCardDetails = false
@@ -879,15 +1048,19 @@ const updateMetaRSSFeed = () => {
     #drawing-strokes-background
     ItemsLocked
     #box-backgrounds
+    #list-contents
     Boxes
     Connections
     #box-infos
     Cards
+    #list-infos
     Lines
+    Lists
     ItemUnlockButtons
     DrawingStrokes
     BoxDetails
     LineDetails
+    //- ListDetails
     CardDetails
     OtherCardDetails
     ConnectionDetails
@@ -896,7 +1069,7 @@ const updateMetaRSSFeed = () => {
     ScrollAtEdgesHandler
     NotificationsWithPosition(layer="space")
     BoxSelecting
-    SnapGuideLines
+    AxisGuideLines
   aside
     PaintSelectCanvas
     DrawingHandler
@@ -947,4 +1120,10 @@ const updateMetaRSSFeed = () => {
     border-radius var(--entity-radius)
     position absolute
     z-index 0 !important
+
+#list-infos,
+#list-contents
+  position absolute
+#list-contents
+  z-index 0
 </style>

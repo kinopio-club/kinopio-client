@@ -18,6 +18,7 @@
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
     "dayjs": "^1.9.1",
+    "fractional-indexing": "^3.2.0",
     "idb-keyval": "^6.2.1",
     "lean-qr": "^2.6.0",
     "lodash-es": "^4.17.15",

@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -18,13 +19,15 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 
 let tallestCardHeight = 0
 
 export const useCardStore = defineStore('cards', {
   state: () => ({
     byId: {},
-    allIds: []
+    allIds: [],
+    cardSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
   getters: {
@@ -86,6 +89,18 @@ export const useCardStore = defineStore('cards', {
       ids = ids.filter(id => Boolean(id))
       const cards = ids.map(id => this.byId[id])
       return cards
+    },
+    getCardIdsGroupedByList () {
+      const cards = this.getAllCards
+      const result = {}
+      for (const card of cards) {
+        if (!card.listId) continue
+        if (!result[card.listId]) {
+          result[card.listId] = []
+        }
+        result[card.listId].push(card.id)
+      }
+      return result // { listId: [id1, id2], .. }
     },
     getCommentCards () {
       const cards = this.getAllCards.filter(card => {
@@ -158,6 +173,14 @@ export const useCardStore = defineStore('cards', {
 
     getCard (id) {
       return this.byId[id]
+    },
+    getCardsByList (listId) {
+      const cardsByList = this.getCardIdsGroupedByList
+      const cardIds = cardsByList[listId]
+      if (!cardIds) { return [] }
+      let cards = cardIds.map(id => this.getCard(id))
+      cards = sortBy(cards, 'listPositionIndex')
+      return cards
     },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
@@ -521,6 +544,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+      const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       if (globalStore.shouldSnapToGrid) {
@@ -552,6 +576,8 @@ export const useCardStore = defineStore('cards', {
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
+      this.updateCardSnapGuides({ items: cards, cursor: endCursor })
+      listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -794,7 +820,7 @@ export const useCardStore = defineStore('cards', {
         utils.clearAllCardDimensions({ id })
       })
       this.updateCards(updates)
-      this.updateCardsDimensions(ids)
+      await this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
       connectionStore.updateConnectionPathsByItemIds(ids)
@@ -933,7 +959,153 @@ export const useCardStore = defineStore('cards', {
           return tags.includes(tagName)
         }
       })
-    }
+    },
 
+    // list
+
+    async updateCardPositionsInList (list) {
+      const listStore = useListStore()
+      const globalStore = useGlobalStore()
+      const cards = this.getCardsByList(list.id)
+      const updates = []
+      const originY = list.y + consts.listInfoHeight
+      cards.forEach((card, index) => {
+        const update = {
+          id: card.id,
+          x: list.x + consts.listPadding,
+          y: originY,
+          height: card.height
+        }
+        if (index > 0) {
+          const prevCard = updates[index - 1]
+          update.y = prevCard.y + prevCard.height + consts.listPadding
+        }
+        updates.push(update)
+      })
+      this.updateCards(updates)
+      listStore.updateListDimensions(list)
+      globalStore.clearDraggingItems()
+      globalStore.clearMultipleSelected()
+    },
+    async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
+      try {
+        const ids = cards.map(card => card.id)
+        await this.updateCardsDimensions(ids)
+        // get positions
+        let targetPositionIndexes
+        if (shouldPrepend) {
+          targetPositionIndexes = generateNKeysBetween(null, targetPositionIndex, cards.length)
+        } else {
+          targetPositionIndexes = generateNKeysBetween(targetPositionIndex, null, cards.length)
+        }
+        // add cards to list
+        const updates = cards.map((card, index) => {
+          return {
+            id: card.id,
+            listId: list.id,
+            listPositionIndex: targetPositionIndexes[index],
+            tilt: 0,
+            resizeWidth: list.resizeWidth - (consts.listPadding * 2)
+          }
+        })
+        this.updateCards(updates)
+        await nextTick()
+        await this.updateCardsDimensions(ids)
+        this.updateCardPositionsInList(list)
+      } catch (error) {
+        console.error('🚒 addCardsToList', error)
+      }
+    },
+    // async removeCardsFromList (cards)
+
+    // snap guides
+
+    createCardSnapGuide ({ side, item, targetCard, cursor }) {
+      let time = Date.now()
+      const prevGuide = this.cardSnapGuides.find(guide => guide.side === side)
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      let distance, sizeOutside
+      // can only snap to target card top or bottom
+      if (side === 'top') {
+        distance = Math.abs(cursor.y - targetCard.y)
+        sizeOutside = Math.abs(targetCard.y - item.y)
+      } else if (side === 'bottom') {
+        distance = Math.abs(cursor.y - (targetCard.y + targetCard.height))
+        sizeOutside = Math.abs((targetCard.y + targetCard.height) - (item.y + item.height))
+      } else {
+        return
+      }
+      return { side, item, target: targetCard, time, distance, sizeOutside }
+    },
+    updateCardSnapGuides ({ items, cursor }) {
+      const globalStore = useGlobalStore()
+      if (globalStore.preventItemSnapping) { return }
+      if (!items.length) { return }
+      if (globalStore.shouldSnapToGrid) { return }
+      const snapThreshold = 10
+      const spaceEdgeThreshold = 100
+      const targetCards = this.getCardsSelectableInViewport()
+      const prevSnapGuides = globalStore.snapGuides
+      let snapGuides = []
+      // find
+      const card = this.getCard(globalStore.currentDraggingCardId) // only current dragging card can snap
+      if (!card) { return }
+      targetCards.forEach(target => {
+        if (target.id === card.id) { return }
+        const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
+        if (isTargetSelected) { return }
+        // assign card sides
+        const cardLeft = card.x
+        const cardRight = card.x + card.width
+        const cardTop = card.y
+        const cardBottom = card.y + card.height
+        // assign target sides
+        const targetLeft = target.x
+        const targetRight = target.x + target.width
+        const targetTop = target.y
+        const targetBottom = target.y + target.height
+        const targetIsMinX = target.x <= spaceEdgeThreshold
+        const targetIsMinY = target.y <= spaceEdgeThreshold
+        // card side is on target edge
+        const cardIsOverTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
+        const cardIsOverTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })
+        const cardIsOverTargetLeft = utils.isBetween({ value: targetLeft, min: cardLeft, max: cardRight })
+        const cardIsOverTargetRight = utils.isBetween({ value: targetRight, min: cardLeft, max: cardRight })
+        // card inside target
+        const cardLeftIsInsideTarget = utils.isBetween({ value: cardLeft, min: targetLeft, max: targetRight })
+        const cardRightIsInsideTarget = utils.isBetween({ value: cardRight, min: targetLeft, max: targetRight })
+        const cardTopIsInsideTarget = utils.isBetween({ value: cardTop, min: targetTop, max: targetBottom })
+        const cardBottomIsInsideTarget = utils.isBetween({ value: cardBottom, min: targetTop, max: targetBottom })
+        // snap top
+        if (cardIsOverTargetTop && (cardLeftIsInsideTarget || cardRightIsInsideTarget)) {
+          const snapGuide = this.createCardSnapGuide({ side: 'top', item: card, targetCard: target, cursor })
+          snapGuides.push(snapGuide)
+        }
+        // snap bottom
+        if (cardIsOverTargetBottom && (cardLeftIsInsideTarget || cardRightIsInsideTarget)) {
+          const snapGuide = this.createCardSnapGuide({ side: 'bottom', item: card, targetCard: target, cursor })
+          snapGuides.push(snapGuide)
+        }
+      })
+      snapGuides = sortBy(snapGuides, ['distance'])
+      // limit card to it's closest target
+      const normalizedGuides = {}
+      snapGuides.forEach(snapGuide => {
+        const itemGuide = normalizedGuides[snapGuide.item.id]
+        if (itemGuide) {
+          if (snapGuide.distance < itemGuide.distance) {
+            normalizedGuides[snapGuide.item.id] = snapGuide
+          }
+        } else {
+          normalizedGuides[snapGuide.item.id] = snapGuide
+        }
+      })
+      const normalizedGuideKeys = Object.keys(normalizedGuides)
+      snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
+      this.cardSnapGuides = snapGuides
+    }
   }
+
 })

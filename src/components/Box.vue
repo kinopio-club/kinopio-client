@@ -86,10 +86,7 @@ const state = reactive({
   remoteConnectionColor: ''
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
-const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserColor = computed(() => userStore.color)
 const name = computed(() => props.box.name)
 const currentBoxIsSelected = computed(() => {
   const selected = globalStore.multipleBoxesSelectedIds
@@ -99,17 +96,15 @@ const currentBoxIsSelected = computed(() => {
 // normalize
 
 const normalizedBox = computed(() => {
-  return normalizeBox(props.box)
-})
-const normalizeBox = (box) => {
+  const box = props.box
   box.resizeWidth = box.resizeWidth || consts.minItemXY
   box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
-  box.color = box.color || randomColor({ luminosity: 'light' })
+  box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
   return box
-}
+})
 const normalizedName = computed(() => {
   // name without checkbox text
   let newName = name.value
@@ -315,7 +310,7 @@ const startResizing = (event) => {
   broadcastStore.update({ updates, action: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
-const resizeColorClass = computed(() => {
+const resizeButtonColorClass = computed(() => {
   const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
   return [colorClass]
 })
@@ -814,7 +809,7 @@ const clearFocus = () => {
       button.inline-button(
         tabindex="-1"
       )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 </template>
 
 <style lang="stylus">
@@ -860,9 +855,15 @@ const clearFocus = () => {
   --header-font var(--header-font-0)
   z-index 1
   border-radius 4px
+  border-bottom-right-radius var(--entity-radius)
   display flex
   align-items center
   width max-content
+  pointer-events all
+  position absolute
+  cursor pointer
+  word-break break-word
+  color var(--primary-on-light-background)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2
@@ -900,12 +901,6 @@ const clearFocus = () => {
       font-size 52px
     h3
       font-size 36px
-  pointer-events all
-  position absolute
-  cursor pointer
-  border-bottom-right-radius var(--entity-radius)
-  word-break break-word
-  color var(--primary-on-light-background)
   &:hover
     box-shadow var(--hover-shadow)
   &:active

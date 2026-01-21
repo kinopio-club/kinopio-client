@@ -258,6 +258,10 @@ const currentBackgroundColorIsDark = computed(() => {
   return utils.colorIsDark(color)
 })
 
+// list
+
+const isInList = computed(() => Boolean(props.card.listId))
+
 // comment
 
 const isComment = computed(() => cardStore.getIsCommentCard(props.card))
@@ -421,6 +425,9 @@ const cardWrapStyle = computed(() => {
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
+  if ((globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value) {
+    styles.opacity = 0.7
+  }
   styles = updateStylesWithWidth(styles)
   return styles
 })
@@ -579,6 +586,7 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
+  if (isInList.value) { return }
   if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
@@ -1460,6 +1468,7 @@ const showCardDetails = (event) => {
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
   if (globalStore.shouldSnapToGrid) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
@@ -1662,7 +1671,21 @@ const shouldNotStick = computed(() => {
   if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
-  return userIsConnecting || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard || isLocked.value
+  return (
+    userIsConnecting ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsResizingBox ||
+    currentUserIsPanning ||
+    currentCardDetailsIsVisible.value ||
+    isRemoteCardDetailsVisible.value ||
+    isRemoteCardDragging.value ||
+    currentCardIsBeingDragged.value ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsTiltingCard ||
+    isLocked.value ||
+    globalStore.currentUserIsDraggingList ||
+    globalStore.currentUserIsResizingList
+  )
 })
 const updateShouldNotStickMap = () => {
   stickyMap = []
@@ -2206,6 +2229,7 @@ const clearFocus = () => {
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
+  transition opacity 0.1s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-resizing,
   &.is-tilting
     *

@@ -244,8 +244,8 @@ export default {
     return {
       x: Math.round(rectPosition.x * zoom),
       y: Math.round(rectPosition.y * zoom),
-      width: Math.round(rect.width || rect.resizeWidth * zoom),
-      height: Math.round(rect.height || rect.resizeHeight * zoom)
+      width: Math.round((rect.width || rect.resizeWidth) * zoom),
+      height: Math.round((rect.height || rect.resizeHeight) * zoom)
     }
   },
   isPositionOutsideOfSpace (position) {
@@ -912,11 +912,14 @@ export default {
     if (!item) { return }
     const card = this.cardElementFromId(item.id)
     const box = this.boxElementFromId(item.id)
+    const list = this.listElementFromId(item.id)
     let rect
     if (card) {
       rect = this.cardElementDimensions(item)
     } else if (box) {
       rect = this.boxElementDimensions(item)
+    } else if (list) {
+      rect = this.listElementDimensions(item)
     }
     return rect
   },
@@ -1043,6 +1046,20 @@ export default {
     box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
+  listElementDimensions (list) {
+    if (!list) { return }
+    const element = this.listElementFromId(list.id)
+    if (!element) { return }
+    // list.shouldRender = element.dataset.shouldRender
+    list.x = parseInt(element.dataset.x)
+    list.y = parseInt(element.dataset.y)
+    list.width = parseInt(element.dataset.width)
+    list.height = parseInt(element.dataset.height)
+    if (element.dataset.isCollapsed === 'true') {
+      list.height = consts.listInfoHeight
+    }
+    return list
+  },
   clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
@@ -1149,13 +1166,24 @@ export default {
     return document.querySelector(`.line-info[data-line-id="${lineId}"]`)
   },
 
+  // lists
+
+  listElementFromId (listId) {
+    return document.querySelector(`.list[data-list-id="${listId}"]`)
+  },
+  listInfoRectFromId (listId) {
+    const element = document.querySelector(`.list-info[data-list-id="${listId}"]`)
+    const rect = element.getBoundingClientRect()
+    return this.rectDimensions(rect)
+  },
+
   // rect
 
   isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
       value: point.x,
       min: rect.x,
-      max: rect.x + rect.width
+      max: rect.x + (rect.width || rect.resizeWidth)
     })
     const yIsInside = this.isBetween({
       value: point.y,
@@ -1174,17 +1202,23 @@ export default {
     }
     return this.isRectAInsideRectB(rect, viewportRect)
   },
-  isRectAInsideRectB (rectA, rectB) {
-    // udpate rects to support space zoom
-    rectA = this.rectDimensions(rectA)
-    rectB = this.rectDimensions(rectB)
+  isNormalizedRectAInsideRectB (rectA, rectB) {
     // Check if any part of rectA intersects with rectB
+    rectA.width = rectA.width || rectA.resizeWidth
+    rectB.width = rectB.width || rectB.resizeWidth
     return (
       rectA.x < rectB.x + rectB.width &&
       rectA.x + rectA.width > rectB.x &&
       rectA.y < rectB.y + rectB.height &&
       rectA.y + rectA.height > rectB.y
     )
+  },
+  isRectAInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // Check if any part of rectA intersects with rectB
+    return this.isNormalizedRectAInsideRectB(rectA, rectB)
   },
   isRectACompletelyInsideRectB (rectA, rectB) {
     // udpate rects to support space zoom
@@ -1601,6 +1635,7 @@ export default {
       connectionTypes: [],
       boxes: [],
       lines: [],
+      lists: [],
       tags: [],
       users: [],
       userId: '',
@@ -1668,6 +1703,7 @@ export default {
       boxes = [],
       tags = [],
       lines = [],
+      lists = [],
       drawingStrokes = []
     } = items
     cards = cards.map(card => {
@@ -1691,6 +1727,17 @@ export default {
       box.id = newId
       box.userId = userId
       return box
+    })
+    lists = lists.map(list => {
+      const userId = this.itemUserId(user, list, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: list.id,
+        newId
+      })
+      list.id = newId
+      list.userId = userId
+      return list
     })
     lines = lines.map(line => {
       const userId = this.itemUserId(user, line, nullItemUsers)
@@ -1737,7 +1784,11 @@ export default {
       tag.userId = userId
       return tag
     })
-    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes }
+    cards = cards.map(card => {
+      card.listId = this.updateAllIds(card, 'listId', itemIdDeltas)
+      return card
+    })
+    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes, lists }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1794,7 +1845,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes']
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes', 'lists']
     itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {

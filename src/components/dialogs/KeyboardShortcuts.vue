@@ -141,12 +141,17 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.box-icon(src="@/assets/line.svg")
             span Insert Line Divider
-          .badge.keyboard-shortcut L
+          .badge.keyboard-shortcut –
         .row
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Box Mode
           .badge.keyboard-shortcut B
+        .row
+          .badge.title
+            //- TODO img.icon.box-icon(src="@/assets/box.svg")
+            span Line Mode
+          .badge.keyboard-shortcut L
         .row
           .badge.title
             img.icon.pencil(src="@/assets/pencil.svg")
@@ -260,6 +265,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.box-icon(src="@/assets/autoplay.svg")
+            span Duplicate Selected Boxes and Cards
+          .badge.keyboard-shortcut {{option}}-Drag
+      article
+        .row
+          .badge.title
             img.icon(src="@/assets/undo.svg")
             span Undo/Redo
           .badge.keyboard-shortcut {{meta}}-Z/{{meta}}-Shift-Z
@@ -303,7 +314,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Move Box Without Moving Cards
-          .badge.keyboard-shortcut {{option}}-Drag on Box
+          .badge.keyboard-shortcut {{meta}}-Drag on Box
       article
         .row
           .badge.title

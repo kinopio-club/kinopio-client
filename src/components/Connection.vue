@@ -444,7 +444,7 @@ watch(() => isActive.value, (value, prevValue) => {
   }, 10)
 })
 const isHovered = computed(() => {
-  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) { return }
   return props.connection.id === globalStore.currentUserIsHoveringOverConnectionId ||
     props.connection.id === globalStore.currentUserIsDraggingConnectionIdLabel ||
     isHoveredOverConnectedItem.value

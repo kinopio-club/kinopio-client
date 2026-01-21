@@ -161,6 +161,7 @@ const connectorButtonBackground = computed(() => {
 })
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
+  if (globalStore.currentUserIsDraggingList) { return }
   if (!utils.arrayHasItems(connectedConnectionTypes.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
     connectedToAnotherItemBeingDraggedColor.value ||

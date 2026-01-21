@@ -25,7 +25,7 @@ export default {
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,
-  boxSnapGuideWaitingDuration: 100,
+  itemSnapGuideWaitingDuration: 100,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   straightLineConnectionPathControlPoint: 'q00,00',
@@ -45,6 +45,8 @@ export default {
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
   lineInfoOffset: 11,
+  listPadding: 8,
+  listInfoHeight: 34,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

@@ -5,7 +5,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
@@ -208,7 +207,6 @@ export const useLineStore = defineStore('lines', {
       if (!canEditSpace) { return }
       for (const id of ids) {
         const line = this.getLine(id)
-        console.log(line)
         await apiStore.addToQueue({ name: 'removeLine', body: line })
       }
       this.removeLinesFromState(ids)
