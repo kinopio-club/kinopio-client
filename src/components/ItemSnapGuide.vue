@@ -67,7 +67,6 @@ const item = computed(() => props.box || props.card)
 // is snapping
 
 const currentSnapGuide = computed(() => {
-  if (listStore.listSnapGuides.listId) { return }
   let guides
   // snap to box
   if (props.box) {
@@ -222,6 +221,7 @@ const waitingAnimationFrame = (timestamp) => {
 
 <style lang="stylus">
 .item-snap-guide
+  z-index var(--max-z)
   --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-card
     --snap-guide-width 10px

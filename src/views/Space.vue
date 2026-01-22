@@ -540,6 +540,7 @@ const checkIfShouldSnapToCard = async (event) => {
   if (globalStore.preventItemSnapping) { return }
   if (!cardStore.cardSnapGuides.length) { return }
   if (!globalStore.itemSnappingIsReady) { return }
+  if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   let { target, side, item } = cardStore.cardSnapGuides[0]
 
