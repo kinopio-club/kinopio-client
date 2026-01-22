@@ -67,7 +67,6 @@ const item = computed(() => props.box || props.card)
 // is snapping
 
 const currentSnapGuide = computed(() => {
-  if (listStore.listSnapGuides.listId) { return }
   let guides
   // snap to box
   if (props.box) {
