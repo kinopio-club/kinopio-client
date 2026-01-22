@@ -340,22 +340,22 @@ const listStyles = computed(() => {
     top: y + 'px',
     zIndex: z || 1,
     width: width + 'px',
+    height: height + 'px'
+  }
+  return styles
+})
+const listBackgroundStyles = computed(() => {
+  const { x, y, z, height } = props.list
+  const width = props.list.resizeWidth
+  const styles = {
+    left: x + 'px',
+    top: y + 'px',
+    width: width + 'px',
     height: height + 'px',
     backgroundColor: color.value
   }
   return styles
 })
-// const infoStyles = computed(() => {
-//   const { x, y, resizeWidth } = normalizedList.value
-//   // x, y
-//   const styles = {
-//     left: x + 'px',
-//     top: y + 'px',
-//     maxWidth: resizeWidth + 'px',
-//     backgroundColor: color.value
-//   }
-//   return styles
-// })
 // const listSnapGuideStyles = computed(() => {
 //   // if (!state.isDraggingCardOverList) { return }
 //   const isDark = utils.colorIsDark(props.list.color)
@@ -382,12 +382,7 @@ const infoClasses = computed(() => {
   return classes
 })
 const infoStyles = computed(() => {
-  const { x, y } = props.list
-  const width = props.list.resizeWidth
   const styles = {
-    left: x + 'px',
-    top: y + 'px',
-    width: width + 'px',
     backgroundColor: color.value
   }
   return styles
@@ -488,56 +483,11 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   :class="classes"
   ref="listElement"
 )
-  teleport(to="#list-infos")
-    .list-info(
-      :data-list-id="list.id"
-      :class="infoClasses"
-      :style="infoStyles"
-      tabindex="0"
-
-      @mouseover="updateIsHover(true)"
-      @mouseleave="updateIsHover(false)"
-      @mousedown.left="startListInfoInteraction"
-
-      @mouseup.left="endListInfoInteraction"
-      @keyup.stop.enter="endListInfoInteraction"
-
-      @touchstart="startLocking"
-      @touchmove="updateCurrentTouchPosition"
-      @touchend="endListInfoInteractionTouch"
-    )
-      .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-      .row
-        //- toggle collapse
-        .inline-button-wrap
-          button.small-button.inline-button(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
-            img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
-            img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
-            span {{ listCards.length }}
-        //- add card
-        .inline-button-wrap
-          button.small-button.inline-button(title="Add Card" @click.left.stop="addCard")
-            img.icon.add(src="@/assets/add.svg")
-        span.name(:title="props.list.name") {{ props.list.name }}
-        //- resize collapsed
-        .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
-          .inline-button-wrap(
-              @pointerover="updateIsHover(true)"
-              @pointerleave="updateIsHover(false)"
-              @mousedown.left="startResizing"
-              @touchstart="startResizing"
-              @dblclick="resetWidth"
-            )
-            button.inline-button(
-              tabindex="-1"
-            )
-              img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
-
-  teleport(to="#list-contents")
-    .list-content(
+  teleport(to="#list-backgrounds")
+    .list-background(
       v-if="!props.list.isCollapsed"
       :data-list-id="list.id"
-      :style="listStyles"
+      :style="listBackgroundStyles"
       :class="classes"
     )
 
@@ -565,7 +515,50 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
             tabindex="-1"
           )
             img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+  //- teleport(to="#list-infos")
+  .list-info(
+    :data-list-id="list.id"
+    :class="infoClasses"
+    :style="infoStyles"
+    tabindex="0"
 
+    @mouseover="updateIsHover(true)"
+    @mouseleave="updateIsHover(false)"
+    @mousedown.left="startListInfoInteraction"
+
+    @mouseup.left="endListInfoInteraction"
+    @keyup.stop.enter="endListInfoInteraction"
+
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="endListInfoInteractionTouch"
+  )
+    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
+    .row
+      //- toggle collapse
+      .inline-button-wrap
+        button.small-button.inline-button(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
+          img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
+          img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
+          span {{ listCards.length }}
+      //- add card
+      .inline-button-wrap
+        button.small-button.inline-button(title="Add Card" @click.left.stop="addCard")
+          img.icon.add(src="@/assets/add.svg")
+      span.name(:title="props.list.name") {{ props.list.name }}
+      //- resize collapsed
+      .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+        .inline-button-wrap(
+            @pointerover="updateIsHover(true)"
+            @pointerleave="updateIsHover(false)"
+            @mousedown.left="startResizing"
+            @touchstart="startResizing"
+            @dblclick="resetWidth"
+          )
+          button.inline-button(
+            tabindex="-1"
+          )
+            img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 </template>
 
 <style lang="stylus">
@@ -576,6 +569,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   position absolute
   border-radius var(--entity-radius)
   min-width var(--min-list-width)
+  // pointer-events all
   // resize
   .bottom-button-wrap
     .inline-button-wrap
@@ -586,7 +580,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
         top 0
         left 0
 
-.list-content
+.list-background
   pointer-events all
   min-width var(--min-list-width)
   min-height 14px
@@ -594,6 +588,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   padding 8px // consts.listPadding
   padding-top 42px // consts.listInfoHeight + consts.listPadding
   border-radius var(--entity-radius)
+  // z-index -1 !important
   &.hover
     box-shadow var(--hover-shadow)
   &.active
@@ -623,8 +618,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   z-index 1
   display flex
   align-items center
-  width max-content
-  position absolute
+  width 100%
   border-radius var(--entity-radius)
   &.is-background-light
     color var(--primary-on-light-background)
