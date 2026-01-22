@@ -21,7 +21,7 @@ import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import LineDetails from '@/components/dialogs/LineDetails.vue'
-// import ListDetails from '@/components/dialogs/ListDetails.vue'
+import ListDetails from '@/components/dialogs/ListDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -1074,7 +1074,7 @@ const updateMetaRSSFeed = () => {
     DrawingStrokes
     BoxDetails
     LineDetails
-    //- ListDetails
+    ListDetails
     CardDetails
     OtherCardDetails
     ConnectionDetails
