@@ -531,13 +531,9 @@ const checkIfShouldSnapToListTop = async (event) => {
   if (globalStore.preventItemSnapping) { return }
   if (!listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
-
-  // ?? should use card snap guides for middle list snap?
-  // const { target, side, item } = cardStore.cardSnapGuides[0]
-
-  // OR use listStore.listSnapGuides.listPositionIndex
-
-  console.log('🌺🌺🌺checkIfShouldSnapToListTop', listStore.listSnapGuides)
+  const { listId, cards } = listStore.listSnapGuides
+  const list = listStore.getList(listId)
+  await cardStore.addCardsToList({ cards, list, targetPositionIndex: null, shouldPrepend: true })
 }
 const checkIfShouldSnapToCard = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
