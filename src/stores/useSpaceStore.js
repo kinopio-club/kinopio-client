@@ -157,12 +157,12 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
       const listStore = useListStore()
-      const cardColors = cardStore.getCardColors
-      const boxColors = boxStore.getboxColors
-      const lineColors = lineStore.getLineColors
-      const listColors = listStore.getListColors
-      const colors = cardColors.concat(boxColors).concat(lineColors).concat(listColors)
-      return uniq(colors)
+      return {
+        card: cardStore.getCardColors,
+        box: boxStore.getBoxColors,
+        line: lineStore.getLineColors,
+        list: listStore.getListColors
+      }
     },
     getSpaceTags () {
       return uniqBy(this.tags, 'name') || []

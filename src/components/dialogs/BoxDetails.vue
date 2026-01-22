@@ -180,7 +180,7 @@ const toggleTextEditAction = async (action) => {
 
 // colors
 
-const itemColors = computed(() => spaceStore.getSpaceItemColors)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.box)
 const colorisDark = computed(() => {
   const color = currentBox.value.color
   return utils.colorIsDark(color)

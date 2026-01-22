@@ -281,7 +281,7 @@ const color = computed(() => {
 const background = computed(() => {
   return props.backgroundColor || color.value
 })
-const itemColors = computed(() => spaceStore.getSpaceItemColors)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.card.concat(spaceStore.getSpaceItemColors.box))
 const updateColor = (color) => {
   items.value.forEach(item => {
     const currentColor = item.backgroundColor || item.color

@@ -15,6 +15,7 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
+import uniq from 'lodash/uniq'
 
 export const useListStore = defineStore('lists', {
   state: () => ({
@@ -42,7 +43,7 @@ export const useListStore = defineStore('lists', {
     getListColors () {
       const lists = this.getAllLists
       const colors = lists.map(list => list.color)
-      return colors
+      return uniq(colors)
     },
     getListsResizing () {
       const globalStore = useGlobalStore()

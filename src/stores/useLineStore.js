@@ -13,6 +13,7 @@ import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
+import uniq from 'lodash/uniq'
 
 export const useLineStore = defineStore('lines', {
   state: () => ({
@@ -40,7 +41,7 @@ export const useLineStore = defineStore('lines', {
     getLineColors () {
       const lines = this.getAllLines
       const colors = lines.map(line => line.color)
-      return colors
+      return uniq(colors)
     }
   },
 

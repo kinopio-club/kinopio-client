@@ -154,7 +154,7 @@ const textareaSizes = () => {
 
 // colors
 
-const itemColors = computed(() => spaceStore.getSpaceItemColors) // TODO list colors (getSpaceItemColors.line)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.line)
 const colorisDark = computed(() => {
   const color = currentLine.value.color
   return utils.colorIsDark(color)
