@@ -153,10 +153,14 @@ export const useListStore = defineStore('lists', {
         this.listSnapGuides = {}
         return
       }
-      // snap
+      // snap to list card
       this.listSnapGuides = { listId: list.id, cards }
       const listCards = cardStore.getCardsByList(list.id)
+      const listCardIds = listCards.map(listCard => listCard.id)
       if (!listCards.length) { return }
+      const isSnappingToListCard = cardStore.cardSnapGuides.find(item => listCardIds.includes(item.target.id))
+      if (isSnappingToListCard) { return }
+      // snap to list (prepend)
       const listCard = listCards[0]
       cardStore.cardSnapGuides = [{
         item: card,
