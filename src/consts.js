@@ -47,6 +47,7 @@ export default {
   lineInfoOffset: 11,
   listPadding: 8,
   listInfoHeight: 34,
+  itemSnapOpacity: 0.5,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

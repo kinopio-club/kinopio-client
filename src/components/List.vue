@@ -345,15 +345,10 @@ const listStyles = computed(() => {
   return styles
 })
 const listBackgroundStyles = computed(() => {
-  const { x, y, z, height } = props.list
+  const styles = utils.clone(listStyles.value)
   const width = props.list.resizeWidth
-  const styles = {
-    left: x + 'px',
-    top: y + 'px',
-    width: width + 'px',
-    height: height + 'px',
-    backgroundColor: color.value
-  }
+  delete styles.zIndex
+  styles.backgroundColor = color.value
   return styles
 })
 // const listSnapGuideStyles = computed(() => {

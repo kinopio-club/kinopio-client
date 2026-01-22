@@ -405,6 +405,7 @@ const safeColor = (color) => {
 
 // styles
 
+const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value)
 const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
@@ -425,8 +426,8 @@ const cardWrapStyle = computed(() => {
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
-  if ((globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value) {
-    styles.opacity = 0.7
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   styles = updateStylesWithWidth(styles)
   return styles

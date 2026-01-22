@@ -165,6 +165,7 @@ const removeViewportObserver = () => {
 
 // styles
 
+const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentBoxIsBeingDragged.value)
 const fillColor = computed(() => {
   let value = color.value
   value = colord(value).alpha(0.5).toRgbString()
@@ -185,6 +186,9 @@ const boxStyles = computed(() => {
   if (hasFill.value && !background) {
     styles.backgroundColor = fillColor.value
   }
+  if (isSnappingToItem.value) {
+    styles.borderColor = colord(color.value).alpha(0.3).toRgbString()
+  }
   return styles
 })
 const infoStyles = computed(() => {
@@ -198,6 +202,9 @@ const infoStyles = computed(() => {
   }
   if (isLocked.value) {
     styles.pointerEvents = 'none'
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
@@ -215,6 +222,9 @@ const backgroundStyles = computed(() => {
   }
   if (props.box.backgroundIsStretch) {
     styles.backgroundSize = 'cover'
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
