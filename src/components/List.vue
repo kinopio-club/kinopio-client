@@ -493,17 +493,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
       :class="classes"
     )
 
-      .list-snap-guide(v-if="!listCards.length" :class="{ active: state.isDraggingCardOverList }")
-         //- :style="listSnapGuideStyles"
-
-         //- positioned at target listPositionIndex
-      //- template(v-if="listCards.length")
-      //-   template(v-if="card in listCards" :key="card.id")
-          //- after for each card , render a placeholder
-          //- active/visible if state.isDraggingCardOverList(card.listPositionIndex)
-          //- .placeholder(v-if="!listCards.length")
-          //- .list-snap-guide(v-if="!listCards.length")
-
       //- resize
       .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
@@ -535,6 +524,8 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endListInfoInteractionTouch"
   )
+    .list-snap-guide(:class="{ active: state.isDraggingCardOverList }")
+       //- :style="listSnapGuideStyles"
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- toggle collapse
@@ -571,7 +562,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   position absolute
   border-radius var(--entity-radius)
   min-width var(--min-list-width)
-  // pointer-events all
   // resize
   .bottom-button-wrap
     .inline-button-wrap
@@ -597,20 +587,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     box-shadow var(--active-shadow)
     transition none
     z-index 1
-  .list-snap-guide
-    height var(--snap-guide-width)
-    border-radius var(--entity-radius)
-    background-color var(--light-shadow)
-    box-shadow var(--button-active-inset-shadow)
-    transform-origin center
-    &.active
-      animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
-  // .placeholder
-  //   background-color var(--light-shadow)
-  //   border-radius var(--entity-radius)
-  //   box-shadow var(--button-active-inset-shadow)
-  //   padding 8px
-  //   height 33px // shortest card height
 
 .list-info
   min-width var(--min-list-width)
@@ -642,6 +618,19 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   &:active,
   &.active
     box-shadow var(--active-shadow)
+  .list-snap-guide
+    position absolute
+    top 42px // consts.listInfoHeight + consts.listpadding
+    right 8px
+    width calc(100% - 16px)
+    height var(--snap-guide-width)
+    border-radius var(--entity-radius)
+    background-color var(--light-shadow)
+    box-shadow var(--button-active-inset-shadow)
+    &.active
+      animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
+    &.has-cards
+      top 34px // consts.listInfoHeight
   // buttons
   .inline-button-wrap
     display inline-block
@@ -664,6 +653,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     background transparent !important // :hover and :active are transparent too
   .inline-button-wrap + .inline-button-wrap
     padding-left 0
+  // name
   .row
     width 100%
     .name
@@ -675,7 +665,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
       vertical-align -3px
   .bottom-button-wrap // resize when list is collapsed
     right -12px
-
+  // touch locking
   .locking-frame
     position absolute
     z-index -1
