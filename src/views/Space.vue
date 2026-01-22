@@ -526,7 +526,7 @@ const updateSizeForNewBox = (boxId) => {
 //   globalStore.currentListIsNew = true
 //   event.preventDefault() // allows dragging lists without scrolling on touch
 // }
-const checkIfShouldSnapToList = async (event) => {
+const checkIfShouldSnapToListTop = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.preventItemSnapping) { return }
   if (!listStore.listSnapGuides.listId) { return }
@@ -537,7 +537,7 @@ const checkIfShouldSnapToList = async (event) => {
 
   // OR use listStore.listSnapGuides.listPositionIndex
 
-  console.log('🌺🌺🌺checkIfShouldSnapToList', listStore.listSnapGuides)
+  console.log('🌺🌺🌺checkIfShouldSnapToListTop', listStore.listSnapGuides)
 }
 const checkIfShouldSnapToCard = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
@@ -549,9 +549,10 @@ const checkIfShouldSnapToCard = async (event) => {
 
   // TODO block drag card out of list
   // const isRemovedFromList = target.listId && !listStore.listSnapGuides.listId
-  if (target.listId) { return } // ?? use checkIfShouldSnapToList instead?
 
-  // if (isRemovedFromList) { or remove dragged items from list calling checkIfShouldSnapToCard()
+  if (target.listId) { return } // TODO handle snapping to card in list
+
+  // if (isRemovedFromList) { or remove dragged items from list calling checkIfShouldSnapToCard(), or can do this after drag complete (seperate method from stopInteractions)??
   //   // TODO remove listId, listPos if cards previously was in list, and now !listStore.listSnapGuides
   //   // cardStore.removeCardsFromList(cards)
   // reset resizeWidth
@@ -911,7 +912,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapToBox(event)
   checkIfShouldSnapToCard(event)
-  checkIfShouldSnapToList(event)
+  checkIfShouldSnapToListTop(event)
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
   if (shouldCancelInteraction(event)) {
