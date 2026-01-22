@@ -541,14 +541,20 @@ const checkIfShouldSnapToCard = async (event) => {
   if (globalStore.preventItemSnapping) { return }
   if (!cardStore.cardSnapGuides.length) { return }
   if (!globalStore.itemSnappingIsReady) { return }
-  if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   let { target, side, item } = cardStore.cardSnapGuides[0]
+  let cards = cardStore.getCardsSelected
+  // add card to list from list card
+  if (target.listId) {
+    const list = listStore.getList(target.listId)
+    const targetPositionIndex = target.listPositionIndex
+    const shouldPrepend = side === 'top'
+    await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
+    return
+  }
 
   // TODO block drag card out of list
   // const isRemovedFromList = target.listId && !listStore.listSnapGuides.listId
-
-  if (target.listId) { return } // TODO handle snapping to card in list
 
   // if (isRemovedFromList) { or remove dragged items from list calling checkIfShouldSnapToCard(), or can do this after drag complete (seperate method from stopInteractions)??
   //   // TODO remove listId, listPos if cards previously was in list, and now !listStore.listSnapGuides
@@ -557,7 +563,6 @@ const checkIfShouldSnapToCard = async (event) => {
   //   return
   // }
 
-  let cards = cardStore.getCardsSelected
   // create new list
   const list = {
     id: nanoid(),

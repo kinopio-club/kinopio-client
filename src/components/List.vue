@@ -346,7 +346,6 @@ const listStyles = computed(() => {
 })
 const listBackgroundStyles = computed(() => {
   const styles = utils.clone(listStyles.value)
-  const width = props.list.resizeWidth
   delete styles.zIndex
   styles.backgroundColor = color.value
   return styles
