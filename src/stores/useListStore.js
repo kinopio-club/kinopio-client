@@ -153,18 +153,16 @@ export const useListStore = defineStore('lists', {
         this.listSnapGuides = {}
         return
       }
-      const listInfo = utils.listInfoRectFromId(list.id)
-      const isListInfo = utils.isNormalizedRectAInsideRectB(card, listInfo)
-      // snap to list
-      if (isListInfo) {
-        this.listSnapGuides = { listId: list.id, cards }
-      // snap to list card
-      } else {
-        const listCards = cardStore.getCardsByList(list.id)
-        // TODO assign listPositionIndex
-        this.listSnapGuides = { listId: list.id, cards }
-      }
-      // console.log('🔮🔮🔮', currentCard.id, cards, cursor, list, '🥀', listCards)
+      // snap
+      this.listSnapGuides = { listId: list.id, cards }
+      const listCards = cardStore.getCardsByList(list.id)
+      if (!listCards.length) { return }
+      const listCard = listCards[0]
+      cardStore.cardSnapGuides = [{
+        item: card,
+        side: 'top',
+        target: listCard
+      }]
     },
 
     // update
