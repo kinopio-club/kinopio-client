@@ -147,7 +147,16 @@ export const useListStore = defineStore('lists', {
       if (!globalStore.currentUserIsDraggingCard) { return }
       const card = cardStore.getCard(globalStore.currentDraggingCardId)
       const lists = this.getAllLists
-      const list = lists.find(list => utils.isNormalizedRectAInsideRectB(card, list))
+      const list = lists.find(listRect => {
+        // if list has cards, list height is list-info only
+        listRect = utils.clone(listRect)
+        const isListCards = cardStore.getCardsByList(listRect.id)
+        if (isListCards.length) {
+          listRect.height = consts.listInfoHeight
+        }
+        // is card in list rect
+        return utils.isNormalizedRectAInsideRectB(card, listRect)
+      })
       // no snap
       if (!list || list.isCollapsed) {
         this.listSnapGuides = {}

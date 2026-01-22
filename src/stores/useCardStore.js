@@ -257,6 +257,7 @@ export const useCardStore = defineStore('cards', {
         if (element.dataset.isLocked === 'true') { return }
         const id = element.dataset.cardId
         const data = this.getCard(id)
+        const { tilt, listId, listPositionIndex } = data
         const rect = element.getBoundingClientRect()
         const card = {
           id: data.id,
@@ -264,7 +265,9 @@ export const useCardStore = defineStore('cards', {
           y: data.y,
           width: Math.round(rect.width || data.width),
           height: Math.round(rect.height || data.height),
-          tilt: data.tilt
+          tilt,
+          listId,
+          listPositionIndex
         }
         cards.push(card)
       })

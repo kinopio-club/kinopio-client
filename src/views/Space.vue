@@ -530,6 +530,7 @@ const checkIfShouldSnapToListTop = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.preventItemSnapping) { return }
   if (!listStore.listSnapGuides.listId) { return }
+  if (cardStore.cardSnapGuides.length) { return }
   if (event.shiftKey) { return }
   const { listId, cards } = listStore.listSnapGuides
   const list = listStore.getList(listId)
