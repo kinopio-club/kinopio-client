@@ -1,6 +1,7 @@
 import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
 const apiHost = 'https://api.kinopio.club'
+const siteHost = 'https://kinopio.club'
 const timeout = 5000 // 5s
 const inviteDescription = 'Work on shared spaces together'
 const privateSpaceDescription = 'Space is private or could not be found'
@@ -59,15 +60,12 @@ const pageTitle = (context, space) => {
 
 const pageJsonLD = (context, space) => {
   let items = space.cards.concat(space.boxes)
+  // sort by y then x for reading order (top-to-bottom, left-to-right)
+  items.sort((a, b) => a.y - b.y || a.x - b.x)
   items = items.map(item => {
     return {
       '@type': 'CreativeWork',
-      name: item.name,
-      position: {
-        '@type': 'Place',
-        x: item.x,
-        y: item.y
-      }
+      name: item.name
     }
   })
   let jsonLD = {
@@ -75,12 +73,9 @@ const pageJsonLD = (context, space) => {
     '@type': 'CreativeWork',
     name: pageTitle(context, space),
     description: space.description,
+    thumbnailUrl: space.previewImage,
     dateCreated: space.createdAt,
-    contentUrl: space.previewImage,
-    hasPart: {
-      '@type': 'ItemList',
-      itemListElement: items
-    }
+    hasPart: items
   }
   jsonLD = JSON.stringify(jsonLD)
   return jsonLD
@@ -131,7 +126,8 @@ export default async (request, context) => {
       const description = space.description
       const previewImage = space.previewImage
       const jsonLD = pageJsonLD(context, space)
-      return rewriteIndexHtml({ context, title, description, previewImage, jsonLD })
+      const canonicalUrl = siteHost + url.pathname
+      return rewriteIndexHtml({ context, title, description, previewImage, jsonLD, canonicalUrl })
     // private space
     } else {
       return rewriteIndexHtml({ context, description: privateSpaceDescription })
