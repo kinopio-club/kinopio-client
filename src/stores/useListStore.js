@@ -194,7 +194,7 @@ export const useListStore = defineStore('lists', {
     },
     moveLists ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
-      const connectionStore = useConnectionStore()
+      const cardStore = useCardStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       if (globalStore.shouldSnapToGrid) {
@@ -210,7 +210,6 @@ export const useListStore = defineStore('lists', {
         y: delta.y * zoom
       }
       let lists = this.getListsSelected
-      // TODO move abs cards in list by the same delta (cardStore.getCardsInList or cardStore.moveCards)
       lists = lists.map(list => {
         let x = Math.round(list.x + delta.x)
         x = Math.max(0, x)
@@ -222,11 +221,11 @@ export const useListStore = defineStore('lists', {
           y
         }
       })
-      // this.updatePageSize(lists[0])
+      // this.updatePageSize(lists[0]) // ??might automatically be done by cards inside
       this.updateLists(lists)
       globalStore.listsWereDragged = true
       // lists = lists.map(list => this.getList(list.id))
-      // boxStore.updateBoxSnapGuides({ items: lists, isLists: true, cursor: endCursor })
+      // boxStore.updateListSnapGuides({ items: lists, isLists: true, cursor: endCursor })
     },
 
     // position
@@ -285,6 +284,22 @@ export const useListStore = defineStore('lists', {
         id: list.id,
         height: listHeight
       })
+    },
+    selectItemsInSelectedLists (selectedList) {
+      const globalStore = useGlobalStore()
+      const cardStore = useCardStore()
+      const lists = this.getListsSelected
+      let cards = []
+      lists.forEach(list => {
+        const listCards = cardStore.getCardsByList(list.id)
+        cards = cards.concat(listCards)
+      })
+      const isMultipleListsSelected = Boolean(globalStore.multipleListsSelectedIds.length)
+      const cardIds = cards.map(card => card.id)
+      globalStore.addMultipleToMultipleCardsSelected(cardIds)
+      if (!isMultipleListsSelected) {
+        globalStore.preventMultipleSelectedActionsIsVisible = true
+      }
     },
 
     // list details

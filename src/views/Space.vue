@@ -679,6 +679,18 @@ const dragBoxes = (event) => {
   }
   dragItems()
 }
+const dragLists = (event) => {
+  const isInitialDrag = !globalStore.listsWereDragged
+  if (isInitialDrag) {
+    const updates = {
+      listId: globalStore.currentDraggingListId,
+      userId: userStore.id
+    }
+    broadcastStore.update({ updates, action: 'addToRemoteListsDragging' })
+    listStore.selectItemsInSelectedLists()
+  }
+  dragItems()
+}
 
 // footer
 
@@ -821,6 +833,8 @@ const interact = (event) => {
   } else if (isDraggingBox.value) {
     globalStore.currentDraggingCardId = ''
     dragBoxes(event)
+  } else if (isDraggingList.value) {
+    dragLists(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
   } else if (isTiltingCard.value) {
@@ -829,7 +843,7 @@ const interact = (event) => {
     resizeBoxes()
   } else if (isResizingList.value) {
     resizeLists()
-  } else if (isDraggingLine.value || isDraggingList.value) {
+  } else if (isDraggingLine.value) {
     dragItems()
   } else if (isResizingCardDetails.value) {
     updateCardDetailsWidth(event)

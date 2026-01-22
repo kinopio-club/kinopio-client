@@ -626,8 +626,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   width max-content
   position absolute
   border-radius var(--entity-radius)
-  border-bottom-left-radius 0
-  border-bottom-right-radius 0
   &.is-background-light
     color var(--primary-on-light-background)
     button
