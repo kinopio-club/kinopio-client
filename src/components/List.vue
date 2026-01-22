@@ -381,7 +381,10 @@ const buttonClasses = computed(() => {
   } else {
     classes.push('is-light')
   }
+  // if ()
+  console.log(classes)
   return classes
+// :class="{'is-light': isLightInDarkTheme, 'is-dark': isDarkInLightTheme}")
 })
 
 // actions
@@ -439,27 +442,17 @@ const resetWidth = () => {
 
 // snapping
 
-const updateIsSnapping = (value) => {
-  if (value) {
-    state.isDraggingCardOverList = true
-    globalStore.itemSnappingIsReady = true
-  } else {
-    state.isDraggingCardOverList = false
-    globalStore.itemSnappingIsReady = false
-  }
-}
 watch(() => listStore.listSnapGuides, (value, prevValue) => {
-  if (!globalStore.currentUserIsDraggingCard) {
-    updateIsSnapping(false)
-    return
-  }
+  if (!globalStore.currentUserIsDraggingCard) { return }
   const { listId, listPositionIndex } = value
   const shouldSnap = listId === props.list.id
-  const shouldCancel = listId !== prevValue.listId || !listId
+  const shouldCancel = listId !== prevValue.listId
   if (shouldSnap) {
-    updateIsSnapping(true)
+    state.isDraggingCardOverList = true
+    globalStore.itemSnappingIsReady = true
   } else if (shouldCancel) {
-    updateIsSnapping(false)
+    state.isDraggingCardOverList = false
+    globalStore.itemSnappingIsReady = false
   }
 })
 </script>
