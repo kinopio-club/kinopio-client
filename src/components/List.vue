@@ -351,14 +351,6 @@ const listBackgroundStyles = computed(() => {
   styles.backgroundColor = color.value
   return styles
 })
-// const listSnapGuideStyles = computed(() => {
-//   // if (!state.isDraggingCardOverList) { return }
-//   const isDark = utils.colorIsDark(props.list.color)
-//   const color = utils.alternateColor(props.list.color, isDark, 0.075)
-//   return {
-//     backgroundColor: color
-//   }
-// })
 const classes = computed(() => {
   return {
     hover: state.isHover,
@@ -525,7 +517,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     @touchend="endListInfoInteractionTouch"
   )
     .list-snap-guide(:class="{ active: state.isDraggingCardOverList }")
-       //- :style="listSnapGuideStyles"
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- toggle collapse
