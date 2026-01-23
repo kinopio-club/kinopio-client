@@ -1221,6 +1221,7 @@ const checkIfShouldDragMultipleCards = (event, cardId = props.card.id) => {
   }
 }
 const startDraggingDuplicateItems = async (event) => {
+  globalStore.currentUserIsDraggingDuplicateItem = true
   checkIfShouldDragMultipleCards(event)
   let cardIds = globalStore.multipleCardsSelectedIds.concat([props.card.id])
   cardIds = uniq(cardIds)

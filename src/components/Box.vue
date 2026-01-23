@@ -372,6 +372,8 @@ const isResizing = computed(() => {
   return isResizing && isCurrent
 })
 const startDraggingDuplicateItems = async (event) => {
+  globalStore.currentUserIsDraggingDuplicateItem = true
+  // select box
   boxStore.selectItemsInSelectedBoxes(props.box)
   let boxIds = globalStore.multipleBoxesSelectedIds.concat([props.box.id])
   boxIds = uniq(boxIds)

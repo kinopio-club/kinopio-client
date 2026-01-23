@@ -942,6 +942,7 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
   globalStore.currentUserIsDraggingList = false
+  globalStore.currentUserIsDraggingDuplicateItem = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false
