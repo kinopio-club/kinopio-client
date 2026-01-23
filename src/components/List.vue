@@ -368,6 +368,9 @@ const infoClasses = computed(() => {
   if (state.isHover) {
     classes.push('hover')
   }
+  if (props.list.isCollapsed) {
+    classes.push('is-collapsed')
+  }
   return classes
 })
 const infoStyles = computed(() => {
@@ -493,7 +496,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
             tabindex="-1"
           )
             img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
-  //- teleport(to="#list-infos")
+
   .list-info(
     :data-list-id="list.id"
     :class="infoClasses"
@@ -515,14 +518,14 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- toggle collapse
-      .inline-button-wrap
-        button.small-button.inline-button(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
+      .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
+        button.small-button.inline-button
           img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
           img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
           span {{ listCards.length }}
       //- add card
-      .inline-button-wrap
-        button.small-button.inline-button(title="Add Card" @click.left.stop="addCard")
+      .inline-button-wrap(title="Add Card" @click.left.stop="addCard")
+        button.small-button.inline-button
           img.icon.add(src="@/assets/add.svg")
       span.name(:title="props.list.name") {{ props.list.name }}
       //- resize collapsed
@@ -604,6 +607,9 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   &:active,
   &.active
     box-shadow var(--active-shadow)
+  &.is-collapsed
+    border-bottom-left-radius var(--small-entity-radius)
+    border-bottom-right-radius var(--small-entity-radius)
   .list-snap-guide
     position absolute
     top 42px // consts.listInfoHeight + consts.listpadding
