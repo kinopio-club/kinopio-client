@@ -450,6 +450,7 @@ const endBoxInfoInteraction = (event) => {
     globalStore.clearMultipleSelected()
   }
   if (globalStore.preventDraggedBoxFromShowingDetails) { return }
+  if (globalStore.currentUserIsDraggingDuplicateItem) { return }
   if (isMeta) { return }
   globalStore.updateBoxDetailsIsVisibleForBoxId(props.box.id)
   event.stopPropagation() // prevent stopInteractions() from closing boxDetails
