@@ -115,6 +115,8 @@ const endListInfoInteraction = (event) => {
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  const isButton = event.target.closest('button')
+  if (isButton) { return }
   if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteListsDragging' })
   globalStore.closeAllDialogs()
