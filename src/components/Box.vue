@@ -267,7 +267,7 @@ const classes = computed(() => {
     active: currentBoxIsBeingDragged.value,
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
-    'is-checked': isChecked.value || isInCheckedBox.value,
+    'is-checked': isChecked.value,
     filtered: isFiltered.value,
     transition: !globalStore.currentBoxIsNew || !globalStore.currentUserIsResizingBox
   }
@@ -689,30 +689,6 @@ const updateRemoteConnections = () => {
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
   return Boolean(utils.checkboxFromString(name.value))
-})
-const containingBoxes = computed(() => {
-  if (!state.isVisibleInViewport) { return }
-  if (globalStore.currentUserIsDraggingBox) { return }
-  if (currentBoxIsBeingDragged.value) { return }
-  if (currentBoxIsSelected.value) { return }
-  if (isResizing.value) { return }
-  if (globalStore.boxDetailsIsVisibleForBoxId) { return }
-  let boxes = boxStore.getAllBoxes
-  boxes = utils.clone(boxes)
-  boxes = boxes.filter(box => {
-    const currentBox = utils.clone(props.box)
-    const isInsideBox = utils.isRectACompletelyInsideRectB(currentBox, box)
-    const boxArea = box.resizeWidth * box.resizeHeight
-    const currentBoxArea = currentBox.resizeWidth * currentBox.resizeHeight
-    const boxIsParent = boxArea > currentBoxArea
-    return isInsideBox && boxIsParent
-  })
-  return boxes
-})
-const isInCheckedBox = computed(() => {
-  if (!containingBoxes.value) { return }
-  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
-  return Boolean(checkedBox)
 })
 
 // box focus
