@@ -1176,6 +1176,21 @@ export default {
     const rect = element.getBoundingClientRect()
     return this.rectDimensions(rect)
   },
+  listSiblingPositionIndex (listCards, targetPositionIndex, shouldPrepend) {
+    let index = listCards.findIndex(card => card.listPositionIndex === targetPositionIndex)
+    if (shouldPrepend) {
+      index -= 1
+    } else {
+      index += 1
+    }
+    if (index < 0) { return null }
+    const siblingCard = listCards[index]
+    if (!siblingCard) {
+      return null
+    } else {
+      return siblingCard.listPositionIndex
+    }
+  },
 
   // rect
 

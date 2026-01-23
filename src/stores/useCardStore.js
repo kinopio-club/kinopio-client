@@ -994,39 +994,22 @@ export const useCardStore = defineStore('cards', {
       try {
         const ids = cards.map(card => card.id)
         await this.updateCardsDimensions(ids)
-        // get position indexes
+        // use prev listCards to determine sibling position
         const listCards = this.getCardsByList(list.id)
-        let index = listCards.findIndex(card => card.listPositionIndex === targetPositionIndex)
-        if (shouldPrepend) {
-          index -= 1
-        } else {
-          index += 1
-        }
-        let siblingPositionIndex
-        if (index < 0) {
-          siblingPositionIndex = null
-        } else {
-          const siblingCard = listCards[index]
-          if (!siblingCard) {
-            siblingPositionIndex = null
-          } else {
-            siblingPositionIndex = siblingCard.listPositionIndex
-          }
-          console.log(siblingCard)
-        }
-        let targetPositionIndexes
+        const siblingPositionIndex = utils.listSiblingPositionIndex(listCards, targetPositionIndex, shouldPrepend)
         // get new cards positions
+        let newPositionIndexes
         if (shouldPrepend) {
-          targetPositionIndexes = generateNKeysBetween(siblingPositionIndex, targetPositionIndex, cards.length)
+          newPositionIndexes = generateNKeysBetween(siblingPositionIndex, targetPositionIndex, cards.length)
         } else {
-          targetPositionIndexes = generateNKeysBetween(targetPositionIndex, siblingPositionIndex, cards.length)
+          newPositionIndexes = generateNKeysBetween(targetPositionIndex, siblingPositionIndex, cards.length)
         }
         // add cards to list
         const updates = cards.map((card, index) => {
           return {
             id: card.id,
             listId: list.id,
-            listPositionIndex: targetPositionIndexes[index],
+            listPositionIndex: newPositionIndexes[index],
             tilt: 0,
             resizeWidth: list.resizeWidth - (consts.listPadding * 2)
           }
