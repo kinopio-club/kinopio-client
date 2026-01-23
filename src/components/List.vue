@@ -393,12 +393,16 @@ const buttonClasses = computed(() => {
 
 const toggleIsCollapsed = () => {
   const value = !props.list.isCollapsed
+  updateIsCollapsed(value)
+}
+const updateIsCollapsed = (value) => {
   listStore.updateList({
     id: props.list.id,
     isCollapsed: value
   })
 }
 const addCard = () => {
+  updateIsCollapsed(false)
   // TODO get prepended list pos
   // create card w listId and listPosition
   console.log('addCard', props.list.id)
