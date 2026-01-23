@@ -98,6 +98,7 @@ const startListInfoInteraction = async (event) => {
   if (!currentListIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
+  if (isResizing.value) { return }
   if (!canEditSpace.value) { return }
   globalStore.currentDraggingListId = ''
   globalStore.closeAllDialogs()
@@ -115,7 +116,7 @@ const endListInfoInteraction = (event) => {
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
-  const isButton = event.target.closest('button')
+  const isButton = event.target.closest('button') || event.target.closest('.inline-button-wrap')
   if (isButton) { return }
   if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteListsDragging' })
@@ -510,7 +511,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endListInfoInteractionTouch"
   )
-    .list-snap-guide(:class="{ active: state.isDraggingCardOverList }")
+    .list-snap-guide(v-if="!props.list.isCollapsed" :class="{ active: state.isDraggingCardOverList }")
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- toggle collapse
@@ -624,7 +625,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     min-width 20px
     cursor pointer
     .icon.down-arrow
-      vertical-align 1px
+      vertical-align 1.5px
       margin 0
     .icon.right-arrow
       transform none
@@ -650,6 +651,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
       vertical-align -3px
   .bottom-button-wrap // resize when list is collapsed
     right -12px
+    bottom 24px
   // touch locking
   .locking-frame
     position absolute
