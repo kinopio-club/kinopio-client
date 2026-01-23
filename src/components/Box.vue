@@ -397,7 +397,7 @@ const startDraggingDuplicateItems = async (event) => {
   })
   const newCurrentBox = newBoxes[index]
   newCards.forEach(card => cardStore.createCard(card, true))
-  newBoxes.forEach(box => boxStore.createBox(box, true))
+  newBoxes.forEach(box => boxStore.createBox(box))
   // select new items
   globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
   globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
