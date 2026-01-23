@@ -368,9 +368,6 @@ const infoClasses = computed(() => {
   if (state.isHover) {
     classes.push('hover')
   }
-  if (props.list.isCollapsed) {
-    classes.push('is-collapsed')
-  }
   return classes
 })
 const infoStyles = computed(() => {
@@ -607,9 +604,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   &:active,
   &.active
     box-shadow var(--active-shadow)
-  &.is-collapsed
-    border-bottom-left-radius var(--small-entity-radius)
-    border-bottom-right-radius var(--small-entity-radius)
   .list-snap-guide
     position absolute
     top 42px // consts.listInfoHeight + consts.listpadding
@@ -656,7 +650,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
       width calc(100% - 85px)
       vertical-align -3px
   .bottom-button-wrap // resize when list is collapsed
-    right -12px
+    right -13px
     bottom 24px
   // touch locking
   .locking-frame
