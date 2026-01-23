@@ -394,6 +394,7 @@ export const useBoxStore = defineStore('boxes', {
     // contained items
 
     isItemInSelectedBoxes (item, type, selectedBox) {
+      const threshold = 1
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
       let selectedBoxes = this.getBoxesSelected
@@ -407,19 +408,19 @@ export const useBoxStore = defineStore('boxes', {
         const isTopLeft = utils.isPointInsideRect({
           x: item.x,
           y: item.y
-        }, box)
+        }, box, threshold)
         const isTopRight = utils.isPointInsideRect({
           x: item.x + item.width,
           y: item.y
-        }, box)
+        }, box, threshold)
         const isBottomLeft = utils.isPointInsideRect({
           x: item.x,
           y: item.y + item.height
-        }, box)
+        }, box, threshold)
         const isBottomRight = utils.isPointInsideRect({
           x: item.x + item.width,
           y: item.y + item.height
-        }, box)
+        }, box, threshold)
         return isTopLeft && isTopRight && isBottomLeft && isBottomRight
       })
     },

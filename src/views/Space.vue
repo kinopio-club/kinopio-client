@@ -606,16 +606,6 @@ const stopResizingLists = () => {
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingLists' })
   // globalStore.checkIfItemShouldIncreasePageSize(lists[0])
 }
-const checkIfShouldExpandLists = (event) => {
-  if (!globalStore.cardsWereDragged && !globalStore.listsWereDragged) { return }
-  if (event.shiftKey) { return }
-  const snapGuides = listStore.listSnapGuides
-  if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => {
-    if (!globalStore.notifyListSnappingIsReady) { return }
-    listStore.updateListSnapToSize(snapGuide)
-  })
-}
 const unselectCardsInDraggedList = () => {
   if (!globalStore.currentDraggingListId) { return }
   if (globalStore.multipleListsSelectedIds.length) { return }

@@ -443,8 +443,6 @@ const endBoxInfoInteraction = (event) => {
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   globalStore.closeAllDialogs()
   if (isMeta) {
-    globalStore.updateMultipleBoxesSelectedIds([props.box.id])
-    boxStore.selectItemsInSelectedBoxes()
     globalStore.updateMultipleBoxesSelectedIds([])
     globalStore.currentUserIsDraggingBox = false
     globalStore.shouldCancelNextMouseUpInteraction = true

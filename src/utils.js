@@ -1179,16 +1179,16 @@ export default {
 
   // rect
 
-  isPointInsideRect (point, rect) {
+  isPointInsideRect (point, rect, threshold = 0) {
     const xIsInside = this.isBetween({
       value: point.x,
-      min: rect.x,
-      max: rect.x + (rect.width || rect.resizeWidth)
+      min: rect.x + threshold,
+      max: rect.x + (rect.width || rect.resizeWidth) - threshold
     })
     const yIsInside = this.isBetween({
       value: point.y,
-      min: rect.y,
-      max: rect.y + rect.height
+      min: rect.y + threshold,
+      max: rect.y + rect.height - threshold
     })
     return xIsInside && yIsInside
   },
