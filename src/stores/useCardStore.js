@@ -994,12 +994,32 @@ export const useCardStore = defineStore('cards', {
       try {
         const ids = cards.map(card => card.id)
         await this.updateCardsDimensions(ids)
-        // get positions
-        let targetPositionIndexes
+        // get position indexes
+        const listCards = this.getCardsByList(list.id)
+        let index = listCards.findIndex(card => card.listPositionIndex === targetPositionIndex)
         if (shouldPrepend) {
-          targetPositionIndexes = generateNKeysBetween(null, targetPositionIndex, cards.length)
+          index -= 1
         } else {
-          targetPositionIndexes = generateNKeysBetween(targetPositionIndex, null, cards.length)
+          index += 1
+        }
+        let siblingPositionIndex
+        if (index < 0) {
+          siblingPositionIndex = null
+        } else {
+          const siblingCard = listCards[index]
+          if (!siblingCard) {
+            siblingPositionIndex = null
+          } else {
+            siblingPositionIndex = siblingCard.listPositionIndex
+          }
+          console.log(siblingCard)
+        }
+        let targetPositionIndexes
+        // get new cards positions
+        if (shouldPrepend) {
+          targetPositionIndexes = generateNKeysBetween(siblingPositionIndex, targetPositionIndex, cards.length)
+        } else {
+          targetPositionIndexes = generateNKeysBetween(targetPositionIndex, siblingPositionIndex, cards.length)
         }
         // add cards to list
         const updates = cards.map((card, index) => {
