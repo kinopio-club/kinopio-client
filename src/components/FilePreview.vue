@@ -15,16 +15,16 @@ const props = defineProps({
   formats: Object
 })
 
-const url = computed(() => props.formats.image || props.formats.video || props.formats.audio)
+const url = computed(() => props.formats.image || props.formats.video || props.formats.audio || props.formats.file)
+const fileName = computed(() => utils.fileNameFromUrl(url.value))
 const download = async () => {
   try {
-    const fileName = utils.fileNameFromUrl(url.value)
     const response = await fetch(url.value)
     const blob = await response.blob()
     const blobUrl = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = blobUrl
-    a.download = fileName
+    a.download = fileName.value
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -33,20 +33,12 @@ const download = async () => {
     console.error('🚒 download', error)
   }
 }
-const canEditCard = () => {
-  const canEditSpace = userStore.getUserCanEditSpace
-  const isSpaceMember = userStore.getUserIsSpaceMember
-  const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(props.card)
-  if (isSpaceMember) { return true }
-  if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
-  return false
-}
 </script>
 
 <template lang="pug">
 .media-preview.row(v-if="props.visible")
   //- download
-  button.small-button.download-button.inline-button(@click.stop="download" title="Download")
+  button.small-button.download-button.inline-button(@click.stop="download" title="Download" :class="{'is-file': props.formats.file}")
     img.icon.download(src="@/assets/download.svg")
   //- Image
   .image-preview.row(v-if="props.formats.image")
@@ -54,7 +46,6 @@ const canEditCard = () => {
       img.image.clickable-item(:src="props.formats.image" draggable="false")
   //- Video
   .video-preview.row(v-if="props.formats.video")
-    //- video
     a(:href="props.formats.video" target="_blank")
       video.video.clickable-item(autoplay loop muted playsinline draggable="false")
         source(:src="props.formats.video")
@@ -66,6 +57,11 @@ const canEditCard = () => {
         a(:href="props.formats.audio" target="_blank")
           button.small-button
             img.icon.visit(src="@/assets/visit.svg")
+  //- File
+  .row(v-if="props.formats.file")
+    .badge.secondary-on-dark-background
+      img.icon.file(src="@/assets/file.svg")
+      span {{fileName}}
 </template>
 
 <style lang="stylus">
@@ -111,4 +107,6 @@ const canEditCard = () => {
     z-index 1
     padding-left 6px
     cursor pointer
+    &.is-file
+      top 0
 </style>

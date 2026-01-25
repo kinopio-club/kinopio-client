@@ -20,7 +20,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
-import MediaPreview from '@/components/MediaPreview.vue'
+import FilePreview from '@/components/FilePreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareItem from '@/components/dialogs/ShareItem.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
@@ -1051,7 +1051,7 @@ const groupInviteUrl = computed(() => {
 // media
 
 const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
-const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio))
+const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio || state.formats.file))
 const addImageOrFile = async (file) => {
   const cardId = card.value.id
   const spaceId = spaceStore.id
@@ -1497,7 +1497,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       .row.badges-row.other-items-row(v-if="otherCardIsVisible")
         OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
-      MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
+      FilePreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
 
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
