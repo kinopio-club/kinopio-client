@@ -83,6 +83,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/dark.svg")
     img.icon(src="@/assets/distribute-horizontally.svg")
     img.icon(src="@/assets/down-arrow.svg")
+    img.icon(src="@/assets/download.svg")
     img.icon.duplicate(src="@/assets/duplicate.svg")
     img.icon(src="@/assets/export.svg")
     img.icon(src="@/assets/emoji.svg")
