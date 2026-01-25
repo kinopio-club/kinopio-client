@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Audio from '@/components/Audio.vue'
+import utils from '@/utils.js'
 
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -14,23 +15,31 @@ const props = defineProps({
   formats: Object
 })
 
-const asset = computed(() => props.formats.image || props.formats.video || props.formats.audio)
-const canEditCard = () => {
-  const canEditSpace = userStore.getUserCanEditSpace
-  const isSpaceMember = userStore.getUserIsSpaceMember
-  const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(props.card)
-  if (isSpaceMember) { return true }
-  if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
-  return false
+const url = computed(() => props.formats.image || props.formats.video || props.formats.audio || props.formats.file)
+const fileName = computed(() => utils.fileNameFromUrl(url.value))
+const download = async () => {
+  try {
+    const response = await fetch(url.value)
+    const blob = await response.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = fileName.value
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl) // cleanup
+  } catch (error) {
+    console.error('🚒 download', error)
+  }
 }
 </script>
 
 <template lang="pug">
 .media-preview.row(v-if="props.visible")
   //- download
-  a(:href="asset" download @click.stop title="Download")
-    button.small-button.download-button.inline-button
-      img.icon.download(src="@/assets/download.svg")
+  button.small-button.download-button.inline-button(@click.stop="download" title="Download" :class="{'is-file': props.formats.file}")
+    img.icon.download(src="@/assets/download.svg")
   //- Image
   .image-preview.row(v-if="props.formats.image")
     a(:href="props.formats.image" target="_blank")
@@ -49,6 +58,11 @@ const canEditCard = () => {
         a(:href="props.formats.audio" target="_blank")
           button.small-button
             img.icon.visit(src="@/assets/visit.svg")
+  //- File
+  .row(v-if="props.formats.file")
+    .badge.secondary-on-dark-background
+      img.icon.file(src="@/assets/file.svg")
+      span {{fileName}}
 </template>
 
 <style lang="stylus">

@@ -2300,7 +2300,7 @@ export default {
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
-    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm|\.mov)(?:\n| |\?|&)/igm)
+    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm)(?:\n| |\?|&)/igm)
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
   },
@@ -2380,7 +2380,6 @@ export default {
   },
   fileNameFromUrl (url) {
     if (!url) { return }
-    if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
     const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+(\?[A-z.0-9-=]*)*$/gim)
