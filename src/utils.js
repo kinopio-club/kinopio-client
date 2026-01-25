@@ -2314,7 +2314,6 @@ export default {
   },
   fileNameFromUrl (url) {
     if (!url) { return }
-    if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
     const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+(\?[A-z.0-9-=]*)*$/gim)
