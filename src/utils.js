@@ -2234,7 +2234,7 @@ export default {
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
-    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm|\.mov)(?:\n| |\?|&)/igm)
+    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm)(?:\n| |\?|&)/igm)
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
   },
