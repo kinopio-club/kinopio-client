@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Audio from '@/components/Audio.vue'
+import utils from '@/utils.js'
 
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -14,7 +15,24 @@ const props = defineProps({
   formats: Object
 })
 
-const asset = computed(() => props.formats.image || props.formats.video || props.formats.audio)
+const url = computed(() => props.formats.image || props.formats.video || props.formats.audio)
+const download = async () => {
+  try {
+    const fileName = utils.fileNameFromUrl(url.value)
+    const response = await fetch(url.value)
+    const blob = await response.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl) // cleanup
+  } catch (error) {
+    console.error('🚒 download', error)
+  }
+}
 const canEditCard = () => {
   const canEditSpace = userStore.getUserCanEditSpace
   const isSpaceMember = userStore.getUserIsSpaceMember
@@ -28,9 +46,8 @@ const canEditCard = () => {
 <template lang="pug">
 .media-preview.row(v-if="props.visible")
   //- download
-  a(:href="asset" download @click.stop title="Download")
-    button.small-button.download-button.inline-button
-      img.icon.download(src="@/assets/download.svg")
+  button.small-button.download-button.inline-button(@click.stop="download" title="Download")
+    img.icon.download(src="@/assets/download.svg")
   //- Image
   .image-preview.row(v-if="props.formats.image")
     a(:href="props.formats.image" target="_blank")
