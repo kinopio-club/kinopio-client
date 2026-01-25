@@ -14,6 +14,7 @@ const props = defineProps({
   formats: Object
 })
 
+const asset = computed(() => props.formats.image || props.formats.video || props.formats.audio)
 const canEditCard = () => {
   const canEditSpace = userStore.getUserCanEditSpace
   const isSpaceMember = userStore.getUserIsSpaceMember
@@ -26,12 +27,17 @@ const canEditCard = () => {
 
 <template lang="pug">
 .media-preview.row(v-if="props.visible")
+  //- download
+  a(:href="asset" download @click.stop title="Download")
+    button.small-button.download-button.inline-button
+      img.icon.download(src="@/assets/download.svg")
   //- Image
   .image-preview.row(v-if="props.formats.image")
     a(:href="props.formats.image" target="_blank")
       img.image.clickable-item(:src="props.formats.image" draggable="false")
   //- Video
   .video-preview.row(v-if="props.formats.video")
+    //- video
     a(:href="props.formats.video" target="_blank")
       video.video.clickable-item(autoplay loop muted playsinline draggable="false")
         source(:src="props.formats.video")
@@ -81,4 +87,11 @@ const canEditCard = () => {
 
   .visit
     vertical-align 2px
+  .download-button
+    position absolute
+    right 8px
+    top 8px
+    z-index 1
+    padding-left 6px
+    cursor pointer
 </style>
