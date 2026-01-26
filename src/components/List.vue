@@ -478,17 +478,19 @@ const snapGuideIsVisible = computed(() => {
 
 // placeholders
 
-const placeholderStyles = (card) => {
-  const cards = listStore.listChildPlaceholders[props.list.id]
-  if (!cards) { return }
-  const placeholder = cards.find(item => item.id === card.id)
-  return {
-    top: placeholder.y + 'px',
-    left: placeholder.x + 'px',
-    width: listItemWidth.value + 'px',
-    height: placeholder.height + 'px'
-  }
-}
+const listChildPlaceholders = computed(() => listStore.listChildPlaceholders[props.list.id])
+const placeholderStylesMap = computed(() => {
+  if (!listChildPlaceholders.value) return {}
+  return listChildPlaceholders.value.reduce((accumulator, placeholder) => {
+    accumulator[placeholder.id] = {
+      top: placeholder.y + 'px',
+      left: placeholder.x + 'px',
+      width: listItemWidth.value + 'px',
+      height: placeholder.height + 'px'
+    }
+    return accumulator
+  }, {})
+})
 </script>
 
 <template lang="pug">
@@ -511,9 +513,9 @@ const placeholderStyles = (card) => {
       :style="listBackgroundStyles"
       :class="classes"
     )
-    template(v-for="card in listCards")
+    template(v-for="card in listChildPlaceholders" :key="card.id")
       .list-placeholder.list-snap-guide(
-        :style="placeholderStyles(card)"
+        :style="placeholderStylesMap[card.id]"
         :data-list-id="list.id"
         :data-card-id="card.id"
         :data-card-listPositionIndex="card.listPositionIndex"
