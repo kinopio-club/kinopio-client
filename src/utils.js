@@ -1191,6 +1191,12 @@ export default {
       return siblingCard.listPositionIndex
     }
   },
+  listChildPlaceholderRectFromCardId (cardId) {
+    const element = document.querySelector(`.list-placeholder[data-card-id="${cardId}"]`)
+    if (!element) { return }
+    const rect = element.getBoundingClientRect()
+    return rect
+  },
 
   // rect
 

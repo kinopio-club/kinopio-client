@@ -492,7 +492,9 @@ const placeholderStylesMap = computed(() => {
   }
   return styles
 })
-const listPlaceholderSnapCardId = computed(() => listStore.listPlaceholderSnapCardId)
+const listPlaceholderSnapCardId = computed(() => {
+  return listStore.listPlaceholderSnapCardId
+})
 </script>
 
 <template lang="pug">
@@ -521,6 +523,7 @@ const listPlaceholderSnapCardId = computed(() => listStore.listPlaceholderSnapCa
         :data-list-id="list.id"
         :data-card-id="card.id"
         :data-card-listPositionIndex="card.listPositionIndex"
+        :class="{active: listPlaceholderSnapCardId === card.id}"
       )
 
       //- resize
