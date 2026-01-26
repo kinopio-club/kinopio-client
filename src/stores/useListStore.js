@@ -21,7 +21,8 @@ export const useListStore = defineStore('lists', {
   state: () => ({
     byId: {},
     allIds: [],
-    listSnapGuides: {} // { listId, listPositionIndex, cards }
+    listSnapGuides: {}, // { listId, listPositionIndex, cards }
+    listChildPlaceholders: {} // { listId: [ card{ id, x, y, height }, {..}] }
   }),
 
   getters: {
@@ -296,6 +297,7 @@ export const useListStore = defineStore('lists', {
         id: list.id,
         height: listHeight
       })
+      this.listChildPlaceholders[list.id] = cards
     },
     selectItemsInSelectedLists (selectedList) {
       const globalStore = useGlobalStore()

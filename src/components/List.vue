@@ -479,14 +479,16 @@ const snapGuideIsVisible = computed(() => {
 // placeholders
 
 const placeholderStyles = (card) => {
+  const cards = listStore.listChildPlaceholders[props.list.id]
+  if (!cards) { return }
+  const placeholder = cards.find(item => item.id === card.id)
   return {
-    top: card.y + 'px',
-    left: card.x + 'px',
+    top: placeholder.y + 'px',
+    left: placeholder.x + 'px',
     width: listItemWidth.value + 'px',
-    height: card.height + 'px'
+    height: placeholder.height + 'px'
   }
 }
-
 </script>
 
 <template lang="pug">
