@@ -73,7 +73,7 @@ export const useListStore = defineStore('lists', {
           x: 300,
           y: 100,
           z: 0,
-          resizeWidth: consts.normalCardMaxWidth,
+          resizeWidth: consts.normalCardWrapWidth,
           isCollapsed: false,
           height: 56
           // spaceId
@@ -112,7 +112,7 @@ export const useListStore = defineStore('lists', {
       list.id = id || nanoid()
       list.color = color || randomColor({ luminosity: 'dark' })
       list.y = Math.max(y, consts.minItemXY)
-      list.resizeWidth = resizeWidth || consts.normalCardMaxWidth
+      list.resizeWidth = resizeWidth || consts.normalCardWrapWidth
       list.isCollapsed = false
       list.name = name || `List ${count}`
       list.userId = userStore.id

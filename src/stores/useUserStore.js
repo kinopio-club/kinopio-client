@@ -76,7 +76,7 @@ export const useUserStore = defineStore('user', {
     prevInviteEmails: '',
     prevHeaderFontId: 0,
     cardSettingsShiftEnterShouldAddChildCard: true,
-    cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
+    cardSettingsCardWrapWidth: consts.normalCardWrapWidth,
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
     shouldShowMinimapJumpToList: true,

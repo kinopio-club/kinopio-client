@@ -1157,7 +1157,7 @@ const splitCards = (event, isPreview) => {
       y: card.value.y,
       frameId: card.value.frameId,
       backgroundColor: card.value.backgroundColor,
-      maxWidth: user.cardSettingsMaxCardWidth
+      maxWidth: user.cardSettingsCardWrapWidth
     }
     return newCard
   })
