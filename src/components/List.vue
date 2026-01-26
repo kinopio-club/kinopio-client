@@ -628,6 +628,9 @@ const placeholderStylesMap = computed(() => {
     animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
   &.has-cards
     top 34px // consts.listInfoHeight
+.list-placeholder
+  &.active
+    animation placeholderGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
 
 .list-info
   min-width var(--min-list-width)
@@ -703,4 +706,7 @@ const placeholderStylesMap = computed(() => {
 @keyframes listSnapGuide
   50%
     transform scaleY(175%)
+@keyframes placeholderGuide
+  50%
+    transform scaleY(115%)
 </style>
