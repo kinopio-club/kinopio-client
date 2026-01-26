@@ -990,6 +990,14 @@ export const useCardStore = defineStore('cards', {
       globalStore.clearDraggingItems()
       globalStore.clearMultipleSelected()
     },
+    async prependCardToList (card, list) {
+      let targetPositionIndex = null
+      const cards = this.getCardsByList(list.id)
+      if (cards.length) {
+        targetPositionIndex = cards[0].listPositionIndex
+      }
+      await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: true })
+    },
     async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
       try {
         const ids = cards.map(card => card.id)

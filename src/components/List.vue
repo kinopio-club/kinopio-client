@@ -9,8 +9,9 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
-// import { colord, extend } from 'colord'
+import { nanoid } from 'nanoid'
 
 const globalStore = useGlobalStore()
 const listStore = useListStore()
@@ -401,11 +402,18 @@ const updateIsCollapsed = (value) => {
     isCollapsed: value
   })
 }
-const addCard = () => {
+const addCard = async () => {
   updateIsCollapsed(false)
-  // TODO get prepended list pos
-  // create card w listId and listPosition
-  console.log('addCard', props.list.id)
+  const width = props.list.resizeWidth - (consts.listPadding * 2)
+  const card = {
+    id: nanoid(),
+    x: props.list.x + consts.listPadding,
+    y: props.list.y + consts.listInfoHeight,
+    resizeWidth: width,
+    width
+  }
+  cardStore.createCard(card)
+  cardStore.prependCardToList(card, props.list)
 }
 
 // resize
