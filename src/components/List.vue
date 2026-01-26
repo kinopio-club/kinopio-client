@@ -328,6 +328,7 @@ const color = computed(() => {
     return props.list.color
   }
 })
+const listItemWidth = computed(() => props.list.resizeWidth - (consts.listPadding * 2))
 const colorIsDark = computed(() => {
   return utils.colorIsDark(color.value)
 })
@@ -404,7 +405,7 @@ const updateIsCollapsed = (value) => {
 }
 const addCard = async () => {
   updateIsCollapsed(false)
-  const width = props.list.resizeWidth - (consts.listPadding * 2)
+  const width = listItemWidth.value
   const card = {
     id: nanoid(),
     x: props.list.x + consts.listPadding,
@@ -469,6 +470,23 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     globalStore.itemSnappingIsReady = false
   }
 })
+
+const snapGuideIsVisible = computed(() => {
+  if (props.list.isCollapsed) { return }
+  return !listCards.value.length
+})
+
+// placeholders
+
+const placeholderStyles = (card) => {
+  return {
+    top: card.y + 'px',
+    left: card.x + 'px',
+    width: listItemWidth.value + 'px',
+    height: card.height + 'px'
+  }
+}
+
 </script>
 
 <template lang="pug">
@@ -491,6 +509,13 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
       :style="listBackgroundStyles"
       :class="classes"
     )
+    template(v-for="card in listCards")
+      .list-placeholder.list-snap-guide(
+        :style="placeholderStyles(card)"
+        :data-list-id="list.id"
+        :data-card-id="card.id"
+        :data-card-listPositionIndex="card.listPositionIndex"
+      )
 
       //- resize
       .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
@@ -523,7 +548,7 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endListInfoInteractionTouch"
   )
-    .list-snap-guide(v-if="!props.list.isCollapsed" :class="{ active: state.isDraggingCardOverList }")
+    .list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }")
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- toggle collapse
@@ -586,6 +611,20 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
     transition none
     z-index 1
 
+.list-snap-guide
+  position absolute
+  top 42px // consts.listInfoHeight + consts.listpadding
+  right 8px
+  width calc(100% - 16px)
+  height var(--snap-guide-width)
+  border-radius var(--entity-radius)
+  background-color var(--light-shadow)
+  box-shadow var(--button-active-inset-shadow)
+  &.active
+    animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
+  &.has-cards
+    top 34px // consts.listInfoHeight
+
 .list-info
   min-width var(--min-list-width)
   pointer-events all
@@ -616,19 +655,6 @@ watch(() => listStore.listSnapGuides, (value, prevValue) => {
   &:active,
   &.active
     box-shadow var(--active-shadow)
-  .list-snap-guide
-    position absolute
-    top 42px // consts.listInfoHeight + consts.listpadding
-    right 8px
-    width calc(100% - 16px)
-    height var(--snap-guide-width)
-    border-radius var(--entity-radius)
-    background-color var(--light-shadow)
-    box-shadow var(--button-active-inset-shadow)
-    &.active
-      animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
-    &.has-cards
-      top 34px // consts.listInfoHeight
   // buttons
   .inline-button-wrap
     display inline-block
