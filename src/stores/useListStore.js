@@ -205,6 +205,16 @@ export const useListStore = defineStore('lists', {
     updateList (update) {
       this.updateLists([update])
     },
+    moveListChildPlaceholders (list, delta) {
+      let cards = this.listChildPlaceholders[list.id]
+      if (!cards) { return }
+      cards = cards.map(card => {
+        card.x = Math.round(card.x + delta.x)
+        card.y = Math.round(card.y + delta.y)
+        return card
+      })
+      this.listChildPlaceholders[list.id] = cards
+    },
     moveLists ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
@@ -224,6 +234,7 @@ export const useListStore = defineStore('lists', {
       }
       let lists = this.getListsSelected
       lists = lists.map(list => {
+        this.moveListChildPlaceholders(list, delta)
         let x = Math.round(list.x + delta.x)
         x = Math.max(0, x)
         let y = Math.round(list.y + delta.y)
@@ -291,6 +302,7 @@ export const useListStore = defineStore('lists', {
     updateListDimensions (list, cards) {
       const cardStore = useCardStore()
       cards = cards || cardStore.getCardsByList(list.id)
+      if (!cards.length) { return }
       const card = last(cards)
       const listHeight = (card.y - list.y) + card.height + consts.listPadding
       this.updateList({

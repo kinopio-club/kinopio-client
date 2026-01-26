@@ -481,16 +481,18 @@ const snapGuideIsVisible = computed(() => {
 const listChildPlaceholders = computed(() => listStore.listChildPlaceholders[props.list.id])
 const placeholderStylesMap = computed(() => {
   if (!listChildPlaceholders.value) return {}
-  return listChildPlaceholders.value.reduce((accumulator, placeholder) => {
-    accumulator[placeholder.id] = {
+  const styles = {}
+  for (const placeholder of listChildPlaceholders.value) {
+    styles[placeholder.id] = {
       top: placeholder.y + 'px',
       left: placeholder.x + 'px',
       width: listItemWidth.value + 'px',
       height: placeholder.height + 'px'
     }
-    return accumulator
-  }, {})
+  }
+  return styles
 })
+const listPlaceholderSnapCardId = computed(() => listStore.listPlaceholderSnapCardId)
 </script>
 
 <template lang="pug">

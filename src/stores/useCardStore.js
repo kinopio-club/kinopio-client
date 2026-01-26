@@ -591,6 +591,7 @@ export const useCardStore = defineStore('cards', {
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
       this.updateCardSnapGuides({ items: cards, cursor: endCursor })
       listStore.updateListSnapGuides(cards)
+      listStore.updateListPlaceholderSnapGuide()
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
