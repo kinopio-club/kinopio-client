@@ -13,8 +13,8 @@ export default {
   defaultCardHeight: 70,
   minItemXY: 70,
   minLineY: 150,
-  normalCardMaxWidth: 200,
-  wideCardMaxWidth: 390,
+  normalCardWrapWidth: 200,
+  wideCardWrapWidth: 390,
   minCardIframeWidth: 310,
   freeCardsCreatedLimit: 100,
   freeUploadSizeLimit: 5, // 5mb

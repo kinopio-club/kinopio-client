@@ -30,15 +30,16 @@ const updateShiftEnter = (value) => {
 
 //  max card width
 
-const maxCardWidth = computed(() => userStore.cardSettingsMaxCardWidth)
-const maxCardWidthIsNormal = computed(() => maxCardWidth.value === consts.normalCardMaxWidth)
-const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
-const updateMaxCardWidthIsWide = (isWide) => {
-  let value = consts.normalCardMaxWidth
+const cardWrapWidth = computed(() => userStore.cardSettingsCardWrapWidth)
+const cardWrapWidthIsNormal = computed(() => cardWrapWidth.value === consts.normalCardWrapWidth)
+const cardWrapWidthIsWide = computed(() => cardWrapWidth.value === consts.wideCardWrapWidth)
+const updateCardWrapWidthIsWide = (isWide) => {
+  let value = consts.normalCardWrapWidth
   if (isWide) {
-    value = consts.wideCardMaxWidth
+    value = consts.wideCardWrapWidth
   }
-  userStore.updateUser({ cardSettingsMaxCardWidth: value })
+  userStore.updateUser({ cardSettingsCardWrapWidth: value })
+  // server migration: cardSettingsCardWrapWidth -> cardSettingsCardWrapWidth
 }
 </script>
 
@@ -52,11 +53,11 @@ const updateMaxCardWidthIsWide = (isWide) => {
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
   section
-    p Max Card Width
+    p Card Wrap Width
     .segmented-buttons
-      button(@click="updateMaxCardWidthIsWide(false)" :class="{ active: !maxCardWidthIsWide }")
+      button(@click="updateCardWrapWidthIsWide(false)" :class="{ active: !cardWrapWidthIsWide }")
         span Normal
-      button(@click="updateMaxCardWidthIsWide(true)" :class="{ active: maxCardWidthIsWide }")
+      button(@click="updateCardWrapWidthIsWide(true)" :class="{ active: cardWrapWidthIsWide }")
         span Wide
   section(v-if="parentIsUserSettings")
     .row

@@ -519,7 +519,7 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
-  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
+  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardWrapWidth
   let cardWidth = resizeWidth.value
   if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
@@ -2201,7 +2201,7 @@ const clearFocus = () => {
 
 <style lang="stylus">
 .card-wrap
-  --card-width 200px // consts.normalCardMaxWidth
+  --card-width 200px // consts.normalCardWrapWidth
   pointer-events all
   position absolute
   max-width var(--card-width)
