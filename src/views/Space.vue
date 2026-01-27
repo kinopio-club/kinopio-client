@@ -526,10 +526,18 @@ const updateSizeForNewBox = (boxId) => {
 //   globalStore.currentListIsNew = true
 //   event.preventDefault() // allows dragging lists without scrolling on touch
 // }
+
+const shouldSnapBackToList = () => {
+  return listStore.currentListChildPlaceholderCardIds.includes(globalStore.currentDraggingCardId)
+}
+const checkIfShouldRemoveFromList = async () => {
+  if (shouldSnapBackToList()) { return }
+  console.log('🦮')
+}
+
 const checkIfShouldSnapBackToList = async () => {
   if (!globalStore.currentUserIsDraggingCard) { return }
-  const shouldSnapBackToList = globalStore.currentDraggingCardId === listStore.currentListChildPlaceholderCardId
-  if (!shouldSnapBackToList) { return }
+  if (!shouldSnapBackToList()) { return }
   const cards = cardStore.getCardsSelected
   let listIds = []
   cards.forEach(card => {
