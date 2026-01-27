@@ -534,6 +534,7 @@ export const useGlobalStore = defineStore('global', {
     triggerEndDrawing () {},
     triggerUpdateDrawingDataUrl () {},
     triggerUpdateDrawingStrokes () {},
+    triggerIsSnappingBackToList () {},
 
     resetPageSizes () {
       this.triggerDrawingReset()

@@ -528,7 +528,8 @@ const updateSizeForNewBox = (boxId) => {
 // }
 const checkIfShouldSnapBackToList = async () => {
   if (!globalStore.currentUserIsDraggingCard) { return }
-  if (globalStore.currentDraggingCardId !== listStore.currentListChildPlaceholderCardId) { return }
+  const shouldSnapBackToList = globalStore.currentDraggingCardId === listStore.currentListChildPlaceholderCardId
+  if (!shouldSnapBackToList) { return }
   const cards = cardStore.getCardsSelected
   let listIds = []
   cards.forEach(card => {
@@ -537,7 +538,8 @@ const checkIfShouldSnapBackToList = async () => {
   listIds = uniq(listIds)
   for (const listId of listIds) {
     const list = listStore.getList(listId)
-    await cardStore.updateCardPositionsInList(list) // return cards to their list position
+    globalStore.triggerIsSnappingBackToList()
+    await cardStore.updateCardPositionsInList(list) // return cards to their prev list position
   }
 }
 const checkIfShouldSnapToListTop = async (event) => {
@@ -566,17 +568,6 @@ const checkIfShouldSnapToCard = async (event) => {
     await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
     return
   }
-
-  // TODO block drag card out of list
-  // const isRemovedFromList = target.listId && !listStore.listSnapGuides.listId
-
-  // if (isRemovedFromList) { or remove dragged items from list calling checkIfShouldSnapToCard(), or can do this after drag complete (seperate method from stopInteractions)??
-  //   // TODO remove listId, listPos if cards previously was in list, and now !listStore.listSnapGuides
-  //   // cardStore.removeCardsFromList(cards)
-  // reset resizeWidth
-  //   return
-  // }
-
   // create new list
   const list = {
     id: nanoid(),

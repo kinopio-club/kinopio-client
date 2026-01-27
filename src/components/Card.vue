@@ -117,6 +117,8 @@ onMounted(async () => {
         updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
       } else if (name === 'triggerCancelLocking') {
         cancelLocking()
+      } else if (name === 'triggerIsSnappingBackToList') {
+        state.isSnappingBackToList = true
       }
     }
   )
@@ -167,7 +169,8 @@ const state = reactive({
   isVisibleInViewport: false,
   shouldRenderParent: false,
   safeColors: {},
-  urls: []
+  urls: [],
+  isSnappingBackToList: false
 })
 watch(() => props.card.name, (value, prevValue) => {
   updateUrls()
@@ -405,6 +408,9 @@ const safeColor = (color) => {
 
 // styles
 
+const cardWrapTransitionEnd = () => {
+  state.isSnappingBackToList = false
+}
 const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value)
 const cardWrapStyle = computed(() => {
   let z = props.card.z
@@ -428,6 +434,9 @@ const cardWrapStyle = computed(() => {
   }
   if (isSnappingToItem.value) {
     styles.opacity = consts.itemSnapOpacity
+  }
+  if (state.isSnappingBackToList) {
+    styles.transition = 'all 0.1s ease-out'
   }
   styles = updateStylesWithWidth(styles)
   return styles
@@ -2026,6 +2035,7 @@ const clearFocus = () => {
   :key="card.id"
   ref="cardElement"
   :class="cardWrapClasses"
+  @transitionend="cardWrapTransitionEnd"
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
