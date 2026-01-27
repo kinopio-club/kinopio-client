@@ -682,6 +682,7 @@ const dragBoxes = (event) => {
     // meta-key-drag box to move without selecting items inside
     if (!isMeta) {
       boxStore.selectItemsInSelectedBoxes()
+      globalStore.multipleBoxesSelectedIds.push(globalStore.currentDraggingBoxId)
     }
   }
   dragItems()
