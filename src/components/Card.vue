@@ -178,6 +178,9 @@ watch(() => props.card.name, (value, prevValue) => {
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
 })
+watch(() => globalStore.currentUserIsDraggingList, (value, prevValue) => {
+  state.isSnappingToList = false
+})
 const updateUrlData = () => {
   updateOtherItems()
   updateUrlPreview()

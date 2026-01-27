@@ -532,9 +532,9 @@ const shouldSnapBackToList = () => {
 }
 const checkIfShouldRemoveFromList = async () => {
   if (shouldSnapBackToList()) { return }
-  console.log('🦮')
+  const cards = cardStore.getCardsSelected
+  cardStore.removeCardsFromLists(cards)
 }
-
 const checkIfShouldSnapBackToList = async () => {
   if (!globalStore.currentUserIsDraggingCard) { return }
   if (!shouldSnapBackToList()) { return }
@@ -544,9 +544,9 @@ const checkIfShouldSnapBackToList = async () => {
     if (card.listId) { listIds.push(card.listId) }
   })
   listIds = uniq(listIds)
+  globalStore.triggerIsSnappingToList()
   for (const listId of listIds) {
     const list = listStore.getList(listId)
-    globalStore.triggerIsSnappingToList()
     await cardStore.updateCardPositionsInList(list) // return cards to their prev list position
   }
 }
@@ -923,6 +923,7 @@ const stopInteractions = async (event) => {
   checkIfShouldSnapBackToList()
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
+  checkIfShouldRemoveFromList()
   if (shouldCancelInteraction(event)) {
     globalStore.currentUserIsResizingCardDetails = false
     return

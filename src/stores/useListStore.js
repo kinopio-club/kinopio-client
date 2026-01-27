@@ -75,7 +75,7 @@ export const useListStore = defineStore('lists', {
           z: 0,
           resizeWidth: consts.normalCardWrapWidth,
           isCollapsed: false,
-          height: 56
+          height: consts.listEmptyHeight
           // spaceId
           // userId
         }
@@ -306,14 +306,23 @@ export const useListStore = defineStore('lists', {
     updateListDimensions (list, cards) {
       const cardStore = useCardStore()
       cards = cards || cardStore.getCardsByList(list.id)
-      if (!cards.length) { return }
-      const card = last(cards)
-      const listHeight = (card.y - list.y) + card.height + consts.listPadding
-      this.updateList({
-        id: list.id,
-        height: listHeight
-      })
-      this.listChildPlaceholders[list.id] = cards
+      // list has cards
+      if (cards.length) {
+        const card = last(cards)
+        const listHeight = (card.y - list.y) + card.height + consts.listPadding
+        this.updateList({
+          id: list.id,
+          height: listHeight
+        })
+        this.listChildPlaceholders[list.id] = cards
+      // list is empty
+      } else {
+        this.listChildPlaceholders[list.id] = []
+        this.updateList({
+          id: list.id,
+          height: consts.listEmptyHeight
+        })
+      }
     },
     selectItemsInSelectedLists (selectedList) {
       const globalStore = useGlobalStore()

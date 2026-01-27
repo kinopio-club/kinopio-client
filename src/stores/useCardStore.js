@@ -1043,7 +1043,31 @@ export const useCardStore = defineStore('cards', {
         console.error('🚒 addCardsToList', error)
       }
     },
-    // async removeCardsFromList (cards)
+    async removeCardsFromLists (cards) {
+      const listStore = useListStore()
+      let listIds = []
+      const ids = cards.map(card => {
+        if (card.listId) {
+          listIds.push(card.listId)
+        }
+        return card.id
+      })
+      listIds = uniq(listIds)
+      const updates = ids.map(id => {
+        return {
+          id,
+          listId: null,
+          listPositionIndex: null
+        }
+      })
+      await this.updateCards(updates)
+      await nextTick()
+      for (const listId of listIds) {
+        const list = listStore.getList(listId)
+        await this.updateCardPositionsInList(list)
+        listStore.updateListDimensions(list)
+      }
+    },
 
     // snap guides
 
