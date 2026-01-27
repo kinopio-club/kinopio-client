@@ -526,6 +526,20 @@ const updateSizeForNewBox = (boxId) => {
 //   globalStore.currentListIsNew = true
 //   event.preventDefault() // allows dragging lists without scrolling on touch
 // }
+const checkIfShouldSnapBackToList = async () => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentDraggingCardId !== listStore.currentListChildPlaceholderCardId) { return }
+  const cards = cardStore.getCardsSelected
+  let listIds = []
+  cards.forEach(card => {
+    if (card.listId) { listIds.push(card.listId) }
+  })
+  listIds = uniq(listIds)
+  for (const listId of listIds) {
+    const list = listStore.getList(listId)
+    await cardStore.updateCardPositionsInList(list) // return cards to their list position
+  }
+}
 const checkIfShouldSnapToListTop = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.preventItemSnapping) { return }
@@ -906,6 +920,7 @@ const stopInteractions = async (event) => {
   checkIfShouldSnapToBox(event)
   checkIfShouldSnapToCard(event)
   checkIfShouldSnapToListTop(event)
+  checkIfShouldSnapBackToList()
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
   if (shouldCancelInteraction(event)) {
