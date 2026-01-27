@@ -517,17 +517,8 @@ const listPlaceholderSnapCardId = computed(() => {
       :style="listBackgroundStyles"
       :class="classes"
     )
-    template(v-for="card in listChildPlaceholders" :key="card.id")
-      .list-placeholder.list-snap-guide(
-        :style="placeholderStylesMap[card.id]"
-        :data-list-id="list.id"
-        :data-card-id="card.id"
-        :data-card-listPositionIndex="card.listPositionIndex"
-        :class="{active: listPlaceholderSnapCardId === card.id}"
-      )
-
       //- resize
-      .bottom-button-wrap(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+      .bottom-button-wrap.asldfkj(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
             @pointerover="updateIsHover(true)"
             @pointerleave="updateIsHover(false)"
@@ -539,6 +530,15 @@ const listPlaceholderSnapCardId = computed(() => {
             tabindex="-1"
           )
             img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+    //- placeholders
+    template(v-for="card in listChildPlaceholders" :key="card.id")
+      .list-placeholder.list-snap-guide(
+        :style="placeholderStylesMap[card.id]"
+        :data-list-id="list.id"
+        :data-card-id="card.id"
+        :data-card-listPositionIndex="card.listPositionIndex"
+        :class="{active: listPlaceholderSnapCardId === card.id}"
+      )
 
   .list-info(
     :data-list-id="list.id"
