@@ -1197,6 +1197,9 @@ export default {
     const rect = element.getBoundingClientRect()
     return rect
   },
+  listChildWidth (listWidth) {
+    return listWidth - (consts.listPadding * 2)
+  },
 
   // rect
 

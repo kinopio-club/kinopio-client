@@ -294,26 +294,6 @@ export const useListStore = defineStore('lists', {
       }
       this.updateList(update)
     },
-    resizeLists (ids, delta) {
-      const globalStore = useGlobalStore()
-      const updates = []
-      ids.forEach(id => {
-        const rect = utils.listElementDimensions({ id })
-        let width = rect.width
-        width = width + delta.x
-        const list = { id, resizeWidth: width }
-        // TODO recalc height from dom, include in list update
-        console.log(width)
-        updates.push(list)
-        // this.updatePageSize(list)
-        globalStore.currentUserIsResizingList = true
-        globalStore.currentUserIsResizingListIds = [list.id]
-        // ??needed? update list computed height
-      })
-      const connectionStore = useConnectionStore()
-      connectionStore.updateConnectionPathsByItemIds(ids)
-      this.updateLists(updates)
-    },
     updateListDimensions (list, cards) {
       const cardStore = useCardStore()
       cards = cards || cardStore.getCardsByList(list.id)
@@ -340,6 +320,55 @@ export const useListStore = defineStore('lists', {
       globalStore.addMultipleToMultipleCardsSelected(cardIds)
       if (!isMultipleListsSelected) {
         globalStore.preventMultipleSelectedActionsIsVisible = true
+      }
+    },
+
+    // resize
+
+    async resizeListChildCards (list, width) {
+      const cardStore = useCardStore()
+      // child width
+      let childWidth = utils.listChildWidth(width)
+      const minChildWidth = utils.listChildWidth(consts.normalCardWrapWidth)
+      childWidth = Math.max(minChildWidth, childWidth)
+      // update cards
+      let cards = cardStore.getCardsByList(list.id)
+      cards = cards.map(card => {
+        return {
+          id: card.id,
+          resizeWidth: childWidth,
+          width: childWidth
+        }
+      })
+      await cardStore.updateCards(cards)
+      const cardIds = cards.map(card => card.id)
+      await cardStore.updateCardsDimensions(cardIds)
+    },
+    async resizeLists (ids, delta) {
+      const globalStore = useGlobalStore()
+      globalStore.currentUserIsResizingList = true
+      globalStore.currentUserIsResizingListIds = ids
+      for (const id of ids) {
+        const rect = utils.listElementDimensions({ id })
+        let width = rect.width
+        width = width + delta.x
+        const list = { id, resizeWidth: width }
+        this.updateList(list)
+        this.resizeListChildCards(list, width)
+      }
+    },
+    async clearResizeLists (id) {
+      const globalStore = useGlobalStore()
+      const width = consts.normalCardWrapWidth
+      await nextTick()
+      const ids = uniq(globalStore.multipleListsSelectedIds.concat([id]))
+      for (const id of ids) {
+        const list = this.getList(id)
+        this.updateList({
+          id,
+          resizeWidth: width
+        })
+        this.resizeListChildCards(list, width)
       }
     },
 

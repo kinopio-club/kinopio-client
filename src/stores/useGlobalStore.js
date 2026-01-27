@@ -962,6 +962,7 @@ export const useGlobalStore = defineStore('global', {
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''
       this.currentDraggingListId = ''
+      this.itemSnappingIsReady = false
     },
     multipleSelectedItemsToLoad (items) {
       utils.typeCheck({ value: items, type: 'object' })
@@ -1243,6 +1244,7 @@ export const useGlobalStore = defineStore('global', {
       this.multipleCardsSelectedIds = []
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []
+      this.currentUserIsResizingListIds = []
     },
     clearSnapGuides () {
       const boxStore = useBoxStore()

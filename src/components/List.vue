@@ -22,7 +22,6 @@ const broadcastStore = useBroadcastStore()
 
 // let unsubscribes
 
-const minListWidth = 200
 // locking
 // long press to touch drag
 const lockingPreDuration = 100 // ms
@@ -328,7 +327,7 @@ const color = computed(() => {
     return props.list.color
   }
 })
-const listItemWidth = computed(() => props.list.resizeWidth - (consts.listPadding * 2))
+const listItemWidth = computed(() => utils.listChildWidth(props.list.resizeWidth))
 const colorIsDark = computed(() => {
   return utils.colorIsDark(color.value)
 })
@@ -448,11 +447,7 @@ const resizeButtonColorClass = computed(() => {
   return [classes]
 })
 const resetWidth = () => {
-  listStore.updateList({
-    id: props.list.id,
-    resizeWidth: minListWidth
-  })
-  // ??? TODO update computed height
+  listStore.clearResizeLists(props.list.id)
 }
 
 // snapping
@@ -588,7 +583,7 @@ const currentListChildPlaceholderCardId = computed(() => {
 
 <style lang="stylus">
 :root
-  --min-list-width 200px // matches minListWidth var
+  --min-list-width 200px // matches consts.normalCardWrapWidth
 
 .list
   position absolute

@@ -1030,7 +1030,7 @@ export const useCardStore = defineStore('cards', {
             listId: list.id,
             listPositionIndex: newPositionIndexes[index],
             tilt: 0,
-            resizeWidth: list.resizeWidth - (consts.listPadding * 2)
+            resizeWidth: utils.listChildWidth(list.resizeWidth)
           }
         })
         this.updateCards(updates)
