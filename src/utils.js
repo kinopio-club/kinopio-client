@@ -1171,6 +1171,9 @@ export default {
   listElementFromId (listId) {
     return document.querySelector(`.list[data-list-id="${listId}"]`)
   },
+  listInfoElementFromId (listId) {
+    return document.querySelector(`.list-info[data-list-id="${listId}"]`)
+  },
   listInfoRectFromId (listId) {
     const element = document.querySelector(`.list-info[data-list-id="${listId}"]`)
     const rect = element.getBoundingClientRect()

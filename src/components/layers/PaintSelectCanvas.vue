@@ -251,7 +251,7 @@ const updateSelectableLists = () => {
   selectableLists = []
   const lists = listStore.getAllLists
   lists.forEach(list => {
-    const element = utils.listElementFromId(list.id)
+    const element = utils.listInfoElementFromId(list.id)
     if (!element) { return }
     // if (element.dataset.isVisibleInViewport === 'false') { return }
     const rect = element.getBoundingClientRect()
