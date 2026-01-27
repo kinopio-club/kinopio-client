@@ -546,7 +546,7 @@ const checkIfShouldSnapBackToList = async () => {
   listIds = uniq(listIds)
   for (const listId of listIds) {
     const list = listStore.getList(listId)
-    globalStore.triggerIsSnappingBackToList()
+    globalStore.triggerIsSnappingToList()
     await cardStore.updateCardPositionsInList(list) // return cards to their prev list position
   }
 }

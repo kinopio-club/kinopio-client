@@ -1010,6 +1010,7 @@ export const useCardStore = defineStore('cards', {
       await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: true })
     },
     async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
+      const globalStore = useGlobalStore()
       try {
         const ids = cards.map(card => card.id)
         await this.updateCardsDimensions(ids)
@@ -1033,6 +1034,7 @@ export const useCardStore = defineStore('cards', {
             resizeWidth: utils.listChildWidth(list.resizeWidth)
           }
         })
+        globalStore.triggerIsSnappingToList()
         this.updateCards(updates)
         await nextTick()
         await this.updateCardsDimensions(ids)

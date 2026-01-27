@@ -117,8 +117,8 @@ onMounted(async () => {
         updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
       } else if (name === 'triggerCancelLocking') {
         cancelLocking()
-      } else if (name === 'triggerIsSnappingBackToList') {
-        state.isSnappingBackToList = true
+      } else if (name === 'triggerIsSnappingToList') {
+        state.isSnappingToList = true
       }
     }
   )
@@ -170,7 +170,7 @@ const state = reactive({
   shouldRenderParent: false,
   safeColors: {},
   urls: [],
-  isSnappingBackToList: false
+  isSnappingToList: false
 })
 watch(() => props.card.name, (value, prevValue) => {
   updateUrls()
@@ -409,7 +409,7 @@ const safeColor = (color) => {
 // styles
 
 const cardWrapTransitionEnd = () => {
-  state.isSnappingBackToList = false
+  state.isSnappingToList = false
 }
 const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value)
 const cardWrapStyle = computed(() => {
@@ -435,7 +435,7 @@ const cardWrapStyle = computed(() => {
   if (isSnappingToItem.value) {
     styles.opacity = consts.itemSnapOpacity
   }
-  if (state.isSnappingBackToList) {
+  if (state.isSnappingToList) {
     styles.transition = 'all 0.1s ease-out'
   }
   styles = updateStylesWithWidth(styles)
