@@ -492,8 +492,8 @@ const placeholderStylesMap = computed(() => {
   }
   return styles
 })
-const listPlaceholderSnapCardId = computed(() => {
-  return listStore.listPlaceholderSnapCardId
+const currentListChildPlaceholderCardId = computed(() => {
+  return listStore.currentListChildPlaceholderCardId
 })
 </script>
 
@@ -537,7 +537,7 @@ const listPlaceholderSnapCardId = computed(() => {
         :data-list-id="list.id"
         :data-card-id="card.id"
         :data-card-listPositionIndex="card.listPositionIndex"
-        :class="{active: listPlaceholderSnapCardId === card.id}"
+        :class="{active: currentListChildPlaceholderCardId === card.id}"
       )
 
   .list-info(

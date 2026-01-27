@@ -23,7 +23,7 @@ export const useListStore = defineStore('lists', {
     allIds: [],
     listSnapGuides: {}, // { listId, listPositionIndex, cards }
     listChildPlaceholders: {}, // { listId: [ card{ id, x, y, height }, {..}] }
-    listPlaceholderSnapCardId: ''
+    currentListChildPlaceholderCardId: ''
   }),
 
   getters: {
@@ -179,7 +179,7 @@ export const useListStore = defineStore('lists', {
         target: listCard
       }]
     },
-    updateListPlaceholderSnapGuide () {
+    updateCurrentListChildPlaceholder () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const card = cardStore.getCard(globalStore.currentDraggingCardId)
@@ -188,9 +188,9 @@ export const useListStore = defineStore('lists', {
       if (!placeholder) { return }
       const cardElement = utils.cardElementDimensions(card)
       if (utils.isRectAInsideRectB(card, placeholder)) {
-        this.listPlaceholderSnapCardId = card.id
+        this.currentListChildPlaceholderCardId = card.id
       } else {
-        this.listPlaceholderSnapCardId = ''
+        this.currentListChildPlaceholderCardId = ''
       }
     },
 
