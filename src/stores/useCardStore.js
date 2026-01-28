@@ -1099,6 +1099,7 @@ export const useCardStore = defineStore('cards', {
     },
     updateCardSnapGuides ({ items, cursor }) {
       const globalStore = useGlobalStore()
+      const listStore = useListStore()
       if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
@@ -1136,13 +1137,20 @@ export const useCardStore = defineStore('cards', {
         const cardRightIsInsideTarget = utils.isBetween({ value: cardRight, min: targetLeft, max: targetRight })
         const cardTopIsInsideTarget = utils.isBetween({ value: cardTop, min: targetTop, max: targetBottom })
         const cardBottomIsInsideTarget = utils.isBetween({ value: cardBottom, min: targetTop, max: targetBottom })
+        // card is in list if snapping to list
+        let cardIsValidListSnap = true
+        if (listStore.listSnapGuides.listId) {
+          cardIsValidListSnap = listStore.listSnapGuides.listId === card.listId
+        }
+        const isSnapTop = cardIsOverTargetTop && (cardLeftIsInsideTarget || cardRightIsInsideTarget) && cardIsValidListSnap
+        const isSnapBottom = cardIsOverTargetBottom && (cardLeftIsInsideTarget || cardRightIsInsideTarget) && cardIsValidListSnap
         // snap top
-        if (cardIsOverTargetTop && (cardLeftIsInsideTarget || cardRightIsInsideTarget)) {
+        if (isSnapTop) {
           const snapGuide = this.createCardSnapGuide({ side: 'top', item: card, targetCard: target, cursor })
           snapGuides.push(snapGuide)
         }
         // snap bottom
-        if (cardIsOverTargetBottom && (cardLeftIsInsideTarget || cardRightIsInsideTarget)) {
+        if (isSnapBottom) {
           const snapGuide = this.createCardSnapGuide({ side: 'bottom', item: card, targetCard: target, cursor })
           snapGuides.push(snapGuide)
         }
