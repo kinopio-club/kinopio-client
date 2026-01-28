@@ -87,7 +87,7 @@ const handleMouseLeavePlayButton = () => {
 const toggleShouldDisplayIframe = (event) => {
   event.preventDefault()
   event.stopPropagation()
-  if (isTwitterUrl.value) { return }
+  if (isSocialMediaUrl.value) { return }
   globalStore.closeAllDialogs()
   cardStore.incrementCardZ(props.card.id)
   const iframeIsVisibleForCardId = globalStore.iframeIsVisibleForCardId
@@ -141,11 +141,12 @@ const autoplay = async (event) => {
 
 // twitter
 
-const isTwitterUrl = computed(() => {
+const isSocialMediaUrl = computed(() => {
   const url = props.card.urlPreviewUrl
-  return url.includes('twitter.com')
+  const domains = ['twitter.com', 'bsky.app', 'x.com', 'threads.com']
+  return domains.some(domain => url.includes(domain))
 })
-const removeTrailingTweetText = (description) => {
+const removeTrailingAttributionText = (description) => {
   const index = description.lastIndexOf('— ')
   if (index > 1) {
     description = description.substring(0, index)
@@ -189,10 +190,10 @@ const title = computed(() => {
   return title
 })
 const description = computed(() => {
-  if (isTwitterUrl.value) {
+  if (isSocialMediaUrl.value) {
     let description = props.card.urlPreviewDescription
-    description = removeTrailingTweetText(description)
-    return utils.truncated(description, 200)
+    description = removeTrailingAttributionText(description)
+    return utils.truncated(description, 280)
   }
   return null
 })
@@ -281,7 +282,7 @@ const openUrl = async (event, url) => {
       @mouseenter="handleMouseEnterPlayButton"
       @mouseleave="handleMouseLeavePlayButton"
     )
-      button.small-button(v-if="!isTwitterUrl" :class="colorClasses")
+      button.small-button(v-if="!isSocialMediaUrl" :class="colorClasses")
         img.icon.stop(v-if="shouldDisplayIframe" src="@/assets/box-filled.svg" :class="colorClasses")
         img.icon.play(v-else src="@/assets/play.svg" :class="colorClasses")
       img.favicon(v-if="props.card.urlPreviewFavicon" :src="props.card.urlPreviewFavicon")
