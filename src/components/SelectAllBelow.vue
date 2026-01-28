@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -17,6 +18,7 @@ const spaceStore = useSpaceStore()
 const lineStore = useLineStore()
 const boxStore = useBoxStore()
 const cardStore = useCardStore()
+const listStore = useListStore()
 
 onMounted(() => {
   window.addEventListener('mousedown', updateIsMetaKey)
@@ -98,6 +100,22 @@ const isNearBoxInfo = (position) => {
     return true
   }
 }
+const isNearListInfo = (position) => {
+  const lists = listStore.getListsNearLeftEdge
+  const list = lists.find(list => {
+    const rect = utils.listInfoRectFromId(list.id)
+    if (!rect) { return }
+    return utils.isBetween({
+      value: position.y,
+      min: list.y,
+      max: list.y + rect.height
+    })
+  })
+  if (list) {
+    state.isVisible = false
+    return true
+  }
+}
 const isNearCard = (position) => {
   const cards = cardStore.getCardsNearLeftEdge
   const card = cards.find(card => {
@@ -131,7 +149,7 @@ const handleMouseMove = (event) => {
   if (isNearLine(pagePosition)) { return }
   if (isNearBoxInfo(pagePosition)) { return }
   if (isNearCard(pagePosition)) { return }
-  // TODO (isNearList)
+  if (isNearListInfo(pagePosition)) { return }
   // check if between controls
   const toolbar = document.querySelector('#toolbar')?.getBoundingClientRect()
   if (!toolbar) { return }

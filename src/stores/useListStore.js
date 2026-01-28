@@ -52,6 +52,12 @@ export const useListStore = defineStore('lists', {
       const ids = globalStore.currentUserIsResizingListIds
       const lists = ids.map(id => this.byId[id])
       return lists
+    },
+    getListsNearLeftEdge () {
+      const lists = this.getAllLists
+      return lists.filter(list => {
+        return list.x <= consts.edgeThreshold
+      })
     }
   },
 
