@@ -1510,7 +1510,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           :visible="true"
           :loading="isLoadingUrlPreview"
           :card="card"
-          @toggleUrlIsVisible="toggleUrlIsVisible"
         )
 
       //- other space

@@ -78,8 +78,6 @@ let stickyTimerComplete = false
 let stickyTimer
 let stickyMap
 
-let prevIsLoadingUrlPreview
-
 let observer
 
 let unsubscribes
@@ -1077,17 +1075,8 @@ const cardUrlPreviewIsVisible = computed(() => {
   // return Boolean(props.card.urlPreviewIsVisible && props.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
 })
 const isLoadingUrlPreview = computed(() => {
-  let isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
-  isLoading = Boolean(isLoading)
-  if (isLoading) {
-    prevIsLoadingUrlPreview = true
-  } else if (prevIsLoadingUrlPreview) {
-    // connectionStore.updateConnectionPathByItemId(props.card.id)
-  }
-  return isLoading
-  // if (!isLoading) { return }
-  // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
-  // return isLoading && !isErrorUrl
+  const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
+  return Boolean(isLoading)
 })
 const updateUrlPreviewOnload = async () => {
   if (!props.card.shouldUpdateUrlPreview) { return }
@@ -2122,7 +2111,6 @@ const clearFocus = () => {
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
-            Loader(:visible="isLoadingUrlPreview")
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Url →
@@ -2190,6 +2178,10 @@ const clearFocus = () => {
           :selectedColor="selectedColor"
           :isImageCard="isImageCard"
         )
+    //- url preview loading
+    .status-container(v-if="isLoadingUrlPreview")
+      .badge.info
+        Loader(:visible="true")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -2390,10 +2382,16 @@ const clearFocus = () => {
       .icon
         filter invert()
 
-    .uploading-container
+    .uploading-container,
+    .status-container
       position absolute
       top 6px
       left 6px
+      .loader
+        margin-left 0
+    .status-container
+      .loader
+        margin 0
 
     &.media-card
       background-color transparent
