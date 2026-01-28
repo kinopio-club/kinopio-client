@@ -414,6 +414,7 @@ const safeColor = (color) => {
 const cardWrapTransitionEnd = () => {
   state.isSnappingToList = false
 }
+const shouldSkipWidth = computed(() => isComment.value && !isInList.value)
 const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value)
 const cardWrapStyle = computed(() => {
   let z = props.card.z
@@ -545,7 +546,7 @@ const updateStylesWithWidth = (styles) => {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
-  if (isComment.value) { return styles }
+  if (shouldSkipWidth.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
   styles.width = cardWidth + 'px'
   return styles
@@ -583,7 +584,7 @@ const width = computed(() => {
   return width
 })
 const resizeWidth = computed(() => {
-  if (isComment.value) { return }
+  if (shouldSkipWidth.value) { return }
   let resizeWidth = props.card.resizeWidth
   if (iframeIsVisible.value) {
     resizeWidth = resizeWidth || consts.minCardIframeWidth
