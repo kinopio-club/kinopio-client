@@ -5,13 +5,18 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const lineStore = useLineStore()
+const boxStore = useBoxStore()
+const cardStore = useCardStore()
 
 onMounted(() => {
   window.addEventListener('mousedown', updateIsMetaKey)
@@ -63,6 +68,50 @@ const updateIsMetaKey = (event) => {
 
 // position
 
+const isNearLine = (position) => {
+  const lines = lineStore.getAllLines
+  const line = lines.find(line => {
+    return utils.isBetween({
+      value: position.y,
+      min: line.y - 12,
+      max: line.y + 12
+    })
+  })
+  if (line) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearBoxInfo = (position) => {
+  const boxes = boxStore.getBoxesNearLeftEdge
+  const box = boxes.find(box => {
+    const rect = utils.boxInfoPositionFromId(box.id)
+    if (!rect) { return }
+    return utils.isBetween({
+      value: position.y,
+      min: box.y,
+      max: box.y + rect.infoHeight
+    })
+  })
+  if (box) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearCard = (position) => {
+  const cards = cardStore.getCardsNearLeftEdge
+  const card = cards.find(card => {
+    return utils.isBetween({
+      value: position.y,
+      min: card.y,
+      max: card.y + card.height
+    })
+  })
+  if (card) {
+    state.isVisible = false
+    return true
+  }
+}
 const handleMouseMove = (event) => {
   if (!event.target.closest) { return }
   if (!canEditSpace.value) { return }
@@ -73,25 +122,17 @@ const handleMouseMove = (event) => {
   updateIsMetaKey(event)
   const position = utils.cursorPositionInViewport(event)
   const pagePosition = utils.cursorPositionInSpace(event)
-  // hide if near line
-  let isLine
-  const lines = lineStore.getAllLines
-  lines.forEach(line => {
-    const isNearLine = utils.isBetween({
-      value: pagePosition.y,
-      min: line.y - 12,
-      max: line.y + 12
-    })
-    if (isNearLine) {
-      isLine = true
-    }
-  })
-  if (isLine) {
+  const isInThreshold = position.x <= consts.edgeThreshold
+  if (!isInThreshold) {
     state.isVisible = false
     return
   }
-  // show if between controls
-  const edgeThreshold = 30
+  // check if over items
+  if (isNearLine(pagePosition)) { return }
+  if (isNearBoxInfo(pagePosition)) { return }
+  if (isNearCard(pagePosition)) { return }
+  // TODO (isNearList)
+  // check if between controls
   const toolbar = document.querySelector('#toolbar')?.getBoundingClientRect()
   if (!toolbar) { return }
   let footer = document.querySelector('.footer-wrap footer')
@@ -101,7 +142,6 @@ const handleMouseMove = (event) => {
     footer = 0
   }
   const viewport = utils.visualViewport()
-  const isInThreshold = position.x <= edgeThreshold
   const isBetweenControls = utils.isBetween({
     value: position.y,
     min: toolbar.y + toolbar.height,

@@ -49,6 +49,7 @@ export default {
   listInfoHeight: 34,
   listEmptyHeight: 56,
   itemSnapOpacity: 0.5,
+  edgeThreshold: 30,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
