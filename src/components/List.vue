@@ -20,7 +20,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
-// let unsubscribes
+let unsubscribes
 
 // locking
 // long press to touch drag
@@ -32,22 +32,21 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
-// onMounted(() => {
-//   console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
-//   const globalActionUnsubscribe = globalStore.$onAction(
-//     ({ name, args }) => {
-//       if (name === 'clearDraggingItems') {
-//         console.log('clearDraggingItems')
-//       }
-//     }
-//   )
-//   unsubscribes = () => {
-//     globalActionUnsubscribe()
-//   }
-// })
-// onBeforeUnmount(() => {
-//   unsubscribes()
-// })
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'clearDraggingItems') {
+        state.isDraggingCardOverList = false
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
 
 const props = defineProps({
   list: Object

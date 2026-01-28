@@ -1067,6 +1067,7 @@ export const useCardStore = defineStore('cards', {
         }
       })
       await this.updateCards(updates)
+      await this.clearResizeCards(ids, true)
       await nextTick()
       for (const listId of listIds) {
         const list = listStore.getList(listId)
