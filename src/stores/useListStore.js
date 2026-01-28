@@ -367,6 +367,8 @@ export const useListStore = defineStore('lists', {
       await cardStore.updateCards(cards)
       const cardIds = cards.map(card => card.id)
       await cardStore.updateCardsDimensions(cardIds)
+      list = this.getList(list.id)
+      cardStore.updateCardPositionsInList(list)
     },
     async resizeLists (ids, delta) {
       const globalStore = useGlobalStore()
