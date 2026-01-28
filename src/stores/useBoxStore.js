@@ -284,10 +284,14 @@ export const useBoxStore = defineStore('boxes', {
       const boxes = this.getBoxesSelected
       const updates = []
       boxes.forEach(box => {
+        let x = Math.round(box.x + delta.x)
+        x = Math.max(0, x)
+        let y = Math.round(box.y + delta.y)
+        y = Math.max(0, y)
         const update = {
           id: box.id,
-          x: box.x + delta.x,
-          y: box.y + delta.y,
+          x,
+          y,
           resizeWidth: box.resizeWidth,
           resizeHeight: box.resizeHeight
         }
