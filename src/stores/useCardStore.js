@@ -151,6 +151,12 @@ export const useCardStore = defineStore('cards', {
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards.filter(card => utils.checkboxFromString(card.name))
+    },
+    getCardsNearLeftEdge () {
+      const cards = this.getAllCards
+      return cards.filter(card => {
+        return card.x <= consts.edgeThreshold
+      })
     }
   },
 

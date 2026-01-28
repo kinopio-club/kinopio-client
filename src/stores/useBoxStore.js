@@ -88,6 +88,12 @@ export const useBoxStore = defineStore('boxes', {
       boxes = boxes.map(boxId => this.getBox(boxId))
       boxes = boxes.filter(box => Boolean(box))
       return boxes
+    },
+    getBoxesNearLeftEdge () {
+      const boxes = this.getAllBoxes
+      return boxes.filter(box => {
+        return box.x <= consts.edgeThreshold
+      })
     }
   },
 

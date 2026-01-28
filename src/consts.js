@@ -45,6 +45,7 @@ export default {
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
   lineInfoOffset: 11,
+  edgeThreshold: 30,
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
