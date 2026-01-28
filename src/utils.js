@@ -1201,6 +1201,7 @@ export default {
     return rect
   },
   listChildWidth (listWidth) {
+    listWidth = listWidth || consts.normalCardWrapWidth
     return listWidth - (consts.listPadding * 2)
   },
 

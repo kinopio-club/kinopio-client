@@ -582,6 +582,7 @@ const currentListChildPlaceholderCardIds = computed(() => listStore.currentListC
 <style lang="stylus">
 :root
   --min-list-width 200px // matches consts.normalCardWrapWidth
+  --min-list-background-width calc(var(--min-list-width) - (8px * 2)) // utils.listChildWidth
 
 .list
   position absolute
@@ -627,6 +628,7 @@ const currentListChildPlaceholderCardIds = computed(() => listStore.currentListC
   &.has-cards
     top 34px // consts.listInfoHeight
 .list-placeholder
+  min-width var(--min-list-background-width)
   &.active
     animation placeholderGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
 
