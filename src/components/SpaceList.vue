@@ -399,6 +399,13 @@ const group = (groupId) => {
   if (!groupId) { return }
   return groupStore.getGroup(groupId)
 }
+
+// preview image
+
+const previewImage = (space) => {
+  if (!space.previewThumbnailImage) { return }
+  return space.previewThumbnailImage + `?date=${globalStore.sessionDate}`
+}
 </script>
 
 <template lang="pug">
@@ -466,8 +473,8 @@ span.space-list-wrap
 
             //- preview image
             template(v-if="!props.hidePreviewImage")
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-                img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
+              .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide}")
+                img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
               GroupLabel(:group="group(space.groupId)")

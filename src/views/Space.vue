@@ -110,6 +110,7 @@ const init = async () => {
     globalStore.updateNotifyIsJoiningGroup(true)
   }
   apiStore.updateDateImage()
+  globalStore.updateSessionDate()
   analyticsStore.event('pageview')
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
@@ -171,6 +172,7 @@ onMounted(async () => {
   hourlyTasks = setInterval(() => {
     spaceStore.updateInboxCache()
     apiStore.updateDateImage()
+    globalStore.updateSessionDate()
   }, 1000 * 60 * 60 * 1) // every 1 hour
 
   const globalActionUnsubscribe = globalStore.$onAction(

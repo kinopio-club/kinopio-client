@@ -308,6 +308,7 @@ export const useGlobalStore = defineStore('global', {
     sendingQueue: [],
     currentUserIsInvitedButCannotEditCurrentSpace: false,
     moderatorIsLoadingRestartServer: false,
+    sessionDate: 0,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
@@ -438,6 +439,9 @@ export const useGlobalStore = defineStore('global', {
         styles.borderRadius = `${radius * 2}px`
       }
       return styles
+    },
+    updateSessionDate () {
+      this.sessionDate = new Date().getTime()
     },
 
     // subscribe triggers
