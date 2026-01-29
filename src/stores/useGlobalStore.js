@@ -1258,7 +1258,7 @@ export const useGlobalStore = defineStore('global', {
       boxStore.boxSnapGuides = []
       cardStore.cardSnapGuides = []
       listStore.listSnapGuides = {}
-      listStore.currentListChildPlaceholderCardIds = []
+      listStore.currentListChildPlaceholderCardId = ''
     },
     updateNotifySpaceNotFound (value) {
       utils.typeCheck({ value, type: 'boolean' })

@@ -486,7 +486,9 @@ const placeholderStylesMap = computed(() => {
   }
   return styles
 })
-const currentListChildPlaceholderCardIds = computed(() => listStore.currentListChildPlaceholderCardIds)
+const currentListChildPlaceholderCardId = computed(() => {
+  return listStore.currentListChildPlaceholderCardId
+})
 </script>
 
 <template lang="pug">
@@ -529,7 +531,7 @@ const currentListChildPlaceholderCardIds = computed(() => listStore.currentListC
         :data-list-id="list.id"
         :data-card-id="card.id"
         :data-card-listPositionIndex="card.listPositionIndex"
-        :class="{active: currentListChildPlaceholderCardIds.includes(card.id)}"
+        :class="{active: currentListChildPlaceholderCardId === card.id}"
       )
 
   .list-info(
