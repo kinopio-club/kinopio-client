@@ -1143,6 +1143,7 @@ const updateUrlPreviewSuccess = async (url, data) => {
     return
   }
   cardStore.updateCard(data)
+  cardStore.updateCardDimensions(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025

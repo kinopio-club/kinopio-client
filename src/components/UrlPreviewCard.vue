@@ -178,6 +178,9 @@ const handleImageError = (event) => {
   emit('retryUrlPreview')
   hasRetried = true
 }
+const handleImageLoaded = (event) => {
+  cardStore.updateCardDimensions(props.card.id)
+}
 
 // title, description
 
@@ -249,7 +252,7 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" loading="lazy")
+      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" loading="lazy")
 
   //- embed
   template(v-if="shouldDisplayIframe")

@@ -720,8 +720,8 @@ export const useCardStore = defineStore('cards', {
       globalStore.updateShouldExplicitlyRenderCardIds(ids)
       const updates = []
       cards.forEach(card => {
-        card.prevWidth = card.width
-        card.prevHeight = card.height
+        card.prevWidth = Math.round(card.width)
+        card.prevHeight = Math.round(card.height)
         const element = utils.cardElement(card)
         if (!element) { return }
         const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
