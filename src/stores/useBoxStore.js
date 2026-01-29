@@ -480,11 +480,11 @@ export const useBoxStore = defineStore('boxes', {
       // lists
       const listIds = lists.map(list => list.id)
       globalStore.updateMultipleListsSelectedIds(listIds)
-      // lists.forEach(list => {
-      //   const listCards = cardStore.getCardsByList(list.id)
-      //   const listCardIds = listCards.map(card => card.id)
-      //   globalStore.addMultipleToMultipleCardsSelected(listCardIds)
-      // })
+      lists.forEach(list => {
+        const listCards = cardStore.getCardsByList(list.id)
+        const listCardIds = listCards.map(card => card.id)
+        globalStore.addMultipleToMultipleCardsSelected(listCardIds)
+      })
     },
 
     // snap guides
