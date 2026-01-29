@@ -532,6 +532,8 @@ const shouldSnapBackToList = () => {
 }
 const checkIfShouldRemoveFromList = async () => {
   if (shouldSnapBackToList()) { return }
+  const card = cardStore.getCurrentDraggingCard()
+  if (!card?.listId) { return }
   const cards = cardStore.getCardsSelected
   cardStore.removeCardsFromLists(cards)
 }

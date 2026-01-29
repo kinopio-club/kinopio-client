@@ -191,6 +191,11 @@ export const useCardStore = defineStore('cards', {
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
     },
+    getCurrentDraggingCard () {
+      const globalStore = useGlobalStore()
+      const cardId = globalStore.currentDraggingCardId
+      return this.getCard(cardId)
+    },
     getVerticallyAlignedCardsBelow (cards, id, deltaHeight = 0) {
       const card = this.byId[id]
       const parentCard = {
