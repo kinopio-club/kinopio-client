@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -436,10 +437,12 @@ export const useBoxStore = defineStore('boxes', {
       })
     },
     getItemsContainedInSelectedBoxes (selectedBox) {
+      const cardStore = useCardStore()
+      const listStore = useListStore()
       const cards = []
       const boxes = []
+      const lists = []
       // cards
-      const cardStore = useCardStore()
       cardStore.getCardsSelectableByY.cards.forEach(card => {
         if (this.isItemInSelectedBoxes(card, 'card', selectedBox)) {
           cards.push(card)
@@ -452,11 +455,18 @@ export const useBoxStore = defineStore('boxes', {
           boxes.push(box)
         }
       })
-      return { cards, boxes }
+      // lists
+      listStore.getAllLists.forEach(list => {
+        if (this.isItemInSelectedBoxes(list, 'list', selectedBox)) {
+          lists.push(list)
+        }
+      })
+      return { cards, boxes, lists }
     },
     selectItemsInSelectedBoxes (selectedBox) {
       const globalStore = useGlobalStore()
-      const { boxes, cards } = this.getItemsContainedInSelectedBoxes(selectedBox)
+      const cardStore = useCardStore()
+      const { boxes, cards, lists } = this.getItemsContainedInSelectedBoxes(selectedBox)
       // boxes
       const boxIds = boxes.map(box => box.id)
       globalStore.updateMultipleBoxesSelectedIds(boxIds)
@@ -467,6 +477,14 @@ export const useBoxStore = defineStore('boxes', {
       if (!isMultipleBoxesSelected) {
         globalStore.preventMultipleSelectedActionsIsVisible = true
       }
+      // lists
+      const listIds = lists.map(list => list.id)
+      globalStore.updateMultipleListsSelectedIds(listIds)
+      // lists.forEach(list => {
+      //   const listCards = cardStore.getCardsByList(list.id)
+      //   const listCardIds = listCards.map(card => card.id)
+      //   globalStore.addMultipleToMultipleCardsSelected(listCardIds)
+      // })
     },
 
     // snap guides
