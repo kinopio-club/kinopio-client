@@ -196,20 +196,16 @@ export const useCardStore = defineStore('cards', {
       const cardId = globalStore.currentDraggingCardId
       return this.getCard(cardId)
     },
-    getVerticallyAlignedCardsBelow (cards, id, deltaHeight = 0) {
-      const card = this.byId[id]
-      const parentCard = {
-        y: card.y,
-        x: card.x,
-        height: card.height - deltaHeight
+    getVerticallyAlignedCardsBelow (cardId, deltaHeight = 0) {
+      let cards = this.getAllCardsSortedByX
+      let parentCard = this.byId[cardId]
+      parentCard = {
+        y: parentCard.y,
+        x: parentCard.x,
+        height: parentCard.height - deltaHeight
       }
       cards = cards.filter(card => {
         const isAlignedX = card.x === parentCard.x
-        // utils.isBetween({
-        //   value: card.x,
-        //   min: parentCard.x - 10,
-        //   max: parentCard.x + 10
-        // })
         const isBelow = card.y > parentCard.y
         return isAlignedX && isBelow
       })
@@ -682,16 +678,22 @@ export const useCardStore = defineStore('cards', {
         index += 1
       }
     },
-    async updateBelowCardsPosition (updates) {
+    async updateCardsBelowPosition (updates) {
+      const listStore = useListStore()
+      let listIds = []
       for (const update of updates) {
         // calc height delta
         const card = this.getCard(update.id)
         if (!card) { return }
         const deltaHeight = update.height - update.prevHeight
         if (deltaHeight === 0) { return }
+        // skip lists
+        if (card.listId) {
+          listIds.push(card.listId)
+          continue
+        }
         // distributeVertically aligned cards below
-        const cards = this.getAllCards
-        const alignedCards = this.getVerticallyAlignedCardsBelow(cards, card.id, deltaHeight)
+        const alignedCards = this.getVerticallyAlignedCardsBelow(card.id, deltaHeight)
         if (!alignedCards.length) { return }
         alignedCards.unshift(card)
         await this.distributeCardsVertically(alignedCards)
@@ -699,6 +701,11 @@ export const useCardStore = defineStore('cards', {
         const connectionStore = useConnectionStore()
         connectionStore.updateConnectionPathsByItemIds(cardIds)
       }
+      listIds = uniq(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        this.updateCardPositionsInList(list)
+      })
     },
     async updateCardsDimensions (ids) {
       const globalStore = useGlobalStore()
@@ -745,7 +752,7 @@ export const useCardStore = defineStore('cards', {
         this.updateTallestCardHeight(card)
       })
       await this.updateCards(updates)
-      await this.updateBelowCardsPosition(updates)
+      await this.updateCardsBelowPosition(updates)
     },
     async updateCardDimensions (id) {
       await this.updateCardsDimensions([id])
