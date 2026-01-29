@@ -398,6 +398,7 @@ const tiltCards = (event) => {
   cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
+  if (!globalStore.currentUserIsTiltingCard) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
