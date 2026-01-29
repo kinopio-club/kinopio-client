@@ -23,7 +23,7 @@ export const useListStore = defineStore('lists', {
     allIds: [],
     listSnapGuides: {}, // { listId, listPositionIndex, cards }
     listChildPlaceholders: {}, // { listId: [ card{ id, x, y, height }, {..}] }
-    currentListChildPlaceholderCardId: ''
+    currentListChildPlaceholderCardIds: []
   }),
 
   getters: {
@@ -188,15 +188,24 @@ export const useListStore = defineStore('lists', {
     updateCurrentListChildPlaceholder () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
-      const card = cardStore.getCard(globalStore.currentDraggingCardId)
-      if (!card) { return }
-      const placeholder = utils.listChildPlaceholderRectFromCardId(card.id)
-      if (!placeholder) { return }
-      const cardElement = utils.cardElementDimensions(card)
-      if (utils.isRectAInsideRectB(card, placeholder)) {
-        this.currentListChildPlaceholderCardId = card.id
+      const cards = cardStore.getCardsSelected
+      if (!cards.length) { return }
+      // placeholder rects
+      const placeholderRects = []
+      cards.forEach(card => {
+        const rect = utils.listChildPlaceholderRectFromCardId(card.id)
+        if (!rect) { return }
+        placeholderRects.push(rect)
+      })
+      const isCardInPlaceholder = cards.find(card => {
+        return placeholderRects.find(placeholder => {
+          return utils.isRectAInsideRectB(card, placeholder)
+        })
+      })
+      if (isCardInPlaceholder) {
+        this.currentListChildPlaceholderCardIds = cards.map(card => card.id)
       } else {
-        this.currentListChildPlaceholderCardId = ''
+        this.currentListChildPlaceholderCardIds = []
       }
     },
 
