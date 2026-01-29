@@ -404,6 +404,7 @@ export const useBoxStore = defineStore('boxes', {
     // contained items
 
     isItemInSelectedBoxes (item, type, selectedBox) {
+      if (item.listId) { return }
       const threshold = 1
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
