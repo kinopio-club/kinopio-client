@@ -46,6 +46,7 @@ const props = defineProps({
 })
 
 const state = reactive({
+  duration: consts.itemSnapGuideWaitingDuration,
   rect: null,
   snapStatus: null // waiting, ready
 })
@@ -63,7 +64,14 @@ watch(() => state.snapStatus, (value, prevValue) => {
 })
 
 const item = computed(() => props.box || props.card)
-
+watch(() => item.value, (value, prevValue) => {
+  if (value.listId) {
+    state.duration = 0
+  } else {
+    // reset duration
+    state.duration = consts.itemSnapGuideWaitingDuration
+  }
+})
 // is snapping
 
 const currentSnapGuide = computed(() => {
@@ -163,6 +171,8 @@ const snapGuideClasses = computed(() => {
     value.push('is-box')
   } else if (props.card) {
     value.push('is-card')
+  } else if (state.duration === 0) {
+    value.push('is-instant')
   }
   return value
 })
@@ -194,7 +204,7 @@ const waitingAnimationFrame = (timestamp) => {
     return
   }
   const elaspedTime = timestamp - waitingStartTime
-  const percentComplete = (elaspedTime / consts.itemSnapGuideWaitingDuration) // between 0 and 1
+  const percentComplete = (elaspedTime / state.duration) // between 0 and 1
   updateRect()
   // waiting
   if (percentComplete < 1) {
@@ -224,6 +234,8 @@ const waitingAnimationFrame = (timestamp) => {
 .item-snap-guide
   z-index var(--max-z)
   --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
+  .is-instant
+    --snap-guide-waiting-duration 0s
   &.is-card
     --snap-guide-width 10px
   position absolute
