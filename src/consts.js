@@ -13,6 +13,7 @@ export default {
   defaultCardHeight: 70,
   minItemXY: 70,
   minLineY: 150,
+  minListWidth: 200,
   normalCardWrapWidth: 200,
   wideCardWrapWidth: 390,
   minCardIframeWidth: 310,

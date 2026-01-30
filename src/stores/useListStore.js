@@ -78,7 +78,7 @@ export const useListStore = defineStore('lists', {
           x: 300,
           y: 100,
           z: 0,
-          resizeWidth: consts.normalCardWrapWidth,
+          resizeWidth: consts.minListWidth,
           isCollapsed: false,
           height: consts.listEmptyHeight
           // spaceId
@@ -117,7 +117,7 @@ export const useListStore = defineStore('lists', {
       list.id = id || nanoid()
       list.color = color || randomColor({ luminosity: 'dark' })
       list.y = Math.max(y, consts.minItemXY)
-      list.resizeWidth = resizeWidth || consts.normalCardWrapWidth
+      list.resizeWidth = resizeWidth || consts.minListWidth
       list.isCollapsed = false
       list.name = name || `List ${count}`
       list.userId = userStore.id
@@ -329,7 +329,7 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       // child width
       let childWidth = utils.listChildWidth(width)
-      const minChildWidth = utils.listChildWidth(consts.normalCardWrapWidth)
+      const minChildWidth = utils.listChildWidth(consts.minListWidth)
       childWidth = Math.max(minChildWidth, childWidth)
       // update cards
       let cards = cardStore.getCardsByList(list.id)
@@ -354,7 +354,7 @@ export const useListStore = defineStore('lists', {
         const rect = utils.listElementDimensions({ id })
         let width = rect.width
         width = width + delta.x
-        width = Math.max(width, consts.normalCardWrapWidth)
+        width = Math.max(width, consts.minListWidth)
         const list = { id, resizeWidth: width }
         this.updateList(list)
         this.resizeListChildCards(list, width)
@@ -362,7 +362,7 @@ export const useListStore = defineStore('lists', {
     },
     async clearResizeLists (id) {
       const globalStore = useGlobalStore()
-      const width = consts.normalCardWrapWidth
+      const width = consts.minListWidth
       await nextTick()
       const ids = uniq(globalStore.multipleListsSelectedIds.concat([id]))
       for (const id of ids) {

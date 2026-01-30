@@ -578,7 +578,7 @@ const placeholderStylesMap = computed(() => {
 
 <style lang="stylus">
 :root
-  --min-list-width 200px // matches consts.normalCardWrapWidth
+  --min-list-width 200px // matches consts.minListWidth
   --min-list-background-width calc(var(--min-list-width) - (8px * 2)) // utils.listChildWidth
 
 .list
