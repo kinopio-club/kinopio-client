@@ -598,7 +598,6 @@ export const useCardStore = defineStore('cards', {
       boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
       this.updateCardSnapGuides({ items: cards, cursor: endCursor })
       listStore.updateListSnapGuides(cards)
-      listStore.updateCurrentListChildPlaceholder()
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -1043,13 +1042,14 @@ export const useCardStore = defineStore('cards', {
           newPositionIndexes = generateNKeysBetween(targetPositionIndex, siblingPositionIndex, cards.length)
         }
         // add cards to list
+        const resizeWidth = utils.listChildWidth(list.resizeWidth)
         const updates = cards.map((card, index) => {
           return {
             id: card.id,
             listId: list.id,
             listPositionIndex: newPositionIndexes[index],
             tilt: 0,
-            resizeWidth: utils.listChildWidth(list.resizeWidth)
+            resizeWidth
           }
         })
         globalStore.triggerIsSnappingToList()

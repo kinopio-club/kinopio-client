@@ -532,7 +532,12 @@ const updateSizeForNewBox = (boxId) => {
 // }
 
 const shouldSnapBackToList = () => {
-  return listStore.currentListChildPlaceholderCardIds.includes(globalStore.currentDraggingCardId)
+  const card = cardStore.getCurrentDraggingCard()
+  if (!card) { return }
+  if (!card.listId) { return }
+  const list = listStore.getList(card.listId)
+  const cardIsInsideList = utils.isNormalizedRectAInsideRectB(card, list)
+  return cardIsInsideList
 }
 const checkIfShouldRemoveFromList = async () => {
   if (shouldSnapBackToList()) { return }
