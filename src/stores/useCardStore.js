@@ -1049,7 +1049,8 @@ export const useCardStore = defineStore('cards', {
             listId: list.id,
             listPositionIndex: newPositionIndexes[index],
             tilt: 0,
-            resizeWidth
+            resizeWidth,
+            width: resizeWidth
           }
         })
         globalStore.triggerIsSnappingToList()

@@ -152,7 +152,7 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
-      const card = cardStore.getCard(globalStore.currentDraggingCardId)
+      const card = cardStore.getCurrentDraggingCard()
       const lists = this.getAllLists
       const list = lists.find(listRect => {
         // if list has cards, list height is list-info only
@@ -354,6 +354,7 @@ export const useListStore = defineStore('lists', {
         const rect = utils.listElementDimensions({ id })
         let width = rect.width
         width = width + delta.x
+        width = Math.max(width, consts.normalCardWrapWidth)
         const list = { id, resizeWidth: width }
         this.updateList(list)
         this.resizeListChildCards(list, width)
