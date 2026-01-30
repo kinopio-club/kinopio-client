@@ -520,6 +520,7 @@ export const useUserStore = defineStore('user', {
       if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
+      cache.updateUser({ cardsCreatedCount: count, cardsCreatedCountRaw: count })
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }
