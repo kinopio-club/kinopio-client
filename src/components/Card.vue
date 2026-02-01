@@ -413,7 +413,10 @@ const cardWrapTransitionEnd = () => {
   state.isSnappingToList = false
 }
 const shouldSkipWidth = computed(() => isComment.value && !isInList.value)
-const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentCardIsBeingDragged.value)
+const isSnappingToItem = computed(() => {
+  const shouldSnap = globalStore.itemSnappingIsReady || globalStore.shouldSnapBackToList
+  return shouldSnap && currentCardIsBeingDragged.value
+})
 const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'

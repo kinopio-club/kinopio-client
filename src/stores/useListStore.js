@@ -147,11 +147,22 @@ export const useListStore = defineStore('lists', {
 
     // snap
 
+    updateShouldSnapBackToList () {
+      const globalStore = useGlobalStore()
+      const cardStore = useCardStore()
+      const card = cardStore.getCurrentDraggingCard()
+      if (!card) { return }
+      if (!card.listId) { return }
+      const list = this.getList(card.listId)
+      const cardIsInsideList = utils.isNormalizedRectAInsideRectB(card, list)
+      globalStore.shouldSnapBackToList = cardIsInsideList
+    },
     updateListSnapGuides (cards) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
+      this.updateShouldSnapBackToList()
       const card = cardStore.getCurrentDraggingCard()
       const lists = this.getAllLists
       const list = lists.find(listRect => {
@@ -287,6 +298,7 @@ export const useListStore = defineStore('lists', {
     },
     updateListDimensions (list, cards) {
       const cardStore = useCardStore()
+      if (!list) { return }
       cards = cards || cardStore.getCardsByList(list.id)
       // list has cards
       if (cards.length) {

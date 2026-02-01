@@ -997,6 +997,7 @@ export const useCardStore = defineStore('cards', {
     async updateCardPositionsInList (list) {
       const listStore = useListStore()
       const globalStore = useGlobalStore()
+      if (!list) { return }
       const cards = this.getCardsByList(list.id)
       const updates = []
       const originY = list.y + consts.listInfoHeight

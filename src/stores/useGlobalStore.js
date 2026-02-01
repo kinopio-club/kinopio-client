@@ -193,6 +193,7 @@ export const useGlobalStore = defineStore('global', {
     // draggingItems
     shouldSnapToGrid: false,
     preventItemSnapping: false,
+    shouldSnapBackToList: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
