@@ -154,6 +154,7 @@ export const useListStore = defineStore('lists', {
       if (!card) { return }
       if (!card.listId) { return }
       const list = this.getList(card.listId)
+      if (!list) { return }
       const cardIsInsideList = utils.isNormalizedRectAInsideRectB(card, list)
       globalStore.shouldSnapBackToList = cardIsInsideList
     },
