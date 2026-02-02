@@ -450,20 +450,14 @@ dialog.narrow.multiple-selected-actions(
     .row(v-if="cardOrBoxIsSelected")
       //- [·]
       ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
-      //- Connect
-      button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all" title="Connect/Disconnect Cards")
-        img.connect-items.icon(src="@/assets/connect-items.svg")
-      //- LINE Options
-      .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
-          span Line
-          img.icon.down-arrow(src="@/assets/down-arrow.svg")
-      //- BOX options
-      .button-wrap(v-if="boxesIsSelected && !onlyBoxesIsSelected")
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedBoxActions" :class="{active : shouldShowMultipleSelectedBoxActions}" title="More Box Options")
-          span Box
-          img.icon.down-arrow(src="@/assets/down-arrow.svg")
-
+      .segmented-buttons(v-if="multipleItemsIsSelected")
+        //- Connect
+        button(:class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all" title="Connect/Disconnect Cards")
+          img.connect.icon(src="@/assets/connect.svg")
+        //- List
+        button(title="Merge/Split Cards into List")
+          img.icon.list-icon(src="@/assets/list.svg")
+    //- card options
     CardOrBoxActions(
       :visible="cardsIsSelected && canEditAll.all"
       :cards="cards"
@@ -471,6 +465,7 @@ dialog.narrow.multiple-selected-actions(
       :backgroundColor="userColor"
       :labelIsVisible="true"
     )
+    //- box options
     CardOrBoxActions(
       :labelIsVisible="true"
       :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected && canEditAll.all"
@@ -480,6 +475,7 @@ dialog.narrow.multiple-selected-actions(
       :collapseExpandIsVisible="boxCollapseExpandIsVisible"
       @scrollIntoView="scrollIntoView"
     )
+    //- connection line options
     ConnectionActions(
       :visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected"
       :connections="editableConnections"
@@ -573,8 +569,8 @@ dialog.narrow.multiple-selected-actions(
   .segmented-buttons + .segmented-buttons
     margin-left 0
 
-  .icon.connect-items
-    height 12px
+  .icon.list-icon,
+  .icon.connect
     vertical-align -1px
 
   &.is-background-light

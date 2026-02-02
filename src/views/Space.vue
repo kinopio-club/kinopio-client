@@ -303,11 +303,12 @@ const pageCursor = computed(() => {
   const isPanning = globalStore.currentUserIsPanning
   const isPanningReady = globalStore.currentUserIsPanningReady
   const toolbarIsBox = globalStore.getToolbarIsBox
+  const toolbarIsList = globalStore.getToolbarIsList
   if (isPanning) {
     return 'grabbing'
   } else if (isPanningReady) {
     return 'grab'
-  } else if (toolbarIsBox) {
+  } else if (toolbarIsBox || toolbarIsList) {
     return 'crosshair'
   }
   return undefined

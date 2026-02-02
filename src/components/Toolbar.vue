@@ -86,14 +86,13 @@ nav#toolbar.toolbar(v-if="visible")
       //- List
       .button-wrap
         button(
-          title="Add List (L)"
+          title="Draw List (L)"
           :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('list')"
         )
-          //- img.icon.box-icon(src="@/assets/box.svg")
-          span L
+          img.icon.list-icon(src="@/assets/list.svg")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
-          span Add List (L)
+          span Draw List (L)
 
       //- Drawing
       .button-wrap
