@@ -54,7 +54,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['closeDialogs'])
+const emit = defineEmits(['closeDialogs', 'scrollIntoView'])
 
 const props = defineProps({
   visible: Boolean,
@@ -74,29 +74,41 @@ const props = defineProps({
     default (value) {
       return []
     }
-  }
+  },
+  collapseExpandIsVisible: Boolean
 })
 const state = reactive({
   framePickerIsVisible: false,
   tagPickerIsVisible: false,
   colorPickerIsVisible: false,
   fontPickerIsVisible: false,
-  defaultColor: '#e3e3e3'
+  defaultColor: '#e3e3e3',
+  isHover: false
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const editableBoxes = computed(() => props.boxes.filter(box => userStore.getUserCanEditBox(box)))
+
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
   const editableCards = props.cards.filter(card => userStore.getUserCanEditCard(card))
   const canEditCards = editableCards.length === props.cards.length
-  const editableBoxes = props.boxes.filter(box => userStore.getUserCanEditBox(box))
-  const canEditBoxes = editableBoxes.length === props.boxes.length
+  const canEditBoxes = editableBoxes.value.length === props.boxes.length
   return canEditCards && canEditBoxes
 })
 const updateDefaultColor = (color) => {
   state.defaultColor = color
 }
+const isVisible = computed(() => {
+  if (editableBoxes.value.length) {
+    return props.labelIsVisible
+  }
+  return props.visible
+})
+
+// utils
+
 const closeDialogs = (shouldPreventEmit) => {
   state.framePickerIsVisible = false
   state.tagPickerIsVisible = false
@@ -105,6 +117,26 @@ const closeDialogs = (shouldPreventEmit) => {
   globalStore.userDetailsIsVisible = false
   if (shouldPreventEmit === true) { return }
   emit('closeDialogs')
+}
+const updateIsHover = (value) => {
+  state.isHover = value
+}
+const isHoverVisible = computed(() => {
+  return state.isHover && props.collapseExpandIsVisible
+})
+
+// collapse/expand
+
+const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShowMultipleSelectedBoxActions)
+const toggleShouldShowMultipleSelectedBoxActions = async () => {
+  closeDialogs()
+  const value = !shouldShowMultipleSelectedBoxActions.value
+  await userStore.updateUser({
+    shouldShowMultipleSelectedBoxActions: value
+  })
+  nextTick(() => {
+    emit('scrollIntoView')
+  })
 }
 
 // items
@@ -503,67 +535,81 @@ const updateBox = (box, updates) => {
 </script>
 
 <template lang="pug">
-section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" :class="colorClasses")
-  p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
-    span {{label}}
-  .row
-    //- h1/h2
-    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isHeaderSelected, 'is-box-details': isBoxDetails }")
-      .segmented-buttons
-        button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
-          span h1
-        button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
-          span h2
-      //- Fonts
-      button.toggle-fonts-button.small-button(:disabled="!canEditAll" v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
-        span Aa
-      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
-    //- Tag
-    .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
-        span Tag
-      TagPickerStyleActions(:visible="state.tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
-    //- Frame
-    .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : state.framePickerIsVisible || isFrames }")
-        span Frame
-      FramePicker(:visible="state.framePickerIsVisible" :cards="cards")
-    //- Color
-    .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
-      button.change-color(:disabled="!canEditAll" :class="{active: state.colorPickerIsVisible}" title="Color")
-        .current-color(:style="{ background: color }")
-      ColorPicker(
-        :currentColor="color"
-        :visible="state.colorPickerIsVisible"
-        :removeIsVisible="isCards"
-        :recentColors="itemColors"
-        @selectedColor="updateColor"
-        @removeColor="removeColor"
-      )
-    //- Box Fill
-    .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill Box")
-        img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill Box")
-        img.icon.box-icon(src="@/assets/box-empty.svg")
+section.subsection.style-actions(
+  v-if="isVisible"
+  @click.left.stop="closeDialogs"
+  :class="colorClasses"
+  @pointerover="updateIsHover(true)"
+  @pointerleave="updateIsHover(false)"
+)
+  template(v-if="props.visible")
+    p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
+      span {{ label }}
+    .row
+      //- h1/h2
+      .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isHeaderSelected, 'is-box-details': isBoxDetails }")
+        .segmented-buttons
+          button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
+            span h1
+          button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
+            span h2
+        //- Fonts
+        button.toggle-fonts-button.small-button(:disabled="!canEditAll" v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
+          span Aa
+        FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
+      //- Tag
+      .button-wrap(v-if="isCards")
+        button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
+          span Tag
+        TagPickerStyleActions(:visible="state.tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
+      //- Frame
+      .button-wrap(v-if="isCards")
+        button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : state.framePickerIsVisible || isFrames }")
+          span Frame
+        FramePicker(:visible="state.framePickerIsVisible" :cards="cards")
+      //- Color
+      .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
+        button.change-color(:disabled="!canEditAll" :class="{active: state.colorPickerIsVisible}" title="Color")
+          .current-color(:style="{ background: color }")
+        ColorPicker(
+          :currentColor="color"
+          :visible="state.colorPickerIsVisible"
+          :removeIsVisible="isCards"
+          :recentColors="itemColors"
+          @selectedColor="updateColor"
+          @removeColor="removeColor"
+        )
+      //- Box Fill
+      .segmented-buttons(v-if="isBoxes")
+        button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill Box")
+          img.icon.box-icon(src="@/assets/box-filled.svg")
+        button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill Box")
+          img.icon.box-icon(src="@/assets/box-empty.svg")
+      //- Lock
+      .button-wrap
+        button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
+          img.icon(src="@/assets/lock.svg")
+      //- Comment
+      .button-wrap(v-if="isCards" title="Turn into Comment")
+        button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
+          img.icon.comment(src="@/assets/comment.svg")
+      //- Surround with Box
+      .button-wrap(v-if="isCards" title="Surround with Box (B)")
+        button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
+          img.icon.box-icon(src="@/assets/box.svg")
+      //- Counter
+      .button-wrap(v-if="isCards")
+        button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
+          span Vote
 
-    //- Lock
-    .button-wrap
-      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
-        img.icon(src="@/assets/lock.svg")
-    //- Comment
-    .button-wrap(v-if="isCards" title="Turn into Comment")
-      button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
-        img.icon.comment(src="@/assets/comment.svg")
-    //- Surround with Box
-    .button-wrap(v-if="isCards" title="Surround with Box (B)")
-      button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
-        img.icon.box-icon(src="@/assets/box.svg")
+  template(v-else)
+    .subsection-horizontal-label(@click="toggleShouldShowMultipleSelectedBoxActions")
+      span {{ label }}
 
-    //- Counter
-    .button-wrap(v-if="isCards")
-      button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
-        span Vote
+  .collapse-expand-button-wrap.inline-button-wrap(v-if="props.collapseExpandIsVisible" @click="toggleShouldShowMultipleSelectedBoxActions" title="Toggle Box Options")
+    button.small-button.inline-button(:class="{active: shouldShowMultipleSelectedBoxActions || isHoverVisible}")
+      img.icon.down-arrow(src="@/assets/down-arrow.svg")
+
 </template>
 
 <style lang="stylus" scoped>
@@ -612,4 +658,8 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
     span
       font-size 15px
       vertical-align initial
+
+  .subsection-horizontal-label
+    cursor pointer
+    margin-bottom 0
 </style>

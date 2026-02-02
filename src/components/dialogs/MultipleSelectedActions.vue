@@ -394,28 +394,22 @@ const toggleMoveItemsIsVisible = () => {
 // more options
 
 const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
+
+// connection line collapse/expand
+
 const shouldShowMultipleSelectedLineActions = computed(() => userStore.shouldShowMultipleSelectedLineActions)
+const connectionCollapseExpandIsVisible = computed(() => {
+  if (onlyConnectionsIsSelected.value) return
+  return connectionsIsSelected.value
+})
+
+// box collapse/expand
+
 const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShowMultipleSelectedBoxActions)
-const toggleShouldShowMultipleSelectedLineActions = async () => {
-  closeDialogs()
-  const value = !shouldShowMultipleSelectedLineActions.value
-  await userStore.updateUser({
-    shouldShowMultipleSelectedLineActions: value
-  })
-  nextTick(() => {
-    scrollIntoView()
-  })
-}
-const toggleShouldShowMultipleSelectedBoxActions = async () => {
-  closeDialogs()
-  const value = !shouldShowMultipleSelectedBoxActions.value
-  await userStore.updateUser({
-    shouldShowMultipleSelectedBoxActions: value
-  })
-  nextTick(() => {
-    scrollIntoView()
-  })
-}
+const boxCollapseExpandIsVisible = computed(() => {
+  if (onlyBoxesIsSelected.value) return
+  return boxesIsSelected.value
+})
 
 // remove
 
@@ -483,8 +477,19 @@ dialog.narrow.multiple-selected-actions(
       :boxes="boxes"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
+      :collapseExpandIsVisible="boxCollapseExpandIsVisible"
+      @scrollIntoView="scrollIntoView"
     )
-    ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+    ConnectionActions(
+      :visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected"
+      :connections="editableConnections"
+      @closeDialogs="closeDialogs"
+      :canEditAll="canEditAll"
+      :backgroundColor="userColor"
+      :label="moreLineOptionsLabel"
+      :collapseExpandIsVisible="connectionCollapseExpandIsVisible"
+      @scrollIntoView="scrollIntoView"
+    )
 
   section
     .row(v-if="cardOrBoxIsSelected")
@@ -565,9 +570,6 @@ dialog.narrow.multiple-selected-actions(
   .style-actions + .connection-actions
     border-top 1px solid var(--primary-border)
 
-  .down-arrow
-    vertical-align 2px
-
   .segmented-buttons + .segmented-buttons
     margin-left 0
 
@@ -585,7 +587,8 @@ dialog.narrow.multiple-selected-actions(
       border-color var(--primary-border-on-dark-background)
     section.subsection + section.subsection
       border-top 1px solid var(--primary-border-on-dark-background)
-  .close-button-wrap
+  .close-button-wrap,
+  .collapse-expand-button-wrap
     cursor pointer
     position absolute
     left initial
@@ -598,4 +601,16 @@ dialog.narrow.multiple-selected-actions(
     button
       cursor pointer
       background-color var(--primary-background)
+      &:active,
+      &.active
+        box-shadow var(--button-active-inset-shadow)
+        color var(--primary)
+        background-color var(--secondary-active-background)
+
+  .collapse-expand-button-wrap
+    right 1px
+    .icon.down-arrow
+      padding 0
+      vertical-align 1px
+      padding-left 1px
 </style>
