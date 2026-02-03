@@ -906,7 +906,7 @@ const selectAllItemsRightOfCursor = (position) => {
   })
   const boxIds = boxes.map(box => box.id)
   // lists
-  let lists = boxStore.getAllLists
+  let lists = listStore.getAllLists
   lists = lists.filter(list => {
     return (list.x * zoom) >= position.x
   })
@@ -933,7 +933,7 @@ const selectAllItemsLeftOfCursor = (position) => {
   })
   const boxIds = boxes.map(box => box.id)
   // lists
-  let lists = boxStore.getAllLists
+  let lists = listStore.getAllLists
   lists = lists.filter(list => {
     return (list.x * zoom) <= position.x
   })
@@ -966,6 +966,7 @@ const selectAllItems = () => {
   const cardIds = cardStore.allIds
   const connectionIds = connectionStore.allIds
   const boxIds = boxStore.allIds
+  const listIds = listStore.allIds
   const dialogOffset = {
     width: 200 / 2,
     height: 150 / 2
@@ -979,6 +980,7 @@ const selectAllItems = () => {
   globalStore.multipleConnectionsSelectedIds = connectionIds
   globalStore.multipleCardsSelectedIds = cardIds
   globalStore.multipleBoxesSelectedIds = boxIds
+  globalStore.multipleListsSelectedIds = listIds
 }
 
 // Search/Jump-to
