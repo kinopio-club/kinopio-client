@@ -181,8 +181,12 @@ onMounted(async () => {
       if (name === 'triggerAddBox') {
         const event = args[0]
         addBox(event)
+      } else if (name === 'triggerAddList') {
+        const event = args[0]
+        addList(event)
+      } else if (name === 'triggerUserIsLoaded') {
+        updateSystemTheme()
       }
-      if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
     }
   )
   const broadcastActionUnsubscribe = broadcastStore.$onAction(
@@ -513,24 +517,24 @@ const updateSizeForNewBox = (boxId) => {
 
 // lists
 
-// const addList = (event) => {
-//   let position = utils.cursorPositionInSpace(event)
-//   if (utils.isPositionOutsideOfSpace(position)) {
-//     position = utils.cursorPositionInPage(event)
-//     globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
-//     return
-//   }
-//   userStore.notifyReadOnly(position)
-//   const shouldPrevent = !userStore.getUserCanEditSpace
-//   if (shouldPrevent) {
-//     globalStore.updateCurrentUserToolbar('card')
-//     return
-//   }
-//   const isResizing = true
-//   listStore.createList({ position, isResizing })
-//   globalStore.currentListIsNew = true
-//   event.preventDefault() // allows dragging lists without scrolling on touch
-// }
+const addList = (event) => {
+  let position = utils.cursorPositionInSpace(event)
+  if (utils.isPositionOutsideOfSpace(position)) {
+    position = utils.cursorPositionInPage(event)
+    globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    return
+  }
+  userStore.notifyReadOnly(position)
+  const shouldPrevent = !userStore.getUserCanEditSpace
+  if (shouldPrevent) {
+    globalStore.updateCurrentUserToolbar('card')
+    return
+  }
+  const isResizing = true
+  listStore.createList({ list: position, isResizing })
+  globalStore.currentListIsNew = true
+  event.preventDefault() // allows dragging lists without scrolling on touch
+}
 
 const checkIfShouldRemoveFromList = async () => {
   if (globalStore.shouldSnapBackToList) { return }

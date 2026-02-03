@@ -336,8 +336,9 @@ const colorIsDark = computed(() => {
 //   return value
 // })
 const listStyles = computed(() => {
-  const { x, y, z, height } = props.list
+  const { x, y, z } = props.list
   const width = props.list.resizeWidth
+  const height = props.list.height || consts.listEmptyHeight
   const styles = {
     left: x + 'px',
     top: y + 'px',

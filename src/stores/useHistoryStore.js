@@ -270,6 +270,82 @@ export const useHistoryStore = defineStore('history', {
       })
     },
 
+    // list events
+
+    processListUpdated: debounce((store, updates) => {
+      const ignoreKeys = ['id', 'z']
+      const patch = []
+      updates.forEach(update => {
+        const keys = Array.from(store.listUpdateKeysProcessing)
+        const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
+        if (everyKeyIsIgnored) { return }
+        let prevList = store.prevListUpdatesProcessing.get(update.id)
+        prevList = utils.objectPickKeys(prevList, keys)
+        const newList = store.listUpdatesProcessing.get(update.id)
+        patch.push({
+          action: 'listUpdated',
+          prev: prevList,
+          new: newList
+        })
+      })
+      if (patch.length) {
+        store.addPatch(patch)
+      }
+      store.listUpdatesProcessing = new Map()
+      store.prevListUpdatesProcessing = new Map()
+      store.listUpdateKeysProcessing = new Set()
+    }, 100),
+    processListCreated (updates) {
+      const patch = [{
+        action: 'listCreated',
+        new: updates
+      }]
+      this.addPatch(patch)
+    },
+    processListRemoved (updates) {
+      const listStore = useListStore()
+      const lists = updates.map(id => listStore.getList(id))
+      const patch = lists.map(list => {
+        return {
+          action: 'listRemoved',
+          new: list
+        }
+      })
+      this.addPatch(patch)
+    },
+    subscribeToLists () {
+      const listStore = useListStore()
+      listStore.$onAction(({ name, args, after, onError }) => {
+        if (this.shouldPreventPatchUpdates) { return }
+        const updates = args[0]
+        switch (name) {
+          case 'updateLists':
+            updates.forEach(update => {
+              const keys = Object.keys(update)
+              keys.forEach(key => this.listUpdateKeysProcessing.add(key))
+              if (this.listUpdatesProcessing.has(update.id)) {
+                // Merge with existing object
+                this.listUpdatesProcessing.set(update.id, { ...this.listUpdatesProcessing.get(update.id), ...update })
+              } else {
+                // Add new object
+                this.listUpdatesProcessing.set(update.id, { ...update })
+              }
+              if (this.prevListUpdatesProcessing.has(update.id)) { return }
+              const prevList = listStore.getList(update.id)
+              this.prevListUpdatesProcessing.set(prevList.id, prevList)
+            })
+            this.processListUpdated(this, updates)
+            break
+          case 'triggerCreateList':
+            this.processListCreated(updates)
+            break
+          case 'removeLists':
+            this.processListRemoved(updates)
+            break
+        }
+      })
+    },
+
     // connection events
 
     processConnectionUpdated: debounce((store, updates) => {

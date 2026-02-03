@@ -518,6 +518,7 @@ export const useGlobalStore = defineStore('global', {
     triggerPanningStart () {},
     triggerClearUserNotifications () {},
     triggerAddBox (event) {},
+    triggerAddList (event) {},
     // select all below
     triggerSelectAllItemsBelowCursor (position) {},
     triggerSelectAllItemsAboveCursor (position) {},

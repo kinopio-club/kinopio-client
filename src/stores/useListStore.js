@@ -66,6 +66,10 @@ export const useListStore = defineStore('lists', {
       return this.byId[id]
     },
 
+    // subscribe triggers
+
+    triggerCreateList (updates) {},
+
     // init
 
     initializeLists (lists = []) {
@@ -136,6 +140,7 @@ export const useListStore = defineStore('lists', {
       if (!userStore.getUserIsSpaceMember) { return }
       list = this.normalizeNewList(list)
       this.addListToState(list)
+      this.triggerCreateList(list)
       if (list.isFromBroadcast) { return }
       broadcastStore.update({ updates: list, store: 'listStore', action: 'addListToState' })
       if (isResizing) {
