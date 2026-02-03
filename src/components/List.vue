@@ -145,6 +145,7 @@ const endListInfoInteraction = (event) => {
   if (globalStore.preventDraggedListFromShowingDetails) { return }
   // if (isMeta) { return }
   globalStore.updateListDetailsIsVisibleForListId(props.list.id)
+  globalStore.clearAllInteractingWithAndSelected()
   event.stopPropagation() // prevent stopInteractions() from closing listDetails
 }
 
