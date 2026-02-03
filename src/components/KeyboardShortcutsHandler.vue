@@ -336,6 +336,20 @@ const handleShortcutsOnKeyDown = (event) => {
 const checkIsOnMinimap = (event) => {
   return Boolean(event.target.closest('#space-minimap'))
 }
+const checkShouldBoxSelect = (isPanScope) => {
+  const toolbarIsBox = globalStore.getToolbarIsBox
+  const toolbarIsList = globalStore.getToolbarIsList
+  const isNotConnecting = !globalStore.currentUserIsDrawingConnection
+  const shouldBoxSelect =
+    event.shiftKey &&
+    isPanScope &&
+    !toolbarIsBox &&
+    !toolbarIsList &&
+    isNotConnecting &&
+    !globalStore.currentUserIsResizingBox &&
+    !globalStore.currentUserIsResizingList
+  return shouldBoxSelect
+}
 const handleMouseDownEvents = (event) => {
   const rightMouseButton = 2
   const middleMouseButton = 1
@@ -344,9 +358,7 @@ const handleMouseDownEvents = (event) => {
   const isMiddleClick = middleMouseButton === event.button
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
-  const toolbarIsBox = globalStore.getToolbarIsBox
-  const isNotConnecting = !globalStore.currentUserIsDrawingConnection
-  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !globalStore.currentUserIsResizingBox && globalStore.currentUserIsResizingList
+  const shouldBoxSelect = checkShouldBoxSelect(isPanScope)
   const userDisablePan = userStore.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
