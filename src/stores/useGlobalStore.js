@@ -339,7 +339,10 @@ export const useGlobalStore = defineStore('global', {
       return transform
     },
     getIsInteractingWithItem () {
-      return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox || this.currentUserIsResizingList || this.currentUserIsDraggingList
+      return this.getIsResizingItem || this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsDraggingBox || this.currentUserIsDraggingList
+    },
+    getIsResizingItem () {
+      return this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsResizingList
     },
     getMultipleItemsSelected () {
       return [

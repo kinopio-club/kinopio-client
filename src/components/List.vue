@@ -115,6 +115,7 @@ const endListInfoInteraction = (event) => {
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (globalStore.getIsResizingItem) { return }
   const isButton = event.target.closest('button') || event.target.closest('.inline-button-wrap')
   if (isButton) { return }
   if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }

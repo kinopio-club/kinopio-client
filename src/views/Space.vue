@@ -644,12 +644,12 @@ const showListDetails = async (event) => {
 }
 const updateSizeForNewList = (listId) => {
   const list = listStore.getList(listId)
-  const isMinSize = list.resizeWidth === consts.minListSize && list.resizeHeight === consts.minListSize
-  if (!isMinSize) { return }
+  const isMinWidth = list.resizeWidth === consts.minListWidth
+  const defaultIsMinWidth = userStore.cardSettingsCardWrapWidth === consts.minListWidth
+  if (!isMinWidth && !defaultIsMinWidth) { return }
   const update = {
     id: list.id,
-    resizeWidth: consts.defaultListWidth,
-    resizeHeight: consts.defaultListHeight
+    resizeWidth: userStore.cardSettingsCardWrapWidth
   }
   listStore.updateList(update)
 }
@@ -941,6 +941,7 @@ const stopInteractions = async (event) => {
   unselectCardsInDraggedBox()
   showMultipleSelectedActions(event)
   showBoxDetails(event)
+  showListDetails(event)
   globalStore.preventMultipleSelectedActionsIsVisible = false
   globalStore.importArenaChannelIsVisible = false
   globalStore.shouldAddCard = false

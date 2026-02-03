@@ -380,7 +380,8 @@ export const useListStore = defineStore('lists', {
     },
     async clearResizeLists (id) {
       const globalStore = useGlobalStore()
-      const width = consts.minListWidth
+      const userStore = useUserStore()
+      const width = userStore.cardSettingsCardWrapWidth
       await nextTick()
       const ids = uniq(globalStore.multipleListsSelectedIds.concat([id]))
       for (const id of ids) {
