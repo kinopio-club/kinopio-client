@@ -540,13 +540,14 @@ const placeholderStylesMap = computed(() => {
           )
             img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
     //- placeholders
-    template(v-for="card in listChildPlaceholders" :key="card.id")
-      .list-placeholder.list-snap-guide(
-        :style="placeholderStylesMap[card.id]"
-        :data-list-id="list.id"
-        :data-card-id="card.id"
-        :data-card-listPositionIndex="card.listPositionIndex"
-      )
+    template(v-if="!props.list.isCollapsed")
+      template(v-for="card in listChildPlaceholders" :key="card.id")
+        .list-placeholder.list-snap-guide(
+          :style="placeholderStylesMap[card.id]"
+          :data-list-id="list.id"
+          :data-card-id="card.id"
+          :data-card-listPositionIndex="card.listPositionIndex"
+        )
 
   .list-info(
     :data-list-id="list.id"
@@ -711,7 +712,8 @@ const placeholderStylesMap = computed(() => {
       vertical-align -3px
   .bottom-button-wrap // resize when list is collapsed
     right -13px
-    bottom 24px
+    top 14px
+    bottom initial
   // touch locking
   .locking-frame
     position absolute

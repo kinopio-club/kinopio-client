@@ -37,25 +37,25 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getAllCardsSortedByX () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'x')
       return cards
     },
     getAllCardsSortedByY () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards
     },
     getAllRemovedCards () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => card.isRemoved)
       return cards
     },
     getCardsSelectableByY () {
       const globalStore = useGlobalStore()
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       // filter
       cards = cards.filter(card => {
         if (card.isLocked) { return }
@@ -73,11 +73,11 @@ export const useCardStore = defineStore('cards', {
       }
     },
     getCardsIsLocked () {
-      const cards = this.allIds.map(id => this.byId[id])
+      const cards = this.getAllCards
       return cards.filter(card => Boolean(card) && card.isLocked && !card.isRemoved)
     },
     getCardsIsNotLocked () {
-      const cards = this.allIds.map(id => this.byId[id])
+      const cards = this.getAllCards
       return cards.filter(card => Boolean(card) && !card.isLocked && !card.isRemoved)
     },
     getCardsSelected () {
@@ -100,7 +100,7 @@ export const useCardStore = defineStore('cards', {
         }
         result[card.listId].push(card.id)
       }
-      return result // { listId: [id1, id2], .. }
+      return result // { listId: [cardId1, cardId2], .. }
     },
     getCommentCards () {
       const cards = this.getAllCards.filter(card => {
@@ -125,7 +125,7 @@ export const useCardStore = defineStore('cards', {
       const cardIds = []
       const spaceIds = []
       const invites = []
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards.forEach(card => {
         const cardIdIsValid = utils.idIsValid(card.linkToCardId)
@@ -162,7 +162,7 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardsIsTodoSortedByY () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards.filter(card => utils.checkboxFromString(card.name))
