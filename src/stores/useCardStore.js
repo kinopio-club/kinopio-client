@@ -1101,11 +1101,17 @@ export const useCardStore = defineStore('cards', {
       let distance, sizeOutside
       // can only snap to target card top or bottom
       if (side === 'top') {
-        distance = Math.abs(cursor.y - targetCard.y)
-        sizeOutside = Math.abs(targetCard.y - item.y)
+        const targetY = targetCard.y
+        const distanceFromLeft = Math.abs(cursor.y - targetY)
+        const distanceFromRight = Math.abs(cursor.y - (targetY + targetCard.width))
+        distance = Math.min(distanceFromLeft, distanceFromRight)
+        sizeOutside = Math.abs(targetY - item.y)
       } else if (side === 'bottom') {
-        distance = Math.abs(cursor.y - (targetCard.y + targetCard.height))
-        sizeOutside = Math.abs((targetCard.y + targetCard.height) - (item.y + item.height))
+        const targetY = targetCard.y + targetCard.height
+        const distanceFromLeft = Math.abs(cursor.y - targetY)
+        const distanceFromRight = Math.abs(cursor.y - (targetY + targetCard.width))
+        distance = Math.min(distanceFromLeft, distanceFromRight)
+        sizeOutside = Math.abs(targetY - (item.y + item.height))
       } else {
         return
       }
@@ -1169,21 +1175,13 @@ export const useCardStore = defineStore('cards', {
           snapGuides.push(snapGuide)
         }
       })
+      if (!snapGuides.length) {
+        this.cardSnapGuides = []
+        return
+      }
       snapGuides = sortBy(snapGuides, ['distance'])
-      // limit card to it's closest target
-      const normalizedGuides = {}
-      snapGuides.forEach(snapGuide => {
-        const itemGuide = normalizedGuides[snapGuide.item.id]
-        if (itemGuide) {
-          if (snapGuide.distance < itemGuide.distance) {
-            normalizedGuides[snapGuide.item.id] = snapGuide
-          }
-        } else {
-          normalizedGuides[snapGuide.item.id] = snapGuide
-        }
-      })
-      const normalizedGuideKeys = Object.keys(normalizedGuides)
-      snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
+      // limit snap to closest target
+      snapGuides = [snapGuides[0]]
       this.cardSnapGuides = snapGuides
     }
   }
