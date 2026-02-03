@@ -1204,18 +1204,31 @@ const updatePastedName = (event) => {
   cardStore.normalizeCardUrls(cardId.value)
 }
 
-// line break
+// enter key shortcuts
 
+// ctrl-enter, alt-enter
+const handleOptionEnterKey = (event) => {
+  const optionEnterChildCard = !userStore.cardSettingsShiftEnterShouldAddChildCard
+  if (optionEnterChildCard) {
+    globalStore.triggerAddChildCard()
+  } else {
+    insertLineBreak(event)
+  }
+}
+// shift-enter
+const handleShiftEnterKey = (event) => {
+  const shiftEnterChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
+  if (shiftEnterChildCard) {
+    globalStore.triggerAddChildCard()
+  } else {
+    insertLineBreak(event)
+  }
+}
 const checkIfIsInsertLineBreak = (event) => {
   const lineBreakInserted = event.ctrlKey || event.altKey
   if (!lineBreakInserted) {
     state.insertedLineBreak = false
   }
-}
-const conditionalInsertLineBreak = (event) => {
-  const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
-  if (shouldAddChildCard) { return }
-  insertLineBreak(event)
 }
 const insertLineBreak = (event) => {
   const position = nameElement.value.selectionEnd
@@ -1397,9 +1410,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
-        @keydown.alt.enter.exact.stop="insertLineBreak"
-        @keydown.ctrl.enter.exact.stop="insertLineBreak"
-        @keydown.shift.enter.exact="conditionalInsertLineBreak"
+        @keydown.alt.enter.exact.stop="handleOptionEnterKey"
+        @keydown.ctrl.enter.exact.stop="handleOptionEnterKey"
+        @keydown.shift.enter.exact="handleShiftEnterKey"
 
         @keyup="updatePickerSearch(null)"
 
