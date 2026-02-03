@@ -77,7 +77,8 @@ const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
 const currentListIsBeingDragged = computed(() => {
   const isDragging = globalStore.currentUserIsDraggingList
   const isCurrent = globalStore.currentDraggingListId === props.list.id
-  return isDragging && (isCurrent || currentListIsSelected.value)
+  const value = isDragging && (isCurrent || currentListIsSelected.value)
+  return value
 })
 const isResizing = computed(() => {
   const isResizing = globalStore.currentUserIsResizingList
@@ -134,8 +135,6 @@ const endListInfoInteraction = (event) => {
   // if (isMeta) { return }
   globalStore.updateListDetailsIsVisibleForListId(props.list.id)
   event.stopPropagation() // prevent stopInteractions() from closing listDetails
-  globalStore.currentUserIsDraggingList = false
-  globalStore.listsWereDragged = false
 }
 
 // Remote
@@ -385,10 +384,7 @@ const buttonClasses = computed(() => {
   } else {
     classes.push('is-light')
   }
-  // if ()
-  console.log(classes)
   return classes
-// :class="{'is-light': isLightInDarkTheme, 'is-dark': isDarkInLightTheme}")
 })
 
 // actions
