@@ -589,7 +589,8 @@ const checkIfShouldSnapToCard = async (event) => {
   const list = {
     id: nanoid(),
     y: target.y - consts.listInfoHeight,
-    x: target.x - consts.listPadding
+    x: target.x - consts.listPadding,
+    resizeWidth: userStore.cardSettingsCardWrapWidth
   }
   listStore.createList({ list })
   // add target to list
