@@ -1204,6 +1204,17 @@ export default {
     listWidth = listWidth || consts.minListWidth
     return listWidth - (consts.listPadding * 2)
   },
+  listCollapseButtonPosition (listId) {
+    const element = document.querySelector(`.list-collapse-button[data-list-id="${listId}"]`)
+    if (!element) { return }
+    let rect = element.getBoundingClientRect()
+    rect = this.rectDimensions(rect)
+    rect = {
+      x: rect.x + (rect.width / 2),
+      y: rect.y + (rect.height / 2)
+    }
+    return rect
+  },
 
   // rect
 

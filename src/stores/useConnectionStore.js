@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
+import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -125,12 +126,25 @@ export const useConnectionStore = defineStore('connections', {
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
+      const listStore = useListStore()
       const spaceStore = useSpaceStore()
       startItem = startItem || spaceStore.getSpaceItemById(startItemId)
       endItem = endItem || spaceStore.getSpaceItemById(endItemId)
       if (!startItem || !endItem) { return }
-      const start = utils.estimatedItemConnectorPosition(startItem)
-      const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
+      const collapsedListIds = listStore.getCollapsedListIds
+      const startListId = collapsedListIds.find(id => startItem.listId)
+      const endListId = collapsedListIds.find(id => endItem.listId)
+      let start, end
+      if (startListId) {
+        start = utils.listCollapseButtonPosition(startListId)
+      } else {
+        start = utils.estimatedItemConnectorPosition(startItem)
+      }
+      if (endListId) {
+        end = utils.listCollapseButtonPosition(endListId)
+      } else {
+        end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
+      }
       const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
       return path
     },
@@ -460,7 +474,9 @@ export const useConnectionStore = defineStore('connections', {
           const endItem = utils.itemElementDimensions({ id: connection.endItemId })
           const path = this.getConnectionPathBetweenItems({
             startItem,
+            startItemId: connection.startItemId,
             endItem,
+            endItemId: connection.endItemId,
             controlPoint: connection.controlPoint
           })
           if (!path) { return }

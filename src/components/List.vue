@@ -508,13 +508,13 @@ const placeholderStylesMap = computed(() => {
 
 <template lang="pug">
 .list(
-  :key="list.id"
-  :data-list-id="list.id"
-  :data-x="list.x"
-  :data-y="list.y"
-  :data-width="list.resizeWidth"
-  :data-height="list.height"
-  :data-is-collapsed="list.isCollapsed"
+  :key="props.list.id"
+  :data-list-id="props.list.id"
+  :data-x="props.list.x"
+  :data-y="props.list.y"
+  :data-width="props.list.resizeWidth"
+  :data-height="props.list.height"
+  :data-is-collapsed="props.list.isCollapsed"
   :style="listStyles"
   :class="classes"
   ref="listElement"
@@ -522,7 +522,7 @@ const placeholderStylesMap = computed(() => {
   teleport(to="#list-backgrounds")
     .list-background(
       v-if="!props.list.isCollapsed"
-      :data-list-id="list.id"
+      :data-list-id="props.list.id"
       :style="listBackgroundStyles"
       :class="classes"
     )
@@ -544,13 +544,13 @@ const placeholderStylesMap = computed(() => {
       template(v-for="card in listChildPlaceholders" :key="card.id")
         .list-placeholder.list-snap-guide(
           :style="placeholderStylesMap[card.id]"
-          :data-list-id="list.id"
+          :data-list-id="props.list.id"
           :data-card-id="card.id"
           :data-card-listPositionIndex="card.listPositionIndex"
         )
 
   .list-info(
-    :data-list-id="list.id"
+    :data-list-id="props.list.id"
     :class="infoClasses"
     :style="infoStyles"
     tabindex="0"
@@ -571,7 +571,9 @@ const placeholderStylesMap = computed(() => {
     .row
       //- toggle collapse
       .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
-        button.small-button.inline-button
+        button.small-button.inline-button.list-collapse-button(
+          :data-list-id="props.list.id"
+        )
           img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
           img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
           span {{ listCards.length }}
