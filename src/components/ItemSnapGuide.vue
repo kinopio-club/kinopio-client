@@ -233,7 +233,7 @@ const waitingAnimationFrame = (timestamp) => {
 <style lang="stylus">
 .item-snap-guide
   z-index var(--max-z)
-  --snap-guide-waiting-duration 0.1s // same as consts.itemSnapGuideWaitingDuration ms
+  --snap-guide-waiting-duration 0.2s // same as consts.itemSnapGuideWaitingDuration ms
   .is-instant
     --snap-guide-waiting-duration 0s
   &.is-card

@@ -2241,7 +2241,7 @@ const clearFocus = () => {
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
-  transition opacity 0.1s // same as consts.itemSnapGuideWaitingDuration ms
+  transition opacity 0.2s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-resizing,
   &.is-tilting
     *
