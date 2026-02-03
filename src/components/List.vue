@@ -40,8 +40,18 @@ onMounted(() => {
       }
     }
   )
+  const listActionUnsubscribe = listStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'moveLists') {
+        state.shouldPreventNextButton = true
+      } else if (name === 'triggerClearShouldPreventNextListInfoButton') {
+        state.shouldPreventNextButton = false
+      }
+    }
+  )
   unsubscribes = () => {
     globalActionUnsubscribe()
+    listActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -56,7 +66,8 @@ const state = reactive({
   isDraggingCardOverList: false,
   isLocking: false,
   lockingPercent: 0,
-  lockingAlpha: 0
+  lockingAlpha: 0,
+  shouldPreventNextButton: false
   // isVisibleInViewport: false,
 })
 
@@ -390,6 +401,10 @@ const buttonClasses = computed(() => {
 // actions
 
 const toggleIsCollapsed = () => {
+  if (state.shouldPreventNextButton) {
+    state.shouldPreventNextButton = false
+    return
+  }
   const value = !props.list.isCollapsed
   updateIsCollapsed(value)
 }
@@ -400,6 +415,10 @@ const updateIsCollapsed = (value) => {
   })
 }
 const addCard = async () => {
+  if (state.shouldPreventNextButton) {
+    state.shouldPreventNextButton = false
+    return
+  }
   updateIsCollapsed(false)
   const width = listItemWidth.value
   const card = {

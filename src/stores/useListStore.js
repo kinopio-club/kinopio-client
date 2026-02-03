@@ -69,6 +69,7 @@ export const useListStore = defineStore('lists', {
     // subscribe triggers
 
     triggerCreateList (updates) {},
+    triggerClearShouldPreventNextListInfoButton () {},
 
     // init
 

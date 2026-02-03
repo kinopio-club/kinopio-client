@@ -973,6 +973,10 @@ const stopInteractions = async (event) => {
   globalStore.clearShouldExplicitlyRenderCardIds()
   globalStore.shouldSnapToGrid = false
   spaceStore.updateSpaceEditedAt()
+  // runs after child component interaction methods
+  setTimeout(() => {
+    listStore.triggerClearShouldPreventNextListInfoButton()
+  }, 20)
 }
 
 // online
