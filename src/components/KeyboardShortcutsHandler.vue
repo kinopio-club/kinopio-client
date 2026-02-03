@@ -37,9 +37,9 @@ let prevCursorPosition, currentCursorPosition, prevRightClickPosition, prevRight
 let unsubscribes
 
 onMounted(() => {
-  window.addEventListener('keyup', handleShortcuts)
+  window.addEventListener('keyup', handleShortcutsOnKeyUp)
   // event.metaKey only works on keydown
-  window.addEventListener('keydown', handleMetaKeyShortcuts)
+  window.addEventListener('keydown', handleShortcutsOnKeyDown)
   window.addEventListener('mousedown', handleMouseDownEvents)
   window.addEventListener('mousemove', handleMouseMoveEvents)
   window.addEventListener('mouseup', handleMouseUpEvents)
@@ -76,8 +76,8 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('keyup', handleShortcuts)
-  window.removeEventListener('keydown', handleMetaKeyShortcuts)
+  window.removeEventListener('keyup', handleShortcutsOnKeyUp)
+  window.removeEventListener('keydown', handleShortcutsOnKeyDown)
   window.removeEventListener('mousedown', handleMouseDownEvents)
   window.removeEventListener('mousemove', handleMouseMoveEvents)
   window.removeEventListener('mouseup', handleMouseUpEvents)
@@ -134,7 +134,7 @@ const isCanvasScope = (event) => {
 }
 
 // on key up
-const handleShortcuts = (event) => {
+const handleShortcutsOnKeyUp = (event) => {
   const key = event.key.toLowerCase()
   const keyCode = event.code // physical key on the keyboard
   const keyB = key === 'b' || keyCode === 'KeyB'
@@ -233,7 +233,7 @@ const handleShortcuts = (event) => {
   }
 }
 // on key down
-const handleMetaKeyShortcuts = (event) => {
+const handleShortcutsOnKeyDown = (event) => {
   const key = event.key.toLowerCase()
   const keyCode = event.code // physical key on the keyboard
   const keyZ = key === 'z' || keyCode === 'KeyZ'
@@ -248,13 +248,8 @@ const handleMetaKeyShortcuts = (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
   const toolbarIsDrawing = globalStore.getToolbarIsDrawing
-  // Add Child Card
-  if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
-    const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
-    if (!shouldAddChildCard) { return }
-    addChildCard()
   // Add Card
-  } else if (key === 'enter' && isSpaceScope) {
+  if (key === 'enter' && isSpaceScope) {
     addCard()
   // Redo
   } else if (event.shiftKey && isMeta && keyZ && !isFromInput) {
