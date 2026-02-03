@@ -407,13 +407,19 @@ export const useListStore = defineStore('lists', {
     async removeLists (ids = []) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const cardStore = useCardStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserIsSpaceMember
       if (!canEditSpace) { return }
+      // remove cards from lists
+      ids.forEach(id => {
+        const cards = cardStore.getCardsByList(id)
+        cardStore.removeCardsFromLists(cards)
+      })
+      // remove lists
       for (const id of ids) {
         const list = this.getList(id)
-        console.log(list)
         await apiStore.addToQueue({ name: 'removeList', body: list })
       }
       this.removeListsFromState(ids)

@@ -378,6 +378,59 @@ const mergeSelectedCards = () => {
   }, 100)
 }
 
+// list
+
+const cardsIsInListTogether = computed(() => {
+  if (!cards.value.length) { return }
+  const listId = cards.value[0].listId
+  if (!listId) { return }
+  const value = cards.value.every(card => card.listId === listId)
+  return value
+})
+const list = computed(() => {
+  if (!cardsIsInListTogether.value) { return }
+  const listId = cards.value[0].listId
+  const list = listStore.getList(listId)
+  return list
+})
+const toggleListCards = async () => {
+  let listCards = []; let listHasOtherCards = []
+  if (list.value) {
+    listCards = cardStore.getCardsByList(list.value.id)
+    listHasOtherCards = listCards.length !== cards.value.length
+  }
+  // move cards out of list
+  if (cardsIsInListTogether.value && listHasOtherCards) {
+    const x = list.value.x + list.value.resizeWidth + consts.listPadding
+    const updates = cards.value.map(card => {
+      return {
+        id: card.id,
+        x
+      }
+    })
+    cardStore.removeCardsFromLists(cards.value)
+    cardStore.updateCards(updates)
+  // remove list
+  } else if (cardsIsInListTogether.value) {
+    listStore.removeList(list.value.id)
+  // create list, add cards to list
+  } else {
+    const cards = cardsSortedByY()
+    const card = cards[0]
+    const list = {
+      id: nanoid(),
+      y: card.y - consts.listInfoHeight,
+      x: card.x - consts.listPadding
+    }
+    listStore.createList({ list })
+    await nextTick()
+    await cardStore.addCardsToList({ cards, list, targetPositionIndex: null })
+  }
+  globalStore.clearMultipleSelected()
+  globalStore.closeAllDialogs()
+  globalStore.multipleSelectedActionsIsVisible = false
+}
+
 // copy and move
 
 const toggleCopyItemsIsVisible = () => {
@@ -452,10 +505,10 @@ dialog.narrow.multiple-selected-actions(
       ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
       .segmented-buttons(v-if="multipleItemsIsSelected")
         //- Connect
-        button(:class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all" title="Connect/Disconnect Cards")
+        button(title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
           img.connect.icon(src="@/assets/connect.svg")
         //- List
-        button(title="Merge/Split Cards into List")
+        button(title="Merge/Split Cards into List" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
           img.icon.list-icon(src="@/assets/list.svg")
     //- card options
     CardOrBoxActions(
