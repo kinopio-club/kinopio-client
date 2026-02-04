@@ -571,9 +571,7 @@ const placeholderStylesMap = computed(() => {
     .row
       //- toggle collapse
       .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
-        button.small-button.inline-button.list-collapse-button(
-          :data-list-id="props.list.id"
-        )
+        button.small-button.inline-button
           img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
           img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
           span {{ listCards.length }}

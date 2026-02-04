@@ -131,20 +131,13 @@ export const useConnectionStore = defineStore('connections', {
       startItem = startItem || spaceStore.getSpaceItemById(startItemId)
       endItem = endItem || spaceStore.getSpaceItemById(endItemId)
       if (!startItem || !endItem) { return }
-      const collapsedListIds = listStore.getCollapsedListIds
-      const startListId = collapsedListIds.find(id => startItem.listId)
-      const endListId = collapsedListIds.find(id => endItem.listId)
-      let start, end
-      if (startListId) {
-        start = utils.listCollapseButtonPosition(startListId)
-      } else {
-        start = utils.estimatedItemConnectorPosition(startItem)
-      }
-      if (endListId) {
-        end = utils.listCollapseButtonPosition(endListId)
-      } else {
-        end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
-      }
+      const lists = listStore.getCollapsedLists
+      lists.forEach(list => {
+        if (list.id === startItem.listId) { startItem = list }
+        if (list.id === endItem.listId) { endItem = list }
+      })
+      const start = utils.estimatedItemConnectorPosition(startItem)
+      const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
       const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
       return path
     },

@@ -63,10 +63,6 @@ export const useListStore = defineStore('lists', {
       return lists.filter(list => {
         return list.isCollapsed
       })
-    },
-    getCollapsedListIds () {
-      const lists = this.getCollapsedLists
-      return lists.map(list => list.id)
     }
   },
 

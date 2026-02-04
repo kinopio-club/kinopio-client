@@ -17,7 +17,8 @@ const cards = computed(() => {
   // exclude if unlocked
   const cards = cardStore.getCardsIsNotLocked
   // exclude if in collapsed list
-  const listIds = listStore.getCollapsedListIds
+  const lists = listStore.getCollapsedLists
+  const listIds = lists.map(list => list.id)
   return cards.filter(card => !listIds.includes(card.listId))
 })
 const lockedCards = computed(() => cardStore.getAllCards.filter(card => card.isLocked))
