@@ -42,18 +42,8 @@ onMounted(() => {
       }
     }
   )
-  const listActionUnsubscribe = listStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'moveLists') {
-        state.shouldPreventNextButton = true
-      } else if (name === 'triggerClearShouldPreventNextListInfoButton') {
-        state.shouldPreventNextButton = false
-      }
-    }
-  )
   unsubscribes = () => {
     globalActionUnsubscribe()
-    listActionUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -68,8 +58,7 @@ const state = reactive({
   isDraggingCardOverList: false,
   isLocking: false,
   lockingPercent: 0,
-  lockingAlpha: 0,
-  shouldPreventNextButton: false
+  lockingAlpha: 0
   // isVisibleInViewport: false,
 })
 
@@ -407,19 +396,15 @@ const buttonClasses = computed(() => {
 // actions
 
 const toggleIsCollapsed = () => {
-  if (state.shouldPreventNextButton) {
-    state.shouldPreventNextButton = false
-    return
-  }
   const value = !props.list.isCollapsed
   updateIsCollapsed(value)
 }
 const updateIsCollapsed = async (value) => {
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
   listStore.updateList({
     id: props.list.id,
     isCollapsed: value
   })
-
   const cards = listCards.value
   const cardIds = cards.map(card => card.id)
   if (!value) {
@@ -429,10 +414,7 @@ const updateIsCollapsed = async (value) => {
   connectionStore.updateConnectionPathsByItemIds(cardIds)
 }
 const addCard = async () => {
-  if (state.shouldPreventNextButton) {
-    state.shouldPreventNextButton = false
-    return
-  }
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
   updateIsCollapsed(false)
   const width = listItemWidth.value
   const card = {
@@ -589,18 +571,19 @@ const placeholderStylesMap = computed(() => {
     .focusing-frame(v-if="state.isDraggingCardOverList && props.list.isCollapsed" :style="{backgroundColor: userColor}")
     .list-snap-guide.empty-list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }" :style="snapGuideStyles")
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    .row
-      //- toggle collapse
-      .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
-        button.small-button.inline-button
-          img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
-          img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
-          span {{ listCards.length }}
-      //- add card
-      .inline-button-wrap(title="Add Card" @click.left.stop="addCard")
-        button.small-button.inline-button
-          img.icon.add(src="@/assets/add.svg")
+    .row.list-info-row
       span.name(:title="props.list.name") {{ props.list.name }}
+      .button-wrap
+        //- add card
+        .inline-button-wrap(title="Add Card" @click.left.stop="addCard")
+          button.small-button.inline-button
+            img.icon.add(src="@/assets/add.svg")
+        //- toggle collapse
+        .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
+          button.small-button.inline-button
+            img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
+            img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
+            span {{ listCards.length }}
       //- resize collapsed
       .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
@@ -721,16 +704,21 @@ const placeholderStylesMap = computed(() => {
     background transparent !important // :hover and :active are transparent too
   .inline-button-wrap + .inline-button-wrap
     padding-left 0
+  .inline-button-wrap:last-child
+    padding-right 0
   // name
-  .row
+  .list-info-row
     width 100%
+    justify-content space-between
+    flex-wrap nowrap
+    display flex
+    align-items center
+    padding 0 8px
     .name
       white-space nowrap
       overflow hidden
       text-overflow ellipsis
       display inline-block
-      width calc(100% - 85px)
-      vertical-align -3px
   .bottom-button-wrap // resize when list is collapsed
     right -13px
     top 14px
