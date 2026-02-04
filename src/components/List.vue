@@ -352,7 +352,10 @@ const colorIsDark = computed(() => {
 const listStyles = computed(() => {
   const { x, y, z } = props.list
   const width = props.list.resizeWidth
-  const height = props.list.height || consts.listEmptyHeight
+  let height = props.list.height || consts.listEmptyHeight
+  if (props.list.isCollapsed) {
+    height = consts.listInfoHeight
+  }
   const styles = {
     left: x + 'px',
     top: y + 'px',
@@ -497,6 +500,13 @@ const snapGuideIsVisible = computed(() => {
   if (props.list.isCollapsed) { return }
   return !listCards.value.length
 })
+const snapGuideStyles = computed(() => {
+  const styles = {}
+  if (state.isDraggingCardOverList) {
+    styles.backgroundColor = userColor.value
+  }
+  return styles
+})
 
 // placeholders
 
@@ -576,7 +586,8 @@ const placeholderStylesMap = computed(() => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endListInfoInteractionTouch"
   )
-    .list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }")
+    .focusing-frame(v-if="state.isDraggingCardOverList && props.list.isCollapsed" :style="{backgroundColor: userColor}")
+    .list-snap-guide.empty-list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }" :style="snapGuideStyles")
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     .row
       //- toggle collapse
@@ -730,6 +741,8 @@ const placeholderStylesMap = computed(() => {
     z-index -1
     pointer-events none
 
+  .focusing-frame
+    animation-iteration-count 100 // animation plays effectively infinite
 @keyframes listSnapGuide
   50%
     transform scaleY(175%)

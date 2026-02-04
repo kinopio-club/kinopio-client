@@ -189,7 +189,7 @@ export const useListStore = defineStore('lists', {
         return utils.isNormalizedRectAInsideRectB(card, listRect)
       })
       // no snap
-      if (!list || list.isCollapsed) {
+      if (!list) {
         this.listSnapGuides = {}
         return
       }
