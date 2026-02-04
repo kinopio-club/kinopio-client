@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useListStore } from '@/stores/useListStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -16,6 +17,7 @@ import { nanoid } from 'nanoid'
 const globalStore = useGlobalStore()
 const listStore = useListStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
@@ -409,11 +411,19 @@ const toggleIsCollapsed = () => {
   const value = !props.list.isCollapsed
   updateIsCollapsed(value)
 }
-const updateIsCollapsed = (value) => {
+const updateIsCollapsed = async (value) => {
   listStore.updateList({
     id: props.list.id,
     isCollapsed: value
   })
+
+  const cards = listCards.value
+  const cardIds = cards.map(card => card.id)
+  if (!value) {
+    await cardStore.updateCardsDimensions(cardIds)
+    await cardStore.updateCardPositionsInList(props.list)
+  }
+  connectionStore.updateConnectionPathsByItemIds(cardIds)
 }
 const addCard = async () => {
   if (state.shouldPreventNextButton) {
