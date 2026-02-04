@@ -91,17 +91,6 @@ const cardUrl = (notification) => {
 const cardDetailsIsVisible = (cardId) => {
   return globalStore.cardDetailsIsVisibleForCardId === cardId
 }
-const showCardDetails = (notification) => {
-  const space = utils.clone(notification.space)
-  const card = utils.clone(notification.card)
-  if (currentSpaceId.value !== space.id) {
-    globalStore.loadSpaceFocusOnCardId = card.id
-    spaceStore.changeSpace(space)
-  } else {
-    cardStore.showCardDetails(card.id)
-  }
-  emit('markAsRead', notification.id)
-}
 const segmentTagColor = (segment) => {
   const spaceTag = spaceStore.getSpaceTagByName(segment.name)
   const userTag = userStore.getUserTagByName(segment.name)
@@ -164,16 +153,21 @@ const deleteUserNotifications = async () => {
 
 // actions
 
-const primaryAction = (notification) => {
-  if (notification.space) {
-    changeSpace(notification.spaceId)
-  }
-}
-const changeSpace = (spaceId) => {
-  globalStore.updateCardDetailsIsVisibleForCardId(null)
+const changeSpace = (notification) => {
+  const { space, spaceId } = notification
+  if (!space) { return }
   if (isCurrentSpace(spaceId)) { return }
-  const space = { id: spaceId }
   spaceStore.changeSpace(space)
+  emit('markAsRead', notification.id)
+}
+const focusCard = (notification) => {
+  if (currentSpaceId.value !== notification.space.id) {
+    changeSpace(notification)
+    globalStore.updateFocusOnCardId(notification.card.id)
+  } else {
+    globalStore.updateFocusOnCardId(notification.card.id)
+  }
+  emit('markAsRead', notification.id)
 }
 
 // explore
@@ -222,7 +216,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     ul.results-list(v-if="state.filteredNotifications.length")
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
-          li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id" :data-notification-icon-class="notification.iconClass")
+          li(@click.stop.prevent="changeSpace(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id" :data-notification-icon-class="notification.iconClass")
             .row
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
@@ -239,7 +233,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                 template(v-if="notification.type === 'addSpaceToGroup'")
                   GroupLabel(:group="notification.group")
                 //- space
-                span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
+                span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }")
                   img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
                   span.space-name {{notification.space.name}}
             //- add to explore button
@@ -248,9 +242,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
             //- card details
             .row.card-details-row(v-if="notification.cardId")
               a(:href="cardUrl(notification)")
-                .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :style="{backgroundColor: notification.card.backgroundColor}")
+                .card-details.badge.button-badge(@click.stop.prevent="focusCard(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :style="{backgroundColor: notification.card.backgroundColor}")
                   template(v-for="segment in cardNameSegments(notification.card.name)")
-                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" :backgroundColorIsDark="cardBackgroundIsDark(notification.card)")
+                    NameSegment(:segment="segment" @showTagDetailsIsVisible="focusCard(notification)" :backgroundColorIsDark="cardBackgroundIsDark(notification.card)")
                   img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 </template>
 
