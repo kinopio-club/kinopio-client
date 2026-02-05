@@ -347,7 +347,8 @@ const checkShouldBoxSelect = (isPanScope) => {
     !toolbarIsList &&
     isNotConnecting &&
     !globalStore.currentUserIsResizingBox &&
-    !globalStore.currentUserIsResizingList
+    !globalStore.currentUserIsResizingList &&
+    !globalStore.currentUserIsDraggingList
   return shouldBoxSelect
 }
 const handleMouseDownEvents = (event) => {

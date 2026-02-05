@@ -803,18 +803,31 @@ const handleTouchStart = (event) => {
   prevCursor = utils.cursorPositionInViewport(event)
 }
 const updateCurrentInteractingItem = () => {
-  let boxId = globalStore.currentDraggingBoxId
+  let boxId, cardId, listId
+  // box
   if (globalStore.currentUserIsResizingBox) {
     boxId = globalStore.currentUserIsResizingBoxIds[0]
+  } else {
+    boxId = globalStore.currentDraggingBoxId
   }
-  let cardId = globalStore.currentDraggingCardId
+  // card
   if (globalStore.currentUserIsResizingCard) {
     cardId = globalStore.currentUserIsResizingCardIds[0]
+  } else {
+    cardId = globalStore.currentDraggingCardId
   }
-  if (boxId) {
+  // list
+  if (globalStore.currentUserIsResizingList) {
+    listId = globalStore.currentUserIsResizingListIds[0]
+  } else {
+    listId = globalStore.currentDraggingListId
+  }
+  // update state.currentInteractingItem
+  if (listId) {
+    state.currentInteractingItem = listStore.getList(listId)
+  } else if (boxId) {
     state.currentInteractingItem = boxStore.getBox(boxId)
-  }
-  if (cardId) {
+  } else if (cardId) {
     state.currentInteractingItem = cardStore.getCard(cardId)
   }
 }
@@ -829,7 +842,14 @@ const initInteractions = (event) => {
   updateCurrentInteractingItem()
 }
 const updateShouldSnapToGrid = (event) => {
-  let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
+  let shouldSnap = (
+    isDraggingCard.value ||
+    isDraggingBox.value ||
+    isDraggingList.value ||
+    isResizingCard.value ||
+    isResizingBox.value ||
+    isResizingList.value
+  )
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
   if (!globalStore.shouldSnapToGrid && shouldSnap) {

@@ -176,6 +176,7 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
+      if (globalStore.shouldSnapToGrid) { return }
       this.updateShouldSnapBackToList()
       const card = cardStore.getCurrentDraggingCard()
       const lists = this.getAllLists
