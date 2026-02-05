@@ -214,7 +214,7 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
       .button-wrap(v-if="canEditSpace")
         button.danger(@click.left="removeList" title="Remove List")
           img.icon(src="@/assets/remove.svg")
-    ItemDetailsDebug(:item="currentList" :keys="['y', 'height', 'resizeWidth']")
+    ItemDetailsDebug(:item="currentList" :keys="['y', 'height', 'width', 'resizeWidth']")
 </template>
 
 <style lang="stylus">
