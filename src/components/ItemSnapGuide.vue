@@ -79,7 +79,8 @@ const currentSnapGuide = computed(() => {
   let guides
   // snap to box
   if (props.box) {
-    if (cardStore.cardSnapGuides.length) { return }
+    if (cardStore.cardSnapGuides.length) { return } // prefer snapping to card
+    if (listStore.listSnapGuides.listId) { return } // prefer snapping to list
     const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
     if (isMultipleBoxesSelectedIds) { return }
     guides = boxStore.boxSnapGuides
@@ -101,7 +102,7 @@ watch(() => currentSnapGuide.value, (value, prevValue) => {
 // styles
 
 const snapGuideSide = computed(() => {
-  const isDraggingItem = globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingCard
+  const isDraggingItem = globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingList
   if (!isDraggingItem) { return }
   const snapGuide = currentSnapGuide.value
   if (!snapGuide) { return null }

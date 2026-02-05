@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -248,6 +249,7 @@ export const useListStore = defineStore('lists', {
     moveLists ({ endCursor, prevCursor, delta }) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
+      const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       if (globalStore.shouldSnapToGrid) {
@@ -272,12 +274,15 @@ export const useListStore = defineStore('lists', {
         return {
           id: list.id,
           x,
-          y
+          y,
+          resizeWidth: list.resizeWidth,
+          height: list.height
         }
       })
       // this.updatePageSize(lists[0]) // ??might automatically be done by cards inside
       this.updateLists(lists)
       globalStore.listsWereDragged = true
+      boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
       // lists = lists.map(list => this.getList(list.id))
       // boxStore.updateListSnapGuides({ items: lists, isLists: true, cursor: endCursor })
     },

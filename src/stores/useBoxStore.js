@@ -511,7 +511,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, item, target: targetBox, time, distance, sizeOutside }
     },
-    updateBoxSnapGuides ({ items, isCards, cursor }) {
+    updateBoxSnapGuides ({ items, isChildren, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
@@ -520,7 +520,7 @@ export const useBoxStore = defineStore('boxes', {
       const targetBoxes = this.getBoxesSelectableInViewport()
       const prevSnapGuides = globalStore.snapGuides
       let snapGuides = []
-      if (isCards) {
+      if (isChildren) {
         items = [utils.boundaryRectFromItems(items)]
       }
       items = items.map(item => {
