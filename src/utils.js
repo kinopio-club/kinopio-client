@@ -586,7 +586,7 @@ export default {
   },
   optionKey () {
     if (this.isMacOrIpad() || this.isIPhone()) {
-      return 'Option'
+      return 'Opt'
     } else {
       return 'Alt'
     }
