@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -39,6 +40,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const listStore = useListStore()
 const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
@@ -342,29 +344,6 @@ const updateCompositionEventEndTime = (event) => {
   // for non-latin input
   // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
   compositionEventEndTime = event.timeStamp
-}
-const handleEnterKey = (event) => {
-  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  console.info('🎹 enter', {
-    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
-    pickersIsVisible
-  })
-  if (globalStore.shouldPreventNextEnterKey) {
-    globalStore.shouldPreventNextEnterKey = false
-  } else if (pickersIsVisible) {
-    triggerPickerSelectItem(event)
-    hidePickers()
-  } else if (state.insertedLineBreak) {
-    state.insertedLineBreak = false
-  // eslint-disable-next-line no-empty
-  } else if (isCompositionEvent) {
-  } else {
-    closeCard()
-    globalStore.closeAllDialogs()
-    globalStore.shouldPreventNextEnterKey = false
-    globalStore.triggerAddCard()
-  }
 }
 const removeCard = () => {
   if (!canEditCard.value) { return }
@@ -1206,7 +1185,56 @@ const updatePastedName = (event) => {
 
 // enter key shortcuts
 
-// ctrl-enter, alt-enter
+const addCard = () => {
+  closeCard()
+  globalStore.closeAllDialogs()
+  globalStore.shouldPreventNextEnterKey = false
+  globalStore.triggerAddCard()
+}
+const addListCard = () => {
+  const list = listStore.getList(card.value.listId)
+  const newCard = {
+    id: nanoid(),
+    listId: card.value.listId,
+    width: card.value.width,
+    resizeWidth: card.value.resizeWidth,
+    x: card.value.x,
+    y: card.value.y + card.value.height + consts.listPadding,
+    backgroundColor: card.value.backgroundColor
+  }
+  closeCard()
+  globalStore.closeAllDialogs()
+  globalStore.shouldPreventNextEnterKey = false
+  cardStore.createCard(newCard, true)
+  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: card.value.listPositionIndex })
+  globalStore.parentCardId = newCard.id
+  globalStore.updateCardDetailsIsVisibleForCardId(newCard.id)
+}
+
+// 🎹 enter
+const handleEnterKey = (event) => {
+  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  console.info('🎹 enter', {
+    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
+    pickersIsVisible
+  })
+  if (globalStore.shouldPreventNextEnterKey) {
+    globalStore.shouldPreventNextEnterKey = false
+  } else if (pickersIsVisible) {
+    triggerPickerSelectItem(event)
+    hidePickers()
+  } else if (state.insertedLineBreak) {
+    state.insertedLineBreak = false
+  // eslint-disable-next-line no-empty
+  } else if (isCompositionEvent) {
+  } else if (card.value.listId) {
+    addListCard()
+  } else {
+    addCard()
+  }
+}
+// 🎹 ctrl-enter, alt-enter
 const handleOptionEnterKey = (event) => {
   const optionEnterChildCard = !userStore.cardSettingsShiftEnterShouldAddChildCard
   if (optionEnterChildCard) {
@@ -1215,7 +1243,7 @@ const handleOptionEnterKey = (event) => {
     insertLineBreak(event)
   }
 }
-// shift-enter
+// 🎹 shift-enter
 const handleShiftEnterKey = (event) => {
   const shiftEnterChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
   if (shiftEnterChildCard) {
