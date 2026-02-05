@@ -433,13 +433,17 @@ const udpateHeaderFontSize = async (size) => {
 
 // lock
 
+const lockedIsDisabled = computed(() => {
+  return items.value.every(item => item.listId)
+})
 const isLocked = computed(() => {
   const matches = items.value.filter(item => item.isLocked)
   return Boolean(matches.length === items.value.length)
 })
 const toggleIsLocked = () => {
   const value = !isLocked.value
-  items.value.forEach(item => {
+  const matches = items.value.filter(item => !item.listId)
+  matches.forEach(item => {
     if (item.isCard) {
       updateCard(item, { isLocked: value })
     }
@@ -587,7 +591,7 @@ section.subsection.style-actions(
           img.icon.box-icon(src="@/assets/box-empty.svg")
       //- Lock
       .button-wrap
-        button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
+        button(:disabled="!canEditAll || lockedIsDisabled" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
           img.icon(src="@/assets/lock.svg")
       //- Comment
       .button-wrap(v-if="isCards" title="Turn into Comment")
