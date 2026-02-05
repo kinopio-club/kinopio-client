@@ -543,7 +543,7 @@ dialog.narrow.multiple-selected-actions(
   section
     .row(v-if="cardOrBoxIsSelected")
       //- Align And Distribute
-      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
       //- Move/Copy
       .segmented-buttons.move-or-copy-wrap
         button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
@@ -553,7 +553,7 @@ dialog.narrow.multiple-selected-actions(
           span Move
           MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
     //- More Options
-    AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+    AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
     .row
       //- Remove

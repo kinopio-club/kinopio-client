@@ -40,7 +40,6 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
-  numberOfSelectedItemsCreatedByCurrentUser: Object,
   shouldHideMoreOptions: Boolean,
   shouldDistributeWithAlign: Boolean,
   canEditAll: Object,
@@ -58,18 +57,6 @@ const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnec
 const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
-const canDistribute = computed(() => {
-  const minimumRequiredToDistribute = 3
-  let cards, boxes
-  if (isSpaceMember.value) {
-    cards = multipleCardsSelectedIds.value.length >= minimumRequiredToDistribute
-    boxes = multipleBoxesSelectedIds.value.length >= minimumRequiredToDistribute
-  } else {
-    cards = props.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
-    boxes = props.numberOfSelectedItemsCreatedByCurrentUser.boxes >= minimumRequiredToDistribute
-  }
-  return Boolean(cards) || Boolean(boxes)
-})
 const items = computed(() => {
   const boxes = normalizeBoxes(props.boxes)
   return props.cards.concat(boxes)
@@ -85,6 +72,29 @@ const ySpaceBetweenCards = (card) => {
   }
   return value
 }
+
+// disabled
+
+const filterItems = (items) => {
+  return items.filter(item => {
+    const isUser = item.userId === userStore.id
+    const isList = Boolean(item.listId)
+    if (isSpaceMember.value) {
+      return !isList
+    } else {
+      return isUser && !isList
+    }
+  })
+}
+const isDistributeDisabled = computed(() => {
+  const minimumRequiredToDistribute = 3
+  const cards = filterItems(props.cards)
+  const boxes = filterItems(props.boxes)
+  const isCards = cards.length >= minimumRequiredToDistribute
+  const isBoxes = boxes.length >= minimumRequiredToDistribute
+  const canDistribute = Boolean(isCards) || Boolean(isBoxes)
+  return !canDistribute
+})
 
 // verify positioning
 
@@ -314,7 +324,7 @@ const normalizeBoxes = (boxes) => {
 // update items
 
 const updateItem = (item, type) => {
-  if (type === 'cards') {
+  if (type === 'cards' && !item.listId) { // skip list cards
     cardStore.updateCard(item)
   }
   if (type === 'boxes') {
@@ -582,7 +592,7 @@ const yDistancesBetween = (items) => {
       button(title="Align Right" :disabled="!canEditAll.cards" @click.left="alignRight" :class="{active: isRightAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
       //- | o |
-      button(title="Distribute Horizontally" :disabled="!canDistribute" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
+      button(title="Distribute Horizontally" :disabled="isDistributeDisabled" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
         img.icon(src="@/assets/distribute-horizontally.svg")
     .segmented-buttons.last-row
       //- ⎺o
@@ -595,7 +605,7 @@ const yDistancesBetween = (items) => {
       button(title="Align Bottom" :disabled="!canEditAll.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
       //- ⎺ o _
-      button(title="Distribute Vertically" :disabled="!canDistribute" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
+      button(title="Distribute Vertically" :disabled="isDistributeDisabled" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 </template>
 

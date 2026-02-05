@@ -442,7 +442,7 @@ const isLocked = computed(() => {
 })
 const toggleIsLocked = () => {
   const value = !isLocked.value
-  const matches = items.value.filter(item => !item.listId)
+  const matches = items.value.filter(item => !item.listId) // don't lock list cards
   matches.forEach(item => {
     if (item.isCard) {
       updateCard(item, { isLocked: value })
