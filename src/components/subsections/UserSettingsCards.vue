@@ -27,6 +27,14 @@ const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftE
 const updateShiftEnter = (value) => {
   userStore.updateUser({ cardSettingsShiftEnterShouldAddChildCard: value })
 }
+const optionKey = computed(() => utils.optionKey())
+const optionKeyShortcut = computed(() => {
+  if (shiftEnterShouldAddChildCard.value) {
+    return 'Line Break'
+  } else {
+    return 'Child Card'
+  }
+})
 
 //  max card width
 
@@ -52,6 +60,10 @@ const updateCardWrapWidthIsWide = (isWide) => {
         span Child Card
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
+    p.row.keyboard-shortcut-row
+      span {{optionKey}}-Enter
+      .badge.keyboard-shortcut {{optionKeyShortcut}}
+
   section
     p Card Wrap Width
     .segmented-buttons
@@ -75,4 +87,7 @@ const updateCardWrapWidthIsWide = (isWide) => {
     border-radius var(--small-entity-radius)
     display inline-block
     vertical-align -3px
+  .keyboard-shortcut-row
+    .badge
+      margin-left 6px
 </style>
