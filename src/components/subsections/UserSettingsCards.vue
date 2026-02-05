@@ -65,7 +65,7 @@ const updateCardWrapWidthIsWide = (isWide) => {
       .badge.keyboard-shortcut {{optionKeyShortcut}}
 
   section
-    p Card Wrap Width
+    p Card and List Wrap Width
     .segmented-buttons
       button(@click="updateCardWrapWidthIsWide(false)" :class="{ active: !cardWrapWidthIsWide }")
         span Normal
