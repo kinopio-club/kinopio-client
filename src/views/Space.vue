@@ -1093,6 +1093,7 @@ const updateMetaRSSFeed = () => {
     Connections
     #box-infos
     Cards
+    #card-meta-containers
     Lines
     Lists
     ItemUnlockButtons

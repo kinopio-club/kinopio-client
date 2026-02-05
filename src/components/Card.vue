@@ -759,7 +759,7 @@ const dateUpdatedAt = computed(() => {
   const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
-      return new Date(date).toLocaleString()
+      return dayjs(date).toISOString()
     } else {
       return utils.shortRelativeTime(date)
     }
@@ -2009,6 +2009,16 @@ const focusColor = computed(() => {
 const clearFocus = () => {
   globalStore.focusOnCardId = ''
 }
+
+// meta
+
+const metaContainerStyles = computed(() => {
+  const padding = 8
+  return {
+    left: `${props.card.x + padding}px`,
+    top: `${props.card.y + props.card.height - 6}px`
+  }
+})
 </script>
 
 <template lang="pug">
@@ -2215,22 +2225,23 @@ const clearFocus = () => {
         span Space is Read Only
 
   //- Meta Info
-  .meta-container(v-if="state.isVisibleInViewport")
-    //- Search result
-    span.badge.search(v-if="isInSearchResultsCards")
-      img.icon.search(src="@/assets/search.svg")
-    //- Vote Counter
-    CardVote(:card="card")
-    //- Created Through API
-    .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
-      img.icon.system(src="@/assets/system.svg")
-    //- User
-    .badge-wrap(v-if="filterShowUsers")
-      UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
-    //- Date
-    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
-      img.icon.time(src="@/assets/time.svg")
-      .name {{dateUpdatedAt}}
+  teleport(to="#card-meta-containers")
+    .card-meta-container(v-if="state.isVisibleInViewport" :style="metaContainerStyles")
+      //- Search result
+      span.badge.search(v-if="isInSearchResultsCards")
+        img.icon.search(src="@/assets/search.svg")
+      //- Vote Counter
+      CardVote(:card="card")
+      //- Created Through API
+      .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
+        img.icon.system(src="@/assets/system.svg")
+      //- User
+      .badge-wrap(v-if="filterShowUsers")
+        UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
+      //- Date
+      .badge.secondary.button-badge.date-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
+        img.icon.time(src="@/assets/time.svg")
+        .name {{dateUpdatedAt}}
 
 </template>
 
@@ -2456,36 +2467,6 @@ const clearFocus = () => {
     button
       cursor pointer
 
-  .meta-container
-    transform translateY(-6px)
-    display -webkit-box
-    padding 8px
-    padding-top 0
-    position absolute
-    .user-label-inline
-      margin-right 0
-      width max-content
-    .user-badge
-      display flex
-      margin 0
-      .label-badge
-        padding 0 10px
-    .badge
-      width max-content
-      &.secondary
-        display flex
-        .icon
-          margin-right 5px
-          margin-top 3px
-        .icon.system
-          margin 0
-
-    .badge + .badge,
-    .badge-wrap + .badge
-      margin-left 6px
-    .date-is-today
-      background-color var(--info-background)
-
   .comment-user-badge
     display inline
     .user
@@ -2532,6 +2513,32 @@ const clearFocus = () => {
   .is-in-checked-box,
   .is-checked
     opacity var(--is-checked-opacity)
+
+.card-meta-container
+  pointer-events all
+  z-index var(--max-z)
+  display flex
+  position absolute
+  .user-label-inline
+    margin-right 0
+    width max-content
+  .user-badge
+    display flex
+    margin 0
+    .label-badge
+      padding 0 10px
+  .badge
+    width max-content
+  .badge + .badge,
+  .badge-wrap + .badge
+    margin-left 6px
+  .date-is-today
+    background-color var(--info-background)
+  .date-badge
+    display flex
+    align-items center
+    .icon
+      margin-right 4px
 
 @keyframes bounce
   0%
