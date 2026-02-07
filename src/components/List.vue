@@ -73,7 +73,7 @@ const listCards = computed(() => {
   return cards
 })
 const todoListCards = computed(() => {
-  return cardStore.getCardsIsTodoByList(props.list.id)
+  return listCards.value.filter(card => utils.checkboxFromString(card.name))
 })
 const todoListCardsCompleted = computed(() => {
   const cards = todoListCards.value
