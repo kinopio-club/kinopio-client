@@ -206,6 +206,6 @@
     "previewUrl": "https://bk.kinopio.club/debug-grid-preview-light-2x.webp",
     "darkPreviewUrl": "https://bk.kinopio.club/debug-grid-preview-dark-2x.webp",
     "thumbnailUrl": "https://bk.kinopio.club/grid-debug-preview-3.png",
-    "isArchived": true
+    "isDeveloper": true
   }  
 ]
