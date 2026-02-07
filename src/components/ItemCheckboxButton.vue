@@ -60,7 +60,7 @@ const toggleItemChecked = (event) => {
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   event.stopPropagation()
   globalStore.preventMultipleSelectedActionsIsVisible = false
-  globalStore.currentDraggingBoxId = ''
+  globalStore.clearDraggingItems()
 }
 
 // handle events
