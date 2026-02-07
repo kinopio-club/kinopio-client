@@ -640,19 +640,7 @@ const showListDetails = async (event) => {
   const listId = globalStore.currentUserIsResizingListIds[0]
   await nextTick()
   await nextTick()
-  updateSizeForNewList(listId)
   globalStore.updateListDetailsIsVisibleForListId(listId)
-}
-const updateSizeForNewList = (listId) => {
-  const list = listStore.getList(listId)
-  const isMinWidth = list.resizeWidth === consts.minListWidth
-  const defaultIsMinWidth = userStore.cardSettingsCardWrapWidth === consts.minListWidth
-  if (!isMinWidth && !defaultIsMinWidth) { return }
-  const update = {
-    id: list.id,
-    resizeWidth: userStore.cardSettingsCardWrapWidth
-  }
-  listStore.updateList(update)
 }
 
 // drag items

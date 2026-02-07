@@ -64,6 +64,10 @@ export const useListStore = defineStore('lists', {
       return lists.filter(list => {
         return list.isCollapsed
       })
+    },
+    getListHighestZ () {
+      const lists = this.getAllLists
+      return utils.highestItemZ(lists)
     }
   },
 
@@ -81,23 +85,6 @@ export const useListStore = defineStore('lists', {
     // init
 
     initializeLists (lists = []) {
-      // TEMP stubbed list data
-      lists = [
-        {
-          id: '123xyz',
-          name: 'List 0 laksdjflksa jdfklajsd flksajdklf jsaldf',
-          color: 'teal',
-          x: 300,
-          y: 100,
-          z: 0,
-          resizeWidth: consts.minListWidth,
-          isCollapsed: false,
-          height: consts.listEmptyHeight
-          // spaceId
-          // userId
-        }
-      ]
-
       const byId = {}
       const allIds = []
       lists.forEach(list => {
@@ -124,16 +111,18 @@ export const useListStore = defineStore('lists', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const { id, color, x, y, name, resizeWidth, spaceId } = list
+      const defaultListWidth = userStore.cardSettingsCardWrapWidth
       const zoom = globalStore.getSpaceCounterZoomDecimal
       const count = this.allIds.length
       list.id = id || nanoid()
       list.color = color || randomColor({ luminosity: 'dark' })
       list.y = Math.max(y, consts.minItemXY)
-      list.resizeWidth = resizeWidth || consts.minListWidth
+      list.resizeWidth = resizeWidth || defaultListWidth || consts.minListWidth
       list.isCollapsed = false
       list.name = name || `List ${count}`
       list.userId = userStore.id
       list.spaceId = spaceId || spaceStore.id
+      list.z = 0
       return list
     },
     addListToState (list) {
@@ -303,8 +292,8 @@ export const useListStore = defineStore('lists', {
     incrementListZ (id) {
       // highest z
       const lists = this.getAllLists
+      let highestZ = this.getListHighestZ
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
-      let highestZ = utils.highestItemZ(lists)
       if (highestZ > maxInt) {
         this.clearAllListsZ()
         highestZ = 1
