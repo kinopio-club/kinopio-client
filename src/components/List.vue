@@ -72,6 +72,13 @@ const listCards = computed(() => {
   cards = cards.filter(card => card.listId === props.list.id)
   return cards
 })
+const todoListCards = computed(() => {
+  return cardStore.getCardsIsTodoByList(props.list.id)
+})
+const todoListCardsCompleted = computed(() => {
+  const cards = todoListCards.value
+  return cards.filter(card => utils.nameIsChecked(card.name))
+})
 
 // interacting
 
@@ -110,7 +117,7 @@ const startListInfoInteraction = async (event) => {
   //   list = await startDraggingDuplicateItems(event)
   // }
   globalStore.currentDraggingListId = list
-  listStore.incrementListZ(list.id)
+  listStore.incrementListZ(props.list.id)
 }
 const endListInfoInteraction = (event) => {
   // const isMeta = event.metaKey || event.ctrlKey
@@ -571,9 +578,12 @@ const placeholderStylesMap = computed(() => {
     .focusing-frame(v-if="state.isDraggingCardOverList && props.list.isCollapsed" :style="{backgroundColor: userColor}")
     .list-snap-guide.empty-list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }" :style="snapGuideStyles")
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
+    //- info row
     .row.list-info-row
-      span.name(:title="props.list.name") {{ props.list.name }}
-      .button-wrap
+      .left-side
+        progress(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length")
+        span.name(:title="props.list.name") {{ props.list.name }}
+      .right-side.button-wrap
         //- add card
         .inline-button-wrap(title="Add Card" @click.left.stop="addCard")
           button.small-button.inline-button
@@ -714,11 +724,20 @@ const placeholderStylesMap = computed(() => {
     display flex
     align-items center
     padding 0 8px
-    .name
-      white-space nowrap
+    .left-side
+      display flex
+      align-items center
       overflow hidden
-      text-overflow ellipsis
-      display inline-block
+      progress
+        display inline-block
+        width 20px
+        margin-right 5px
+      .name
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        display inline-block
+        // max-width calc(100% - 100px)
   .bottom-button-wrap // resize when list is collapsed
     right -13px
     top 14px

@@ -188,6 +188,10 @@ export const useCardStore = defineStore('cards', {
       cards = sortBy(cards, 'listPositionIndex')
       return cards
     },
+    getCardsIsTodoByList (listId) {
+      const cards = this.getCardsByList(listId)
+      return cards.filter(card => card.isTodo)
+    },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
     },

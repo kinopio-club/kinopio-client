@@ -28,6 +28,8 @@ const state = reactive({
   colorPickerIsVisible: false
 })
 
+let prevList
+
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentList = computed(() => {
   return listStore.getList(globalStore.listDetailsIsVisibleForListId) || {}
@@ -41,9 +43,12 @@ watch(() => visible.value, async (value, prevValue) => {
     scrollIntoViewAndFocus()
     textareaSizes()
     globalStore.preventMultipleSelectedActionsIsVisible = false
+    prevList = currentList.value
   } else {
     globalStore.currentDraggingListId = ''
     globalStore.updateMultipleListsSelectedIds([])
+    const list = listStore.getList(prevList.id)
+    listStore.updateListDimensions(list)
   }
 })
 const lists = computed(() => listStore.getAllLists)
@@ -214,7 +219,7 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
       .button-wrap(v-if="canEditSpace")
         button.danger(@click.left="removeList" title="Remove List")
           img.icon(src="@/assets/remove.svg")
-    ItemDetailsDebug(:item="currentList" :keys="['y', 'height', 'width', 'resizeWidth']")
+    ItemDetailsDebug(:item="currentList" :keys="['x', 'y', 'height', 'resizeWidth']")
 </template>
 
 <style lang="stylus">

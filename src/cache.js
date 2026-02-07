@@ -4,6 +4,7 @@ import debounce from 'lodash-es/debounce'
 import * as idb from 'idb-keyval'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
 let showDebugMessages = false
@@ -162,8 +163,8 @@ export default {
       console.warn(updateErrorMessage)
       return
     }
-    const normalizeKeys = ['cards', 'connections', 'connectionTypes', 'boxes']
-    if (normalizeKeys.includes(key)) {
+    const itemTypes = consts.itemTypes
+    if (itemTypes.includes(key)) {
       value = utils.denormalizeItems(value)
     }
     space[key] = value

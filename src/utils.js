@@ -1873,8 +1873,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes', 'lines', 'drawingStrokes', 'lists']
-    itemTypes.forEach(itemType => {
+    consts.itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {
         const shouldUpdate = item.userId !== null && item.userId !== consts.rootUserId // ensures corect free card count
