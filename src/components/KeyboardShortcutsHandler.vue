@@ -944,7 +944,7 @@ const selectAllItemsLeftOfCursor = (position) => {
 
 // Select All Cards, Connections, and Boxes
 
-const selectItemIds = ({ position, cardIds, boxIds, lineIds, listIds }) => {
+const selectItemIds = ({ position, cardIds = [], boxIds = [], lineIds = [], listIds = [] }) => {
   const preventMultipleSelectedActionsIsVisible = globalStore.preventMultipleSelectedActionsIsVisible
   const isItemIds = Boolean(cardIds.length || boxIds.length || lineIds.length || listIds.length)
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {

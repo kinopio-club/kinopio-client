@@ -1021,6 +1021,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
       listStore.updateListDimensions(list)
       globalStore.clearDraggingItems()
+      await nextTick()
       globalStore.clearMultipleSelected()
     },
     async prependCardToList (card, list) {

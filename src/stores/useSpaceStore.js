@@ -450,6 +450,7 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
@@ -459,6 +460,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
       connectionStore.initializeRemoteConnections(space.connections)
       lineStore.initializeRemoteLines(space.lines)
+      listStore.initializeRemoteLists(space.lists)
       globalStore.updatePageSizes()
       // init space
       historyStore.redoLocalUpdates()
