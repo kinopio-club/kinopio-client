@@ -43,7 +43,7 @@ export const useHistoryStore = defineStore('history', {
   //                    └──────────────────────┘░                ▼
   //                     ░░░░░░░░░░░░░░░░░░░░░░░░
   //
-  //  subscribe to items → process updates → create patch
+  //  subscribe to items → process updates → create debounced patch
   //
   state: () => ({
     patches: [],
@@ -61,7 +61,16 @@ export const useHistoryStore = defineStore('history', {
     // connection
     connectionUpdatesProcessing: new Map(),
     prevConnectionUpdatesProcessing: new Map(),
-    connectionUpdateKeysProcessing: new Set()
+    connectionUpdateKeysProcessing: new Set(),
+    // line
+    // lineUpdatesProcessing: new Map(),
+    // prevLineUpdatesProcessing: new Map(),
+    // lineUpdateKeysProcessing: new Set(),
+    // list
+    listUpdatesProcessing: new Map(),
+    prevListUpdatesProcessing: new Map(),
+    listUpdateKeysProcessing: new Set()
+
   }),
   actions: {
 
@@ -77,7 +86,7 @@ export const useHistoryStore = defineStore('history', {
     },
     debouncePendingPatch: debounce(function () {
       if (!this.pendingPatch.length) { return }
-      const combinedPatch = [...this.pendingPatch]
+      const combinedPatch = utils.clone(this.pendingPatch)
       this.pendingPatch = []
       // remove patches above pointer
       this.patches = this.patches.slice(0, this.pointer)
@@ -112,7 +121,7 @@ export const useHistoryStore = defineStore('history', {
       this.pointer = Math.max(0, this.pointer)
       this.pointer = Math.min(this.patches.length, this.pointer)
       if (showDebugMessages) {
-        console.info('☞ update history pointer', this.pointer, increment, decrement)
+        console.info('✦ update history pointer', this.pointer, increment, decrement)
       }
     },
 
@@ -122,6 +131,8 @@ export const useHistoryStore = defineStore('history', {
       this.subscribeToCards()
       this.subscribeToBoxes()
       this.subscribeToConnections()
+      // this.subscribeToLines() // todo
+      this.subscribeToLists()
     },
 
     // card events
