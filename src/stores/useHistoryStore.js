@@ -49,6 +49,7 @@ export const useHistoryStore = defineStore('history', {
     patches: [],
     pointer: 0,
     shouldPreventPatchUpdates: false,
+    pendingPatch: [],
     // card
     cardUpdatesProcessing: new Map(),
     prevCardUpdatesProcessing: new Map(),
@@ -71,16 +72,23 @@ export const useHistoryStore = defineStore('history', {
       // console.log('🌺 addPatch', patch)
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
+      this.pendingPatch.push(...patch)
+      this.debouncePendingPatch()
+    },
+    debouncePendingPatch: debounce(function () {
+      if (!this.pendingPatch.length) { return }
+      const combinedPatch = [...this.pendingPatch]
+      this.pendingPatch = []
       // remove patches above pointer
       this.patches = this.patches.slice(0, this.pointer)
       // add patch to pointer
-      this.patches.splice(this.pointer, 0, patch)
+      this.patches.splice(this.pointer, 0, combinedPatch)
       this.updatePointer({ increment: true })
       this.trimPatches()
       if (showDebugMessages) {
-        console.info('⏺ add history patch', { newPatch: patch, pointer: this.pointer })
+        console.info('⏺ add history patch', { newPatch: combinedPatch, pointer: this.pointer })
       }
-    },
+    }, 500), // matches apiStore.sendQueue
     trimPatches () {
       if (this.patches.length > max) {
         this.patches.shift()
@@ -90,6 +98,7 @@ export const useHistoryStore = defineStore('history', {
     reset () {
       this.patches = []
       this.pointer = 0
+      this.pendingPatch = []
       if (showDebugMessages) {
         console.info('reset history')
       }
