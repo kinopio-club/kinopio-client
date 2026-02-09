@@ -205,6 +205,7 @@ const shouldShowChangelogIsUpdated = computed(() => {
 
 // current space
 
+const currentSpace = computed(() => spaceStore)
 const currentSpaceUrl = computed(() => spaceStore.getSpaceUrl)
 const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
 const currentSpaceName = computed(() => {
@@ -236,6 +237,7 @@ const currentSpaceIsTemplate = computed(() => {
   return templateSpaceIds.includes(spaceStore.id)
 })
 const currentSpaceIsInbox = computed(() => spaceStore.name === 'Inbox')
+const currentSpaceIsPrivate = computed(() => spaceStore.getSpaceIsPrivate)
 const shouldShowInExplore = computed(() => {
   if (spaceStore.getSpaceIsPrivate) { return false }
   return spaceStore.showInExplore
@@ -683,12 +685,14 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .space-name-wrap(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   img.icon.inbox-icon(v-if="currentSpaceIsInbox" src="@/assets/inbox.svg")
-
-                  //- span(v-if="currentSpaceIsTemplate")
-                  //-   img.icon.templates(src="@/assets/templates.svg")
-                  //- span
+                  //- name
                   span.space-name {{currentSpaceName}}
-                  //- PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+                    //- template
+                    span(v-if="currentSpaceIsTemplate")
+                      img.icon.templates(src="@/assets/templates.svg")
+                    //- private
+                    template(v-if="currentSpaceIsPrivate")
+                      PrivacyIcon(:privacy="currentSpace.privacy")
 
                 //- img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
                 //- span as
@@ -872,6 +876,8 @@ header
     white-space nowrap
     overflow hidden
     text-overflow ellipsis
+    .icon
+      margin-left 6px
 
   // should not bubble down into dialogs
   .space-details-row,
