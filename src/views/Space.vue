@@ -535,13 +535,11 @@ const addList = (event) => {
   globalStore.currentListIsNew = true
   event.preventDefault() // allows dragging lists without scrolling on touch
 }
-
 const checkIfShouldRemoveFromList = async () => {
   if (globalStore.shouldSnapBackToList) { return }
-  const card = cardStore.getCurrentDraggingCard()
-  if (!card) { return }
-  if (!card.listId) { return }
-  const cards = cardStore.getCardsSelected
+  if (!globalStore.cardsWereDragged) { return }
+  let cards = cardStore.getCardsSelected
+  cards = cards.filter(card => card.listId)
   cardStore.removeCardsFromLists(cards)
 }
 const checkIfShouldSnapBackToList = async () => {
