@@ -467,7 +467,7 @@ export const useSpaceStore = defineStore('space', {
       this.$state = space
       historyStore.reset()
       // clean up unused keys
-      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
+      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines', 'lists']
       itemKeys.forEach(key => {
         delete this[key]
       })

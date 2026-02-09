@@ -94,6 +94,16 @@ export const useListStore = defineStore('lists', {
       this.byId = byId
       this.allIds = allIds
     },
+    updateListsShouldUpdateList () {
+      const cardStore = useCardStore()
+      const lists = this.getAllLists
+      lists.forEach(list => {
+        if (list.shouldUpdateList) {
+          cardStore.updateCardPositionsInList(list)
+          this.updateListDimensions(list)
+        }
+      })
+    },
     initializeRemoteLists (remoteLists = []) {
       const localLists = utils.clone(this.getAllLists)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteLists, localLists)
@@ -102,6 +112,7 @@ export const useListStore = defineStore('lists', {
       addItems.forEach(list => this.addListToState(list))
       const ids = removeItems.map(list => list.id)
       this.removeListsFromState(ids)
+      this.updateListsShouldUpdateList()
     },
 
     // create
