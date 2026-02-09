@@ -90,6 +90,7 @@ const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecim
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
+const cardBoxOrListIsSelected = computed(() => cardOrBoxIsSelected.value || lists.value.length)
 const cardBoxOrConnectionIsSelected = computed(() => cardOrBoxIsSelected.value || editableConnections.value.length)
 // items
 
@@ -100,7 +101,16 @@ const canEditAsNonMember = computed(() => {
   return spaceIsOpen && !isSpaceMember
 })
 const canEditAll = computed(() => {
-  if (isSpaceMember.value) { return { cards: true, connections: true, all: true } }
+  if (isSpaceMember.value) {
+    return {
+      cards: true,
+      connections: true,
+      boxes: true,
+      lines: true,
+      lists: true,
+      all: true
+    }
+  }
   const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
@@ -109,10 +119,15 @@ const canEditAll = computed(() => {
   const all = cards && connections && boxes && lines && lists
   return { cards, connections, boxes, lines, lists, all }
 })
-const multipleCardOrBoxesIsSelected = computed(() => {
-  const cards = multipleCardsIsSelected.value
-  const boxes = multipleBoxesSelectedIds.value.length > 1
-  return cards || boxes
+const alignableItemsIsSelected = computed(() => {
+  let cardIds = multipleCardsSelectedIds.value
+  const boxIds = multipleBoxesSelectedIds.value
+  const listIds = multipleListsSelectedIds.value
+  cardIds = cardIds.filter(id => {
+    const isInSelectedList = multipleListsSelectedIds.value.includes(id)
+    return !isInSelectedList
+  })
+  return cardIds.length > 1 || boxIds.length > 1 || listIds.length > 1
 })
 const selectedItemsIsEditableByCurrentUser = computed(() => {
   const isCards = editableCards.value.length === cards.value.length
@@ -380,6 +395,14 @@ const mergeSelectedCards = () => {
 
 // list
 
+const lists = computed(() => {
+  let lists = multipleListsSelectedIds.value.map(listId => {
+    return listStore.getList(listId)
+  })
+  lists = lists.filter(list => Boolean(list))
+  // prevLists = lists
+  return lists
+})
 const cardsIsInListTogether = computed(() => {
   if (!cards.value.length) { return }
   const listId = cards.value[0].listId
@@ -541,11 +564,11 @@ dialog.narrow.multiple-selected-actions(
     )
 
   section
-    .row(v-if="cardOrBoxIsSelected")
+    .row(v-if="cardBoxOrListIsSelected")
       //- Align And Distribute
-      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+      AlignAndDistribute(:visible="alignableItemsIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes" :lists="lists")
       //- Move/Copy
-      .segmented-buttons.move-or-copy-wrap
+      .segmented-buttons.move-or-copy-wrap(v-if="cardOrBoxIsSelected")
         button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
           span Copy
           MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
@@ -553,7 +576,7 @@ dialog.narrow.multiple-selected-actions(
           span Move
           MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
     //- More Options
-    AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+    AlignAndDistribute(:visible="alignableItemsIsSelected && moreOptionsIsVisible" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes" :lists="lists")
 
     .row
       //- Remove

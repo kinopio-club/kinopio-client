@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -17,6 +18,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -43,11 +45,12 @@ const props = defineProps({
   shouldHideMoreOptions: Boolean,
   shouldDistributeWithAlign: Boolean,
   canEditAll: Object,
-  cards: Object,
-  editableCards: Object,
-  connections: Object,
-  boxes: Object,
-  editableBoxes: Object
+  cards: Array,
+  editableCards: Array,
+  connections: Array,
+  boxes: Array,
+  editableBoxes: Array,
+  lists: Array
 })
 
 const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
@@ -58,8 +61,10 @@ const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelecte
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
 const items = computed(() => {
-  const boxes = normalizeBoxes(props.boxes)
-  return props.cards.concat(boxes)
+  console.log(props)
+  const boxes = normalizeDimensions(props.boxes)
+  const lists = normalizeDimensions(props.lists)
+  return props.cards.concat(boxes, lists)
 })
 const toggleMoreOptionsIsVisible = () => {
   const value = !moreOptionsIsVisible.value
@@ -72,17 +77,33 @@ const ySpaceBetweenCards = (card) => {
   }
   return value
 }
+const canEdit = computed(() => {
+  let value
+  if (props.cards.length) {
+    value = props.canEditAll.cards
+  }
+  // if (props.connections) {
+  //   value = props.canEditAll.connections
+  // }
+  // if (props.boxes.length) {
+  //   value = props.canEditAll.boxes
+  // }
+  if (props.lists.length) {
+    value = props.canEditAll.all
+  }
+  return value
+})
 
 // disabled
 
 const filterItems = (items) => {
   return items.filter(item => {
     const isUser = item.userId === userStore.id
-    const isList = Boolean(item.listId)
+    const isInList = Boolean(item.listId)
     if (isSpaceMember.value) {
-      return !isList
+      return !isInList
     } else {
-      return isUser && !isList
+      return isUser && !isInList
     }
   })
 }
@@ -90,9 +111,11 @@ const isDistributeDisabled = computed(() => {
   const minimumRequiredToDistribute = 3
   const cards = filterItems(props.cards)
   const boxes = filterItems(props.boxes)
+  const lists = props.lists
   const isCards = cards.length >= minimumRequiredToDistribute
   const isBoxes = boxes.length >= minimumRequiredToDistribute
-  const canDistribute = Boolean(isCards) || Boolean(isBoxes)
+  const isLists = lists.length >= minimumRequiredToDistribute
+  const canDistribute = Boolean(isCards) || Boolean(isBoxes) || Boolean(isLists)
   return !canDistribute
 })
 
@@ -261,65 +284,43 @@ const isDistributedVertically = computed(() => {
 
 // sort items
 
-const sortedByX = computed(() => {
-  // cards
-  const editableCards = utils.clone(props.editableCards)
-  const cards = utils.sortByX(editableCards)
-  // boxes
-  const editableBoxes = utils.clone(props.editableBoxes)
-  let boxes = normalizeBoxes(editableBoxes)
-  boxes = utils.sortByX(boxes)
-  // all
-  const all = cards.concat(boxes)
-  return { cards, boxes, all }
-})
-const sortedByY = computed(() => {
-  // cards
-  const editableCards = utils.clone(props.editableCards)
-  const cards = utils.sortByY(editableCards)
-  // boxes
-  const editableBoxes = utils.clone(props.editableBoxes)
-  let boxes = normalizeBoxes(editableBoxes)
-  boxes = utils.sortByY(boxes)
-  // all
-  const all = cards.concat(boxes)
-  return { cards, boxes, all }
-})
-const sortedByXWidth = computed(() => {
-  const editableCards = utils.clone(props.editableCards)
-  const cards = editableCards.sort((a, b) => {
-    return (b.x + b.width) - (a.x + a.width)
-  })
-  const editableBoxes = utils.clone(props.editableBoxes)
-  let boxes = normalizeBoxes(editableBoxes)
-  boxes = boxes.sort((a, b) => {
-    return (b.x + b.width) - (a.x + a.width)
-  })
-  const all = cards.concat(boxes)
-  return { cards, boxes, all }
-})
-const sortedByYHeight = computed(() => {
-  const editableCards = utils.clone(props.editableCards)
-  const cards = editableCards.sort((a, b) => {
-    return (b.y + b.height) - (a.y + a.height)
-  })
-  const editableBoxes = utils.clone(props.editableBoxes)
-  let boxes = normalizeBoxes(editableBoxes)
-  boxes = boxes.sort((a, b) => {
-    return (b.y + b.height) - (a.y + a.height)
-  })
-  const all = cards.concat(boxes)
-  return { cards, boxes, all }
-})
-const normalizeBoxes = (boxes) => {
-  boxes = utils.clone(boxes)
-  boxes = boxes.map(box => {
-    box.width = box.resizeWidth
-    box.height = box.resizeHeight
-    return box
-  })
-  return boxes
+const processSort = (items, sortFn) => {
+  let processed = utils.clone(items)
+  processed = normalizeDimensions(processed)
+  processed = sortFn(processed)
+  return processed
 }
+const computedSort = (sortFn) => computed(() => {
+  const cards = processSort(props.editableCards, sortFn)
+  const boxes = processSort(props.editableBoxes, sortFn)
+  const lists = processSort(props.lists, sortFn)
+  const all = cards.concat(boxes, lists)
+  return { cards, boxes, lists, all }
+})
+const sortByXWidth = (items) => {
+  return items.sort((a, b) => {
+    return (b.x + b.width) - (a.x + a.width)
+  })
+}
+const sortByYHeight = (items) => {
+  return items.sort((a, b) => {
+    return (b.y + b.height) - (a.y + a.height)
+  })
+}
+const normalizeDimensions = (items) => {
+  items = utils.clone(items)
+  items = items.map(item => {
+    item.width = item.resizeWidth || item.width
+    item.height = item.resizeHeight || item.height
+    return item
+  })
+  return items
+}
+// computed properties using the sort factory
+const sortedByX = computedSort(utils.sortByX)
+const sortedByY = computedSort(utils.sortByY)
+const sortedByXWidth = computedSort(sortByXWidth)
+const sortedByYHeight = computedSort(sortByYHeight)
 
 // update items
 
@@ -329,6 +330,10 @@ const updateItem = (item, type) => {
   }
   if (type === 'boxes') {
     boxStore.updateBox(item)
+  }
+  if (type === 'lists') {
+    listStore.updateList(item)
+    cardStore.updateCardPositionsInList(item)
   }
 }
 const updateCardDimensions = async () => {
@@ -346,12 +351,21 @@ const updateConnectionPaths = async () => {
 
 // update positions
 
+const getItemDimensions = (item) => {
+  return utils.cardElementDimensions({ id: item.id }) ||
+  utils.boxElementDimensions({ id: item.id }) ||
+  utils.listElementDimensions({ id: item.id }) ||
+  item
+}
+
 // ⎺o
 const alignTop = () => {
   const cards = sortedByX.value.cards
   const boxes = sortedByX.value.boxes
+  const lists = sortedByX.value.lists
   alignTopItems(cards, 'cards')
   alignTopItems(boxes, 'boxes')
+  alignTopItems(lists, 'lists')
 }
 const alignTopItems = (items, type) => {
   const zoom = spaceCounterZoomDecimal.value
@@ -363,7 +377,7 @@ const alignTopItems = (items, type) => {
       item.y = origin.y
       if (props.shouldDistributeWithAlign) {
         const previousItem = newItems[index - 1]
-        const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
+        const rect = getItemDimensions(previousItem)
         const previousRightSide = previousItem.x + rect.width
         item.x = previousRightSide + consts.spaceBetweenCards
       }
@@ -377,8 +391,10 @@ const alignTopItems = (items, type) => {
 const centerHorizontally = () => {
   const cards = sortedByX.value.cards
   const boxes = sortedByX.value.boxes
+  const lists = sortedByX.value.lists
   centerHorizontallyItems(cards, 'cards')
   centerHorizontallyItems(boxes, 'boxes')
+  centerHorizontallyItems(lists, 'lists')
 }
 const centerHorizontallyItems = (items, type) => {
   const origin = items[0]
@@ -400,19 +416,21 @@ const centerHorizontallyItems = (items, type) => {
 const alignRight = () => {
   const cards = sortedByXWidth.value.cards
   const boxes = sortedByXWidth.value.boxes
+  const lists = sortedByXWidth.value.lists
   alignRightItems(cards, 'cards')
   alignRightItems(boxes, 'boxes')
+  alignRightItems(lists, 'lists')
 }
 const alignRightItems = (items, type) => {
   const zoom = spaceCounterZoomDecimal.value
   const origin = items[0]
   if (!origin) { return }
-  let rect = utils.cardElementDimensions({ id: origin.id }) || utils.boxElementDimensions({ id: origin.id }) || origin
+  let rect = getItemDimensions(origin)
   const originWidth = rect.width
   items.forEach((item, index) => {
     if (index > 0) {
       item = utils.clone(item)
-      rect = utils.cardElementDimensions({ id: item.id }) || utils.boxElementDimensions({ id: item.id }) || item
+      rect = getItemDimensions(item)
       const itemWidth = rect.width
       item.x = origin.x + originWidth - itemWidth
       updateItem(item, type)
@@ -424,8 +442,10 @@ const alignRightItems = (items, type) => {
 const distributeHorizontally = () => {
   const cards = sortedByX.value.cards
   const boxes = sortedByX.value.boxes
+  const lists = sortedByX.value.lists
   distributeHorizontallyItems(cards, 'cards')
   distributeHorizontallyItems(boxes, 'boxes')
+  distributeHorizontallyItems(lists, 'lists')
 }
 const distributeHorizontallyItems = (items, type) => {
   if (!items.length) { return }
@@ -446,24 +466,30 @@ const distributeHorizontallyItems = (items, type) => {
 const alignLeft = () => {
   const cards = sortedByY.value.cards
   const boxes = sortedByY.value.boxes
+  const lists = sortedByY.value.lists
   alignLeftItems(cards, 'cards')
   alignLeftItems(boxes, 'boxes')
+  alignLeftItems(lists, 'lists')
 }
 const alignLeftItems = (items, type) => {
   const zoom = spaceCounterZoomDecimal.value
   const newItems = []
   const origin = items[0]
+
   items.forEach((item, index) => {
     if (index > 0) {
       item = utils.clone(item)
       item.x = origin.x
       if (props.shouldDistributeWithAlign) {
         const previousItem = newItems[index - 1]
-        const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
+        const rect = getItemDimensions(previousItem)
         const previousItemHeight = rect.height
         const previousBottomSide = previousItem.y + previousItemHeight
         item.y = previousBottomSide + ySpaceBetweenCards(previousItem)
       }
+      console.log(origin.x, item.x, item.name)
+      console.log('☎️☎️', item, type)
+
       updateItem(item, type)
     }
     newItems.push(item)
@@ -474,8 +500,10 @@ const alignLeftItems = (items, type) => {
 const centerVertically = () => {
   const cards = sortedByX.value.cards
   const boxes = sortedByX.value.boxes
+  const lists = sortedByX.value.lists
   centerVerticallyItems(cards, 'cards')
   centerVerticallyItems(boxes, 'boxes')
+  centerVerticallyItems(lists, 'lists')
 }
 const centerVerticallyItems = (items, type) => {
   const origin = items[0]
@@ -497,8 +525,10 @@ const centerVerticallyItems = (items, type) => {
 const alignBottom = () => {
   const cards = sortedByYHeight.value.cards
   const boxes = sortedByYHeight.value.boxes
+  const lists = sortedByYHeight.value.lists
   alignBottomItems(cards, 'cards')
   alignBottomItems(boxes, 'boxes')
+  alignBottomItems(lists, 'lists')
 }
 const alignBottomItems = (items, type) => {
   const origin = items[0]
@@ -520,8 +550,10 @@ const alignBottomItems = (items, type) => {
 const distributeVertically = () => {
   const cards = sortedByY.value.cards
   const boxes = sortedByY.value.boxes
+  const lists = sortedByY.value.lists
   distributeVerticallyItems(cards, 'cards')
   distributeVerticallyItems(boxes, 'boxes')
+  distributeVerticallyItems(lists, 'lists')
 }
 const distributeVerticallyItems = (items, type) => {
   if (!items.length) { return }
@@ -565,44 +597,45 @@ const yDistancesBetween = (items) => {
   })
   return yDistances
 }
+
 </script>
 
 <template lang="pug">
 .align-and-distribute(v-if="visible")
   .segmented-buttons(v-if="shouldHideMoreOptions")
     //- |o
-    button(title="Align Left and Distribute" :disabled="!canEditAll.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
+    button(title="Align Left and Distribute" :disabled="!canEdit" @click.left="alignLeft" :class="{active: isLeftAligned}")
       img.icon(src="@/assets/align-left-distributed.svg")
     //- ⎺o
-    button(title="Align Top and Distribute" :disabled="!canEditAll.cards" @click.left="alignTop" :class="{active: isTopAligned}")
+    button(title="Align Top and Distribute" :disabled="!canEdit" @click.left="alignTop" :class="{active: isTopAligned}")
       img.icon.align-top(src="@/assets/align-left-distributed.svg")
-    button(title="More Options" :disabled="!canEditAll.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+    button(title="More Options" :disabled="!canEdit" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
   //- More Options
   .more-options(v-if="visible && !shouldHideMoreOptions")
     .segmented-buttons.first-row
       //- |o
-      button(title="Align Left" :disabled="!canEditAll.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
+      button(title="Align Left" :disabled="!canEdit" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
       //- o|o
-      button(title="Center Horizontally" :disabled="!canEditAll.cards" @click.left="centerHorizontally" :class="{active: isCenteredHorizontally}")
+      button(title="Center Horizontally" :disabled="!canEdit" @click.left="centerHorizontally" :class="{active: isCenteredHorizontally}")
         img.icon(src="@/assets/center-horizontally.svg")
       //- o|
-      button(title="Align Right" :disabled="!canEditAll.cards" @click.left="alignRight" :class="{active: isRightAligned}")
+      button(title="Align Right" :disabled="!canEdit" @click.left="alignRight" :class="{active: isRightAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
       //- | o |
       button(title="Distribute Horizontally" :disabled="isDistributeDisabled" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
         img.icon(src="@/assets/distribute-horizontally.svg")
     .segmented-buttons.last-row
       //- ⎺o
-      button(title="Align Top" :disabled="!canEditAll.cards" @click.left="alignTop" :class="{active: isTopAligned}")
+      button(title="Align Top" :disabled="!canEdit" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
       //- o-o
-      button(title="Center Verticaly" :disabled="!canEditAll.cards" @click.left="centerVertically" :class="{active: isCenteredVertically}")
+      button(title="Center Verticaly" :disabled="!canEdit" @click.left="centerVertically" :class="{active: isCenteredVertically}")
         img.icon.center-vertically(src="@/assets/center-horizontally.svg")
       //- _o
-      button(title="Align Bottom" :disabled="!canEditAll.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
+      button(title="Align Bottom" :disabled="!canEdit" @click.left="alignBottom" :class="{active: isBottomAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
       //- ⎺ o _
       button(title="Distribute Vertically" :disabled="isDistributeDisabled" @click.left="distributeVertically" :class="{active: isDistributedVertically}")

@@ -347,6 +347,7 @@ export const useListStore = defineStore('lists', {
 
     async resizeListChildCards (list, width) {
       const cardStore = useCardStore()
+      const globalStore = useGlobalStore()
       // child width
       let childWidth = utils.listChildWidth(width)
       const minChildWidth = utils.listChildWidth(consts.minListWidth)
@@ -365,6 +366,7 @@ export const useListStore = defineStore('lists', {
       await cardStore.updateCardsDimensions(cardIds)
       list = this.getList(list.id)
       cardStore.updateCardPositionsInList(list)
+      globalStore.clearAllSelected()
     },
     async resizeLists (ids, delta) {
       const globalStore = useGlobalStore()

@@ -1016,9 +1016,6 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
       listStore.updateListDimensions(list)
-      globalStore.clearDraggingItems()
-      await nextTick()
-      globalStore.clearMultipleSelected()
     },
     async prependCardToList (card, list) {
       let targetPositionIndex = null
@@ -1060,6 +1057,7 @@ export const useCardStore = defineStore('cards', {
         await nextTick()
         await this.updateCardsDimensions(ids)
         this.updateCardPositionsInList(list)
+        globalStore.clearAllSelected()
       } catch (error) {
         console.error('🚒 addCardsToList', error)
       }

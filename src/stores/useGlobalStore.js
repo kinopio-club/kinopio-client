@@ -991,6 +991,11 @@ export const useGlobalStore = defineStore('global', {
       this.multipleConnectionTypesSelectedIdsToLoad = []
       this.multipleBoxesSelectedIdsToLoad = []
     },
+    async clearAllSelected () {
+      this.clearDraggingItems()
+      await nextTick()
+      this.clearMultipleSelected()
+    },
 
     // multiple cards
 

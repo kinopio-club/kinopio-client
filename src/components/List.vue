@@ -407,9 +407,10 @@ const buttonClasses = computed(() => {
 
 // actions
 
-const toggleIsCollapsed = () => {
+const toggleIsCollapsed = async () => {
   const value = !props.list.isCollapsed
   updateIsCollapsed(value)
+  globalStore.clearAllSelected()
 }
 const updateIsCollapsed = async (value) => {
   if (globalStore.preventDraggedListFromShowingDetails) { return }
