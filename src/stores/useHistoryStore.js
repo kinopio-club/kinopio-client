@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 
-const showDebugMessages = false
+const showDebugMessages = true
 const max = 30
 
 export const useHistoryStore = defineStore('history', {
@@ -84,7 +84,7 @@ export const useHistoryStore = defineStore('history', {
       this.pendingPatch.push(...patch)
       this.debouncePendingPatch()
     },
-    debouncePendingPatch: debounce(function () {
+    commitPendingPatch () {
       if (!this.pendingPatch.length) { return }
       const combinedPatch = utils.clone(this.pendingPatch)
       this.pendingPatch = []
@@ -97,7 +97,18 @@ export const useHistoryStore = defineStore('history', {
       if (showDebugMessages) {
         console.info('⏺ add history patch', { newPatch: combinedPatch, pointer: this.pointer })
       }
-    }, 500), // matches apiStore.sendQueue
+    },
+    debouncePendingPatch: debounce(function () {
+      this.commitPendingPatch()
+    }, 150, { maxWait: 200 }), // maxWait ensures it fires even if constantly triggered
+
+    // Shared debounced processor for all entity types
+    processAllUpdates: debounce(function () {
+      this.processCardUpdatesNow()
+      this.processBoxUpdatesNow()
+      this.processConnectionUpdatesNow()
+      this.processListUpdatesNow()
+    }, 100),
     trimPatches () {
       if (this.patches.length > max) {
         this.patches.shift()
@@ -137,17 +148,18 @@ export const useHistoryStore = defineStore('history', {
 
     // card events
 
-    processCardUpdated: debounce((store, updates) => {
+    processCardUpdatesNow () {
+      if (!this.cardUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'nameUpdatedAt', 'height', 'width', 'z', 'prevHeight', 'prevWidth', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
       const cardStore = useCardStore()
       const patch = []
-      updates.forEach(update => {
-        const keys = Array.from(store.cardUpdateKeysProcessing)
+      this.cardUpdatesProcessing.forEach((update, id) => {
+        const keys = Array.from(this.cardUpdateKeysProcessing)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
-        let prevCard = store.prevCardUpdatesProcessing.get(update.id)
+        let prevCard = this.prevCardUpdatesProcessing.get(id)
         prevCard = utils.objectPickKeys(prevCard, keys)
-        const newCard = store.cardUpdatesProcessing.get(update.id)
+        const newCard = this.cardUpdatesProcessing.get(id)
         patch.push({
           action: 'cardUpdated',
           prev: prevCard,
@@ -155,12 +167,12 @@ export const useHistoryStore = defineStore('history', {
         })
       })
       if (patch.length) {
-        store.addPatch(patch)
+        this.addPatch(patch)
       }
-      store.cardUpdatesProcessing = new Map()
-      store.prevCardUpdatesProcessing = new Map()
-      store.cardUpdateKeysProcessing = new Set()
-    }, 100),
+      this.cardUpdatesProcessing = new Map()
+      this.prevCardUpdatesProcessing = new Map()
+      this.cardUpdateKeysProcessing = new Set()
+    },
     processCardsCreated (updates) {
       const patch = updates.map(update => {
         return {
@@ -202,7 +214,10 @@ export const useHistoryStore = defineStore('history', {
               const prevCard = cardStore.getCard(update.id)
               this.prevCardUpdatesProcessing.set(prevCard?.id, prevCard)
             })
-            this.processCardUpdated(this, updates)
+
+            console.log('🌎🌎', updates)
+
+            this.processAllUpdates()
             break
           case 'createCard':
             this.processCardsCreated([updates])
@@ -216,16 +231,17 @@ export const useHistoryStore = defineStore('history', {
 
     // box events
 
-    processBoxUpdated: debounce((store, updates) => {
+    processBoxUpdatesNow () {
+      if (!this.boxUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'z']
       const patch = []
-      updates.forEach(update => {
-        const keys = Array.from(store.boxUpdateKeysProcessing)
+      this.boxUpdatesProcessing.forEach((update, id) => {
+        const keys = Array.from(this.boxUpdateKeysProcessing)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
-        let prevBox = store.prevBoxUpdatesProcessing.get(update.id)
+        let prevBox = this.prevBoxUpdatesProcessing.get(id)
         prevBox = utils.objectPickKeys(prevBox, keys)
-        const newBox = store.boxUpdatesProcessing.get(update.id)
+        const newBox = this.boxUpdatesProcessing.get(id)
         patch.push({
           action: 'boxUpdated',
           prev: prevBox,
@@ -233,12 +249,12 @@ export const useHistoryStore = defineStore('history', {
         })
       })
       if (patch.length) {
-        store.addPatch(patch)
+        this.addPatch(patch)
       }
-      store.boxUpdatesProcessing = new Map()
-      store.prevBoxUpdatesProcessing = new Map()
-      store.boxUpdateKeysProcessing = new Set()
-    }, 100),
+      this.boxUpdatesProcessing = new Map()
+      this.prevBoxUpdatesProcessing = new Map()
+      this.boxUpdateKeysProcessing = new Set()
+    },
     processBoxCreated (updates) {
       const patch = [{
         action: 'boxCreated',
@@ -278,7 +294,7 @@ export const useHistoryStore = defineStore('history', {
               const prevBox = boxStore.getBox(update.id)
               this.prevBoxUpdatesProcessing.set(prevBox.id, prevBox)
             })
-            this.processBoxUpdated(this, updates)
+            this.processAllUpdates()
             break
           case 'triggerCreateBox':
             this.processBoxCreated(updates)
@@ -292,16 +308,17 @@ export const useHistoryStore = defineStore('history', {
 
     // list events
 
-    processListUpdated: debounce((store, updates) => {
+    processListUpdatesNow () {
+      if (!this.listUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'z']
       const patch = []
-      updates.forEach(update => {
-        const keys = Array.from(store.listUpdateKeysProcessing)
+      this.listUpdatesProcessing.forEach((update, id) => {
+        const keys = Array.from(this.listUpdateKeysProcessing)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
-        let prevList = store.prevListUpdatesProcessing.get(update.id)
+        let prevList = this.prevListUpdatesProcessing.get(id)
         prevList = utils.objectPickKeys(prevList, keys)
-        const newList = store.listUpdatesProcessing.get(update.id)
+        const newList = this.listUpdatesProcessing.get(id)
         patch.push({
           action: 'listUpdated',
           prev: prevList,
@@ -309,12 +326,12 @@ export const useHistoryStore = defineStore('history', {
         })
       })
       if (patch.length) {
-        store.addPatch(patch)
+        this.addPatch(patch)
       }
-      store.listUpdatesProcessing = new Map()
-      store.prevListUpdatesProcessing = new Map()
-      store.listUpdateKeysProcessing = new Set()
-    }, 100),
+      this.listUpdatesProcessing = new Map()
+      this.prevListUpdatesProcessing = new Map()
+      this.listUpdateKeysProcessing = new Set()
+    },
     processListCreated (updates) {
       const patch = [{
         action: 'listCreated',
@@ -354,7 +371,7 @@ export const useHistoryStore = defineStore('history', {
               const prevList = listStore.getList(update.id)
               this.prevListUpdatesProcessing.set(prevList.id, prevList)
             })
-            this.processListUpdated(this, updates)
+            this.processAllUpdates()
             break
           case 'triggerCreateList':
             this.processListCreated(updates)
@@ -368,16 +385,17 @@ export const useHistoryStore = defineStore('history', {
 
     // connection events
 
-    processConnectionUpdated: debounce((store, updates) => {
+    processConnectionUpdatesNow () {
+      if (!this.connectionUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'path']
       const patch = []
-      updates.forEach(update => {
-        const keys = Array.from(store.connectionUpdateKeysProcessing)
+      this.connectionUpdatesProcessing.forEach((update, id) => {
+        const keys = Array.from(this.connectionUpdateKeysProcessing)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
-        let prevConnection = store.prevConnectionUpdatesProcessing.get(update.id)
+        let prevConnection = this.prevConnectionUpdatesProcessing.get(id)
         prevConnection = utils.objectPickKeys(prevConnection, keys)
-        const newConnection = store.connectionUpdatesProcessing.get(update.id)
+        const newConnection = this.connectionUpdatesProcessing.get(id)
         patch.push({
           action: 'connectionUpdated',
           prev: prevConnection,
@@ -385,12 +403,12 @@ export const useHistoryStore = defineStore('history', {
         })
       })
       if (patch.length) {
-        store.addPatch(patch)
+        this.addPatch(patch)
       }
-      store.connectionUpdatesProcessing = new Map()
-      store.prevConnectionUpdatesProcessing = new Map()
-      store.connectionUpdateKeysProcessing = new Set()
-    }, 100),
+      this.connectionUpdatesProcessing = new Map()
+      this.prevConnectionUpdatesProcessing = new Map()
+      this.connectionUpdateKeysProcessing = new Set()
+    },
     processConnectionCreated (updates) {
       const patch = [{
         action: 'connectionCreated',
@@ -430,7 +448,7 @@ export const useHistoryStore = defineStore('history', {
               const prevConnection = connectionStore.getConnection(update.id)
               this.prevConnectionUpdatesProcessing.set(prevConnection.id, prevConnection)
             })
-            this.processConnectionUpdated(this, updates)
+            this.processAllUpdates()
             break
           case 'createConnection':
             this.processConnectionCreated(updates)
