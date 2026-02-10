@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 
-const showDebugMessages = true
+const showDebugMessages = false
 const max = 30
 
 export const useHistoryStore = defineStore('history', {
@@ -214,9 +214,6 @@ export const useHistoryStore = defineStore('history', {
               const prevCard = cardStore.getCard(update.id)
               this.prevCardUpdatesProcessing.set(prevCard?.id, prevCard)
             })
-
-            console.log('🌎🌎', updates)
-
             this.processAllUpdates()
             break
           case 'createCard':
