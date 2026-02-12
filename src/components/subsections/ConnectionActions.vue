@@ -146,11 +146,10 @@ section.subsection.connection-actions(
 <style lang="stylus">
 dialog section.connection-actions
   position relative
-  padding 4px
+  padding var(--subsection-padding)
   padding-bottom 0
   background-color transparent
   border 1px solid var(--primary-border)
-  padding 4px
   padding-bottom 0
   &.is-background-light
     border-color var(--primary-border-on-light-background) !important

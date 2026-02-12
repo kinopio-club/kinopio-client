@@ -14,6 +14,7 @@ import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import ItemActions from '@/components/subsections/ItemActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
+import ListActions from '@/components/subsections/ListActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 
@@ -91,7 +92,7 @@ const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 const cardBoxOrListIsSelected = computed(() => cardOrBoxIsSelected.value || lists.value.length)
-const cardBoxOrConnectionIsSelected = computed(() => cardOrBoxIsSelected.value || editableConnections.value.length)
+const ItemIsSelected = computed(() => cardOrBoxIsSelected.value || editableConnections.value.length || listsIsSelected.value)
 // items
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
@@ -255,7 +256,7 @@ const disconnectItems = () => {
 // connections
 
 const moreLineOptionsLabel = computed(() => 'LINE')
-const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
+const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value && !listsIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
   return multipleConnectionsSelectedIds.value.map(id => connectionStore.getConnection(id))
@@ -283,7 +284,7 @@ const connectionType = (event) => {
 
 // boxes
 
-const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value)
+const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value && !listsIsSelected.value)
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
   let boxes = multipleBoxesSelectedIds.value.map(boxId => {
@@ -302,6 +303,69 @@ const editableBoxes = computed(() => {
     })
   }
 })
+
+// list
+
+const onlyListsIsSelected = computed(() => listsIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value && !boxesIsSelected.value)
+const listsIsSelected = computed(() => multipleListsSelectedIds.value.length > 0)
+const lists = computed(() => {
+  let lists = multipleListsSelectedIds.value.map(listId => {
+    return listStore.getList(listId)
+  })
+  lists = lists.filter(list => Boolean(list))
+  // prevLists = lists
+  return lists
+})
+const cardsIsInListTogether = computed(() => {
+  if (!cards.value.length) { return }
+  const listId = cards.value[0].listId
+  if (!listId) { return }
+  const value = cards.value.every(card => card.listId === listId)
+  return value
+})
+const list = computed(() => {
+  if (!cardsIsInListTogether.value) { return }
+  const listId = cards.value[0].listId
+  const list = listStore.getList(listId)
+  return list
+})
+const toggleListCards = async () => {
+  let listCards = []; let listHasOtherCards = []
+  if (list.value) {
+    listCards = cardStore.getCardsByList(list.value.id)
+    listHasOtherCards = listCards.length !== cards.value.length
+  }
+  // move cards out of list
+  if (cardsIsInListTogether.value && listHasOtherCards) {
+    const x = list.value.x + list.value.resizeWidth + consts.listPadding
+    const updates = cards.value.map(card => {
+      return {
+        id: card.id,
+        x
+      }
+    })
+    cardStore.removeCardsFromLists(cards.value)
+    cardStore.updateCards(updates)
+  // remove list
+  } else if (cardsIsInListTogether.value) {
+    listStore.removeList(list.value.id)
+  // create list, add cards to list
+  } else {
+    const cards = cardsSortedByY()
+    const card = cards[0]
+    const list = {
+      id: nanoid(),
+      y: card.y - consts.listInfoHeight,
+      x: card.x - consts.listPadding
+    }
+    listStore.createList({ list })
+    await nextTick()
+    await cardStore.addCardsToList({ cards, list, targetPositionIndex: null })
+  }
+  globalStore.clearMultipleSelected()
+  globalStore.closeAllDialogs()
+  globalStore.multipleSelectedActionsIsVisible = false
+}
 
 // split and merge
 
@@ -393,67 +457,6 @@ const mergeSelectedCards = () => {
   }, 100)
 }
 
-// list
-
-const lists = computed(() => {
-  let lists = multipleListsSelectedIds.value.map(listId => {
-    return listStore.getList(listId)
-  })
-  lists = lists.filter(list => Boolean(list))
-  // prevLists = lists
-  return lists
-})
-const cardsIsInListTogether = computed(() => {
-  if (!cards.value.length) { return }
-  const listId = cards.value[0].listId
-  if (!listId) { return }
-  const value = cards.value.every(card => card.listId === listId)
-  return value
-})
-const list = computed(() => {
-  if (!cardsIsInListTogether.value) { return }
-  const listId = cards.value[0].listId
-  const list = listStore.getList(listId)
-  return list
-})
-const toggleListCards = async () => {
-  let listCards = []; let listHasOtherCards = []
-  if (list.value) {
-    listCards = cardStore.getCardsByList(list.value.id)
-    listHasOtherCards = listCards.length !== cards.value.length
-  }
-  // move cards out of list
-  if (cardsIsInListTogether.value && listHasOtherCards) {
-    const x = list.value.x + list.value.resizeWidth + consts.listPadding
-    const updates = cards.value.map(card => {
-      return {
-        id: card.id,
-        x
-      }
-    })
-    cardStore.removeCardsFromLists(cards.value)
-    cardStore.updateCards(updates)
-  // remove list
-  } else if (cardsIsInListTogether.value) {
-    listStore.removeList(list.value.id)
-  // create list, add cards to list
-  } else {
-    const cards = cardsSortedByY()
-    const card = cards[0]
-    const list = {
-      id: nanoid(),
-      y: card.y - consts.listInfoHeight,
-      x: card.x - consts.listPadding
-    }
-    listStore.createList({ list })
-    await nextTick()
-    await cardStore.addCardsToList({ cards, list, targetPositionIndex: null })
-  }
-  globalStore.clearMultipleSelected()
-  globalStore.closeAllDialogs()
-  globalStore.multipleSelectedActionsIsVisible = false
-}
-
 // copy and move
 
 const toggleCopyItemsIsVisible = () => {
@@ -485,6 +488,14 @@ const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShow
 const boxCollapseExpandIsVisible = computed(() => {
   if (onlyBoxesIsSelected.value) return
   return boxesIsSelected.value
+})
+
+// list collapse/expand
+
+const shouldShowMultipleSelectedListActions = computed(() => userStore.shouldShowMultipleSelectedListActions)
+const listCollapseExpandIsVisible = computed(() => {
+  if (onlyListsIsSelected.value) return
+  return listsIsSelected.value
 })
 
 // remove
@@ -520,7 +531,7 @@ dialog.narrow.multiple-selected-actions(
   .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
     button.small-button.inline-button
       img.icon.cancel(src="@/assets/add.svg")
-  section(v-if="cardBoxOrConnectionIsSelected")
+  section(v-if="ItemIsSelected")
 
     //- Edit Cards
     .row(v-if="cardOrBoxIsSelected")
@@ -560,6 +571,17 @@ dialog.narrow.multiple-selected-actions(
       :backgroundColor="userColor"
       :label="moreLineOptionsLabel"
       :collapseExpandIsVisible="connectionCollapseExpandIsVisible"
+      @scrollIntoView="scrollIntoView"
+    )
+    //- connection line options
+    ListActions(
+      :visible="(shouldShowMultipleSelectedListActions || onlyListsIsSelected) && listsIsSelected"
+      :lists="lists"
+      @closeDialogs="closeDialogs"
+      :canEditAll="canEditAll"
+      :backgroundColor="userColor"
+      label="LIST"
+      :collapseExpandIsVisible="listCollapseExpandIsVisible"
       @scrollIntoView="scrollIntoView"
     )
 
