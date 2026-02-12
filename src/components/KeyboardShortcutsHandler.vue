@@ -984,6 +984,7 @@ const selectAllItems = () => {
   const connectionIds = connectionStore.allIds
   const boxIds = boxStore.allIds
   const listIds = listStore.allIds
+  const lineIds = lineStore.allIds
   const dialogOffset = {
     width: 200 / 2,
     height: 150 / 2
@@ -998,6 +999,7 @@ const selectAllItems = () => {
   globalStore.multipleCardsSelectedIds = cardIds
   globalStore.multipleBoxesSelectedIds = boxIds
   globalStore.multipleListsSelectedIds = listIds
+  globalStore.multipleLinesSelectedIds = lineIds
 }
 
 // Search/Jump-to
