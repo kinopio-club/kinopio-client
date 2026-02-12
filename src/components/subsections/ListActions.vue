@@ -142,6 +142,7 @@ section.subsection.list-actions(
           :visible="state.colorPickerIsVisible"
           :recentColors="itemColors"
           @selectedColor="updateColor"
+          :luminosityIsDark="true"
         )
   //- collapsed horizontal label
   template(v-else)
