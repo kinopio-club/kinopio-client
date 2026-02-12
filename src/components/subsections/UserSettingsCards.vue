@@ -60,7 +60,7 @@ const updateCardWrapWidthIsWide = (isWide) => {
         span Child Card
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
-    p.row.keyboard-shortcut-row
+    .row.keyboard-shortcut-row
       span {{optionKey}}-Enter
       .badge.keyboard-shortcut {{optionKeyShortcut}}
 
@@ -88,6 +88,7 @@ const updateCardWrapWidthIsWide = (isWide) => {
     display inline-block
     vertical-align -3px
   .keyboard-shortcut-row
+    margin-top 10px
     .badge
       margin-left 6px
 </style>
