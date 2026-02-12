@@ -318,53 +318,11 @@ const lists = computed(() => {
 })
 const cardsIsInListTogether = computed(() => {
   if (!cards.value.length) { return }
-  const listId = cards.value[0].listId
-  if (!listId) { return }
-  const value = cards.value.every(card => card.listId === listId)
-  return value
-})
-const list = computed(() => {
-  if (!cardsIsInListTogether.value) { return }
-  const listId = cards.value[0].listId
-  const list = listStore.getList(listId)
-  return list
+  return cardStore.cardsIsInListTogether(cards)
 })
 const toggleListCards = async () => {
-  let listCards = []; let listHasOtherCards = []
-  if (list.value) {
-    listCards = cardStore.getCardsByList(list.value.id)
-    listHasOtherCards = listCards.length !== cards.value.length
-  }
-  // move cards out of list
-  if (cardsIsInListTogether.value && listHasOtherCards) {
-    const x = list.value.x + list.value.resizeWidth + consts.listPadding
-    const updates = cards.value.map(card => {
-      return {
-        id: card.id,
-        x
-      }
-    })
-    cardStore.removeCardsFromLists(cards.value)
-    cardStore.updateCards(updates)
-  // remove list
-  } else if (cardsIsInListTogether.value) {
-    listStore.removeList(list.value.id)
-  // create list, add cards to list
-  } else {
-    const cards = cardsSortedByY()
-    const card = cards[0]
-    const list = {
-      id: nanoid(),
-      y: card.y - consts.listInfoHeight,
-      x: card.x - consts.listPadding
-    }
-    listStore.createList({ list })
-    await nextTick()
-    await cardStore.addCardsToList({ cards, list, targetPositionIndex: null })
-  }
-  globalStore.clearMultipleSelected()
-  globalStore.closeAllDialogs()
-  globalStore.multipleSelectedActionsIsVisible = false
+  const cards = cardsSortedByY()
+  cardStore.toggleListCards(cards)
 }
 
 // split and merge

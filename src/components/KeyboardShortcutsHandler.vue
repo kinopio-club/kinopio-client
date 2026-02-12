@@ -140,6 +140,7 @@ const handleShortcutsOnKeyUp = (event) => {
   const key = event.key.toLowerCase()
   const keyCode = event.code // physical key on the keyboard
   const keyB = key === 'b' || keyCode === 'KeyB'
+  const keyL = key === 'l' || keyCode === 'KeyL'
   const keyN = key === 'n' || keyCode === 'KeyN'
   const keyM = key === 'm' || keyCode === 'KeyM'
   const keyT = key === 't' || keyCode === 'KeyT'
@@ -201,6 +202,7 @@ const handleShortcutsOnKeyUp = (event) => {
     spaceKeyIsDown = false
   // b
   } else if (keyB && isSpaceScope) {
+    if (!canEditSpace) { return }
     let cards
     const multipleCardIds = globalStore.multipleCardsSelectedIds
     const cardId = globalStore.cardDetailsIsVisibleForCardId
@@ -215,6 +217,24 @@ const handleShortcutsOnKeyUp = (event) => {
     } else {
       globalStore.toggleCurrentUserToolbar('box')
     }
+  // l
+  } else if (keyL && isSpaceScope) {
+    if (!canEditSpace) { return }
+    let cards
+    const multipleCardIds = globalStore.multipleCardsSelectedIds
+    const cardId = globalStore.cardDetailsIsVisibleForCardId
+    // Toggle cards in list
+    if (cardId) {
+      cards = [cardStore.getCard(cardId)]
+      cardStore.toggleListCards(cards)
+    } else if (multipleCardIds.length) {
+      cards = multipleCardIds.map(id => cardStore.getCard(id))
+      cardStore.toggleListCards(cards)
+    // Toolbar List Mode
+    } else {
+      globalStore.toggleCurrentUserToolbar('list')
+    }
+
   // d
   } else if (key === 'd' && isSpaceScope) {
     if (!canEditSpace) { return }
@@ -229,10 +249,6 @@ const handleShortcutsOnKeyUp = (event) => {
   // s
   } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
     userStore.cycleDrawingBrushSize()
-  // l
-  } else if (key === 'l' && isSpaceScope) {
-    if (!canEditSpace) { return }
-    globalStore.toggleCurrentUserToolbar('list')
   // -
   } else if ((key === '-' || key === '–') && isSpaceScope) {
     if (!canEditSpace) { return }

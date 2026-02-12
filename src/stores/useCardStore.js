@@ -1088,6 +1088,57 @@ export const useCardStore = defineStore('cards', {
         listStore.updateListDimensions(list)
       }
     },
+    cardsIsInListTogether (cards) {
+      if (!cards.length) { return }
+      const listId = cards[0].listId
+      if (!listId) { return }
+      const value = cards.every(card => card.listId === listId)
+      return value
+    },
+    async toggleListCards (cards) {
+      const globalStore = useGlobalStore()
+      const listStore = useListStore()
+      let list
+      let listCards = []
+      let listHasOtherCards = []
+
+      if (this.cardsIsInListTogether(cards)) {
+        list = listStore.getList(cards[0].listId)
+      }
+      if (list) {
+        listCards = this.getCardsByList(list.id)
+        listHasOtherCards = listCards.length !== cards.length
+      }
+      // move cards out of list
+      if (this.cardsIsInListTogether(cards) && listHasOtherCards) {
+        const x = list.x + list.resizeWidth + consts.listPadding
+        const updates = cards.map(card => {
+          return {
+            id: card.id,
+            x
+          }
+        })
+        this.removeCardsFromLists(cards)
+        this.updateCards(updates)
+      // remove list
+      } else if (this.cardsIsInListTogether(cards)) {
+        listStore.removeList(list.id)
+      // create list, add cards to list
+      } else {
+        const card = cards[0]
+        const list = {
+          id: nanoid(),
+          y: card.y - consts.listInfoHeight,
+          x: card.x - consts.listPadding
+        }
+        listStore.createList({ list })
+        await nextTick()
+        await this.addCardsToList({ cards, list, targetPositionIndex: null })
+      }
+      globalStore.clearMultipleSelected()
+      globalStore.closeAllDialogs()
+      globalStore.multipleSelectedActionsIsVisible = false
+    },
 
     // snap guides
 
