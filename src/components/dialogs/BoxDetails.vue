@@ -8,7 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import ItemActions from '@/components/subsections/ItemActions.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -314,7 +314,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
     ItemDetailsDebug(:item="currentBox" :keys="['infoWidth', 'fill', 'background', 'resizeWidth']")
 
-    ItemActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")

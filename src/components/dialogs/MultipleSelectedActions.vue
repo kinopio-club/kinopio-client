@@ -12,7 +12,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-import ItemActions from '@/components/subsections/ItemActions.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ListActions from '@/components/subsections/ListActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
@@ -545,7 +545,7 @@ dialog.narrow.multiple-selected-actions(
         button(title="Merge/Split Cards into List" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
           img.icon.list-icon(src="@/assets/list.svg")
     //- card options
-    ItemActions(
+    CardOrBoxActions(
       :visible="cardsIsSelected && canEditAll.all"
       :cards="cards"
       @closeDialogs="closeDialogs"
@@ -553,7 +553,7 @@ dialog.narrow.multiple-selected-actions(
       :labelIsVisible="true"
     )
     //- box options
-    ItemActions(
+    CardOrBoxActions(
       :labelIsVisible="true"
       :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected && canEditAll.all"
       :boxes="boxes"
