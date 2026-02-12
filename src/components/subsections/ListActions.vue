@@ -45,6 +45,7 @@ const props = defineProps({
   label: String,
   collapseExpandIsVisible: Boolean,
   colorIsHidden: Boolean
+  // shouldHideColor: Boolean
 })
 const state = reactive({
   isHover: false,
