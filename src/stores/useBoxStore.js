@@ -485,7 +485,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       // lists
       const listIds = lists.map(list => list.id)
-      globalStore.updateMultipleListsSelectedIds(listIds)
+      globalStore.addMultipleToMultipleListsSelected(listIds)
       lists.forEach(list => {
         const listCards = cardStore.getCardsByList(list.id)
         const listCardIds = listCards.map(card => card.id)

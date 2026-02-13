@@ -17,6 +17,7 @@ import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
+import uniq from 'lodash-es/uniq'
 import last from 'lodash-es/last'
 import dayjs from 'dayjs'
 
@@ -1003,6 +1004,33 @@ export const useGlobalStore = defineStore('global', {
       await nextTick()
       this.clearMultipleSelected()
     },
+    selectListsFromMultipleSelectedItems () {
+      const cardStore = useCardStore()
+      const currentCard = cardStore.getCard(this.currentDraggingCardId)
+      // get cards, excluding currently dragging card
+      let cards = cardStore.getCardsSelected
+
+      cards = cards.filter(card => card.id !== currentCard?.id)
+      // get card lists
+      let listIds = []
+      cards.forEach(card => {
+        if (card.listId) {
+          listIds.push(card.listId)
+        }
+      })
+      listIds = uniq(listIds)
+      // exclude list from current card list
+      if (currentCard?.listId) {
+        listIds = listIds.filter(listId => currentCard.listId !== listId)
+      }
+      this.addMultipleToMultipleListsSelected(listIds)
+      // select list cards
+      listIds.forEach(listId => {
+        const cards = cardStore.getCardsByList(listId)
+        const listCardIds = cards.map(card => card.id)
+        this.addMultipleToMultipleCardsSelected(listCardIds)
+      })
+    },
 
     // multiple cards
 
@@ -1178,7 +1206,8 @@ export const useGlobalStore = defineStore('global', {
       const combinedSet = new Set([...set1, ...set2])
       // Convert back to array
       listIds = [...combinedSet]
-      this.multipleListsSelectedIds = listIds || []
+      postMessage.sendHaptics({ name: 'selection' })
+      this.multipleListsSelectedIds = listIds
       const updates = {
         userId: userStore.id,
         listIds

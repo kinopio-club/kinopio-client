@@ -421,6 +421,7 @@ const startBoxInfoInteraction = async (event) => {
   }
   globalStore.currentDraggingBoxId = boxId
   boxStore.incrementBoxZ(boxId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingBox) { return }
