@@ -1257,6 +1257,30 @@ const startDraggingDuplicateItems = async (event) => {
   globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
   return newCurrentCard.id
 }
+const checkIfShouldSelectLists = (cardId = props.card.id) => {
+  // select other selected cards, excludes current dragging card
+  const currentDraggingCard = cardStore.getCard(cardId)
+  const cardIds = globalStore.multipleCardsSelectedIds.filter(id => id !== cardId)
+  const cards = cardIds.map(id => cardStore.getCard(id))
+  // select other card lists
+  let listIds = []
+  cards.forEach(card => {
+    if (card.listId) {
+      listIds.push(card.listId)
+    }
+  })
+  listIds = uniq(listIds)
+  if (currentDraggingCard.listId) {
+    listIds = listIds.filter(listId => currentDraggingCard.listId !== listId)
+  }
+  globalStore.addMultipleToMultipleListsSelected(listIds)
+  // select list cards
+  listIds.forEach(listId => {
+    const cards = cardStore.getCardsByList(listId)
+    const listCardIds = cards.map(card => card.id)
+    globalStore.addMultipleToMultipleCardsSelected(listCardIds)
+  })
+}
 const startDraggingCard = async (event) => {
   isMultiTouch = false
   let cardId = props.card.id
@@ -1289,6 +1313,7 @@ const startDraggingCard = async (event) => {
   globalStore.parentCardId = cardId
   globalStore.childCardId = ''
   checkIfShouldDragMultipleCards(event, cardId)
+  checkIfShouldSelectLists(cardId)
   cardStore.incrementCardZ(cardId)
 }
 const notifyPressAndHoldToDrag = () => {

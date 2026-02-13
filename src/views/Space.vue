@@ -538,6 +538,11 @@ const addList = (event) => {
 const checkIfShouldRemoveFromList = async () => {
   if (globalStore.shouldSnapBackToList) { return }
   if (!globalStore.cardsWereDragged) { return }
+  // remove from list if current dragging card is in list
+  const cardId = globalStore.currentDraggingCardId
+  const card = cardStore.getCard(cardId)
+  if (!card?.listId) { return }
+  // if removeing current card from list, remove all selected list cards from lists
   let cards = cardStore.getCardsSelected
   cards = cards.filter(card => card.listId)
   cardStore.removeCardsFromLists(cards)
