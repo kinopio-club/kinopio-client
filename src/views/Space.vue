@@ -562,7 +562,6 @@ const checkIfShouldSnapBackToList = async () => {
     const list = listStore.getList(listId)
     await cardStore.updateCardPositionsInList(list) // return cards to their prev list position
   }
-  globalStore.shouldSnapBackToList = false
 }
 const checkIfShouldSnapToListTop = async (event) => {
   if (!globalStore.currentUserIsDraggingCard) { return }
@@ -948,14 +947,14 @@ const stopInteractions = async (event) => {
     globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldSnapToBox(event)
-  checkIfShouldSnapToCard(event)
-  checkIfShouldSnapToListTop(event)
-  checkIfShouldSnapBackToList()
-  checkIfShouldUpdateCardPositionsInEdgeLists()
+  await checkIfShouldRemoveFromList()
+  await checkIfShouldSnapToBox(event)
+  await checkIfShouldSnapToCard(event)
+  await checkIfShouldSnapToListTop(event)
+  await checkIfShouldSnapBackToList()
+  await checkIfShouldUpdateCardPositionsInEdgeLists()
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
-  checkIfShouldRemoveFromList()
   if (shouldCancelInteraction(event)) {
     globalStore.currentUserIsResizingCardDetails = false
     return
@@ -975,6 +974,7 @@ const stopInteractions = async (event) => {
   stopTiltingCards()
   stopResizingBoxes()
   stopResizingLists()
+  globalStore.shouldSnapBackToList = false
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
   globalStore.currentUserIsDraggingCard = false
