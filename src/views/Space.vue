@@ -646,6 +646,16 @@ const showListDetails = async (event) => {
   await nextTick()
   globalStore.updateListDetailsIsVisibleForListId(listId)
 }
+const checkIfShouldUpdateCardPositionsInEdgeLists = () => {
+  let lists = listStore.getListsSelected
+  lists = lists.forEach(list => {
+    const isX = list.x === 0
+    const isY = list.y === 0
+    if (isX || isY) {
+      cardStore.updateCardPositionsInList(list)
+    }
+  })
+}
 
 // drag items
 
@@ -943,6 +953,7 @@ const stopInteractions = async (event) => {
   checkIfShouldSnapToCard(event)
   checkIfShouldSnapToListTop(event)
   checkIfShouldSnapBackToList()
+  checkIfShouldUpdateCardPositionsInEdgeLists()
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
   checkIfShouldRemoveFromList()
