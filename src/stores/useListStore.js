@@ -278,6 +278,7 @@ export const useListStore = defineStore('lists', {
         x = Math.max(0, x)
         let y = Math.round(list.y + delta.y)
         y = Math.max(0, y)
+        globalStore.updateMultipleListIdsWereDraggedToEdge(list, x, y)
         return {
           id: list.id,
           x,

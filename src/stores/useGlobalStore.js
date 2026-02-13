@@ -185,6 +185,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsDraggingListIds: [],
     remoteListsDragging: [],
     preventDraggedListFromShowingDetails: false,
+    multipleListIdsWereDraggedToEdge: [],
     // resizing lists
     currentUserIsResizingList: false,
     currentUserIsResizingListIds: [],
@@ -933,6 +934,13 @@ export const useGlobalStore = defineStore('global', {
     clearRemoteListsDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteListsDragging = this.remoteListsDragging.filter(list => list.userId !== update.userId) || []
+    },
+    updateMultipleListIdsWereDraggedToEdge (list, x, y) {
+      const isX = x === 0
+      const isY = y === 0
+      if (isX || isY) {
+        this.multipleListIdsWereDraggedToEdge.push(list.id)
+      }
     },
 
     // Tags

@@ -647,14 +647,12 @@ const showListDetails = async (event) => {
   globalStore.updateListDetailsIsVisibleForListId(listId)
 }
 const checkIfShouldUpdateCardPositionsInEdgeLists = () => {
-  let lists = listStore.getListsSelected
-  lists = lists.forEach(list => {
-    const isX = list.x === 0
-    const isY = list.y === 0
-    if (isX || isY) {
-      cardStore.updateCardPositionsInList(list)
-    }
+  let listIds = uniq(globalStore.multipleListIdsWereDraggedToEdge)
+  listIds = listIds.forEach(id => {
+    const list = listStore.getList(id)
+    cardStore.updateCardPositionsInList(list)
   })
+  globalStore.multipleListsWereDraggedToEdge = []
 }
 
 // drag items
