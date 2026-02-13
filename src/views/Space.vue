@@ -481,6 +481,7 @@ const stopResizingBoxes = () => {
 const checkIfShouldSnapToBox = (event) => {
   if (globalStore.preventItemSnapping) { return }
   if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
+  if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
