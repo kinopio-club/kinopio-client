@@ -980,26 +980,8 @@ const selectItemIds = ({ position, cardIds = [], boxIds = [], lineIds = [], list
   }
 }
 const selectAllItems = () => {
-  const cardIds = cardStore.allIds
-  const connectionIds = connectionStore.allIds
-  const boxIds = boxStore.allIds
-  const listIds = listStore.allIds
-  const lineIds = lineStore.allIds
-  const dialogOffset = {
-    width: 200 / 2,
-    height: 150 / 2
-  }
-  const viewportCenter = {
-    x: (globalStore.viewportWidth / 2) + window.scrollX - dialogOffset.width,
-    y: (globalStore.viewportHeight / 2) + window.scrollY - dialogOffset.height
-  }
-  globalStore.multipleSelectedActionsPosition = viewportCenter
-  globalStore.updateMultipleSelectedActionsIsVisible(true)
-  globalStore.multipleConnectionsSelectedIds = connectionIds
-  globalStore.multipleCardsSelectedIds = cardIds
-  globalStore.multipleBoxesSelectedIds = boxIds
-  globalStore.multipleListsSelectedIds = listIds
-  globalStore.multipleLinesSelectedIds = lineIds
+  selectAllItemsBelowCursor({ y: 0 })
+  globalStore.updateMultipleSelectedActionsIsVisible(false)
 }
 
 // Search/Jump-to
