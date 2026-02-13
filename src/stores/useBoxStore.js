@@ -475,7 +475,7 @@ export const useBoxStore = defineStore('boxes', {
       const { boxes, cards, lists } = this.getItemsContainedInSelectedBoxes(selectedBox)
       // boxes
       const boxIds = boxes.map(box => box.id)
-      globalStore.updateMultipleBoxesSelectedIds(boxIds)
+      globalStore.addMultipleToMultipleBoxesSelected(boxIds)
       // cards
       const isMultipleBoxesSelected = Boolean(globalStore.multipleBoxesSelectedIds.length)
       const cardIds = cards.map(card => card.id)
