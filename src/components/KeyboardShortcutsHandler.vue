@@ -291,6 +291,9 @@ const handleShortcutsOnKeyDown = (event) => {
   } else if (isMeta && keyA && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItems()
+  } else if (isMeta && keyA && !isCardScope && !isFromInput) {
+    event.preventDefault()
+    selectAllItems()
   // Search/Jump-to Space
   } else if (isMeta && keyK && isSpaceScope) {
     event.preventDefault()
