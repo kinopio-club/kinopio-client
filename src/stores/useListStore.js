@@ -59,6 +59,12 @@ export const useListStore = defineStore('lists', {
         return list.x <= consts.edgeThreshold
       })
     },
+    getListsNearTopEdge () {
+      const lists = this.getAllLists
+      return lists.filter(list => {
+        return list.y <= consts.edgeThreshold
+      })
+    },
     getCollapsedLists () {
       const lists = this.getAllLists
       return lists.filter(list => {

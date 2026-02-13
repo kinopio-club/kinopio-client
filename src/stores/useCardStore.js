@@ -172,6 +172,12 @@ export const useCardStore = defineStore('cards', {
       return cards.filter(card => {
         return card.x <= consts.edgeThreshold
       })
+    },
+    getCardsNearTopEdge () {
+      const cards = this.getAllCards
+      return cards.filter(card => {
+        return card.y <= consts.edgeThreshold
+      })
     }
   },
 

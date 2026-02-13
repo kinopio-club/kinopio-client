@@ -95,6 +95,12 @@ export const useBoxStore = defineStore('boxes', {
       return boxes.filter(box => {
         return box.x <= consts.edgeThreshold
       })
+    },
+    getBoxesNearTopEdge () {
+      const boxes = this.getAllBoxes
+      return boxes.filter(box => {
+        return box.y <= consts.edgeThreshold
+      })
     }
   },
 

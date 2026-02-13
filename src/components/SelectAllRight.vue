@@ -4,12 +4,18 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const boxStore = useBoxStore()
+const cardStore = useCardStore()
+const listStore = useListStore()
 
 const xCenterOffset = 12
 
@@ -79,14 +85,69 @@ const isBetweenControls = (event) => {
   })
   return isBetween
 }
+const isNearBoxInfo = (position) => {
+  const boxes = boxStore.getBoxesNearTopEdge
+  const box = boxes.find(box => {
+    const rect = utils.boxInfoPositionFromId(box.id)
+    if (!rect) { return }
+    return utils.isBetween({
+      value: position.x,
+      min: box.x,
+      max: box.x + rect.infoWidth
+    })
+  })
+
+  if (box) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearListInfo = (position) => {
+  const lists = listStore.getListsNearTopEdge
+  const list = lists.find(list => {
+    const rect = utils.listInfoRectFromId(list.id)
+    if (!rect) { return }
+    return utils.isBetween({
+      value: position.x,
+      min: list.x,
+      max: list.x + rect.width
+    })
+  })
+  if (list) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearCard = (position) => {
+  const cards = cardStore.getCardsNearTopEdge
+  const card = cards.find(card => {
+    return utils.isBetween({
+      value: position.x,
+      min: card.x,
+      max: card.x + card.width
+    })
+  })
+  if (card) {
+    state.isVisible = false
+    return true
+  }
+}
+
 const handleMouseMove = (event) => {
   if (!event.target.closest) { return }
   if (!canEditSpace.value) { return }
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingList) { return }
   if (globalStore.isEmbedMode) { return }
   updateIsMetaKey(event)
+  // check if over items
+  const pagePosition = utils.cursorPositionInSpace(event)
+  if (isNearBoxInfo(pagePosition)) { return }
+  if (isNearCard(pagePosition)) { return }
+  if (isNearListInfo(pagePosition)) { return }
+  // check if between header controls
   const edgeThreshold = 30
   const position = utils.cursorPositionInViewport(event)
   const isInThreshold = position.y <= edgeThreshold

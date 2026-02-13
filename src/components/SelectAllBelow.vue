@@ -136,16 +136,17 @@ const handleMouseMove = (event) => {
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (globalStore.currentUserIsDraggingCard) { return }
   if (globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingList) { return }
   if (globalStore.isEmbedMode) { return }
   updateIsMetaKey(event)
   const position = utils.cursorPositionInViewport(event)
-  const pagePosition = utils.cursorPositionInSpace(event)
   const isInThreshold = position.x <= consts.edgeThreshold
   if (!isInThreshold) {
     state.isVisible = false
     return
   }
   // check if over items
+  const pagePosition = utils.cursorPositionInSpace(event)
   if (isNearLine(pagePosition)) { return }
   if (isNearBoxInfo(pagePosition)) { return }
   if (isNearCard(pagePosition)) { return }
