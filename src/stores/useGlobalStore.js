@@ -207,7 +207,6 @@ export const useGlobalStore = defineStore('global', {
     remoteLinesSelected: [], // [{ lineId, userId }, …]
     remoteListsSelected: [], // [{ listId, userId }, …]
     multipleConnectionsSelectedIds: [],
-    previousMultipleBoxesSelectedIds: [],
     isSelectingX: false,
     isSelectingY: false,
     multipleCardsSelectedIdsToLoad: [],
@@ -1070,10 +1069,6 @@ export const useGlobalStore = defineStore('global', {
 
     // multiple boxes
 
-    previousMultipleBoxesSelectedIds (boxIds) {
-      utils.typeCheck({ value: boxIds, type: 'array' })
-      this.previousMultipleBoxesSelectedIds = boxIds
-    },
     removeFromRemoteBoxesSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1097,10 +1092,6 @@ export const useGlobalStore = defineStore('global', {
 
     // multiple lines
 
-    previousMultipleLinesSelectedIds (lineIds) {
-      utils.typeCheck({ value: lineIds, type: 'array' })
-      this.previousMultipleLinesSelectedIds = lineIds
-    },
     removeFromRemoteLinesSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
