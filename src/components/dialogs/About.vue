@@ -190,18 +190,18 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section
     .row
       .button-wrap
-        a(href="https://kinopio.club/discord")
+        a(href="https://kinopio.club/discord" target="_blank")
           button
             span Discord{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
-        a(href="https://kinopio.club/forum")
+        a(href="https://kinopio.club/forum" target="_blank")
           button
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
       .button-wrap
-        a(href="https://kinopio.club/blog")
+        a(href="https://kinopio.club/blog" target="_blank")
           button
             span Blog{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
