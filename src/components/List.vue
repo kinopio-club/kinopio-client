@@ -82,10 +82,7 @@ const todoListCardsCompleted = computed(() => {
 const todoListCardsCompletedPercent = computed(() => {
   let value = todoListCardsCompleted.value.length / todoListCards.value.length
   value = Math.round(value * 100)
-  return `${value}%`
-})
-const todoListCardsCompletedPercentTitle = computed(() => {
-  return `${todoListCardsCompletedPercent.value} Completed`
+  return `${value}% Completed`
 })
 
 // interacting
@@ -590,10 +587,7 @@ const placeholderStylesMap = computed(() => {
     //- info row
     .row.list-info-row
       .left-side
-        .progress-wrap(v-if="todoListCards.length" :title="todoListCardsCompletedPercentTitle")
-          progress(:value="todoListCardsCompleted.length" :max="todoListCards.length")
-          .label-badge.small-badge.inline-badge
-            span {{ todoListCardsCompletedPercent }}
+        progress(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length" :title="todoListCardsCompletedPercent")
         span.name(:title="props.list.name") {{ props.list.name }}
       .right-side.button-wrap
         //- add card
@@ -691,10 +685,6 @@ const placeholderStylesMap = computed(() => {
       color var(--primary-on-light-background) !important
       .icon
         filter none
-    .progress-wrap
-      .label-badge
-        span
-          color var(--primary-on-light-background)
   &.is-background-dark
     color var(--primary-on-dark-background)
     button
@@ -702,11 +692,6 @@ const placeholderStylesMap = computed(() => {
       color var(--primary-on-dark-background) !important
       .icon
         filter invert()
-    .progress-wrap
-      .label-badge
-        span
-          color var(--primary-on-dark-background)
-
   &:hover,
   &.hover
     box-shadow var(--hover-shadow)
@@ -749,17 +734,10 @@ const placeholderStylesMap = computed(() => {
       display flex
       align-items center
       overflow hidden
-      .progress-wrap
+      progress
+        display inline-block
+        width 20px
         margin-right 5px
-        width min-content
-        transform translateY(1px)
-        progress
-          display block
-          min-width 20px
-        .label-badge
-          position static
-          background-color transparent
-          padding 0
       .name
         white-space nowrap
         overflow hidden
