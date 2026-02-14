@@ -144,6 +144,7 @@ const handleShortcutsOnKeyUp = (event) => {
   const keyN = key === 'n' || keyCode === 'KeyN'
   const keyM = key === 'm' || keyCode === 'KeyM'
   const keyT = key === 't' || keyCode === 'KeyT'
+  console.log('🎹 B TEST', key, keyCode, keyB) // temp debug
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
