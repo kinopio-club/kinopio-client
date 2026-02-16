@@ -61,7 +61,6 @@ const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelecte
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
 const items = computed(() => {
-  console.log(props)
   const boxes = normalizeDimensions(props.boxes)
   const lists = normalizeDimensions(props.lists)
   return props.cards.concat(boxes, lists)
