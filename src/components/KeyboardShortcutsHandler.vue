@@ -144,9 +144,9 @@ const handleShortcutsOnKeyUp = (event) => {
   const keyN = key === 'n' || keyCode === 'KeyN'
   const keyM = key === 'm' || keyCode === 'KeyM'
   const keyT = key === 't' || keyCode === 'KeyT'
-  console.log('🎹 B TEST', key, keyCode, keyB) // temp debug
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
+  console.log('🎹 B TEST', key, keyCode, keyB, isSpaceScope) // temp debug
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   const toolbarIsDrawing = globalStore.getToolbarIsDrawing
   const canEditSpace = userStore.getUserCanEditSpace
@@ -208,6 +208,7 @@ const handleShortcutsOnKeyUp = (event) => {
     const multipleCardIds = globalStore.multipleCardsSelectedIds
     const cardId = globalStore.cardDetailsIsVisibleForCardId
     // Surround Selected Cards with Box
+    console.log('🎹🎹', cardId, multipleCardIds.length)
     if (cardId) {
       cards = [cardStore.getCard(cardId)]
       containItemsInNewBox(cards)
@@ -1048,6 +1049,7 @@ const toggleLockCards = () => {
 
 const containItemsInNewBox = async (cards) => {
   const isSpaceMember = userStore.getUserIsSpaceMember
+  console.log('🎹🎹🎹', isSpaceMember)
   if (!isSpaceMember) { return }
   const rect = utils.boundaryRectFromItems(cards)
   // box size
