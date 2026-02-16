@@ -55,6 +55,10 @@ const state = reactive({
   inviteType: 'edit' // 'group', 'edit', 'read'
 })
 
+watch(() => props.group, (value, prevValue) => {
+  updateDefaultInviteType()
+})
+
 const spaceName = computed(() => spaceStore.name)
 const collaboratorKey = computed(() => spaceStore.collaboratorKey)
 const closeDialogs = () => {
@@ -93,6 +97,8 @@ const inviteTypeIsRead = computed(() => state.inviteType === 'read')
 const updateDefaultInviteType = () => {
   if (props.group) {
     state.inviteType = 'group'
+  } else {
+    state.inviteType = 'edit'
   }
 }
 const updateInviteType = (type) => {
