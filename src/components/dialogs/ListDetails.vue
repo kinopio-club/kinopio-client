@@ -47,6 +47,7 @@ watch(() => visible.value, async (value, prevValue) => {
   } else {
     globalStore.currentDraggingListId = ''
     globalStore.updateMultipleListsSelectedIds([])
+    await nextTick()
     const list = listStore.getList(prevList.id)
     listStore.updateListDimensions(list)
   }
