@@ -150,9 +150,11 @@ const copyInviteLink = async (event) => {
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .button-wrap.invite-button
-    button(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
-      InviteLabel(:inviteType="state.inviteType" :group="props.group" :randomUser="randomUser")
-      InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="props.group" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+    button.title-row-flex(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
+      span
+        InviteLabel(:inviteType="state.inviteType" :group="props.group" :randomUser="randomUser")
+        InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="props.group" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+      img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
   section.subsection
     .row

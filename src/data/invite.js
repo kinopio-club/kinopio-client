@@ -9,13 +9,14 @@ export default {
       },
       {
         type: 'edit',
-        friendlyName: 'Invite to Collaborate',
-        description: 'Collaborators can edit this space.'
+        friendlyName: 'Invite to Edit',
+        description: 'Anyone with the link can edit this space and become a collaborator.'
+        // ppl will become
       },
       {
         type: 'read',
-        friendlyName: 'Invite to Read Only',
-        description: ''
+        friendlyName: 'Invite to View Only',
+        description: 'Anyone with the link can view this space. No account is needed.'
       }
     ]
   }

@@ -183,14 +183,14 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
-    section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
+    section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection-member': isSpaceMember}")
       .row.title-row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
             .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
-            span Copy URL
+            span Copy Public URL
           button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
             img.icon.qr-code(src="@/assets/qr-code.svg")
         QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
@@ -244,8 +244,6 @@ dialog.share
     display inline-block
     &.danger
       background-color var(--danger-background)
-  .privacy-button + .textarea
-    margin-top 10px
   .description
     margin-top 3px
   dialog.user-details
@@ -257,11 +255,6 @@ dialog.share
     bottom 25px
   .share-private
     margin-top 10px
-  .privacy-button + input
-    margin-top 10px
-  .privacy-button
-    > button
-      padding-top 8px
   .button-tip-badge
     top -12px
     pointer-events none
@@ -289,9 +282,14 @@ dialog.share
         pointer-events none
 
   .privacy-button
+    width 100%
     button
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+      width 100%
+    &.open,
+    &.closed
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
 
   .private-copy-badge
     margin-left 6px

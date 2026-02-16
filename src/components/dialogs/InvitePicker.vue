@@ -67,7 +67,6 @@ dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.le
             span {{ inviteState.description }}
   //- tips
   section
-    p Invitees don't need an account to view spaces.
     p
       span.badge.info If your account is upgraded, collaborators can create cards in this space without increasing their free card count.
 </template>
