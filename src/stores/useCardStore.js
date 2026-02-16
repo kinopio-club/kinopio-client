@@ -1082,7 +1082,9 @@ export const useCardStore = defineStore('cards', {
         return {
           id,
           listId: null,
-          listPositionIndex: null
+          listPositionIndex: null,
+          resizeWidth: null,
+          width: null
         }
       })
       await this.updateCards(updates)

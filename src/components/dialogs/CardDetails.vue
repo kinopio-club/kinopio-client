@@ -1610,7 +1610,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
       template(v-if="state.error.unknownUploadError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ItemDetailsDebug(:item="card" :keys="['listId', 'listPositionIndex', 'resizeWidth', 'x', 'y']")
+      ItemDetailsDebug(:item="card" :keys="['listId', 'listPositionIndex', 'resizeWidth', 'width']")
     CardDetailsResize
 </template>
 

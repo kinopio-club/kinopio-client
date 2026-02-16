@@ -549,7 +549,9 @@ const updateStylesWithWidth = (styles) => {
   }
   if (shouldSkipWidth.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
-  styles.width = cardWidth + 'px'
+  if (cardWidth) {
+    styles.width = cardWidth + 'px'
+  }
   return styles
 }
 const updatePreviousResultItem = () => {
