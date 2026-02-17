@@ -26,6 +26,7 @@ import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { nanoid } from 'nanoid'
 import throttle from 'lodash-es/throttle'
 import debounce from 'lodash-es/debounce'
+import isEqual from 'lodash-es/isEqual'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -243,7 +244,6 @@ export default function webSocketPlugin () {
       }
     }
   }
-
   const handleAction = (store, pinia, action, updates) => {
     try {
       const piniaStore = getPiniaStore(store, pinia)
@@ -269,11 +269,11 @@ export default function webSocketPlugin () {
     } else if (name === 'userJoinedRoom') {
       spaceStore.addUserToJoinedSpace(user)
     } else if (name === 'userLeftRoom') {
-      spaceStore.removeIdleClientFromSpace(user || updates.user)
+      spaceStore.removeIdleClientFromSpace(user)
       globalStore.clearRemoteMultipleSelected(updates)
     } else if (name === 'userLeftSpace') {
-      spaceStore.removeCollaboratorFromSpace(updates.user, true)
-      if (updates.user.id === userStore.id) {
+      spaceStore.removeCollaboratorFromSpace(user, true)
+      if (user.id === userStore.id) {
         spaceStore.removeCurrentUserFromSpace()
       }
     } else if (name === 'updateSpaceClients') {
@@ -291,7 +291,6 @@ export default function webSocketPlugin () {
   // 🌛 Send
 
   let queuedActions, pendingMessages, frameIsPending
-
   const sendMessages = () => {
     if (!websocket) {
       frameIsPending = false
@@ -306,14 +305,33 @@ export default function webSocketPlugin () {
     }
     frameIsPending = false
   }
-
   const scheduleSend = () => {
     if (!frameIsPending) {
       frameIsPending = true
       requestAnimationFrame(sendMessages)
     }
   }
-
+  const mergeUpdates = (prev, next) => {
+    // updates may be arrays or objects
+    if (Array.isArray(prev) && Array.isArray(next)) {
+      const map = new Map(prev.map(item => [item.id, item]))
+      next.forEach(item => map.set(item.id, { ...map.get(item.id), ...item }))
+      return Array.from(map.values())
+    }
+    if (Array.isArray(prev) || Array.isArray(next)) {
+      return next
+    }
+    return { ...prev, ...next }
+  }
+  const mergeMessage = (message, queuedMessage) => {
+    const mergedUpdates = mergeUpdates(queuedMessage.updates, message.updates)
+    const mergedMessage = { ...queuedMessage, updates: mergedUpdates }
+    queuedActions.set(message.action, mergedMessage)
+    const pendingIndex = pendingMessages.findIndex(p => p.message?.action === message.action)
+    if (pendingIndex !== -1) {
+      pendingMessages[pendingIndex] = { ...pendingMessages[pendingIndex], message: mergedMessage }
+    }
+  }
   const queueMessage = (pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
@@ -321,7 +339,7 @@ export default function webSocketPlugin () {
       return
     }
     if (!queuedActions) {
-      queuedActions = new Set()
+      queuedActions = new Map()
     }
     const data = {
       message,
@@ -330,9 +348,15 @@ export default function webSocketPlugin () {
       user: userStore.getUserPublicMeta
     }
     if (message?.action) {
-    // only send unique actions per frame
-      if (queuedActions.has(message.action)) { return }
-      queuedActions.add(message.action)
+      // only send unique actions per frame
+      const queuedMessage = queuedActions.get(message.action)
+      if (queuedMessage) {
+        const isUnchanged = isEqual(message.updates, queuedMessage.updates)
+        if (isUnchanged) { return }
+        mergeMessage(message, queuedMessage)
+        return
+      }
+      queuedActions.set(message.action, message)
       pendingMessages = pendingMessages || []
       pendingMessages.push(data)
       scheduleSend()

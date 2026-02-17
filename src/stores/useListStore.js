@@ -234,6 +234,7 @@ export const useListStore = defineStore('lists', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       if (!userStore.getUserCanEditSpace) { return }
+      if (!updates.length) { return }
       this.updateListsState(updates)
       broadcastStore.update({ updates, store: 'listStore', action: 'updateListsState' })
       for (const list of updates) {
@@ -426,6 +427,11 @@ export const useListStore = defineStore('lists', {
 
     // remove
 
+    removeListsBroadcast ({ ids }) {
+      const cardStore = useCardStore()
+      cardStore.removeCardsFromListsByLists(ids)
+      this.removeListsFromState(ids)
+    },
     removeListsFromState (ids) {
       for (const id of ids) {
         const idIndex = this.allIds.indexOf(id)
@@ -449,7 +455,7 @@ export const useListStore = defineStore('lists', {
         await apiStore.addToQueue({ name: 'removeList', body: list })
       }
       this.removeListsFromState(ids)
-      broadcastStore.update({ updates: ids, store: 'listStore', action: 'removeListsFromState' })
+      broadcastStore.update({ updates: { ids }, store: 'listStore', action: 'removeListsBroadcast' })
       await cache.updateSpace('lists', this.getAllLists, spaceStore.id)
     },
     async removeList (id) {
