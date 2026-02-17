@@ -325,7 +325,7 @@ export default function webSocketPlugin () {
 
   // 🌛 Send
 
-  let sentActions, pendingMessages
+  let queuedActions, pendingMessages
   const sendMessageThrottle = throttle(() => {
     if (!websocket) { return }
     if (pendingMessages?.length) {
@@ -333,7 +333,7 @@ export default function webSocketPlugin () {
         websocket.send(JSON.stringify(data))
       })
       pendingMessages = []
-      sentActions.clear()
+      queuedActions.clear()
     }
   }, 16) // 60fps
   const sendMessage = (pinia, message, type) => {
@@ -342,8 +342,8 @@ export default function webSocketPlugin () {
     if (!websocket || !isConnected) {
       return
     }
-    if (!sentActions) {
-      sentActions = new Set()
+    if (!queuedActions) {
+      queuedActions = new Set()
       sendMessageThrottle()
     }
     const data = {
@@ -354,8 +354,8 @@ export default function webSocketPlugin () {
     }
     if (message?.action) {
       // only send unique actions per frame
-      if (sentActions.has(message.action)) { return }
-      sentActions.add(message.action)
+      if (queuedActions.has(message.action)) { return }
+      queuedActions.add(message.action)
       pendingMessages = pendingMessages || []
       pendingMessages.push(data)
       sendMessageThrottle()
