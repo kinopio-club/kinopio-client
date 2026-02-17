@@ -421,6 +421,15 @@ export default {
     }
     return false
   },
+  countArrayItems (obj) {
+    let total = 0
+    for (const value of Object.values(obj)) {
+      if (Array.isArray(value)) {
+        total += value.length
+      }
+    }
+    return total
+  },
   longestStringInArray (array) {
     this.typeCheck({ value: array, type: 'array', origin: 'longestStringInArray' })
     let longest = ''

@@ -89,10 +89,11 @@ const userColor = computed(() => userStore.color)
 const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
-
+const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 const cardBoxOrListIsSelected = computed(() => cardOrBoxIsSelected.value || lists.value.length)
-const ItemIsSelected = computed(() => cardOrBoxIsSelected.value || editableConnections.value.length || listsIsSelected.value)
+const ItemIsSelected = computed(() => Boolean(utils.countArrayItems(selectedItems.value)))
+
 // items
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
@@ -548,7 +549,7 @@ dialog.narrow.multiple-selected-actions(
       //- Align And Distribute
       AlignAndDistribute(:visible="alignableItemsIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes" :lists="lists")
       //- Move/Copy
-      .segmented-buttons.move-or-copy-wrap(v-if="cardOrBoxIsSelected")
+      .segmented-buttons.move-or-copy-wrap
         button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
           span Copy
           MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
