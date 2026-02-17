@@ -1233,7 +1233,11 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const { cards, boxes, connections, connectionTypes, tags } = items
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      const { cards, boxes, connections, connectionTypes, tags, lines, lists } = items
+      lines.forEach(line => lineStore.createLine(line))
+      lists.forEach(list => listStore.createList({ list }))
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
       for (const connection of connections) {

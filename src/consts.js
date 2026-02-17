@@ -41,7 +41,7 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/squiggle-background-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
-  itemTypesWithPositions: ['boxes', 'cards'],
+  itemTypesWithPositions: ['boxes', 'cards', 'lists', 'lines'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,

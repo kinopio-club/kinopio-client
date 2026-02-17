@@ -704,14 +704,15 @@ const remove = () => {
 
 const writeSelectedToClipboard = async (position) => {
   const selectedItems = spaceStore.getSpaceSelectedItems
-  let { cards, connectionTypes, connections, boxes } = selectedItems
+  let { cards, connectionTypes, connections, boxes, lines, lists } = selectedItems
   // data
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
-  let data = { cards, connections, connectionTypes, boxes }
+  lists = utils.sortByY(lists)
+  let data = { cards, connections, connectionTypes, boxes, lines, lists }
   data = utils.updateSpaceItemsRelativeToOrigin(data, position)
   // text
-  let items = cards.concat(boxes)
+  let items = cards.concat(boxes, lists, lines)
   items = utils.sortByY(items)
   const text = utils.nameStringFromItems(items)
   // clipboard
@@ -752,6 +753,14 @@ const normalizePasteData = (data) => {
   data.boxes = data.boxes.map(box => {
     box.name = utils.decodeEntitiesFromHTML(box.name)
     return box
+  })
+  data.lines = data.lines.map(line => {
+    line.name = utils.decodeEntitiesFromHTML(line.name)
+    return line
+  })
+  data.lists = data.lists.map(list => {
+    list.name = utils.decodeEntitiesFromHTML(list.name)
+    return list
   })
   return data
 }
