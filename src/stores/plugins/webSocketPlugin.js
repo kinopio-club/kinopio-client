@@ -325,9 +325,13 @@ export default function webSocketPlugin () {
 
   // 🌛 Send
 
-  let queuedActions, pendingMessages
-  const sendMessageThrottle = throttle(() => {
-    if (!websocket) { return }
+  let queuedActions, pendingMessages, frameIsPending
+
+  const sendMessages = () => {
+    if (!websocket) {
+      frameIsPending = false
+      return
+    }
     if (pendingMessages?.length) {
       pendingMessages.forEach(data => {
         websocket.send(JSON.stringify(data))
@@ -335,8 +339,17 @@ export default function webSocketPlugin () {
       pendingMessages = []
       queuedActions.clear()
     }
-  }, 16) // 60fps
-  const sendMessage = (pinia, message, type) => {
+    frameIsPending = false
+  }
+
+  const scheduleSend = () => {
+    if (!frameIsPending) {
+      frameIsPending = true
+      requestAnimationFrame(sendMessages)
+    }
+  }
+
+  const queueMessage = (pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     if (!websocket || !isConnected) {
@@ -344,7 +357,6 @@ export default function webSocketPlugin () {
     }
     if (!queuedActions) {
       queuedActions = new Set()
-      sendMessageThrottle()
     }
     const data = {
       message,
@@ -353,12 +365,12 @@ export default function webSocketPlugin () {
       user: userStore.getUserPublicMeta
     }
     if (message?.action) {
-      // only send unique actions per frame
+    // only send unique actions per frame
       if (queuedActions.has(message.action)) { return }
       queuedActions.add(message.action)
       pendingMessages = pendingMessages || []
       pendingMessages.push(data)
-      sendMessageThrottle()
+      scheduleSend()
     } else {
       websocket.send(JSON.stringify(data))
     }
@@ -393,10 +405,10 @@ export default function webSocketPlugin () {
       case 'leaveSpaceRoom':
         spaceStore.clients = []
         message.name = 'userLeftRoom'
-        sendMessage(pinia, message)
+        queueMessage(pinia, message)
         break
       case 'update':
-        sendMessage(pinia, message)
+        queueMessage(pinia, message)
         break
       case 'close':
         closeWebsocket(pinia)
