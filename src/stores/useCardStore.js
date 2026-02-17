@@ -1096,6 +1096,12 @@ export const useCardStore = defineStore('cards', {
         listStore.updateListDimensions(list)
       }
     },
+    async removeCardsFromListsByLists (listIds) {
+      listIds.forEach(id => {
+        const cards = this.getCardsByList(id)
+        this.removeCardsFromLists(cards)
+      })
+    },
     cardsIsInListTogether (cards) {
       if (!cards.length) { return }
       const listId = cards[0].listId

@@ -440,11 +440,8 @@ export const useListStore = defineStore('lists', {
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserIsSpaceMember
       if (!canEditSpace) { return }
-      // remove cards from lists
-      ids.forEach(id => {
-        const cards = cardStore.getCardsByList(id)
-        cardStore.removeCardsFromLists(cards)
-      })
+      // update cards
+      cardStore.removeCardsFromListsByLists(ids)
       // remove lists
       for (const id of ids) {
         const list = this.getList(id)
