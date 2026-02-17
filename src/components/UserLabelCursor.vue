@@ -164,7 +164,6 @@ const userLabelVisibleFrame = () => {
   display inline-block
   border-radius var(--small-entity-radius)
   width max-width
-  transition all 0.2s
   .pointer
     width 15px
     height 15px
