@@ -266,7 +266,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingAlpha = alpha
     window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
-    console.info('🔒🐢 box lockingAnimationFrame locked')
+    console.info('🔒🐢 list lockingAnimationFrame locked')
     lockingAnimationTimer = undefined
     lockingStartTime = undefined
     state.isLocking = false
@@ -351,6 +351,7 @@ const colorIsDark = computed(() => {
 //   return value
 // })
 const listStyles = computed(() => {
+  const isSnappingToBox = globalStore.itemSnappingIsReady && currentListIsBeingDragged.value
   const { x, y, z } = props.list
   const width = props.list.resizeWidth
   let height = props.list.height || consts.listEmptyHeight
@@ -363,6 +364,9 @@ const listStyles = computed(() => {
     zIndex: z || 1,
     width: width + 'px',
     height: height + 'px'
+  }
+  if (isSnappingToBox) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
