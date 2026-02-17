@@ -132,7 +132,6 @@ export default function webSocketPlugin () {
     try {
       websocket.close()
       websocket = null
-      cleanupDebouncedActions()
     } catch (error) {
       console.error('🚒 closeWebsocket', error)
     }
@@ -245,46 +244,11 @@ export default function webSocketPlugin () {
     }
   }
 
-  const cleanupDebouncedActions = () => {
-    debouncedStoreActions.forEach((actionKey) => {
-      actionKey.cancel()
-    })
-    debouncedStoreActions.clear()
-  }
-  const actionDelay = (actionKey) => {
-    actionKey = actionKey.toLowerCase()
-    const criticalActionTypes = ['create', 'add', 'delete', 'remove']
-    let isCritical
-    criticalActionTypes.find(actionTypes => {
-      if (actionKey.includes(actionTypes)) {
-        isCritical = true
-        return true
-      }
-    })
-    if (isCritical) {
-      return 0 // immediate
-    } else {
-      return 16 // 60fps
-    }
-  }
-  const debouncedAction = (store, pinia, action, updates) => {
-    const userId = updates?.userId || updates?.user?.id
-    const actionKey = `${userId}:${action}`
-    if (!debouncedStoreActions.has(actionKey)) {
-      const delay = actionDelay(actionKey)
-      debouncedStoreActions.set(
-        actionKey,
-        debounce((store, pinia, action, updates) => {
-          const piniaStore = getPiniaStore(store, pinia)
-          piniaStore[action](updates)
-          checkIfShouldUpdateLinkToItem(pinia, { action, updates })
-          checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
-        }, delay)
-      )
-    } else {
-      const debouncedAction = debouncedStoreActions.get(actionKey)
-      debouncedAction(store, pinia, action, updates)
-    }
+  const handleAction = (store, pinia, action, updates) => {
+    const piniaStore = getPiniaStore(store, pinia)
+    piniaStore[action](updates)
+    checkIfShouldUpdateLinkToItem(pinia, { action, updates })
+    checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
   }
   const receiveMessage = (pinia, data) => {
     const globalStore = useGlobalStore(pinia)
@@ -313,7 +277,7 @@ export default function webSocketPlugin () {
     } else if (isAction) {
       const piniaStore = getPiniaStore(store, pinia)
       if (piniaStore) {
-        debouncedAction(store, pinia, action, updates)
+        handleAction(store, pinia, action, updates)
       }
     } else {
       console.warn('🌚 unhandled message', data)
