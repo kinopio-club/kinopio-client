@@ -300,9 +300,6 @@ export default function webSocketPlugin () {
       console.info('🌛 user connected', user)
     } else if (name === 'userJoinedRoom') {
       spaceStore.addUserToJoinedSpace(user)
-    } else if (name === 'updateUserPresence') {
-      spaceStore.updateUserPresence(updates.user)
-      globalStore.updateOtherUsers(updates.user)
     } else if (name === 'userLeftRoom') {
       spaceStore.removeIdleClientFromSpace(user || updates.user)
       globalStore.clearRemoteMultipleSelected(updates)
