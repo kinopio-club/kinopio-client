@@ -894,6 +894,14 @@ export const useSpaceStore = defineStore('space', {
         console.warn('🚑 updateOtherUsers', error)
       }
     },
+    broadcastUpdateSpace (update) {
+      const broadcastStore = useBroadcastStore()
+      const ignoreKeys = ['id', 'editedAt', 'editedByUserId']
+      const keys = Object.keys(update)
+      const shouldPrevent = keys.every(key => ignoreKeys.includes(key))
+      if (shouldPrevent) { return }
+      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
+    },
     async updateOtherItems (options) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
@@ -940,13 +948,12 @@ export const useSpaceStore = defineStore('space', {
     async updateSpace (update) {
       const apiStore = useApiStore()
       const keys = Object.keys(update)
-      const broadcastStore = useBroadcastStore()
       for (const key of keys) {
         this[key] = update[key]
       }
       update.id = this.id
       if (update.isFromBroadcast) { return }
-      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
+      this.broadcastUpdateSpace(update)
       await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
