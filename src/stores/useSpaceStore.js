@@ -132,16 +132,21 @@ export const useSpaceStore = defineStore('space', {
       return this.name === 'Hello Kinopio'
     },
     getSpaceSelectedItems () {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const globalStore = useGlobalStore()
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      // card
       const cards = globalStore.multipleCardsSelectedIds.map(cardId => {
         return cardStore.getCard(cardId)
       })
+      // box
       const boxes = globalStore.multipleBoxesSelectedIds.map(boxId => {
         return boxStore.getBox(boxId)
       })
+      // connection
       const connections = connectionStore.getAllConnections.filter(connection => {
         const selectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
         const isStartCardMatch = selectedIds.includes(connection.startItemId)
@@ -150,7 +155,15 @@ export const useSpaceStore = defineStore('space', {
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = connectionTypeIds.map(id => connectionStore.getConnectionType(id))
-      return { cards, connectionTypes, connections, boxes }
+      // line
+      const lines = globalStore.multipleLinesSelectedIds.map(lineId => {
+        return lineStore.getLine(lineId)
+      })
+      // list
+      const lists = globalStore.multipleListsSelectedIds.map(listId => {
+        return listStore.getList(listId)
+      })
+      return { cards, connectionTypes, connections, boxes, lines, lists }
     },
     getSpaceItemColors () {
       const cardStore = useCardStore()

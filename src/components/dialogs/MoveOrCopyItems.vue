@@ -89,14 +89,8 @@ const selectedSpaceIsRecentSpace = (space) => {
 
 // items
 
-const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
-const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
-const multipleCardsIsSelected = computed(() => {
-  const numberOfCards = multipleCardsSelectedIds.value.length
-  return Boolean(numberOfCards > 1)
-})
-const itemsCount = computed(() => multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length)
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
+const itemsCount = computed(() => utils.countArrayItems(selectedItems.value))
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const sortedByY = (items) => {
   items = items.sort((a, b) => {
@@ -120,7 +114,7 @@ const actionLabel = computed(() => {
   }
 })
 const pluralItem = computed(() => {
-  const condition = multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length !== 1
+  const condition = itemsCount.value !== 1
   return utils.pluralize('item', condition)
 })
 const actionLabelCapitalized = computed(() => utils.capitalizeFirstLetter(actionLabel.value))
@@ -158,6 +152,10 @@ const copyToSelectedSpace = async (items) => {
   }
   await cache.addToSpace(newItems, selectedSpaceId)
   // update server
+  for (const list of newItems.lists) {
+    list.shouldUpdateList = true
+    await apiStore.addToQueue({ name: 'createList', body: list, spaceId: selectedSpaceId })
+  }
   for (const card of newItems.cards) {
     await apiStore.addToQueue({ name: 'createCard', body: card, spaceId: selectedSpaceId })
   }
@@ -169,6 +167,9 @@ const copyToSelectedSpace = async (items) => {
   }
   for (const box of newItems.boxes) {
     await apiStore.addToQueue({ name: 'createBox', body: box, spaceId: selectedSpaceId })
+  }
+  for (const line of newItems.lines) {
+    await apiStore.addToQueue({ name: 'createLine', body: line, spaceId: selectedSpaceId })
   }
   console.info('🚚 copies created', newItems)
   state.loading = false
