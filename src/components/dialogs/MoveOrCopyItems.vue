@@ -149,7 +149,6 @@ const copyText = async () => {
 const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
-  const selectedSpaceisCurrentSpace = selectedSpaceId === spaceStore.id
   newItems = await spaceStore.getNewItems(items, selectedSpaceId)
   // update cache
   const space = await cache.space(selectedSpaceId).cards
@@ -158,14 +157,6 @@ const copyToSelectedSpace = async (items) => {
     await cache.saveSpace({ id: selectedSpaceId })
   }
   await cache.addToSpace(newItems, selectedSpaceId)
-  // update current space
-  if (selectedSpaceisCurrentSpace) {
-    const shouldOffsetPosition = true
-    cardStore.createCards(newItems.cards, shouldOffsetPosition)
-    newItems.connectionTypes.forEach(connectionType => connectionStore.createConnectionType(connectionType))
-    newItems.connections.forEach(connection => connectionStore.createConnection(connection))
-    newItems.boxes.forEach(box => boxStore.createBox(box))
-  }
   // update server
   for (const card of newItems.cards) {
     await apiStore.addToQueue({ name: 'createCard', body: card, spaceId: selectedSpaceId })
