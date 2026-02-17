@@ -82,7 +82,7 @@ const todoListCardsCompleted = computed(() => {
 const todoListCardsCompletedPercent = computed(() => {
   let value = todoListCardsCompleted.value.length / todoListCards.value.length
   value = Math.round(value * 100)
-  return `${value}% Completed`
+  return `${todoListCardsCompleted.value.length}/${todoListCards.value.length}, ${value}% Completed`
 })
 
 // interacting
