@@ -915,7 +915,7 @@ export const useGlobalStore = defineStore('global', {
 
     // Dragging Lines
 
-    addtoRemoteLinesDragging (update) {
+    addToRemoteLinesDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.userId)
       this.remoteLinesDragging = this.remoteLinesDragging.concat(update)
@@ -927,7 +927,7 @@ export const useGlobalStore = defineStore('global', {
 
     // Dragging Lists
 
-    addtoRemoteListsDragging (update) {
+    addToRemoteListsDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteListsDragging = this.remoteListsDragging.filter(list => list.userId !== update.userId)
       this.remoteListsDragging = this.remoteListsDragging.concat(update)

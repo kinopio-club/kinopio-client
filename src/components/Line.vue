@@ -163,7 +163,7 @@ const startLineInfoInteraction = (event) => {
     lineId: props.line.id,
     userId: userStore.id
   }
-  broadcastStore.update({ updates, action: 'addtoRemoteLinesDragging' })
+  broadcastStore.update({ updates, action: 'addToRemoteLinesDragging' })
 }
 
 // line details
