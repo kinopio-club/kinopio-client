@@ -30,7 +30,8 @@ export const useListStore = defineStore('lists', {
     // getters take no params, and are invoked like object properties
     // blankStore.getAllLists
     getAllLists () {
-      return this.allIds.map(id => this.byId[id])
+      const lists = this.allIds.map(id => this.byId[id])
+      return lists.filter(list => Boolean(list))
     },
     getListsSelected () {
       const globalStore = useGlobalStore()
