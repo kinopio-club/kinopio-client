@@ -217,16 +217,20 @@ template(v-if="visible")
           img.icon.file(src="@/assets/file.svg")
           span PDF
       .button-wrap
-        button(@click.left="downloadLocalCanvas")
-          img.icon.json-canvas(src="@/assets/json-canvas.svg")
-          span Canvas
-    p(v-if="state.pdfIsVisible")
-      span.badge.success PDF Sent to your Email
-    .row
-      .button-wrap
         button(@click.left="downloadLocalJson")
           img.icon.file(src="@/assets/file.svg")
           span Space JSON
+    .row(v-if="state.pdfIsVisible")
+      span.badge.success PDF Sent to your Email
+
+    details
+      summary Other Formats
+      section.subsection
+        .row
+          .button-wrap
+            button(@click.left="downloadLocalCanvas")
+              img.icon.json-canvas(src="@/assets/json-canvas.svg")
+              span Canvas
 
   section.export
     // anon user
@@ -266,4 +270,6 @@ section.export
     display none
   .info-container
     margin-top 10px
+  details
+    margin-top -4px
 </style>

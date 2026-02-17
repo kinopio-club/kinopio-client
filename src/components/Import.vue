@@ -160,14 +160,19 @@ template(v-if="visible")
     input.hidden(type="file" ref="inputElement" accept="" @change="readFile")
     .row From File
     .row
-      button(@click.left="selectFile('canvas')" :class="{active: isLoadingCanvas}")
-        img.icon.json-canvas(src="@/assets/json-canvas.svg")
-        span Canvas
-        Loader(:visible="isLoadingCanvas")
       button(@click.left="selectFile('json')" :class="{active: isLoadingJson}")
         img.icon.file(src="@/assets/file.svg")
         span Space JSON
         Loader(:visible="isLoadingJson")
+
+    details
+      summary Other Formats
+      section.subsection
+        .row
+          button(@click.left="selectFile('canvas')" :class="{active: isLoadingCanvas}")
+            img.icon.json-canvas(src="@/assets/json-canvas.svg")
+            span Canvas
+            Loader(:visible="isLoadingCanvas")
 
     .row(v-if="state.unknownError")
       .badge.danger (シ_ _)シ Something went wrong parsing your file
@@ -205,4 +210,6 @@ section.import
     list-style-type square
   .row
     align-items baseline
+  details
+    margin-top -4px
 </style>
