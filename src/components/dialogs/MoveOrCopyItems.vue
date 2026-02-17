@@ -233,8 +233,13 @@ const notifyNewSpaceSuccess = (newSpace) => {
 <template lang="pug">
 dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeDialogs")
   section.title-section
-    .row
-      p {{actionLabelCapitalized}} to
+    .row.title-row
+      span {{actionLabelCapitalized}} to
+      .button-wrap(v-if="!actionIsMove && text")
+        button.small-button(@click.left="copyText")
+          img.icon.cut(src="@/assets/cut.svg")
+          span Clipboard
+
   section
     //- space picker
     .row
@@ -254,12 +259,6 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
       img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
       Loader(:visible="state.loading")
-
-  //- section(v-if="!actionIsMove && text")
-  //-   //- Copy Card Names
-  //-   button.button-small(@click.left="copyText")
-  //-     img.icon.copy(src="@/assets/copy.svg")
-  //-     span Copy Card Names
 
   //- error
   section.error-card-limit(v-if="state.cardsCreatedIsOverLimit")
