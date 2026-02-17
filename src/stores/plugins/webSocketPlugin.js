@@ -245,10 +245,14 @@ export default function webSocketPlugin () {
   }
 
   const handleAction = (store, pinia, action, updates) => {
-    const piniaStore = getPiniaStore(store, pinia)
-    piniaStore[action](updates)
-    checkIfShouldUpdateLinkToItem(pinia, { action, updates })
-    checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
+    try {
+      const piniaStore = getPiniaStore(store, pinia)
+      piniaStore[action](updates)
+      checkIfShouldUpdateLinkToItem(pinia, { action, updates })
+      checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
+    } catch (error) {
+      console.error('🚒 handleAction', error, { store, pinia, action, updates })
+    }
   }
   const receiveMessage = (pinia, data) => {
     const globalStore = useGlobalStore(pinia)
