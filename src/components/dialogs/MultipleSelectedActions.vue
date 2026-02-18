@@ -12,7 +12,9 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+// import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import CardActions from '@/components/subsections/CardActions.vue'
+import BoxActions from '@/components/subsections/BoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ListActions from '@/components/subsections/ListActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
@@ -504,7 +506,7 @@ dialog.narrow.multiple-selected-actions(
         button(title="Merge/Split Cards into List" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
           img.icon.list-icon(src="@/assets/list.svg")
     //- card options
-    CardOrBoxActions(
+    CardActions(
       :visible="cardsIsSelected && canEditAll.all"
       :cards="cards"
       @closeDialogs="closeDialogs"
@@ -512,9 +514,9 @@ dialog.narrow.multiple-selected-actions(
       :labelIsVisible="true"
     )
     //- box options
-    CardOrBoxActions(
+    BoxActions(
       :labelIsVisible="true"
-      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected && canEditAll.all"
+      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected || boxesIsSelected) && canEditAll.all"
       :boxes="boxes"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
