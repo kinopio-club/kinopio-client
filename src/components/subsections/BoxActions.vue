@@ -78,20 +78,13 @@ const updateDefaultColor = (color) => {
   state.defaultColor = color
 }
 
-const isVisible = computed(() => {
-  if (props.collapseExpandIsVisible) {
-    return props.labelIsVisible
-  }
-  return props.visible
-})
-
 // utils
 
 const closeDialogs = (shouldPreventEmit) => {
   state.colorPickerIsVisible = false
   state.fontPickerIsVisible = false
   globalStore.userDetailsIsVisible = false
-  if (shouldPreventEmit === true) { return }
+  if (shouldPreventEmit) { return }
   emit('closeDialogs')
 }
 const updateIsHover = (value) => {
@@ -106,7 +99,9 @@ const toggleShouldShowMultipleSelectedBoxActions = async () => {
   closeDialogs()
   const value = !shouldShowMultipleSelectedBoxActions.value
   await userStore.updateUser({ shouldShowMultipleSelectedBoxActions: value })
-  nextTick(() => { emit('scrollIntoView') })
+  nextTick(() => {
+    emit('scrollIntoView')
+  })
 }
 
 // items (boxes only)
@@ -251,7 +246,7 @@ const updateBox = (box, updates) => {
 
 <template lang="pug">
 section.subsection.style-actions(
-  v-if="isVisible"
+  v-if="props.boxes.length"
   @click.left.stop="closeDialogs"
   :class="colorClasses"
   @pointerover="updateIsHover(true)"

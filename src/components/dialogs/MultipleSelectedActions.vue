@@ -516,7 +516,7 @@ dialog.narrow.multiple-selected-actions(
     //- box options
     BoxActions(
       :labelIsVisible="true"
-      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected || boxesIsSelected) && canEditAll.all"
+      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected"
       :boxes="boxes"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
