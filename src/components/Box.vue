@@ -335,9 +335,9 @@ const shrinkToDefaultBoxSize = () => {
 }
 const shrink = () => {
   prevSelectedBox = props.box
-  const { cards, boxes } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
+  const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
   prevSelectedBox = null
-  const items = cards.concat(boxes)
+  const items = cards.concat(boxes, lists)
   if (!items.length) {
     shrinkToDefaultBoxSize()
     return

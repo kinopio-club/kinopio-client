@@ -410,7 +410,7 @@ export const useBoxStore = defineStore('boxes', {
 
     // contained items
 
-    isItemInSelectedBoxes (item, type, selectedBox) {
+    isItemInSelectedBoxes (item, selectedBox) {
       if (item.listId) { return }
       const threshold = 1
       item.width = item.width || item.resizeWidth
@@ -450,20 +450,20 @@ export const useBoxStore = defineStore('boxes', {
       const lists = []
       // cards
       cardStore.getCardsSelectableByY.cards.forEach(card => {
-        if (this.isItemInSelectedBoxes(card, 'card', selectedBox)) {
+        if (this.isItemInSelectedBoxes(card, selectedBox)) {
           cards.push(card)
         }
       })
       // boxes
       const selectableBoxes = this.getAllBoxes
       this.getBoxesSelectableByY.boxes.forEach(box => {
-        if (this.isItemInSelectedBoxes(box, 'box', selectedBox)) {
+        if (this.isItemInSelectedBoxes(box, selectedBox)) {
           boxes.push(box)
         }
       })
       // lists
       listStore.getAllLists.forEach(list => {
-        if (this.isItemInSelectedBoxes(list, 'list', selectedBox)) {
+        if (this.isItemInSelectedBoxes(list, selectedBox)) {
           lists.push(list)
         }
       })
