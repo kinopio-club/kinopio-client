@@ -863,6 +863,14 @@ export const useGlobalStore = defineStore('global', {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteListDetailsVisible = this.remoteListDetailsVisible.filter(list => list.userId !== update.userId) || []
     },
+    removeRemoteUserResizingLists (update) {
+      this.remoteUserResizingLists = this.remoteUserResizingLists.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+
+    updateRemoteUserResizingLists (update) {
+      this.remoteUserResizingLists = this.remoteUserResizingLists.filter(remoteUser => remoteUser.userId !== update.userId)
+      this.remoteUserResizingLists = this.remoteUserResizingLists.concat(update)
+    },
 
     // drawing
 
