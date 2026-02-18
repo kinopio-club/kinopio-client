@@ -412,6 +412,7 @@ const buttonClasses = computed(() => {
 // actions
 
 const toggleIsCollapsed = async () => {
+  cancelLocking()
   const value = !props.list.isCollapsed
   updateIsCollapsed(value)
   globalStore.clearAllSelected()
@@ -432,6 +433,7 @@ const updateIsCollapsed = async (value) => {
 }
 const addCard = async () => {
   if (globalStore.preventDraggedListFromShowingDetails) { return }
+  cancelLocking()
   updateIsCollapsed(false)
   const width = listItemWidth.value
   const card = {
@@ -595,11 +597,11 @@ const placeholderStylesMap = computed(() => {
         span.name(:title="props.list.name") {{ props.list.name }}
       .right-side.button-wrap
         //- add card
-        .inline-button-wrap(title="Add Card" @click.left.stop="addCard")
+        .inline-button-wrap(title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
           button.small-button.inline-button
             img.icon.add(src="@/assets/add.svg")
         //- toggle collapse
-        .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed")
+        .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed" @touchend.stop="toggleIsCollapsed")
           button.small-button.inline-button
             img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
