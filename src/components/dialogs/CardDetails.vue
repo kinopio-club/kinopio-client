@@ -1206,7 +1206,7 @@ const addListCard = () => {
   globalStore.shouldPreventNextEnterKey = false
   const prevCard = cardStore.getCard(prevCardId)
   cardStore.createCard(newCard, true)
-  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: prevCard.listPositionIndex, shouldPrepend: false })
+  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: prevCard.listPositionIndex })
   globalStore.parentCardId = newCard.id
   globalStore.updateCardDetailsIsVisibleForCardId(newCard.id)
 }

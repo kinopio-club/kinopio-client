@@ -1031,7 +1031,7 @@ export const useCardStore = defineStore('cards', {
       }
       await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: true })
     },
-    async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend = true }) {
+    async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend }) {
       const globalStore = useGlobalStore()
       try {
         const ids = cards.map(card => card.id)
