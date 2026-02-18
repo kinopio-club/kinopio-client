@@ -1195,7 +1195,6 @@ const addListCard = () => {
   const list = listStore.getList(card.value.listId)
   const newCard = {
     id: nanoid(),
-    listId: card.value.listId,
     width: card.value.width,
     resizeWidth: card.value.resizeWidth,
     x: card.value.x,
@@ -1205,8 +1204,9 @@ const addListCard = () => {
   closeCard()
   globalStore.closeAllDialogs()
   globalStore.shouldPreventNextEnterKey = false
+  const prevCard = cardStore.getCard(prevCardId)
   cardStore.createCard(newCard, true)
-  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: card.value.listPositionIndex })
+  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: prevCard.listPositionIndex, shouldPrepend: false })
   globalStore.parentCardId = newCard.id
   globalStore.updateCardDetailsIsVisibleForCardId(newCard.id)
 }
