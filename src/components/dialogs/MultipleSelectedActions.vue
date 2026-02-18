@@ -131,7 +131,7 @@ const alignableItemsIsSelected = computed(() => {
     const isInSelectedList = multipleListsSelectedIds.value.includes(id)
     return !isInSelectedList
   })
-  return cardIds.length > 1 || boxIds.length > 1 || listIds.length > 1
+  return (cardIds.length + boxIds.length + listIds.length) > 1
 })
 const selectedItemsIsEditableByCurrentUser = computed(() => {
   const isCards = editableCards.value.length === cards.value.length
