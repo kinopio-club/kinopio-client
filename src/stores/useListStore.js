@@ -136,6 +136,7 @@ export const useListStore = defineStore('lists', {
       list.color = color || randomColor({ luminosity: 'dark' })
       list.y = Math.max(y, consts.minItemXY)
       list.resizeWidth = resizeWidth || defaultListWidth || consts.minListWidth
+      list.height = consts.listEmptyHeight
       list.isCollapsed = false
       list.name = name || `List ${count}`
       list.userId = userStore.id
