@@ -102,6 +102,7 @@ const styles = computed(() => {
   return styles
 })
 const broadcastShowListDetails = () => {
+  if (!canEditSpace.value) { return }
   const updates = {
     listId: currentList.value.id,
     userId: userStore.id
@@ -218,18 +219,18 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    .row
+    .row(v-if="canEditSpace")
       //- remove
       .button-wrap(v-if="canEditSpace")
         button.danger(@click.left="removeList" title="Remove List")
           img.icon(src="@/assets/remove.svg")
-
-    ListActions(
-      :visible="true"
-      :lists="[currentList]"
-      @closeDialogs="closeDialogs"
-      :colorIsHidden="true"
-    )
+    template(v-if="canEditSpace")
+      ListActions(
+        :visible="true"
+        :lists="[currentList]"
+        @closeDialogs="closeDialogs"
+        :colorIsHidden="true"
+      )
 
     ItemDetailsDebug(:item="currentList" :keys="['x', 'y', 'height', 'resizeWidth']")
 </template>

@@ -93,6 +93,7 @@ const styles = computed(() => {
   return styles
 })
 const broadcastShowLineDetails = () => {
+  if (canEditSpace.value) { return }
   const updates = {
     lineId: currentLine.value.id,
     userId: userStore.id
@@ -218,9 +219,9 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    .row
+    .row(v-if="canEditSpace")
       //- remove
-      .button-wrap(v-if="canEditSpace")
+      .button-wrap
         button.danger(@click.left="removeLine" title="Remove Line")
           img.icon(src="@/assets/remove.svg")
       //- jump to

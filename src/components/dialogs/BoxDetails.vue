@@ -68,6 +68,7 @@ watch(() => visible.value, async (value, prevValue) => {
 })
 
 const broadcastShowBoxDetails = () => {
+  if (!canEditBox.value) { return }
   const updates = {
     boxId: currentBox.value.id,
     userId: userStore.id
