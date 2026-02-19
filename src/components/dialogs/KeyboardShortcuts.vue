@@ -145,12 +145,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .row
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
-            span Box Mode
+            span Draw Box
           .badge.keyboard-shortcut B
         .row
           .badge.title
-            //- TODO img.icon.box-icon(src="@/assets/box.svg")
-            span Line Mode
+            img.icon.list-icon(src="@/assets/list.svg")
+            span Draw List
           .badge.keyboard-shortcut L
         .row
           .badge.title
