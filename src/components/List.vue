@@ -9,6 +9,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
+import Frames from '@/components/Frames.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -376,8 +377,23 @@ const listBackgroundStyles = computed(() => {
   styles.backgroundColor = color.value
   return styles
 })
-const classes = computed(() => {
-  return {
+const addSizeClasses = (classes) => {
+  const height = props.list.height
+  const width = props.list.resizeWidth
+  const sizes = {
+    m: 100,
+    l: 150
+  }
+  classes['s-width'] = width < sizes.m
+  classes['m-width'] = utils.isBetween({ value: width, min: sizes.m, max: sizes.l })
+  classes['l-width'] = width > sizes.l
+  classes['s-height'] = height < sizes.m
+  classes['m-height'] = utils.isBetween({ value: height, min: sizes.m, max: sizes.l })
+  classes['l-height'] = height > sizes.l
+  return classes
+}
+const listClasses = computed(() => {
+  let classes = {
     hover: state.isHover,
     active: currentListIsBeingDragged.value,
     'is-resizing': isResizing.value,
@@ -385,6 +401,8 @@ const classes = computed(() => {
     // filtered: isFiltered.value,
     // transition: !globalStore.currentListIsNew || !globalStore.currentUserIsResizingList
   }
+  classes = addSizeClasses(classes)
+  return classes
 })
 const infoClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: color.value })
@@ -537,15 +555,16 @@ const placeholderStylesMap = computed(() => {
   :data-height="props.list.height"
   :data-is-collapsed="props.list.isCollapsed"
   :style="listStyles"
-  :class="classes"
+  :class="listClasses"
   ref="listElement"
 )
+  Frames(v-if="props.list.isCollapsed" :item="props.list")
   teleport(to="#list-backgrounds")
     .list-background(
       v-if="!props.list.isCollapsed"
       :data-list-id="props.list.id"
       :style="listBackgroundStyles"
-      :class="classes"
+      :class="listClasses"
     )
       //- resize
       .bottom-button-wrap.asldfkj(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
@@ -560,6 +579,8 @@ const placeholderStylesMap = computed(() => {
             tabindex="-1"
           )
             img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+      Frames(:item="props.list")
+
     //- placeholders
     template(v-if="!props.list.isCollapsed")
       template(v-for="card in listChildPlaceholders" :key="card.id")

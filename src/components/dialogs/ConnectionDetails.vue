@@ -290,9 +290,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
 
-    //- debug
-    ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
-
     //- label, reverse etc.
     ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
 
@@ -309,6 +306,10 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       template(v-else-if="spacePrivacyIsClosed")
         img.icon(src="@/assets/unlock.svg")
         span Read Only
+
+    //- debug
+    ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
+
   section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
     //- Use Last Type
     .row.title-row

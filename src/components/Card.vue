@@ -2088,7 +2088,7 @@ const metaContainerStyles = computed(() => {
       img(src="@/assets/anon-avatar.svg")
 
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    Frames(:card="card")
+    Frames(:item="card")
 
     template(v-if="isVisualCard || pendingUploadDataUrl")
       ImageOrVideo(
