@@ -12,7 +12,6 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-// import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import CardActions from '@/components/subsections/CardActions.vue'
 import BoxActions from '@/components/subsections/BoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'

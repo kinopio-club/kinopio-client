@@ -313,7 +313,8 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundPickerIsVisible")
         BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
 
-    BoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    template(v-if="canEditBox")
+      BoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
@@ -336,9 +337,11 @@ dialog.box-details
     width calc(100% - 6px)
     border-color var(--primary-border)
     &.is-dark
+      -webkit-text-fill-color var(--primary-on-dark-background)
       color var(--primary-on-dark-background)
       border-color var(--primary-border-on-dark-background)
     &.is-light
+      -webkit-text-fill-color var(--primary-on-light-background)
       color var(--primary-on-light-background)
       border-color var(--primary-border-on-light-background)
   .info-row
