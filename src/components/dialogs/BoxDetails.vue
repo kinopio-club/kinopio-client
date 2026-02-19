@@ -284,7 +284,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         )
       //- name
       .textarea-wrap
-        textarea.name(
+        textarea.name.on-background-color(
           :disabled="!canEditBox"
           ref="nameElement"
           rows="1"
@@ -331,20 +331,6 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
 <style lang="stylus">
 dialog.box-details
   transform-origin top left
-  textarea.name
-    margin-left 6px
-    margin-top 2px
-    margin-bottom 0
-    width calc(100% - 6px)
-    border-color var(--primary-border)
-    &.is-dark
-      -webkit-text-fill-color var(--primary-on-dark-background)
-      color var(--primary-on-dark-background)
-      border-color var(--primary-border-on-dark-background)
-    &.is-light
-      -webkit-text-fill-color var(--primary-on-light-background)
-      color var(--primary-on-light-background)
-      border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
   .filter-button-wrap

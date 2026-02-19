@@ -172,11 +172,6 @@ const endLineInfoInteraction = (event) => {
   if (isMultiTouch) { return }
   globalStore.clearMultipleSelected()
   broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
-  // read only
-  if (!userIsSpaceMember.value) {
-    globalStore.triggerReadOnlyJiggle()
-    return
-  }
   // touch button fix
   const isButton = event.target.closest('button')
   if (isButton) {

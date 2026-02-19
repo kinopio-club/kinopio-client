@@ -209,7 +209,7 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
         )
       //- name
       .textarea-wrap
-        textarea.name(
+        textarea.name.on-background-color(
           :disabled="!canEditSpace"
           ref="nameElement"
           rows="1"
@@ -243,18 +243,6 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
 <style lang="stylus">
 dialog.link-details
   transform-origin top left
-  textarea.name
-    margin-left 6px
-    margin-top 2px
-    margin-bottom 0
-    width calc(100% - 6px)
-    border-color var(--primary-border)
-    &.is-dark
-      color var(--primary-on-dark-background)
-      border-color var(--primary-border-on-dark-background)
-    &.is-light
-      color var(--primary-on-light-background)
-      border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
   .up-arrow
