@@ -1563,7 +1563,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
       //- Read Only
       template(v-if="!canEditCard")
-        CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
         .row.edit-message
           template(v-if="spacePrivacyIsOpen")
             span.badge.info
