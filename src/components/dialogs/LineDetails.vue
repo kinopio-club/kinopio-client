@@ -37,7 +37,7 @@ watch(() => visible.value, async (value, prevValue) => {
   await nextTick()
   if (value) {
     closeDialogs()
-    // broadcastShowLineDetails()
+    broadcastShowLineDetails()
     scrollIntoViewAndFocus()
     textareaSizes()
     globalStore.preventMultipleSelectedActionsIsVisible = false

@@ -1531,6 +1531,8 @@ export const useGlobalStore = defineStore('global', {
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteCardDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteConnectionDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteBoxDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteListDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteLineDetailsVisible' })
       this.passwordResetIsVisible = false
       this.updateFocusOnCardId('')
       this.updateFocusOnBoxId('')
