@@ -219,9 +219,9 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    .row(v-if="canEditSpace")
+    .row
       //- remove
-      .button-wrap
+      .button-wrap(v-if="canEditSpace")
         button.danger(@click.left="removeLine" title="Remove Line")
           img.icon(src="@/assets/remove.svg")
       //- jump to
@@ -231,7 +231,7 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
             img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
           button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
             img.icon.down-arrow(src="@/assets/down-arrow.svg")
-    .row(v-else)
+    .row(v-if="!canEditSpace")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
