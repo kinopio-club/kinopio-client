@@ -62,7 +62,7 @@ const DrawingLabel = computed(() => {
 nav#toolbar.toolbar(v-if="visible")
   DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
-    .segmented-buttons
+    .segmented-buttons-vertical
       //- Line
       .button-wrap
         button(
@@ -72,27 +72,27 @@ nav#toolbar.toolbar(v-if="visible")
         )
           img.icon.line-icon(src="@/assets/line.svg")
 
-      //- Box
-      .button-wrap
-        button(
-          title="Draw Box (B)"
-          :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
-          @click="toggleToolbar('box')"
-        )
-          img.icon.box-icon(src="@/assets/box.svg")
-        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
-          span Draw Box (B)
-
-      //- List
-      .button-wrap
-        button(
-          title="Draw List (L)"
-          :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
-          @click="toggleToolbar('list')"
-        )
-          img.icon.list-icon(src="@/assets/list.svg")
-        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
-          span Draw List (L)
+      .segmented-buttons-horizontal
+        //- List
+        .button-wrap
+          button(
+            title="Draw List (L)"
+            :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
+            @click="toggleToolbar('list')"
+          )
+            img.icon.list-icon(src="@/assets/list.svg")
+          .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
+            span Draw List (L)
+        //- Box
+        .button-wrap
+          button(
+            title="Draw Box (B)"
+            :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+            @click="toggleToolbar('box')"
+          )
+            img.icon.box-icon(src="@/assets/box.svg")
+          .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
+            span Draw Box (B)
 
       //- Drawing
       .button-wrap
@@ -109,7 +109,7 @@ nav#toolbar.toolbar(v-if="visible")
 <style lang="stylus">
 nav.toolbar
   position absolute
-  top 44px
+  top 54px
   .toolbar-badge-wrap
     pointer-events none
     position absolute
@@ -122,7 +122,26 @@ nav.toolbar
       width 100%
       color var(--primary)
   .toolbar-items
-    .segmented-buttons
+    .segmented-buttons-horizontal
+      > .button-wrap
+        margin 0
+        > button
+          width 30px
+          z-index -1
+          padding 5px 8px
+          margin-top -1px
+          margin-bottom -1px
+      > .button-wrap
+        &:first-child
+          > button
+            border-radius 0
+        &:last-child
+          > button
+            border-top-left-radius 0
+            border-bottom-left-radius 0
+            margin-left -1px
+
+    .segmented-buttons-vertical
       display flex
       flex-flow column
       > .button-wrap
@@ -141,9 +160,9 @@ nav.toolbar
             border-radius 0
             border-bottom-left-radius var(--entity-radius)
             border-bottom-right-radius var(--entity-radius)
-      > .button-wrap + .button-wrap
-        margin 0
-        margin-top -1px
+        > .button-wrap + .button-wrap
+          margin 0
+          margin-top -1px
       .icon.line-icon
         vertical-align -2px
 </style>

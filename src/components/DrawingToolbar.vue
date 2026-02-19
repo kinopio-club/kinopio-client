@@ -141,7 +141,7 @@ const clearDrawing = () => {
 <style lang="stylus">
 .drawing-toolbar
   position absolute
-  top 87px
+  top 58px
   left 29px
   display block
   dialog
