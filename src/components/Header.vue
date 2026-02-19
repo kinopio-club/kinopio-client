@@ -687,6 +687,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   img.icon.inbox-icon(v-if="currentSpaceIsInbox" src="@/assets/inbox.svg")
                   //- name
                   span.space-name {{currentSpaceName}}
+                  .space-name-icons
                     //- template
                     span(v-if="currentSpaceIsTemplate")
                       img.icon.templates(src="@/assets/templates.svg")
@@ -866,6 +867,11 @@ header
     > .search
       vertical-align 0
 
+  .space-name-icons
+    margin-left 5px
+    span + img
+      margin-left 5px
+
   .space-details-button
     display flex !important
   .space-name-wrap
@@ -927,8 +933,6 @@ header
     .icon.explore
       width 16px
       vertical-align -2px
-    .icon.templates
-      width 11px
     .label-badge
       width max-content
       pointer-events none
