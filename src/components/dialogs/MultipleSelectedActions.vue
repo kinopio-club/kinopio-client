@@ -534,12 +534,11 @@ dialog.narrow.multiple-selected-actions(
       :collapseExpandIsVisible="connectionCollapseExpandIsVisible"
       @scrollIntoView="scrollIntoView"
     )
-    //- connection line options
+    //- list options
     ListActions(
       :visible="(shouldShowMultipleSelectedListActions || onlyListsIsSelected) && listsIsSelected"
       :lists="lists"
       @closeDialogs="closeDialogs"
-      :canEditAll="canEditAll"
       :backgroundColor="userColor"
       label="LIST"
       :collapseExpandIsVisible="listCollapseExpandIsVisible"

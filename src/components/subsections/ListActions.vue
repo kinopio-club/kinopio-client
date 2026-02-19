@@ -40,12 +40,10 @@ onBeforeUnmount(() => {
 const props = defineProps({
   visible: Boolean,
   lists: Array,
-  canEditAll: Object,
   backgroundColor: String,
   label: String,
   collapseExpandIsVisible: Boolean,
   colorIsHidden: Boolean
-  // shouldHideColor: Boolean
 })
 const state = reactive({
   isHover: false,
@@ -56,6 +54,8 @@ const state = reactive({
 const colorClasses = computed(() => {
   return utils.colorClasses({ backgroundColor: props.backgroundColor })
 })
+
+const canEditAll = computed(() => userStore.getUserIsSpaceMember)
 
 // utils
 

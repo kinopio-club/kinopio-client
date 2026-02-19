@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import ListActions from '@/components/subsections/ListActions.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 
@@ -30,7 +31,8 @@ const state = reactive({
 
 let prevList
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const canEditSpace = computed(() => userStore.getUserIsSpaceMember)
+
 const currentList = computed(() => {
   return listStore.getList(globalStore.listDetailsIsVisibleForListId) || {}
 })
@@ -220,6 +222,14 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
       .button-wrap(v-if="canEditSpace")
         button.danger(@click.left="removeList" title="Remove List")
           img.icon(src="@/assets/remove.svg")
+
+    ListActions(
+      :visible="true"
+      :lists="[currentList]"
+      @closeDialogs="closeDialogs"
+      :colorIsHidden="true"
+    )
+
     ItemDetailsDebug(:item="currentList" :keys="['x', 'y', 'height', 'resizeWidth']")
 </template>
 
