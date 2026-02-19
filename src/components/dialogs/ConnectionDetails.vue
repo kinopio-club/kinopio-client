@@ -104,9 +104,6 @@ const scrollIntoViewAndFocus = async () => {
     element.setSelectionRange(length, length)
   }
 }
-const triggerSignUpOrInIsVisible = () => {
-  globalStore.triggerSignUpOrInIsVisible()
-}
 const focus = () => {
   globalStore.pinchCounterZoomDecimal = 1
 }
@@ -124,9 +121,7 @@ const closeAllDialogs = () => {
 // space
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
-const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
 const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 
@@ -291,19 +286,11 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         img.icon(src="@/assets/remove.svg")
 
     //- label, reverse etc.
-    ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
-
-    p.edit-message.badge.info(v-if="!canEditConnection")
-      template(v-if="spacePrivacyIsOpen")
-        img.icon.open(src="@/assets/open.svg")
-        span In open spaces, you can only edit connections you created
-      template(v-else-if="isInvitedButCannotEditSpace")
-        img.icon(src="@/assets/unlock.svg")
-        span To edit spaces you've been invited to, you'll need to sign up or in
-        .row
-          .button-wrap
-            button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-      template(v-else-if="spacePrivacyIsClosed")
+    template(v-if="canEditConnection")
+      ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
+    //- read only badge
+    .row(v-if="!canEditConnection")
+      .badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
 
