@@ -142,6 +142,7 @@ export const useListStore = defineStore('lists', {
       list.userId = userStore.id
       list.spaceId = spaceId || spaceStore.id
       list.z = 0
+      list.frameId = 0
       return list
     },
     addListToState (list) {

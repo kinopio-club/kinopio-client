@@ -7,6 +7,7 @@ import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import FramePicker from '@/components/dialogs/FramePicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
@@ -47,8 +48,8 @@ const props = defineProps({
 })
 const state = reactive({
   isHover: false,
-  colorPickerIsVisible: false
-  // defaultColor: '#e3e3e3',
+  colorPickerIsVisible: false,
+  framePickerIsVisible: false
 })
 
 const colorClasses = computed(() => {
@@ -64,6 +65,8 @@ const closeDialogsAndEmit = () => {
   emit('closeDialogs')
 }
 const closeDialogs = () => {
+  state.framePickerIsVisible = false
+  state.colorPickerIsVisible = false
 }
 const updateIsHover = (value) => {
   state.isHover = value
@@ -121,6 +124,17 @@ const updateColor = (color) => {
   })
 }
 
+// frames
+
+const isFrames = computed(() => {
+  const lists = props.lists.filter(list => list.frameId)
+  return lists.length === props.lists.length
+})
+const toggleFramePickerIsVisible = () => {
+  const isVisible = state.framePickerIsVisible
+  closeDialogs()
+  state.framePickerIsVisible = !isVisible
+}
 </script>
 
 <template lang="pug">
@@ -129,6 +143,7 @@ section.subsection.list-actions(
   :class="colorClasses"
   @pointerover="updateIsHover(true)"
   @pointerleave="updateIsHover(false)"
+  @click="closeDialogs"
 )
   template(v-if="props.visible")
     p.subsection-vertical-label(v-if="props.label" :style="{ background: props.backgroundColor }")
@@ -145,6 +160,12 @@ section.subsection.list-actions(
           @selectedColor="updateColor"
           :luminosityIsDark="true"
         )
+      //- Frame
+      .button-wrap
+        button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active: state.framePickerIsVisible || isFrames }")
+          span Frame
+        FramePicker(:visible="state.framePickerIsVisible" :lists="lists")
+
   //- collapsed horizontal label
   template(v-else)
     .subsection-horizontal-label(@click="toggleShouldShowMultipleSelectedListActions")

@@ -60,6 +60,7 @@ const lists = computed(() => listStore.getAllLists)
 
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
+  globalStore.triggerCloseChildDialogs()
 }
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
