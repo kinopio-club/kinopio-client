@@ -172,41 +172,6 @@ export default {
     space.cacheDate = Date.now()
     await this.saveSpace(space)
   },
-  updateSpaceCardsDebounced: debounce(async function (cards, spaceId) {
-    cards = utils.denormalizeItems(cards)
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    cards = utils.denormalizeItems(cards)
-    space.cards = cards
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
-  }, 200),
-  updateSpaceConnectionsDebounced: debounce(async function (connections, spaceId) {
-    connections = utils.denormalizeItems(connections)
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    space.connections = connections
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
-  }, 200),
-  updateSpaceBoxesDebounced: debounce(async function (boxes, spaceId) {
-    boxes = utils.denormalizeItems(boxes)
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    boxes = utils.denormalizeItems(boxes)
-    space.boxes = boxes
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
-  }, 200),
 
   async addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
     // space items
