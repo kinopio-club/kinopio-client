@@ -8,6 +8,7 @@ import consts from '@/consts.js'
 
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
 let showDebugMessages = false
+const spaceUpdateQueue = {} // spaceId → Promise chain
 
 export default {
   async migrateFromLocalStorage () {
@@ -158,21 +159,26 @@ export default {
     }
   },
   async updateSpace (key, value, spaceId) {
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    const itemTypes = consts.itemTypes
-    if (itemTypes.includes(key)) {
-      value = utils.denormalizeItems(value)
-    }
-    space[key] = value
-    space.clients = []
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
+  // Serialize updates per space to prevent read-write race conditions
+    const prev = spaceUpdateQueue[spaceId] || Promise.resolve()
+    const next = prev.then(async () => {
+      const space = await this.space(spaceId)
+      if (!utils.objectHasKeys(space)) {
+        console.warn(updateErrorMessage)
+        return
+      }
+      const itemTypes = consts.itemTypes
+      if (itemTypes.includes(key)) {
+        value = utils.denormalizeItems(value)
+      }
+      space[key] = value
+      space.clients = []
+      space.cacheDate = Date.now()
+      await this.saveSpace(space)
+    })
+    spaceUpdateQueue[spaceId] = next.catch(() => {}) // prevent a rejected promise from breaking the chain
+    return next
   },
-
   async addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
     // space items
     const space = await this.space(spaceId)
