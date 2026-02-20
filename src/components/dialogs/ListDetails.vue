@@ -232,7 +232,7 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
         @closeDialogs="closeDialogs"
         :colorIsHidden="true"
       )
-    .row(v-if="!canEditBox")
+    .row(v-if="!canEditSpace")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
