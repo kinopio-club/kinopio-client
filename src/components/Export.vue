@@ -226,7 +226,7 @@ template(v-if="visible")
       .button-wrap
         button(@click.left="downloadLocalJson")
           img.icon.file(src="@/assets/file.svg")
-          span Space JSON
+          span Kinopio JSON
 
   section.export
     // anon user
