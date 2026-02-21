@@ -17,14 +17,14 @@ export const createApp = ViteSSG(
   async ({ app, router, isClient, initialState }) => {
     const pinia = createPinia()
     pinia.use(webSocketPlugin())
-
-    router.push('/')
-    app.use(router)
     app.use(pinia)
 
     if (isClient) {
       const userStore = useUserStore()
       await userStore.initializeUser()
     }
+
+    router.push('/')
+    app.use(router)
   }
 )

@@ -39,6 +39,7 @@ export const useUserStore = defineStore('user', {
     cardsCreatedCountRaw: 0,
     isUpgraded: false,
     isModerator: false,
+    isAnonymous: false,
     filterShowUsers: false,
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
@@ -117,6 +118,9 @@ export const useUserStore = defineStore('user', {
       return utils.userMeta(this.getUserAllState, spaceStore.getSpaceAllState)
     },
     getUserIsSignedIn () {
+      return Boolean(this.apiKey) && !this.isAnonymous
+    },
+    getUserHasAPIKey () {
       return Boolean(this.apiKey)
     },
     getUserCardsCreatedIsOverLimit () {
@@ -302,8 +306,12 @@ export const useUserStore = defineStore('user', {
       console.info('🌸 Create new user')
       this.themeIsSystem = true
       this.appleAppAccountToken = uuidv4()
-      const allState = { ...this.$state }
-      cache.saveUser(allState)
+      this.isAnonymous = true
+      this.color = randomColor({ luminosity: 'light', seed: this.id })
+      const apiStore = useApiStore()
+      const response = await apiStore.createAnonymousUser(this.getUserAllState)
+      const user = await response.json()
+      await this.initializeUserState(user)
     },
     async restoreRemoteUser () {
       const apiStore = useApiStore()
@@ -371,6 +379,7 @@ export const useUserStore = defineStore('user', {
     async initializeUser () {
       const globalStore = useGlobalStore()
       const themeStore = useThemeStore()
+      const spaceStore = useSpaceStore()
       const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.info('🌸 Initialize user from cache', cachedUser.id)
@@ -379,7 +388,7 @@ export const useUserStore = defineStore('user', {
         this.restoreRemoteUser()
         this.restoreUserAssociatedData()
       } else {
-        this.createNewUser()
+        await this.createNewUser()
         themeStore.restoreTheme()
       }
       globalStore.triggerUserIsLoaded()

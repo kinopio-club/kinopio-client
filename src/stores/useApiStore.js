@@ -218,8 +218,7 @@ export const useApiStore = defineStore('api', {
       body.spaceId = spaceId || spaceStore.id
       body.userId = userStore.id
       body.clientCreatedAt = new Date()
-      const isSignedIn = userStore.getUserIsSignedIn
-      if (!isSignedIn) { return }
+      if (!userStore.getUserHasAPIKey) { return }
       const newItem = {
         name,
         body
@@ -305,6 +304,13 @@ export const useApiStore = defineStore('api', {
       } catch (error) {
         this.handleServerError({ name: 'getEmojis', error })
       }
+    },
+
+    // Anonymous User
+
+    async createAnonymousUser (user) {
+      const options = await this.requestOptions({ method: 'POST', body: user })
+      return fetch(`${consts.apiHost()}/user/create-anonymous`, options)
     },
 
     // Session Token (sign up spam mitigation)
