@@ -1156,29 +1156,28 @@ export const useCardStore = defineStore('cards', {
 
     // snap guides
 
+    distanceCursorToCardEdge ({ cursor, targetCard, edgeY }) {
+      const nearestEdgeX = Math.max(targetCard.x, Math.min(cursor.x, targetCard.x + targetCard.width))
+      const dx = cursor.x - nearestEdgeX
+      const dy = cursor.y - edgeY
+      return Math.sqrt(dx * dx + dy * dy)
+    },
     createCardSnapGuide ({ side, item, targetCard, cursor }) {
-      let time = Date.now()
+      const edgeParams = {
+        top: {
+          edgeY: targetCard.y,
+          sizeOutside: Math.abs(targetCard.y - item.y)
+        },
+        bottom: {
+          edgeY: targetCard.y + targetCard.height,
+          sizeOutside: Math.abs((targetCard.y + targetCard.height) - (item.y + item.height))
+        }
+      }
+      if (!edgeParams[side]) { return }
+      const { edgeY, sizeOutside } = edgeParams[side]
       const prevGuide = this.cardSnapGuides.find(guide => guide.side === side)
-      if (prevGuide) {
-        time = prevGuide.time
-      }
-      let distance, sizeOutside
-      // can only snap to target card top or bottom
-      if (side === 'top') {
-        const targetY = targetCard.y
-        const distanceFromLeft = Math.abs(cursor.y - targetY)
-        const distanceFromRight = Math.abs(cursor.y - (targetY + targetCard.width))
-        distance = Math.min(distanceFromLeft, distanceFromRight)
-        sizeOutside = Math.abs(targetY - item.y)
-      } else if (side === 'bottom') {
-        const targetY = targetCard.y + targetCard.height
-        const distanceFromLeft = Math.abs(cursor.y - targetY)
-        const distanceFromRight = Math.abs(cursor.y - (targetY + targetCard.width))
-        distance = Math.min(distanceFromLeft, distanceFromRight)
-        sizeOutside = Math.abs(targetY - (item.y + item.height))
-      } else {
-        return
-      }
+      const time = prevGuide ? prevGuide.time : Date.now()
+      const distance = this.distanceCursorToCardEdge({ cursor, targetCard, edgeY })
       return { side, item, target: targetCard, time, distance, sizeOutside }
     },
     updateCardSnapGuides ({ items, cursor }) {
@@ -1212,29 +1211,24 @@ export const useCardStore = defineStore('cards', {
         const targetIsMinX = target.x <= spaceEdgeThreshold
         const targetIsMinY = target.y <= spaceEdgeThreshold
         // card side is on target edge
-        const cardIsOverTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
-        const cardIsOverTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })
-        const cardIsOverTargetLeft = utils.isBetween({ value: targetLeft, min: cardLeft, max: cardRight })
-        const cardIsOverTargetRight = utils.isBetween({ value: targetRight, min: cardLeft, max: cardRight })
-        // card inside target
-        const cardLeftIsInsideTarget = utils.isBetween({ value: cardLeft, min: targetLeft, max: targetRight })
-        const cardRightIsInsideTarget = utils.isBetween({ value: cardRight, min: targetLeft, max: targetRight })
-        const cardTopIsInsideTarget = utils.isBetween({ value: cardTop, min: targetTop, max: targetBottom })
-        const cardBottomIsInsideTarget = utils.isBetween({ value: cardBottom, min: targetTop, max: targetBottom })
+        const cardOverlapsTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
+        const cardOverlapsTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })
+        const cardOverlapsTargetX = cardLeft < targetRight && cardRight > targetLeft
+        const cardOverlapsTargetY = cardTop < targetBottom && cardBottom > targetTop
+        const cardOverlapsTarget = cardOverlapsTargetX && cardOverlapsTargetY
         // card is in list if snapping to list
         let cardIsValidListSnap = true
         if (listStore.listSnapGuides.listId) {
           cardIsValidListSnap = listStore.listSnapGuides.listId === card.listId
         }
-        const isSnapTop = cardIsOverTargetTop && (cardLeftIsInsideTarget || cardRightIsInsideTarget) && cardIsValidListSnap
-        const isSnapBottom = cardIsOverTargetBottom && (cardLeftIsInsideTarget || cardRightIsInsideTarget) && cardIsValidListSnap
+        const isSnapable = cardOverlapsTarget && cardIsValidListSnap
         // snap top
-        if (isSnapTop) {
+        if (cardOverlapsTargetTop && isSnapable) {
           const snapGuide = this.createCardSnapGuide({ side: 'top', item: card, targetCard: target, cursor })
           snapGuides.push(snapGuide)
         }
         // snap bottom
-        if (isSnapBottom) {
+        if (cardOverlapsTargetBottom && isSnapable) {
           const snapGuide = this.createCardSnapGuide({ side: 'bottom', item: card, targetCard: target, cursor })
           snapGuides.push(snapGuide)
         }
@@ -1243,7 +1237,7 @@ export const useCardStore = defineStore('cards', {
         this.cardSnapGuides = []
         return
       }
-      snapGuides = sortBy(snapGuides, ['distance'])
+      snapGuides = sortBy(snapGuides, ['distance', 'sizeOutside'])
       // limit snap to closest target
       snapGuides = [snapGuides[0]]
       this.cardSnapGuides = snapGuides
