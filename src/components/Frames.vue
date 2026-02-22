@@ -2,10 +2,10 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 const props = defineProps({
-  card: Object
+  item: Object
 })
 
-const id = computed(() => props.card?.frameId)
+const id = computed(() => props.item?.frameId)
 const isGardenLeaves = computed(() => Boolean(id.value === 1))
 const isMagicalHelper = computed(() => Boolean(id.value === 2))
 const isTeaTime = computed(() => Boolean(id.value === 3))
@@ -57,6 +57,7 @@ aside.frames
 </template>
 
 <style lang="stylus">
+// card sizes
 .card.s-width
   .m-width,
   .l-width
@@ -64,12 +65,27 @@ aside.frames
 .card.m-width
   .l-width
     display none
-
 .card.s-height
   .m-height,
   .l-height
     display none
 .card.m-height
+  .l-height
+    display none
+
+// list sizes
+.list.s-width
+  .m-width,
+  .l-width
+    display none
+.list.m-width
+  .l-width
+    display none
+.list.s-height
+  .m-height,
+  .l-height
+    display none
+.list.m-height
   .l-height
     display none
 

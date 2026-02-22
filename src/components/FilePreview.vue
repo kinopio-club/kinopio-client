@@ -46,6 +46,7 @@ const download = async () => {
       img.image.clickable-item(:src="props.formats.image" draggable="false")
   //- Video
   .video-preview.row(v-if="props.formats.video")
+    //- video
     a(:href="props.formats.video" target="_blank")
       video.video.clickable-item(autoplay loop muted playsinline draggable="false")
         source(:src="props.formats.video")
@@ -107,6 +108,4 @@ const download = async () => {
     z-index 1
     padding-left 6px
     cursor pointer
-    &.is-file
-      top 0
 </style>

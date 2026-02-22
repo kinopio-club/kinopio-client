@@ -67,20 +67,25 @@ const updateLocalSpaces = () => {
 
 <template lang="pug">
 .button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace" :class="privacyState.name")
-  button(
+  button.title-row-flex(
     @click.left.stop="togglePrivacyPickerIsVisible"
     :disabled="isInvitedButCannotEditSpace"
     :class="{ active: props.privacyPickerIsVisible }"
     title="Space Privacy Options"
   )
+    //- short name
     template(v-if="props.showShortName")
       PrivacyIcon(:privacy="privacyState.name")
       span {{shortName}}
+    //- long name
     template(v-else)
       .badge(:class="privacyState.color")
         PrivacyIcon(:privacy="privacyState.name")
         span {{name}}
-    p.description(v-if="props.showDescription") {{description}}
+    //- down arrow
+    template(v-if="!props.showShortName")
+      img.icon.down-arrow(src="@/assets/down-arrow.svg")
+
   PrivacyPicker(:visible="props.privacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
 </template>
 
@@ -88,9 +93,7 @@ const updateLocalSpaces = () => {
 .privacy-button
   button
     height initial
-dialog.share
-  .privacy-button
-    width 100%
-    button
-      width 100%
+    .badge
+      margin 0
+
 </style>

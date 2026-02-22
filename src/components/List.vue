@@ -1,0 +1,792 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useListStore } from '@/stores/useListStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+
+import Frames from '@/components/Frames.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+import { nanoid } from 'nanoid'
+
+const globalStore = useGlobalStore()
+const listStore = useListStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
+
+let unsubscribes
+
+// locking
+// long press to touch drag
+const lockingPreDuration = 100 // ms
+const lockingDuration = 100 // ms
+let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+let isMultiTouch
+let initialTouchEvent = {}
+let touchPosition = {}
+let currentTouchPosition = {}
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'clearDraggingItems') {
+        state.isDraggingCardOverList = false
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
+
+const props = defineProps({
+  list: Object
+})
+const state = reactive({
+  isHover: false,
+  isDraggingCardOverList: false,
+  isLocking: false,
+  lockingPercent: 0,
+  lockingAlpha: 0
+  // isVisibleInViewport: false,
+})
+
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const userColor = computed(() => userStore.color)
+
+// cards
+
+const listCards = computed(() => {
+  let cards = cardStore.getAllCards
+  cards = cards.filter(card => card.listId === props.list.id)
+  return cards
+})
+const todoListCards = computed(() => {
+  return listCards.value.filter(card => utils.checkboxFromString(card.name))
+})
+const todoListCardsCompleted = computed(() => {
+  const cards = todoListCards.value
+  return cards.filter(card => utils.nameIsChecked(card.name))
+})
+const todoListCardsCompletedPercent = computed(() => {
+  let value = todoListCardsCompleted.value.length / todoListCards.value.length
+  value = Math.round(value * 100)
+  return `${todoListCardsCompleted.value.length}/${todoListCards.value.length}, ${value}% Completed`
+})
+
+// interacting
+
+const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
+const currentListIsBeingDragged = computed(() => {
+  const isDragging = globalStore.currentUserIsDraggingList
+  const isCurrent = globalStore.currentDraggingListId === props.list.id
+  const value = isDragging && (isCurrent || currentListIsSelected.value)
+  return value
+})
+const isResizing = computed(() => {
+  const isResizing = globalStore.currentUserIsResizingList
+  const isCurrent = globalStore.currentUserIsResizingListIds.includes(props.list.id)
+  return isResizing && isCurrent
+})
+const currentListIsSelected = computed(() => {
+  const selected = globalStore.multipleListsSelectedIds
+  return selected.find(id => props.list.id === id)
+})
+const updateIsHover = (value) => {
+  if (globalStore.currentUserIsDraggingList) { return }
+  if (isPaintSelecting.value) { return }
+  state.isHover = value
+}
+const startListInfoInteraction = async (event) => {
+  if (!currentListIsSelected.value) {
+    globalStore.clearMultipleSelected()
+  }
+  if (isResizing.value) { return }
+  if (!canEditSpace.value) { return }
+  globalStore.currentDraggingListId = ''
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsDraggingList = true
+  const list = props.list.id
+  // if (event.altKey) {
+  //   list = await startDraggingDuplicateItems(event)
+  // }
+  globalStore.currentDraggingListId = list
+  listStore.incrementListZ(props.list.id)
+}
+const endListInfoInteraction = (event) => {
+  // const isMeta = event.metaKey || event.ctrlKey
+  const userId = userStore.id
+  if (globalStore.currentUserIsPaintSelecting) { return }
+  if (isMultiTouch) { return }
+  if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (globalStore.getIsResizingItem) { return }
+  const isButton = event.target.closest('button') || event.target.closest('.inline-button-wrap')
+  if (isButton) { return }
+  if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
+  broadcastStore.update({ updates: { userId }, action: 'clearRemoteListsDragging' })
+  globalStore.closeAllDialogs()
+  // if (isMeta) {
+  //   globalStore.updateMultipleListsSelectedIds([props.list.id])
+  //   listStore.selectItemsInSelectedLists()
+  //   globalStore.updateMultipleListsSelectedIds([])
+  //   globalStore.currentUserIsDraggingList = false
+  //   globalStore.shouldCancelNextMouseUpInteraction = true
+  // } else {
+  globalStore.clearMultipleSelected()
+  // }
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
+  // if (isMeta) { return }
+  globalStore.updateListDetailsIsVisibleForListId(props.list.id)
+  globalStore.clearAllInteractingWithAndSelected()
+  event.stopPropagation() // prevent stopInteractions() from closing listDetails
+}
+
+// Remote
+
+const isRemoteSelected = computed(() => {
+  const remoteListsSelected = globalStore.remoteListsSelected
+  const selectedList = remoteListsSelected.find(list => list.listId === props.list.id)
+  return Boolean(selectedList)
+})
+const isRemoteListDetailsVisible = computed(() => {
+  const remoteListDetailsVisible = globalStore.remoteListDetailsVisible
+  const visibleList = remoteListDetailsVisible.find(list => list.listId === props.list.id)
+  return Boolean(visibleList)
+})
+const remoteListDetailsVisibleColor = computed(() => {
+  const remoteListDetailsVisible = globalStore.remoteListDetailsVisible
+  const visibleList = remoteListDetailsVisible.find(list => list.listId === props.list.id)
+  if (visibleList) {
+    const user = spaceStore.getSpaceUserById(visibleList.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteSelectedColor = computed(() => {
+  const remoteListsSelected = globalStore.remoteListsSelected
+  const selectedList = remoteListsSelected.find(list => list.listId === props.list.id)
+  if (selectedList) {
+    const user = spaceStore.getSpaceUserById(selectedList.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteUserResizingListsColor = computed(() => {
+  const remoteUserResizingLists = globalStore.remoteUserResizingLists
+  if (!remoteUserResizingLists.length) { return }
+  let user = remoteUserResizingLists.find(user => user.listIds.includes(props.list.id))
+  if (user) {
+    user = spaceStore.getSpaceUserById(user.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteListDraggingColor = computed(() => {
+  const remoteListsDragging = globalStore.remoteListsDragging
+  const draggingList = remoteListsDragging.find(list => list.listId === props.list.id)
+  if (draggingList) {
+    const user = spaceStore.getSpaceUserById(draggingList.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+
+// touch locking
+
+const lockingFrameStyle = computed(() => {
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
+  const initialBorderRadius = 50
+  const padding = initialPadding * state.lockingPercent
+  const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
+  const size = `calc(100% + ${padding}px)`
+  const position = -(padding / 2) + 'px'
+  return {
+    width: size,
+    height: size,
+    left: position,
+    top: position,
+    background: userColor.value,
+    opacity: state.lockingAlpha,
+    borderRadius
+  }
+})
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const cancelLockingAnimationFrame = () => {
+  state.isLocking = false
+  state.lockingPercent = 0
+  state.lockingAlpha = 0
+  shouldCancelLocking = false
+}
+const startLocking = (event) => {
+  console.info('startLocking', event)
+  updateTouchPosition(event)
+  updateCurrentTouchPosition(event)
+  state.isLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    if (!lockingAnimationTimer) {
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
+    }
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+    notifyPressAndHoldToDrag()
+    cancelLockingAnimationFrame()
+  }
+  if (shouldCancelLocking) {
+    cancelLockingAnimationFrame()
+  }
+  if (state.isLocking && percentComplete <= 1) {
+    const percentRemaining = Math.abs(percentComplete - 1)
+    state.lockingPercent = percentRemaining
+    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    state.lockingAlpha = alpha
+    window.requestAnimationFrame(lockingAnimationFrame)
+  } else if (state.isLocking && percentComplete > 1) {
+    console.info('🔒🐢 list lockingAnimationFrame locked')
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    state.isLocking = false
+    startListInfoInteraction(initialTouchEvent)
+  } else {
+    window.cancelAnimationFrame(lockingAnimationTimer)
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    cancelLockingAnimationFrame()
+  }
+}
+const notifyPressAndHoldToDrag = () => {
+  const hasNotified = globalStore.hasNotifiedPressAndHoldToDrag
+  if (!hasNotified) {
+    globalStore.addNotification({ message: 'Press and hold to drag', icon: 'press-and-hold' })
+  }
+  globalStore.hasNotifiedPressAndHoldToDrag = true
+}
+const updateTouchPosition = (event) => {
+  initialTouchEvent = event
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+    return
+  }
+  touchPosition = utils.cursorPositionInViewport(event)
+}
+const updateCurrentTouchPosition = (event) => {
+  currentTouchPosition = utils.cursorPositionInViewport(event)
+  if (currentListIsBeingDragged.value || isResizing.value) {
+    event.preventDefault() // allows dragging boxes without scrolling
+  }
+}
+const touchIsNearTouchPosition = (event) => {
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const touchBlur = 12
+  const isTouchX = utils.isBetween({
+    value: currentPosition.x,
+    min: touchPosition.x - touchBlur,
+    max: touchPosition.x + touchBlur
+  })
+  const isTouchY = utils.isBetween({
+    value: currentPosition.y,
+    min: touchPosition.y - touchBlur,
+    max: touchPosition.y + touchBlur
+  })
+  if (isTouchX && isTouchY) {
+    return true
+  }
+}
+const endListInfoInteractionTouch = (event) => {
+  cancelLocking()
+  if (touchIsNearTouchPosition(event)) {
+    endListInfoInteraction(event)
+  }
+}
+
+// styles
+
+const color = computed(() => {
+  const remoteColor = (
+    remoteListDetailsVisibleColor.value ||
+    remoteSelectedColor.value ||
+    remoteUserResizingListsColor.value ||
+    remoteListDraggingColor.value
+  )
+  if (remoteColor) {
+    return remoteColor
+  } else if (currentListIsSelected.value) {
+    return userColor.value
+  } else {
+    return props.list.color
+  }
+})
+const listItemWidth = computed(() => utils.listChildWidth(props.list.resizeWidth))
+const colorIsDark = computed(() => {
+  return utils.colorIsDark(color.value)
+})
+// const fillColor = computed(() => {
+//   let value = color.value
+//   value = colord(value).alpha(0.5).toRgbString()
+//   return value
+// })
+const listStyles = computed(() => {
+  const isSnappingToBox = globalStore.itemSnappingIsReady && currentListIsBeingDragged.value
+  const { x, y, z } = props.list
+  const width = props.list.resizeWidth
+  let height = props.list.height || consts.listEmptyHeight
+  if (props.list.isCollapsed) {
+    height = consts.listInfoHeight
+  }
+  const styles = {
+    left: x + 'px',
+    top: y + 'px',
+    zIndex: z || 1,
+    width: width + 'px',
+    height: height + 'px'
+  }
+  if (isSnappingToBox) {
+    styles.opacity = consts.itemSnapOpacity
+  }
+  return styles
+})
+const listBackgroundStyles = computed(() => {
+  const styles = utils.clone(listStyles.value)
+  delete styles.zIndex
+  styles.backgroundColor = color.value
+  return styles
+})
+const addSizeClasses = (classes) => {
+  const height = props.list.height
+  const width = props.list.resizeWidth
+  const sizes = {
+    m: 100,
+    l: 150
+  }
+  classes['s-width'] = width < sizes.m
+  classes['m-width'] = utils.isBetween({ value: width, min: sizes.m, max: sizes.l })
+  classes['l-width'] = width > sizes.l
+  classes['s-height'] = height < sizes.m
+  classes['m-height'] = utils.isBetween({ value: height, min: sizes.m, max: sizes.l })
+  classes['l-height'] = height > sizes.l
+  return classes
+}
+const listClasses = computed(() => {
+  let classes = {
+    hover: state.isHover,
+    active: currentListIsBeingDragged.value,
+    'is-resizing': isResizing.value,
+    'is-selected': currentListIsSelected.value
+    // filtered: isFiltered.value,
+    // transition: !globalStore.currentListIsNew || !globalStore.currentUserIsResizingList
+  }
+  classes = addSizeClasses(classes)
+  return classes
+})
+const infoClasses = computed(() => {
+  const classes = utils.colorClasses({ backgroundColor: color.value })
+  if (state.isHover) {
+    classes.push('hover')
+  }
+  return classes
+})
+const infoStyles = computed(() => {
+  const styles = {
+    backgroundColor: color.value
+  }
+  return styles
+})
+const buttonClasses = computed(() => {
+  const classes = []
+  if (colorIsDark.value) {
+    classes.push('is-dark')
+  } else {
+    classes.push('is-light')
+  }
+  return classes
+})
+
+// actions
+
+const toggleIsCollapsed = async () => {
+  cancelLocking()
+  const value = !props.list.isCollapsed
+  updateIsCollapsed(value)
+  globalStore.clearAllSelected()
+}
+const updateIsCollapsed = async (value) => {
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
+  listStore.updateList({
+    id: props.list.id,
+    isCollapsed: value
+  })
+  const cards = listCards.value
+  const cardIds = cards.map(card => card.id)
+  if (!value) {
+    await cardStore.updateCardsDimensions(cardIds)
+    await cardStore.updateCardPositionsInList(props.list)
+  }
+  connectionStore.updateConnectionPathsByItemIds(cardIds)
+}
+const addCard = async () => {
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
+  cancelLocking()
+  updateIsCollapsed(false)
+  const width = listItemWidth.value
+  const card = {
+    id: nanoid(),
+    x: props.list.x + consts.listPadding,
+    y: props.list.y + consts.listInfoHeight,
+    resizeWidth: width,
+    width
+  }
+  cardStore.createCard(card)
+  cardStore.prependCardToList(card, props.list)
+}
+
+// resize
+
+const resizeIsVisible = computed(() => {
+  if (!canEditSpace.value) { return }
+  if (userStore.getUserIsCommentOnly) { return }
+  return true
+})
+const startResizing = (event) => {
+  if (!canEditSpace.value) { return }
+  if (utils.isMultiTouch(event)) { return }
+  globalStore.closeAllDialogs()
+  globalStore.currentUserIsResizingList = true
+  globalStore.preventMultipleSelectedActionsIsVisible = true
+  let listIds = [props.list.id]
+  const multipleListsSelectedIds = globalStore.multipleListsSelectedIds
+  if (multipleListsSelectedIds.length) {
+    listIds = multipleListsSelectedIds
+  }
+  globalStore.currentUserIsResizingListIds = listIds
+  const updates = {
+    userId: userStore.id,
+    listIds
+  }
+  broadcastStore.update({ updates, action: 'updateRemoteUserResizingLists' })
+  event.preventDefault() // allows resizing list without scrolling on mobile
+}
+const resizeButtonColorClass = computed(() => {
+  const classes = utils.colorClasses({ backgroundColor: color.value })
+  return [classes]
+})
+const resetWidth = () => {
+  listStore.clearResizeLists(props.list.id)
+}
+
+// snapping
+
+watch(() => listStore.listSnapGuides, (value, prevValue) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  const { listId, listPositionIndex } = value
+  const shouldSnap = listId === props.list.id
+  const shouldCancel = listId !== prevValue.listId
+  if (shouldSnap) {
+    state.isDraggingCardOverList = true
+    globalStore.itemSnappingIsReady = true
+  } else if (shouldCancel) {
+    state.isDraggingCardOverList = false
+    globalStore.itemSnappingIsReady = false
+  }
+})
+
+const snapGuideIsVisible = computed(() => {
+  if (props.list.isCollapsed) { return }
+  return !listCards.value.length
+})
+const snapGuideStyles = computed(() => {
+  const styles = {}
+  if (state.isDraggingCardOverList) {
+    styles.backgroundColor = userColor.value
+  }
+  return styles
+})
+
+// placeholders
+
+const listChildPlaceholders = computed(() => listStore.listChildPlaceholders[props.list.id])
+const placeholderStylesMap = computed(() => {
+  if (!listChildPlaceholders.value) return {}
+  const styles = {}
+  for (const placeholder of listChildPlaceholders.value) {
+    styles[placeholder.id] = {
+      top: placeholder.y + 'px',
+      left: placeholder.x + 'px',
+      width: listItemWidth.value + 'px',
+      height: placeholder.height + 'px'
+    }
+  }
+  return styles
+})
+</script>
+
+<template lang="pug">
+.list(
+  :key="props.list.id"
+  :data-list-id="props.list.id"
+  :data-x="props.list.x"
+  :data-y="props.list.y"
+  :data-width="props.list.resizeWidth"
+  :data-height="props.list.height"
+  :data-is-collapsed="props.list.isCollapsed"
+  :style="listStyles"
+  :class="listClasses"
+  ref="listElement"
+)
+  Frames(v-if="props.list.isCollapsed" :item="props.list")
+  teleport(to="#list-backgrounds")
+    .list-background(
+      v-if="!props.list.isCollapsed"
+      :data-list-id="props.list.id"
+      :style="listBackgroundStyles"
+      :class="listClasses"
+    )
+      //- resize
+      .bottom-button-wrap.asldfkj(v-if="!props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+        .inline-button-wrap(
+            @pointerover="updateIsHover(true)"
+            @pointerleave="updateIsHover(false)"
+            @mousedown.left="startResizing"
+            @touchstart="startResizing"
+            @dblclick="resetWidth"
+          )
+          button.inline-button(
+            tabindex="-1"
+          )
+            img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+      Frames(:item="props.list")
+
+    //- placeholders
+    template(v-if="!props.list.isCollapsed")
+      template(v-for="card in listChildPlaceholders" :key="card.id")
+        .list-placeholder.list-snap-guide(
+          :style="placeholderStylesMap[card.id]"
+          :data-list-id="props.list.id"
+          :data-card-id="card.id"
+          :data-card-listPositionIndex="card.listPositionIndex"
+        )
+
+  .list-info(
+    :data-list-id="props.list.id"
+    :class="infoClasses"
+    :style="infoStyles"
+    tabindex="0"
+
+    @mouseover="updateIsHover(true)"
+    @mouseleave="updateIsHover(false)"
+    @mousedown.left="startListInfoInteraction"
+
+    @mouseup.left="endListInfoInteraction"
+    @keyup.stop.enter="endListInfoInteraction"
+
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="endListInfoInteractionTouch"
+  )
+    .focusing-frame(v-if="state.isDraggingCardOverList && props.list.isCollapsed" :style="{backgroundColor: userColor}")
+    .list-snap-guide.empty-list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }" :style="snapGuideStyles")
+    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
+    //- info row
+    .row.list-info-row
+      .left-side
+        progress(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length" :title="todoListCardsCompletedPercent")
+        span.name(:title="props.list.name") {{ props.list.name }}
+      .right-side.button-wrap
+        //- add card
+        .inline-button-wrap(title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
+          button.small-button.inline-button
+            img.icon.add(src="@/assets/add.svg")
+        //- toggle collapse
+        .inline-button-wrap(title="Toggle Collapsed" @click.left.stop="toggleIsCollapsed" @touchend.stop="toggleIsCollapsed")
+          button.small-button.inline-button
+            img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
+            img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
+            span {{ listCards.length }}
+      //- resize collapsed
+      .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
+        .inline-button-wrap(
+            @pointerover="updateIsHover(true)"
+            @pointerleave="updateIsHover(false)"
+            @mousedown.left="startResizing"
+            @touchstart="startResizing"
+            @dblclick="resetWidth"
+          )
+          button.inline-button(
+            tabindex="-1"
+          )
+            img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+</template>
+
+<style lang="stylus">
+:root
+  --min-list-width 200px // matches consts.minListWidth
+  --min-list-background-width calc(var(--min-list-width) - (8px * 2)) // utils.listChildWidth
+
+.list
+  position absolute
+  border-radius var(--entity-radius)
+  min-width var(--min-list-width)
+  // resize
+  .bottom-button-wrap
+    .inline-button-wrap
+      cursor nwse-resize
+      button
+        cursor nwse-resize
+      .resize-icon
+        top 0
+        left 0
+
+.list-background
+  pointer-events all
+  min-width var(--min-list-width)
+  min-height 14px
+  position absolute
+  padding 8px // consts.listPadding
+  padding-top 42px // consts.listInfoHeight + consts.listPadding
+  border-radius var(--entity-radius)
+  // z-index -1 !important
+  &.hover
+    box-shadow var(--hover-shadow)
+  &.active
+    box-shadow var(--active-shadow)
+    transition none
+    z-index 1
+
+.list-snap-guide
+  position absolute
+  top 42px // consts.listInfoHeight + consts.listpadding
+  right 8px
+  width calc(100% - 16px)
+  height var(--snap-guide-width)
+  border-radius var(--entity-radius)
+  background-color var(--light-shadow)
+  box-shadow var(--button-active-inset-shadow)
+  &.active
+    animation listSnapGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
+  &.has-cards
+    top 34px // consts.listInfoHeight
+.list-placeholder
+  min-width var(--min-list-background-width)
+  &.active
+    animation placeholderGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
+
+.list-info
+  min-width var(--min-list-width)
+  pointer-events all
+  border-radius var(--entity-radius)
+  cursor pointer
+  z-index 1
+  display flex
+  align-items center
+  width 100%
+  border-radius var(--entity-radius)
+  &.is-background-light
+    color var(--primary-on-light-background)
+    button
+      border-color var(--primary-border-on-light-background)
+      color var(--primary-on-light-background) !important
+      .icon
+        filter none
+  &.is-background-dark
+    color var(--primary-on-dark-background)
+    button
+      border-color var(--primary-border-on-dark-background)
+      color var(--primary-on-dark-background) !important
+      .icon
+        filter invert()
+  &:hover,
+  &.hover
+    box-shadow var(--hover-shadow)
+  &:active,
+  &.active
+    box-shadow var(--active-shadow)
+  // buttons
+  .inline-button-wrap
+    display inline-block
+  button
+    width initial
+    min-width 20px
+    cursor pointer
+    .icon.down-arrow
+      vertical-align 1.5px
+      margin 0
+    .icon.right-arrow
+      transform none
+      vertical-align 1px
+      margin-left 5px
+      margin-right 1px
+    .icon.add
+      width 8px
+      margin-left 1px
+  .inline-button
+    background transparent !important // :hover and :active are transparent too
+  .inline-button-wrap + .inline-button-wrap
+    padding-left 0
+  .inline-button-wrap:last-child
+    padding-right 0
+  // name
+  .list-info-row
+    width 100%
+    justify-content space-between
+    flex-wrap nowrap
+    display flex
+    align-items center
+    padding 0 8px
+    .left-side
+      display flex
+      align-items center
+      overflow hidden
+      progress
+        display inline-block
+        width 20px
+        margin-right 5px
+      .name
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        display inline-block
+        // max-width calc(100% - 100px)
+  .bottom-button-wrap // resize when list is collapsed
+    right -13px
+    top 14px
+    bottom initial
+  // touch locking
+  .locking-frame
+    position absolute
+    z-index -1
+    pointer-events none
+
+  .focusing-frame
+    animation-iteration-count 100 // animation plays effectively infinite
+@keyframes listSnapGuide
+  50%
+    transform scaleY(175%)
+@keyframes placeholderGuide
+  50%
+    transform scaleY(115%)
+</style>

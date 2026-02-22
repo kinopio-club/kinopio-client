@@ -65,7 +65,7 @@ const clearCardColor = (color) => {
   userStore.updateUser({ defaultCardBackgroundColor: null })
 }
 const dialogTitle = computed(() => 'New Card Color')
-const itemColors = computed(() => spaceStore.getSpaceItemColors)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
 </script>
 
 <template lang="pug">

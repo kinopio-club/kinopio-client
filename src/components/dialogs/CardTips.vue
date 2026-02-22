@@ -65,6 +65,22 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
+
+const shiftEnterIsChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
+const childCardShortcut = computed(() => {
+  if (shiftEnterIsChildCard.value) {
+    return 'Shift-Enter'
+  } else {
+    return `${utils.optionKey()}-Enter`
+  }
+})
+const lineBreakShortcut = computed(() => {
+  if (shiftEnterIsChildCard.value) {
+    return `${utils.optionKey()}-Enter`
+  } else {
+    return 'Shift-Enter'
+  }
+})
 </script>
 
 <template lang="pug">
@@ -86,20 +102,18 @@ dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible
           img.icon(src="@/assets/add.svg")
           span Add Card
         span.badge.keyboard-shortcut Enter
-    article(v-if="shiftEnterShouldAddChildCard")
+    article
       .row
         p
           img.icon(src="@/assets/add.svg")
           span Add Child Card
-        span.badge.keyboard-shortcut Shift-Enter
+        span.badge.keyboard-shortcut {{childCardShortcut}}
     article
       .row
         p
           img.icon(src="@/assets/line-break.svg")
           span Line Break
-        span.badge.keyboard-shortcut
-          span(v-if="!shiftEnterShouldAddChildCard") Shift-Enter or{{' '}}
-          span Ctrl-Enter
+        span.badge.keyboard-shortcut {{ lineBreakShortcut }}
     template(v-if="!shouldHideAdvanced")
       article
         .row

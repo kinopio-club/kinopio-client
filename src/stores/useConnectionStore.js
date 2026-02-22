@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
+import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -125,10 +126,16 @@ export const useConnectionStore = defineStore('connections', {
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
+      const listStore = useListStore()
       const spaceStore = useSpaceStore()
       startItem = startItem || spaceStore.getSpaceItemById(startItemId)
       endItem = endItem || spaceStore.getSpaceItemById(endItemId)
       if (!startItem || !endItem) { return }
+      const lists = listStore.getCollapsedLists
+      lists.forEach(list => {
+        if (list.id === startItem.listId) { startItem = list }
+        if (list.id === endItem.listId) { endItem = list }
+      })
       const start = utils.estimatedItemConnectorPosition(startItem)
       const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
       const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
@@ -460,7 +467,9 @@ export const useConnectionStore = defineStore('connections', {
           const endItem = utils.itemElementDimensions({ id: connection.endItemId })
           const path = this.getConnectionPathBetweenItems({
             startItem,
+            startItemId: connection.startItemId,
             endItem,
+            endItemId: connection.endItemId,
             controlPoint: connection.controlPoint
           })
           if (!path) { return }

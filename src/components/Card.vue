@@ -78,8 +78,6 @@ let stickyTimerComplete = false
 let stickyTimer
 let stickyMap
 
-let prevIsLoadingUrlPreview
-
 let observer
 
 let unsubscribes
@@ -117,6 +115,8 @@ onMounted(async () => {
         updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
       } else if (name === 'triggerCancelLocking') {
         cancelLocking()
+      } else if (name === 'triggerIsSnappingToList') {
+        state.isSnappingToList = true
       }
     }
   )
@@ -167,13 +167,17 @@ const state = reactive({
   isVisibleInViewport: false,
   shouldRenderParent: false,
   safeColors: {},
-  urls: []
+  urls: [],
+  isSnappingToList: false
 })
 watch(() => props.card.name, (value, prevValue) => {
   updateUrls()
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
+})
+watch(() => globalStore.currentUserIsDraggingList, (value, prevValue) => {
+  state.isSnappingToList = false
 })
 const updateUrlData = () => {
   updateOtherItems()
@@ -257,6 +261,10 @@ const currentBackgroundColorIsDark = computed(() => {
   const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
+
+// list
+
+const isInList = computed(() => Boolean(props.card.listId))
 
 // comment
 
@@ -401,6 +409,14 @@ const safeColor = (color) => {
 
 // styles
 
+const cardWrapTransitionEnd = () => {
+  state.isSnappingToList = false
+}
+const shouldSkipWidth = computed(() => isComment.value && !isInList.value)
+const isSnappingToItem = computed(() => {
+  const shouldSnap = globalStore.itemSnappingIsReady || globalStore.shouldSnapBackToList
+  return shouldSnap && currentCardIsBeingDragged.value
+})
 const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
@@ -420,6 +436,12 @@ const cardWrapStyle = computed(() => {
   }
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
+  }
+  if (state.isSnappingToList) {
+    styles.transition = 'all 0.1s ease-out'
   }
   styles = updateStylesWithWidth(styles)
   return styles
@@ -519,15 +541,17 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
-  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardWrapWidth
+  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || userStore.cardSettingsCardWrapWidth || consts.normalCardWrapWidth
   let cardWidth = resizeWidth.value
   if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
-  if (isComment.value) { return styles }
+  if (shouldSkipWidth.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
-  styles.width = cardWidth + 'px'
+  if (cardWidth) {
+    styles.width = cardWidth + 'px'
+  }
   return styles
 }
 const updatePreviousResultItem = () => {
@@ -563,7 +587,7 @@ const width = computed(() => {
   return width
 })
 const resizeWidth = computed(() => {
-  if (isComment.value) { return }
+  if (shouldSkipWidth.value) { return }
   let resizeWidth = props.card.resizeWidth
   if (iframeIsVisible.value) {
     resizeWidth = resizeWidth || consts.minCardIframeWidth
@@ -579,6 +603,7 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
+  if (isInList.value) { return }
   if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
@@ -736,7 +761,7 @@ const dateUpdatedAt = computed(() => {
   const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
-      return new Date(date).toLocaleString()
+      return dayjs(date).toISOString()
     } else {
       return utils.shortRelativeTime(date)
     }
@@ -1055,17 +1080,8 @@ const cardUrlPreviewIsVisible = computed(() => {
   // return Boolean(props.card.urlPreviewIsVisible && props.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
 })
 const isLoadingUrlPreview = computed(() => {
-  let isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
-  isLoading = Boolean(isLoading)
-  if (isLoading) {
-    prevIsLoadingUrlPreview = true
-  } else if (prevIsLoadingUrlPreview) {
-    // connectionStore.updateConnectionPathByItemId(props.card.id)
-  }
-  return isLoading
-  // if (!isLoading) { return }
-  // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
-  // return isLoading && !isErrorUrl
+  const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
+  return Boolean(isLoading)
 })
 const updateUrlPreviewOnload = async () => {
   if (!props.card.shouldUpdateUrlPreview) { return }
@@ -1132,6 +1148,7 @@ const updateUrlPreviewSuccess = async (url, data) => {
     return
   }
   cardStore.updateCard(data)
+  cardStore.updateCardDimensions(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025
@@ -1212,6 +1229,7 @@ const checkIfShouldDragMultipleCards = (event, cardId = props.card.id) => {
   }
 }
 const startDraggingDuplicateItems = async (event) => {
+  globalStore.currentUserIsDraggingDuplicateItem = true
   checkIfShouldDragMultipleCards(event)
   let cardIds = globalStore.multipleCardsSelectedIds.concat([props.card.id])
   cardIds = uniq(cardIds)
@@ -1274,6 +1292,7 @@ const startDraggingCard = async (event) => {
   globalStore.childCardId = ''
   checkIfShouldDragMultipleCards(event, cardId)
   cardStore.incrementCardZ(cardId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
@@ -1460,6 +1479,7 @@ const showCardDetails = (event) => {
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
   if (globalStore.shouldSnapToGrid) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
@@ -1662,7 +1682,21 @@ const shouldNotStick = computed(() => {
   if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
-  return userIsConnecting || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard || isLocked.value
+  return (
+    userIsConnecting ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsResizingBox ||
+    currentUserIsPanning ||
+    currentCardDetailsIsVisible.value ||
+    isRemoteCardDetailsVisible.value ||
+    isRemoteCardDragging.value ||
+    currentCardIsBeingDragged.value ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsTiltingCard ||
+    isLocked.value ||
+    globalStore.currentUserIsDraggingList ||
+    globalStore.currentUserIsResizingList
+  )
 })
 const updateShouldNotStickMap = () => {
   stickyMap = []
@@ -1978,6 +2012,16 @@ const focusColor = computed(() => {
 const clearFocus = () => {
   globalStore.focusOnCardId = ''
 }
+
+// meta
+
+const metaContainerStyles = computed(() => {
+  const padding = 8
+  return {
+    left: `${props.card.x + padding}px`,
+    top: `${props.card.y + props.card.height - 6}px`
+  }
+})
 </script>
 
 <template lang="pug">
@@ -2001,6 +2045,7 @@ const clearFocus = () => {
   :key="card.id"
   ref="cardElement"
   :class="cardWrapClasses"
+  @transitionend="cardWrapTransitionEnd"
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
@@ -2043,7 +2088,7 @@ const clearFocus = () => {
       img(src="@/assets/anon-avatar.svg")
 
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    Frames(:card="card")
+    Frames(:item="card")
 
     template(v-if="isVisualCard || pendingUploadDataUrl")
       ImageOrVideo(
@@ -2083,7 +2128,6 @@ const clearFocus = () => {
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
-            Loader(:visible="isLoadingUrlPreview")
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Url →
@@ -2151,6 +2195,10 @@ const clearFocus = () => {
           :selectedColor="selectedColor"
           :isImageCard="isImageCard"
         )
+    //- url preview loading
+    .status-container(v-if="isLoadingUrlPreview")
+      .badge.info
+        Loader(:visible="true")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -2180,22 +2228,23 @@ const clearFocus = () => {
         span Space is Read Only
 
   //- Meta Info
-  .meta-container(v-if="state.isVisibleInViewport")
-    //- Search result
-    span.badge.search(v-if="isInSearchResultsCards")
-      img.icon.search(src="@/assets/search.svg")
-    //- Vote Counter
-    CardVote(:card="card")
-    //- Created Through API
-    .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
-      img.icon.system(src="@/assets/system.svg")
-    //- User
-    .badge-wrap(v-if="filterShowUsers")
-      UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
-    //- Date
-    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
-      img.icon.time(src="@/assets/time.svg")
-      .name {{dateUpdatedAt}}
+  teleport(to="#card-meta-containers")
+    .card-meta-container(v-if="state.isVisibleInViewport" :style="metaContainerStyles")
+      //- Search result
+      span.badge.search(v-if="isInSearchResultsCards")
+        img.icon.search(src="@/assets/search.svg")
+      //- Vote Counter
+      CardVote(:card="card")
+      //- Created Through API
+      .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
+        img.icon.system(src="@/assets/system.svg")
+      //- User
+      .badge-wrap(v-if="filterShowUsers")
+        UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
+      //- Date
+      .badge.secondary.button-badge.date-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
+        img.icon.time(src="@/assets/time.svg")
+        .name {{dateUpdatedAt}}
 
 </template>
 
@@ -2206,6 +2255,7 @@ const clearFocus = () => {
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
+  transition opacity 0.2s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-resizing,
   &.is-tilting
     *
@@ -2350,10 +2400,16 @@ const clearFocus = () => {
       .icon
         filter invert()
 
-    .uploading-container
+    .uploading-container,
+    .status-container
       position absolute
       top 6px
       left 6px
+      .loader
+        margin-left 0
+    .status-container
+      .loader
+        margin 0
 
     &.media-card
       background-color transparent
@@ -2414,36 +2470,6 @@ const clearFocus = () => {
     button
       cursor pointer
 
-  .meta-container
-    transform translateY(-6px)
-    display -webkit-box
-    padding 8px
-    padding-top 0
-    position absolute
-    .user-label-inline
-      margin-right 0
-      width max-content
-    .user-badge
-      display flex
-      margin 0
-      .label-badge
-        padding 0 10px
-    .badge
-      width max-content
-      &.secondary
-        display flex
-        .icon
-          margin-right 5px
-          margin-top 3px
-        .icon.system
-          margin 0
-
-    .badge + .badge,
-    .badge-wrap + .badge
-      margin-left 6px
-    .date-is-today
-      background-color var(--info-background)
-
   .comment-user-badge
     display inline
     .user
@@ -2490,6 +2516,32 @@ const clearFocus = () => {
   .is-in-checked-box,
   .is-checked
     opacity var(--is-checked-opacity)
+
+.card-meta-container
+  pointer-events all
+  z-index var(--max-z)
+  display flex
+  position absolute
+  .user-label-inline
+    margin-right 0
+    width max-content
+  .user-badge
+    display flex
+    margin 0
+    .label-badge
+      padding 0 10px
+  .badge
+    width max-content
+  .badge + .badge,
+  .badge-wrap + .badge
+    margin-left 6px
+  .date-is-today
+    background-color var(--info-background)
+  .date-badge
+    display flex
+    align-items center
+    .icon
+      margin-right 4px
 
 @keyframes bounce
   0%

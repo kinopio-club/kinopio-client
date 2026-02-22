@@ -20,11 +20,13 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
 import throttle from 'lodash-es/throttle'
 import debounce from 'lodash-es/debounce'
+import isEqual from 'lodash-es/isEqual'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -45,6 +47,7 @@ export default function webSocketPlugin () {
     const boxStore = useBoxStore(pinia)
     const connectionStore = useConnectionStore(pinia)
     const lineStore = useLineStore(pinia)
+    const listStore = useListStore(pinia)
     if (store === 'globalStore') {
       return globalStore
     } else if (store === 'spaceStore') {
@@ -59,6 +62,8 @@ export default function webSocketPlugin () {
       return connectionStore
     } else if (store === 'lineStore') {
       return lineStore
+    } else if (store === 'listStore') {
+      return listStore
     } else {
       return globalStore
     }
@@ -128,7 +133,6 @@ export default function webSocketPlugin () {
     try {
       websocket.close()
       websocket = null
-      cleanupDebouncedActions()
     } catch (error) {
       console.error('🚒 closeWebsocket', error)
     }
@@ -240,46 +244,14 @@ export default function webSocketPlugin () {
       }
     }
   }
-
-  const cleanupDebouncedActions = () => {
-    debouncedStoreActions.forEach((actionKey) => {
-      actionKey.cancel()
-    })
-    debouncedStoreActions.clear()
-  }
-  const actionDelay = (actionKey) => {
-    actionKey = actionKey.toLowerCase()
-    const criticalActionTypes = ['create', 'add', 'delete', 'remove']
-    let isCritical
-    criticalActionTypes.find(actionTypes => {
-      if (actionKey.includes(actionTypes)) {
-        isCritical = true
-        return true
-      }
-    })
-    if (isCritical) {
-      return 0 // immediate
-    } else {
-      return 16 // 60fps
-    }
-  }
-  const debouncedAction = (store, pinia, action, updates) => {
-    const userId = updates?.userId || updates?.user?.id
-    const actionKey = `${userId}:${action}`
-    if (!debouncedStoreActions.has(actionKey)) {
-      const delay = actionDelay(actionKey)
-      debouncedStoreActions.set(
-        actionKey,
-        debounce((store, pinia, action, updates) => {
-          const piniaStore = getPiniaStore(store, pinia)
-          piniaStore[action](updates)
-          checkIfShouldUpdateLinkToItem(pinia, { action, updates })
-          checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
-        }, delay)
-      )
-    } else {
-      const debouncedAction = debouncedStoreActions.get(actionKey)
-      debouncedAction(store, pinia, action, updates)
+  const handleAction = (store, pinia, action, updates) => {
+    try {
+      const piniaStore = getPiniaStore(store, pinia)
+      piniaStore[action](updates)
+      checkIfShouldUpdateLinkToItem(pinia, { action, updates })
+      checkIfShouldNotifyOffscreenCardCreated(pinia, { action, updates })
+    } catch (error) {
+      console.error('🚒 handleAction', error, { store, pinia, action, updates })
     }
   }
   const receiveMessage = (pinia, data) => {
@@ -296,15 +268,12 @@ export default function webSocketPlugin () {
       console.info('🌛 user connected', user)
     } else if (name === 'userJoinedRoom') {
       spaceStore.addUserToJoinedSpace(user)
-    } else if (name === 'updateUserPresence') {
-      spaceStore.updateUserPresence(updates.user)
-      globalStore.updateOtherUsers(updates.user)
     } else if (name === 'userLeftRoom') {
-      spaceStore.removeIdleClientFromSpace(user || updates.user)
+      spaceStore.removeIdleClientFromSpace(user)
       globalStore.clearRemoteMultipleSelected(updates)
     } else if (name === 'userLeftSpace') {
-      spaceStore.removeCollaboratorFromSpace(updates.user, true)
-      if (updates.user.id === userStore.id) {
+      spaceStore.removeCollaboratorFromSpace(user, true)
+      if (user.id === userStore.id) {
         spaceStore.removeCurrentUserFromSpace()
       }
     } else if (name === 'updateSpaceClients') {
@@ -312,7 +281,7 @@ export default function webSocketPlugin () {
     } else if (isAction) {
       const piniaStore = getPiniaStore(store, pinia)
       if (piniaStore) {
-        debouncedAction(store, pinia, action, updates)
+        handleAction(store, pinia, action, updates)
       }
     } else {
       console.warn('🌚 unhandled message', data)
@@ -321,26 +290,56 @@ export default function webSocketPlugin () {
 
   // 🌛 Send
 
-  let sentActions, pendingMessages
-  const sendMessageThrottle = throttle(() => {
-    if (!websocket) { return }
+  let queuedActions, pendingMessages, frameIsPending
+  const sendMessages = () => {
+    if (!websocket) {
+      frameIsPending = false
+      return
+    }
     if (pendingMessages?.length) {
       pendingMessages.forEach(data => {
         websocket.send(JSON.stringify(data))
       })
       pendingMessages = []
-      sentActions.clear()
+      queuedActions.clear()
     }
-  }, 16) // 60fps
-  const sendMessage = (pinia, message, type) => {
+    frameIsPending = false
+  }
+  const scheduleSend = () => {
+    if (!frameIsPending) {
+      frameIsPending = true
+      requestAnimationFrame(sendMessages)
+    }
+  }
+  const mergeUpdates = (prev, next) => {
+    // updates may be arrays or objects
+    if (Array.isArray(prev) && Array.isArray(next)) {
+      const map = new Map(prev.map(item => [item.id, item]))
+      next.forEach(item => map.set(item.id, { ...map.get(item.id), ...item }))
+      return Array.from(map.values())
+    }
+    if (Array.isArray(prev) || Array.isArray(next)) {
+      return next
+    }
+    return { ...prev, ...next }
+  }
+  const mergeMessage = (message, queuedMessage) => {
+    const mergedUpdates = mergeUpdates(queuedMessage.updates, message.updates)
+    const mergedMessage = { ...queuedMessage, updates: mergedUpdates }
+    queuedActions.set(message.action, mergedMessage)
+    const pendingIndex = pendingMessages.findIndex(p => p.message?.action === message.action)
+    if (pendingIndex !== -1) {
+      pendingMessages[pendingIndex] = { ...pendingMessages[pendingIndex], message: mergedMessage }
+    }
+  }
+  const queueMessage = (pinia, message, type) => {
     const spaceStore = useSpaceStore(pinia)
     const userStore = useUserStore(pinia)
     if (!websocket || !isConnected) {
       return
     }
-    if (!sentActions) {
-      sentActions = new Set()
-      sendMessageThrottle()
+    if (!queuedActions) {
+      queuedActions = new Map()
     }
     const data = {
       message,
@@ -350,11 +349,17 @@ export default function webSocketPlugin () {
     }
     if (message?.action) {
       // only send unique actions per frame
-      if (sentActions.has(message.action)) { return }
-      sentActions.add(message.action)
+      const queuedMessage = queuedActions.get(message.action)
+      if (queuedMessage) {
+        const isUnchanged = isEqual(message.updates, queuedMessage.updates)
+        if (isUnchanged) { return }
+        mergeMessage(message, queuedMessage)
+        return
+      }
+      queuedActions.set(message.action, message)
       pendingMessages = pendingMessages || []
       pendingMessages.push(data)
-      sendMessageThrottle()
+      scheduleSend()
     } else {
       websocket.send(JSON.stringify(data))
     }
@@ -389,10 +394,10 @@ export default function webSocketPlugin () {
       case 'leaveSpaceRoom':
         spaceStore.clients = []
         message.name = 'userLeftRoom'
-        sendMessage(pinia, message)
+        queueMessage(pinia, message)
         break
       case 'update':
-        sendMessage(pinia, message)
+        queueMessage(pinia, message)
         break
       case 'close':
         closeWebsocket(pinia)

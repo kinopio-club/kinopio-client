@@ -5,7 +5,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useLineStore } from '@/stores/useLineStore'
 
 import Line from '@/components/Line.vue'
-import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const lineStore = useLineStore()

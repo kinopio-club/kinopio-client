@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
@@ -10,10 +10,10 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
-import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import FontPicker from '@/components/dialogs/FontPicker.vue'
+import FramePicker from '@/components/dialogs/FramePicker.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -58,120 +58,88 @@ const emit = defineEmits(['closeDialogs'])
 
 const props = defineProps({
   visible: Boolean,
-  colorIsHidden: Boolean,
   labelIsVisible: Boolean,
   tagsInCard: Array,
   backgroundColor: String,
   backgroundColorIsFromTheme: Boolean,
   cards: {
     type: Array,
-    default (value) {
-      return []
-    }
-  },
-  boxes: {
-    type: Array,
-    default (value) {
-      return []
-    }
+    default () { return [] }
   }
 })
+
 const state = reactive({
-  framePickerIsVisible: false,
   tagPickerIsVisible: false,
   colorPickerIsVisible: false,
   fontPickerIsVisible: false,
+  framePickerIsVisible: false,
   defaultColor: '#e3e3e3'
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const canOnlyComment = computed(() => userStore.getUserIsCommentOnly)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
   const editableCards = props.cards.filter(card => userStore.getUserCanEditCard(card))
-  const canEditCards = editableCards.length === props.cards.length
-  const editableBoxes = props.boxes.filter(box => userStore.getUserCanEditBox(box))
-  const canEditBoxes = editableBoxes.length === props.boxes.length
-  return canEditCards && canEditBoxes
+  return editableCards.length === props.cards.length
 })
+
+const isNotCollaborator = computed(() => {
+  if (canOnlyComment.value) { return true }
+  return !canEditAll.value
+})
+
 const updateDefaultColor = (color) => {
   state.defaultColor = color
 }
+
+const cardIds = computed(() => props.cards.map(card => card.id))
+const isSingleCard = computed(() => props.cards.length === 1)
+const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBoxId))
+
+// utils
+
 const closeDialogs = (shouldPreventEmit) => {
-  state.framePickerIsVisible = false
   state.tagPickerIsVisible = false
   state.colorPickerIsVisible = false
   state.fontPickerIsVisible = false
+  state.framePickerIsVisible = false
   globalStore.userDetailsIsVisible = false
   if (shouldPreventEmit === true) { return }
   emit('closeDialogs')
 }
 
-// items
+// items (cards only)
 
-const isCards = computed(() => Boolean(props.cards.length))
-const isSingleCard = computed(() => props.cards.length === 1 && !isBoxes.value)
-const isBoxes = computed(() => Boolean(props.boxes.length))
 const items = computed(() => {
-  let cards = utils.clone(props.cards)
-  let boxes = utils.clone(props.boxes)
-  cards = cards.map(card => {
-    card.isCard = true
-    return card
-  })
-  boxes = boxes.map(box => {
-    box.isBox = true
-    return box
-  })
-  return cards.concat(boxes)
+  return props.cards.map(card => ({ ...card, isCard: true }))
 })
-const label = computed(() => {
-  let value = 'card'
-  if (isBoxes.value) {
-    value = 'box'
-  }
-  return value.toUpperCase()
-})
-const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBoxId))
-const cardIds = computed(() => props.cards.map(card => card.id))
+
+const label = 'CARD'
 
 // update name
 
 const itemsWithPattern = (pattern) => {
   return items.value.filter(item => {
     const name = normalizedName(item.name)
-    const result = utils.markdown()[pattern].exec(name)
-    return Boolean(result)
+    return Boolean(utils.markdown()[pattern].exec(name))
   })
 }
 const normalizedName = (name) => {
   name = utils.removeMarkdownCodeblocksFromString(name) || ''
   const urls = utils.urlsFromString(name) || []
-  urls.forEach(url => {
-    name = name.replace(url, '')
-  })
+  urls.forEach(url => { name = name.replace(url, '') })
   const tags = utils.tagsFromString(name) || []
-  tags.forEach(tag => {
-    name = name.replace(tag, '')
-  })
+  tags.forEach(tag => { name = name.replace(tag, '') })
   const checkbox = utils.checkboxFromString(name) || ''
   name = name.replace(checkbox, '')
-  name = name.trim()
-  return name
-}
-const removePattern = (pattern) => {
-  if (pattern === 'h1Pattern') {
-    return 'h2Pattern'
-  } else if (pattern === 'h2Pattern') {
-    return 'h1Pattern'
-  }
+  return name.trim()
 }
 const markdown = (pattern) => {
-  if (pattern === 'h1Pattern') {
-    return '# '
-  } else if (pattern === 'h2Pattern') {
-    return '## '
-  }
+  if (pattern === 'h1Pattern') return '# '
+  if (pattern === 'h2Pattern') return '## '
 }
 const prependToName = ({ pattern, item, nameSegment }) => {
   const md = markdown(pattern)
@@ -183,29 +151,13 @@ const prependToName = ({ pattern, item, nameSegment }) => {
 const prependToItemNames = (pattern) => {
   items.value.forEach(item => {
     const name = normalizedName(item.name) || ''
-    const patternExists = utils.markdown()[pattern].exec(name)
-    if (patternExists) {
-      return // skip
-    }
+    if (utils.markdown()[pattern].exec(name)) { return }
     prependToName({ pattern, item, nameSegment: name })
   })
 }
-const updateName = async (item, newName) => {
-  if (item.isCard) {
-    const card = cardStore.getCard(item.id)
-    const update = {
-      id: card.id,
-      name: newName
-    }
-    cardStore.updateCard(update)
-  }
-  if (item.isBox) {
-    const update = {
-      id: item.id,
-      name: newName
-    }
-    boxStore.updateBox(update)
-  }
+const updateName = (item, newName) => {
+  const card = cardStore.getCard(item.id)
+  cardStore.updateCard({ id: card.id, name: newName })
 }
 
 // tag
@@ -225,10 +177,8 @@ const toggleTagPickerIsVisible = () => {
 const containItemsInNewBox = async () => {
   if (isNotCollaborator.value) { return }
   const rect = utils.boundaryRectFromItems(items.value)
-  // box size
   const padding = consts.spaceBetweenCards
   const paddingTop = 30 + padding
-  // same as Box shrinkToMinBoxSize
   const box = {
     id: nanoid(),
     x: rect.x - padding,
@@ -244,62 +194,25 @@ const containItemsInNewBox = async () => {
   analyticsStore.event('containItemsInNewBox')
 }
 
-// box fill
-
-const boxFillIsEmpty = computed(() => {
-  const numberOfBoxes = props.boxes.length
-  const boxes = props.boxes.filter(box => box.fill === 'empty')
-  return boxes.length === numberOfBoxes
-})
-const boxFillIsFilled = computed(() => {
-  const numberOfBoxes = props.boxes.length
-  const boxes = props.boxes.filter(box => box.fill === 'filled')
-  return boxes.length === numberOfBoxes
-})
-const updateBoxFill = (fill) => {
-  props.boxes.forEach(box => {
-    updateBox(box, { fill })
-  })
-  if (fill === 'empty') {
-    analyticsStore.event('UpdateBoxFillToEmpty')
-  }
-}
-
 // color
 
 const color = computed(() => {
-  let colors = items.value.map(item => item.backgroundColor || item.color)
-  colors = colors.filter(color => Boolean(color))
+  const colors = items.value.map(item => item.backgroundColor).filter(Boolean)
   const itemsHaveColors = colors.length === items.value.length
   const colorsAreEqual = uniq(colors).length === 1
-  if (itemsHaveColors && colorsAreEqual) {
-    return colors[0]
-  } else {
-    return state.defaultColor
-  }
+  if (itemsHaveColors && colorsAreEqual) return colors[0]
+  return state.defaultColor
 })
-const background = computed(() => {
-  return props.backgroundColor || color.value
-})
-const itemColors = computed(() => spaceStore.getSpaceItemColors)
+const background = computed(() => props.backgroundColor || color.value)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
 const updateColor = (color) => {
   items.value.forEach(item => {
-    const currentColor = item.backgroundColor || item.color
-    if (currentColor === color) { return }
-    if (item.isCard) {
-      updateCard(item, { backgroundColor: color })
-    } else if (item.isBox) {
-      if (color === 'transparent') { return }
-      updateBox(item, { color })
-    }
+    if (item.backgroundColor === color) { return }
+    updateCard(item, { backgroundColor: color })
   })
 }
 const removeColor = () => {
-  items.value.forEach(item => {
-    if (item.isCard) {
-      updateCard(item, { backgroundColor: null })
-    }
-  })
+  items.value.forEach(item => updateCard(item, { backgroundColor: null }))
 }
 const toggleColorPickerIsVisible = () => {
   const isVisible = state.colorPickerIsVisible
@@ -309,16 +222,15 @@ const toggleColorPickerIsVisible = () => {
 const colorClasses = computed(() => {
   if (props.backgroundColorIsFromTheme) {
     return utils.colorClasses({ backgroundColorIsDark: themeStore.getIsThemeDark })
-  } else {
-    return utils.colorClasses({ backgroundColor: background.value })
   }
+  return utils.colorClasses({ backgroundColor: background.value })
 })
 
 // frames
 
 const isFrames = computed(() => {
   const cards = props.cards.filter(card => card.frameId)
-  return Boolean(cards.length === props.cards.length)
+  return cards.length === props.cards.length
 })
 const toggleFramePickerIsVisible = () => {
   const isVisible = state.framePickerIsVisible
@@ -328,38 +240,19 @@ const toggleFramePickerIsVisible = () => {
 
 // header h1 h2
 
-const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length)
-})
-const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length)
-})
-const isH3 = computed(() => {
-  const pattern = 'h3Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length)
-})
-const isHeaderSelected = computed(() => {
-  return isH1.value || isH2.value || isH3.value
-})
+const isH1 = computed(() => Boolean(itemsWithPattern('h1Pattern').length))
+const isH2 = computed(() => Boolean(itemsWithPattern('h2Pattern').length))
+const isH3 = computed(() => Boolean(itemsWithPattern('h3Pattern').length))
+const isHeaderSelected = computed(() => isH1.value || isH2.value || isH3.value)
+
 const removeHeaderFromItemNames = () => {
-  // https://regexr.com/804qh
-  // ignores [] or [x] + space at beginning of string
-  // matches # or ## + space
   const headerPattern = new RegExp(/^(?:\[x?\])?[# ]+/gm)
   items.value.forEach(item => {
     let match = item.name.match(headerPattern)
     if (!match) { return }
-    match = match[0]
-    match = match.replace('[] ', '')
-    match = match.replace('[x] ', '')
+    match = match[0].replace('[] ', '').replace('[x] ', '')
     const newName = item.name.replace(match, '')
-    if (newName === item.name) { return }
-    updateName(item, newName)
+    if (newName !== item.name) { updateName(item, newName) }
   })
 }
 const toggleHeader = async (pattern) => {
@@ -378,23 +271,13 @@ const toggleFontPickerIsVisible = () => {
   state.fontPickerIsVisible = !isVisible
 }
 const updateHeaderFont = async (font) => {
-  props.cards.forEach(card => {
-    updateCard(card, { headerFontId: font.id })
-  })
-  props.boxes.forEach(box => {
-    updateBox(box, { headerFontId: font.id })
-  })
+  props.cards.forEach(card => updateCard(card, { headerFontId: font.id }))
   userStore.updateUser({ prevHeaderFontId: font.id })
   await nextTick()
   connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
 const udpateHeaderFontSize = async (size) => {
-  props.cards.forEach(card => {
-    updateCard(card, { headerFontSize: size })
-  })
-  props.boxes.forEach(box => {
-    updateBox(box, { headerFontSize: size })
-  })
+  props.cards.forEach(card => updateCard(card, { headerFontSize: size }))
   await nextTick()
   connectionStore.updateConnectionPathsByItemIds(cardIds.value)
 }
@@ -402,31 +285,22 @@ const udpateHeaderFontSize = async (size) => {
 // lock
 
 const isLocked = computed(() => {
-  const matches = items.value.filter(item => item.isLocked)
-  return Boolean(matches.length === items.value.length)
+  return items.value.every(item => item.isLocked)
+})
+const lockedIsDisabled = computed(() => {
+  return items.value.every(item => item.listId)
 })
 const toggleIsLocked = () => {
   const value = !isLocked.value
-  items.value.forEach(item => {
-    if (item.isCard) {
-      updateCard(item, { isLocked: value })
-    }
-    if (item.isBox) {
-      updateBox(item, { isLocked: value })
-    }
+  items.value.filter(item => !item.listId).forEach(item => {
+    updateCard(item, { isLocked: value })
   })
 }
 
 // comment
 
-const canOnlyComment = computed(() => userStore.getUserIsCommentOnly)
-const isNotCollaborator = computed(() => {
-  if (canOnlyComment.value) { return true }
-  return !canEditAll.value
-})
 const isComment = computed(() => {
-  const cards = props.cards.filter(card => card.isComment)
-  return Boolean(cards.length === props.cards.length)
+  return props.cards.every(card => card.isComment)
 })
 const toggleIsComment = async () => {
   if (isNotCollaborator.value) { return }
@@ -437,9 +311,7 @@ const toggleIsComment = async () => {
       name: utils.nameWithoutCommentPattern(card.name),
       isComment: value
     }
-    if (!card.name) {
-      delete update.name
-    }
+    if (!card.name) { delete update.name }
     cardStore.updateCard(update)
   })
   await nextTick()
@@ -450,21 +322,16 @@ const toggleIsComment = async () => {
 // vote counter
 
 const countersIsVisible = computed(() => {
-  const cards = props.cards.filter(card => card.counterIsVisible)
-  return Boolean(cards.length === props.cards.length)
+  return props.cards.every(card => card.counterIsVisible)
 })
 const toggleCounterIsVisible = () => {
-  let counterIsVisible = true
-  if (countersIsVisible.value) {
-    counterIsVisible = false
-  }
+  const counterIsVisible = !countersIsVisible.value
   props.cards.forEach(card => {
-    const update = {
+    cardStore.updateCard({
       id: card.id,
       counterIsVisible,
       counterValue: card.counterValue || 1
-    }
-    cardStore.updateCard(update)
+    })
   })
 }
 
@@ -472,40 +339,28 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  setTimeout(async function () {
-    const ids = props.cards.map(card => card.id)
-    cardStore.updateCardsDimensions(ids)
+  setTimeout(async () => {
+    cardStore.updateCardsDimensions(cardIds.value)
     await nextTick()
     await nextTick()
   }, 10)
 }
 const updateCard = async (card, updates) => {
-  const keys = Object.keys(updates)
-  card = { id: card.id }
-  keys.forEach(key => {
-    card[key] = updates[key]
-  })
-  cardStore.updateCard(card)
+  const update = { id: card.id, ...updates }
+  cardStore.updateCard(update)
   await updateCardDimensions()
   connectionStore.updateConnectionPathByItemId(card.id)
-}
-
-// box
-
-const updateBox = (box, updates) => {
-  const keys = Object.keys(updates)
-  box = { id: box.id }
-  keys.forEach(key => {
-    box[key] = updates[key]
-  })
-  boxStore.updateBox(box)
 }
 </script>
 
 <template lang="pug">
-section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" :class="colorClasses")
+section.subsection.style-actions(
+  v-if="props.visible"
+  @click.left.stop="closeDialogs"
+  :class="colorClasses"
+)
   p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
-    span {{label}}
+    span {{ label }}
   .row
     //- h1/h2
     .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isHeaderSelected, 'is-box-details': isBoxDetails }")
@@ -517,51 +372,43 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
       //- Fonts
       button.toggle-fonts-button.small-button(:disabled="!canEditAll" v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Aa
-      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
-    .button-wrap(v-if="isCards")
+    .button-wrap
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
         span Tag
       TagPickerStyleActions(:visible="state.tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
     //- Frame
-    .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : state.framePickerIsVisible || isFrames }")
+    .button-wrap
+      button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active: state.framePickerIsVisible || isFrames }")
         span Frame
       FramePicker(:visible="state.framePickerIsVisible" :cards="cards")
     //- Color
-    .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
+    .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
       button.change-color(:disabled="!canEditAll" :class="{active: state.colorPickerIsVisible}" title="Color")
         .current-color(:style="{ background: color }")
       ColorPicker(
         :currentColor="color"
         :visible="state.colorPickerIsVisible"
-        :removeIsVisible="isCards"
+        :removeIsVisible="true"
         :recentColors="itemColors"
         @selectedColor="updateColor"
         @removeColor="removeColor"
       )
-    //- Box Fill
-    .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill Box")
-        img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill Box")
-        img.icon.box-icon(src="@/assets/box-empty.svg")
-
     //- Lock
     .button-wrap
-      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
+      button(:disabled="!canEditAll || lockedIsDisabled" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
-    .button-wrap(v-if="isCards" title="Turn into Comment")
+    .button-wrap(title="Turn into Comment")
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
     //- Surround with Box
-    .button-wrap(v-if="isCards" title="Surround with Box (B)")
+    .button-wrap(title="Surround with Box (B)")
       button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
         img.icon.box-icon(src="@/assets/box.svg")
-
     //- Counter
-    .button-wrap(v-if="isCards")
+    .button-wrap
       button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
         span Vote
 </template>
@@ -572,7 +419,6 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
   padding var(--subsection-padding)
   background-color transparent
   border 1px solid var(--primary-border)
-  padding var(--subsection-padding)
   &.is-background-light
     border-color var(--primary-border-on-light-background)
   &.is-background-dark

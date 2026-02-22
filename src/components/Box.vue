@@ -86,10 +86,7 @@ const state = reactive({
   remoteConnectionColor: ''
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
-const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserColor = computed(() => userStore.color)
 const name = computed(() => props.box.name)
 const currentBoxIsSelected = computed(() => {
   const selected = globalStore.multipleBoxesSelectedIds
@@ -99,17 +96,15 @@ const currentBoxIsSelected = computed(() => {
 // normalize
 
 const normalizedBox = computed(() => {
-  return normalizeBox(props.box)
-})
-const normalizeBox = (box) => {
+  const box = props.box
   box.resizeWidth = box.resizeWidth || consts.minItemXY
   box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
-  box.color = box.color || randomColor({ luminosity: 'light' })
+  box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
   return box
-}
+})
 const normalizedName = computed(() => {
   // name without checkbox text
   let newName = name.value
@@ -170,6 +165,7 @@ const removeViewportObserver = () => {
 
 // styles
 
+const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentBoxIsBeingDragged.value)
 const fillColor = computed(() => {
   let value = color.value
   value = colord(value).alpha(0.5).toRgbString()
@@ -190,6 +186,9 @@ const boxStyles = computed(() => {
   if (hasFill.value && !background) {
     styles.backgroundColor = fillColor.value
   }
+  if (isSnappingToItem.value) {
+    styles.borderColor = colord(color.value).alpha(0.3).toRgbString()
+  }
   return styles
 })
 const infoStyles = computed(() => {
@@ -203,6 +202,9 @@ const infoStyles = computed(() => {
   }
   if (isLocked.value) {
     styles.pointerEvents = 'none'
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
@@ -220,6 +222,9 @@ const backgroundStyles = computed(() => {
   }
   if (props.box.backgroundIsStretch) {
     styles.backgroundSize = 'cover'
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
@@ -262,7 +267,7 @@ const classes = computed(() => {
     active: currentBoxIsBeingDragged.value,
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
-    'is-checked': isChecked.value || isInCheckedBox.value,
+    'is-checked': isChecked.value,
     filtered: isFiltered.value,
     transition: !globalStore.currentBoxIsNew || !globalStore.currentUserIsResizingBox
   }
@@ -315,7 +320,7 @@ const startResizing = (event) => {
   broadcastStore.update({ updates, action: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
-const resizeColorClass = computed(() => {
+const resizeButtonColorClass = computed(() => {
   const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
   return [colorClass]
 })
@@ -330,9 +335,9 @@ const shrinkToDefaultBoxSize = () => {
 }
 const shrink = () => {
   prevSelectedBox = props.box
-  const { cards, boxes } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
+  const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
   prevSelectedBox = null
-  const items = cards.concat(boxes)
+  const items = cards.concat(boxes, lists)
   if (!items.length) {
     shrinkToDefaultBoxSize()
     return
@@ -367,6 +372,8 @@ const isResizing = computed(() => {
   return isResizing && isCurrent
 })
 const startDraggingDuplicateItems = async (event) => {
+  globalStore.currentUserIsDraggingDuplicateItem = true
+  // select box
   boxStore.selectItemsInSelectedBoxes(props.box)
   let boxIds = globalStore.multipleBoxesSelectedIds.concat([props.box.id])
   boxIds = uniq(boxIds)
@@ -390,7 +397,7 @@ const startDraggingDuplicateItems = async (event) => {
   })
   const newCurrentBox = newBoxes[index]
   newCards.forEach(card => cardStore.createCard(card, true))
-  newBoxes.forEach(box => boxStore.createBox(box, true))
+  newBoxes.forEach(box => boxStore.createBox(box))
   // select new items
   globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
   globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
@@ -414,6 +421,7 @@ const startBoxInfoInteraction = async (event) => {
   }
   globalStore.currentDraggingBoxId = boxId
   boxStore.incrementBoxZ(boxId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingBox) { return }
@@ -432,12 +440,11 @@ const endBoxInfoInteraction = (event) => {
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (globalStore.getIsResizingItem) { return }
   if (!canEditBox.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   globalStore.closeAllDialogs()
   if (isMeta) {
-    globalStore.updateMultipleBoxesSelectedIds([props.box.id])
-    boxStore.selectItemsInSelectedBoxes()
     globalStore.updateMultipleBoxesSelectedIds([])
     globalStore.currentUserIsDraggingBox = false
     globalStore.shouldCancelNextMouseUpInteraction = true
@@ -445,6 +452,7 @@ const endBoxInfoInteraction = (event) => {
     globalStore.clearMultipleSelected()
   }
   if (globalStore.preventDraggedBoxFromShowingDetails) { return }
+  if (globalStore.currentUserIsDraggingDuplicateItem) { return }
   if (isMeta) { return }
   globalStore.updateBoxDetailsIsVisibleForBoxId(props.box.id)
   event.stopPropagation() // prevent stopInteractions() from closing boxDetails
@@ -685,30 +693,6 @@ const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
   return Boolean(utils.checkboxFromString(name.value))
 })
-const containingBoxes = computed(() => {
-  if (!state.isVisibleInViewport) { return }
-  if (globalStore.currentUserIsDraggingBox) { return }
-  if (currentBoxIsBeingDragged.value) { return }
-  if (currentBoxIsSelected.value) { return }
-  if (isResizing.value) { return }
-  if (globalStore.boxDetailsIsVisibleForBoxId) { return }
-  let boxes = boxStore.getAllBoxes
-  boxes = utils.clone(boxes)
-  boxes = boxes.filter(box => {
-    const currentBox = utils.clone(props.box)
-    const isInsideBox = utils.isRectACompletelyInsideRectB(currentBox, box)
-    const boxArea = box.resizeWidth * box.resizeHeight
-    const currentBoxArea = currentBox.resizeWidth * currentBox.resizeHeight
-    const boxIsParent = boxArea > currentBoxArea
-    return isInsideBox && boxIsParent
-  })
-  return boxes
-})
-const isInCheckedBox = computed(() => {
-  if (!containingBoxes.value) { return }
-  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
-  return Boolean(checkedBox)
-})
 
 // box focus
 
@@ -814,7 +798,7 @@ const clearFocus = () => {
       button.inline-button(
         tabindex="-1"
       )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 </template>
 
 <style lang="stylus">
@@ -860,9 +844,15 @@ const clearFocus = () => {
   --header-font var(--header-font-0)
   z-index 1
   border-radius 4px
+  border-bottom-right-radius var(--entity-radius)
   display flex
   align-items center
   width max-content
+  pointer-events all
+  position absolute
+  cursor pointer
+  word-break break-word
+  color var(--primary-on-light-background)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2
@@ -900,12 +890,6 @@ const clearFocus = () => {
       font-size 52px
     h3
       font-size 36px
-  pointer-events all
-  position absolute
-  cursor pointer
-  border-bottom-right-radius var(--entity-radius)
-  word-break break-word
-  color var(--primary-on-light-background)
   &:hover
     box-shadow var(--hover-shadow)
   &:active

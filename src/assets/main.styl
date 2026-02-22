@@ -26,6 +26,8 @@
   --glyphs-font GoodGlyphs, wingdings
   --is-checked-opacity 0.6
   --focus-padding 20px
+  --snap-guide-width 6px
+  --snap-guide-ready-duration 0.4s
 
 @font-face
   font-family 'GoodGlyphs'
@@ -328,6 +330,23 @@ label // used for checkbox buttons
 
   &.fixed-height
     height var(--button-fixed-height)
+
+textarea.name.on-background-color
+  margin-left 6px
+  margin-top 2px
+  margin-bottom 0
+  width calc(100% - 6px)
+  border-color var(--primary-border)
+  &.is-dark
+    -webkit-text-fill-color var(--primary-on-dark-background)
+    color var(--primary-on-dark-background)
+    border-color var(--primary-border-on-dark-background)
+  &.is-light
+    -webkit-text-fill-color var(--primary-on-light-background)
+    color var(--primary-on-light-background)
+    border-color var(--primary-border-on-light-background)
+
+
 .unselectable
   pointer-events none !important
 
@@ -593,6 +612,11 @@ section.subsection
   left -7px
   padding 2px 0
   width 14px
+  span
+    font-size 11px
+.subsection-horizontal-label
+  margin-top -3px
+  margin-bottom 4px
   span
     font-size 11px
 

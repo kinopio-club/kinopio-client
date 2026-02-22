@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -20,6 +21,7 @@ import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
 import LineDetails from '@/components/dialogs/LineDetails.vue'
+import ListDetails from '@/components/dialogs/ListDetails.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -29,9 +31,10 @@ import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Lines from '@/components/Lines.vue'
+import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
-import SnapGuideLines from '@/components/SnapGuideLines.vue'
+import AxisGuideLines from '@/components/AxisGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
@@ -60,12 +63,15 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+import { nanoid } from 'nanoid'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -87,6 +93,8 @@ window.globalStore = useGlobalStore()
 window.cardStore = useCardStore()
 window.connectionStore = useConnectionStore()
 window.boxStore = useBoxStore()
+window.lineStore = useLineStore()
+window.listStore = useListStore()
 window.spaceStore = useSpaceStore()
 window.changelogStore = useChangelogStore()
 window.themeStore = useThemeStore()
@@ -103,6 +111,7 @@ const init = async () => {
     globalStore.updateNotifyIsJoiningGroup(true)
   }
   apiStore.updateDateImage()
+  globalStore.updateSessionDate()
   analyticsStore.event('pageview')
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
@@ -164,6 +173,7 @@ onMounted(async () => {
   hourlyTasks = setInterval(() => {
     spaceStore.updateInboxCache()
     apiStore.updateDateImage()
+    globalStore.updateSessionDate()
   }, 1000 * 60 * 60 * 1) // every 1 hour
 
   const globalActionUnsubscribe = globalStore.$onAction(
@@ -171,8 +181,12 @@ onMounted(async () => {
       if (name === 'triggerAddBox') {
         const event = args[0]
         addBox(event)
+      } else if (name === 'triggerAddList') {
+        const event = args[0]
+        addList(event)
+      } else if (name === 'triggerUserIsLoaded') {
+        updateSystemTheme()
       }
-      if (name === 'triggerUserIsLoaded') { updateSystemTheme() }
     }
   )
   const broadcastActionUnsubscribe = broadcastStore.$onAction(
@@ -230,6 +244,8 @@ const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
+const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
+const isResizingList = computed(() => globalStore.currentUserIsResizingList)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -247,6 +263,9 @@ watch(() => globalStore.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizes(value)
 })
 watch(() => globalStore.currentUserIsDraggingLine, (value, prevValue) => {
+  updatePageSizes(value)
+})
+watch(() => globalStore.currentUserIsDraggingList, (value, prevValue) => {
   updatePageSizes(value)
 })
 const updatePageSizes = async (value) => {
@@ -288,11 +307,12 @@ const pageCursor = computed(() => {
   const isPanning = globalStore.currentUserIsPanning
   const isPanningReady = globalStore.currentUserIsPanningReady
   const toolbarIsBox = globalStore.getToolbarIsBox
+  const toolbarIsList = globalStore.getToolbarIsList
   if (isPanning) {
     return 'grabbing'
   } else if (isPanningReady) {
     return 'grab'
-  } else if (toolbarIsBox) {
+  } else if (toolbarIsBox || toolbarIsList) {
     return 'crosshair'
   }
   return undefined
@@ -386,6 +406,7 @@ const tiltCards = (event) => {
   cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
+  if (!globalStore.currentUserIsTiltingCard) { return }
   const cardIds = globalStore.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
@@ -457,13 +478,15 @@ const stopResizingBoxes = () => {
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
   // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])
 }
-const checkIfShouldExpandBoxes = (event) => {
+const checkIfShouldSnapToBox = (event) => {
+  if (globalStore.preventItemSnapping) { return }
   if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
+  if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    if (!globalStore.notifyBoxSnappingIsReady) { return }
+    if (!globalStore.itemSnappingIsReady) { return }
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
@@ -493,6 +516,145 @@ const updateSizeForNewBox = (boxId) => {
   boxStore.updateBox(update)
 }
 
+// lists
+
+const addList = (event) => {
+  let position = utils.cursorPositionInSpace(event)
+  if (utils.isPositionOutsideOfSpace(position)) {
+    position = utils.cursorPositionInPage(event)
+    globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    return
+  }
+  userStore.notifyReadOnly(position)
+  const shouldPrevent = !userStore.getUserCanEditSpace
+  if (shouldPrevent) {
+    globalStore.updateCurrentUserToolbar('card')
+    return
+  }
+  const isResizing = true
+  listStore.createList({ list: position, isResizing })
+  globalStore.currentListIsNew = true
+  event.preventDefault() // allows dragging lists without scrolling on touch
+}
+const checkIfShouldRemoveFromList = async () => {
+  if (globalStore.shouldSnapBackToList) { return }
+  if (!globalStore.cardsWereDragged) { return }
+  // remove from list if current dragging card is in list
+  const cardId = globalStore.currentDraggingCardId
+  const card = cardStore.getCard(cardId)
+  if (!card?.listId) { return }
+  // if removeing current card from list, remove all selected list cards from lists
+  let cards = cardStore.getCardsSelected
+  cards = cards.filter(card => card.listId)
+  cardStore.removeCardsFromLists(cards)
+}
+const checkIfShouldSnapBackToList = async () => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (!globalStore.shouldSnapBackToList) { return }
+  const cards = cardStore.getCardsSelected
+  let listIds = []
+  cards.forEach(card => {
+    if (card.listId) { listIds.push(card.listId) }
+  })
+  listIds = uniq(listIds)
+  globalStore.triggerIsSnappingToList()
+  for (const listId of listIds) {
+    const list = listStore.getList(listId)
+    await cardStore.updateCardPositionsInList(list) // return cards to their prev list position
+  }
+}
+const checkIfShouldSnapToListTop = async (event) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.preventItemSnapping) { return }
+  if (!listStore.listSnapGuides.listId) { return }
+  if (cardStore.cardSnapGuides.length) { return }
+  if (event.shiftKey) { return }
+  const { listId, cards } = listStore.listSnapGuides
+  const list = listStore.getList(listId)
+  await cardStore.addCardsToList({ cards, list, targetPositionIndex: null, shouldPrepend: true })
+}
+const checkIfShouldSnapToCard = async (event) => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.preventItemSnapping) { return }
+  if (!cardStore.cardSnapGuides.length) { return }
+  if (!globalStore.itemSnappingIsReady) { return }
+  if (event.shiftKey) { return }
+  let { target, side, item } = cardStore.cardSnapGuides[0]
+  let cards = cardStore.getCardsSelected
+  // add card to list from list card
+  if (target.listId) {
+    const list = listStore.getList(target.listId)
+    const targetPositionIndex = target.listPositionIndex
+    const shouldPrepend = side === 'top'
+    await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
+    return
+  }
+  // create new list
+  const list = {
+    id: nanoid(),
+    y: target.y - consts.listInfoHeight,
+    x: target.x - consts.listPadding,
+    resizeWidth: userStore.cardSettingsCardWrapWidth
+  }
+  listStore.createList({ list })
+  // add target to list
+  await nextTick()
+  await cardStore.addCardsToList({ cards: [target], list, targetPositionIndex: null })
+  await nextTick()
+  // add dragging cards to list
+  cards = sortBy(cards, 'y')
+  target = cardStore.getCard(target.id)
+  const targetPositionIndex = target.listPositionIndex
+  const shouldPrepend = side === 'top'
+  await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
+}
+const resizeLists = async () => {
+  if (!prevCursor) { return }
+  const lists = listStore.getListsResizing
+  const ids = lists.map(list => list.id)
+
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  let delta = {
+    x: endCursor.x - prevCursor.x,
+    y: endCursor.y - prevCursor.y
+  }
+  delta = {
+    x: Math.round(delta.x * zoom),
+    y: Math.round(delta.y * zoom)
+  }
+  listStore.resizeLists(ids, delta)
+  await nextTick()
+  globalStore.updatePageSizes()
+}
+const stopResizingLists = () => {
+  if (!globalStore.currentUserIsResizingList) { return }
+  globalStore.currentUserIsResizingList = false
+  globalStore.updateCurrentUserToolbar('card')
+  broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingLists' })
+  // globalStore.checkIfItemShouldIncreasePageSize(lists[0])
+}
+const unselectCardsInDraggedList = () => {
+  if (!globalStore.currentDraggingListId) { return }
+  if (globalStore.multipleListsSelectedIds.length) { return }
+  globalStore.clearMultipleSelected()
+}
+const showListDetails = async (event) => {
+  if (!globalStore.currentListIsNew) { return }
+  if (utils.isMobile()) { return }
+  const listId = globalStore.currentUserIsResizingListIds[0]
+  await nextTick()
+  await nextTick()
+  globalStore.updateListDetailsIsVisibleForListId(listId)
+}
+const checkIfShouldUpdateCardPositionsInEdgeLists = () => {
+  let listIds = uniq(globalStore.multipleListIdsWereDraggedToEdge)
+  listIds = listIds.forEach(id => {
+    const list = listStore.getList(id)
+    cardStore.updateCardPositionsInList(list)
+  })
+  globalStore.multipleListsWereDraggedToEdge = []
+}
+
 // drag items
 
 const dragItemsOnNextTick = async () => {
@@ -515,8 +677,11 @@ const dragItems = () => {
   boxStore.moveBoxes({ endCursor, prevCursor, endSpaceCursor })
   // lines
   lineStore.moveLines({ endCursor, prevCursor })
+  // lists
+  listStore.moveLists({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
+  const isMeta = event.metaKey || event.ctrlKey
   const isInitialDrag = !globalStore.boxesWereDragged
   if (isInitialDrag) {
     const updates = {
@@ -524,10 +689,23 @@ const dragBoxes = (event) => {
       userId: userStore.id
     }
     broadcastStore.update({ updates, action: 'addToRemoteBoxesDragging' })
-    // alt-drag box to move without selecting items inside
-    if (!event.altKey) {
+    // meta-key-drag box to move without selecting items inside
+    if (!isMeta) {
       boxStore.selectItemsInSelectedBoxes()
+      globalStore.multipleBoxesSelectedIds.push(globalStore.currentDraggingBoxId)
     }
+  }
+  dragItems()
+}
+const dragLists = (event) => {
+  const isInitialDrag = !globalStore.listsWereDragged
+  if (isInitialDrag) {
+    const updates = {
+      listId: globalStore.currentDraggingListId,
+      userId: userStore.id
+    }
+    broadcastStore.update({ updates, action: 'addToRemoteListsDragging' })
+    listStore.selectItemsInSelectedLists()
   }
   dragItems()
 }
@@ -588,7 +766,16 @@ const updateCardDetailsWidth = (event) => {
 // interactions
 
 const isInteracting = computed(() => {
-  return isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value || isDraggingLine.value || isResizingCardDetails.value
+  return (
+    isDraggingCard.value ||
+    isDrawingConnection.value ||
+    isResizingCard.value ||
+    isResizingBox.value ||
+    isDraggingBox.value ||
+    isDraggingLine.value ||
+    isDraggingList.value ||
+    isResizingCardDetails.value
+  )
 })
 watch(() => isInteracting.value, (value, prevValue) => {
   if (value) {
@@ -616,18 +803,31 @@ const handleTouchStart = (event) => {
   prevCursor = utils.cursorPositionInViewport(event)
 }
 const updateCurrentInteractingItem = () => {
-  let boxId = globalStore.currentDraggingBoxId
+  let boxId, cardId, listId
+  // box
   if (globalStore.currentUserIsResizingBox) {
     boxId = globalStore.currentUserIsResizingBoxIds[0]
+  } else {
+    boxId = globalStore.currentDraggingBoxId
   }
-  let cardId = globalStore.currentDraggingCardId
+  // card
   if (globalStore.currentUserIsResizingCard) {
     cardId = globalStore.currentUserIsResizingCardIds[0]
+  } else {
+    cardId = globalStore.currentDraggingCardId
   }
-  if (boxId) {
+  // list
+  if (globalStore.currentUserIsResizingList) {
+    listId = globalStore.currentUserIsResizingListIds[0]
+  } else {
+    listId = globalStore.currentDraggingListId
+  }
+  // update state.currentInteractingItem
+  if (listId) {
+    state.currentInteractingItem = listStore.getList(listId)
+  } else if (boxId) {
     state.currentInteractingItem = boxStore.getBox(boxId)
-  }
-  if (cardId) {
+  } else if (cardId) {
     state.currentInteractingItem = cardStore.getCard(cardId)
   }
 }
@@ -642,12 +842,19 @@ const initInteractions = (event) => {
   updateCurrentInteractingItem()
 }
 const updateShouldSnapToGrid = (event) => {
-  let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
+  let shouldSnap = (
+    isDraggingCard.value ||
+    isDraggingBox.value ||
+    isDraggingList.value ||
+    isResizingCard.value ||
+    isResizingBox.value ||
+    isResizingList.value
+  )
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
   if (!globalStore.shouldSnapToGrid && shouldSnap) {
     const item = state.currentInteractingItem
-    globalStore.snapGuideLinesOrigin = {
+    globalStore.axisGuideLinesOrigin = {
       x: item.x,
       y: item.y
     }
@@ -664,12 +871,16 @@ const interact = (event) => {
   } else if (isDraggingBox.value) {
     globalStore.currentDraggingCardId = ''
     dragBoxes(event)
+  } else if (isDraggingList.value) {
+    dragLists(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
   } else if (isTiltingCard.value) {
     tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
+  } else if (isResizingList.value) {
+    resizeLists()
   } else if (isDraggingLine.value) {
     dragItems()
   } else if (isResizingCardDetails.value) {
@@ -686,6 +897,8 @@ const checkShouldShowDetails = () => {
     globalStore.preventDraggedBoxFromShowingDetails = true
   } else if (isDraggingLine.value) {
     globalStore.preventDraggedLineFromShowingDetails = true
+  } else if (isDraggingList.value) {
+    globalStore.preventDraggedListFromShowingDetails = true
   }
 }
 const eventIsFromTextarea = (event) => {
@@ -734,8 +947,14 @@ const stopInteractions = async (event) => {
     globalStore.triggerUpdateHeaderAndFooterPosition()
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldExpandBoxes(event)
-  boxStore.boxSnapGuides = []
+  await checkIfShouldRemoveFromList()
+  await checkIfShouldSnapToBox(event)
+  await checkIfShouldSnapToCard(event)
+  await checkIfShouldSnapToListTop(event)
+  await checkIfShouldSnapBackToList()
+  await checkIfShouldUpdateCardPositionsInEdgeLists()
+  globalStore.clearSnapGuides()
+  globalStore.preventItemSnapping = false
   if (shouldCancelInteraction(event)) {
     globalStore.currentUserIsResizingCardDetails = false
     return
@@ -744,22 +963,29 @@ const stopInteractions = async (event) => {
   unselectCardsInDraggedBox()
   showMultipleSelectedActions(event)
   showBoxDetails(event)
+  showListDetails(event)
   globalStore.preventMultipleSelectedActionsIsVisible = false
   globalStore.importArenaChannelIsVisible = false
   globalStore.shouldAddCard = false
   globalStore.preventDraggedCardFromShowingDetails = false
   globalStore.preventDraggedBoxFromShowingDetails = false
+  globalStore.preventDraggedListFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()
+  stopResizingLists()
+  globalStore.shouldSnapBackToList = false
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
   globalStore.currentUserIsDraggingCard = false
   globalStore.currentUserIsDraggingBox = false
   globalStore.currentUserIsDraggingLine = false
+  globalStore.currentUserIsDraggingList = false
+  globalStore.currentUserIsDraggingDuplicateItem = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false
+  globalStore.listsWereDragged = false
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   globalStore.currentUserIsResizingCardDetails = false
@@ -770,6 +996,10 @@ const stopInteractions = async (event) => {
   globalStore.clearShouldExplicitlyRenderCardIds()
   globalStore.shouldSnapToGrid = false
   spaceStore.updateSpaceEditedAt()
+  // runs after child component interaction methods
+  setTimeout(() => {
+    listStore.triggerClearShouldPreventNextListInfoButton()
+  }, 20)
 }
 
 // online
@@ -881,14 +1111,18 @@ const updateMetaRSSFeed = () => {
     ItemsLocked
     #box-backgrounds
     Boxes
+    #list-backgrounds
     Connections
     #box-infos
     Cards
+    #card-meta-containers
     Lines
+    Lists
     ItemUnlockButtons
     DrawingStrokes
     BoxDetails
     LineDetails
+    ListDetails
     CardDetails
     OtherCardDetails
     ConnectionDetails
@@ -897,7 +1131,7 @@ const updateMetaRSSFeed = () => {
     ScrollAtEdgesHandler
     NotificationsWithPosition(layer="space")
     BoxSelecting
-    SnapGuideLines
+    AxisGuideLines
   aside
     PaintSelectCanvas
     DrawingHandler
@@ -947,5 +1181,11 @@ const updateMetaRSSFeed = () => {
   .box-background
     border-radius var(--entity-radius)
     position absolute
+    z-index 0 !important
+
+#list-backgrounds
+  position absolute
+  z-index 0
+  .list-background
     z-index 0 !important
 </style>

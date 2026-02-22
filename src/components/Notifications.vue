@@ -104,6 +104,7 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
 const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
+const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
 // space
 
@@ -201,7 +202,6 @@ const notifySpaceIsUnavailableOffline = computed(() => globalStore.currentSpaceI
 const notifyIsJoiningGroup = computed(() => globalStore.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => globalStore.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => globalStore.notifyIsDuplicatingSpace)
-const notifyBoxSnappingIsReady = computed(() => globalStore.notifyBoxSnappingIsReady)
 const notifificationClasses = (item) => {
   const classes = {
     danger: item.type === 'danger',
@@ -322,7 +322,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   globalStore.multipleSelectedItemsToLoad(items)
   changeSpace(spaceId)
 }
-const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
 const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle
@@ -383,9 +383,9 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/constrain-axis.svg")
     span Snap to Grid
 
-  .persistent-item.info(v-if="notifyBoxSnappingIsReady")
-    img.icon(src="@/assets/box-snap.svg")
-    span Snap to Box
+  .persistent-item.info(v-if="itemSnappingIsReady")
+    img.icon(src="@/assets/merge.svg")
+    span Release to Snap
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
@@ -491,7 +491,9 @@ aside.notifications(@click.left="closeAllDialogs")
           img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
-    p Error saving changes to server
+    p
+      img.icon.offline(src="@/assets/offline.svg")
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")

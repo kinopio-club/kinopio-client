@@ -4,9 +4,11 @@ import debounce from 'lodash-es/debounce'
 import * as idb from 'idb-keyval'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
 let showDebugMessages = false
+const spaceUpdateQueue = {} // spaceId → Promise chain
 
 export default {
   async migrateFromLocalStorage () {
@@ -157,56 +159,26 @@ export default {
     }
   },
   async updateSpace (key, value, spaceId) {
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    const normalizeKeys = ['cards', 'connections', 'connectionTypes', 'boxes']
-    if (normalizeKeys.includes(key)) {
-      value = utils.denormalizeItems(value)
-    }
-    space[key] = value
-    space.clients = []
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
+  // Serialize updates per space to prevent read-write race conditions
+    const prev = spaceUpdateQueue[spaceId] || Promise.resolve()
+    const next = prev.then(async () => {
+      const space = await this.space(spaceId)
+      if (!utils.objectHasKeys(space)) {
+        console.warn(updateErrorMessage)
+        return
+      }
+      const itemTypes = consts.itemTypes
+      if (itemTypes.includes(key)) {
+        value = utils.denormalizeItems(value)
+      }
+      space[key] = value
+      space.clients = []
+      space.cacheDate = Date.now()
+      await this.saveSpace(space)
+    })
+    spaceUpdateQueue[spaceId] = next.catch(() => {}) // prevent a rejected promise from breaking the chain
+    return next
   },
-  updateSpaceCardsDebounced: debounce(async function (cards, spaceId) {
-    cards = utils.denormalizeItems(cards)
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    cards = utils.denormalizeItems(cards)
-    space.cards = cards
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
-  }, 200),
-  updateSpaceConnectionsDebounced: debounce(async function (connections, spaceId) {
-    connections = utils.denormalizeItems(connections)
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    space.connections = connections
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
-  }, 200),
-  updateSpaceBoxesDebounced: debounce(async function (boxes, spaceId) {
-    boxes = utils.denormalizeItems(boxes)
-    const space = await this.space(spaceId)
-    if (!utils.objectHasKeys(space)) {
-      console.warn(updateErrorMessage)
-      return
-    }
-    boxes = utils.denormalizeItems(boxes)
-    space.boxes = boxes
-    space.cacheDate = Date.now()
-    await this.saveSpace(space)
-  }, 200),
-
   async addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
     // space items
     const space = await this.space(spaceId)
@@ -248,7 +220,8 @@ export default {
       tags: space.tags,
       boxes: space.boxes,
       lines: space.lines,
-      drawingStrokes: space.drawingStrokes
+      drawingStrokes: space.drawingStrokes,
+      lists: space.lists
     }
     const uniqueItems = await utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards.map(card => {
@@ -264,6 +237,7 @@ export default {
     space.boxes = uniqueItems.boxes
     space.lines = uniqueItems.lines
     space.drawingStrokes = uniqueItems.drawingStrokes
+    space.lists = uniqueItems.lists
     await this.saveSpace(space)
     return space
   },

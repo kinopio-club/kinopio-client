@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -50,6 +51,7 @@ export const useSpaceStore = defineStore('space', {
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       const space = this.getSpaceAllState
       if (!space) { return }
       space.cards = cardStore.getAllCards
@@ -57,6 +59,7 @@ export const useSpaceStore = defineStore('space', {
       space.connectionTypes = connectionStore.getAllConnectionTypes
       space.boxes = boxStore.getAllBoxes
       space.lines = lineStore.getAllLines
+      space.lists = listStore.getAllLists
       space.drawingStrokes = this.drawingStrokes || []
       return space
     },
@@ -129,16 +132,21 @@ export const useSpaceStore = defineStore('space', {
       return this.name === 'Hello Kinopio'
     },
     getSpaceSelectedItems () {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const globalStore = useGlobalStore()
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      // card
       const cards = globalStore.multipleCardsSelectedIds.map(cardId => {
         return cardStore.getCard(cardId)
       })
+      // box
       const boxes = globalStore.multipleBoxesSelectedIds.map(boxId => {
         return boxStore.getBox(boxId)
       })
+      // connection
       const connections = connectionStore.getAllConnections.filter(connection => {
         const selectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
         const isStartCardMatch = selectedIds.includes(connection.startItemId)
@@ -147,17 +155,27 @@ export const useSpaceStore = defineStore('space', {
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = connectionTypeIds.map(id => connectionStore.getConnectionType(id))
-      return { cards, connectionTypes, connections, boxes }
+      // line
+      const lines = globalStore.multipleLinesSelectedIds.map(lineId => {
+        return lineStore.getLine(lineId)
+      })
+      // list
+      const lists = globalStore.multipleListsSelectedIds.map(listId => {
+        return listStore.getList(listId)
+      })
+      return { cards, connectionTypes, connections, boxes, lines, lists }
     },
     getSpaceItemColors () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
-      const cardColors = cardStore.getCardColors
-      const boxColors = boxStore.getboxColors
-      const lineColors = lineStore.getLineColors
-      const colors = cardColors.concat(boxColors).concat(lineColors)
-      return uniq(colors)
+      const listStore = useListStore()
+      return {
+        card: cardStore.getCardColors,
+        box: boxStore.getBoxColors,
+        line: lineStore.getLineColors,
+        list: listStore.getListColors
+      }
     },
     getSpaceTags () {
       return uniqBy(this.tags, 'name') || []
@@ -332,6 +350,7 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       space = utils.removeRemovedCardsFromSpace(space)
       // initialize items
       cardStore.initializeCards(space?.cards)
@@ -339,6 +358,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
       lineStore.initializeLines(space?.lines)
+      listStore.initializeLists(space?.lists)
       // initialize space
       this.$state = space
       console.log('🍍 restoreSpace', this.getSpaceAllState)
@@ -443,6 +463,7 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
@@ -452,13 +473,14 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
       connectionStore.initializeRemoteConnections(space.connections)
       lineStore.initializeRemoteLines(space.lines)
+      listStore.initializeRemoteLists(space.lists)
       globalStore.updatePageSizes()
       // init space
       historyStore.redoLocalUpdates()
       this.$state = space
       historyStore.reset()
       // clean up unused keys
-      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
+      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines', 'lists']
       itemKeys.forEach(key => {
         delete this[key]
       })
@@ -885,6 +907,14 @@ export const useSpaceStore = defineStore('space', {
         console.warn('🚑 updateOtherUsers', error)
       }
     },
+    broadcastUpdateSpace (update) {
+      const broadcastStore = useBroadcastStore()
+      const ignoreKeys = ['id', 'editedAt', 'editedByUserId']
+      const keys = Object.keys(update)
+      const shouldPrevent = keys.every(key => ignoreKeys.includes(key))
+      if (shouldPrevent) { return }
+      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
+    },
     async updateOtherItems (options) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
@@ -931,13 +961,12 @@ export const useSpaceStore = defineStore('space', {
     async updateSpace (update) {
       const apiStore = useApiStore()
       const keys = Object.keys(update)
-      const broadcastStore = useBroadcastStore()
       for (const key of keys) {
         this[key] = update[key]
       }
       update.id = this.id
       if (update.isFromBroadcast) { return }
-      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
+      this.broadcastUpdateSpace(update)
       await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
@@ -1204,7 +1233,11 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const { cards, boxes, connections, connectionTypes, tags } = items
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      const { cards, boxes, connections, connectionTypes, tags, lines, lists } = items
+      lines.forEach(line => lineStore.createLine(line))
+      lists.forEach(list => listStore.createList({ list }))
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
       for (const connection of connections) {

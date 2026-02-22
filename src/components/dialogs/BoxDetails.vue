@@ -8,7 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import BoxActions from '@/components/subsections/BoxActions.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -68,6 +68,7 @@ watch(() => visible.value, async (value, prevValue) => {
 })
 
 const broadcastShowBoxDetails = () => {
+  if (!canEditBox.value) { return }
   const updates = {
     boxId: currentBox.value.id,
     userId: userStore.id
@@ -180,7 +181,7 @@ const toggleTextEditAction = async (action) => {
 
 // colors
 
-const itemColors = computed(() => spaceStore.getSpaceItemColors)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.box)
 const colorisDark = computed(() => {
   const color = currentBox.value.color
   return utils.colorIsDark(color)
@@ -283,7 +284,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         )
       //- name
       .textarea-wrap
-        textarea.name(
+        textarea.name.on-background-color(
           :disabled="!canEditBox"
           ref="nameElement"
           rows="1"
@@ -312,9 +313,9 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundPickerIsVisible")
         BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundPickerIsVisible")
         BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
-    ItemDetailsDebug(:item="currentBox" :keys="['infoWidth', 'fill', 'background']")
 
-    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    template(v-if="canEditBox")
+      BoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
@@ -323,23 +324,13 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
     p.badge.info(v-if="warningBackgroundFillIsEmptyIsVisible")
       span Background image won't be drawn because fill mode is set to empty{{' '}}
       img.icon.box-icon(src="@/assets/box-empty.svg")
+
+    ItemDetailsDebug(:item="currentBox" :keys="['infoWidth', 'fill', 'background', 'resizeWidth']")
 </template>
 
 <style lang="stylus">
 dialog.box-details
   transform-origin top left
-  textarea.name
-    margin-left 6px
-    margin-top 2px
-    margin-bottom 0
-    width calc(100% - 6px)
-    border-color var(--primary-border)
-    &.is-dark
-      color var(--primary-on-dark-background)
-      border-color var(--primary-border-on-dark-background)
-    &.is-light
-      color var(--primary-on-light-background)
-      border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
   .filter-button-wrap

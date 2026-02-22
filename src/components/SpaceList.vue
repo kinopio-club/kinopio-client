@@ -109,8 +109,7 @@ const props = defineProps({
   parentDialog: String,
   previewImageIsWide: Boolean,
   hidePreviewImage: Boolean,
-  showSpaceGroups: Boolean,
-  showDuplicateTemplateIcon: Boolean
+  showSpaceGroups: Boolean
 })
 
 const state = reactive({
@@ -400,6 +399,13 @@ const group = (groupId) => {
   if (!groupId) { return }
   return groupStore.getGroup(groupId)
 }
+
+// preview image
+
+const previewImage = (space) => {
+  if (!space.previewThumbnailImage) { return }
+  return space.previewThumbnailImage + `?date=${globalStore.sessionDate}`
+}
 </script>
 
 <template lang="pug">
@@ -443,10 +449,6 @@ span.space-list-wrap
             //- inbox
             template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
-            //- template
-            template(v-if="space.isTemplate")
-              img.icon.templates.duplicate-template(v-if="showDuplicateTemplateIcon" src="@/assets/duplicate.svg" title="Duplicate Template")
-              img.icon.templates(v-else src="@/assets/templates.svg" title="Template")
             //- Users
             //- show spectators
             template(v-if="showOtherUsers && isMultipleUsers(space)")
@@ -471,8 +473,8 @@ span.space-list-wrap
 
             //- preview image
             template(v-if="!props.hidePreviewImage")
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-                img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
+              .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide}")
+                img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
               GroupLabel(:group="group(space.groupId)")
@@ -486,8 +488,13 @@ span.space-list-wrap
                 NameMatch(:name="space.name" :indexes="space.matchIndexes")
               span(v-else)
                 span {{space.name}}
+              //- template
+              template(v-if="space.isTemplate")
+                img.icon.templates(src="@/assets/templates.svg" title="Template")
+              //- privacy
               template(v-if='space.privacy')
                 PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
+              //- explore
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
             //- new
             .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
@@ -571,8 +578,7 @@ span.space-list-wrap
         top 10px
         z-index 1
       .icon.templates
-        margin-right 5px
-        margin-top 3px
+        vertical-align -2px
       .icon.duplicate-template
         margin-top 5px
 

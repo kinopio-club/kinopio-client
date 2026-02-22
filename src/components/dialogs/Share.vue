@@ -16,6 +16,8 @@ import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 import consts from '@/consts.js'
+import GroupLabel from '@/components/GroupLabel.vue'
+import AddToGroup from '@/components/dialogs/AddToGroup.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -53,7 +55,8 @@ const state = reactive({
   isShareInPresentationMode: false,
   childDialogIsVisible: false,
   spaceUsersIsVisible: false,
-  QRCodeIsVisible: false
+  QRCodeIsVisible: false,
+  addToGroupIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -95,7 +98,15 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.childDialogIsVisible || state.spaceUsersIsVisible || state.QRCodeIsVisible
+  return (
+    state.privacyPickerIsVisible ||
+    state.rssFeedsIsVisible ||
+    state.embedIsVisible ||
+    state.childDialogIsVisible ||
+    state.spaceUsersIsVisible ||
+    state.QRCodeIsVisible ||
+    state.addToGroupIsVisible
+  )
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
@@ -104,6 +115,7 @@ const closeDialogs = () => {
   state.childDialogIsVisible = false
   state.spaceUsersIsVisible = false
   state.QRCodeIsVisible = false
+  state.addToGroupIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
@@ -141,11 +153,11 @@ const toggleQRCodeIsVisible = () => {
   closeDialogs()
   state.QRCodeIsVisible = !isVisible
 }
-
-// invites
-
-const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const toggleAddToGroupIsVisible = () => {
+  const isVisible = state.addToGroupIsVisible
+  closeDialogs()
+  state.addToGroupIsVisible = !isVisible
+}
 
 // users
 
@@ -156,6 +168,48 @@ const toggleSpaceUsersIsVisible = () => {
   state.spaceUsersIsVisible = value
 }
 
+// group
+
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
+const userGroups = computed(() => groupStore.getCurrentUserGroups)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const currentUserIsGroupAdmin = (group) => {
+  return groupStore.getGroupUserIsAdmin({
+    userId: userStore.id,
+    groupId: group.id
+  })
+}
+const toggleSpaceGroup = async (group) => {
+  const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
+  if (shouldRemoveSpaceGroup) {
+    await removeSpaceGroup(group)
+  } else {
+    await updateSpaceGroup(group)
+  }
+}
+const updateSpaceGroup = (group) => {
+  const isSpaceCreator = userStore.getUserIsSpaceCreator
+  if (isSpaceCreator) {
+    groupStore.addSpaceToGroup(group)
+  } else {
+    globalStore.addNotification({
+      message: 'Only space creator can assign to group',
+      type: 'danger'
+    })
+  }
+}
+const removeSpaceGroup = (group) => {
+  const isGroupAdmin = currentUserIsGroupAdmin(group)
+  const isSpaceCreator = userStore.getUserIsSpaceCreator
+  if (isGroupAdmin || isSpaceCreator) {
+    groupStore.removeSpaceFromGroup()
+  } else {
+    globalStore.addNotification({
+      message: 'Only space creator, or group admin, can remove from group',
+      type: 'danger'
+    })
+  }
+}
 </script>
 
 <template lang="pug">
@@ -183,14 +237,14 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
-    section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
+    section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection-member': isSpaceMember}")
       .row.title-row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
             .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
-            span Copy URL
+            span Copy Public URL
           button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
             img.icon.qr-code(src="@/assets/qr-code.svg")
         QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
@@ -200,6 +254,16 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.prevent.stop.left="toggleIsShareInPresentationMode" @touchend.prevent.stop="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
+
+  //- Group
+  section
+    .button-wrap
+      button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+        img.icon.group(src="@/assets/group.svg")
+        GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
+        template(v-else)
+          span Add to Group
+      AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
 
   //- Invite
   InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" :group="spaceGroup" @childDialogIsVisible="childDialogIsVisible")
@@ -244,8 +308,6 @@ dialog.share
     display inline-block
     &.danger
       background-color var(--danger-background)
-  .privacy-button + .textarea
-    margin-top 10px
   .description
     margin-top 3px
   dialog.user-details
@@ -257,11 +319,6 @@ dialog.share
     bottom 25px
   .share-private
     margin-top 10px
-  .privacy-button + input
-    margin-top 10px
-  .privacy-button
-    > button
-      padding-top 8px
   .button-tip-badge
     top -12px
     pointer-events none
@@ -289,9 +346,14 @@ dialog.share
         pointer-events none
 
   .privacy-button
+    width 100%
     button
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+      width 100%
+    &.open,
+    &.closed
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
 
   .private-copy-badge
     margin-left 6px

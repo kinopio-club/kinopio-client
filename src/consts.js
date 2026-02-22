@@ -13,6 +13,7 @@ export default {
   defaultCardHeight: 70,
   minItemXY: 70,
   minLineY: 150,
+  minListWidth: 200,
   normalCardWrapWidth: 200,
   wideCardWrapWidth: 390,
   minCardIframeWidth: 310,
@@ -25,7 +26,7 @@ export default {
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,
-  boxSnapGuideWaitingDuration: 100,
+  itemSnapGuideWaitingDuration: 200,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   straightLineConnectionPathControlPoint: 'q00,00',
@@ -40,12 +41,17 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/squiggle-background-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
-  itemTypesWithPositions: ['boxes', 'cards'],
+  itemTypesWithPositions: ['boxes', 'cards', 'lists', 'lines'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
   lineInfoOffset: 11,
+  listPadding: 8,
+  listInfoHeight: 34,
+  listEmptyHeight: 56,
+  itemSnapOpacity: 0.5,
   edgeThreshold: 30,
+  itemTypes: ['cards', 'connections', 'connectionTypes', 'boxes', 'lists', 'lines', 'drawingStrokes'],
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

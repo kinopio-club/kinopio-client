@@ -151,18 +151,16 @@ export const useApiStore = defineStore('api', {
         return
       }
       const data = await response.json()
-      const operations = data.operations
       console.warn('🚑 serverOperationsError', data)
+      const { operations, errors } = data
       const nonCriticalErrorStatusCodes = [400, 401, 404]
-      operations.forEach(operation => {
-        const error = operation.error
-        if (!error) { return }
+      errors.forEach(error => {
         const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
         if (isCritical) {
-          console.error('🚒 critical serverOperationsError operation', operation)
+          console.error('🚒 critical serverOperationsError operation', error)
           globalStore.updateNotifyServerCouldNotSave(true)
         } else {
-          console.warn('🚑 non-critical serverOperationsError operation', operation)
+          console.warn('🚑 non-critical serverOperationsError operation', error)
         }
       })
     },
@@ -226,7 +224,7 @@ export const useApiStore = defineStore('api', {
       }
       // try to to merge new item into matching prev one
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
+      const shouldNotMergeOperations = ['createList', 'createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
       let isPrevItem
       const newQueue = sessionQueue.map(prevItem => {
         const isOperationName = prevItem.name === newItem.name

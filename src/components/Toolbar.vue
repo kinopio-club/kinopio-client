@@ -31,6 +31,10 @@ const toolbarIsBox = computed(() => {
   if (globalStore.currentUserIsResizingBox) { return }
   return globalStore.getToolbarIsBox
 })
+const toolbarIsList = computed(() => {
+  if (globalStore.currentUserIsResizingList) { return }
+  return globalStore.getToolbarIsList
+})
 const toolbarIsDrawing = computed(() => {
   return globalStore.getToolbarIsDrawing
 })
@@ -59,14 +63,15 @@ nav#toolbar.toolbar(v-if="visible")
   DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
     .segmented-buttons
-      //- line
+      //- Line
       .button-wrap
         button(
           @click="addLine"
-          title="Add Line Divider (L)"
+          title="Add Line Divider (-)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
           img.icon.line-icon(src="@/assets/line.svg")
+
       //- Box
       .button-wrap
         button(
@@ -77,6 +82,17 @@ nav#toolbar.toolbar(v-if="visible")
           img.icon.box-icon(src="@/assets/box.svg")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
           span Draw Box (B)
+
+      //- List
+      .button-wrap
+        button(
+          title="Draw List (L)"
+          :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
+          @click="toggleToolbar('list')"
+        )
+          img.icon.list-icon(src="@/assets/list.svg")
+        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
+          span Draw List (L)
 
       //- Drawing
       .button-wrap

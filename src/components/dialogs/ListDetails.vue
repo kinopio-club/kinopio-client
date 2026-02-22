@@ -4,11 +4,12 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
-import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import ListActions from '@/components/subsections/ListActions.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 
@@ -17,7 +18,7 @@ import { colord, extend } from 'colord'
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
-const lineStore = useLineStore()
+const listStore = useListStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
@@ -28,30 +29,38 @@ const state = reactive({
   colorPickerIsVisible: false
 })
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const currentLine = computed(() => {
-  return lineStore.getLine(globalStore.lineDetailsIsVisibleForLineId) || {}
+let prevList
+
+const canEditSpace = computed(() => userStore.getUserIsSpaceMember)
+
+const currentList = computed(() => {
+  return listStore.getList(globalStore.listDetailsIsVisibleForListId) || {}
 })
-const visible = computed(() => utils.objectHasKeys(currentLine.value))
+const visible = computed(() => utils.objectHasKeys(currentList.value))
 watch(() => visible.value, async (value, prevValue) => {
   await nextTick()
   if (value) {
     closeDialogs()
-    broadcastShowLineDetails()
+    broadcastShowListDetails()
     scrollIntoViewAndFocus()
     textareaSizes()
     globalStore.preventMultipleSelectedActionsIsVisible = false
+    prevList = currentList.value
   } else {
-    globalStore.currentDraggingLineId = ''
-    globalStore.updateMultipleLinesSelectedIds([])
+    globalStore.currentDraggingListId = ''
+    globalStore.updateMultipleListsSelectedIds([])
+    await nextTick()
+    const list = listStore.getList(prevList.id)
+    listStore.updateListDimensions(list)
   }
 })
-const lines = computed(() => lineStore.getAllLines)
+const lists = computed(() => listStore.getAllLists)
 
 // dialog state
 
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
+  globalStore.triggerCloseChildDialogs()
 }
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
@@ -87,30 +96,30 @@ const styles = computed(() => {
   }
   const styles = {
     transform: `scale(${zoom})`,
-    left: `${currentLine.value.x + 8}px`,
-    top: `${currentLine.value.y + 8}px`
+    left: `${currentList.value.x + 8}px`,
+    top: `${currentList.value.y + 8}px`
   }
   return styles
 })
-const broadcastShowLineDetails = () => {
-  if (canEditSpace.value) { return }
+const broadcastShowListDetails = () => {
+  if (!canEditSpace.value) { return }
   const updates = {
-    lineId: currentLine.value.id,
+    listId: currentList.value.id,
     userId: userStore.id
   }
-  broadcastStore.update({ updates, action: 'updateRemoteLineDetailsVisible' })
+  broadcastStore.update({ updates, action: 'updateRemoteListDetailsVisible' })
 }
 const update = (updates) => {
   const keys = Object.keys(updates)
-  const update = { id: currentLine.value.id }
+  const update = { id: currentList.value.id }
   keys.forEach(key => {
     update[key] = updates[key]
   })
-  lineStore.updateLine(update)
+  listStore.updateList(update)
   // state.isUpdated = true
 }
 const sectionStyles = computed(() => {
-  const backgroundColor = colord(currentLine.value.color).alpha(1).toRgbString()
+  const backgroundColor = colord(currentList.value.color).alpha(1).toRgbString()
   return { backgroundColor }
 })
 
@@ -118,7 +127,7 @@ const sectionStyles = computed(() => {
 
 const name = computed({
   get () {
-    return currentLine.value.name
+    return currentList.value.name
   },
   set (name) {
     update({ name })
@@ -134,14 +143,14 @@ const focusName = async () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const selectName = () => {
-  // select all in new lines, else put cursor at end (like cards)
-  const currentLineIsNew = globalStore.currentLineIsNew
+  // select all in new lists, else put cursor at end (like cards)
+  const currentListIsNew = globalStore.currentListIsNew
   const element = nameElement.value
   const length = name.value.length
   if (length && element) {
     element.setSelectionRange(0, length)
   }
-  globalStore.currentLineIsNew = false
+  globalStore.currentListIsNew = false
 }
 const textareaSizes = () => {
   const element = dialogElement.value
@@ -155,9 +164,9 @@ const textareaSizes = () => {
 
 // colors
 
-const itemColors = computed(() => spaceStore.getSpaceItemColors.line)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.list)
 const colorisDark = computed(() => {
-  const color = currentLine.value.color
+  const color = currentList.value.color
   return utils.colorIsDark(color)
 })
 const toggleColorPicker = () => {
@@ -175,23 +184,14 @@ const isThemeDarkAndUserColorLight = computed(() => {
 
 // remove
 
-const removeLine = () => {
-  lineStore.removeLine(currentLine.value.id)
+const removeList = () => {
+  listStore.removeList(currentList.value.id)
   globalStore.closeAllDialogs()
-}
-
-// jump to
-
-const nextLine = computed(() => lineStore.getNextLine(currentLine.value.y))
-const prevLine = computed(() => lineStore.getPrevLine(currentLine.value.y))
-const focusLine = (line) => {
-  globalStore.updateFocusOnLineId(line.id)
-  globalStore.updateLineDetailsIsVisibleForLineId(line.id)
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click.left.stop="closeDialogs" ref="dialogElement" :date-line-id="currentLine.id")
+dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click.left.stop="closeDialogs" ref="dialogElement" :date-list-id="currentList.id")
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
 
   section(:style="sectionStyles")
@@ -199,9 +199,9 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
       //- color
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
-          .current-color(:style="{backgroundColor: currentLine.color}")
+          .current-color(:style="{backgroundColor: currentList.color}")
         ColorPicker(
-          :currentColor="currentLine.color"
+          :currentColor="currentList.color"
           :visible="state.colorPickerIsVisible"
           :recentColors="itemColors"
           :luminosityIsDark="true"
@@ -213,30 +213,31 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           :disabled="!canEditSpace"
           ref="nameElement"
           rows="1"
-          placeholder="Line Name"
+          placeholder="List Name"
           v-model="name"
           @keydown.enter.stop.prevent="closeAllDialogs"
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    .row
-      //- remove
-      .button-wrap(v-if="canEditSpace")
-        button.danger(@click.left="removeLine" title="Remove Line")
-          img.icon(src="@/assets/remove.svg")
-      //- jump to
-      .button-wrap
-        .segmented-buttons
-          button(@click.left="focusLine(prevLine)" :disabled="!prevLine" title="Jump to Previous Line")
-            img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
-          button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
-            img.icon.down-arrow(src="@/assets/down-arrow.svg")
+    template(v-if="canEditSpace")
+      .row
+        //- remove
+        .button-wrap(v-if="canEditSpace")
+          button.danger(@click.left="removeList" title="Remove List")
+            img.icon(src="@/assets/remove.svg")
+
+      ListActions(
+        :visible="true"
+        :lists="[currentList]"
+        @closeDialogs="closeDialogs"
+        :colorIsHidden="true"
+      )
     .row(v-if="!canEditSpace")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
 
-    ItemDetailsDebug(:item="currentLine" :keys="['y', 'color']")
+    ItemDetailsDebug(:item="currentList" :keys="['x', 'y', 'height', 'resizeWidth']")
 </template>
 
 <style lang="stylus">

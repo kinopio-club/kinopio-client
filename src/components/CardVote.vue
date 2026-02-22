@@ -65,8 +65,6 @@ const decrement = () => {
 <style lang="stylus">
 .card-counter
   display flex
-  min-width 68px
-  width max-content
   .counter-buttons
     margin-right 5px
     button
@@ -78,4 +76,5 @@ const decrement = () => {
         margin-left 2px
   .badge.counter
     margin-left -5px
+    margin-right 0
 </style>

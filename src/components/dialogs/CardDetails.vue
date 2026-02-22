@@ -5,13 +5,14 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useApiStore } from '@/stores/useApiStore'
 
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import CardActions from '@/components/subsections/CardActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -39,6 +40,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const listStore = useListStore()
 const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
@@ -342,29 +344,6 @@ const updateCompositionEventEndTime = (event) => {
   // for non-latin input
   // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
   compositionEventEndTime = event.timeStamp
-}
-const handleEnterKey = (event) => {
-  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  console.info('🎹 enter', {
-    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
-    pickersIsVisible
-  })
-  if (globalStore.shouldPreventNextEnterKey) {
-    globalStore.shouldPreventNextEnterKey = false
-  } else if (pickersIsVisible) {
-    triggerPickerSelectItem(event)
-    hidePickers()
-  } else if (state.insertedLineBreak) {
-    state.insertedLineBreak = false
-  // eslint-disable-next-line no-empty
-  } else if (isCompositionEvent) {
-  } else {
-    closeCard()
-    globalStore.closeAllDialogs()
-    globalStore.shouldPreventNextEnterKey = false
-    globalStore.triggerAddCard()
-  }
 }
 const removeCard = () => {
   if (!canEditCard.value) { return }
@@ -1206,7 +1185,56 @@ const updatePastedName = (event) => {
 
 // enter key shortcuts
 
-// ctrl-enter, alt-enter
+const addCard = () => {
+  closeCard()
+  globalStore.closeAllDialogs()
+  globalStore.shouldPreventNextEnterKey = false
+  globalStore.triggerAddCard()
+}
+const addListCard = () => {
+  const list = listStore.getList(card.value.listId)
+  const newCard = {
+    id: nanoid(),
+    width: card.value.width,
+    resizeWidth: card.value.resizeWidth,
+    x: card.value.x,
+    y: card.value.y + card.value.height + consts.listPadding,
+    backgroundColor: card.value.backgroundColor
+  }
+  closeCard()
+  globalStore.closeAllDialogs()
+  globalStore.shouldPreventNextEnterKey = false
+  const prevCard = cardStore.getCard(prevCardId)
+  cardStore.createCard(newCard, true)
+  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: prevCard.listPositionIndex })
+  globalStore.parentCardId = newCard.id
+  globalStore.updateCardDetailsIsVisibleForCardId(newCard.id)
+}
+
+// 🎹 enter
+const handleEnterKey = (event) => {
+  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  console.info('🎹 enter', {
+    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
+    pickersIsVisible
+  })
+  if (globalStore.shouldPreventNextEnterKey) {
+    globalStore.shouldPreventNextEnterKey = false
+  } else if (pickersIsVisible) {
+    triggerPickerSelectItem(event)
+    hidePickers()
+  } else if (state.insertedLineBreak) {
+    state.insertedLineBreak = false
+  // eslint-disable-next-line no-empty
+  } else if (isCompositionEvent) {
+  } else if (card.value.listId) {
+    addListCard()
+  } else {
+    addCard()
+  }
+}
+// 🎹 ctrl-enter, alt-enter
 const handleOptionEnterKey = (event) => {
   const optionEnterChildCard = !userStore.cardSettingsShiftEnterShouldAddChildCard
   if (optionEnterChildCard) {
@@ -1215,7 +1243,7 @@ const handleOptionEnterKey = (event) => {
     insertLineBreak(event)
   }
 }
-// shift-enter
+// 🎹 shift-enter
 const handleShiftEnterKey = (event) => {
   const shiftEnterChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
   if (shiftEnterChildCard) {
@@ -1488,7 +1516,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             span Share
           ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
-      CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
+      CardActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
       CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
       .row(v-if="nameMetaRowIsVisible && canEditCard")
@@ -1523,7 +1551,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           :visible="true"
           :loading="isLoadingUrlPreview"
           :card="card"
-          @toggleUrlIsVisible="toggleUrlIsVisible"
         )
 
       //- other space
@@ -1536,7 +1563,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
       //- Read Only
       template(v-if="!canEditCard")
-        CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
         .row.edit-message
           template(v-if="spacePrivacyIsOpen")
             span.badge.info
@@ -1583,7 +1609,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
       template(v-if="state.error.unknownUploadError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ItemDetailsDebug(:item="card" :keys="['x', 'y', 'urlIsVisible']")
+      ItemDetailsDebug(:item="card" :keys="['listId', 'listPositionIndex', 'x', 'y']")
     CardDetailsResize
 </template>
 

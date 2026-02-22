@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
@@ -24,6 +25,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
@@ -67,6 +69,7 @@ let selectableBoxesInViewport = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
 let selectableLines = []
+let selectableLists = []
 
 let unsubscribes
 
@@ -171,6 +174,7 @@ const isPanning = computed(() => globalStore.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => globalStore.currentUserToolbar === 'card')
 const toolbarIsBox = computed(() => globalStore.getToolbarIsBox)
+const toolbarIsList = computed(() => globalStore.getToolbarIsList)
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
@@ -242,6 +246,24 @@ const updateSelectableLines = () => {
       height: Math.round(rect.height)
     }
     selectableLines.push(value)
+  })
+}
+const updateSelectableLists = () => {
+  selectableLists = []
+  const lists = listStore.getAllLists
+  lists.forEach(list => {
+    const element = utils.listInfoElementFromId(list.id)
+    if (!element) { return }
+    // if (element.dataset.isVisibleInViewport === 'false') { return }
+    const rect = element.getBoundingClientRect()
+    const value = {
+      id: list.id,
+      x: list.x,
+      y: list.y,
+      width: Math.round(rect.width),
+      height: Math.round(rect.height)
+    }
+    selectableLists.push(value)
   })
 }
 
@@ -421,6 +443,10 @@ const selectItems = (points) => {
   matches = collisionDetection.checkPointsInRects(points, selectableLines)
   const lineIds = matches.map(match => match.id)
   globalStore.addMultipleToMultipleLinesSelected(lineIds)
+  // lists
+  matches = collisionDetection.checkPointsInRects(points, selectableLists)
+  const listIds = matches.map(match => match.id)
+  globalStore.addMultipleToMultipleListsSelected(listIds)
 }
 
 // Post Scrolling (for android)
@@ -494,6 +520,7 @@ const startPainting = (event) => {
   updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
   updateSelectableLines()
+  updateSelectableLists()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
   if (utils.isMultiTouch(event)) { return }
@@ -512,6 +539,10 @@ const startPainting = (event) => {
   // add box
   } else if (shouldAdd && toolbarIsBox.value) {
     globalStore.triggerAddBox(event)
+    return
+  // add list
+  } else if (shouldAdd && toolbarIsList.value) {
+    globalStore.triggerAddList(event)
     return
   }
   // clear selected
@@ -623,7 +654,7 @@ const painting = (event) => {
 // Initial Circles
 
 const createInitialCircle = (circle) => {
-  if (toolbarIsBox.value) { return }
+  if (toolbarIsBox.value || toolbarIsList.value) { return }
   const initialCircle = {
     x: startCursor.x,
     y: startCursor.y,
@@ -674,7 +705,7 @@ const cancelLocking = () => {
   shouldCancelLocking = true
 }
 const startLocking = () => {
-  if (toolbarIsBox.value) { return }
+  if (toolbarIsBox.value || toolbarIsList.value) { return }
   currentUserIsLocking = true
   shouldCancelLocking = false
   setTimeout(() => {

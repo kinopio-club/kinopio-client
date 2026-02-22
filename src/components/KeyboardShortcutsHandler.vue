@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -22,6 +23,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
@@ -138,6 +140,7 @@ const handleShortcutsOnKeyUp = (event) => {
   const key = event.key.toLowerCase()
   const keyCode = event.code // physical key on the keyboard
   const keyB = key === 'b' || keyCode === 'KeyB'
+  const keyL = key === 'l' || keyCode === 'KeyL'
   const keyN = key === 'n' || keyCode === 'KeyN'
   const keyM = key === 'm' || keyCode === 'KeyM'
   const keyT = key === 't' || keyCode === 'KeyT'
@@ -171,7 +174,8 @@ const handleShortcutsOnKeyUp = (event) => {
   } else if (key === 'escape') {
     globalStore.closeAllDialogs()
     globalStore.updateCurrentUserToolbar('card')
-    boxStore.boxSnapGuides = []
+    globalStore.preventItemSnapping = true
+    globalStore.clearSnapGuides()
   } else if (key === '1' && isSpaceScope) {
     let value = userStore.filterShowUsers
     value = !value
@@ -198,6 +202,7 @@ const handleShortcutsOnKeyUp = (event) => {
     spaceKeyIsDown = false
   // b
   } else if (keyB && isSpaceScope) {
+    if (!canEditSpace) { return }
     let cards
     const multipleCardIds = globalStore.multipleCardsSelectedIds
     const cardId = globalStore.cardDetailsIsVisibleForCardId
@@ -212,6 +217,24 @@ const handleShortcutsOnKeyUp = (event) => {
     } else {
       globalStore.toggleCurrentUserToolbar('box')
     }
+  // l
+  } else if (keyL && isSpaceScope) {
+    if (!canEditSpace) { return }
+    let cards
+    const multipleCardIds = globalStore.multipleCardsSelectedIds
+    const cardId = globalStore.cardDetailsIsVisibleForCardId
+    // Toggle cards in list
+    if (cardId) {
+      cards = [cardStore.getCard(cardId)]
+      cardStore.toggleListCards(cards)
+    } else if (multipleCardIds.length) {
+      cards = multipleCardIds.map(id => cardStore.getCard(id))
+      cardStore.toggleListCards(cards)
+    // Toolbar List Mode
+    } else {
+      globalStore.toggleCurrentUserToolbar('list')
+    }
+
   // d
   } else if (key === 'd' && isSpaceScope) {
     if (!canEditSpace) { return }
@@ -226,8 +249,9 @@ const handleShortcutsOnKeyUp = (event) => {
   // s
   } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
     userStore.cycleDrawingBrushSize()
-  // l
-  } else if (key === 'l' && isSpaceScope) {
+  // -
+  } else if ((key === '-' || key === '–') && isSpaceScope) {
+    if (!canEditSpace) { return }
     const line = { y: currentCursorPosition.y }
     lineStore.createLine(line)
   }
@@ -265,6 +289,9 @@ const handleShortcutsOnKeyDown = (event) => {
     selectAllItemsBelowCursor()
   // Select All Cards and Connections
   } else if (isMeta && keyA && isSpaceScope && !toolbarIsDrawing) {
+    event.preventDefault()
+    selectAllItems()
+  } else if (isMeta && keyA && !isCardScope && !isFromInput) {
     event.preventDefault()
     selectAllItems()
   // Search/Jump-to Space
@@ -328,6 +355,21 @@ const handleShortcutsOnKeyDown = (event) => {
 const checkIsOnMinimap = (event) => {
   return Boolean(event.target.closest('#space-minimap'))
 }
+const checkShouldBoxSelect = (isPanScope) => {
+  const toolbarIsBox = globalStore.getToolbarIsBox
+  const toolbarIsList = globalStore.getToolbarIsList
+  const isNotConnecting = !globalStore.currentUserIsDrawingConnection
+  const shouldBoxSelect =
+    event.shiftKey &&
+    isPanScope &&
+    !toolbarIsBox &&
+    !toolbarIsList &&
+    isNotConnecting &&
+    !globalStore.currentUserIsResizingBox &&
+    !globalStore.currentUserIsResizingList &&
+    !globalStore.currentUserIsDraggingList
+  return shouldBoxSelect
+}
 const handleMouseDownEvents = (event) => {
   const rightMouseButton = 2
   const middleMouseButton = 1
@@ -336,9 +378,7 @@ const handleMouseDownEvents = (event) => {
   const isMiddleClick = middleMouseButton === event.button
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
-  const toolbarIsBox = globalStore.getToolbarIsBox
-  const isNotConnecting = !globalStore.currentUserIsDrawingConnection
-  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !globalStore.currentUserIsResizingBox
+  const shouldBoxSelect = checkShouldBoxSelect(isPanScope)
   const userDisablePan = userStore.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
@@ -626,6 +666,7 @@ const remove = () => {
   const cardIds = selectedCardIds()
   const boxes = boxStore.getBoxesSelected
   const lines = lineStore.getLinesSelected
+  const lists = listStore.getListsSelected
   selectedConnectionIds.forEach(connectionId => {
     if (canEditConnectionById(connectionId)) {
       connectionStore.removeConnection(connectionId)
@@ -648,6 +689,12 @@ const remove = () => {
       lineStore.removeLine(line.id)
     }
   })
+  lists.forEach(list => {
+    const canEditLists = userStore.getUserIsSpaceMember
+    if (canEditLists) {
+      listStore.removeList(list.id)
+    }
+  })
   connectionStore.removeAllUnusedConnectionTypes()
   clearAllSelectedCards()
   globalStore.closeAllDialogs()
@@ -657,14 +704,15 @@ const remove = () => {
 
 const writeSelectedToClipboard = async (position) => {
   const selectedItems = spaceStore.getSpaceSelectedItems
-  let { cards, connectionTypes, connections, boxes } = selectedItems
+  let { cards, connectionTypes, connections, boxes, lines, lists } = selectedItems
   // data
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
-  let data = { cards, connections, connectionTypes, boxes }
+  lists = utils.sortByY(lists)
+  let data = { cards, connections, connectionTypes, boxes, lines, lists }
   data = utils.updateSpaceItemsRelativeToOrigin(data, position)
   // text
-  let items = cards.concat(boxes)
+  let items = cards.concat(boxes, lists, lines)
   items = utils.sortByY(items)
   const text = utils.nameStringFromItems(items)
   // clipboard
@@ -705,6 +753,14 @@ const normalizePasteData = (data) => {
   data.boxes = data.boxes.map(box => {
     box.name = utils.decodeEntitiesFromHTML(box.name)
     return box
+  })
+  data.lines = data.lines.map(line => {
+    line.name = utils.decodeEntitiesFromHTML(line.name)
+    return line
+  })
+  data.lists = data.lists.map(list => {
+    list.name = utils.decodeEntitiesFromHTML(list.name)
+    return list
   })
   return data
 }
@@ -831,8 +887,12 @@ const selectAllItemsBelowCursor = (position) => {
   let lines = lineStore.getAllLines
   lines = lines.filter(line => (line.y * zoom) > position.y)
   const lineIds = lines.map(line => line.id)
+  // lists
+  let lists = listStore.getAllLists
+  lists = lists.filter(list => (list.y * zoom) > position.y)
+  const listIds = lists.map(list => list.id)
   // select
-  selectItemIds({ position, cardIds, boxIds, lineIds })
+  selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
 }
 const selectAllItemsAboveCursor = (position) => {
   let zoom
@@ -855,8 +915,12 @@ const selectAllItemsAboveCursor = (position) => {
   let lines = lineStore.getAllLines
   lines = lines.filter(line => (line.y * zoom) < position.y)
   const lineIds = lines.map(line => line.id)
+  // lists
+  let lists = listStore.getAllLists
+  lists = lists.filter(list => (list.y * zoom) < position.y)
+  const listIds = lists.map(list => list.id)
   // select
-  selectItemIds({ position, cardIds, boxIds, lineIds })
+  selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
 }
 const selectAllItemsRightOfCursor = (position) => {
   let zoom
@@ -877,7 +941,13 @@ const selectAllItemsRightOfCursor = (position) => {
     return (box.x * zoom) >= position.x
   })
   const boxIds = boxes.map(box => box.id)
-  selectItemIds({ position, cardIds, boxIds })
+  // lists
+  let lists = listStore.getAllLists
+  lists = lists.filter(list => {
+    return (list.x * zoom) >= position.x
+  })
+  const listIds = lists.map(list => list.id)
+  selectItemIds({ position, cardIds, boxIds, listIds })
 }
 const selectAllItemsLeftOfCursor = (position) => {
   let zoom
@@ -898,45 +968,39 @@ const selectAllItemsLeftOfCursor = (position) => {
     return (box.x * zoom) <= position.x
   })
   const boxIds = boxes.map(box => box.id)
-  selectItemIds({ position, cardIds, boxIds })
+  // lists
+  let lists = listStore.getAllLists
+  lists = lists.filter(list => {
+    return (list.x * zoom) <= position.x
+  })
+  const listIds = lists.map(list => list.id)
+  selectItemIds({ position, cardIds, boxIds, listIds })
 }
 
 // Select All Cards, Connections, and Boxes
 
-const selectItemIds = ({ position, cardIds, boxIds, lineIds }) => {
+const selectItemIds = ({ position, cardIds = [], boxIds = [], lineIds = [], listIds = [] }) => {
   const preventMultipleSelectedActionsIsVisible = globalStore.preventMultipleSelectedActionsIsVisible
-  const isItemIds = Boolean(cardIds.length || boxIds.length || lineIds.length)
+  const isItemIds = Boolean(cardIds.length || boxIds.length || lineIds.length || listIds.length)
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     globalStore.updateMultipleCardsSelectedIds(cardIds)
     globalStore.updateMultipleBoxesSelectedIds(boxIds)
     globalStore.updateMultipleLinesSelectedIds(lineIds)
+    globalStore.updateMultipleListsSelectedIds(listIds)
   } else if (isItemIds) {
     globalStore.multipleSelectedActionsPosition = position
     globalStore.updateMultipleSelectedActionsIsVisible(true)
     globalStore.updateMultipleCardsSelectedIds(cardIds)
     globalStore.updateMultipleBoxesSelectedIds(boxIds)
     globalStore.updateMultipleLinesSelectedIds(lineIds)
+    globalStore.updateMultipleListsSelectedIds(listIds)
   } else {
     globalStore.updateMultipleSelectedActionsIsVisible(false)
   }
 }
 const selectAllItems = () => {
-  const cardIds = cardStore.allIds
-  const connectionIds = connectionStore.allIds
-  const boxIds = boxStore.allIds
-  const dialogOffset = {
-    width: 200 / 2,
-    height: 150 / 2
-  }
-  const viewportCenter = {
-    x: (globalStore.viewportWidth / 2) + window.scrollX - dialogOffset.width,
-    y: (globalStore.viewportHeight / 2) + window.scrollY - dialogOffset.height
-  }
-  globalStore.multipleSelectedActionsPosition = viewportCenter
-  globalStore.updateMultipleSelectedActionsIsVisible(true)
-  globalStore.multipleConnectionsSelectedIds = connectionIds
-  globalStore.multipleCardsSelectedIds = cardIds
-  globalStore.multipleBoxesSelectedIds = boxIds
+  selectAllItemsBelowCursor({ y: 0 })
+  globalStore.updateMultipleSelectedActionsIsVisible(false)
 }
 
 // Search/Jump-to

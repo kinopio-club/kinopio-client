@@ -3,17 +3,25 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 
 import Card from '@/components/Card.vue'
 import CardCommentPreview from '@/components/CardCommentPreview.vue'
-import utils from '@/utils.js'
+import ItemSnapGuide from '@/components/ItemSnapGuide.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
+const listStore = useListStore()
 
-const cards = computed(() => cardStore.getAllCards)
-const lockedCards = computed(() => cards.value.filter(card => card.isLocked))
-const unlockedCards = computed(() => cards.value.filter(card => !card.isLocked))
+const cards = computed(() => {
+  // exclude if unlocked
+  const cards = cardStore.getCardsIsNotLocked
+  // exclude if in collapsed list
+  const lists = listStore.getCollapsedLists
+  const listIds = lists.map(list => list.id)
+  return cards.filter(card => !listIds.includes(card.listId))
+})
+const lockedCards = computed(() => cardStore.getAllCards.filter(card => card.isLocked))
 
 // card comment preview
 
@@ -46,8 +54,9 @@ const shouldPrevent = computed(() => {
 
 <template lang="pug">
 .cards
-  template(v-for="card in unlockedCards" :key="card.id")
+  template(v-for="card in cards" :key="card.id")
     Card(:card="card")
+    ItemSnapGuide(:card="card")
   CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="currentHoveredCard")
   //- locked cards rendered in ItemsLocked
   template(v-for="card in lockedCards" :key="card.id")

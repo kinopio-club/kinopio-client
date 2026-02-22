@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -93,6 +94,12 @@ export const useBoxStore = defineStore('boxes', {
       const boxes = this.getAllBoxes
       return boxes.filter(box => {
         return box.x <= consts.edgeThreshold
+      })
+    },
+    getBoxesNearTopEdge () {
+      const boxes = this.getAllBoxes
+      return boxes.filter(box => {
+        return box.y <= consts.edgeThreshold
       })
     }
   },
@@ -403,7 +410,9 @@ export const useBoxStore = defineStore('boxes', {
 
     // contained items
 
-    isItemInSelectedBoxes (item, type, selectedBox) {
+    isItemInSelectedBoxes (item, selectedBox) {
+      if (item.listId) { return }
+      const threshold = 1
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
       let selectedBoxes = this.getBoxesSelected
@@ -417,47 +426,56 @@ export const useBoxStore = defineStore('boxes', {
         const isTopLeft = utils.isPointInsideRect({
           x: item.x,
           y: item.y
-        }, box)
+        }, box, threshold)
         const isTopRight = utils.isPointInsideRect({
           x: item.x + item.width,
           y: item.y
-        }, box)
+        }, box, threshold)
         const isBottomLeft = utils.isPointInsideRect({
           x: item.x,
           y: item.y + item.height
-        }, box)
+        }, box, threshold)
         const isBottomRight = utils.isPointInsideRect({
           x: item.x + item.width,
           y: item.y + item.height
-        }, box)
+        }, box, threshold)
         return isTopLeft && isTopRight && isBottomLeft && isBottomRight
       })
     },
     getItemsContainedInSelectedBoxes (selectedBox) {
+      const cardStore = useCardStore()
+      const listStore = useListStore()
       const cards = []
       const boxes = []
+      const lists = []
       // cards
-      const cardStore = useCardStore()
       cardStore.getCardsSelectableByY.cards.forEach(card => {
-        if (this.isItemInSelectedBoxes(card, 'card', selectedBox)) {
+        if (this.isItemInSelectedBoxes(card, selectedBox)) {
           cards.push(card)
         }
       })
       // boxes
       const selectableBoxes = this.getAllBoxes
       this.getBoxesSelectableByY.boxes.forEach(box => {
-        if (this.isItemInSelectedBoxes(box, 'box', selectedBox)) {
+        if (this.isItemInSelectedBoxes(box, selectedBox)) {
           boxes.push(box)
         }
       })
-      return { cards, boxes }
+      // lists
+      listStore.getAllLists.forEach(list => {
+        if (this.isItemInSelectedBoxes(list, selectedBox)) {
+          lists.push(list)
+        }
+      })
+      return { cards, boxes, lists }
     },
     selectItemsInSelectedBoxes (selectedBox) {
       const globalStore = useGlobalStore()
-      const { boxes, cards } = this.getItemsContainedInSelectedBoxes(selectedBox)
+      const cardStore = useCardStore()
+      const { boxes, cards, lists } = this.getItemsContainedInSelectedBoxes(selectedBox)
       // boxes
       const boxIds = boxes.map(box => box.id)
-      globalStore.updateMultipleBoxesSelectedIds(boxIds)
+      globalStore.addMultipleToMultipleBoxesSelected(boxIds)
       // cards
       const isMultipleBoxesSelected = Boolean(globalStore.multipleBoxesSelectedIds.length)
       const cardIds = cards.map(card => card.id)
@@ -465,6 +483,14 @@ export const useBoxStore = defineStore('boxes', {
       if (!isMultipleBoxesSelected) {
         globalStore.preventMultipleSelectedActionsIsVisible = true
       }
+      // lists
+      const listIds = lists.map(list => list.id)
+      globalStore.addMultipleToMultipleListsSelected(listIds)
+      lists.forEach(list => {
+        const listCards = cardStore.getCardsByList(list.id)
+        const listCardIds = listCards.map(card => card.id)
+        globalStore.addMultipleToMultipleCardsSelected(listCardIds)
+      })
     },
 
     // snap guides
@@ -491,7 +517,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, item, target: targetBox, time, distance, sizeOutside }
     },
-    updateBoxSnapGuides ({ items, isCards, cursor }) {
+    updateBoxSnapGuides ({ items, isChildren, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
       if (globalStore.shouldSnapToGrid) { return }
@@ -500,7 +526,7 @@ export const useBoxStore = defineStore('boxes', {
       const targetBoxes = this.getBoxesSelectableInViewport()
       const prevSnapGuides = globalStore.snapGuides
       let snapGuides = []
-      if (isCards) {
+      if (isChildren) {
         items = [utils.boundaryRectFromItems(items)]
       }
       items = items.map(item => {
@@ -514,16 +540,6 @@ export const useBoxStore = defineStore('boxes', {
           if (targetBox.id === item.id) { return }
           targetBox.width = targetBox.resizeWidth
           targetBox.height = targetBox.resizeHeight
-          const isBetweenTargetBoxPointsX = utils.isBetween({
-            value: item.x,
-            min: targetBox.x + snapThreshold,
-            max: targetBox.x + targetBox.width - snapThreshold
-          })
-          const isBetweenTargetBoxPointsY = utils.isBetween({
-            value: item.y,
-            min: targetBox.y + snapThreshold,
-            max: targetBox.y + targetBox.height - snapThreshold
-          })
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width
