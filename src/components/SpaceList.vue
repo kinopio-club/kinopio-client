@@ -109,6 +109,7 @@ const props = defineProps({
   parentDialog: String,
   previewImageIsWide: Boolean,
   hidePreviewImage: Boolean,
+  hideTemplatesIcon: Boolean,
   showSpaceGroups: Boolean
 })
 
@@ -183,11 +184,6 @@ const isLoadingSpace = (space) => {
 const spaceIsCurrentSpace = (space) => {
   const currentSpace = spaceStore.id
   return Boolean(currentSpace === space.id)
-}
-const spaceIsTemplate = (space) => {
-  if (space.isTemplate) { return true }
-  const templateSpaceIds = templates.spaces().map(template => template.id)
-  return templateSpaceIds.includes(space.id)
 }
 const showInExplore = (space) => {
   if (props.hideExploreBadge) { return }
@@ -489,7 +485,7 @@ span.space-list-wrap
               span(v-else)
                 span {{space.name}}
               //- template
-              template(v-if="space.isTemplate")
+              template(v-if="space.isTemplate && !props.hideTemplatesIcon")
                 img.icon.templates(src="@/assets/templates.svg" title="Template")
               //- privacy
               template(v-if='space.privacy')

@@ -389,7 +389,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
         //- New Space
         AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" :isSmall="true")
         //- Templates
-        button.small-button(@click="showTemplatesDialog")
+        button.small-button(@click="showTemplatesDialog" title="Templates")
           img.icon.templates(src="@/assets/templates.svg")
       //- Filters
       .button-wrap
