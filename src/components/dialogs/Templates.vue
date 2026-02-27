@@ -92,9 +92,9 @@ const updateSelectedCategory = (name) => {
 const categoryIsActive = (name) => {
   return state.selectedCategory === name
 }
-// const categoryIsVisible = (name) => {
-//   return state.selectedCategory === 'All' || state.selectedCategory === name
-// }
+const categoryIsVisible = (name) => {
+  return state.selectedCategory === 'All' || state.selectedCategory === name
+}
 const categoryByName = (name) => {
   return categories.value.find(category => category.name === name)
 }
@@ -145,6 +145,9 @@ dialog.templates(
       Loader(:visible="isLoading" :isSmall="true")
 
   .results-sections(ref="resultsSectionsElement" :style="{'max-height': state.resultsSectionsHeight + 'px'}")
+
+    //- todo search filter input
+
     //- user templates
     section.results-section.results-section-border-top(v-if="isUserTemplatesVisible")
       SpaceList(
@@ -158,7 +161,7 @@ dialog.templates(
         :hideTemplatesIcon="true"
       )
     //- system templates
-    section.results-section.results-section-border-top
+    section.results-section.results-section-border-top(v-if="categoryIsVisible('Life')")
       //- Life
       p.category
         span.badge.secondary(:style="{ 'background-color': categories[1].color }" @click="updateSelectedCategory(categories[1].name)") {{categories[1].name}}
@@ -171,6 +174,16 @@ dialog.templates(
       //-   :hideFilter="true"
       //-   :showSpaceGroups="true"
       //- )
+
+    //- Work
+    section.results-section.results-section-border-top(v-if="categoryIsVisible('Work')")
+      p.category
+        span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}
+
+    //- School
+    section.results-section.results-section-border-top(v-if="categoryIsVisible('School')")
+      p.category
+        span.badge.secondary(:style="{ 'background-color': categories[3].color }" @click="updateSelectedCategory(categories[3].name)") {{categories[3].name}}
 
 </template>
 
