@@ -2394,15 +2394,6 @@ const metaContainerStyles = computed(() => {
       left 5px
       top 3.5px
 
-    .is-light-in-dark-theme
-      border-color var(--primary-on-light-background)
-      .icon
-        filter none
-    .is-dark-in-light-theme
-      border-color var(--primary-on-dark-background)
-      .icon
-        filter invert()
-
     .uploading-container,
     .status-container
       position absolute

@@ -46,24 +46,6 @@ const canEditItem = computed(() => {
   return canEditSpace.value
 })
 
-// user
-
-const isThemeDark = computed(() => userStore.theme === 'dark')
-const isDarkInLightTheme = computed(() => {
-  if (props.box?.fill === 'empty') {
-    return isThemeDark.value
-  } else {
-    return backgroundColorIsDark.value && !isThemeDark.value
-  }
-})
-const isLightInDarkTheme = computed(() => {
-  if (props.box?.fill === 'empty') {
-    return !isThemeDark.value
-  } else {
-    return !backgroundColorIsDark.value && isThemeDark.value
-  }
-})
-
 // connections
 
 const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(item.value.id))
@@ -128,13 +110,9 @@ const addConnectionType = (event) => {
 
 // connector button
 
-const isConnectorDarkInLightTheme = computed(() => {
-  if (connectionTypeColorisDark.value) { return connectionTypeColorisDark.value }
-  return isDarkInLightTheme.value
-})
-const isConnectorLightInDarkTheme = computed(() => {
+const isConnectorBackgroundColorLight = computed(() => {
   if (connectionTypeColorisDark.value) { return !connectionTypeColorisDark.value }
-  return isLightInDarkTheme.value
+  return !backgroundColorIsDark.value
 })
 const isImageCard = computed(() => {
   if (!props.card) { return }
@@ -158,6 +136,10 @@ const connectorButtonBackground = computed(() => {
     return 'transparent'
   }
   return props.currentBackgroundColor
+})
+const buttonStyles = computed(() => {
+  const styles = { background: connectorButtonBackground.value }
+  return styles
 })
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
@@ -299,14 +281,12 @@ const handleMouseLeaveConnector = () => {
       .color(:style="{ background: type?.color}")
 
   button.inline-button.connector-button(
-    :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light-in-dark-theme': isConnectorLightInDarkTheme, 'is-dark-in-light-theme': isConnectorDarkInLightTheme}"
-    :style="{background: connectorButtonBackground }"
+    :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light': isConnectorBackgroundColorLight, 'is-dark': !isConnectorBackgroundColorLight }"
+    :style="buttonStyles"
     tabindex="-1"
   )
     template(v-if="hasConnections || props.isConnectingFrom || props.isConnectingTo")
-      img.connector-icon(src="@/assets/connector-closed-in-card.svg")
-    //- template(v-else)
-    //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
+      img.connector-icon(src="@/assets/connector-closed-in-card.svg" :class="{ 'is-light': !connectionTypeColorisDark, 'is-dark': connectionTypeColorisDark }")
 
 </template>
 
@@ -361,15 +341,16 @@ const handleMouseLeaveConnector = () => {
     user-drag none
     -webkit-user-drag none
     pointer-events none
-
-  .is-light-in-dark-theme
-    border-color var(--primary-on-light-background)
-    .connector-icon
+    &.is-light
       filter none
-  .is-dark-in-light-theme
-    border-color var(--primary-on-dark-background)
-    .connector-icon
+    &.is-dark
       filter invert()
+
+  button
+    &.is-light
+      border-color var(--primary-border-on-light-background)
+    &.is-dark
+      border-color var(--primary-border-on-dark-background)
 
   .connected-colors
     position absolute
