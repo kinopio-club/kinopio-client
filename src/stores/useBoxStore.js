@@ -698,19 +698,20 @@ export const useBoxStore = defineStore('boxes', {
     },
     updateBoxSnapToTarget (snapGuide) {
       const globalStore = useGlobalStore()
+      const cardStore = useCardStore()
       let { side, item, target, isOutside } = snapGuide
       if (item.id !== globalStore.currentDraggingBoxId) { return }
       const borderWidth = 0
       item = this.byId[item.id]
+      item = utils.clone(item)
+      const prevItem = utils.clone(item)
       if (!item) { return }
       const shouldAlignWithItemY = side === 'right' || side === 'left'
-      // size
+      // update position on main axis
       if (shouldAlignWithItemY) {
         item.y = target.y
-        item.resizeHeight = target.resizeHeight
       } else {
         item.x = target.x
-        item.resizeWidth = target.resizeWidth
       }
       // position
       if (side === 'right') {
@@ -722,8 +723,15 @@ export const useBoxStore = defineStore('boxes', {
       } else if (side === 'bottom') {
         item.y = target.y + target.resizeHeight - borderWidth
       }
+      const delta = {
+        x: item.x - prevItem.x,
+        y: item.y - prevItem.y
+      }
       globalStore.boxIsSnappingTransition = true
+      const cards = this.getItemsContainedInSelectedBoxes(prevItem).cards
       this.updateBox(item)
+      cardStore.moveCards({ delta, cards })
+      globalStore.closeAllDialogs()
     }
   }
 })

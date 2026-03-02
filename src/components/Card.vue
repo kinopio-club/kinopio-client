@@ -443,6 +443,9 @@ const cardWrapStyle = computed(() => {
   if (state.isSnappingToList) {
     styles.transition = 'all 0.1s ease-out'
   }
+  if (globalStore.boxIsSnappingTransition) {
+    styles.transition = 'all 0.2s ease-out'
+  }
   styles = updateStylesWithWidth(styles)
   return styles
 })
