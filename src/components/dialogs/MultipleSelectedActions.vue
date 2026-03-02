@@ -64,18 +64,13 @@ watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
     globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-    scrollIntoView()
+    updatePositionClamped()
     closeDialogs()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
     globalStore.shouldExplicitlyHideFooter = false
   }
 })
-
-const scrollIntoView = () => {
-  const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element })
-}
 
 const isThemeDarkAndUserColorLight = computed(() => {
   const isThemeDark = userStore.theme === 'dark'
@@ -94,6 +89,35 @@ const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 const cardBoxOrListIsSelected = computed(() => cardOrBoxIsSelected.value || lists.value.length)
 const ItemIsSelected = computed(() => Boolean(utils.countArrayItems(selectedItems.value)))
+
+// position
+
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  globalStore.scrollElementIntoView({ element })
+}
+const updatePositionClamped = () => {
+  let { x, y } = globalStore.multipleSelectedActionsPosition
+  const element = dialogElement.value
+  const rect = element.getBoundingClientRect()
+  const { height, width } = rect
+  const margin = 16
+  const viewportWidth = globalStore.viewportWidth + window.scrollX
+  const viewportHeight = globalStore.viewportHeight + window.scrollY
+  const maxX = viewportWidth - width - margin
+  const maxY = viewportHeight - height - margin
+  if (x < 0) {
+    x = 0
+  } else if (x > maxX) {
+    x = maxX
+  }
+  if (y < 0) {
+    y = 0
+  } else if (y > maxY) {
+    y = maxY
+  }
+  globalStore.multipleSelectedActionsPosition = { x, y }
+}
 
 // items
 
