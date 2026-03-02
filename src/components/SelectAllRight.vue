@@ -152,7 +152,7 @@ const handleMouseMove = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const isInThreshold = position.y <= edgeThreshold
   const isInPosition = isInThreshold && isBetweenControls(event)
-  const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('.card-wrap'))
+  const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('.card-wrap') || event.target.closest('dialog'))
   const shouldShow = isInPosition && !isCancelledByHover
   if (shouldShow || isSelectingX.value) {
     state.positionX = position.x - xCenterOffset
