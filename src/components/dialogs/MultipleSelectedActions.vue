@@ -690,4 +690,21 @@ dialog.narrow.multiple-selected-actions(
       padding 0
       vertical-align 1px
       padding-left 1px
+
+  .drag-area
+    position absolute
+    width 100%
+    height 8px
+    top 0
+    left 0
+    background-image url('../../assets/drag-area.svg')
+    background-repeat: repeat-x
+    cursor grab
+    border-top-left-radius var(--entity-radius)
+    border-top-right-radius var(--entity-radius)
+    opacity 0.3
+  &.is-background-dark
+    .drag-area
+      background-image url('../../assets/drag-area-invert.svg')
+
 </style>
