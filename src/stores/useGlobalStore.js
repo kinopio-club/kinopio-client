@@ -215,6 +215,7 @@ export const useGlobalStore = defineStore('global', {
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
     multipleConnectionTypesSelectedIdsToLoad: [],
+    currentUserIsDraggingMultipleSelectedActionsDialog: false,
 
     // connections
     currentConnectionStartItemIds: [],
@@ -340,10 +341,21 @@ export const useGlobalStore = defineStore('global', {
       return transform
     },
     getIsInteractingWithItem () {
-      return this.getIsResizingItem || this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsDraggingBox || this.currentUserIsDraggingList
+      return (
+        this.getIsResizingItem ||
+        this.currentUserIsDraggingCard ||
+        this.currentUserIsDrawingConnection ||
+        this.currentUserIsDraggingBox ||
+        this.currentUserIsDraggingList ||
+        this.currentUserIsDraggingMultipleSelectedActionsDialog
+      )
     },
     getIsResizingItem () {
-      return this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsResizingList
+      return (
+        this.currentUserIsResizingCard ||
+        this.currentUserIsResizingBox ||
+        this.currentUserIsResizingList
+      )
     },
     getMultipleItemsSelected () {
       return [
@@ -1039,6 +1051,24 @@ export const useGlobalStore = defineStore('global', {
         this.addMultipleToMultipleCardsSelected(listCardIds)
       })
     },
+    moveMultipleSelectedActions ({ endCursor, prevCursor, delta }) {
+      if (!endCursor || !prevCursor) { return }
+      const zoom = this.getSpaceCounterZoomDecimal
+      delta = delta || {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
+      let { x, y } = this.multipleSelectedActionsPosition
+      x = Math.round(x + delta.x)
+      x = Math.max(0, x)
+      y = Math.round(y + delta.y)
+      y = Math.max(0, y)
+      this.multipleSelectedActionsPosition = { x, y }
+    },
 
     // multiple cards
 
@@ -1292,6 +1322,7 @@ export const useGlobalStore = defineStore('global', {
       this.currentUserIsDraggingBox = false
       this.currentUserIsResizingList = false
       this.currentUserIsDraggingList = false
+      this.currentUserIsDraggingMultipleSelectedActionsDialog = false
       this.multipleCardsSelectedIds = []
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []

@@ -77,8 +77,12 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColor: userColor.value })
+const classes = computed(() => {
+  const value = utils.colorClasses({ backgroundColor: userColor.value })
+  if (globalStore.currentUserIsDraggingMultipleSelectedActionsDialog) {
+    value.push('is-dragging')
+  }
+  return value
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
@@ -500,6 +504,12 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   globalStore.clearMultipleSelected()
 }
 
+// dragging dialog
+
+const toggleDraggingDialog = (value) => {
+  globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+}
+
 </script>
 
 <template lang="pug">
@@ -509,8 +519,11 @@ dialog.narrow.multiple-selected-actions(
   ref="dialogElement"
   @click.left="closeDialogs"
   :style="styles"
-  :class="colorClasses"
+  :class="classes"
+  @pointerdown.stop="toggleDraggingDialog(true)"
+  @pointerup.stop="toggleDraggingDialog(false)"
 )
+  .drag-area
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
     button.small-button.inline-button
@@ -606,6 +619,9 @@ dialog.narrow.multiple-selected-actions(
 <style lang="stylus">
 .multiple-selected-actions
   transform-origin top left
+  cursor grab
+  &.is-dragging
+    cursor grabbing
   .segmented-colors
     display inline-block
     vertical-align middle
@@ -699,12 +715,13 @@ dialog.narrow.multiple-selected-actions(
     left 0
     background-image url('../../assets/drag-area.svg')
     background-repeat: repeat-x
-    cursor grab
     border-top-left-radius var(--entity-radius)
     border-top-right-radius var(--entity-radius)
     opacity 0.3
   &.is-background-dark
     .drag-area
       background-image url('../../assets/drag-area-invert.svg')
-
+  &.is-dragging
+    .drag-area
+      opacity 0.6
 </style>

@@ -246,6 +246,7 @@ const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
 const isResizingList = computed(() => globalStore.currentUserIsResizingList)
+const isDraggingDialog = computed(() => globalStore.currentUserIsDraggingMultipleSelectedActionsDialog)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -885,6 +886,8 @@ const interact = (event) => {
     dragItems()
   } else if (isResizingCardDetails.value) {
     updateCardDetailsWidth(event)
+  } else if (isDraggingDialog.value) {
+    globalStore.moveMultipleSelectedActions({ endCursor, prevCursor })
   }
   prevCursor = endCursor
 }
@@ -982,6 +985,7 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsDraggingLine = false
   globalStore.currentUserIsDraggingList = false
   globalStore.currentUserIsDraggingDuplicateItem = false
+  globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false
