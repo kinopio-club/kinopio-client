@@ -488,7 +488,11 @@ const checkIfShouldSnapToBox = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.itemSnappingIsReady) { return }
-    boxStore.updateBoxSnapToSize(snapGuide)
+    if (snapGuide.isOutside) {
+      boxStore.updateBoxSnapToTarget(snapGuide)
+    } else {
+      boxStore.updateBoxExpandToItem(snapGuide)
+    }
   })
 }
 const unselectCardsInDraggedBox = () => {

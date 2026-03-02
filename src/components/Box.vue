@@ -259,6 +259,16 @@ const infoClasses = computed(() => {
   if (fontSizeModifier) {
     classList.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
+  if (globalStore.boxIsSnappingTransition) {
+    classList.push('transition')
+  }
+  return classList
+})
+const backgroundClasses = computed(() => {
+  const classList = []
+  if (globalStore.boxIsSnappingTransition) {
+    classList.push('transition')
+  }
   return classList
 })
 const classes = computed(() => {
@@ -272,6 +282,9 @@ const classes = computed(() => {
     transition: !globalStore.currentBoxIsNew || !globalStore.currentUserIsResizingBox
   }
 })
+const handleTransitionEnd = () => {
+  globalStore.boxIsSnappingTransition = false
+}
 
 // space filters
 
@@ -723,7 +736,7 @@ const clearFocus = () => {
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: fillColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
-    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
+    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles" classes="backgroundClasses")
   teleport(to="#box-infos")
     //- name
     .box-info(
@@ -732,6 +745,7 @@ const clearFocus = () => {
       :data-is-visible-in-viewport="state.isVisibleInViewport"
       :style="infoStyles"
       :class="infoClasses"
+      @transitionend="handleTransitionEnd"
       tabindex="0"
 
       @mouseover="updateIsHover(true)"
@@ -841,6 +855,7 @@ const clearFocus = () => {
         left 0
 
 .box-info
+  --ease-out-circ cubic-bezier(0, 0.55, 0.45, 1) // https://easings.net/#easeOutCirc
   --header-font var(--header-font-0)
   z-index 1
   border-radius 4px
@@ -853,6 +868,11 @@ const clearFocus = () => {
   cursor pointer
   word-break break-word
   color var(--primary-on-light-background)
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2

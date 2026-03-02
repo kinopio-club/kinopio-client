@@ -118,6 +118,7 @@ export const useGlobalStore = defineStore('global', {
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
     remoteBoxDetailsVisible: [],
+    boxIsSnappingTransition: false,
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],

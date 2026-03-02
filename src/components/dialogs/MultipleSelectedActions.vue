@@ -367,13 +367,12 @@ const splitCard = () => {
   globalStore.triggerSplitCard(cardId)
 }
 const positionNewCards = async (newCards) => {
-  const spaceBetweenCards = 12
   await nextTick()
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
     const rect = utils.cardElementDimensions(prevCard)
-    card.y = rect.y + rect.height + spaceBetweenCards
+    card.y = rect.y + rect.height + consts.spaceBetweenCards
     return card
   })
   newCards = newCards.map(card => {

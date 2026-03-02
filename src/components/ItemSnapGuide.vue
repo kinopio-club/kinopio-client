@@ -108,8 +108,6 @@ const snapGuideSide = computed(() => {
   if (!snapGuide) { return null }
   if (snapGuide?.target.id === item.value.id) {
     return snapGuide.side
-  } else if (snapGuide?.origin.id === item.value.id) {
-    return utils.oppositeSide(snapGuide.side)
   } else {
     return null
   }
