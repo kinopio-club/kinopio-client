@@ -109,25 +109,11 @@ const snapGuideSide = computed(() => {
   if (snapGuide?.target.id === item.value.id) {
     return snapGuide.side
   } else if (snapGuide?.origin.id === item.value.id) {
-    return oppositeSide(snapGuide.side)
+    return utils.oppositeSide(snapGuide.side)
   } else {
     return null
   }
 })
-const oppositeSide = (side) => {
-  if (side === 'left') {
-    return 'right'
-  }
-  if (side === 'right') {
-    return 'left'
-  }
-  if (side === 'top') {
-    return 'bottom'
-  }
-  if (side === 'bottom') {
-    return 'top'
-  }
-}
 const updateRect = () => {
   if (props.card) {
     state.rect = utils.cardElementDimensions(props.card)

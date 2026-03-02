@@ -378,6 +378,20 @@ export default {
       return true
     }
   },
+  oppositeSide (side) {
+    if (side === 'left') {
+      return 'right'
+    }
+    if (side === 'right') {
+      return 'left'
+    }
+    if (side === 'top') {
+      return 'bottom'
+    }
+    if (side === 'bottom') {
+      return 'top'
+    }
+  },
   numberOfLeadingTabs (string) {
     // https://regexr.com/6dl8u
     // matches /t tab characters at start of string
