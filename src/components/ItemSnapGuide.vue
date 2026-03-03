@@ -72,6 +72,7 @@ watch(() => item.value, (value, prevValue) => {
     state.duration = consts.itemSnapGuideWaitingDuration
   }
 })
+
 // is snapping
 
 const currentSnapGuide = computed(() => {
@@ -81,8 +82,6 @@ const currentSnapGuide = computed(() => {
   if (props.box) {
     if (cardStore.cardSnapGuides.length) { return } // prefer snapping to card
     if (listStore.listSnapGuides.listId) { return } // prefer snapping to list
-    const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
-    if (isMultipleBoxesSelectedIds) { return }
     guides = boxStore.boxSnapGuides
   // snap to card
   } else if (props.card) {

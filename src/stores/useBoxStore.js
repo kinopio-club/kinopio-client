@@ -295,7 +295,7 @@ export const useBoxStore = defineStore('boxes', {
         y: delta.y * zoom
       }
       const boxes = this.getBoxesSelected
-      const updates = []
+      let updates = []
       boxes.forEach(box => {
         let x = Math.round(box.x + delta.x)
         x = Math.max(0, x)
@@ -316,6 +316,10 @@ export const useBoxStore = defineStore('boxes', {
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPathsByItemIds(itemIds)
       const cursor = endSpaceCursor || endCursor
+      updates = updates.map(update => {
+        update.itemType = 'box'
+        return update
+      })
       this.updateBoxSnapGuides({ items: updates, cursor })
     },
     updateBoxInfoDimensions (update) {
@@ -517,6 +521,20 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, item, target: targetBox, time, distance, sizeOutside, isOutside }
     },
+    filterBoxSnapGuidesMultipleSelectedBoxes (snapGuides) {
+      const globalStore = useGlobalStore()
+      const boxId = globalStore.currentDraggingBoxId
+      let excludeBoxIds = globalStore.multipleBoxesSelectedIds
+      excludeBoxIds = excludeBoxIds.filter(id => id !== boxId)
+      snapGuides = snapGuides.filter(guide => {
+        const { item, target } = guide
+        if (item.itemType !== 'box') { return true }
+        const shouldInclude = item.id === boxId || target.id === boxId
+        const shouldExclude = excludeBoxIds.includes(item.id) || excludeBoxIds.includes(target.id)
+        return shouldInclude && !shouldExclude
+      })
+      return snapGuides
+    },
     updateBoxSnapGuides ({ items, isChildren, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
@@ -638,6 +656,8 @@ export const useBoxStore = defineStore('boxes', {
         })
         snapGuides = sortBy(snapGuides, ['distance'])
       })
+      // exclude other selected boxes
+      snapGuides = this.filterBoxSnapGuidesMultipleSelectedBoxes(snapGuides)
       // limit each origin item to it's closest target
       const normalizedGuides = {}
       snapGuides.forEach(snapGuide => {
