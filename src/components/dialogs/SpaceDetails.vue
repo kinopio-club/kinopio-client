@@ -422,14 +422,11 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       :parentDialog="state.parentDialog"
       :showSpaceGroups="true"
       :showFilter="true"
-      :previewImageIsWide="true"
     )
 </template>
 
 <style lang="stylus">
 dialog.space-details
-  &.wide
-    width 300px
   &.back-button-is-visible
     left -18px
   button.disabled
