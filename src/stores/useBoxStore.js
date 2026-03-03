@@ -721,6 +721,7 @@ export const useBoxStore = defineStore('boxes', {
     updateBoxSnapToTarget (snapGuide) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
+      const listStore = useListStore()
       let { side, item, target, isOutside } = snapGuide
       if (item.id !== globalStore.currentDraggingBoxId) { return }
       const borderWidth = 0
@@ -751,9 +752,15 @@ export const useBoxStore = defineStore('boxes', {
       }
       globalStore.boxIsSnappingTransition = true
       this.updateBox(item)
-      const { cards, boxes } = this.getItemsContainedInSelectedBoxes(prevItem)
+      // move contained items
+      const { cards, boxes, lists } = this.getItemsContainedInSelectedBoxes(prevItem)
       cardStore.moveCards({ delta, cards })
       this.moveBoxes({ delta, boxes })
+      listStore.moveLists({ delta, lists })
+      lists.forEach(list => {
+        list = listStore.getList(list.id)
+        cardStore.updateCardPositionsInList(list)
+      })
       globalStore.closeAllDialogs()
     }
   }
