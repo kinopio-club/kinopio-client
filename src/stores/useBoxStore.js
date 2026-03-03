@@ -277,11 +277,11 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.pageWidth = boxX
       }
     },
-    moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor }) {
+    moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor, boxes }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
-      if (!endCursor || !prevCursor) { return }
+      if ((!endCursor || !prevCursor) && !delta) { return }
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -294,7 +294,7 @@ export const useBoxStore = defineStore('boxes', {
         x: delta.x * zoom,
         y: delta.y * zoom
       }
-      const boxes = this.getBoxesSelected
+      boxes = boxes || this.getBoxesSelected
       let updates = []
       boxes.forEach(box => {
         let x = Math.round(box.x + delta.x)
@@ -316,11 +316,13 @@ export const useBoxStore = defineStore('boxes', {
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPathsByItemIds(itemIds)
       const cursor = endSpaceCursor || endCursor
-      updates = updates.map(update => {
-        update.itemType = 'box'
-        return update
-      })
-      this.updateBoxSnapGuides({ items: updates, cursor })
+      if (cursor) {
+        updates = updates.map(update => {
+          update.itemType = 'box'
+          return update
+        })
+        this.updateBoxSnapGuides({ items: updates, cursor })
+      }
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)
@@ -748,9 +750,10 @@ export const useBoxStore = defineStore('boxes', {
         y: item.y - prevItem.y
       }
       globalStore.boxIsSnappingTransition = true
-      const cards = this.getItemsContainedInSelectedBoxes(prevItem).cards
       this.updateBox(item)
+      const { cards, boxes } = this.getItemsContainedInSelectedBoxes(prevItem)
       cardStore.moveCards({ delta, cards })
+      this.moveBoxes({ delta, boxes })
       globalStore.closeAllDialogs()
     }
   }
