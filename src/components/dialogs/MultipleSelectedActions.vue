@@ -39,7 +39,8 @@ let prevCards, prevBoxes
 const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
-  cardsIsConnected: false
+  cardsIsConnected: false,
+  isPointerDown: false
 })
 
 const closeAllDialogs = () => {
@@ -81,6 +82,9 @@ const classes = computed(() => {
   const value = utils.colorClasses({ backgroundColor: userColor.value })
   if (globalStore.currentUserIsDraggingMultipleSelectedActionsDialog) {
     value.push('is-dragging')
+  }
+  if (state.isPointerDown) {
+    value.push('is-pointer-down')
   }
   return value
 })
@@ -506,7 +510,15 @@ const remove = ({ shouldRemoveCardsOnly }) => {
 // dragging dialog
 
 const toggleDraggingDialog = (value) => {
-  globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+  if (value && state.isPointerDown) {
+    globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+  } else if (!value) {
+    globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+    state.isPointerDown = false
+  }
+}
+const toggleIsPointerDown = () => {
+  state.isPointerDown = true
 }
 
 </script>
@@ -519,7 +531,8 @@ dialog.narrow.multiple-selected-actions(
   @click.left="closeDialogs"
   :style="styles"
   :class="classes"
-  @pointerdown.stop="toggleDraggingDialog(true)"
+  @pointermove="toggleDraggingDialog(true)"
+  @pointerdown.stop="toggleIsPointerDown"
   @pointerup.stop="toggleDraggingDialog(false)"
 )
   .drag-area
@@ -619,7 +632,8 @@ dialog.narrow.multiple-selected-actions(
 .multiple-selected-actions
   transform-origin top left
   cursor grab
-  &.is-dragging
+  &.is-dragging,
+  &.is-pointer-down
     cursor grabbing
   .segmented-colors
     display inline-block
