@@ -23,8 +23,14 @@ const emit = defineEmits(['selectFont', 'selectFontSize'])
 
 const props = defineProps({
   visible: Boolean,
-  cards: Array,
-  boxes: Array
+  cards: {
+    type: Array,
+    default () { return [] }
+  },
+  boxes: {
+    type: Array,
+    default () { return [] }
+  }
 })
 const state = reactive({
   dialogHeight: null,
