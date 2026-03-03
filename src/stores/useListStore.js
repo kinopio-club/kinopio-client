@@ -294,7 +294,9 @@ export const useListStore = defineStore('lists', {
       // this.updatePageSize(lists[0]) // ??might automatically be done by cards inside
       this.updateLists(lists)
       globalStore.listsWereDragged = true
-      boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
+      if (globalStore.getInteractingWithItemType === 'list') {
+        boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
+      }
       // lists = lists.map(list => this.getList(list.id))
       // boxStore.updateListSnapGuides({ items: lists, isLists: true, cursor: endCursor })
     },

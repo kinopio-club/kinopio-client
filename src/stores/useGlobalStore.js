@@ -351,6 +351,17 @@ export const useGlobalStore = defineStore('global', {
         this.currentUserIsDraggingMultipleSelectedActionsDialog
       )
     },
+    getInteractingWithItemType () {
+      if (this.currentUserIsDraggingCard) {
+        return 'card'
+      } else if (this.currentUserIsDrawingConnection) {
+        return 'connection'
+      } else if (this.currentUserIsDraggingBox) {
+        return 'box'
+      } else if (this.currentUserIsDraggingList) {
+        return 'list'
+      }
+    },
     getIsResizingItem () {
       return (
         this.currentUserIsResizingCard ||
