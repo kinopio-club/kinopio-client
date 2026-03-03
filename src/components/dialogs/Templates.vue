@@ -9,6 +9,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import templates from '@/data/templates.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import Loader from '@/components/Loader.vue'
 
 const globalStore = useGlobalStore()
@@ -17,6 +18,8 @@ const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsSectionsElement = ref(null)
+
+const shouldUseProduction = true
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -70,13 +73,27 @@ const isUserTemplatesVisible = computed(() => {
   if (state.selectedCategory !== 'All') { return }
   return !state.isLoadingUserTemplates || !state.userTemplates.length
 })
+const templateSpaces = () => {
+  if (consts.isDevelopment() && !shouldUseProduction) {
+    return templates.developmentSpaces()
+  } else {
+    return templates.spaces()
+  }
+}
 const updateSystemTemplates = async () => {
   try {
     state.isLoadingSystemTemplates = true
-    // TODO
-    // state.systemTemplates = await apiStore. get multiple spaces by ids
+    const data = templateSpaces(shouldUseProduction)
+    const spaceIds = data.map(space => space.id)
+    state.systemTemplates = await apiStore.getPublicSpaces(spaceIds, shouldUseProduction)
+
+    // todo assign categoryIds from templates.spaces
+    console.log('🐸🐸🐸🐸🐸', state.systemTemplates)
   } catch (error) {
     console.error('🚒 updateSystemTemplates', error)
+
+    // todo show err,
+    // todo handle offline
   }
   state.isLoadingSystemTemplates = false
   await nextTick()
@@ -159,6 +176,7 @@ dialog.templates(
         :hideFilter="true"
         :showSpaceGroups="true"
         :hideTemplatesIcon="true"
+        :previewImageIsWide="true"
       )
     //- system templates
     section.results-section.results-section-border-top(v-if="categoryIsVisible('Life')")

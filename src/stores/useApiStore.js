@@ -779,6 +779,17 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'search', error })
       }
     },
+    async getPublicSpaces (spaceIds, shouldUseProduction) {
+      try {
+        spaceIds = spaceIds.join(',')
+        console.info('🛬 getting remote public spaces', spaceIds)
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetchWithTimeout(`${consts.apiHost(shouldUseProduction)}/space/public/multiple?spaceIds=${spaceIds}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getPublicSpaces', error })
+      }
+    },
     async createSpaces () {
       const userStore = useUserStore()
       try {
