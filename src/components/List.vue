@@ -403,7 +403,8 @@ const listClasses = computed(() => {
     hover: state.isHover,
     active: currentListIsBeingDragged.value,
     'is-resizing': isResizing.value,
-    'is-selected': currentListIsSelected.value
+    'is-selected': currentListIsSelected.value,
+    transition: globalStore.boxIsSnappingTransition
     // filtered: isFiltered.value,
     // transition: !globalStore.currentListIsNew || !globalStore.currentUserIsResizingList
   }
@@ -414,6 +415,9 @@ const infoClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: color.value })
   if (state.isHover) {
     classes.push('hover')
+  }
+  if (globalStore.boxIsSnappingTransition) {
+    classes.push('transition')
   }
   return classes
 })
@@ -651,6 +655,7 @@ const placeholderStylesMap = computed(() => {
 :root
   --min-list-width 200px // matches consts.minListWidth
   --min-list-background-width calc(var(--min-list-width) - (8px * 2)) // utils.listChildWidth
+  --ease-out-circ cubic-bezier(0, 0.55, 0.45, 1) // https://easings.net/#easeOutCirc
 
 .list
   position absolute
@@ -667,6 +672,11 @@ const placeholderStylesMap = computed(() => {
       .resize-icon
         top 0
         left 0
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
 
 .list-background
   pointer-events all
@@ -683,6 +693,11 @@ const placeholderStylesMap = computed(() => {
     box-shadow var(--active-shadow)
     transition none
     z-index 1
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
 
 .list-snap-guide
   position absolute
@@ -732,6 +747,11 @@ const placeholderStylesMap = computed(() => {
   &:active,
   &.active
     box-shadow var(--active-shadow)
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
   // buttons
   .inline-button-wrap
     display inline-block
