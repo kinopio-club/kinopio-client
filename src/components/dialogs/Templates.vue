@@ -11,6 +11,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import Loader from '@/components/Loader.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
@@ -36,7 +37,10 @@ const state = reactive({
   isLoadingUserTemplates: true,
   isLoadingSystemTemplates: true,
   userTemplates: [],
-  systemTemplates: []
+  systemTemplates: [],
+  error: {
+    unknownServerError: false
+  }
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -44,6 +48,7 @@ watch(() => props.visible, (value, prevValue) => {
   updateSystemTemplates()
   updateHeight()
   state.selectedCategory = 'All'
+  state.error.unknownServerError = false
 })
 
 const parentDialog = computed(() => 'templates')
@@ -91,9 +96,7 @@ const updateSystemTemplates = async () => {
     console.log('🐸🐸🐸🐸🐸', state.systemTemplates)
   } catch (error) {
     console.error('🚒 updateSystemTemplates', error)
-
-    // todo show err,
-    // todo handle offline
+    state.error.unknownServerError = true
   }
   state.isLoadingSystemTemplates = false
   await nextTick()
@@ -161,6 +164,10 @@ dialog.templates(
         span.badge.secondary.button-badge(:class="{ active: categoryIsActive(category.name) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategory(category.name)") {{category.name}}
       Loader(:visible="isLoading" :isSmall="true")
 
+    OfflineBadge(:isDanger="true" :isInline="true")
+    p.badge.error-badge.danger(v-if="state.error.unknownServerError")
+      span (シ_ _)シ Something went wrong, Please try again or contact support
+
   .results-sections(ref="resultsSectionsElement" :style="{'max-height': state.resultsSectionsHeight + 'px'}")
 
     //- todo search filter input
@@ -178,30 +185,32 @@ dialog.templates(
         :hideTemplatesIcon="true"
         :previewImageIsWide="true"
       )
-    //- system templates
-    section.results-section.results-section-border-top(v-if="categoryIsVisible('Life')")
-      //- Life
-      p.category
-        span.badge.secondary(:style="{ 'background-color': categories[1].color }" @click="updateSelectedCategory(categories[1].name)") {{categories[1].name}}
-      //- SpaceList(
-      //-   :spaces="userTemplates"
-      //-   :showCategory="true"
-      //-   @selectSpace="changeSpace"
-      //-   :isLoading="state.isLoadingUserTemplates"
-      //-   :parentDialog="parentDialog"
-      //-   :hideFilter="true"
-      //-   :showSpaceGroups="true"
-      //- )
 
-    //- Work
-    section.results-section.results-section-border-top(v-if="categoryIsVisible('Work')")
-      p.category
-        span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}
+    template(v-if="!state.error.unknownServerError")
+      //- system templates
+      section.results-section.results-section-border-top(v-if="categoryIsVisible('Life')")
+        //- Life
+        p.category
+          span.badge.secondary(:style="{ 'background-color': categories[1].color }" @click="updateSelectedCategory(categories[1].name)") {{categories[1].name}}
+        //- SpaceList(
+        //-   :spaces="userTemplates"
+        //-   :showCategory="true"
+        //-   @selectSpace="changeSpace"
+        //-   :isLoading="state.isLoadingUserTemplates"
+        //-   :parentDialog="parentDialog"
+        //-   :hideFilter="true"
+        //-   :showSpaceGroups="true"
+        //- )
 
-    //- School
-    section.results-section.results-section-border-top(v-if="categoryIsVisible('School')")
-      p.category
-        span.badge.secondary(:style="{ 'background-color': categories[3].color }" @click="updateSelectedCategory(categories[3].name)") {{categories[3].name}}
+      //- Work
+      section.results-section.results-section-border-top(v-if="categoryIsVisible('Work')")
+        p.category
+          span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}
+
+      //- School
+      section.results-section.results-section-border-top(v-if="categoryIsVisible('School')")
+        p.category
+          span.badge.secondary(:style="{ 'background-color': categories[3].color }" @click="updateSelectedCategory(categories[3].name)") {{categories[3].name}}
 
 </template>
 
@@ -220,4 +229,6 @@ dialog.templates
   p.category
     margin 4px
     margin-bottom 10px
+  .offline-badge
+    margin-top 10px
 </style>
