@@ -32,7 +32,7 @@ export default {
         categoryId: 1
       },
       {
-        id: 'IoH27fnouzCpoSj1vWg3s',
+        id: 'p56fqtZUlNtFJ6td-uovI',
         categoryId: 2
       },
       {
