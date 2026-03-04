@@ -78,7 +78,7 @@ const isUserTemplatesVisible = computed(() => {
   if (state.selectedCategory !== 'All') { return }
   return !state.isLoadingUserTemplates || !state.userTemplates.length
 })
-const templateSpaces = () => {
+const spaceTemplatesData = () => {
   if (consts.isDevelopment() && !shouldUseProduction) {
     return templates.developmentSpaces()
   } else {
@@ -88,12 +88,14 @@ const templateSpaces = () => {
 const updateSystemTemplates = async () => {
   try {
     state.isLoadingSystemTemplates = true
-    const data = templateSpaces(shouldUseProduction)
-    const spaceIds = data.map(space => space.id)
-    state.systemTemplates = await apiStore.getPublicSpaces(spaceIds, shouldUseProduction)
-
-    // todo assign categoryIds from templates.spaces
-    console.log('🐸🐸🐸🐸🐸', state.systemTemplates)
+    const templatesData = spaceTemplatesData(shouldUseProduction)
+    const spaceIds = templatesData.map(space => space.id)
+    const results = await apiStore.getPublicSpaces(spaceIds, shouldUseProduction)
+    state.systemTemplates = results.map(space => {
+      const data = templatesData.find(templateData => templateData.id === space.id)
+      space.categoryId = data.categoryId
+      return space
+    })
   } catch (error) {
     console.error('🚒 updateSystemTemplates', error)
     state.error.unknownServerError = true
@@ -122,6 +124,15 @@ const categoryColor = (name) => {
   const color = categoryByName(name).color
   return color
 }
+const systemTemplatesByCategoryLife = computed(() => {
+  return state.systemTemplates.filter(space => space.categoryId === 1)
+})
+const systemTemplatesByCategoryWork = computed(() => {
+  return state.systemTemplates.filter(space => space.categoryId === 2)
+})
+const systemTemplatesByCategorySchool = computed(() => {
+  return state.systemTemplates.filter(space => space.categoryId === 3)
+})
 
 // dialog height
 
@@ -183,7 +194,6 @@ dialog.templates(
         :hideFilter="true"
         :showSpaceGroups="true"
         :hideTemplatesIcon="true"
-        :previewImageIsWide="true"
       )
 
     template(v-if="!state.error.unknownServerError")
@@ -192,25 +202,46 @@ dialog.templates(
         //- Life
         p.category
           span.badge.secondary(:style="{ 'background-color': categories[1].color }" @click="updateSelectedCategory(categories[1].name)") {{categories[1].name}}
-        //- SpaceList(
-        //-   :spaces="userTemplates"
-        //-   :showCategory="true"
-        //-   @selectSpace="changeSpace"
-        //-   :isLoading="state.isLoadingUserTemplates"
-        //-   :parentDialog="parentDialog"
-        //-   :hideFilter="true"
-        //-   :showSpaceGroups="true"
-        //- )
+        SpaceList(
+          :spaces="systemTemplatesByCategoryLife"
+          :showCategory="true"
+          @selectSpace="changeSpace"
+          :isLoading="state.isLoadingUserTemplates"
+          :parentDialog="parentDialog"
+          :hideFilter="true"
+          :showSpaceGroups="true"
+          :previewImageIsWide="true"
+        )
 
       //- Work
       section.results-section.results-section-border-top(v-if="categoryIsVisible('Work')")
         p.category
           span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}
+        SpaceList(
+          :spaces="systemTemplatesByCategoryWork"
+          :showCategory="true"
+          @selectSpace="changeSpace"
+          :isLoading="state.isLoadingUserTemplates"
+          :parentDialog="parentDialog"
+          :hideFilter="true"
+          :showSpaceGroups="true"
+          :previewImageIsWide="true"
+        )
 
       //- School
       section.results-section.results-section-border-top(v-if="categoryIsVisible('School')")
         p.category
           span.badge.secondary(:style="{ 'background-color': categories[3].color }" @click="updateSelectedCategory(categories[3].name)") {{categories[3].name}}
+        SpaceList(
+          :spaces="systemTemplatesByCategorySchool"
+          :showCategory="true"
+          @selectSpace="changeSpace"
+          :isLoading="state.isLoadingUserTemplates"
+          :parentDialog="parentDialog"
+          :hideFilter="true"
+          :showSpaceGroups="true"
+          :previewImageIsWide="true"
+        )
 
 </template>
 
