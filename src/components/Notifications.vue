@@ -155,8 +155,8 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     if (editedAtIsChanged) {
       console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
         editedAtIsChanged,
-        spaceEditedAt,
-        remoteSpaceEditedAt,
+        spaceEditedAt: space.editedAt,
+        remoteSpaceEditedAt: remoteSpace.editedAt,
         spaceEditedAtFromNow: spaceEditedAt.fromNow(),
         remoteSpaceEditedAtFromNow: remoteSpaceEditedAt.fromNow(),
         deltaMinutes
