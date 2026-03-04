@@ -36,9 +36,10 @@ export default {
         categoryId: 2
       },
       {
-        id: 'HKksDw5m1Mi4xDdscyK2L',
+        id: 'J4vbhO646y4296cLRQEU3',
         categoryId: 2
       },
+
       {
         id: 'Vn7WpQst9migsCwpEpGMo',
         categoryId: 2
