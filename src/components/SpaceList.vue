@@ -110,7 +110,8 @@ const props = defineProps({
   previewImageIsWide: Boolean,
   hidePreviewImage: Boolean,
   hideTemplatesIcon: Boolean,
-  showSpaceGroups: Boolean
+  showSpaceGroups: Boolean,
+  hideTodayBadge: Boolean
 })
 
 const state = reactive({
@@ -477,7 +478,8 @@ span.space-list-wrap
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
             //- today
-            SpaceTodayBadge(:space="space")
+            template(v-if="!props.hideTodayBadge")
+              SpaceTodayBadge(:space="space")
             //- space details
             .name
               span(v-if="state.filter")

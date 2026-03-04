@@ -76,7 +76,8 @@ const updateUserTemplates = async () => {
 }
 const isUserTemplatesVisible = computed(() => {
   if (state.selectedCategory !== 'All') { return }
-  return !state.isLoadingUserTemplates || !state.userTemplates.length
+  if (state.isLoadingUserTemplates) { return }
+  return Boolean(state.userTemplates.length)
 })
 const spaceTemplatesData = () => {
   if (consts.isDevelopment() && !shouldUseProduction) {
@@ -211,6 +212,7 @@ dialog.templates(
           :hideFilter="true"
           :showSpaceGroups="true"
           :previewImageIsWide="true"
+          :hideTodayBadge="true"
         )
 
       //- Work
@@ -226,6 +228,7 @@ dialog.templates(
           :hideFilter="true"
           :showSpaceGroups="true"
           :previewImageIsWide="true"
+          :hideTodayBadge="true"
         )
 
       //- School
@@ -241,6 +244,7 @@ dialog.templates(
           :hideFilter="true"
           :showSpaceGroups="true"
           :previewImageIsWide="true"
+          :hideTodayBadge="true"
         )
 
 </template>
