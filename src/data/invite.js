@@ -9,7 +9,7 @@ export default {
       },
       {
         type: 'edit',
-        friendlyName: 'Invite to Edit',
+        friendlyName: 'Invite to Edit Space',
         description: 'Anyone with the link can edit this space and become a collaborator.'
         // ppl will become
       },

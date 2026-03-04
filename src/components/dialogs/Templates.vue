@@ -12,6 +12,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
@@ -106,6 +107,16 @@ const updateSystemTemplates = async () => {
   updateHeight()
 }
 
+// filter
+
+const allTemplates = computed(() => state.userTemplates.concat(state.systemTemplates))
+const updateFilter = (string) => {
+  console.log(string)
+}
+const updateFilteredItems = (items) => {
+  console.log(items)
+}
+
 // categories
 
 const categories = computed(() => templates.categories())
@@ -175,15 +186,13 @@ dialog.templates(
     .categories
       template(v-for="category in categories" :key="category.name")
         span.badge.secondary.button-badge(:class="{ active: categoryIsActive(category.name) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategory(category.name)") {{category.name}}
-
+    //- errors
     OfflineBadge(:isDanger="true" :isInline="true")
     p.badge.error-badge.danger(v-if="state.error.unknownServerError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
-
+    //- search filter
+    ResultsFilter(:items="allTemplates" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
   .results-sections(ref="resultsSectionsElement" :style="{'max-height': state.resultsSectionsHeight + 'px'}")
-
-    //- todo search filter input
-
     //- user templates
     section.results-section.results-section-border-top(v-if="isUserTemplatesVisible")
       SpaceList(
@@ -196,11 +205,10 @@ dialog.templates(
         :showSpaceGroups="true"
         :hideTemplatesIcon="true"
       )
-
+    //- system templates
     template(v-if="!state.error.unknownServerError")
-      //- system templates
+      //- Life
       section.results-section.results-section-border-top(v-if="categoryIsVisible('Life')")
-        //- Life
         p.category
           span.badge.secondary(:style="{ 'background-color': categories[1].color }" @click="updateSelectedCategory(categories[1].name)") {{categories[1].name}}
         SpaceList(
@@ -214,7 +222,6 @@ dialog.templates(
           :previewImageIsWide="true"
           :hideTodayBadge="true"
         )
-
       //- Work
       section.results-section.results-section-border-top(v-if="categoryIsVisible('Work')")
         p.category
@@ -230,7 +237,6 @@ dialog.templates(
           :previewImageIsWide="true"
           :hideTodayBadge="true"
         )
-
       //- School
       section.results-section.results-section-border-top(v-if="categoryIsVisible('School')")
         p.category
@@ -246,7 +252,6 @@ dialog.templates(
           :previewImageIsWide="true"
           :hideTodayBadge="true"
         )
-
 </template>
 
 <style lang="stylus">
@@ -256,15 +261,23 @@ dialog.templates
     margin-left 4px
     vertical-align -1px
   .categories
-    margin-top: -6px;
-    display: flex;
-    flex-wrap: wrap;
+    margin-top -6px
+    display flex
+    flex-wrap wrap
     .button-badge
       margin-top 6px
       color var(--primary-on-light-background)
   p.category
     margin 4px
     margin-bottom 10px
+    padding-top 0
   .offline-badge
     margin-top 10px
+  .results-filter
+    margin 0
+    align-items center
+    .icon.search
+      margin-top 0
+    input
+      margin-bottom 0
 </style>
