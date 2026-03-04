@@ -140,31 +140,32 @@ const toggleNotifySpaceOutOfSync = (value) => {
   state.notifySpaceOutOfSync = value
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
-  if (document.visibilityState !== 'visible') { return }
-  if (state.notifySpaceOutOfSync) { return }
-  if (globalStore.isLoadingSpace) { return }
-  try {
-    if (!currentUserIsSignedIn.value) { return }
-    const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
-    if (!remoteSpace) { return }
-    const space = spaceStore.getSpaceAllState
-    const spaceEditedAt = dayjs(space.editedAt)
-    const remoteSpaceEditedAt = dayjs(remoteSpace.editedAt)
-    const deltaMinutes = remoteSpaceEditedAt.diff(spaceEditedAt, 'minute')
-    const editedAtIsChanged = deltaMinutes >= 15
-    if (editedAtIsChanged) {
-      console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-        editedAtIsChanged,
-        spaceEditedAt: spaceEditedAt.fromNow(),
-        remoteSpaceEditedAt: remoteSpaceEditedAt.fromNow(),
-        deltaMinutes
-      })
-      state.notifySpaceOutOfSync = true
-    }
-  } catch (error) {
-    console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
-    state.notifySpaceOutOfSync = true
-  }
+  // temp disable
+  // if (document.visibilityState !== 'visible') { return }
+  // if (state.notifySpaceOutOfSync) { return }
+  // if (globalStore.isLoadingSpace) { return }
+  // try {
+  //   if (!currentUserIsSignedIn.value) { return }
+  //   const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
+  //   if (!remoteSpace) { return }
+  //   const space = spaceStore.getSpaceAllState
+  //   const spaceEditedAt = dayjs(space.editedAt)
+  //   const remoteSpaceEditedAt = dayjs(remoteSpace.editedAt)
+  //   const deltaMinutes = remoteSpaceEditedAt.diff(spaceEditedAt, 'minute')
+  //   const editedAtIsChanged = deltaMinutes >= 15
+  //   if (editedAtIsChanged) {
+  //     console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+  //       editedAtIsChanged,
+  //       spaceEditedAt: spaceEditedAt.fromNow(),
+  //       remoteSpaceEditedAt: remoteSpaceEditedAt.fromNow(),
+  //       deltaMinutes
+  //     })
+  //     state.notifySpaceOutOfSync = true
+  //   }
+  // } catch (error) {
+  //   console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
+  //   state.notifySpaceOutOfSync = true
+  // }
 }
 
 // notifications
