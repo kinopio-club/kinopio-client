@@ -28,7 +28,7 @@ export default {
   spaces () {
     return [
       {
-        id: 'oVBOOfoO4qg7AzzUwweyf',
+        id: 'I4x2de1LCW2P25d_21Tsy',
         categoryId: 1
       },
       {
