@@ -1719,7 +1719,7 @@ export default {
     space.groupId = null
     space.group = null
     space.createdAt = new Date()
-    space.editedAt = new Date()
+    space.editedAt = new Date().getTime()
     space.collaboratorKey = nanoid()
     space.readOnlyKey = nanoid()
     space.cards = space.cards.map(card => {

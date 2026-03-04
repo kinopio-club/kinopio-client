@@ -526,7 +526,7 @@ export const useSpaceStore = defineStore('space', {
         this.saveSpaceToCache()
         this.notifySpaceIsOpen()
         this.updateUserLastSpaceId()
-        this.editedAt = new Date()
+        this.editedAt = new Date().getTime()
         globalStore.isLoadingSpace = false
         globalStore.triggerDrawingInitialize()
         globalStore.updateTags()
@@ -690,7 +690,7 @@ export const useSpaceStore = defineStore('space', {
       space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
-      space.editedAt = new Date()
+      space.editedAt = new Date().getTime()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
       const shouldHideTutorialCards = userStore.shouldHideTutorialCards
@@ -829,7 +829,7 @@ export const useSpaceStore = defineStore('space', {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
-      space.editedAt = new Date()
+      space.editedAt = new Date().getTime()
       space.userId = userStore.id
       space.cards = space.cards.map(card => {
         card.id = nanoid()
@@ -984,9 +984,10 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
-      console.log('☎️☎️ updateSpaceEditedAt', new Date(), new Date().valueOf(), dayjs(new Date()).fromNow(), dayjs(new Date().valueOf()).fromNow())
+      const editedAt = new Date().getTime()
+      console.log('☎️☎️ updateSpaceEditedAt', editedAt, dayjs(editedAt).fromNow())
       await this.updateSpace({
-        editedAt: new Date(),
+        editedAt,
         editedByUserId: userStore.id
       })
     },
