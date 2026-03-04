@@ -147,15 +147,14 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     if (!currentUserIsSignedIn.value) { return }
     const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
     if (!remoteSpace) { return }
-    const space = spaceStore.getSpaceAllState
-    const spaceEditedAt = dayjs(space.editedAt)
+    const spaceEditedAt = dayjs(spaceStore.editedAt)
     const remoteSpaceEditedAt = dayjs(remoteSpace.editedAt)
     const deltaMinutes = remoteSpaceEditedAt.diff(spaceEditedAt, 'minute')
     const editedAtIsChanged = deltaMinutes >= 15
     if (editedAtIsChanged) {
       console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
         editedAtIsChanged,
-        spaceEditedAt: space.editedAt,
+        spaceEditedAt: spaceStore.editedAt,
         remoteSpaceEditedAt: remoteSpace.editedAt,
         spaceEditedAtFromNow: spaceEditedAt.fromNow(),
         remoteSpaceEditedAtFromNow: remoteSpaceEditedAt.fromNow(),
