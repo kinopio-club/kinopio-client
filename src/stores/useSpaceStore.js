@@ -526,6 +526,7 @@ export const useSpaceStore = defineStore('space', {
         this.saveSpaceToCache()
         this.notifySpaceIsOpen()
         this.updateUserLastSpaceId()
+        this.editedAt = new Date()
         globalStore.isLoadingSpace = false
         globalStore.triggerDrawingInitialize()
         globalStore.updateTags()

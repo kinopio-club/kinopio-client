@@ -436,6 +436,16 @@ export const useCardStore = defineStore('cards', {
         }
       })
     },
+    shouldUpdateSpaceEditedAt (updates) {
+      const ignoreKeys = ['id', 'z']
+      let keys = []
+      for (const card of updates) {
+        Object.keys(card).forEach(key => keys.push(key))
+      }
+      keys = uniq(keys)
+      keys = keys.filter(key => !ignoreKeys.includes(key))
+      return Boolean(keys.length)
+    },
     async updateCards (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -454,6 +464,9 @@ export const useCardStore = defineStore('cards', {
         let cards = this.getAllCards
         cards = utils.clone(cards)
         await cache.updateSpace('cards', cards, spaceStore.id)
+        if (this.shouldUpdateSpaceEditedAt(updates)) {
+          spaceStore.updateSpaceEditedAt()
+        }
       } catch (error) {
         console.error('🚒 updateCards', error, updates)
       }
