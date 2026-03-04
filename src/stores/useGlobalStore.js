@@ -470,7 +470,7 @@ export const useGlobalStore = defineStore('global', {
       return styles
     },
     updateSessionDate () {
-      this.sessionDate = new Date().getTime()
+      this.sessionDate = new Date().toISOString()
     },
 
     // subscribe triggers

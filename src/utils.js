@@ -758,7 +758,7 @@ export default {
   },
   unixTime (date) {
     date = date || new Date()
-    return new Date(date).getTime()
+    return new Date(date).toISOString()
   },
   shortRelativeTime (date) {
     if (!date) { return }
@@ -1719,7 +1719,7 @@ export default {
     space.groupId = null
     space.group = null
     space.createdAt = new Date()
-    space.editedAt = new Date().getTime()
+    space.editedAt = new Date().toISOString()
     space.collaboratorKey = nanoid()
     space.readOnlyKey = nanoid()
     space.cards = space.cards.map(card => {

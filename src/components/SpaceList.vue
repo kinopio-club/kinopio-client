@@ -320,7 +320,7 @@ const updateFilter = async (filter, isClearFilter) => {
     globalStore.spaceListFilterInfo = {
       filter,
       parentDialog: parentDialog.value,
-      updatedAt: new Date().getTime()
+      updatedAt: new Date().toISOString()
     }
   }
   const spaces = spacesFiltered.value || props.spaces

@@ -151,7 +151,7 @@ const trimName = (name) => {
 }
 const createSpace = async (channel) => {
   const space = utils.emptySpace(nanoid())
-  space.cacheDate = new Date().getTime()
+  space.cacheDate = new Date().toISOString()
   space.name = channel.title
   const metaCard = {
     id: nanoid(),
