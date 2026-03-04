@@ -156,13 +156,13 @@ dialog.templates(
     .row.title-row
       span
         span Templates
+        Loader(:visible="isLoading" :isSmall="true")
       button.small-button(@click="showSpaceDetailsDialog")
         span My Spaces
     //- categories
     .categories
       template(v-for="category in categories" :key="category.name")
         span.badge.secondary.button-badge(:class="{ active: categoryIsActive(category.name) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategory(category.name)") {{category.name}}
-      Loader(:visible="isLoading" :isSmall="true")
 
     OfflineBadge(:isDanger="true" :isInline="true")
     p.badge.error-badge.danger(v-if="state.error.unknownServerError")
@@ -218,7 +218,8 @@ dialog.templates(
 dialog.templates
   overflow auto
   .loader
-    margin-top 10px
+    margin-left 4px
+    vertical-align -1px
   .categories
     margin-top: -6px;
     display: flex;
