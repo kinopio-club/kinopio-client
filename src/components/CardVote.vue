@@ -13,6 +13,14 @@ const props = defineProps({
   card: Object
 })
 
+const cancelClick = (event) => {
+  globalStore.currentUserIsDraggingCard = false
+  const isConnectingTo = globalStore.currentConnectionSuccess.id
+  if (isConnectingTo) { return }
+  globalStore.closeAllDialogs()
+  event.stopPropagation()
+}
+
 const counterValue = computed(() => props.card.counterValue || 0)
 
 const isDecrementDisabled = computed(() => {
@@ -50,13 +58,16 @@ const decrement = () => {
 </script>
 
 <template lang="pug">
-.card-counter(v-if="props.card.counterIsVisible")
+.card-counter(v-if="props.card.counterIsVisible"
+  @mouseup.left.prevent="cancelClick"
+  @touchend.prevent="cancelClick"
+)
   .segmented-buttons.counter-buttons
     //- -
-    button.small-button(@click="decrement" @touchend="decrement" :disabled="isDecrementDisabled")
+    button.small-button(@click.stop="decrement" @touchend="decrement" :disabled="isDecrementDisabled")
       img.icon.minus(src="@/assets/minus.svg")
     //- +
-    button.small-button(@click="increment" @touchend="increment" :disabled="isIncrementDisabled")
+    button.small-button(@click.stop="increment" @touchend="increment" :disabled="isIncrementDisabled")
       img.icon.plus(src="@/assets/add.svg")
   //- count
   .badge.info.counter {{counterValue}}
