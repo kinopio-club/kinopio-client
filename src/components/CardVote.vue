@@ -58,7 +58,7 @@ const decrement = () => {
 </script>
 
 <template lang="pug">
-.card-counter(v-if="props.card.counterIsVisible"
+.card-vote(v-if="props.card.counterIsVisible"
   @mouseup.left.prevent="cancelClick"
   @touchend.prevent="cancelClick"
 )
@@ -74,7 +74,7 @@ const decrement = () => {
 </template>
 
 <style lang="stylus">
-.card-counter
+.card-vote
   display flex
   .counter-buttons
     margin-right 5px

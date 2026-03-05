@@ -2119,7 +2119,7 @@ const metaContainerStyles = computed(() => {
           //- User
           UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
         //- Vote Counter
-        .card-vote-wrap(@mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+        .card-vote-wrap(v-if="props.card.counterIsVisible" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
           CardVote(:card="card")
 
       //- Not Comment
@@ -2135,7 +2135,7 @@ const metaContainerStyles = computed(() => {
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
         //- Vote Counter
-        .card-vote-wrap
+        .card-vote-wrap(v-if="props.card.counterIsVisible")
           CardVote(:card="card")
 
       //- Right buttons
