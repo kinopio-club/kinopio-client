@@ -561,6 +561,7 @@ export const useBoxStore = defineStore('boxes', {
           if (targetBox.id === item.id) { return }
           targetBox.width = targetBox.resizeWidth
           targetBox.height = targetBox.resizeHeight
+          const itemCanSnapOutside = item.itemType === 'box'
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width
@@ -612,7 +613,7 @@ export const useBoxStore = defineStore('boxes', {
             const snapGuide = this.createBoxSnapGuide({ side: 'left', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           // snap left outside
-          } else if (itemIsNearOutsideTargetBoxLeft && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
+          } else if (itemCanSnapOutside && itemIsNearOutsideTargetBoxLeft && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
             const side = 'left'
             let snapGuide = this.createBoxSnapGuide({ side, item, targetBox, cursor, isOutside: true })
             snapGuides.push(snapGuide)
@@ -624,7 +625,7 @@ export const useBoxStore = defineStore('boxes', {
             const snapGuide = this.createBoxSnapGuide({ side: 'right', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           // snap right outside
-          } else if (itemIsNearOutsideTargetBoxRight && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
+          } else if (itemCanSnapOutside && itemIsNearOutsideTargetBoxRight && (itemTopIsInsideTargetBox || itemBottomIsInsideTargetBox)) {
             const side = 'right'
             let snapGuide = this.createBoxSnapGuide({ side, item, targetBox, cursor, isOutside: true })
             snapGuides.push(snapGuide)
@@ -636,7 +637,7 @@ export const useBoxStore = defineStore('boxes', {
             const snapGuide = this.createBoxSnapGuide({ side: 'top', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           // snap top outside
-          } else if (itemIsNearOutsideTargetBoxTop && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
+          } else if (itemCanSnapOutside && itemIsNearOutsideTargetBoxTop && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
             const side = 'top'
             let snapGuide = this.createBoxSnapGuide({ side, item, targetBox, cursor, isOutside: true })
             snapGuides.push(snapGuide)
@@ -648,7 +649,7 @@ export const useBoxStore = defineStore('boxes', {
             const snapGuide = this.createBoxSnapGuide({ side: 'bottom', item, targetBox, cursor })
             snapGuides.push(snapGuide)
           // snap bottom outside
-          } else if (itemIsNearOutsideTargetBoxBottom && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
+          } else if (itemCanSnapOutside && itemIsNearOutsideTargetBoxBottom && (itemLeftIsInsideTargetBox || itemRightIsInsideTargetBox)) {
             const side = 'bottom'
             let snapGuide = this.createBoxSnapGuide({ side, item, targetBox, cursor, isOutside: true })
             snapGuides.push(snapGuide)
