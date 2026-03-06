@@ -46,6 +46,11 @@ export default {
         name: 'Moodboard',
         id: 'GgDOqKvEEzTA93EYmAZrn',
         categoryId: 2
+      },
+      {
+        name: 'Weekly Planner',
+        id: 'tZgYERhi-QFX2LmlVNOAb',
+        categoryId: 1
       }
 
       // {
