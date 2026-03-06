@@ -220,6 +220,7 @@ dialog.templates(
           :showSpaceGroups="true"
           :previewImageIsWide="true"
           :hideTodayBadge="true"
+          :hideExploreBadge="true"
         )
       //- Work & School
       section.results-section.results-section-border-top(v-if="categoryIsVisible('Work & School')")
@@ -235,6 +236,7 @@ dialog.templates(
           :showSpaceGroups="true"
           :previewImageIsWide="true"
           :hideTodayBadge="true"
+          :hideExploreBadge="true"
         )
 </template>
 

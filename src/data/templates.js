@@ -51,6 +51,11 @@ export default {
         name: 'Weekly Planner',
         id: 'tZgYERhi-QFX2LmlVNOAb',
         categoryId: 1
+      },
+      {
+        name: 'Calendar Grid',
+        id: 'fqSeePL0oeocZfcg6y1w5',
+        categoryId: 1
       }
 
       // {
