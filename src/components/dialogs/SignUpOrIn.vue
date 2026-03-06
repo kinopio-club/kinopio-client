@@ -189,36 +189,40 @@ const migrationAppleAppAccountToken = () => {
   }
 }
 const signUp = async (event) => {
-  if (state.loading.signUpOrIn) { return }
-  const email = event.target[0].value.toLowerCase()
-  const password = event.target[1].value
-  const confirmPassword = event.target[2].value
-  migrationAppleAppAccountToken()
-  const currentUser = userStore.getUserAllState
-  if (!isPasswordMatchesEmail(email, password)) { return }
-  if (!isSignUpPasswordTooShort(password)) { return }
-  if (!isSignUpPasswordsMatch(password, confirmPassword)) { return }
-  state.loading.signUpOrIn = true
-  const response = await apiStore.signUp({ email, password, currentUser, sessionToken })
-  const newUser = await response.json()
-  if (isSuccess(response)) {
-    globalStore.clearAllNotifications()
-    // update user
-    userStore.initializeUserState(newUser)
-    // update and save spaces
-    await backupLocalSpaces()
-    await migrationSpacesConnections()
-    await updateLocalSpacesUser()
-    updateCurrentSpaceWithNewUser(currentUser, newUser)
-    await apiStore.createSpaces()
-    notifySignedIn()
-    notifyIsJoiningGroup()
-    userStore.checkIfShouldJoinGroup()
-    await addCollaboratorToInvitedSpaces()
-    globalStore.triggerUpdateWindowHistory()
-    themeStore.restoreTheme()
-  } else {
-    await handleErrors(newUser)
+  try {
+    if (state.loading.signUpOrIn) { return }
+    const email = event.target[0].value.toLowerCase()
+    const password = event.target[1].value
+    const confirmPassword = event.target[2].value
+    migrationAppleAppAccountToken()
+    const currentUser = userStore.getUserAllState
+    if (!isPasswordMatchesEmail(email, password)) { return }
+    if (!isSignUpPasswordTooShort(password)) { return }
+    if (!isSignUpPasswordsMatch(password, confirmPassword)) { return }
+    state.loading.signUpOrIn = true
+    const response = await apiStore.signUp({ email, password, currentUser, sessionToken })
+    const newUser = await response.json()
+    if (isSuccess(response)) {
+      globalStore.clearAllNotifications()
+      // update user
+      userStore.initializeUserState(newUser)
+      // update and save spaces
+      await backupLocalSpaces()
+      await migrationSpacesConnections()
+      await updateLocalSpacesUser()
+      updateCurrentSpaceWithNewUser(currentUser, newUser)
+      await apiStore.createSpaces()
+      notifySignedIn()
+      notifyIsJoiningGroup()
+      userStore.checkIfShouldJoinGroup()
+      await addCollaboratorToInvitedSpaces()
+      globalStore.triggerUpdateWindowHistory()
+      themeStore.restoreTheme()
+    } else {
+      await handleErrors(newUser)
+    }
+  } catch (error) {
+    console.error('🚒 signUp', error)
   }
 }
 
@@ -343,7 +347,7 @@ const removeUneditedSpace = async (spaceName) => {
       shouldLoadLastSpace = true
     }
   } else {
-    console.info('🌹 signIn removeUneditedSpace isEdited: keep space', spaceName, spaceIsEdited, cardNames, currentSpace?.cards)
+    console.info('🌹 signIn keep spaceIsEdited', spaceName, currentSpace)
   }
 }
 
