@@ -218,7 +218,6 @@ dialog.templates(
           :parentDialog="parentDialog"
           :hideFilter="true"
           :showSpaceGroups="true"
-          :previewImageIsWide="true"
           :hideTodayBadge="true"
           :hideExploreBadge="true"
         )
@@ -234,7 +233,6 @@ dialog.templates(
           :parentDialog="parentDialog"
           :hideFilter="true"
           :showSpaceGroups="true"
-          :previewImageIsWide="true"
           :hideTodayBadge="true"
           :hideExploreBadge="true"
         )

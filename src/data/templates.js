@@ -10,12 +10,12 @@ export default {
       {
         id: 1,
         name: 'Life',
-        color: '#b9a7ff'
+        color: 'lawngreen'
       },
       {
         id: 2,
         name: 'Work & School',
-        color: '#6fff6f'
+        color: 'aquamarine'
       }
     ]
   },
@@ -53,7 +53,7 @@ export default {
         categoryId: 1
       },
       {
-        name: 'Calendar Grid',
+        name: 'Calendar',
         id: 'fqSeePL0oeocZfcg6y1w5',
         categoryId: 1
       }
