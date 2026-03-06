@@ -584,31 +584,11 @@ const checkIfShouldSnapToCard = async (event) => {
   if (!cardStore.cardSnapGuides.length) { return }
   if (!globalStore.itemSnappingIsReady) { return }
   if (event.shiftKey) { return }
-  let { target, side, item } = cardStore.cardSnapGuides[0]
-  let cards = cardStore.getCardsSelected
-  // add card to list from list card
-  if (target.listId) {
-    const list = listStore.getList(target.listId)
-    const targetPositionIndex = target.listPositionIndex
-    const shouldPrepend = side === 'top'
-    await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
-    return
-  }
-  // create new list
-  const list = {
-    id: nanoid(),
-    y: target.y - consts.listInfoHeight,
-    x: target.x - consts.listPadding,
-    resizeWidth: userStore.cardSettingsCardWrapWidth
-  }
-  listStore.createList({ list })
-  // add target to list
-  await nextTick()
-  await cardStore.addCardsToList({ cards: [target], list, targetPositionIndex: null })
-  await nextTick()
-  // add dragging cards to list
-  cards = sortBy(cards, 'y')
-  target = cardStore.getCard(target.id)
+  const { target, side, item } = cardStore.cardSnapGuides[0]
+  if (!target.listId) { return } // only snap to list cards
+  const cards = cardStore.getCardsSelected
+  // add card to list
+  const list = listStore.getList(target.listId)
   const targetPositionIndex = target.listPositionIndex
   const shouldPrepend = side === 'top'
   await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
