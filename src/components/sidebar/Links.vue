@@ -126,8 +126,10 @@ const updateResultsSectionHeight = async () => {
 <template lang="pug">
 .links(v-if="props.visible")
   section
-    p Backlinks
-    Loader(:visible="state.loading" :isSmall="true")
+    .row.title-row
+      div
+        span Backlinks
+        Loader(:visible="state.loading" :isSmall="true")
   section.results-section(v-if="shouldShowSpaces" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="filteredSpaces"
@@ -166,4 +168,7 @@ const updateResultsSectionHeight = async () => {
       .user-avatar
         width 17px
         height 16px
+  .loader
+    margin-left 5px
+    vertical-align -1px
 </style>

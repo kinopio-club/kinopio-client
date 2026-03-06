@@ -74,7 +74,13 @@ const toggleShouldShowCurrentSpaceTags = () => {
 <template lang="pug">
 .tags(v-if="props.visible")
   section
-    p.row Tags
+    .row.title-row
+      span Tags
+      .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
+        label.small-button(:class="{ active: shouldShowCurrentSpaceTags }")
+          input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
+          span In Current Space Only
+
     section.subsection(v-if="!tags.length")
       p Use tags to help cards stand out, and to connect ideas across spaces.
       p Type
@@ -83,10 +89,6 @@ const toggleShouldShowCurrentSpaceTags = () => {
         span when editing a card to create tags.
   //- tags list
   section.results-section(v-if="tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-    .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
-      label(:class="{ active: shouldShowCurrentSpaceTags }")
-        input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
-        span In Current Space
     TagList(:tags="filteredTags" :isLoading="state.isLoading" :parentIsPinned="props.parentIsPinned" :positionTagsOnLeftSide="true")
 </template>
 

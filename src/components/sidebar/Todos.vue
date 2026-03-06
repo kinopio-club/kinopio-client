@@ -93,13 +93,16 @@ const boxes = computed(() => {
 <template lang="pug">
 .todos(v-if="props.visible")
   section
-    .row
-      p Todos
-      Loader(:visible="!spaceIsLoaded" :isSmall="true")
+    .row.title-row
+      div
+        span Todos
+        Loader(:visible="!spaceIsLoaded" :isSmall="true")
+
     section.subsection(v-if="!cards.length")
-      p Prepend cards with
+      span Prepend cards or boxes with
         span.badge.info [ ]
         span to create checkbox cards that you can track here.
+
   section.results-section(v-if="cards.length || boxes.length")
     BoxList(
       :boxes="boxes"
@@ -123,6 +126,8 @@ const boxes = computed(() => {
   .subsection
     padding 4px
     border-radius var(--entity-radius)
+    .badge
+      white-space nowrap
   label
     .user
       vertical-align -3px
@@ -135,6 +140,8 @@ const boxes = computed(() => {
     padding-left 2px
     padding-right 2px
     padding-bottom 2px
+
   .loader
-    margin-left 6px
+    margin-left 5px
+    vertical-align -1px
 </style>
