@@ -10,12 +10,12 @@ export default {
       {
         id: 1,
         name: 'Life',
-        color: 'lawngreen'
+        color: '#ec87f4'
       },
       {
         id: 2,
         name: 'Work & School',
-        color: 'aquamarine'
+        color: '#6fff6f'
       }
     ]
   },
