@@ -585,7 +585,6 @@ const checkIfShouldSnapToCard = async (event) => {
   if (!globalStore.itemSnappingIsReady) { return }
   if (event.shiftKey) { return }
   const { target, side, item } = cardStore.cardSnapGuides[0]
-  if (!target.listId) { return } // only snap to list cards
   const cards = cardStore.getCardsSelected
   // add card to list
   const list = listStore.getList(target.listId)

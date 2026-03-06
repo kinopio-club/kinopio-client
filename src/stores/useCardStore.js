@@ -1233,6 +1233,7 @@ export const useCardStore = defineStore('cards', {
       if (!card) { return }
       targetCards.forEach(target => {
         if (target.id === card.id) { return }
+        if (!target.listId) { return } // only snap to list cards
         const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
         if (isTargetSelected) { return }
         // assign card sides
