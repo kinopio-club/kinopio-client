@@ -14,13 +14,8 @@ export default {
       },
       {
         id: 2,
-        name: 'Work',
-        color: '#88cefa'
-      },
-      {
-        id: 3,
-        name: 'School',
-        color: '#fa7e73'
+        name: 'Work & School',
+        color: '#6fff6f'
       }
     ]
   },
@@ -51,13 +46,13 @@ export default {
         name: 'Moodboard',
         id: 'GgDOqKvEEzTA93EYmAZrn',
         categoryId: 2
-      },
-
-      {
-        temp: true,
-        id: 'eodGGinm01LcP2hfTJ4wi',
-        categoryId: 3
       }
+
+      // {
+      //   temp: true,
+      //   id: 'eodGGinm01LcP2hfTJ4wi',
+      //   categoryId: 3
+      // }
     ]
   },
   developmentSpaces () {

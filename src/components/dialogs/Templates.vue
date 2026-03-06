@@ -68,6 +68,7 @@ const updateUserTemplates = async () => {
   try {
     state.isLoadingUserTemplates = true
     state.userTemplates = await apiStore.getUserTemplateSpaces() || []
+    state.userTemplates = utils.sortByAlphabetical(state.userTemplates, 'name')
   } catch (error) {
     console.error('🚒 updateUserTemplates', error)
   }
@@ -98,6 +99,7 @@ const updateSystemTemplates = async () => {
       space.categoryId = data.categoryId
       return space
     })
+    state.systemTemplates = utils.sortByAlphabetical(state.systemTemplates, 'name')
   } catch (error) {
     console.error('🚒 updateSystemTemplates', error)
     state.error.unknownServerError = true
@@ -141,9 +143,6 @@ const systemTemplatesByCategoryLife = computed(() => {
 })
 const systemTemplatesByCategoryWork = computed(() => {
   return state.systemTemplates.filter(space => space.categoryId === 2)
-})
-const systemTemplatesByCategorySchool = computed(() => {
-  return state.systemTemplates.filter(space => space.categoryId === 3)
 })
 
 // dialog height
@@ -221,27 +220,12 @@ dialog.templates(
           :previewImageIsWide="true"
           :hideTodayBadge="true"
         )
-      //- Work
-      section.results-section.results-section-border-top(v-if="categoryIsVisible('Work')")
+      //- Work & School
+      section.results-section.results-section-border-top(v-if="categoryIsVisible('Work & School')")
         p.category
           span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}
         SpaceList(
           :spaces="systemTemplatesByCategoryWork"
-          :showCategory="true"
-          @selectSpace="changeSpace"
-          :isLoading="state.isLoadingUserTemplates"
-          :parentDialog="parentDialog"
-          :hideFilter="true"
-          :showSpaceGroups="true"
-          :previewImageIsWide="true"
-          :hideTodayBadge="true"
-        )
-      //- School
-      section.results-section.results-section-border-top(v-if="categoryIsVisible('School')")
-        p.category
-          span.badge.secondary(:style="{ 'background-color': categories[3].color }" @click="updateSelectedCategory(categories[3].name)") {{categories[3].name}}
-        SpaceList(
-          :spaces="systemTemplatesByCategorySchool"
           :showCategory="true"
           @selectSpace="changeSpace"
           :isLoading="state.isLoadingUserTemplates"
