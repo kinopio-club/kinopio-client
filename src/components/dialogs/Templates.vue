@@ -203,7 +203,6 @@ dialog.templates(
         :parentDialog="parentDialog"
         :hideFilter="true"
         :showSpaceGroups="true"
-        :hideTemplatesIcon="true"
       )
     //- system templates
     template(v-if="!state.error.unknownServerError")
