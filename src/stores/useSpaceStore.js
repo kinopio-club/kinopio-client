@@ -985,7 +985,6 @@ export const useSpaceStore = defineStore('space', {
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       const editedAt = new Date().toISOString()
-      console.log('☎️☎️ updateSpaceEditedAt', editedAt, dayjs(editedAt).fromNow())
       await this.updateSpace({
         editedAt,
         editedByUserId: userStore.id

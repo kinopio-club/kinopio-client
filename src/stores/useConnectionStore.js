@@ -325,7 +325,7 @@ export const useConnectionStore = defineStore('connections', {
       if (connectionType.isFromBroadcast) { return }
       broadcastStore.update({ updates: connectionType, store: 'connectionStore', action: 'addConnectionTypeToState' })
       await apiStore.addToQueue({ name: 'createConnectionType', body: connectionType })
-      await cache.updateSpace('connectionsTypes', this.getAllConnectionTypes, spaceStore.id)
+      await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
     },
 
     // update
