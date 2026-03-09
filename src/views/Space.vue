@@ -246,6 +246,7 @@ const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
 const isResizingList = computed(() => globalStore.currentUserIsResizingList)
+const isDraggingDialog = computed(() => globalStore.currentUserIsDraggingMultipleSelectedActionsDialog)
 const checkIfShouldShowExploreOnLoad = () => {
   const shouldShow = globalStore.shouldShowExploreOnLoad
   if (shouldShow) {
@@ -487,7 +488,11 @@ const checkIfShouldSnapToBox = (event) => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!globalStore.itemSnappingIsReady) { return }
-    boxStore.updateBoxSnapToSize(snapGuide)
+    if (snapGuide.isOutside) {
+      boxStore.updateBoxSnapToTarget(snapGuide)
+    } else {
+      boxStore.updateBoxExpandToItem(snapGuide)
+    }
   })
 }
 const unselectCardsInDraggedBox = () => {
@@ -579,31 +584,10 @@ const checkIfShouldSnapToCard = async (event) => {
   if (!cardStore.cardSnapGuides.length) { return }
   if (!globalStore.itemSnappingIsReady) { return }
   if (event.shiftKey) { return }
-  let { target, side, item } = cardStore.cardSnapGuides[0]
-  let cards = cardStore.getCardsSelected
-  // add card to list from list card
-  if (target.listId) {
-    const list = listStore.getList(target.listId)
-    const targetPositionIndex = target.listPositionIndex
-    const shouldPrepend = side === 'top'
-    await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
-    return
-  }
-  // create new list
-  const list = {
-    id: nanoid(),
-    y: target.y - consts.listInfoHeight,
-    x: target.x - consts.listPadding,
-    resizeWidth: userStore.cardSettingsCardWrapWidth
-  }
-  listStore.createList({ list })
-  // add target to list
-  await nextTick()
-  await cardStore.addCardsToList({ cards: [target], list, targetPositionIndex: null })
-  await nextTick()
-  // add dragging cards to list
-  cards = sortBy(cards, 'y')
-  target = cardStore.getCard(target.id)
+  const { target, side, item } = cardStore.cardSnapGuides[0]
+  const cards = cardStore.getCardsSelected
+  // add card to list
+  const list = listStore.getList(target.listId)
   const targetPositionIndex = target.listPositionIndex
   const shouldPrepend = side === 'top'
   await cardStore.addCardsToList({ cards, list, targetPositionIndex, shouldPrepend })
@@ -885,6 +869,8 @@ const interact = (event) => {
     dragItems()
   } else if (isResizingCardDetails.value) {
     updateCardDetailsWidth(event)
+  } else if (isDraggingDialog.value) {
+    globalStore.moveMultipleSelectedActions({ endCursor, prevCursor })
   }
   prevCursor = endCursor
 }
@@ -982,6 +968,7 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsDraggingLine = false
   globalStore.currentUserIsDraggingList = false
   globalStore.currentUserIsDraggingDuplicateItem = false
+  globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = false
   globalStore.boxesWereDragged = false
   globalStore.cardsWereDragged = false
   globalStore.linesWereDragged = false

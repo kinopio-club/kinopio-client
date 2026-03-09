@@ -30,7 +30,7 @@ const title = computed(() => {
   if (props.isDanger) {
     return 'Unavailable Offline'
   } else {
-    return ''
+    return 'Is Offline'
   }
 })
 </script>

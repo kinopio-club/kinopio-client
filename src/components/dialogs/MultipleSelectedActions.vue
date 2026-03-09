@@ -39,7 +39,8 @@ let prevCards, prevBoxes
 const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
-  cardsIsConnected: false
+  cardsIsConnected: false,
+  isPointerDown: false
 })
 
 const closeAllDialogs = () => {
@@ -64,7 +65,7 @@ watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
     globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-    scrollIntoView()
+    updatePositionClamped()
     closeDialogs()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
@@ -72,18 +73,20 @@ watch(() => visible.value, async (value, prevValue) => {
   }
 })
 
-const scrollIntoView = () => {
-  const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element })
-}
-
 const isThemeDarkAndUserColorLight = computed(() => {
   const isThemeDark = userStore.theme === 'dark'
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColor: userColor.value })
+const classes = computed(() => {
+  const value = utils.colorClasses({ backgroundColor: userColor.value })
+  if (globalStore.currentUserIsDraggingMultipleSelectedActionsDialog) {
+    value.push('is-dragging')
+  }
+  if (state.isPointerDown) {
+    value.push('is-pointer-down')
+  }
+  return value
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
@@ -94,6 +97,35 @@ const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 const cardBoxOrListIsSelected = computed(() => cardOrBoxIsSelected.value || lists.value.length)
 const ItemIsSelected = computed(() => Boolean(utils.countArrayItems(selectedItems.value)))
+
+// position
+
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  globalStore.scrollElementIntoView({ element })
+}
+const updatePositionClamped = () => {
+  let { x, y } = globalStore.multipleSelectedActionsPosition
+  const element = dialogElement.value
+  const rect = element.getBoundingClientRect()
+  const { height, width } = rect
+  const margin = 16
+  const viewportWidth = globalStore.viewportWidth + window.scrollX
+  const viewportHeight = globalStore.viewportHeight + window.scrollY
+  const maxX = viewportWidth - width - margin
+  const maxY = viewportHeight - height - margin
+  if (x < 0) {
+    x = 0
+  } else if (x > maxX) {
+    x = maxX
+  }
+  if (y < 0) {
+    y = 0
+  } else if (y > maxY) {
+    y = maxY
+  }
+  globalStore.multipleSelectedActionsPosition = { x, y }
+}
 
 // items
 
@@ -339,13 +371,12 @@ const splitCard = () => {
   globalStore.triggerSplitCard(cardId)
 }
 const positionNewCards = async (newCards) => {
-  const spaceBetweenCards = 12
   await nextTick()
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
     const rect = utils.cardElementDimensions(prevCard)
-    card.y = rect.y + rect.height + spaceBetweenCards
+    card.y = rect.y + rect.height + consts.spaceBetweenCards
     return card
   })
   newCards = newCards.map(card => {
@@ -476,6 +507,20 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   globalStore.clearMultipleSelected()
 }
 
+// dragging dialog
+
+const toggleDraggingDialog = (value) => {
+  if (value && state.isPointerDown) {
+    globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+  } else if (!value) {
+    globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+    state.isPointerDown = false
+  }
+}
+const toggleIsPointerDown = () => {
+  state.isPointerDown = true
+}
+
 </script>
 
 <template lang="pug">
@@ -485,8 +530,12 @@ dialog.narrow.multiple-selected-actions(
   ref="dialogElement"
   @click.left="closeDialogs"
   :style="styles"
-  :class="colorClasses"
+  :class="classes"
+  @pointermove="toggleDraggingDialog(true)"
+  @pointerdown.stop="toggleIsPointerDown"
+  @pointerup.stop="toggleDraggingDialog(false)"
 )
+  .drag-area
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
     button.small-button.inline-button
@@ -582,6 +631,10 @@ dialog.narrow.multiple-selected-actions(
 <style lang="stylus">
 .multiple-selected-actions
   transform-origin top left
+  cursor grab
+  &.is-dragging,
+  &.is-pointer-down
+    cursor grabbing
   .segmented-colors
     display inline-block
     vertical-align middle
@@ -666,4 +719,22 @@ dialog.narrow.multiple-selected-actions(
       padding 0
       vertical-align 1px
       padding-left 1px
+
+  .drag-area
+    position absolute
+    width 100%
+    height 8px
+    top 0
+    left 0
+    background-image url('../../assets/drag-area.svg')
+    background-repeat: repeat-x
+    border-top-left-radius var(--entity-radius)
+    border-top-right-radius var(--entity-radius)
+    opacity 0.3
+  &.is-background-dark
+    .drag-area
+      background-image url('../../assets/drag-area-invert.svg')
+  &.is-dragging
+    .drag-area
+      opacity 0.6
 </style>

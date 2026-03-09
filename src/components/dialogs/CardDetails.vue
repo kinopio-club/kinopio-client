@@ -1055,6 +1055,7 @@ const updateMediaUrls = () => {
   state.formats.image = ''
   state.formats.video = ''
   state.formats.audio = ''
+  state.formats.file = ''
   state.formats.link = ''
   if (!urls) { return }
   if (!urls.length) { return }

@@ -140,32 +140,32 @@ const toggleNotifySpaceOutOfSync = (value) => {
   state.notifySpaceOutOfSync = value
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
-  // temp disable
-  // if (document.visibilityState !== 'visible') { return }
-  // if (state.notifySpaceOutOfSync) { return }
-  // if (globalStore.isLoadingSpace) { return }
-  // try {
-  //   if (!currentUserIsSignedIn.value) { return }
-  //   const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
-  //   if (!remoteSpace) { return }
-  //   const space = spaceStore.getSpaceAllState
-  //   const spaceEditedAt = dayjs(space.editedAt)
-  //   const remoteSpaceEditedAt = dayjs(remoteSpace.editedAt)
-  //   const deltaMinutes = remoteSpaceEditedAt.diff(spaceEditedAt, 'minute')
-  //   const editedAtIsChanged = deltaMinutes >= 15
-  //   if (editedAtIsChanged) {
-  //     console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-  //       editedAtIsChanged,
-  //       spaceEditedAt: spaceEditedAt.fromNow(),
-  //       remoteSpaceEditedAt: remoteSpaceEditedAt.fromNow(),
-  //       deltaMinutes
-  //     })
-  //     state.notifySpaceOutOfSync = true
-  //   }
-  // } catch (error) {
-  //   console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
-  //   state.notifySpaceOutOfSync = true
-  // }
+  if (document.visibilityState !== 'visible') { return }
+  if (state.notifySpaceOutOfSync) { return }
+  if (globalStore.isLoadingSpace) { return }
+  try {
+    if (!currentUserIsSignedIn.value) { return }
+    const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
+    if (!remoteSpace) { return }
+    const spaceEditedAt = dayjs(spaceStore.editedAt)
+    const remoteSpaceEditedAt = dayjs(remoteSpace.editedAt)
+    const deltaMinutes = remoteSpaceEditedAt.diff(spaceEditedAt, 'minute')
+    const editedAtIsChanged = deltaMinutes >= 15
+    if (editedAtIsChanged) {
+      console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+        editedAtIsChanged,
+        spaceEditedAt: spaceStore.editedAt,
+        remoteSpaceEditedAt: remoteSpace.editedAt,
+        spaceEditedAtFromNow: spaceEditedAt.fromNow(),
+        remoteSpaceEditedAtFromNow: remoteSpaceEditedAt.fromNow(),
+        deltaMinutes
+      })
+      state.notifySpaceOutOfSync = true
+    }
+  } catch (error) {
+    console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
+    state.notifySpaceOutOfSync = true
+  }
 }
 
 // notifications
@@ -186,6 +186,9 @@ const hideNotifyServerCouldNotSave = () => {
 const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
+  const space = spaceStore.getSpaceAllState
+  const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
+  if (isReadOnlyInvitedToSpace) { return }
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
 })
 const notifyCardsCreatedIsNearLimit = computed(() => globalStore.notifyCardsCreatedIsNearLimit)

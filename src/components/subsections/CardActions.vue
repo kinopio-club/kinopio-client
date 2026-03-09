@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
@@ -24,6 +25,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const analyticsStore = useAnalyticsStore()
@@ -332,6 +334,11 @@ const toggleCounterIsVisible = () => {
       counterIsVisible,
       counterValue: card.counterValue || 1
     })
+    // update list card positions below
+    if (card.listId) {
+      const list = listStore.getList(card.listStore)
+      cardStore.updateCardDimensions(card.id)
+    }
   })
 }
 

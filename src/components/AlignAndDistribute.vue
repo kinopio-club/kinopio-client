@@ -57,11 +57,6 @@ const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomD
 const toggleMoreOptionsIsVisible = () => {
   userStore.updateUser({ shouldShowMoreAlignOptions: !moreOptionsIsVisible.value })
 }
-const ySpaceBetweenCards = (item) => {
-  let value = consts.spaceBetweenCards
-  if (item?.counterIsVisible) { value += 10 }
-  return value
-}
 const canEdit = computed(() => {
   if (props.lists.length) { return props.canEditAll.all }
   return props.canEditAll.cards
@@ -260,7 +255,7 @@ const alignLeft = () => {
       if (props.shouldDistributeWithAlign) {
         const previousItem = newItems[index - 1]
         const rect = getItemDimensions(previousItem)
-        item.y = previousItem.y + rect.height + ySpaceBetweenCards(previousItem)
+        item.y = previousItem.y + rect.height + consts.spaceBetweenCards
       }
       updateItem(item)
     }

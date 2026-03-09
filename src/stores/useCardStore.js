@@ -579,13 +579,13 @@ export const useCardStore = defineStore('cards', {
         globalStore.pageWidth = cardX
       }
     },
-    moveCards ({ endCursor, prevCursor, delta }) {
+    moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
       const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
-      if (!endCursor || !prevCursor) { return }
+      if ((!endCursor || !prevCursor) && !delta) { return }
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -598,7 +598,7 @@ export const useCardStore = defineStore('cards', {
         x: delta.x * zoom,
         y: delta.y * zoom
       }
-      let cards = this.getCardsSelected
+      cards = cards || this.getCardsSelected
       cards = cards.map(card => {
         let x = Math.round(card.x + delta.x)
         x = Math.max(0, x)
@@ -614,8 +614,10 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isChildren: true, cursor: endCursor })
-      this.updateCardSnapGuides({ items: cards, cursor: endCursor })
+      if (endCursor) {
+        boxStore.updateBoxSnapGuides({ items: cards, isChildren: true, cursor: endCursor })
+        this.updateCardSnapGuides({ items: cards, cursor: endCursor })
+      }
       listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
@@ -1231,6 +1233,7 @@ export const useCardStore = defineStore('cards', {
       if (!card) { return }
       targetCards.forEach(target => {
         if (target.id === card.id) { return }
+        if (!target.listId) { return } // only snap to list cards
         const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
         if (isTargetSelected) { return }
         // assign card sides

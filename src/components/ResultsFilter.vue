@@ -184,7 +184,7 @@ const clearFilter = (shouldClearFilterInfo) => {
   if (shouldClearFilterInfo) {
     globalStore.spaceListFilterInfo = {
       filter: '',
-      updatedAt: new Date().getTime()
+      updatedAt: new Date().toISOString()
     }
   }
 }

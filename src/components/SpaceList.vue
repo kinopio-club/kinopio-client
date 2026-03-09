@@ -109,7 +109,9 @@ const props = defineProps({
   parentDialog: String,
   previewImageIsWide: Boolean,
   hidePreviewImage: Boolean,
-  showSpaceGroups: Boolean
+  hideTemplatesIcon: Boolean,
+  showSpaceGroups: Boolean,
+  hideTodayBadge: Boolean
 })
 
 const state = reactive({
@@ -183,11 +185,6 @@ const isLoadingSpace = (space) => {
 const spaceIsCurrentSpace = (space) => {
   const currentSpace = spaceStore.id
   return Boolean(currentSpace === space.id)
-}
-const spaceIsTemplate = (space) => {
-  if (space.isTemplate) { return true }
-  const templateSpaceIds = templates.spaces().map(template => template.id)
-  return templateSpaceIds.includes(space.id)
 }
 const showInExplore = (space) => {
   if (props.hideExploreBadge) { return }
@@ -324,7 +321,7 @@ const updateFilter = async (filter, isClearFilter) => {
     globalStore.spaceListFilterInfo = {
       filter,
       parentDialog: parentDialog.value,
-      updatedAt: new Date().getTime()
+      updatedAt: new Date().toISOString()
     }
   }
   const spaces = spacesFiltered.value || props.spaces
@@ -481,7 +478,8 @@ span.space-list-wrap
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
             //- today
-            SpaceTodayBadge(:space="space")
+            template(v-if="!props.hideTodayBadge")
+              SpaceTodayBadge(:space="space")
             //- space details
             .name
               span(v-if="state.filter")
@@ -489,7 +487,7 @@ span.space-list-wrap
               span(v-else)
                 span {{space.name}}
               //- template
-              template(v-if="space.isTemplate")
+              template(v-if="space.isTemplate && !props.hideTemplatesIcon")
                 img.icon.templates(src="@/assets/templates.svg" title="Template")
               //- privacy
               template(v-if='space.privacy')

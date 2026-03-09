@@ -234,7 +234,6 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   if (!isSignedIn) {
     globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
     globalStore.addToSpaceCollaboratorKeys({ spaceId, collaboratorKey })
-    globalStore.currentUserIsInvitedButCannotEditCurrentSpace = true
     return
   }
   // join

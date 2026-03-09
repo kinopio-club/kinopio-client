@@ -167,7 +167,7 @@ const handleMouseMove = (event) => {
     max: viewport.height - footer
   })
   const isInPosition = isInThreshold && isBetweenControls
-  const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('.card-wrap'))
+  const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('.card-wrap') || event.target.closest('dialog'))
   const shouldShow = isInPosition && !isCancelledByHover
   if (shouldShow || isSelectingY.value) {
     state.positionY = position.y

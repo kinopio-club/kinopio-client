@@ -443,6 +443,9 @@ const cardWrapStyle = computed(() => {
   if (state.isSnappingToList) {
     styles.transition = 'all 0.1s ease-out'
   }
+  if (globalStore.boxIsSnappingTransition) {
+    styles.transition = 'all 0.2s ease-out'
+  }
   styles = updateStylesWithWidth(styles)
   return styles
 })
@@ -2115,6 +2118,9 @@ const metaContainerStyles = computed(() => {
           img.icon.view(src="@/assets/comment.svg")
           //- User
           UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
+        //- Vote Counter
+        .card-vote-wrap(v-if="props.card.counterIsVisible" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+          CardVote(:card="card")
 
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
@@ -2128,6 +2134,10 @@ const metaContainerStyles = computed(() => {
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
+        //- Vote Counter
+        .card-vote-wrap(v-if="props.card.counterIsVisible")
+          CardVote(:card="card")
+
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Url →
@@ -2233,8 +2243,6 @@ const metaContainerStyles = computed(() => {
       //- Search result
       span.badge.search(v-if="isInSearchResultsCards")
         img.icon.search(src="@/assets/search.svg")
-      //- Vote Counter
-      CardVote(:card="card")
       //- Created Through API
       .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
         img.icon.system(src="@/assets/system.svg")
@@ -2287,6 +2295,10 @@ const metaContainerStyles = computed(() => {
     &.is-comment
       opacity 0.5
 
+    .card-vote-wrap
+      margin 8px
+      margin-top 0
+
     .card-comment
       > .badge
         margin 0
@@ -2302,6 +2314,9 @@ const metaContainerStyles = computed(() => {
         height 15px
         img
           vertical-align 4px
+      .card-vote-wrap
+        margin 4px
+        margin-right 0
 
     .card-content-wrap
       display flex
@@ -2391,15 +2406,6 @@ const metaContainerStyles = computed(() => {
       left 5px
       top 3.5px
 
-    .is-light-in-dark-theme
-      border-color var(--primary-on-light-background)
-      .icon
-        filter none
-    .is-dark-in-light-theme
-      border-color var(--primary-on-dark-background)
-      .icon
-        filter invert()
-
     .uploading-container,
     .status-container
       position absolute
@@ -2433,6 +2439,9 @@ const metaContainerStyles = computed(() => {
         justify-content space-between
         .name
           background-color var(--secondary-background)
+          margin-bottom 0
+        .card-vote-wrap
+          margin-top 8px
 
     &.audio-card
       .card-content-wrap

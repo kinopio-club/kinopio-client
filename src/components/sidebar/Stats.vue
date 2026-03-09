@@ -140,9 +140,11 @@ const showUserDetails = async (event, user) => {
 
 <template lang="pug">
 section.stats(v-if="visible")
-  p Space Stats
-  p(v-if="isLoadingSpace")
-    Loader(:visible="true")
+  .row.title-row
+    div
+      span Space Stats
+      Loader(:visible="isLoadingSpace" :isSmall="true")
+
   template(v-if="!isLoadingSpace")
     table
       tbody
@@ -197,13 +199,8 @@ section.results-section(v-if="!state.isLoadingFavorites && visible")
 </template>
 
 <style lang="stylus">
-// .stats
-//   overflow auto
-//   table
-//     margin-top 10px
-//     border-collapse collapse
-//     td
-//       border 1px solid var(--secondary-active-background)
-//       padding 5px
-//       user-select text
+.stats
+  .loader
+    margin-left 5px
+    vertical-align -1px
 </style>

@@ -118,6 +118,7 @@ export const useGlobalStore = defineStore('global', {
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
     remoteBoxDetailsVisible: [],
+    boxIsSnappingTransition: false,
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],
@@ -215,6 +216,7 @@ export const useGlobalStore = defineStore('global', {
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
     multipleConnectionTypesSelectedIdsToLoad: [],
+    currentUserIsDraggingMultipleSelectedActionsDialog: false,
 
     // connections
     currentConnectionStartItemIds: [],
@@ -340,10 +342,32 @@ export const useGlobalStore = defineStore('global', {
       return transform
     },
     getIsInteractingWithItem () {
-      return this.getIsResizingItem || this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsDraggingBox || this.currentUserIsDraggingList
+      return (
+        this.getIsResizingItem ||
+        this.currentUserIsDraggingCard ||
+        this.currentUserIsDrawingConnection ||
+        this.currentUserIsDraggingBox ||
+        this.currentUserIsDraggingList ||
+        this.currentUserIsDraggingMultipleSelectedActionsDialog
+      )
+    },
+    getInteractingWithItemType () {
+      if (this.currentUserIsDraggingCard) {
+        return 'card'
+      } else if (this.currentUserIsDrawingConnection) {
+        return 'connection'
+      } else if (this.currentUserIsDraggingBox) {
+        return 'box'
+      } else if (this.currentUserIsDraggingList) {
+        return 'list'
+      }
     },
     getIsResizingItem () {
-      return this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsResizingList
+      return (
+        this.currentUserIsResizingCard ||
+        this.currentUserIsResizingBox ||
+        this.currentUserIsResizingList
+      )
     },
     getMultipleItemsSelected () {
       return [
@@ -446,7 +470,7 @@ export const useGlobalStore = defineStore('global', {
       return styles
     },
     updateSessionDate () {
-      this.sessionDate = new Date().getTime()
+      this.sessionDate = new Date().toISOString()
     },
 
     // subscribe triggers
@@ -1039,6 +1063,24 @@ export const useGlobalStore = defineStore('global', {
         this.addMultipleToMultipleCardsSelected(listCardIds)
       })
     },
+    moveMultipleSelectedActions ({ endCursor, prevCursor, delta }) {
+      if (!endCursor || !prevCursor) { return }
+      const zoom = this.getSpaceCounterZoomDecimal
+      delta = delta || {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
+      let { x, y } = this.multipleSelectedActionsPosition
+      x = Math.round(x + delta.x)
+      x = Math.max(0, x)
+      y = Math.round(y + delta.y)
+      y = Math.max(0, y)
+      this.multipleSelectedActionsPosition = { x, y }
+    },
 
     // multiple cards
 
@@ -1292,6 +1334,7 @@ export const useGlobalStore = defineStore('global', {
       this.currentUserIsDraggingBox = false
       this.currentUserIsResizingList = false
       this.currentUserIsDraggingList = false
+      this.currentUserIsDraggingMultipleSelectedActionsDialog = false
       this.multipleCardsSelectedIds = []
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []
@@ -1804,11 +1847,11 @@ export const useGlobalStore = defineStore('global', {
     async updateCurrentUserIsInvitedButCannotEditCurrentSpace (space) {
       const userStore = useUserStore()
       space = space || this.currentSpace
-      const currentUserIsSignedIn = userStore.getUserIsSignedIn
+      const isSignedIn = userStore.getUserIsSignedIn
       const invitedSpaces = await cache.invitedSpaces()
       const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
       const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
-      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      const inviteRequiresSignIn = !isSignedIn && isInvitedToSpace
       const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
       this.currentUserIsInvitedButCannotEditCurrentSpace = value
     },

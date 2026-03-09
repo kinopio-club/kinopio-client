@@ -385,7 +385,7 @@ export const useSpaceStore = defineStore('space', {
         } else if (collaboratorKey) {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await apiStore.getSpaceAnonymously(space)
-          cache.saveInvitedSpace(remoteSpace)
+          await cache.saveInvitedSpace(remoteSpace)
           globalStore.clearSpaceCollaboratorKeys()
         } else if (this.getSpaceIsRemote) {
           remoteSpace = await apiStore.getSpaceAnonymously(space)
@@ -526,7 +526,7 @@ export const useSpaceStore = defineStore('space', {
         this.saveSpaceToCache()
         this.notifySpaceIsOpen()
         this.updateUserLastSpaceId()
-        this.editedAt = new Date()
+        this.editedAt = new Date().toISOString()
         globalStore.isLoadingSpace = false
         globalStore.triggerDrawingInitialize()
         globalStore.updateTags()
@@ -690,7 +690,7 @@ export const useSpaceStore = defineStore('space', {
       space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
-      space.editedAt = new Date()
+      space.editedAt = new Date().toISOString()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
       const shouldHideTutorialCards = userStore.shouldHideTutorialCards
@@ -829,7 +829,7 @@ export const useSpaceStore = defineStore('space', {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
-      space.editedAt = new Date()
+      space.editedAt = new Date().toISOString()
       space.userId = userStore.id
       space.cards = space.cards.map(card => {
         card.id = nanoid()

@@ -257,12 +257,12 @@ export const useListStore = defineStore('lists', {
       })
       this.listChildPlaceholders[list.id] = cards
     },
-    moveLists ({ endCursor, prevCursor, delta }) {
+    moveLists ({ endCursor, prevCursor, delta, lists }) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
-      if (!endCursor || !prevCursor) { return }
+      if ((!endCursor || !prevCursor) && !delta) { return }
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -275,7 +275,7 @@ export const useListStore = defineStore('lists', {
         x: delta.x * zoom,
         y: delta.y * zoom
       }
-      let lists = this.getListsSelected
+      lists = lists || this.getListsSelected
       lists = lists.map(list => {
         this.moveListChildPlaceholders(list, delta)
         let x = Math.round(list.x + delta.x)
@@ -294,7 +294,9 @@ export const useListStore = defineStore('lists', {
       // this.updatePageSize(lists[0]) // ??might automatically be done by cards inside
       this.updateLists(lists)
       globalStore.listsWereDragged = true
-      boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
+      if (endCursor && globalStore.getInteractingWithItemType === 'list') {
+        boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
+      }
       // lists = lists.map(list => this.getList(list.id))
       // boxStore.updateListSnapGuides({ items: lists, isLists: true, cursor: endCursor })
     },

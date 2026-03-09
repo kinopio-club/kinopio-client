@@ -72,6 +72,7 @@ watch(() => item.value, (value, prevValue) => {
     state.duration = consts.itemSnapGuideWaitingDuration
   }
 })
+
 // is snapping
 
 const currentSnapGuide = computed(() => {
@@ -81,8 +82,6 @@ const currentSnapGuide = computed(() => {
   if (props.box) {
     if (cardStore.cardSnapGuides.length) { return } // prefer snapping to card
     if (listStore.listSnapGuides.listId) { return } // prefer snapping to list
-    const isMultipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds.length > 1
-    if (isMultipleBoxesSelectedIds) { return }
     guides = boxStore.boxSnapGuides
   // snap to card
   } else if (props.card) {
@@ -108,26 +107,10 @@ const snapGuideSide = computed(() => {
   if (!snapGuide) { return null }
   if (snapGuide?.target.id === item.value.id) {
     return snapGuide.side
-  } else if (snapGuide?.origin.id === item.value.id) {
-    return oppositeSide(snapGuide.side)
   } else {
     return null
   }
 })
-const oppositeSide = (side) => {
-  if (side === 'left') {
-    return 'right'
-  }
-  if (side === 'right') {
-    return 'left'
-  }
-  if (side === 'top') {
-    return 'bottom'
-  }
-  if (side === 'bottom') {
-    return 'top'
-  }
-}
 const updateRect = () => {
   if (props.card) {
     state.rect = utils.cardElementDimensions(props.card)

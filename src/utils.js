@@ -378,6 +378,20 @@ export default {
       return true
     }
   },
+  oppositeSide (side) {
+    if (side === 'left') {
+      return 'right'
+    }
+    if (side === 'right') {
+      return 'left'
+    }
+    if (side === 'top') {
+      return 'bottom'
+    }
+    if (side === 'bottom') {
+      return 'top'
+    }
+  },
   numberOfLeadingTabs (string) {
     // https://regexr.com/6dl8u
     // matches /t tab characters at start of string
@@ -744,7 +758,7 @@ export default {
   },
   unixTime (date) {
     date = date || new Date()
-    return new Date(date).getTime()
+    return new Date(date).toISOString()
   },
   shortRelativeTime (date) {
     if (!date) { return }
@@ -1705,7 +1719,7 @@ export default {
     space.groupId = null
     space.group = null
     space.createdAt = new Date()
-    space.editedAt = new Date()
+    space.editedAt = new Date().toISOString()
     space.collaboratorKey = nanoid()
     space.readOnlyKey = nanoid()
     space.cards = space.cards.map(card => {

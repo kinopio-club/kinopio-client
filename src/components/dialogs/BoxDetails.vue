@@ -325,7 +325,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       span Background image won't be drawn because fill mode is set to empty{{' '}}
       img.icon.box-icon(src="@/assets/box-empty.svg")
 
-    ItemDetailsDebug(:item="currentBox" :keys="['infoWidth', 'fill', 'background', 'resizeWidth']")
+    ItemDetailsDebug(:item="currentBox" :keys="['x', 'y']")
 </template>
 
 <style lang="stylus">
