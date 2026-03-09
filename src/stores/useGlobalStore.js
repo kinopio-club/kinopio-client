@@ -1847,11 +1847,11 @@ export const useGlobalStore = defineStore('global', {
     async updateCurrentUserIsInvitedButCannotEditCurrentSpace (space) {
       const userStore = useUserStore()
       space = space || this.currentSpace
-      const currentUserIsSignedIn = userStore.getUserIsSignedIn
+      const isSignedIn = userStore.getUserIsSignedIn
       const invitedSpaces = await cache.invitedSpaces()
       const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
       const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
-      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      const inviteRequiresSignIn = !isSignedIn && isInvitedToSpace
       const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
       this.currentUserIsInvitedButCannotEditCurrentSpace = value
     },

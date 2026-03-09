@@ -385,7 +385,7 @@ export const useSpaceStore = defineStore('space', {
         } else if (collaboratorKey) {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await apiStore.getSpaceAnonymously(space)
-          cache.saveInvitedSpace(remoteSpace)
+          await cache.saveInvitedSpace(remoteSpace)
           globalStore.clearSpaceCollaboratorKeys()
         } else if (this.getSpaceIsRemote) {
           remoteSpace = await apiStore.getSpaceAnonymously(space)
