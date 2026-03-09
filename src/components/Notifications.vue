@@ -186,6 +186,9 @@ const hideNotifyServerCouldNotSave = () => {
 const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
+  const space = spaceStore.getSpaceAllState
+  const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
+  if (isReadOnlyInvitedToSpace) { return }
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
 })
 const notifyCardsCreatedIsNearLimit = computed(() => globalStore.notifyCardsCreatedIsNearLimit)
