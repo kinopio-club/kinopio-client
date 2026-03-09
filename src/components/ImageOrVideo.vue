@@ -212,6 +212,7 @@ img.image(
     border-radius var(--entity-radius)
     display block
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
+    content-visibility auto
     &.selected
       mix-blend-mode color-burn
 </style>
