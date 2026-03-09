@@ -10,7 +10,7 @@ export default {
       {
         id: 1,
         name: 'Life',
-        color: '#b9a7ff'
+        color: '#ec87f4'
       },
       {
         id: 2,
@@ -50,6 +50,11 @@ export default {
       {
         name: 'Weekly Planner',
         id: 'tZgYERhi-QFX2LmlVNOAb',
+        categoryId: 1
+      },
+      {
+        name: 'Calendar',
+        id: 'fqSeePL0oeocZfcg6y1w5',
         categoryId: 1
       }
 

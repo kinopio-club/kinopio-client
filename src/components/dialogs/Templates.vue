@@ -218,8 +218,8 @@ dialog.templates(
           :parentDialog="parentDialog"
           :hideFilter="true"
           :showSpaceGroups="true"
-          :previewImageIsWide="true"
           :hideTodayBadge="true"
+          :hideExploreBadge="true"
         )
       //- Work & School
       section.results-section.results-section-border-top(v-if="categoryIsVisible('Work & School')")
@@ -233,8 +233,8 @@ dialog.templates(
           :parentDialog="parentDialog"
           :hideFilter="true"
           :showSpaceGroups="true"
-          :previewImageIsWide="true"
           :hideTodayBadge="true"
+          :hideExploreBadge="true"
         )
 </template>
 
