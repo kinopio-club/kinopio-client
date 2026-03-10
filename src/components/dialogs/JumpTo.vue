@@ -123,5 +123,5 @@ dialog.jump-to
   section.jump-to-section
     user-select none
   section.results-section
-    max-height 20dvh
+    max-height 50dvh
 </style>
