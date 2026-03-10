@@ -72,6 +72,7 @@ export const useUserStore = defineStore('user', {
     themeIsSystem: false,
     outsideSpaceBackgroundIsStatic: false,
     shouldDisableHapticFeedback: false,
+    isDebugMode: false,
     studentDiscountIsAvailable: false,
     lastSidebarSection: '',
     prevInviteEmails: '',
