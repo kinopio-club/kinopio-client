@@ -137,6 +137,7 @@ dialog.minimap
   bottom 28px
   top initial
   left initial
+  text-align left
   &.is-pinned
     right 0
   .right-pin
