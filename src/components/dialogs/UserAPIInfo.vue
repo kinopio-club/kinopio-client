@@ -66,7 +66,7 @@ const copy = async (event, type) => {
 dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
-      span Developer
+      span API
       .button-wrap
         a(href="https://help.kinopio.club/api")
           button.small-button
