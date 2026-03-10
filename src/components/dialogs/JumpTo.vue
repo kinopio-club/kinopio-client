@@ -74,10 +74,10 @@ const placeholderIsVisible = computed(() => {
 
 // pin dialog
 
-const dialogIsPinned = computed(() => globalStore.minimapIsPinned)
+const dialogIsPinned = computed(() => globalStore.jumpToIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  globalStore.minimapIsPinned = isPinned
+  globalStore.jumpToIsPinned = isPinned
 }
 
 // lines
@@ -104,7 +104,7 @@ const focusBox = (box) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.minimap.is-pinnable(
+dialog.narrow.jump-to.is-pinnable(
   v-if="props.visible"
   :open="props.visible"
   @click.left.stop
@@ -113,7 +113,7 @@ dialog.narrow.minimap.is-pinnable(
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section.minimap-section.title-section
+  section.jump-to-section.title-section
     .row.title-row(ref="rowElement")
       span Jump To
       .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
@@ -131,7 +131,7 @@ dialog.narrow.minimap.is-pinnable(
 </template>
 
 <style lang="stylus">
-dialog.minimap
+dialog.jump-to
   overflow auto
   right 8px
   bottom 28px
@@ -142,7 +142,7 @@ dialog.minimap
     right 0
   .right-pin
     transform rotate(180deg)
-  section.minimap-section
+  section.jump-to-section
     user-select none
   section.results-section
     max-height 20dvh

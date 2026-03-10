@@ -38,7 +38,7 @@ const categories = [
     color: '#65cdaa'
   },
   {
-    name: 'Search and Jump',
+    name: 'Search',
     color: '#8fbb8f'
   }
 

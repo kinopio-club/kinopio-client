@@ -247,7 +247,7 @@ export const useGlobalStore = defineStore('global', {
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
-    minimapIsPinned: false,
+    jumpToIsPinned: false,
     searchIsPinned: false,
     userSettingsIsPinned: false,
 
@@ -517,7 +517,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateUrlPreview (cardId) {},
     triggerUpdateUrlPreviewComplete (cardId) {},
     triggerRemovedIsVisible () {},
-    triggerMinimapIsVisible () {},
+    triggerJumpToIsVisible () {},
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},
     triggerUpdateLockedItemButtonPositionCardId (cardId) {},
