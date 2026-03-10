@@ -43,6 +43,14 @@ const updateDialogHeight = async () => {
 }
 
 const userId = computed(() => userStore.id)
+const censor = (value) => {
+  const uncensoredCharacters = 5
+  const uncensored = value.slice(-uncensoredCharacters)
+  const toСensor = value.slice(0, -uncensoredCharacters)
+  const censored = toСensor.replace(/[^-]/g, 'x') // replace every character that isn't `-`
+  return censored + uncensored
+}
+const censoredApiKey = computed(() => censor(userStore.apiKey))
 const copy = async (event, type) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
@@ -89,6 +97,8 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
       p
         img.icon.key(src="@/assets/key.svg")
         span API Key
+    .row
+      code.badge.secondary {{ censoredApiKey }}
     .row
       .badge.danger.copy-api-keys
         .button-wrap
