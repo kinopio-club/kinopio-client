@@ -553,6 +553,14 @@ const placeholderStylesMap = computed(() => {
   }
   return styles
 })
+
+// focus
+
+const isFocusing = computed(() => props.list.id === globalStore.focusOnListId)
+const clearFocus = () => {
+  globalStore.focusOnListId = ''
+}
+
 </script>
 
 <template lang="pug">
@@ -618,7 +626,8 @@ const placeholderStylesMap = computed(() => {
     @touchmove="updateCurrentTouchPosition"
     @touchend="endListInfoInteractionTouch"
   )
-    .focusing-frame(v-if="state.isDraggingCardOverList && props.list.isCollapsed" :style="{backgroundColor: userColor}")
+    .focusing-frame.infinite-focusing-frame(v-if="state.isDraggingCardOverList && props.list.isCollapsed" :style="{backgroundColor: userColor}")
+    .focusing-frame(v-if="isFocusing" :style="{backgroundColor: props.list.color}" @animationend="clearFocus")
     .list-snap-guide.empty-list-snap-guide(v-if="snapGuideIsVisible" :class="{ active: state.isDraggingCardOverList }" :style="snapGuideStyles")
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     //- info row
@@ -810,7 +819,8 @@ const placeholderStylesMap = computed(() => {
     pointer-events none
 
   .focusing-frame
-    animation-iteration-count 100 // animation plays effectively infinite
+    &.infinite-focusing-frame
+      animation-iteration-count 100 // animation plays effectively infinite
 @keyframes listSnapGuide
   50%
     transform scaleY(175%)

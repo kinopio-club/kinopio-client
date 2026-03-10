@@ -128,7 +128,7 @@ const selectAllBelow = () => {
   globalStore.triggerSelectAllItemsBelowCursor(position)
 }
 
-// card focus
+// focus
 
 const isFocusing = computed(() => props.line.id === globalStore.focusOnLineId)
 const clearFocus = () => {

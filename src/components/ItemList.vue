@@ -13,27 +13,6 @@ const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-// let unsubscribes
-
-onMounted(() => {
-  // allItems
-  // console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
-//   const globalActionUnsubscribe = globalStore.$onAction(
-//     ({ name, args }) => {
-//       if (name === 'clearDraggingItems') {
-//         console.log('clearDraggingItems')
-//       }
-//     }
-//   )
-//   unsubscribes = () => {
-//     globalActionUnsubscribe()
-//   }
-// })
-// onBeforeUnmount(() => {
-//   unsubscribes()
-  console.log('👄👄👄', allItems.value)
-})
-
 const emit = defineEmits(['selectItem'])
 
 const props = defineProps({
@@ -73,19 +52,12 @@ const allItems = computed(() => {
   return items
 })
 
-// const placeholderIsVisible = computed(() => {
-//   return
-//   return !lines.value.length && !boxes.value.length && !lists.value.length
-// })
+const selectItem = (item) => {
+  emit('selectItem', item)
+}
 
-// const state = reactive({
-//   count: 0
-// })
+// styles
 
-// watch(() => props.visible, (value, prevValue) => {
-//   if (value) {
-//     console.info('💁‍♀️', value)
-//   }
 const boxBadgeStyles = (box) => {
   return {
     border: `1px solid ${box.color}`,
@@ -95,15 +67,9 @@ const boxBadgeStyles = (box) => {
 const badgeColorClasses = (line) => {
   return utils.colorClasses({ backgroundColor: line.color })
 }
-
-const selectItem = (item) => {
-  emit('selectItem', item)
-}
-
 </script>
 
 <template lang="pug">
-
 ul.results-list.item-list(v-if="allItems.length")
   template(v-for="item in allItems" :key="item.id")
     //- box item
@@ -115,17 +81,15 @@ ul.results-list.item-list(v-if="allItems.length")
         span {{item.name}}
     //- line item
     template(v-if="item.itemType === 'line'")
-      li
+      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
         .badge-horizontal-line(:style="{ background: item.color }")
-        .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)" @click="selectItem(item)")
+        .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- list item
     template(v-if="item.itemType === 'list'")
-      li
-        .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)" @click="selectItem(item)")
+      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+        .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
-
-  //- ListListItem
 
 .badge.secondary(v-if="!allItems.length")
   span No lines, lists, or boxes in this space yet

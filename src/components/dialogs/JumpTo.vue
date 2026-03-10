@@ -80,10 +80,9 @@ const focusItem = (item) => {
   if (item.itemType === 'line') {
     globalStore.updateFocusOnLineId(item.id)
   }
-  // TODO
-  // if (item.itemType === 'list') {
-  //   globalStore.updateFocusOnListId(list.id)
-  // }
+  if (item.itemType === 'list') {
+    globalStore.updateFocusOnListId(item.id)
+  }
 }
 </script>
 
