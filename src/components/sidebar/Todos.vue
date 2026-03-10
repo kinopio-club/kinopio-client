@@ -7,7 +7,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
-import Loader from '@/components/Loader.vue'
 import CardList from '@/components/CardList.vue'
 import BoxList from '@/components/BoxList.vue'
 import ProgressCircle from '@/components/ProgressCircle.vue'
@@ -135,7 +134,6 @@ const itemsRemaningCount = computed(() => {
       div
         ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
         span Todos
-        Loader(:visible="!spaceIsLoaded" :isSmall="true")
       .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
         label.small-button(:class="{ active: state.shouldShowCompleted }")
           input(type="checkbox" v-model="state.shouldShowCompleted")
@@ -183,10 +181,6 @@ const itemsRemaningCount = computed(() => {
     padding-left 2px
     padding-right 2px
     padding-bottom 2px
-
-  .loader
-    margin-left 5px
-    vertical-align -1px
   .progress-circle
     vertical-align -2px
 </style>
