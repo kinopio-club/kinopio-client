@@ -80,6 +80,7 @@ const focusItem = (item) => {
   if (item.itemType === 'line') {
     globalStore.updateFocusOnLineId(item.id)
   }
+  // TODO
   // if (item.itemType === 'list') {
   //   globalStore.updateFocusOnListId(list.id)
   // }
@@ -105,6 +106,7 @@ dialog.narrow.jump-to.is-pinnable(
   section
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
+  section.results-section
     ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem")
 </template>
 

@@ -86,21 +86,68 @@ const allItems = computed(() => {
 //   if (value) {
 //     console.info('💁‍♀️', value)
 //   }
-// })
+const boxBadgeStyles = (box) => {
+  return {
+    border: `1px solid ${box.color}`,
+    borderTop: `8px solid ${box.color}`
+  }
+}
+const badgeColorClasses = (line) => {
+  return utils.colorClasses({ backgroundColor: line.color })
+}
+
+const selectItem = (item) => {
+  emit('selectItem', item)
+}
+
 </script>
 
 <template lang="pug">
-section.results-section.item-list(v-if="allItems.length")
-  //- v for item in allitems
-    //- v-if item.itemType is box..
-    //- LineListItem
-    //- BoxListItem
-    //- ListListItem
 
-section.badge.secondary(v-if="!allItems.length")
+ul.results-list.item-list(v-if="allItems.length")
+  template(v-for="item in allItems" :key="item.id")
+    //- box item
+    template(v-if="item.itemType === 'box'")
+      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+        .box-badge.badge(:style="boxBadgeStyles(item)")
+          .box-info(:style="{backgroundColor: item.color}")
+          .box-fill(:style="{backgroundColor: item.color}")
+        span {{item.name}}
+    //- line item
+    template(v-if="item.itemType === 'line'")
+      li
+        .badge-horizontal-line(:style="{ background: item.color }")
+        .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)" @click="selectItem(item)")
+          span {{ item.name }}
+    //- list item
+    template(v-if="item.itemType === 'list'")
+      li
+        .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)" @click="selectItem(item)")
+          span {{ item.name }}
+
+  //- ListListItem
+
+.badge.secondary(v-if="!allItems.length")
   span No lines, lists, or boxes in this space yet
 </template>
 
 <style lang="stylus">
-// .component-name
+.item-list
+  .box-badge
+    padding 1px 4px
+    overflow hidden
+    .box-fill
+      top 0
+      left 0
+      width 100%
+      height 100%
+      position absolute
+      opacity 0.5
+  .badge-horizontal-line
+    position absolute
+    left 0
+    top 17px
+    width 100%
+    height 1px
+
 </style>
