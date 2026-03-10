@@ -131,6 +131,14 @@ const deleteUserPermanent = async () => {
   location.reload()
   state.loading.deleteUserPermanent = false
 }
+
+// debug mode
+
+const isDebugMode = computed(() => { return userStore.isDebugMode })
+const toggleIsDebugMode = () => {
+  const value = !isDebugMode.value
+  userStore.updateUser({ isDebugMode: value })
+}
 </script>
 
 <template lang="pug">
@@ -166,6 +174,7 @@ const deleteUserPermanent = async () => {
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
         UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+  section
     .row
       //- API/Developer Info
       .button-wrap
@@ -173,8 +182,13 @@ const deleteUserPermanent = async () => {
           img.icon.key(src="@/assets/key.svg")
           span API
         UserAPIInfo(:visible="state.userAPIInfoIsVisible")
-      //- Moderator Actions
-      .button-wrap(v-if="isModerator")
+      .button-wrap
+        label(:class="{active: isDebugMode}" @click.left.prevent="toggleIsDebugMode" @keydown.stop.enter="toggleIsDebugMode")
+          input(type="checkbox" v-model="isDebugMode")
+          span Debug Mode
+    //- Moderator Actions
+    .row(v-if="isModerator")
+      .button-wrap
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
         ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")

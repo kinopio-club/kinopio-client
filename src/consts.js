@@ -43,7 +43,6 @@ export default {
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards', 'lists', 'lines'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
-  itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
   lineInfoOffset: 11,
   listPadding: 8,
