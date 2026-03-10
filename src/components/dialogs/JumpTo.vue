@@ -4,15 +4,16 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 
-import BoxList from '@/components/BoxList.vue'
-import LineList from '@/components/LineList.vue'
+import ItemList from '@/components/ItemList.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
 
@@ -40,7 +41,6 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     updateSize()
-    updateDetailsOpen()
   }
 })
 
@@ -58,19 +58,6 @@ const updateSize = async () => {
   const rect = element.getBoundingClientRect()
   state.size = Math.min(rect.width, maxHeight)
 }
-const updateDetailsOpen = async () => {
-  await nextTick()
-  const element = detailsElement.value
-  element.open = userStore.shouldShowMinimapJumpToList
-}
-const toggleShouldShowMinimapJumpToList = () => {
-  const element = detailsElement.value
-  const value = element.open
-  userStore.updateUser({ shouldShowMinimapJumpToList: value })
-}
-const placeholderIsVisible = computed(() => {
-  return !lines.value.length && !boxes.value.length
-})
 
 // pin dialog
 
@@ -80,27 +67,23 @@ const toggleDialogIsPinned = () => {
   globalStore.jumpToIsPinned = isPinned
 }
 
-// lines
+// items
 
-const lines = computed(() => {
-  const items = lineStore.getAllLines
-  return items
-})
-const focusLine = (line) => {
-  globalStore.updateFocusOnLineId(line.id)
+const lines = computed(() => lineStore.getAllLines)
+const boxes = computed(() => boxStore.getAllBoxes)
+const lists = computed(() => listStore.getAllLists)
+const focusItem = (item) => {
+  console.log('🐢🐢focusItem', item)
+  if (item.itemType === 'box') {
+    globalStore.updateFocusOnBoxId(item.id)
+  }
+  if (item.itemType === 'line') {
+    globalStore.updateFocusOnLineId(item.id)
+  }
+  // if (item.itemType === 'list') {
+  //   globalStore.updateFocusOnListId(list.id)
+  // }
 }
-
-// boxes
-
-const boxes = computed(() => {
-  let items = boxStore.getAllBoxes
-  items = utils.sortByDistanceFromOrigin(items)
-  return items
-})
-const focusBox = (box) => {
-  globalStore.updateFocusOnBoxId(box.id)
-}
-
 </script>
 
 <template lang="pug">
@@ -122,12 +105,7 @@ dialog.narrow.jump-to.is-pinnable(
   section
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
-    section.results-section
-      LineList(:lines="lines" @selectLine="focusLine")
-      BoxList(:boxes="boxes" @selectBox="focusBox")
-      .row(v-if="placeholderIsVisible")
-        p
-          span No lines, lists, or boxes in this space yet
+    ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem")
 </template>
 
 <style lang="stylus">
