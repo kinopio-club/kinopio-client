@@ -242,11 +242,11 @@ const updatePositionInVisualViewport = () => {
     //- minimap
     .button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: state.minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
-        img.icon.minimap(src="@/assets/minimap.svg")
+        img.icon.toc(src="@/assets/toc.svg")
     //- presentation mode
     .button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
-        img.icon.settings(src="@/assets/presentation.svg")
+        img.icon.presentation(src="@/assets/presentation.svg")
       Minimap(:visible="state.minimapIsVisible")
 
 </template>
@@ -314,9 +314,8 @@ const updatePositionInVisualViewport = () => {
   .footer-button-wrap + .footer-button-wrap
     margin-left 4px
 
-  .icon.minimap
-    width 13px
-    vertical-align -1px
+  .icon.toc
+    vertical-align 1px
 
   .embed-label
     left 8px

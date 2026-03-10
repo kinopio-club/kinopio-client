@@ -51,11 +51,12 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeightFromHeader(element)
 }
 const updateSize = async () => {
+  const maxHeight = 150
   await nextTick()
   const element = rowElement.value
   if (!element) { return }
   const rect = element.getBoundingClientRect()
-  state.size = rect.width
+  state.size = Math.min(rect.width, maxHeight)
 }
 const updateDetailsOpen = async () => {
   await nextTick()
@@ -114,25 +115,19 @@ dialog.narrow.minimap.is-pinnable(
 )
   section.minimap-section.title-section
     .row.title-row(ref="rowElement")
-      span Minimap
+      span Jump To
       .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
   section
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
-  section.boxes-section.results-section
-    details(ref="detailsElement" @toggle="toggleShouldShowMinimapJumpToList")
-      summary
-        //- .row
-        span Jump to
-      section.subsection
-        LineList(:lines="lines" @selectLine="focusLine")
-        BoxList(:boxes="boxes" @selectBox="focusBox")
-        .row(v-if="placeholderIsVisible")
-          p
-            img.icon.box-icon(src="@/assets/box.svg")
-            span No lines or boxes in this space yet
+    section.results-section
+      LineList(:lines="lines" @selectLine="focusLine")
+      BoxList(:boxes="boxes" @selectBox="focusBox")
+      .row(v-if="placeholderIsVisible")
+        p
+          span No lines, lists, or boxes in this space yet
 </template>
 
 <style lang="stylus">
@@ -148,12 +143,6 @@ dialog.minimap
     transform rotate(180deg)
   section.minimap-section
     user-select none
-  section.boxes-section
-    user-select none
-  .icon.box-icon
-    border-radius 0
-  summary
-    text-align left
-  .line-list + .box-list
-    margin-top 10px
+  section.results-section
+    max-height 20dvh
 </style>
