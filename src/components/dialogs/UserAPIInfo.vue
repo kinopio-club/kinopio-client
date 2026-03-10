@@ -43,6 +43,15 @@ const updateDialogHeight = async () => {
 }
 
 const userId = computed(() => userStore.id)
+const censor = (value) => {
+  const uncensoredCharacters = 5
+  const uncensored = value.slice(-uncensoredCharacters)
+  const toСensor = value.slice(0, -uncensoredCharacters)
+  const censored = toСensor.replace(/[^-]/g, 'x') // replace every character that isn't `-`
+  return censored + uncensored
+}
+const censoredAppApiKey = computed(() => censor(userStore.apiKey))
+
 const copy = async (event, type) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
@@ -75,23 +84,28 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
 
   //- user id
   section
-    p User Id
+    span User Id
     .row
       code.badge.secondary {{ userId }}
     .row
-      .button-wrap
-        button(@click.left="copy($event, 'userId')")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy UserId
+      button(@click.left="copy($event, 'userId')")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy UserId
+
   //- api key
   section
-    .row
-      p
+    .row.title-row
+      span
         img.icon.key(src="@/assets/key.svg")
         span API Key
+      button.small-button
+        img.icon.refresh(src="@/assets/refresh.svg")
+        span Regenerate
+    .row
+      code.badge.secondary {{ censoredAppApiKey }}
     .row
       .badge.danger.copy-api-keys
-        .button-wrap
+        .row
           button(@click.left="copy($event, 'apiKey')")
             img.icon.copy(src="@/assets/copy.svg")
             span Copy API Key
