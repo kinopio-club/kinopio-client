@@ -4,15 +4,16 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 
-import BoxList from '@/components/BoxList.vue'
-import LineList from '@/components/LineList.vue'
+import ItemList from '@/components/ItemList.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
 
@@ -40,7 +41,6 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     updateSize()
-    updateDetailsOpen()
   }
 })
 
@@ -51,59 +51,43 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeightFromHeader(element)
 }
 const updateSize = async () => {
+  const maxHeight = 150
   await nextTick()
   const element = rowElement.value
   if (!element) { return }
   const rect = element.getBoundingClientRect()
-  state.size = rect.width
+  state.size = Math.min(rect.width, maxHeight)
 }
-const updateDetailsOpen = async () => {
-  await nextTick()
-  const element = detailsElement.value
-  element.open = userStore.shouldShowMinimapJumpToList
-}
-const toggleShouldShowMinimapJumpToList = () => {
-  const element = detailsElement.value
-  const value = element.open
-  userStore.updateUser({ shouldShowMinimapJumpToList: value })
-}
-const placeholderIsVisible = computed(() => {
-  return !lines.value.length && !boxes.value.length
-})
 
 // pin dialog
 
-const dialogIsPinned = computed(() => globalStore.minimapIsPinned)
+const dialogIsPinned = computed(() => globalStore.jumpToIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  globalStore.minimapIsPinned = isPinned
+  globalStore.jumpToIsPinned = isPinned
 }
 
-// lines
+// items
 
-const lines = computed(() => {
-  const items = lineStore.getAllLines
-  return items
-})
-const focusLine = (line) => {
-  globalStore.updateFocusOnLineId(line.id)
+const lines = computed(() => lineStore.getAllLines)
+const boxes = computed(() => boxStore.getAllBoxes)
+const lists = computed(() => listStore.getAllLists)
+const focusItem = (item) => {
+  console.log('🐢🐢focusItem', item)
+  if (item.itemType === 'box') {
+    globalStore.updateFocusOnBoxId(item.id)
+  }
+  if (item.itemType === 'line') {
+    globalStore.updateFocusOnLineId(item.id)
+  }
+  if (item.itemType === 'list') {
+    globalStore.updateFocusOnListId(item.id)
+  }
 }
-
-// boxes
-
-const boxes = computed(() => {
-  let items = boxStore.getAllBoxes
-  items = utils.sortByDistanceFromOrigin(items)
-  return items
-})
-const focusBox = (box) => {
-  globalStore.updateFocusOnBoxId(box.id)
-}
-
 </script>
 
 <template lang="pug">
-dialog.narrow.minimap.is-pinnable(
+dialog.narrow.jump-to.is-pinnable(
   v-if="props.visible"
   :open="props.visible"
   @click.left.stop
@@ -112,48 +96,33 @@ dialog.narrow.minimap.is-pinnable(
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section.minimap-section.title-section
+  section.jump-to-section.title-section
     .row.title-row(ref="rowElement")
-      span Minimap
+      span Jump To
       .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
   section
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
-  section.boxes-section.results-section
-    details(ref="detailsElement" @toggle="toggleShouldShowMinimapJumpToList")
-      summary
-        //- .row
-        span Jump to
-      section.subsection
-        LineList(:lines="lines" @selectLine="focusLine")
-        BoxList(:boxes="boxes" @selectBox="focusBox")
-        .row(v-if="placeholderIsVisible")
-          p
-            img.icon.box-icon(src="@/assets/box.svg")
-            span No lines or boxes in this space yet
+  section.results-section
+    ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem")
 </template>
 
 <style lang="stylus">
-dialog.minimap
+dialog.jump-to
   overflow auto
   right 8px
   bottom 28px
   top initial
   left initial
+  text-align left
   &.is-pinned
     right 0
   .right-pin
     transform rotate(180deg)
-  section.minimap-section
+  section.jump-to-section
     user-select none
-  section.boxes-section
-    user-select none
-  .icon.box-icon
-    border-radius 0
-  summary
-    text-align left
-  .line-list + .box-list
-    margin-top 10px
+  section.results-section
+    max-height 20dvh
 </style>

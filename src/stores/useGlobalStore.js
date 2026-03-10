@@ -176,6 +176,7 @@ export const useGlobalStore = defineStore('global', {
     preventDraggedLineFromShowingDetails: false,
 
     // lists
+    focusOnListId: '',
     listDetailsIsVisibleForListId: '',
     multipleListsSelectedIds: [],
     remoteListDetailsVisible: [],
@@ -247,7 +248,7 @@ export const useGlobalStore = defineStore('global', {
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
-    minimapIsPinned: false,
+    jumpToIsPinned: false,
     searchIsPinned: false,
     userSettingsIsPinned: false,
 
@@ -517,7 +518,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateUrlPreview (cardId) {},
     triggerUpdateUrlPreviewComplete (cardId) {},
     triggerRemovedIsVisible () {},
-    triggerMinimapIsVisible () {},
+    triggerJumpToIsVisible () {},
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},
     triggerUpdateLockedItemButtonPositionCardId (cardId) {},
@@ -1533,6 +1534,12 @@ export const useGlobalStore = defineStore('global', {
       this.focusOnLineId = lineId
       if (!lineId) { return }
       const element = utils.lineElementFromId(lineId)
+      this.scrollElementIntoView({ element, positionIsCenter: true })
+    },
+    updateFocusOnListId (listId) {
+      this.focusOnListId = listId
+      if (!listId) { return }
+      const element = utils.listElementFromId(listId)
       this.scrollElementIntoView({ element, positionIsCenter: true })
     },
     checkIfItemShouldIncreasePageSize (item) {

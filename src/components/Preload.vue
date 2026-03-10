@@ -148,6 +148,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/group.svg")
     img.icon(src="@/assets/qr-code.svg")
     img.icon(src="@/assets/time.svg")
+    img.icon(src="@/assets/toc.svg")
     img.icon(src="@/assets/today.svg")
     img.icon(src="@/assets/transparent.svg")
     img.icon(src="@/assets/unchecked.svg")

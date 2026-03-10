@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
@@ -9,6 +10,7 @@ import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -24,6 +26,9 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     state.selectedCategory = 'All'
+    globalStore.shouldExplicitlyHideFooter = true
+  } else {
+    globalStore.shouldExplicitlyHideFooter = false
   }
 })
 
@@ -96,7 +101,7 @@ const toggleChecked = (name) => {
 </script>
 
 <template lang="pug">
-dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" @click="closeDialogs" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" @click="closeDialogs" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row
       p Keyboard Shortcuts
@@ -186,6 +191,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.toc(src="@/assets/toc.svg")
+            span Toggle Jump To
+          .badge.keyboard-shortcut J
+      article
+        .row
+          .badge.title
             img.icon.presentation(src="@/assets/presentation.svg")
             span Presentation Mode
           .badge.keyboard-shortcut P
@@ -207,12 +218,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon.magnifying-glass(src="@/assets/magnifying-glass-negative.svg")
             span Toggle Max Zoom Out
           .badge.keyboard-shortcut Z
-      article
-        .row
-          .badge.title
-            img.icon.minimap(src="@/assets/minimap.svg")
-            span Toggle Minimap
-          .badge.keyboard-shortcut M
 
     //- Edit
     template(v-if="categoryIsVisible('Edit')")
@@ -375,27 +380,27 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           span.badge.keyboard-shortcut Shift-Click
           span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
 
-    //- Search and Jump
-    template(v-if="categoryIsVisible('Search and Jump')")
+    //- Search
+    template(v-if="categoryIsVisible('Search')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('Search and Jump') }") Search and Jump
+        .badge.info(:style="{ 'background-color': categoryColor('Search') }") Search
       article
         .row
           .badge.title
             img.icon(src="@/assets/search.svg")
-            span Search/Jump-to Spaces
+            span Search Spaces
           .badge.keyboard-shortcut {{meta}}–K
       article
         .row
           .badge.title
             img.icon(src="@/assets/search.svg")
-            span Search/Jump-to Cards in Current Space
+            span Search Cards in Current Space
           .badge.keyboard-shortcut {{meta}}–F
       article
         .row
           .badge.title
             img.icon(src="@/assets/search.svg")
-            span Search/Jump-to Cards in All Spaces
+            span Search Cards in All Spaces
           .badge.keyboard-shortcut {{meta}}–Shift–F
 
 </template>
@@ -474,7 +479,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
   .inbox-icon
     margin 0
 
-  .icon.minimap,
   .icon.presentation
     width 12px
     vertical-align -1px
