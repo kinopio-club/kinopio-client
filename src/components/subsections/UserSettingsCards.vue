@@ -13,9 +13,15 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
+const customInputElement = ref(null)
+
 const props = defineProps({
   visible: Boolean,
   parentIsUserSettings: Boolean
+})
+
+const state = reactive({
+  customIsVisible: false
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
@@ -41,39 +47,74 @@ const optionKeyShortcut = computed(() => {
 const cardWrapWidth = computed(() => userStore.cardSettingsCardWrapWidth)
 const cardWrapWidthIsNormal = computed(() => cardWrapWidth.value === consts.normalCardWrapWidth)
 const cardWrapWidthIsWide = computed(() => cardWrapWidth.value === consts.wideCardWrapWidth)
-const updateCardWrapWidthIsWide = (isWide) => {
-  let value = consts.normalCardWrapWidth
-  if (isWide) {
-    value = consts.wideCardWrapWidth
-  }
+const updateCardWrapWidth = (value) => {
   userStore.updateUser({ cardSettingsCardWrapWidth: value })
-  // server migration: cardSettingsCardWrapWidth -> cardSettingsCardWrapWidth
 }
+
+// custom card width
+
+const focusCustomInput = () => {
+  const element = customInputElement.value
+  if (!element) { return }
+  element.focus()
+  element.setSelectionRange(0, 99999)
+}
+const customValue = computed({
+  get () {
+    return cardWrapWidth.value
+  },
+  set (newValue) {
+    newValue = parseInt(newValue)
+    newValue = newValue || consts.normalCardWrapWidth
+    updateCardWrapWidth(newValue)
+  }
+})
+
 </script>
 
 <template lang="pug">
 .cards-settings(v-if="visible")
+  //- shift-enter
   section
-    p Shift-Enter
+    .row
+      span Shift-Enter
     .segmented-buttons
       button(@click="updateShiftEnter(true)" :class="{ active: shiftEnterShouldAddChildCard }")
         span Child Card
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
-    .row.keyboard-shortcut-row
+    .row
       span {{optionKey}}-Enter
       .badge.keyboard-shortcut {{optionKeyShortcut}}
 
+  //- wrap width
   section
-    p Card and List Wrap Width
+    .row
+      span Card and List Wrap Width
     .segmented-buttons
-      button(@click="updateCardWrapWidthIsWide(false)" :class="{ active: !cardWrapWidthIsWide }")
+      button(@click="updateCardWrapWidth(consts.normalCardWrapWidth, true)" :class="{ active: cardWrapWidthIsNormal }")
         span Normal
-      button(@click="updateCardWrapWidthIsWide(true)" :class="{ active: cardWrapWidthIsWide }")
+      button(@click="updateCardWrapWidth(consts.wideCardWrapWidth, true)" :class="{ active: cardWrapWidthIsWide }")
         span Wide
+    //- input
+    .row
+      span.badge.secondary.input-badge
+        input(
+          type="number"
+          :placeholder="200"
+          v-model="customValue"
+          ref="customInputElement"
+          @keyup.space.prevent
+          @keyup.backspace.stop
+          @keyup.delete.stop
+          @keyup.clear.stop
+        )
+        span px
+
+  //- new spaces
   section(v-if="parentIsUserSettings")
     .row
-      p New Spaces
+      span New Spaces
     UserSettingsNewSpaces
 </template>
 
@@ -87,8 +128,13 @@ const updateCardWrapWidthIsWide = (isWide) => {
     border-radius var(--small-entity-radius)
     display inline-block
     vertical-align -3px
-  .keyboard-shortcut-row
+  .segmented-buttons + .row
     margin-top 10px
     .badge
       margin-left 6px
+    .input-badge
+      margin-left 0
+      input
+        width 55px
+        margin-right 4px
 </style>
