@@ -8,7 +8,7 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
-import UserDeveloperInfo from '@/components/dialogs/UserDeveloperInfo.vue'
+import UserAPIInfo from '@/components/dialogs/UserAPIInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
@@ -55,7 +55,7 @@ const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
   deleteAllConfirmationVisible: false,
-  userDeveloperInfoIsVisible: false,
+  userAPIInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
   loading: {
     deleteUserPermanent: false
@@ -71,7 +71,7 @@ const closeDialogs = () => {
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
-  state.userDeveloperInfoIsVisible = false
+  state.userAPIInfoIsVisible = false
   state.moderatorActionsSettingsIsVisible = false
 }
 
@@ -107,11 +107,11 @@ const toggleThemeSettingsIsVisible = () => {
   closeConfirmations()
   state.themeSettingsIsVisible = !isVisible
 }
-const toggleUserDeveloperInfoIsVisible = () => {
-  const isVisible = state.userDeveloperInfoIsVisible
+const toggleUserAPIInfoIsVisible = () => {
+  const isVisible = state.userAPIInfoIsVisible
   closeDialogs()
   closeConfirmations()
-  state.userDeveloperInfoIsVisible = !isVisible
+  state.userAPIInfoIsVisible = !isVisible
 }
 const toggleModeratorActionsSettingsIsVisible = () => {
   const isVisible = state.moderatorActionsSettingsIsVisible
@@ -167,12 +167,12 @@ const deleteUserPermanent = async () => {
           span(v-else) Billing
         UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
     .row
-      //- Developer Info
+      //- API/Developer Info
       .button-wrap
-        button(@click.left.stop="toggleUserDeveloperInfoIsVisible" :class="{active: state.userDeveloperInfoIsVisible}")
+        button(@click.left.stop="toggleUserAPIInfoIsVisible" :class="{active: state.userAPIInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
-          span Developer
-        UserDeveloperInfo(:visible="state.userDeveloperInfoIsVisible")
+          span API
+        UserAPIInfo(:visible="state.userAPIInfoIsVisible")
       //- Moderator Actions
       .button-wrap(v-if="isModerator")
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
