@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -25,8 +26,9 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null
-  // : false
+  dialogHeight: null,
+  regenInfoIsVisible: false,
+  isLoading: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -50,12 +52,12 @@ const censor = (value) => {
   const censored = toСensor.replace(/[^-]/g, 'x') // replace every character that isn't `-`
   return censored + uncensored
 }
-const censoredAppApiKey = computed(() => censor(userStore.apiKey))
+const censoredAppApiKey = computed(() => censor(userStore.apiKey)) // TODO use appApiKey
 
 const copy = async (event, type) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
-  const apiKey = userStore.apiKey
+  const apiKey = userStore.apiKey // TODO use appApiKey
   let text = userId.value
   if (type === 'apiKey') {
     text = apiKey
@@ -69,13 +71,32 @@ const copy = async (event, type) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
+
+// refresh key
+
+const toggleRegenInfoIsVisible = () => {
+  state.regenInfoIsVisible = !state.regenInfoIsVisible
+}
+const refreshAppApiKey = () => {
+  try {
+    state.isLoading = true
+    state.isError = false
+    state.regenInfoIsVisible = false
+    console.log('🐢🐢🐢🐢 TODO fetch here')
+  } catch (error) {
+    console.error('🚒 refreshAppApiKey', error)
+    state.isError = true
+  }
+  // state.isLoading = false
+}
+
 </script>
 
 <template lang="pug">
 dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
-      span API
+      span API Access
       .button-wrap
         a(href="https://help.kinopio.club/api")
           button.small-button
@@ -97,25 +118,46 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
     .row.title-row
       span
         img.icon.key(src="@/assets/key.svg")
-        span API Key
-      button.small-button
+        span App API Key
+      button.small-button(@click="toggleRegenInfoIsVisible" :class="{ active: state.regenInfoIsVisible }" title="Regenerate Key")
         img.icon.refresh(src="@/assets/refresh.svg")
-        span Regenerate
-    .row
-      code.badge.secondary {{ censoredAppApiKey }}
-    .row
-      .badge.danger.copy-api-keys
+
+    //- regenerate info
+    .row(v-if="state.regenInfoIsVisible")
+      .badge.danger.api-keys-info
         .row
-          button(@click.left="copy($event, 'apiKey')")
+          button(@click="refreshAppApiKey" :disabled="state.isLoading")
+            img.icon.refresh(src="@/assets/refresh.svg")
+            span Regenerate Key
+        .row
+          span This will disconnect your Kinopio account from any third party apps.
+    //- key and loader
+    .row
+      code.badge.secondary
+        template(v-if="state.isLoading")
+          Loader(:visible="true")
+          span Regenerating Key…
+        template(v-else)
+          span {{ censoredAppApiKey }}
+    //- error handling
+    .badge.danger(v-if="state.isError")
+      span something went wrong
+    //- copy key info
+    .row
+      .badge.danger.api-keys-info
+        .row
+          button(@click.left="copy($event, 'apiKey')" :disabled="state.isLoading")
             img.icon.copy(src="@/assets/copy.svg")
-            span Copy API Key
+            span Copy Key
         p Anyone with your key can read, edit, and remove your cards and spaces. So keep it private.
 </template>
 
 <style lang="stylus">
 dialog.user-developer-info
   overflow auto
-  .copy-api-keys
+  .api-keys-info
     padding-top 4px
     padding-bottom 4px
+  .loader
+    vertical-align -2px
 </style>
