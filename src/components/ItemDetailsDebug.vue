@@ -16,7 +16,7 @@ const props = defineProps({
 })
 
 const visible = computed(() => userStore.isDebugMode)
-const isDevelopment = computed(() => consts.isDevelopment)
+const isDevelopment = computed(() => consts.isDevelopment())
 </script>
 
 <template lang="pug">
