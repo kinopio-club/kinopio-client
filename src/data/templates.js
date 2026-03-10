@@ -56,6 +56,11 @@ export default {
         name: 'Calendar',
         id: 'fqSeePL0oeocZfcg6y1w5',
         categoryId: 1
+      },
+      {
+        name: '2×2 Matrix',
+        id: '7g5WGAAgha0ovyOJIXC1Q',
+        categoryId: 2
       }
 
       // {
