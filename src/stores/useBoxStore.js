@@ -544,7 +544,9 @@ export const useBoxStore = defineStore('boxes', {
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       const outsideThreshold = 20
-      const targetBoxes = this.getBoxesSelectableInViewport()
+      let targetBoxes = this.getBoxesSelectableInViewport()
+      const itemIds = items.map(item => item.id)
+      targetBoxes = targetBoxes.filter(box => !itemIds.includes(box.id)) // exclude selected boxes from targetBoxes
       const prevSnapGuides = globalStore.snapGuides
       let snapGuides = []
       if (isChildren) {
