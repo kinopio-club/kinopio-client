@@ -873,7 +873,7 @@ export const useSpaceStore = defineStore('space', {
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)
-      console.info('🙈 updated space preview image', response?.urls)
+      console.info('🙈 space preview image added to queue')
     }, 10 * 1000), // 10 seconds
     updateUserLastSpaceId () {
       const userStore = useUserStore()
