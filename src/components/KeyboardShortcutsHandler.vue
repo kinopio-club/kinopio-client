@@ -252,6 +252,8 @@ const handleShortcutsOnKeyUp = (event) => {
     userStore.cycleDrawingBrushSize()
   // -
   } else if ((key === '-' || key === '–') && isSpaceScope) {
+    const isMeta = event.metaKey || event.ctrlKey
+    if (isMeta) { return }
     if (!canEditSpace) { return }
     const line = { y: currentCursorPosition.y }
     lineStore.createLine(line)
