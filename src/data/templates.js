@@ -61,13 +61,17 @@ export default {
         name: '2×2 Matrix',
         id: '7g5WGAAgha0ovyOJIXC1Q',
         categoryId: 2
+      },
+      {
+        name: 'Business Plan',
+        id: '286llONI_DEmGoIa1sCtj',
+        categoryId: 2
+      },
+      {
+        name: 'Time Tracking',
+        id: '-ou2kHxO40-rDFZymIn1A',
+        categoryId: 1
       }
-
-      // {
-      //   temp: true,
-      //   id: 'eodGGinm01LcP2hfTJ4wi',
-      //   categoryId: 3
-      // }
     ]
   },
   developmentSpaces () {
