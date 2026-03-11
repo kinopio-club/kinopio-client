@@ -237,7 +237,7 @@ const currentSpaceIsTemplate = computed(() => {
   return templateSpaceIds.includes(spaceStore.id)
 })
 const currentSpaceIsInbox = computed(() => spaceStore.name === 'Inbox')
-const currentSpaceIsPrivate = computed(() => spaceStore.getSpaceIsPrivate)
+const currentSpaceIsPrivateOrOpen = computed(() => spaceStore.getSpaceIsPrivate || spaceStore.getSpaceIsOpen)
 const shouldShowInExplore = computed(() => {
   if (spaceStore.getSpaceIsPrivate) { return false }
   return spaceStore.showInExplore
@@ -692,7 +692,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                     span(v-if="currentSpaceIsTemplate")
                       img.icon.templates(src="@/assets/templates.svg")
                     //- private
-                    template(v-if="currentSpaceIsPrivate")
+                    template(v-if="currentSpaceIsPrivateOrOpen")
                       PrivacyIcon(:privacy="currentSpace.privacy")
 
                 //- img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
