@@ -923,6 +923,11 @@ export default {
   denormalizeItems (normalizedItems) {
     return Object.values(normalizedItems)
   },
+  toBoolean (string) {
+    if (string === 'true') {
+      return true
+    }
+  },
 
   // items (cards or boxes)
 
@@ -1044,7 +1049,8 @@ export default {
     const element = this.cardElement(card)
     if (!element) { return }
     const cardId = card.id
-    card.shouldRender = element.dataset.shouldRender
+    card.shouldRender = this.toBoolean(element.dataset.shouldRender)
+    card.isLocked = this.toBoolean(element.dataset.isLocked)
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -1052,13 +1058,15 @@ export default {
     card.width = Math.ceil(width)
     card.height = Math.ceil(height)
     card.id = cardId
+    card.itemType = 'card'
     return card
   },
   boxElementDimensions (box) {
     if (!box) { return }
     const element = this.boxElementFromId(box.id)
     if (!element) { return }
-    box.shouldRender = element.dataset.shouldRender
+    box.shouldRender = this.toBoolean(element.dataset.shouldRender)
+    box.isLocked = this.toBoolean(element.dataset.isLocked)
     box.x = parseInt(element.dataset.x)
     box.y = parseInt(element.dataset.y)
     box.resizeWidth = parseInt(element.dataset.resizeWidth)
@@ -1067,6 +1075,7 @@ export default {
     box.height = parseInt(element.dataset.resizeHeight)
     box.infoWidth = parseInt(element.dataset.infoWidth)
     box.infoHeight = parseInt(element.dataset.infoHeight)
+    box.itemType = 'box'
     return box
   },
   listElementDimensions (list) {
@@ -1081,6 +1090,7 @@ export default {
     if (element.dataset.isCollapsed === 'true') {
       list.height = consts.listInfoHeight
     }
+    list.itemType = 'list'
     return list
   },
   clearAllCardDimensions (card) {
