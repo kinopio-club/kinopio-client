@@ -923,7 +923,7 @@ export default {
   denormalizeItems (normalizedItems) {
     return Object.values(normalizedItems)
   },
-  toBoolean (string) {
+  stringToBoolean (string) {
     if (string === 'true') {
       return true
     }
@@ -1049,8 +1049,8 @@ export default {
     const element = this.cardElement(card)
     if (!element) { return }
     const cardId = card.id
-    card.shouldRender = this.toBoolean(element.dataset.shouldRender)
-    card.isLocked = this.toBoolean(element.dataset.isLocked)
+    card.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
+    card.isLocked = this.stringToBoolean(element.dataset.isLocked)
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -1065,8 +1065,8 @@ export default {
     if (!box) { return }
     const element = this.boxElementFromId(box.id)
     if (!element) { return }
-    box.shouldRender = this.toBoolean(element.dataset.shouldRender)
-    box.isLocked = this.toBoolean(element.dataset.isLocked)
+    box.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
+    box.isLocked = this.stringToBoolean(element.dataset.isLocked)
     box.x = parseInt(element.dataset.x)
     box.y = parseInt(element.dataset.y)
     box.resizeWidth = parseInt(element.dataset.resizeWidth)
