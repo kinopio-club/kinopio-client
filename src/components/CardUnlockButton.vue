@@ -64,9 +64,10 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 // styles
 
 const positionStyles = computed(() => {
-  const buttonWidth = 36
+  const buttonWidth = 34
+  const xOffset = 2
   const width = props.card.width || props.card.resizeWidth
-  const x = props.card.x + width - buttonWidth
+  const x = props.card.x + width - buttonWidth + xOffset
   return {
     left: x + 'px',
     top: props.card.y + 'px',
@@ -116,12 +117,14 @@ const unlockCard = (event) => {
   position absolute
   button
     cursor pointer
+    width fit-content
+    padding 5px 8px
   &:hover
     .lock-icon
       opacity 1
   .lock-icon
     position absolute
-    left 5.5px
+    left 4px
     top 2px
     height 10px
     opacity 0.3

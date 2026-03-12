@@ -2476,6 +2476,7 @@ const metaContainerStyles = computed(() => {
     pointer-events all
     cursor pointer
     position relative
+    padding 8px 4px
     button
       cursor pointer
 
