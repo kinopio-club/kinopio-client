@@ -1417,6 +1417,9 @@ export default {
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15
+    if (item.itemType === 'box' && item.isLocked) {
+      item.infoWidth = item.resizeWidth
+    }
     const width = item.infoWidth || item.resizeWidth || item.width
     const rightSide = item.x + width
     let x = rightSide
