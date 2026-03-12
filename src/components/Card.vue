@@ -2363,6 +2363,7 @@ const metaContainerStyles = computed(() => {
           h3
             text-decoration line-through
         &.has-checkbox
+          width calc(100% - 32px) // - width of checkbox
           .audio
             width 132px
     .name-wrap
