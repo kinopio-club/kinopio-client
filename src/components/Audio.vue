@@ -138,13 +138,15 @@ const togglePlayPause = (event) => {
     playAudio()
   }
 }
-const playAudio = () => {
+const playAudio = async () => {
   const audio = audioElement.value
   if (state.progressPercent >= 98) {
     state.progressPercent = 0
     audio.currentTime = 0
   }
   audio.volume = 0.25
+  audio.load()
+  await nextTick()
   audio.play()
   state.isPlaying = true
   updateCurrentTime()
