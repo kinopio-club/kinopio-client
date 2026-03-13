@@ -189,7 +189,8 @@ export const useUploadStore = defineStore('upload', {
         const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({
           key,
-          type: file.type
+          type: file.type,
+          size: file.size
         })
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }

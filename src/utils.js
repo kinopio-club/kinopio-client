@@ -2589,10 +2589,11 @@ export default {
   // Upload
 
   isFileTooBig ({ file, userIsUpgraded }) {
-    const sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
-    if (file.size > sizeLimit && !userIsUpgraded) {
-      return true
+    let sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
+    if (userIsUpgraded) {
+      sizeLimit = 1024 * 1024 * consts.upgradedUploadSizeLimit // 256
     }
+    return file.size > sizeLimit
   },
   async dataFromClipboard () {
     let text, file
