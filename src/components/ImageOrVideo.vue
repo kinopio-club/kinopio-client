@@ -11,14 +11,32 @@ const globalStore = useGlobalStore()
 const videoElement = ref(null)
 const imageElement = ref(null)
 
+let unsubscribes
+
 onMounted(() => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'triggerUploadComplete') {
+        const { url, fileName } = args[0]
+        if (props.video.includes(fileName)) {
+          await nextTick()
+          videoElement.value.load()
+        }
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', updateCanvasSelectedClass)
   window.removeEventListener('touchmove', updateCanvasSelectedClass)
+  unsubscribes()
 })
 
 const emit = defineEmits(['loadSuccess'])
