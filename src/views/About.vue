@@ -171,6 +171,9 @@ onMounted(() => {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
     themeStore.restoreTheme()
   }
+  if (consts.isDevelopment()) {
+    document.title = '[DEV] Kinopio'
+  }
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'closeAllDialogs') {
