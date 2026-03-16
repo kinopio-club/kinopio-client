@@ -1,0 +1,27 @@
+# Kinopio
+
+> Kinopio is a spatial thinking canvas for connecting thoughts, ideas, and feelings using cards, connection lines, boxes, and lists. Kinopio supports collaboration, works offline, and is free for 100 cards. No sign up required.
+
+## Docs
+
+- [Help](https://kinopio.club/help)
+- [API](https://kinopio.club/help/api)
+- [Blog](https://kinopio.club/blog/)
+- [Changelog](https://kinopio.club/changelog)
+
+## Examples
+
+Kinopio is a flexible tool that can be used for whiteboarding, mind-mapping, moodboarding, research, planning, note-taking, and more.
+
+- [Project & Issue Tracker](https://kinopio.club/project-issue-tracker-p56fqtZUlNtFJ6td-uovI)
+- [Weekly Planner](https://kinopio.club/weekly-planner-tZgYERhi-QFX2LmlVNOAb)
+- [Time Tracking](https://kinopio.club/time-tracking--ou2kHxO40-rDFZymIn1A)
+- [Business Plan](https://kinopio.club/business-plan-286llONI_DEmGoIa1sCtj)
+- [Personal Dashboard](https://kinopio.club/personal-dashboard-I4x2de1LCW2P25d_21Tsy)
+- [Moodboard](https://kinopio.club/moodboard-GgDOqKvEEzTA93EYmAZrn)
+- [Roadmap](https://kinopio.club/roadmap-J4vbhO646y4296cLRQEU3)
+
+## Community
+
+- [Forum](https://kinopio.club/forum)
+- [Discord](https://kinopio.club/discord)

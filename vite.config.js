@@ -112,6 +112,7 @@ export default defineConfig(async ({ command, mode }) => {
             // Exclude exact route only
             /^\/security\.txt$/,
             /^\/robots\.txt$/,
+            /^\/llms\.txt$/,
             /^\/sitemap\.xml$/,
             /^\/changelog$/,
             /^\/roadmap$/,

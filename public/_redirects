@@ -3,6 +3,7 @@
 
 /robots.txt       /robots.txt   200
 /security.txt       /security.txt   200
+/llms.txt       /llms.txt   200
 
 # sitemap entries in vite.config.js
 
