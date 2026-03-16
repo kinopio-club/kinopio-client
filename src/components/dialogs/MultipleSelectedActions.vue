@@ -546,9 +546,9 @@ dialog.narrow.multiple-selected-actions(
     .row(v-if="cardOrBoxIsSelected")
       //- [·]
       ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
-      .segmented-buttons(v-if="multipleItemsIsSelected")
+      .segmented-buttons
         //- Connect
-        button(title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
+        button(v-if="multipleItemsIsSelected" title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
           img.connect.icon(src="@/assets/connect.svg")
         //- List
         button(title="Merge/Split Cards into List" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
