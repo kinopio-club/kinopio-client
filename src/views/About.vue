@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 
 import AboutJsonLd from '@/components/page/AboutJsonLd.vue'
 import Header from '@/components/page/Header.vue'
+import AboutSocialProof from '@/components/page/AboutSocialProof.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
@@ -80,7 +81,9 @@ AboutJsonLd
         h1.wordmark Kinopio
         video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
           source(src="@/assets/page/about/hero/vid.mp4")
-        p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
+        p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings.{{' '}}
+          a(href="https://pketh.org/organic-software.html") Built for the long-term
+          span , and designed to work the way your mind works.
         p Free for 100 cards. No sign up required.
 
         //- cta
@@ -88,7 +91,10 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
+      AboutSocialProof
+
       AboutExamples
+
       AboutFeatures
 
       section.faq
