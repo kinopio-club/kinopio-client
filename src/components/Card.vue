@@ -2152,7 +2152,7 @@ const toggleVideoIsPaused = () => {
         .name-wrap
           //- video pause
           .button-wrap.play-button-wrap.badge.secondary(
-            v-if="state.formats.video"
+            v-if="state.formats.video && canEditCard"
             @mousedown.stop
             @touchstart.stop
             @mouseup.stop.prevent
