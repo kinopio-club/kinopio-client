@@ -10,7 +10,7 @@ import Header from '@/components/page/Header.vue'
 import AboutSocialProof from '@/components/page/AboutSocialProof.vue'
 import AboutHowTo from '@/components/page/AboutHowTo.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
-import AboutFeatures from '@/components/page/AboutFeatures.vue'
+import AboutMoreFeatures from '@/components/page/AboutMoreFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
 import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
@@ -98,7 +98,7 @@ AboutJsonLd
 
       AboutExamples
 
-      AboutFeatures
+      AboutMoreFeatures
 
       section.faq
         h2 FAQ

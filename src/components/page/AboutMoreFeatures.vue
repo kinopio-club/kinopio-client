@@ -36,7 +36,7 @@ defineExpose({ vPauseAnimation })
 </script>
 
 <template lang="pug">
-section.features
+section.more-features
   .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
     .row.horizontal
       p.marquee(v-pause-animation) Featuring ● Real-Time Collaboration ● Privacy Settings ● Code Blocks and Markdown ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● Works Offline
@@ -54,7 +54,7 @@ section.features
 </template>
 
 <style lang="stylus">
-section.features
+section.more-features
   .scrolling-rows
     cursor pointer
   .horizontal
