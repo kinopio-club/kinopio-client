@@ -130,6 +130,7 @@ section.how-to(ref="parentElement")
 section.how-to
   .how-to-wrap
     background-color var(--how-to-background)
+    // dark #
     border-radius var(--page-entity-radius)
     padding 2rem
     @media(max-width 460px)

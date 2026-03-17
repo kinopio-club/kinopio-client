@@ -79,9 +79,7 @@ AboutJsonLd
   main.page(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        .row
-          h1.wordmark Kinopio
-          span For New Ideas and Hard Problems
+        h1.wordmark Kinopio
         video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
           source(src="@/assets/page/about/hero/vid.mp4")
         p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings.{{' '}}
@@ -235,7 +233,7 @@ main.page
       width 100%
       margin-bottom 2rem
       padding 0 20px
-      h1
+      > h1
         font-family var(--header-font-9)
         font-size 66px
         margin-block initial
@@ -264,10 +262,7 @@ main.page
     > section.intro
       video
         border-radius calc(var(--entity-radius) * 2)
-      .row
-        display flex
-        gap 10px
-        align-items center
+
     > section.faq
       max-width 480px
       section.subsection
