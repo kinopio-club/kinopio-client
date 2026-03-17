@@ -72,6 +72,14 @@ watch(() => props.pendingUploadDataUrl, (url) => {
     state.imageUrl = url
   }
 })
+watch(() => props.videoIsPaused, (value) => {
+  if (!props.video) { return }
+  if (value) {
+    pauseVideo()
+  } else {
+    playVideo()
+  }
+})
 watch(() => props.width, (width) => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
 })
@@ -210,7 +218,7 @@ const handleError = (event) => {
 
 <template lang="pug">
 //- Video
-video(v-if="Boolean(props.video)" autoplay loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
+video(v-if="Boolean(props.video)" :autoplay="!props.videoIsPaused" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="props.video")
 //- Image
 img.image(

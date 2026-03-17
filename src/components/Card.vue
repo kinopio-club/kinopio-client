@@ -2162,10 +2162,9 @@ const toggleVideoIsPaused = () => {
             @mouseleave="handleMouseLeavePlayButton"
             :style="{ backgroundColor: currentBackgroundColor }"
           )
-            button.small-button(:class="{ active: props.card.videoIsPaused }")
-              img.icon.stop(v-if="props.card.videoIsPaused" src="@/assets/box-filled.svg" :class="colorClasses")
-              img.icon.play(v-else src="@/assets/play.svg" :class="colorClasses")
-
+            button.small-button
+              img.icon.play(v-if="props.card.videoIsPaused" src="@/assets/play.svg" :class="colorClasses")
+              img.icon.stop(v-else src="@/assets/box-filled.svg" :class="colorClasses")
           //- [·]
           ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
