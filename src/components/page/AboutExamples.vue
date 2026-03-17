@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-// mounted pause all videos
 const parentElement = ref(null)
 
 onMounted(() => {
