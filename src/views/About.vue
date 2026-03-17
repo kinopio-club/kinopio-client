@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import AboutJsonLd from '@/components/page/AboutJsonLd.vue'
 import Header from '@/components/page/Header.vue'
 import AboutSocialProof from '@/components/page/AboutSocialProof.vue'
+import AboutHowTo from '@/components/page/AboutHowTo.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutFeatures from '@/components/page/AboutFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
@@ -92,6 +93,8 @@ AboutJsonLd
             button.success Open Kinopio
 
       AboutSocialProof
+
+      AboutHowTo
 
       AboutExamples
 
