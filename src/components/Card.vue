@@ -570,6 +570,14 @@ const nameSegmentsStyles = computed(() => {
   if (!isImageCard.value) { return }
   return { background: currentBackgroundColor.value }
 })
+const colorClasses = computed(() => {
+  const recomputeOnThemeChange = isThemeDark.value // used to force recompute
+  let color = currentBackgroundColor.value
+  if (!color) {
+    color = utils.cssVariable('secondary-background')
+  }
+  return utils.colorClasses({ backgroundColor: color })
+})
 
 // position and dimensions
 
@@ -1674,6 +1682,12 @@ const handleMouseEnterUrlButton = () => {
 const handleMouseLeaveUrlButton = () => {
   globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
+const handleMouseEnterPlayButton = () => {
+  globalStore.preventDraggedCardFromShowingDetails = true
+}
+const handleMouseLeavePlayButton = () => {
+  globalStore.preventDraggedCardFromShowingDetails = false
+}
 
 // sticky
 
@@ -2025,6 +2039,13 @@ const metaContainerStyles = computed(() => {
     top: `${props.card.y + props.card.height - 6}px`
   }
 })
+const toggleVideoIsPaused = () => {
+  const update = {
+    id: props.card.id,
+    videoIsPaused: !props.card.videoIsPaused
+  }
+  cardStore.updateCard(update)
+}
 </script>
 
 <template lang="pug">
@@ -2099,6 +2120,7 @@ const metaContainerStyles = computed(() => {
         :pendingUploadDataUrl="pendingUploadDataUrl"
         :image="state.formats.image"
         :video="state.formats.video"
+        :videoIsPaused="props.card.videoIsPaused"
         @loadSuccess="updateDimensionsAndPaths"
         :cardId="card.id"
         :width="props.card.width"
@@ -2128,6 +2150,22 @@ const metaContainerStyles = computed(() => {
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
+          //- video pause
+          .button-wrap.play-button-wrap.badge.secondary(
+            v-if="state.formats.video"
+            @mousedown.stop
+            @touchstart.stop
+            @mouseup.stop.prevent
+            @click.stop="toggleVideoIsPaused"
+            @touchend.stop="toggleVideoIsPaused"
+            @mouseenter="handleMouseEnterPlayButton"
+            @mouseleave="handleMouseLeavePlayButton"
+            :style="{ backgroundColor: currentBackgroundColor }"
+          )
+            button.small-button(:class="{ active: props.card.videoIsPaused }")
+              img.icon.stop(v-if="props.card.videoIsPaused" src="@/assets/box-filled.svg" :class="colorClasses")
+              img.icon.play(v-else src="@/assets/play.svg" :class="colorClasses")
+
           //- [·]
           ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
@@ -2366,6 +2404,25 @@ const metaContainerStyles = computed(() => {
           width calc(100% - 32px) // - width of checkbox
           .audio
             width 132px
+      > .play-button-wrap
+        flex-shrink 0
+        padding 0
+        height fit-content
+        margin-top 7px
+        margin-left 8px
+        margin-right 0
+        button
+          width 23px
+          background transparent
+          padding-left 7px
+          .icon.play
+            pointer-events none
+            vertical-align 1px
+          .icon.stop
+            pointer-events none
+            width 7px
+            margin-bottom 2px
+
     .name-wrap
       min-width 40px
     .connector,

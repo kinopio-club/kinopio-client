@@ -46,6 +46,7 @@ const props = defineProps({
   pendingUploadDataUrl: String,
   image: String,
   video: String,
+  videoIsPaused: Boolean,
   cardId: String,
   width: Number,
   height: Number
@@ -209,8 +210,8 @@ const handleError = (event) => {
 
 <template lang="pug">
 //- Video
-video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
-  source(:src="video")
+video(v-if="Boolean(props.video)" autoplay loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
+  source(:src="props.video")
 //- Image
 img.image(
   v-if="state.imageUrl"
