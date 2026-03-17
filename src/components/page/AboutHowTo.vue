@@ -7,7 +7,7 @@ import utils from '@/utils.js'
 
 // const themeStore = useThemeStore()
 
-const parentElement = ref(null)
+// const parentElement = ref(null)
 
 // onMounted(() => {
 //   resetVideos()
@@ -43,13 +43,24 @@ const parentElement = ref(null)
 </script>
 
 <template lang="pug">
-section.how-to(ref="parentElement")
-  h2 Turn Information into Knowledge
+section.how-to
+  //- (ref="parentElement")
+  h2 Bend Information into Knowledge
   .how-to-wrap
     //- (:class="colorClasses")
     .row
-      .side.left 11111111111111 1111111111111111111111 11111111111111111111 111111111111111111111 11111111111
-      .side.right 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+      .side.left
+        h3 Headline snappy for cards
+        p 11111111111111111111 111111111111111111111 11111111111
+      .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+
+    .row
+      .side.left
+        h3 Headline snappy for cards
+        p 11111111111111111111 111111111111111111111 11111111111
+      .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+
+    //- TODO help site link
 
   //- .examples-wrap
   //-   .row
@@ -139,14 +150,19 @@ section.how-to
       display flex
       flex-wrap wrap
       justify-content space-between
-      // gap 6px 0
       // align-items center
       // margin-bottom 20px
-      .side
+      // .side
+      //   max-width 50%
+      // 40 / 60??
+      .left
         max-width 50%
-        // .left
-        // .right
-
+      .right
+        max-width 50%
+    .row + .row
+      margin-top 20px
+  h3
+    margin-top 0
   img,
   video
     border-radius calc(var(--entity-radius) * 2)

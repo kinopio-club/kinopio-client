@@ -13,7 +13,6 @@ import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/page/AboutMoreFeatures.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
-import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -69,7 +68,6 @@ const logSystemThemeChange = (event) => {
 const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
-
 </script>
 
 <template lang="pug">
@@ -102,8 +100,6 @@ AboutJsonLd
 
       section.faq
         h2 FAQ
-
-        WhoMakesKinopio(title="Who makes Kinopio")
 
         details
           summary How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?
@@ -201,9 +197,20 @@ AboutJsonLd
         .button-wrap
           router-link(to="/app")
             button.success Open Kinopio
-        p I hope you enjoy using Kinopio and find it invaluable,
-        img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
 
+      section.who-makes-this
+        p Hi I'm{{' '}}
+          a(href="https://pketh.org/about") Piri
+          span , a designer, engineer, and tool-maker. I started Kinopio in 2018 to help people{{' '}}
+          a(href="https://pketh.org/dream-of-being-understood.html") understand each other
+          span , and themselves.
+        p If you're curious, I wrote{{' '}}
+          a(href="https://pketh.org/how-kinopio-is-made.html")
+            span How Kinopio is Made
+          span . I hope you enjoy using Kinopio and find it invaluable,
+        img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
+        .row
+          a(href="mailto:hi@kinopio.club") hi@kinopio.club
       FooterSitemap
   Footer
 </template>
