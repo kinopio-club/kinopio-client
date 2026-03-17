@@ -1,11 +1,21 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-// mounted pause all videos
+// import { useThemeStore } from '@/stores/useThemeStore'
+
+import utils from '@/utils.js'
+
+// const themeStore = useThemeStore()
+
 const parentElement = ref(null)
 
 // onMounted(() => {
 //   resetVideos()
+// })
+
+// const colorClasses = computed(() => {
+//   const colorClass = utils.colorClasses({ backgroundColorIsDark: themeStore.getIsThemeDark })
+//   return [colorClass]
 // })
 
 // const state = reactive({
@@ -36,6 +46,7 @@ const parentElement = ref(null)
 section.how-to(ref="parentElement")
   h2 Turn Information into Knowledge
   .how-to-wrap
+    //- (:class="colorClasses")
     .row
       .side.left 11111111111111 1111111111111111111111 11111111111111111111 111111111111111111111 11111111111
       .side.right 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
@@ -118,7 +129,8 @@ section.how-to(ref="parentElement")
 
 section.how-to
   .how-to-wrap
-    background-color #701f39
+    background-color var(--how-to-background)
+    // dark #
     border-radius var(--page-entity-radius)
     padding 2rem
     @media(max-width 460px)
@@ -132,6 +144,8 @@ section.how-to
       // margin-bottom 20px
       .side
         max-width 50%
+        // .left
+        // .right
 
   img,
   video
