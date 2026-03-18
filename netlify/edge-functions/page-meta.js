@@ -84,13 +84,13 @@ const pageJsonLD = (context, space) => {
 
 // invites
 
-const urlIsSpaceInvite = (url) => {
-  console.log('🌱🌱🌱🌱🌱🌱', url.pathname, url)
-  return url.pathname === '/space/invite'
-}
-const urlIsGroupInvite = (url) => {
-  return url.pathname === '/group/invite'
-}
+// const urlIsSpaceInvite = (url) => {
+//   console.log('🌱🌱🌱🌱🌱🌱', url.pathname, url)
+//   return
+// }
+// const urlIsGroupInvite = (url) => {
+//   return url.pathname === '/group/invite'
+// }
 const nameFromUrl = (url) => {
   return url.searchParams.get('name') || ''
 }
@@ -100,11 +100,11 @@ export default async (request, context) => {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
     url = new URL(url)
-    const requestIsFontFile = url.pathname.startsWidth('/fonts/')
+    const requestIsFontFile = url.pathname.startsWith('/fonts/')
     if (requestIsFontFile) { return }
     console.info('🕊️ edge function request', url)
-    const isGroupInvite = urlIsGroupInvite(url)
-    const isSpaceInvite = urlIsSpaceInvite(url)
+    const isGroupInvite = url.pathname.startsWith('/group/invite/')
+    const isSpaceInvite = url.pathname.startsWith('/space/invite/')
     const name = nameFromUrl(url)
     // group invite url
     console.log('🌱🌱🌱🌱', isGroupInvite, isSpaceInvite)
