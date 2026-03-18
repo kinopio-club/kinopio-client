@@ -107,9 +107,13 @@ export default async (request, context) => {
     if (isSpaceInvite) {
       const spaceId = spaceIdFromString(url.pathname)
       const space = await spacePublicMeta(spaceId)
+      let inviteLabel = '[Invite]'
+      if (url.searchParams.get('readOnlyKey')) {
+        inviteLabel = '[Read Only Invite]'
+      }
       return rewriteIndexHtml({
         context,
-        title: `[Invite] ${pageTitle(space)}`,
+        title: `${inviteLabel} ${pageTitle(space)}`,
         previewImage: space.previewImage,
         description: inviteDescription
       })
