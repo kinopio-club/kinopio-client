@@ -34,7 +34,7 @@ const spacePublicMeta = async (context, spaceId) => {
     const url = `${apiHost}/space/${spaceId}/public-meta`
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
     const space = await normalizeResponse(response)
-    console.log('❤️❤️❤️❤️ spacePublicMeta', spaceId, apiHost, space)
+    console.log('❤️❤️❤️❤️ spacePublicMeta', spaceId, apiHost, url, space, response)
 
     return space
   } catch (error) {
