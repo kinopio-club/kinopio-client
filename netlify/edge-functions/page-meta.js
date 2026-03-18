@@ -137,18 +137,17 @@ export default async (request, context) => {
       return
     }
     const space = await spacePublicMeta(context, spaceId)
-    // public space
-    if (space) {
-      const title = pageTitle(context, space)
-      const description = space.description
-      const previewImage = space.previewImage
-      const jsonLD = pageJsonLD(context, space)
-      const canonicalUrl = siteHost + url.pathname
-      return rewriteIndexHtml({ context, title, description, previewImage, jsonLD, canonicalUrl })
-    // private space
-    } else {
-      return rewriteIndexHtml({ context, description: privateSpaceDescription })
-    }
+    // if (space) {
+    const title = pageTitle(context, space)
+    const description = space.description || privateSpaceDescription
+    const previewImage = space.previewImage
+    const jsonLD = pageJsonLD(context, space)
+    const canonicalUrl = siteHost + url.pathname
+    return rewriteIndexHtml({ context, title, description, previewImage, jsonLD, canonicalUrl })
+    // // private space
+    // } else {
+    //   return rewriteIndexHtml({ context, description: privateSpaceDescription })
+    // }
   } catch (error) {
     console.error('🚑 pageMeta, 👻 skipped', error)
   }
