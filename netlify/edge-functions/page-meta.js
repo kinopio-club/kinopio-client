@@ -99,7 +99,7 @@ export default async (request, context) => {
   try {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
-    const requestIsFontFile = url.pathname.startsWidth('/fonts/')
+    const requestIsFontFile = url.pathname.startsWith('/fonts/')
     if (requestIsFontFile) { return }
     console.info('🕊️ edge function request', url)
     url = new URL(url)
