@@ -5,7 +5,7 @@ const siteHost = 'https://kinopio.club'
 const timeout = 5000 // 5s
 const inviteDescription = 'Work on shared spaces together'
 
-// utils
+// space
 
 const spaceIdFromString = (string) => {
   const uuidLength = 21
@@ -15,9 +15,6 @@ const spaceIdFromString = (string) => {
   console.info('🌷 spaceId', id)
   return id
 }
-
-// space
-
 const normalizeResponse = async (response) => {
   const success = [200, 201, 202, 204]
   if (success.includes(response.status)) {
