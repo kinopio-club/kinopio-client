@@ -12,7 +12,6 @@ const spaceIdFromString = (string) => {
   const id = string.substring(string.length - uuidLength)
   const idIsInvalid = id.includes('/') || id.includes('.') || id.length !== uuidLength
   if (idIsInvalid) { return }
-  console.info('🌷 spaceId', id)
   return id
 }
 const normalizeResponse = async (response) => {
@@ -29,8 +28,6 @@ const spacePublicMeta = async (spaceId) => {
     const url = `${apiHost}/space/${spaceId}/public-meta`
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
     const space = await normalizeResponse(response)
-    console.log('❤️❤️❤️❤️ spacePublicMeta', spaceId, apiHost, url, space, response)
-
     return space
   } catch (error) {
     console.warn('🚑 spacePublicMeta', error)
@@ -94,12 +91,11 @@ export default async (request, context) => {
     url = new URL(url)
     const requestIsFontFile = url.pathname.startsWith('/fonts/')
     if (requestIsFontFile) { return }
-    console.info('🕊️ edge function request', url)
+    console.info('🕊️ edge function request', url.href)
     const isGroupInvite = url.pathname.startsWith('/group/invite/')
     const isSpaceInvite = url.pathname.startsWith('/space/invite/')
     const name = nameFromUrl(url)
     // group invite url
-    console.log('🌱🌱🌱🌱', isGroupInvite, isSpaceInvite)
     if (isGroupInvite) {
       const title = `[Group Invite] ${name}`
       return rewriteIndexHtml({ context, title, description: inviteDescription })
@@ -108,7 +104,6 @@ export default async (request, context) => {
     if (isSpaceInvite) {
       const spaceId = spaceIdFromString(url.pathname)
       const space = await spacePublicMeta(spaceId)
-      console.log('🫐🫐🫐🫐🫐', url.pathname, space)
       return rewriteIndexHtml({
         context,
         title: `[Invite] ${pageTitle(space)}`,
@@ -118,9 +113,8 @@ export default async (request, context) => {
     }
     // space url
     const spaceId = spaceIdFromString(url.pathname)
-    console.log('💋💋💋💋 is space url', spaceId)
     if (!spaceId) {
-      console.info('👻 edge function skipped')
+      console.info('👻 edge function skipped', url.href)
       return
     }
     const space = await spacePublicMeta(spaceId)
