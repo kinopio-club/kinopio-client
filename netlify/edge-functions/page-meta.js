@@ -84,7 +84,8 @@ const pageJsonLD = (context, space) => {
 // invites
 
 const urlIsSpaceInvite = (url) => {
-  return url.pathname === '/invite'
+  console.log('🌱🌱🌱🌱🌱🌱', url.pathname, url)
+  return url.pathname === '/space/invite'
 }
 const urlIsGroupInvite = (url) => {
   return url.pathname === '/group/invite'
@@ -114,7 +115,14 @@ export default async (request, context) => {
       return rewriteIndexHtml({ context, title })
     }
     // space url
-    const spaceId = spaceIdFromUrl(url)
+    let spaceId
+    if (isGroupInvite || isSpaceInvite) {
+      spaceId = spaceIdFromUrl(url)
+      console.log('💋💋💋💋', url, spaceId)
+    } else {
+      spaceId = spaceIdFromUrl(url)
+    }
+
     if (!spaceId) {
       console.info('👻 edge function skipped')
       return
