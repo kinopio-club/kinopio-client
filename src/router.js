@@ -155,7 +155,7 @@ const router = {
         const groupId = to.params.groupId
         const collaboratorKey = to.query.collaboratorKey
         const group = await apiStore.getGroupPublicMeta(groupId)
-        console.log('🫐🫐🫐group invite', groupId, collaboratorKey, group)
+        console.log('🫐🫐🫐🫐🫐group invite', groupId, collaboratorKey, group)
         globalStore.groupToJoinOnLoad = { groupId, collaboratorKey, group }
         globalStore.shouldNotifyIsJoiningGroup = true
         next()
