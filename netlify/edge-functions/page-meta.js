@@ -85,19 +85,11 @@ const pageJsonLD = (space) => {
   return jsonLD
 }
 
-// invites
-
-// const urlIsSpaceInvite = (url) => {
-//   console.log('🌱🌱🌱🌱🌱🌱', url.pathname, url)
-//   return
-// }
-// const urlIsGroupInvite = (url) => {
-//   return url.pathname === '/group/invite'
-// }
 const nameFromUrl = (url) => {
   return url.searchParams.get('name') || ''
 }
 
+// handle url
 export default async (request, context) => {
   try {
     let url = request.url
@@ -117,47 +109,33 @@ export default async (request, context) => {
     }
     // space invite url
     if (isSpaceInvite) {
-      // TODO get space ,
-      // const spaceId =
-      console.log('🫐🫐🫐🫐🫐', url.pathname)
       const spaceId = spaceIdFromString(url.pathname)
       const space = await spacePublicMeta(spaceId)
-      const title = `[Invite] ${space.name || name}` // real space title
-      const previewImage = space.previewImage
-
-      // const previewImage = space.previewImage
-      // description: inviteDescription
-      return rewriteIndexHtml({ context, title, previewImage })
+      console.log('🫐🫐🫐🫐🫐', url.pathname, space)
+      return rewriteIndexHtml({
+        context,
+        title: `[Invite] ${pageTitle(space)}`,
+        previewImage: space.previewImage,
+        description: inviteDescription
+      })
     }
-
     // space url
-    // let spaceId
-    // if (isGroupInvite || isSpaceInvite) {
-    //   spaceId = spaceIdFromString(url)
-
-    // } else {
-    // no space or space id if group invite
     const spaceId = spaceIdFromString(url.pathname)
     console.log('💋💋💋💋 is space url', spaceId)
-
-    // }
-
     if (!spaceId) {
       console.info('👻 edge function skipped')
       return
     }
     const space = await spacePublicMeta(spaceId)
-    // if (space) {
-    const title = pageTitle(space)
-    const description = space.description
-    const previewImage = space.previewImage
-    const jsonLD = pageJsonLD(space)
-    const canonicalUrl = siteHost + url.pathname
-    return rewriteIndexHtml({ context, title, description, previewImage, jsonLD, canonicalUrl })
-    // // private space
-    // } else {
-    //   return rewriteIndexHtml({ context, description: privateSpaceDescription })
-    // }
+    const { description, previewImage } = space
+    return rewriteIndexHtml({
+      context,
+      title: pageTitle(space),
+      description,
+      previewImage,
+      jsonLD: pageJsonLD(space),
+      canonicalUrl: siteHost + url.pathname
+    })
   } catch (error) {
     console.error('🚑 pageMeta, 👻 skipped', error)
   }
