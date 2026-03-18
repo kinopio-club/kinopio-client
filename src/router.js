@@ -22,7 +22,6 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         window.document.title = 'Add Card'
-        const urlParams = new URLSearchParams(window.location.search)
         globalStore.isAddPage = true
         next()
       }
@@ -38,8 +37,7 @@ const router = {
       beforeEnter: (to, from, next) => {
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
-          const urlParams = new URLSearchParams(window.location.search)
-          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+          globalStore.disableViewportOptimizations = to.params.disableViewportOptimizations
         }
         next()
       }
@@ -49,8 +47,7 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const apiKey = urlParams.get('apiKey')
+        const apiKey = to.params.apiKey
         if (apiKey) {
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
@@ -63,8 +60,7 @@ const router = {
       name: 'update-arena-access-token',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
-        const urlParams = new URLSearchParams(window.location.search)
-        const arenaReturnedCode = urlParams.get('code')
+        const arenaReturnedCode = to.params.code
         next()
         history.replaceState({}, document.title, window.location.origin)
         const userStore = useUserStore()
@@ -100,12 +96,11 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        if (urlParams.get('present')) {
+        globalStore.disableViewportOptimizations = to.params.disableViewportOptimizations
+        if (to.params.present) {
           globalStore.isPresentationMode = true
         }
-        if (urlParams.get('comment')) {
+        if (to.params.comment) {
           globalStore.isCommentMode = true
         }
         globalStore.updateSpaceAndCardUrlToLoad(path)
@@ -116,13 +111,12 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const spaceId = urlParams.get('spaceId')
+        const spaceId = to.params.spaceId
         const zoomLimit = {
           min: 40,
           max: 100
         }
-        let zoom = urlParams.get('zoom')
+        let zoom = to.params.zoom
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
         globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
@@ -145,8 +139,7 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const sessionId = urlParams.get('sessionId')
+        const sessionId = to.params.sessionId
         if (sessionId) {
           globalStore.notifyThanksForUpgrading = true
         }
@@ -172,18 +165,17 @@ const router = {
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.get('present')) {
+        if (to.params.present) {
           globalStore.isPresentationMode = true
         }
-        if (urlParams.get('comment')) {
+        if (to.params.comment) {
           globalStore.isCommentMode = true
         }
-        const spaceId = urlParams.get('spaceId')
-        const collaboratorKey = urlParams.get('collaboratorKey')
-        const readOnlyKey = urlParams.get('readOnlyKey')
-        const isPresentationMode = urlParams.get('present') || false
-        const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
+        const spaceId = to.params.spaceId
+        const collaboratorKey = to.params.collaboratorKey
+        const readOnlyKey = to.params.readOnlyKey
+        const isPresentationMode = to.params.present || false
+        const isDisableViewportOptimizations = Boolean(to.params.disableViewportOptimizations)
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
         await userStore.initializeUser()
         globalStore.isLoadingSpace = true
@@ -212,11 +204,10 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.get('present')) {
+        if (to.params.present) {
           globalStore.isPresentationMode = true
         }
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        globalStore.disableViewportOptimizations = to.params.disableViewportOptimizations
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
