@@ -61,6 +61,7 @@ const pageTitle = (context, space) => {
 // https://json-ld.org/
 
 const pageJsonLD = (context, space) => {
+  if (!space.cards) { return }
   let items = space.cards.concat(space.boxes)
   // sort by y then x for reading order (top-to-bottom, left-to-right)
   items.sort((a, b) => a.y - b.y || a.x - b.x)
