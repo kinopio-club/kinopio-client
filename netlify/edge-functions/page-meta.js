@@ -87,6 +87,9 @@ const nameFromUrl = (url) => {
 export default async (request, context) => {
   try {
     let url = request.url
+    if (url.includes('netlify-prerender-function')) {
+      url = new URL(url).searchParams.get('url')
+    }
     url = url.replaceAll('?hidden=true', '')
     url = new URL(url)
     const requestIsFontFile = url.pathname.startsWith('/fonts/')
