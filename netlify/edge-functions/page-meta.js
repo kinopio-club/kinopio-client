@@ -31,6 +31,7 @@ const normalizeResponse = async (response) => {
 }
 const spacePublicMeta = async (context, spaceId) => {
   try {
+    console.log('❤️❤️❤️❤️ spacePublicMeta', spaceId)
     const url = `${apiHost}/space/${spaceId}/public-meta`
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
     const space = await normalizeResponse(response)
@@ -91,37 +92,42 @@ const urlIsGroupInvite = (url) => {
   return url.pathname === '/group/invite'
 }
 const nameFromUrl = (url) => {
-  return url.searchParams.get('name')
+  return url.searchParams.get('name') || ''
 }
 
 export default async (request, context) => {
   try {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
+
     console.info('🕊️ edge function request', url)
     url = new URL(url)
     const isGroupInvite = urlIsGroupInvite(url)
     const isSpaceInvite = urlIsSpaceInvite(url)
+    const name = nameFromUrl(url)
     // group invite url
+    console.log('🌱🌱🌱🌱', isGroupInvite, isSpaceInvite)
     if (isGroupInvite) {
-      const groupName = nameFromUrl(url)
-      const title = `[Group Invite] ${groupName}`
+      const title = `[Group Invite] ${name}`
       return rewriteIndexHtml({ context, title, description: inviteDescription })
     }
     // space invite url
     if (isSpaceInvite) {
-      const spaceName = nameFromUrl(url)
-      const title = `[Invite] ${spaceName}`
+      const title = `[Invite] ${name}`
       return rewriteIndexHtml({ context, title })
     }
+
     // space url
-    let spaceId
-    if (isGroupInvite || isSpaceInvite) {
-      spaceId = spaceIdFromUrl(url)
-      console.log('💋💋💋💋', url, spaceId)
-    } else {
-      spaceId = spaceIdFromUrl(url)
-    }
+    // let spaceId
+    // if (isGroupInvite || isSpaceInvite) {
+    //   spaceId = spaceIdFromUrl(url)
+
+    // } else {
+    // no space or space id if group invite
+    const spaceId = spaceIdFromUrl(url)
+    console.log('💋💋💋💋 is space url', spaceId)
+
+    // }
 
     if (!spaceId) {
       console.info('👻 edge function skipped')

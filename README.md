@@ -113,7 +113,7 @@ I couldn't figure out how to run the netlify-cli locally, so instead I test this
 
 To view the logs:
 
-Netlify website → Deploys → Edge Functions
+Netlify project → Deploys → Choose PR deployment → Edge Functions
 
 ## Netlify Prerender
 
