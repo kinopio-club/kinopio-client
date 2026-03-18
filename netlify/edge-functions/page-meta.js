@@ -99,10 +99,10 @@ export default async (request, context) => {
   try {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
-    const requestIsFontFile = url.startsWidth('/fonts/')
+    url = new URL(url)
+    const requestIsFontFile = url.pathname.startsWidth('/fonts/')
     if (requestIsFontFile) { return }
     console.info('🕊️ edge function request', url)
-    url = new URL(url)
     const isGroupInvite = urlIsGroupInvite(url)
     const isSpaceInvite = urlIsSpaceInvite(url)
     const name = nameFromUrl(url)
