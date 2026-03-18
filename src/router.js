@@ -149,12 +149,14 @@ const router = {
       path: '/group/invite/:groupId',
       name: 'groupInvite',
       component: () => import('./views/Space.vue'),
-      beforeEnter: (to, from, next) => {
+      beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
+        const apiStore = useApiStore()
         const groupId = to.params.groupId
         const collaboratorKey = to.query.collaboratorKey
-        console.log('🫐🫐🫐group invite', groupId, collaboratorKey)
-        globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
+        const group = await apiStore.getGroupPublicMeta(groupId)
+        console.log('🫐🫐🫐group invite', groupId, collaboratorKey, group)
+        globalStore.groupToJoinOnLoad = { groupId, collaboratorKey, group }
         globalStore.shouldNotifyIsJoiningGroup = true
         next()
       }

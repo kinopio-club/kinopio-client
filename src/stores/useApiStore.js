@@ -1467,6 +1467,16 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getGroup', error })
       }
     },
+    async getGroupPublicMeta (groupId) {
+      try {
+        console.info('🛬 getting remote group', groupId)
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetch(`${consts.apiHost()}/group/${groupId}/public-meta`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getGroup', error })
+      }
+    },
     async createGroup (body) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
