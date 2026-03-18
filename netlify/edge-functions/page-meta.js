@@ -28,7 +28,7 @@ const normalizeResponse = async (response) => {
     throw { response, status: response.status }
   }
 }
-const spacePublicMeta = async (context, spaceId) => {
+const spacePublicMeta = async (spaceId) => {
   try {
     const url = `${apiHost}/space/${spaceId}/public-meta`
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
@@ -44,7 +44,7 @@ const spacePublicMeta = async (context, spaceId) => {
 
 // title
 
-const pageTitle = (context, space) => {
+const pageTitle = (space) => {
   let title
   const spaceIsPrivate = !space.cards
   if (space.name === 'Hello Kinopio') {
@@ -62,7 +62,7 @@ const pageTitle = (context, space) => {
 // json-ld for crawlers
 // https://json-ld.org/
 
-const pageJsonLD = (context, space) => {
+const pageJsonLD = (space) => {
   if (!space.cards) { return }
   let items = space.cards.concat(space.boxes)
   // sort by y then x for reading order (top-to-bottom, left-to-right)
@@ -76,7 +76,7 @@ const pageJsonLD = (context, space) => {
   let jsonLD = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
-    name: pageTitle(context, space),
+    name: pageTitle(space),
     description: space.description,
     thumbnailUrl: space.previewImage,
     dateCreated: space.createdAt,
@@ -118,8 +118,16 @@ export default async (request, context) => {
     }
     // space invite url
     if (isSpaceInvite) {
-      const title = `[Invite] ${name}`
-      return rewriteIndexHtml({ context, title })
+      // TODO get space ,
+      // const spaceId =
+      const spaceId = spaceIdFromUrl(url.pathname)
+      const space = await spacePublicMeta(spaceId)
+      const title = `[Invite] ${space.name || name}` // real space title
+      const previewImage = space.previewImage
+
+      // const previewImage = space.previewImage
+      // description: inviteDescription
+      return rewriteIndexHtml({ context, title, previewImage })
     }
 
     // space url
@@ -138,12 +146,12 @@ export default async (request, context) => {
       console.info('👻 edge function skipped')
       return
     }
-    const space = await spacePublicMeta(context, spaceId)
+    const space = await spacePublicMeta(spaceId)
     // if (space) {
-    const title = pageTitle(context, space)
+    const title = pageTitle(space)
     const description = space.description
     const previewImage = space.previewImage
-    const jsonLD = pageJsonLD(context, space)
+    const jsonLD = pageJsonLD(space)
     const canonicalUrl = siteHost + url.pathname
     return rewriteIndexHtml({ context, title, description, previewImage, jsonLD, canonicalUrl })
     // // private space
