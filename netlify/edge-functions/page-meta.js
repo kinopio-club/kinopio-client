@@ -7,10 +7,9 @@ const inviteDescription = 'Work on shared spaces together'
 
 // utils
 
-const spaceIdFromUrl = (url) => {
+const spaceIdFromString = (string) => {
   const uuidLength = 21
-  const path = url.pathname
-  const id = path.substring(path.length - uuidLength)
+  const id = string.substring(string.length - uuidLength)
   const idIsInvalid = id.includes('/') || id.includes('.') || id.length !== uuidLength
   if (idIsInvalid) { return }
   console.info('🌷 spaceId', id)
@@ -121,7 +120,7 @@ export default async (request, context) => {
       // TODO get space ,
       // const spaceId =
       console.log('🫐🫐🫐🫐🫐', url.pathname)
-      const spaceId = spaceIdFromUrl(url.pathname)
+      const spaceId = spaceIdFromString(url.pathname)
       const space = await spacePublicMeta(spaceId)
       const title = `[Invite] ${space.name || name}` // real space title
       const previewImage = space.previewImage
@@ -134,11 +133,11 @@ export default async (request, context) => {
     // space url
     // let spaceId
     // if (isGroupInvite || isSpaceInvite) {
-    //   spaceId = spaceIdFromUrl(url)
+    //   spaceId = spaceIdFromString(url)
 
     // } else {
     // no space or space id if group invite
-    const spaceId = spaceIdFromUrl(url)
+    const spaceId = spaceIdFromString(url.pathname)
     console.log('💋💋💋💋 is space url', spaceId)
 
     // }
