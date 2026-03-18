@@ -120,6 +120,7 @@ export default async (request, context) => {
     if (isSpaceInvite) {
       // TODO get space ,
       // const spaceId =
+      console.log('🫐🫐🫐🫐🫐', url.pathname)
       const spaceId = spaceIdFromUrl(url.pathname)
       const space = await spacePublicMeta(spaceId)
       const title = `[Invite] ${space.name || name}` // real space title
