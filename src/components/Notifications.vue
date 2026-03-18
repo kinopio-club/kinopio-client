@@ -106,6 +106,10 @@ const isTouchDevice = computed(() => globalStore.isTouchDevice)
 const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
 const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
+// group
+
+const groupToJoin = computed(() => globalStore.groupToJoinOnLoad.group)
+
 // space
 
 const privacyState = computed(() => {
@@ -557,7 +561,10 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item(v-if="notifySignUpToJoinGroup" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     .row
       p
-        img.icon.group(src="@/assets/group.svg")
+        template(v-if="groupToJoin")
+          GroupLabel(:group="groupToJoin" :showName="true")
+        template(v-else)
+          img.icon.group(src="@/assets/group.svg")
         span You've been invited to a group
     .row
       p
