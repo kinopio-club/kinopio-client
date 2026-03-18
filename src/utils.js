@@ -2104,13 +2104,13 @@ export default {
     if (!spaceId) { return }
     spaceName = this.normalizeString(spaceName)
     spaceName = this.truncated(spaceName, 20, '-')
-    let inviteKey = ''
+    let inviteQuery = ''
     if (collaboratorKey) {
-      inviteKey = `collaboratorKey=${collaboratorKey}`
+      inviteQuery = `collaboratorKey=${collaboratorKey}`
     } else if (readOnlyKey) {
-      inviteKey = `readOnlyKey=${readOnlyKey}`
+      inviteQuery = `readOnlyKey=${readOnlyKey}`
     }
-    let url = `${consts.kinopioDomain()}/space/invite/${spaceId}?${inviteKey}&name=${spaceName}`
+    let url = `${consts.kinopioDomain()}/space/invite/${spaceId}?${inviteQuery}&name=${spaceName}`
     if (isCommentMode) {
       url = url + '&comment=true'
     }
@@ -2120,8 +2120,8 @@ export default {
     if (!groupId || !collaboratorKey) { return }
     groupName = this.normalizeString(groupName)
     groupName = this.truncated(groupName, 20, '-')
-    const inviteKey = `collaboratorKey=${collaboratorKey}`
-    const url = `${consts.kinopioDomain()}/group/invite/${groupId}?${inviteKey}&name=${groupName}`
+    const inviteQuery = `collaboratorKey=${collaboratorKey}`
+    const url = `${consts.kinopioDomain()}/group/invite/${groupId}?${inviteQuery}&name=${groupName}`
     return url
   },
   urlSearchParamsToObject (searchParams) {
