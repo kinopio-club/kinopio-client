@@ -64,7 +64,7 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
-import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
+import { generateNKeysBetween } from 'fractional-indexing'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()

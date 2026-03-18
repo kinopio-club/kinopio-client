@@ -1573,9 +1573,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             span.badge.info
               img.icon(src="@/assets/unlock.svg")
               span To edit spaces you've been invited to, you'll need to sign up or in
-            .row
-              .button-wrap
-                button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+              .row
+                .button-wrap
+                  button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
           template(v-else-if="spacePrivacyIsClosed")
             span.badge.info
               img.icon(src="@/assets/unlock.svg")
