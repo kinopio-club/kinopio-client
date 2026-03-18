@@ -37,7 +37,7 @@ const router = {
       beforeEnter: (to, from, next) => {
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
-          globalStore.disableViewportOptimizations = to.params.disableViewportOptimizations
+          globalStore.disableViewportOptimizations = to.query.disableViewportOptimizations
         }
         next()
       }
@@ -47,7 +47,7 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const apiKey = to.params.apiKey
+        const apiKey = to.query.apiKey
         if (apiKey) {
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
@@ -60,7 +60,7 @@ const router = {
       name: 'update-arena-access-token',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
-        const arenaReturnedCode = to.params.code
+        const arenaReturnedCode = to.query.code
         next()
         history.replaceState({}, document.title, window.location.origin)
         const userStore = useUserStore()
@@ -96,11 +96,11 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        globalStore.disableViewportOptimizations = to.params.disableViewportOptimizations
-        if (to.params.present) {
+        globalStore.disableViewportOptimizations = to.query.disableViewportOptimizations
+        if (to.query.present) {
           globalStore.isPresentationMode = true
         }
-        if (to.params.comment) {
+        if (to.query.comment) {
           globalStore.isCommentMode = true
         }
         globalStore.updateSpaceAndCardUrlToLoad(path)
@@ -111,12 +111,12 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const spaceId = to.params.spaceId
+        const spaceId = to.query.spaceId
         const zoomLimit = {
           min: 40,
           max: 100
         }
-        let zoom = to.params.zoom
+        let zoom = to.query.zoom
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
         globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
@@ -139,7 +139,7 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const sessionId = to.params.sessionId
+        const sessionId = to.query.sessionId
         if (sessionId) {
           globalStore.notifyThanksForUpgrading = true
         }
@@ -165,17 +165,17 @@ const router = {
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
-        if (to.params.present) {
+        if (to.query.present) {
           globalStore.isPresentationMode = true
         }
-        if (to.params.comment) {
+        if (to.query.comment) {
           globalStore.isCommentMode = true
         }
-        const spaceId = to.params.spaceId
-        const collaboratorKey = to.params.collaboratorKey
-        const readOnlyKey = to.params.readOnlyKey
-        const isPresentationMode = to.params.present || false
-        const isDisableViewportOptimizations = Boolean(to.params.disableViewportOptimizations)
+        const spaceId = to.query.spaceId
+        const collaboratorKey = to.query.collaboratorKey
+        const readOnlyKey = to.query.readOnlyKey
+        const isPresentationMode = to.query.present || false
+        const isDisableViewportOptimizations = Boolean(to.query.disableViewportOptimizations)
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
         await userStore.initializeUser()
         globalStore.isLoadingSpace = true
@@ -204,10 +204,10 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        if (to.params.present) {
+        if (to.query.present) {
           globalStore.isPresentationMode = true
         }
-        globalStore.disableViewportOptimizations = to.params.disableViewportOptimizations
+        globalStore.disableViewportOptimizations = to.query.disableViewportOptimizations
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
