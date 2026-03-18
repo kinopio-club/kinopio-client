@@ -19,7 +19,7 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
-import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
+import { generateNKeysBetween } from 'fractional-indexing'
 
 let tallestCardHeight = 0
 

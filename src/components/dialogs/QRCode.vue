@@ -5,7 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
-import { generate, correction } from 'lean-qr/nano'
+import { generate } from 'lean-qr/nano'
 
 const globalStore = useGlobalStore()
 
