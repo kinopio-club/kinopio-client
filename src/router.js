@@ -153,6 +153,7 @@ const router = {
         const globalStore = useGlobalStore()
         const groupId = to.params.groupId
         const collaboratorKey = to.query.collaboratorKey
+        console.log('🫐🫐🫐group invite', groupId, collaboratorKey)
         globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
         globalStore.shouldNotifyIsJoiningGroup = true
         next()
@@ -173,7 +174,7 @@ const router = {
         const spaceId = to.params.spaceId
         const collaboratorKey = to.query.collaboratorKey
         const readOnlyKey = to.query.readOnlyKey
-        console.log('🐽🐽🐽', to, spaceId, collaboratorKey, readOnlyKey)
+        console.log('🐽🐽🐽 space invite', spaceId, collaboratorKey, readOnlyKey)
         const isPresentationMode = to.query.present || false
         const isDisableViewportOptimizations = Boolean(to.query.disableViewportOptimizations)
         globalStore.disableViewportOptimizations = isDisableViewportOptimizations
