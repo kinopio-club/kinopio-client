@@ -4,7 +4,6 @@ const apiHost = 'https://api.kinopio.club'
 const siteHost = 'https://kinopio.club'
 const timeout = 5000 // 5s
 const inviteDescription = 'Work on shared spaces together'
-const privateSpaceDescription = 'Space is private or could not be found'
 
 // utils
 
@@ -47,8 +46,11 @@ const spacePublicMeta = async (context, spaceId) => {
 
 const pageTitle = (context, space) => {
   let title
+  const spaceIsPrivate = !space.cards
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
+  } else if (space.name && spaceIsPrivate) {
+    title = `[Private] ${space.name} – Kinopio`
   } else if (space.name) {
     title = `${space.name} – Kinopio`
   } else {
@@ -139,7 +141,7 @@ export default async (request, context) => {
     const space = await spacePublicMeta(context, spaceId)
     // if (space) {
     const title = pageTitle(context, space)
-    const description = space.description || privateSpaceDescription
+    const description = space.description
     const previewImage = space.previewImage
     const jsonLD = pageJsonLD(context, space)
     const canonicalUrl = siteHost + url.pathname
