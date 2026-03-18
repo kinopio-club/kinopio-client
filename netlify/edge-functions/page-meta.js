@@ -31,10 +31,11 @@ const normalizeResponse = async (response) => {
 }
 const spacePublicMeta = async (context, spaceId) => {
   try {
-    console.log('❤️❤️❤️❤️ spacePublicMeta', spaceId)
     const url = `${apiHost}/space/${spaceId}/public-meta`
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
     const space = await normalizeResponse(response)
+    console.log('❤️❤️❤️❤️ spacePublicMeta', spaceId, apiHost, space)
+
     return space
   } catch (error) {
     console.warn('🚑 spacePublicMeta', error)
