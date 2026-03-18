@@ -197,47 +197,6 @@ const router = {
         // load space
         next()
       }
-    // deprecated mar 2026
-    }, {
-      path: '/invite',
-      name: 'invite',
-      component: () => import('./views/Space.vue'),
-      beforeEnter: async (to, from, next) => {
-        const globalStore = useGlobalStore()
-        const userStore = useUserStore()
-        if (to.query.present) {
-          globalStore.isPresentationMode = true
-        }
-        if (to.query.comment) {
-          globalStore.isCommentMode = true
-        }
-        const spaceId = to.query.spaceId
-        const collaboratorKey = to.query.collaboratorKey
-        const readOnlyKey = to.query.readOnlyKey
-        const isPresentationMode = to.query.present || false
-        const isDisableViewportOptimizations = Boolean(to.query.disableViewportOptimizations)
-        globalStore.disableViewportOptimizations = isDisableViewportOptimizations
-        await userStore.initializeUser()
-        globalStore.isLoadingSpace = true
-        if (!spaceId) {
-          globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
-          next()
-          return
-        }
-        globalStore.isPresentationMode = isPresentationMode
-        // edit
-        if (collaboratorKey) {
-          await inviteToEdit({ spaceId, collaboratorKey })
-        // read only
-        } else if (readOnlyKey) {
-          inviteToReadOnly({ next, spaceId, readOnlyKey })
-        // error
-        } else {
-          globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
-        }
-        // load space
-        next()
-      }
     }, {
       path: '/:space',
       component: () => import('./views/Space.vue'),
