@@ -146,14 +146,13 @@ const router = {
         next()
       }
     }, {
-      path: '/group/invite',
+      path: '/group/invite/:groupId',
       name: 'groupInvite',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const groupId = urlParams.get('groupId')
-        const collaboratorKey = urlParams.get('collaboratorKey')
+        const groupId = to.params.groupId
+        const collaboratorKey = to.query.collaboratorKey
         globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
         globalStore.shouldNotifyIsJoiningGroup = true
         next()
