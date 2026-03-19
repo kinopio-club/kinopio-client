@@ -44,19 +44,18 @@ import utils from '@/utils.js'
 
 <template lang="pug">
 section.how-to
-  //- (ref="parentElement")
   h2 Bend Information into Knowledge
   .how-to-wrap
-    //- (:class="colorClasses")
     .row
       .side.left
         h3 Headline snappy for cards
         p 11111111111111111111 111111111111111111111 11111111111
+        //- was it the sticky note, the text box, the image tool, or the add url button?
       .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
     .row
       .side.left
-        h3 Headline snappy for cards
+        h3 Headline snappy for connections
         p 11111111111111111111 111111111111111111111 11111111111
       .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
@@ -141,7 +140,6 @@ section.how-to
 section.how-to
   .how-to-wrap
     background-color var(--how-to-background)
-    // dark #
     border-radius var(--page-entity-radius)
     padding 2rem
     @media(max-width 460px)
