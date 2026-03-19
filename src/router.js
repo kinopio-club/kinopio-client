@@ -183,7 +183,7 @@ const router = {
           await inviteToEdit({ spaceId, collaboratorKey })
         // read only
         } else if (readOnlyKey) {
-          inviteToReadOnly({ next, spaceId, readOnlyKey })
+          inviteToReadOnly({ spaceId, readOnlyKey })
         // error
         } else {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
@@ -208,7 +208,7 @@ const router = {
 
 export default router
 
-const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
+const inviteToEdit = async ({ spaceId, collaboratorKey }) => {
   const globalStore = useGlobalStore()
   const userStore = useUserStore()
   const apiStore = useApiStore()
@@ -234,7 +234,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   }
 }
 
-const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
+const inviteToReadOnly = ({ spaceId, readOnlyKey }) => {
   const globalStore = useGlobalStore()
   globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
   globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }
