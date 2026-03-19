@@ -178,10 +178,6 @@ const router = {
           next()
           return
         }
-        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
-        globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
-        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
-        console.log('🍒🍒🍒🍒🍒🍒', to.query, '🐢', to, to.query.disableViewportOptimizations, globalStore.disableViewportOptimizations)
         // edit
         if (collaboratorKey) {
           await inviteToEdit({ spaceId, collaboratorKey })
@@ -194,6 +190,10 @@ const router = {
         }
         // load space
         next()
+        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
+        globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
+        console.log('🍒🍒🍒🍒🍒🍒', to.query, '🐢', to, to.query.disableViewportOptimizations, globalStore.disableViewportOptimizations, spaceId)
       }
     }, {
       path: '/:space',
@@ -201,9 +201,7 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        if (to.query.present) {
-          globalStore.isPresentationMode = true
-        }
+        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
         globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
