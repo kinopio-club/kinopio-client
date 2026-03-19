@@ -43,7 +43,7 @@ const themes = {
       // user badges
       'badge-donor': '#ff9dff',
       'badge-upgraded': 'springgreen',
-      // page sections
+      // /about page sections
       'example-background': '#889e9a',
       'how-to-background': '#a45871'
     }
@@ -84,7 +84,7 @@ const themes = {
       'badge-upgraded': 'green',
       'badge-moderator': 'olive',
       'badge-ambassador': '#0f9189',
-      // page sections
+      // /about page sections
       'example-background': '#14292d',
       'how-to-background': '#43091b'
     }

@@ -96,7 +96,7 @@ AboutJsonLd
 
       AboutExamples
 
-      //- TODO to section
+      //- TODO to for-work section
       //- details
       //-   summary Why should I use Kinopio for work?
       //-   section.subsection
@@ -109,6 +109,7 @@ AboutJsonLd
 
       AboutMoreFeatures
 
+      //- TODO to component
       section.faq
         h2 FAQ
 
@@ -162,7 +163,9 @@ AboutJsonLd
           section.subsection
             p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
             p
-              span With whiteboarding, mind-mapping, or mood-boarding, the journey of placing ideas and images, making connections, and figuring out what things should be grouped together yourself is vitally important to building up your own{{' '}}
+              span With whiteboarding, mind-mapping, or mood-boarding, it's{{' '}}
+                strong the journey
+                span {{' '}}of placing ideas and images, making connections, and figuring out what things should be grouped together yourself is vitally important to building up your own{{' '}}
               a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
               span . This is the magic that makes big ideas easier to recall and reason about.
 
