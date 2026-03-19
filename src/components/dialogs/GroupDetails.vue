@@ -13,6 +13,7 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import InviteToGroup from '@/components/InviteToGroup.vue'
 import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -155,6 +156,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
         GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible" :isBackgroundColor="true")
       template(v-else)
         p {{props.group.emoji}} {{props.group.name}}
+    ItemDetailsDebug(:item="props.group")
   InviteToGroup(:visible="isGroupUser" :group="props.group" @closeDialogs="closeDialogs")
 
   UserList(

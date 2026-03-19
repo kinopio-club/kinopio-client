@@ -110,7 +110,7 @@ const updateInviteType = (type) => {
 const editUrl = computed(() => {
   const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
-  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
+  const url = utils.spaceInviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
   console.info('🍇 invite edit url', url)
   return url
 })
@@ -118,7 +118,7 @@ const readUrl = computed(() => {
   const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
-  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
+  const url = utils.spaceInviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
   console.info('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
   return url
 })

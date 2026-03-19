@@ -5,6 +5,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import consts from './consts.js'
+import utils from './utils.js'
 
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +23,6 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         window.document.title = 'Add Card'
-        const urlParams = new URLSearchParams(window.location.search)
         globalStore.isAddPage = true
         next()
       }
@@ -38,8 +38,7 @@ const router = {
       beforeEnter: (to, from, next) => {
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
-          const urlParams = new URLSearchParams(window.location.search)
-          globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+          globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         }
         next()
       }
@@ -49,8 +48,7 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const apiKey = urlParams.get('apiKey')
+        const apiKey = to.query.apiKey
         if (apiKey) {
           globalStore.updatePasswordApiKey = apiKey
           globalStore.passwordResetIsVisible = true
@@ -63,8 +61,7 @@ const router = {
       name: 'update-arena-access-token',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
-        const urlParams = new URLSearchParams(window.location.search)
-        const arenaReturnedCode = urlParams.get('code')
+        const arenaReturnedCode = to.query.code
         next()
         history.replaceState({}, document.title, window.location.origin)
         const userStore = useUserStore()
@@ -100,14 +97,9 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        const urlParams = new URLSearchParams(window.location.search)
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        if (urlParams.get('present')) {
-          globalStore.isPresentationMode = true
-        }
-        if (urlParams.get('comment')) {
-          globalStore.isCommentMode = true
-        }
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
+        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
+        globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
@@ -116,13 +108,12 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const spaceId = urlParams.get('spaceId')
+        const spaceId = to.query.spaceId
         const zoomLimit = {
           min: 40,
           max: 100
         }
-        let zoom = urlParams.get('zoom')
+        let zoom = parseInt(to.query.zoom)
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
         globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
@@ -145,46 +136,37 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const sessionId = urlParams.get('sessionId')
+        const sessionId = to.query.sessionId
         if (sessionId) {
           globalStore.notifyThanksForUpgrading = true
         }
         next()
       }
     }, {
-      path: '/group/invite',
+      path: '/group/invite/:groupId',
       name: 'groupInvite',
       component: () => import('./views/Space.vue'),
-      beforeEnter: (to, from, next) => {
+      beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        const groupId = urlParams.get('groupId')
-        const collaboratorKey = urlParams.get('collaboratorKey')
+        const apiStore = useApiStore()
+        const groupId = to.params.groupId
+        const collaboratorKey = to.query.collaboratorKey
         globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
         globalStore.shouldNotifyIsJoiningGroup = true
         next()
+        const group = await apiStore.getGroupPublicMeta(groupId)
+        globalStore.groupToJoinOnLoad.group = group
       }
     }, {
-      path: '/invite',
+      path: '/space/invite/:spaceId',
       name: 'invite',
       component: () => import('./views/Space.vue'),
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.get('present')) {
-          globalStore.isPresentationMode = true
-        }
-        if (urlParams.get('comment')) {
-          globalStore.isCommentMode = true
-        }
-        const spaceId = urlParams.get('spaceId')
-        const collaboratorKey = urlParams.get('collaboratorKey')
-        const readOnlyKey = urlParams.get('readOnlyKey')
-        const isPresentationMode = urlParams.get('present') || false
-        const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
-        globalStore.disableViewportOptimizations = isDisableViewportOptimizations
+        const spaceId = to.params.spaceId
+        const collaboratorKey = to.query.collaboratorKey
+        const readOnlyKey = to.query.readOnlyKey
         await userStore.initializeUser()
         globalStore.isLoadingSpace = true
         if (!spaceId) {
@@ -192,13 +174,15 @@ const router = {
           next()
           return
         }
-        globalStore.isPresentationMode = isPresentationMode
+        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
+        globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         // edit
         if (collaboratorKey) {
           await inviteToEdit({ spaceId, collaboratorKey })
         // read only
         } else if (readOnlyKey) {
-          inviteToReadOnly({ next, spaceId, readOnlyKey })
+          inviteToReadOnly({ spaceId, readOnlyKey })
         // error
         } else {
           globalStore.addNotification({ message: 'Invalid invite URL', type: 'danger' })
@@ -212,11 +196,7 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.get('present')) {
-          globalStore.isPresentationMode = true
-        }
-        globalStore.disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
+        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
@@ -226,7 +206,7 @@ const router = {
 
 export default router
 
-const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
+const inviteToEdit = async ({ spaceId, collaboratorKey }) => {
   const globalStore = useGlobalStore()
   const userStore = useUserStore()
   const apiStore = useApiStore()
@@ -252,7 +232,7 @@ const inviteToEdit = async ({ next, spaceId, collaboratorKey }) => {
   }
 }
 
-const inviteToReadOnly = ({ next, spaceId, readOnlyKey }) => {
+const inviteToReadOnly = ({ spaceId, readOnlyKey }) => {
   const globalStore = useGlobalStore()
   globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
   globalStore.spaceReadOnlyKey = { spaceId, key: readOnlyKey }

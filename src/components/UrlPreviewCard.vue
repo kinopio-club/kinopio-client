@@ -72,6 +72,13 @@ const colorClasses = computed(() => {
 const previewImageIsVisible = computed(() => {
   return props.card.urlPreviewImage && !shouldHideImage.value
 })
+const lazyLoading = computed(() => {
+  if (globalStore.disableViewportOptimizations) {
+    return 'eager' // default
+  } else {
+    return 'lazy'
+  }
+})
 
 // embed play button
 
@@ -252,7 +259,7 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" loading="lazy")
+      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" :loading="lazyLoading")
 
   //- embed
   template(v-if="shouldDisplayIframe")

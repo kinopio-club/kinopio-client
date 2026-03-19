@@ -2083,7 +2083,7 @@ export default {
   spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     let url
     if (collaboratorKey || readOnlyKey) {
-      url = this.inviteUrl({ spaceId, spaceName, collaboratorKey, readOnlyKey })
+      url = this.spaceInviteUrl({ spaceId, spaceName, collaboratorKey, readOnlyKey })
     } else {
       url = this.url({ name: spaceName, id: spaceId })
     }
@@ -2100,29 +2100,28 @@ export default {
     }
     return url
   },
-  inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
+  spaceInviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
     if (!spaceId) { return }
     spaceName = this.normalizeString(spaceName)
     spaceName = this.truncated(spaceName, 20, '-')
-    let invite = ''
-    let comment = ''
+    let inviteQuery = ''
     if (collaboratorKey) {
-      invite = `collaboratorKey=${collaboratorKey}`
+      inviteQuery = `collaboratorKey=${collaboratorKey}`
     } else if (readOnlyKey) {
-      invite = `readOnlyKey=${readOnlyKey}`
+      inviteQuery = `readOnlyKey=${readOnlyKey}`
     }
+    let url = `${consts.kinopioDomain()}/space/invite/${spaceId}?${inviteQuery}&name=${spaceName}`
     if (isCommentMode) {
-      comment = '&comment=true'
+      url = url + '&comment=true'
     }
-    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}${comment}`
     return url
   },
   groupInviteUrl ({ groupId, groupName, collaboratorKey }) {
     if (!groupId || !collaboratorKey) { return }
     groupName = this.normalizeString(groupName)
     groupName = this.truncated(groupName, 20, '-')
-    const invite = `collaboratorKey=${collaboratorKey}`
-    const url = `${consts.kinopioDomain()}/group/invite?groupId=${groupId}&${invite}&name=${groupName}`
+    const inviteQuery = `collaboratorKey=${collaboratorKey}`
+    const url = `${consts.kinopioDomain()}/group/invite/${groupId}?${inviteQuery}&name=${groupName}`
     return url
   },
   urlSearchParamsToObject (searchParams) {
