@@ -168,18 +168,9 @@ const router = {
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
-        if (utils.stringToBoolean(to.query.present)) {
-          globalStore.isPresentationMode = true
-        }
-        if (utils.stringToBoolean(to.query.comment)) {
-          globalStore.isCommentMode = true
-        }
         const spaceId = to.params.spaceId
         const collaboratorKey = to.query.collaboratorKey
         const readOnlyKey = to.query.readOnlyKey
-        console.log('🥙🥙🥙🥙🥙', to.query, '🐢', to, to.query.disableViewportOptimizations)
-        const isPresentationMode = utils.stringToBoolean(to.query.present) || false
-        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         await userStore.initializeUser()
         globalStore.isLoadingSpace = true
         if (!spaceId) {
@@ -187,7 +178,10 @@ const router = {
           next()
           return
         }
-        globalStore.isPresentationMode = isPresentationMode
+        globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
+        globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
+        console.log('🍒🍒🍒🍒🍒🍒', to.query, '🐢', to, to.query.disableViewportOptimizations, globalStore.disableViewportOptimizations)
         // edit
         if (collaboratorKey) {
           await inviteToEdit({ spaceId, collaboratorKey })
