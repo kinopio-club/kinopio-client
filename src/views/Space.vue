@@ -255,10 +255,6 @@ const checkIfShouldShowExploreOnLoad = () => {
   globalStore.shouldShowExploreOnLoad = false
 }
 
-watch(() => globalStore.disableViewportOptimizations, (value, prevValue) => {
-  console.error('🔥🔥🔥🔥disableViewportOptimizations', value, prevValue)
-})
-
 // page size
 
 watch(() => globalStore.currentUserIsDraggingCard, (value, prevValue) => {
