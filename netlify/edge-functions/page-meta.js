@@ -86,6 +86,7 @@ const nameFromUrl = (url) => {
 // handle url
 export default async (request, context) => {
   try {
+    // normalize or skip url
     let url = request.url
     if (url.includes('netlify-prerender-function')) {
       url = new URL(url).searchParams.get('url')
@@ -100,8 +101,11 @@ export default async (request, context) => {
     const name = nameFromUrl(url)
     // group invite url
     if (isGroupInvite) {
-      const title = `[Group Invite] ${name}`
-      return rewriteIndexHtml({ context, title, description: inviteDescription })
+      return rewriteIndexHtml({
+        context,
+        title: `[Group Invite] ${name}`,
+        description: inviteDescription
+      })
     }
     // space invite url
     if (isSpaceInvite) {
