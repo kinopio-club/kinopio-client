@@ -96,7 +96,7 @@ AboutJsonLd
 
       AboutExamples
 
-      //- TODO to for-work section
+      //- TODO to AboutForWork component
       //- details
       //-   summary Why should I use Kinopio for work?
       //-   section.subsection
@@ -107,9 +107,7 @@ AboutJsonLd
       //-     p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
       //-     p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
 
-      AboutSocialProof
-
-      //- TODO to component
+      //- TODO to AboutFAQ component
       section.faq
         h2 FAQ
 
@@ -170,31 +168,18 @@ AboutJsonLd
               span . This is the magic that makes big ideas easier to recall and reason about.
 
         details
+          //- TODO add public api mention
           summary Can I export my data?
           section.subsection
             p Yes, of course – what you write inside Kinopio belongs only to you. There are export options in a variety of formats, and you can download a backup of all your spaces together.
             p
+              //- todo i'm rather proud of how easy to use and comprehensive it is, almost everything the app can do to your spaces, cards, connections, etc. you can do programmatically yourself.
+              //- You can use it to make cool things too . examples .. , the api has been used to let users do x y z .. phone 2 note etc. no links
               span There is also a {{' '}}
               a(href="/api") public API
               span {{' '}}available.
 
-        details
-          summary Who else uses Kinopio?
-          section.subsection
-            p
-              span Over the years, it’s been amazing to hear how people use Kinopio to map out and make sense of their ideas, feelings, and plans. I recently started capturing the nice things people are saying about it on the{{' '}}
-              a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") Community Love Wall
-              span .
-            p Used by students, teachers, and researchers, at ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
-                a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
-            p And by designers, engineers, and PMs, at ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
-            p Kinopio has also been featured in{{' '}}
-              a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
-              span ,{{' '}}
-              a(href="https://appstacks.club/kinopio") App Stacks
-              span , and was the{{' '}}
-              a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
-              span .
+      AboutSocialProof
 
       section
         //- cta

@@ -40,27 +40,37 @@ const business = computed(() => 'And by designers, engineers, and PMs, at ● Di
 
 <template lang="pug">
 section.social-proof
-  .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
-    .row.horizontal
-      p.marquee(v-pause-animation) {{ academic }}
-    .row.horizontal
-      p.marquee.row-2(v-pause-animation) {{ business }}
+  section.subsection
 
-  .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
-    p {{ academic }}
-    p {{ business }}
+    .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
+      .row.horizontal
+        p.marquee(v-pause-animation) {{ academic }}
+      .row.horizontal
+        p.marquee.row-2(v-pause-animation) {{ business }}
+    .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
+      p {{ academic }}
+      p {{ business }}
 
-  p Kinopio has also been featured in{{' '}}
-    a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
-    span ,{{' '}}
-    a(href="https://appstacks.club/kinopio") App Stacks
-    span , and was the{{' '}}
-    a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
-    span .
+    p Kinopio has also been featured in{{' '}}
+      a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
+      span ,{{' '}}
+      a(href="https://appstacks.club/kinopio") App Stacks
+      span , and was the{{' '}}
+      a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
+      span .
+    p But it's the{{' '}}
+      a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") glowing reviews from customers
+      span {{' '}}that means the most to me.
 </template>
 
 <style lang="stylus">
 section.social-proof
+  section.subsection
+    border-radius var(--page-entity-radius)
+    padding 2rem
+  .love-wall
+    margin-bottom 10px
+    margin-top 0
   .scrolling-rows
     cursor pointer
   .horizontal
