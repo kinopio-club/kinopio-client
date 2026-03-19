@@ -177,6 +177,7 @@ const router = {
         const spaceId = to.params.spaceId
         const collaboratorKey = to.query.collaboratorKey
         const readOnlyKey = to.query.readOnlyKey
+        console.log('🥙🥙🥙🥙🥙', to.query, '🐢', to, to.query.disableViewportOptimizations)
         const isPresentationMode = utils.stringToBoolean(to.query.present) || false
         globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         await userStore.initializeUser()
