@@ -90,9 +90,9 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
-      AboutSocialProof
-
       AboutHowTo
+
+      AboutMoreFeatures
 
       AboutExamples
 
@@ -107,7 +107,7 @@ AboutJsonLd
       //-     p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
       //-     p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
 
-      AboutMoreFeatures
+      AboutSocialProof
 
       //- TODO to component
       section.faq
