@@ -5,6 +5,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import consts from './consts.js'
+import utils from './utils.js'
 
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
@@ -37,7 +38,7 @@ const router = {
       beforeEnter: (to, from, next) => {
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
-          globalStore.disableViewportOptimizations = to.query.disableViewportOptimizations
+          globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         }
         next()
       }
@@ -96,11 +97,11 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
-        globalStore.disableViewportOptimizations = to.query.disableViewportOptimizations
-        if (to.query.present) {
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
+        if (utils.stringToBoolean(to.query.present)) {
           globalStore.isPresentationMode = true
         }
-        if (to.query.comment) {
+        if (utils.stringToBoolean(to.query.comment)) {
           globalStore.isCommentMode = true
         }
         globalStore.updateSpaceAndCardUrlToLoad(path)
@@ -116,7 +117,7 @@ const router = {
           min: 40,
           max: 100
         }
-        let zoom = to.query.zoom
+        let zoom = parseInt(to.query.zoom)
         zoom = Math.max(zoomLimit.min, zoom)
         zoom = Math.min(zoomLimit.max, zoom)
         globalStore.spaceUrlToLoad = `${consts.kinopioDomain()}/${spaceId}`
@@ -167,18 +168,17 @@ const router = {
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
-        if (to.query.present) {
+        if (utils.stringToBoolean(to.query.present)) {
           globalStore.isPresentationMode = true
         }
-        if (to.query.comment) {
+        if (utils.stringToBoolean(to.query.comment)) {
           globalStore.isCommentMode = true
         }
         const spaceId = to.params.spaceId
         const collaboratorKey = to.query.collaboratorKey
         const readOnlyKey = to.query.readOnlyKey
-        const isPresentationMode = to.query.present || false
-        const isDisableViewportOptimizations = Boolean(to.query.disableViewportOptimizations)
-        globalStore.disableViewportOptimizations = isDisableViewportOptimizations
+        const isPresentationMode = utils.stringToBoolean(to.query.present) || false
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         await userStore.initializeUser()
         globalStore.isLoadingSpace = true
         if (!spaceId) {
@@ -209,7 +209,7 @@ const router = {
         if (to.query.present) {
           globalStore.isPresentationMode = true
         }
-        globalStore.disableViewportOptimizations = to.query.disableViewportOptimizations
+        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         globalStore.updateSpaceAndCardUrlToLoad(path)
         next()
       }
