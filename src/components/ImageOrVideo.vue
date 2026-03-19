@@ -114,6 +114,14 @@ watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
   removeCanvasSelectedClass()
 })
 
+const lazyLoading = computed(() => {
+  if (globalStore.disableViewportOptimizations) {
+    return 'eager' // default
+  } else {
+    return 'lazy'
+  }
+})
+
 // video
 
 const pauseVideo = () => {
@@ -228,7 +236,7 @@ img.image(
   :class="{selected: isSelectedOrDragging}"
   @load="handleSuccess"
   @error="handleError"
-  loading="lazy"
+  :loading="lazyLoading"
 )
 </template>
 
