@@ -198,8 +198,8 @@ const router = {
         const globalStore = useGlobalStore()
         const path = window.location.pathname
         globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
-        globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         globalStore.updateSpaceAndCardUrlToLoad(path)
+        console.error('👄👄👄👄v /:space')
         next()
       }
     }
