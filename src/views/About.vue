@@ -11,6 +11,7 @@ import AboutSocialProof from '@/components/page/AboutSocialProof.vue'
 import AboutHowTo from '@/components/page/AboutHowTo.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/page/AboutMoreFeatures.vue'
+import AboutFAQ from '@/components/page/AboutFAQ.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
 import consts from '@/consts.js'
@@ -107,77 +108,7 @@ AboutJsonLd
       //-     p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
       //-     p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
 
-      //- TODO to AboutFAQ component
-      section.faq
-        h2 FAQ
-
-        details
-          summary How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?
-          section.subsection
-            p Physical whiteboards are so productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas and shared understanding.
-            p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
-            p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and experimentation.
-            p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
-              a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
-              span {{' '}}and conceptual – ideal for problem solving and consensus building.
-            p The other major difference is that Kinopio is{{' '}}
-              a(href="https://pketh.org/organic-software.html") organic software
-              span , paid for by the people who use it, rather than by VC investors looking for an{{' '}}
-              a(href="https://ourincrediblejourney.tumblr.com/") easy exit
-              span .
-            table
-              thead
-                tr
-                  td
-                    strong Company
-                  td
-                    strong VC Funding
-              tbody
-                tr
-                  td Figjam
-                  td $1,400,000,000 Series F
-                tr
-                  td Miro
-                  td $476,300,000 Series C
-                tr
-                  td Milanote
-                  td $780,000
-                tr
-                  td Mural
-                  td $196,600,000 Series C
-                tr
-                  td Whimsical
-                  td $30,000,000 Series A
-                tr
-                  td.badge.info Kinopio
-                  td.badge.info $0
-            p The result? Kinopio is a product that embraces individuality and personality. Made for people, not drones.
-            p To see how this plays out IRL, here's a video by a customer comparing{{' '}}
-              a(href="https://www.youtube.com/watch?v=Colow9UCPqM") Kinopio vs Milanote
-              span .
-
-        details
-          summary Why doesn't Kinopio have AI features?
-          section.subsection
-            p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
-            p
-              span With whiteboarding, mind-mapping, or mood-boarding, it's{{' '}}
-                strong the journey
-                span {{' '}}of placing ideas and images, making connections, and figuring out what things should be grouped together yourself is vitally important to building up your own{{' '}}
-              a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
-              span . This is the magic that makes big ideas easier to recall and reason about.
-
-        details
-          //- TODO add public api mention
-          summary Can I export my data?
-          section.subsection
-            p Yes, of course – what you write inside Kinopio belongs only to you. There are export options in a variety of formats, and you can download a backup of all your spaces together.
-            p
-              //- todo i'm rather proud of how easy to use and comprehensive it is, almost everything the app can do to your spaces, cards, connections, etc. you can do programmatically yourself.
-              //- You can use it to make cool things too . examples .. , the api has been used to let users do x y z .. phone 2 note etc. no links
-              span There is also a {{' '}}
-              a(href="/api") public API
-              span {{' '}}available.
+      AboutFAQ
 
       AboutSocialProof
 
@@ -259,19 +190,6 @@ main.page
       video
         border-radius calc(var(--entity-radius) * 2)
 
-    > section.faq
-      max-width 480px
-      section.subsection
-        padding 12px !important
-        padding-top 2px !important
-        margin-bottom 0.5rem
-        blockquote
-          border-left 1px solid var(--tertiary-hover-background)
-          margin-left 0
-          padding-left 1rem
-        table
-          td
-            padding 5px 10px
     .signature
       width 70px
       margin 0
