@@ -5,39 +5,35 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 <template lang="pug">
 section.how-to
   h2 Bend Information into Knowledge
+  p Kinopio gives you the tools to combine creative expression with focused productivity.
   .how-to-wrap
     .row
       .side.left
         h3 Cards and Connections
         p To create cards, tap anywhere and start typing. Format with markdown, paste URLs to create links and play YouTube videos, add images, colors and more. Connect related cards by dragging from the connector to another card.
-      //- video in .right
-      .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
-
-    .row
-      .side.left
-        h3 Paint Select and Multi-Edit
-        p 11111111111111111111 111111111111111111111 11111111111
+      //- TODO vid
       .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
     .row
       .side.left
         h3 Boxes, Lists, and Lines
-        p 11111111111111111111 111111111111111111111 11111111111
+        p When you’re ready to add structure, use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management. Lines are horizontal dividers that can be used as page or section breaks.
+      //- TODO vid
       .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
     .row
       .side.left
-        h3 Sharing and Collaboration
-        p 11111111111111111111 111111111111111111111 11111111111
+        h3 Paint Select and Multi-Edit
+        p Drag from an empty area to paint over items you want to move or edit them together. First-class bulk edits are one of Kinopio's most powerful features.
+      //- TODO vid
       .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
-    //- TODO help site link
+    //- TODO help site link?
 
 </template>
 
 <style lang="stylus">
 :root
-  --example-button-active-inset-shadow inset 0 1px 2px var(--primary-transparent)
   --how-to-column-gap 10px
 
 section.how-to
@@ -45,8 +41,6 @@ section.how-to
     background-color var(--how-to-background)
     border-radius var(--page-entity-radius)
     padding 2rem
-    @media(max-width 460px)
-      padding 1rem
     .row
       display flex
       flex-wrap wrap
@@ -59,12 +53,14 @@ section.how-to
         max-width 50%
     .row + .row
       margin-top 20px
-  h3
-    margin-top 0
-  img,
-  video
-    border-radius calc(var(--entity-radius) * 2)
-    margin-bottom 0
-  .button-badge.badge.active
-    box-shadow var(--example-button-active-inset-shadow)
+    h3
+      margin-top 0
+    img,
+    video
+      border-radius calc(var(--entity-radius) * 2)
+      margin-bottom 0
+    @media(max-width 460px)
+      padding 1rem
+    // @media(max-width 540px)
+    //   padding 1rem
 </style>
