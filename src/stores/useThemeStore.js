@@ -45,7 +45,8 @@ const themes = {
       'badge-upgraded': 'springgreen',
       // /about page sections
       'example-background': '#889e9a',
-      'how-to-background': '#a45871'
+      'how-to-background': '#a45871',
+      'for-work-background': '#68aacd'
     }
   },
   dark: {
@@ -86,7 +87,8 @@ const themes = {
       'badge-ambassador': '#0f9189',
       // /about page sections
       'example-background': '#14292d',
-      'how-to-background': '#43091b'
+      'how-to-background': '#43091b',
+      'for-work-background': '#085077'
     }
   }
 }

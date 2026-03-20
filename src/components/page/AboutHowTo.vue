@@ -1,8 +1,5 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-
-import utils from '@/utils.js'
-
 </script>
 
 <template lang="pug">

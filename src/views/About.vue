@@ -11,6 +11,7 @@ import AboutSocialProof from '@/components/page/AboutSocialProof.vue'
 import AboutHowTo from '@/components/page/AboutHowTo.vue'
 import AboutExamples from '@/components/page/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/page/AboutMoreFeatures.vue'
+import AboutForWork from '@/components/page/AboutForWork.vue'
 import AboutFAQ from '@/components/page/AboutFAQ.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
@@ -97,16 +98,7 @@ AboutJsonLd
 
       AboutExamples
 
-      //- TODO to AboutForWork component
-      //- details
-      //-   summary Why should I use Kinopio for work?
-      //-   section.subsection
-      //-     blockquote
-      //-       p There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true.
-      //-       p – Steve Jobs
-      //-     p Exploring big ideas and tackling hard problems is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
-      //-     p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
-      //-     p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
+      AboutForWork
 
       AboutFAQ
 
