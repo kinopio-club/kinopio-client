@@ -84,6 +84,7 @@ const remoteLineDraggingColor = computed(() => {
 
 // styles
 
+const isOutdented = computed(() => props.line.y < consts.minLineYOutdent)
 const color = computed(() => {
   let color = props.line.color
   const remoteColor = remoteLineDetailsVisibleColor.value || remoteSelectedColor.value || remoteLineDraggingColor.value
@@ -298,6 +299,7 @@ const lockingAnimationFrame = (timestamp) => {
 .line-info.badge.button-badge(
     :data-line-id="props.line.id"
     :style="infoStyles"
+    :class="{ 'is-outdented': isOutdented }"
     @mousedown.left="startLineInfoInteraction"
     @mouseup.left="endLineInfoInteraction"
     @keyup.stop.enter="endLineInfoInteraction"
@@ -329,6 +331,10 @@ const lockingAnimationFrame = (timestamp) => {
   border-top-left-radius 0
   border-bottom-left-radius 0
   left 0
+  &.is-outdented
+    left 50px
+    transition left 0.1s
+    border-radius var(--entity-radius)
   &.button-badge
     box-shadow none
   .name
