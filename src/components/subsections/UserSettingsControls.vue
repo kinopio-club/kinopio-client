@@ -33,14 +33,6 @@ const toggleShouldDisableHapticFeedback = () => {
   userStore.updateUser({ shouldDisableHapticFeedback: value })
 }
 
-// panning
-
-const shouldDisableRightClickToPan = computed(() => userStore.shouldDisableRightClickToPan)
-const toggleShouldDisableRightClickToPan = () => {
-  const value = !shouldDisableRightClickToPan.value
-  userStore.updateUser({ shouldDisableRightClickToPan: value })
-}
-
 // zoom
 
 const shouldInvertZoom = computed(() => userStore.shouldInvertZoom)
@@ -143,10 +135,6 @@ const clearTips = () => {
   section
     .row.title-row
       p Zoom
-    .row
-      label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
-        input(type="checkbox" v-model="shouldDisableRightClickToPan")
-        span Disable Right/Middle Click to Pan
     .row
       label(:class="{ active: shouldInvertZoom }" @click.left.prevent="toggleShouldInvertZoom" @keydown.stop.enter="toggleShouldInvertZoom")
         input(type="checkbox" v-model="shouldInvertZoom")
