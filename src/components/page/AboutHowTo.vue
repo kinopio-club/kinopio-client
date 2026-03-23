@@ -5,7 +5,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 <template lang="pug">
 section.how-to
   h2 Bend Information into Knowledge
-  p Kinopio gives you the tools to combine creative expression with focused productivity.
+  //- p Kinopio gives you the tools to combine creative expression with focused productivity.
   .how-to-wrap
     .row
       .side.left
@@ -16,8 +16,8 @@ section.how-to
 
     .row
       .side.left
-        h3 Boxes, Lists, and Lines
-        p When you’re ready to add structure, use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management. Lines are horizontal dividers that can be used as page or section breaks.
+        h3 Boxes and Lists
+        p When you’re ready to add structure, use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
       //- TODO vid
       .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
@@ -39,6 +39,8 @@ section.how-to
 section.how-to
   .how-to-wrap
     background-color var(--how-to-background)
+    background-color #004021
+    color white
     border-radius var(--page-entity-radius)
     padding 2rem
     .row

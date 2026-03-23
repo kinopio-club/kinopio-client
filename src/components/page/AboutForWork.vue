@@ -6,7 +6,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 section.for-work
   h2 Kinopio at Work
   //- see love wall
-  p The collaboration tool for new ideas and hard problems that teams enjoy using.
+  //- p The collaboration tool for new ideas and hard problems that teams enjoy using.
   .for-work-wrap
     p We need to work together but we can't read minds.
 
@@ -59,6 +59,8 @@ section.for-work
 section.for-work
   .for-work-wrap
     background-color var(--for-work-background)
+    // background-color rgb(6, 73, 107)
+    // color white
     border-radius var(--page-entity-radius)
     padding 2rem
     @media(max-width 460px)

@@ -48,8 +48,8 @@ section.more-features
     p Featuring ● Real-Time Collaboration ● Privacy Settings ● ```Code Blocks``` ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● Works Offline ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Freehand Drawing ● Group Workspaces ● Quick Save to Inbox With Browser Extensions ● Trackable Todos ● Personal Templates ● Snap to Grid ● Other secret features may be available… (don’t tell anyone)
   p
     img.updated.icon(src="@/assets/updated.gif" alt="updated" width="44" height="12")
-    span New features are being added all the time in{{' '}}
     a(href="/changelog") Changelog
+    span {{' '}}Is updated all the time with new features
     span .
 </template>
 
@@ -88,6 +88,8 @@ section.more-features
   .static-row
     p
       line-height 1.5
+  .updated.icon
+    margin-right 4px
 @keyframes marquee
   0%
     transform translate(0px)

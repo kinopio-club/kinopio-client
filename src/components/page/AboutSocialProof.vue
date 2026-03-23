@@ -59,7 +59,7 @@ section.social-proof
       a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
       span .
     p But it's the{{' '}}
-      a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") glowing reviews from customers
+      a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love from customers
       span {{' '}}that means the most to me.
 </template>
 

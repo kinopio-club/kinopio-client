@@ -98,7 +98,7 @@ const toggleTemplatesIsVisible = () => {
             button.translucent-button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: state.templatesIsVisible }")
               img.icon.templates(src="@/assets/templates.svg")
               span Templates
-            Templates(:visible="state.templatesIsVisible")
+            Templates(:visible="state.templatesIsVisible" :hideMySpacesButton="true")
         .right
           .button-wrap
             button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
