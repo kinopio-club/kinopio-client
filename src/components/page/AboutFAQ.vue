@@ -63,17 +63,25 @@ section.faq
         span . This is the magic that makes big ideas easier to recall and reason about.
 
   details
-    //- TODO add public api mention
-    summary Can I export my data?
+    summary Do I Have Full Control of My Data
     section.subsection
-      p Yes, of course – what you write inside Kinopio belongs only to you. There are export options in a variety of formats, and you can download a backup of all your spaces together.
-      p
-        //- todo i'm rather proud of how easy to use and comprehensive it is, almost everything the app can do to your spaces, cards, connections, etc. you can do programmatically yourself.
-        //- You can use it to make cool things too . examples .. , the api has been used to let users do x y z .. phone 2 note etc. no links
-        span There is also a {{' '}}
-        a(href="/api") public API
-        span {{' '}}available.
-
+      p Absolutely. Your data belongs to you and will never be sold.
+      p You can export spaces in a variety of formats, including as open{{' '}}
+        a(href="https://jsoncanvas.org/") JSON Canvas
+        span {{' '}}files, and you can download a backup of all your spaces together.
+      p There is a{{' '}}
+        a(href="/help/api") public API
+        span {{' '}}available with full
+        a(href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete") CRUD
+        span {{' '}}capability so that you can build your own custom integrations and tooling.
+      p And if you'd like, you can{{' '}}
+        a(href="/help/posts/delete-your-account/") permanently delete your account
+        span{{' '}}at any time.
+      p For more information,{{' '}}
+      a(href="/help/posts/security") Trust & Security
+      span ,{{' '}}
+      a(href="/help/posts/privacy-policy/") Privacy Policy
+      span .
 </template>
 
 <style lang="stylus">
