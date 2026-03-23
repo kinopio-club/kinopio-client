@@ -382,7 +382,7 @@ const handleMouseDownEvents = (event) => {
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
   const shouldBoxSelect = checkShouldBoxSelect(isPanScope)
-  const userDisablePan = userStore.shouldDisableRightClickToPan
+  const userDisablePan = userStore.isDebugMode
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
   const isButtonScope = checkIsButtonScope(event)
