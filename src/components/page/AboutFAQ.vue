@@ -63,25 +63,23 @@ section.faq
         span . This is the magic that makes big ideas easier to recall and reason about.
 
   details
-    summary Do I Have Full Control of My Data
+    summary Do I Have Full Control of My Data?
     section.subsection
-      p Absolutely. Your data belongs to you and will never be sold.
+      p Yes. Your data belongs to you and will never be sold.
       p You can export spaces in a variety of formats, including as open{{' '}}
         a(href="https://jsoncanvas.org/") JSON Canvas
         span {{' '}}files, and you can download a backup of all your spaces together.
-      p There is a{{' '}}
+      p There is a comprehensive{{' '}}
         a(href="/help/api") public API
-        span {{' '}}available with full
-        a(href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete") CRUD
-        span {{' '}}capability so that you can build your own custom integrations and tooling.
+        span {{' '}} so that you can build your own custom integrations and tooling.
       p And if you'd like, you can{{' '}}
-        a(href="/help/posts/delete-your-account/") permanently delete your account
-        span{{' '}}at any time.
-      p For more information,{{' '}}
-      a(href="/help/posts/security") Trust & Security (GDPR, CPRA)
-      span ,{{' '}}
-      a(href="/help/posts/privacy-policy/") Privacy Policy
-      span .
+        a(href="/help/posts/delete-your-account/") delete your account
+        span {{' '}}at any time.
+      //- p For more information,{{' '}}
+      //-   a(href="/help/posts/security") Trust & Security (GDPR, CPRA)
+      //-   span ,{{' '}}
+      //-   a(href="/help/posts/privacy-policy/") Privacy Policy
+      //-   span .
 </template>
 
 <style lang="stylus">
