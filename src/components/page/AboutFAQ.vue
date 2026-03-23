@@ -63,10 +63,10 @@ section.faq
         span . This is the magic that makes big ideas easier to recall and reason about.
 
   details
-    summary Do I Have Full Control of My Data?
+    summary Do I Have Full Control Over My Data?
     section.subsection
       p Yes. Your data belongs to you and will never be sold.
-      p You can export spaces in a variety of formats, including as open{{' '}}
+      p You can import and export spaces in a variety of formats, including as open{{' '}}
         a(href="https://jsoncanvas.org/") JSON Canvas
         span {{' '}}files, and you can download a backup of all your spaces together.
       p There is a comprehensive{{' '}}

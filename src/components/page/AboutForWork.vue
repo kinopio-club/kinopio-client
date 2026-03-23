@@ -4,7 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 <template lang="pug">
 section.for-work
-  h2 Great Teams Deserve Great Tools
+  h2 Kinopio at Work
   //- see love wall
   .for-work-wrap
     p 123

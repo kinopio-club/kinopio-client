@@ -144,7 +144,7 @@ main.page
   .page-wrap
     margin-left auto
     margin-right auto
-    max-width 730px
+    max-width 755px
     @media(max-width 760px)
       max-width 600px
 
