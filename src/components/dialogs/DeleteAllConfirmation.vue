@@ -83,9 +83,8 @@ dialog.delete-all-confirmation.narrow(v-if="props.visible" :open="props.visible"
         button(@click.left.stop="toggleUserBillingSettingsIsVisible")
           span Billing
     section.subsection.danger
-      p
-        span(v-if="isSignedIn") Permanently Delete your account and all your spaces from this computer and Kinopio's servers?
-        span(v-else) all your spaces and user data from this computer?
+      p(v-if="isSignedIn") Permanently Delete your account and all your spaces from this computer and Kinopio's servers?
+      p(v-else) Permanently Delete your account and all your spaces and user data from this computer?
     section.subsection.danger
       p Type "Permanently Delete Account" in the input below to confirm. There is no going back. Please be certain.
       p
