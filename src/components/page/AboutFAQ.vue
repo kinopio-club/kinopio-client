@@ -78,7 +78,7 @@ section.faq
         a(href="/help/posts/delete-your-account/") permanently delete your account
         span{{' '}}at any time.
       p For more information,{{' '}}
-      a(href="/help/posts/security") Trust & Security
+      a(href="/help/posts/security") Trust & Security (GDPR, CPRA)
       span ,{{' '}}
       a(href="/help/posts/privacy-policy/") Privacy Policy
       span .
