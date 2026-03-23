@@ -10,7 +10,7 @@ section.faq
     summary How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?
     section.subsection
       p Physical whiteboards are so productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas and shared understanding.
-      p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
+      p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with a maze through endless toolbars and sticky notes in one of five designer-approved pastel shades.
       p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and experimentation.
       p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
         a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity

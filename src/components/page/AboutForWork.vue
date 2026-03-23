@@ -6,8 +6,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 section.for-work
   h2 Kinopio at Work
   //- see love wall
+  p The collaboration tool for new ideas and hard problems that teams enjoy using.
   .for-work-wrap
-    p 123
+    p We need to work together but we can't read minds.
+
+    //- maybe put this in a card vid?
+    //- p There’s always been this myth that really neat, fun people at home all of [a] sudden get very dull and boring and serious when they come to work, and it’s simply not true.
+    //- p – Steve Jobs
+
   //- .how-to-wrap
   //-   .row
   //-     .side.left
@@ -45,7 +51,7 @@ section.for-work
   //-     p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
   //-     p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
 
-//- gdpr..
+//- gdpr.. trust and security
 
 </template>
 
