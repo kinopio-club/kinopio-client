@@ -33,14 +33,6 @@ const toggleShouldDisableHapticFeedback = () => {
   userStore.updateUser({ shouldDisableHapticFeedback: value })
 }
 
-// panning
-
-const shouldDisableRightClickToPan = computed(() => userStore.shouldDisableRightClickToPan)
-const toggleShouldDisableRightClickToPan = () => {
-  const value = !shouldDisableRightClickToPan.value
-  userStore.updateUser({ shouldDisableRightClickToPan: value })
-}
-
 // zoom
 
 const shouldInvertZoom = computed(() => userStore.shouldInvertZoom)
@@ -104,7 +96,7 @@ const clearTips = () => {
 .controls-settings(v-if="visible")
   section
     .row
-      p Accessibility
+      span Accessibility
     .row(v-if="deviceSupportsHapticFeedback")
       label(:class="{active: shouldDisableHapticFeedback}" @click.left.prevent="toggleShouldDisableHapticFeedback" @keydown.stop.enter="toggleShouldDisableHapticFeedback")
         input(type="checkbox" v-model="shouldDisableHapticFeedback")
@@ -125,7 +117,7 @@ const clearTips = () => {
 
   section
     .row.title-row
-      p Outside Space Color
+      span Outside Space Color
       .button-wrap
         button.small-button(@click="toggleOutsideSpaceColorTipsIsVisible" :class="{ active: state.outsideSpaceColorTipsIsVisible }")
           span ?
@@ -142,11 +134,7 @@ const clearTips = () => {
 
   section
     .row.title-row
-      p Zoom
-    .row
-      label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
-        input(type="checkbox" v-model="shouldDisableRightClickToPan")
-        span Disable Right/Middle Click to Pan
+      span Zoom
     .row
       label(:class="{ active: shouldInvertZoom }" @click.left.prevent="toggleShouldInvertZoom" @keydown.stop.enter="toggleShouldInvertZoom")
         input(type="checkbox" v-model="shouldInvertZoom")
