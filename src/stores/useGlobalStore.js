@@ -630,7 +630,7 @@ export const useGlobalStore = defineStore('global', {
       this.viewportHeight = Math.round(viewport.height)
     },
 
-    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter }) {
+    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter, positionIsTop }) {
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const smallCardCharacterLimit = 300
@@ -640,6 +640,9 @@ export const useGlobalStore = defineStore('global', {
       if (sidebarIsVisible || positionIsCenter) {
         horizontal = 'center'
         vertical = 'center'
+      }
+      if (positionIsTop) {
+        vertical = 'start'
       }
       if (sidebarIsVisible && isViewportNarrow) {
         horizontal = 'start'
@@ -1534,7 +1537,7 @@ export const useGlobalStore = defineStore('global', {
       this.focusOnLineId = lineId
       if (!lineId) { return }
       const element = utils.lineElementFromId(lineId)
-      this.scrollElementIntoView({ element, positionIsCenter: true })
+      this.scrollElementIntoView({ element, positionIsTop: true })
     },
     updateFocusOnListId (listId) {
       this.focusOnListId = listId
