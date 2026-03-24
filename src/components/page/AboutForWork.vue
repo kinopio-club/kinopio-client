@@ -61,7 +61,7 @@ section.for-work
   .for-work-wrap
     p
       em If only
-      span {{' '}}projects went smoothly from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
+      span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
     //- ??? A // myth of the perfect plan -> B // no surprises or learning
 
     //-   .row
@@ -92,14 +92,18 @@ section.for-work
 
     .row.feature-wrap
       .feature
-        h3 Groups
+        h3 Group Workspaces
         .row.group-label-row
           template(v-for="group in groups" :key="group.id")
             GroupLabel(:group="group" :showName="true")
         p Create and manage shared spaces for teams, projects, or clients.
       .feature
         h3 Flexible Collaboration
-        p Whether working through ideas together in real-time, organizing spaces on mobile, or contributing async, Kinopio is designed for every kind of thinker.
+        //- TODO useruseruser
+        //-       User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+        //- User(:user="props.randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+
+        p Work through ideas together in real-time, organize spaces on mobile, or contribute async.
 
     //- ?? best in class security. gdpr.. trust and security
 
@@ -109,8 +113,12 @@ section.for-work
 section.for-work
   .for-work-wrap
     // background-color var(--for-work-background)
+    // light color is less hackery , more biz trust
+
     background-color #002c43
     color white
+    // background-color #84AABE
+    // color black
     border-radius var(--page-entity-radius)
     padding 2rem
     video
@@ -177,9 +185,9 @@ section.for-work
     justify-content space-between
     .feature
       padding 0 1rem
-      border-radius calc(var(--entity-radius) * 2)
-      // background-color #618aa0 // for-work-feature-background
-      border 1px solid #3a5c6e
+      border-radius calc(var(--entity-radius) * 3)
+      // background-color #94BCD2 // for-work-feature-background
+      border 1px solid #38596a
       max-width calc(50% - 10px)
       gap 0 10px
       p
