@@ -69,18 +69,17 @@ watch(() => state.loading, (value, prevValue) => {
   updateResultsSectionHeight()
 })
 
-const spaces = computed(() => {
-  return state.incomingSpaces
-})
-
-const shouldShowSpaces = computed(() => {
-  const spaces = state.incomingSpaces || []
-  return !state.loading && spaces.length
-})
-const filteredSpaces = computed(() => {
-  return spaces.value
-})
 const parentDialog = computed(() => 'links')
+const spaces = computed(() => {
+  if (state.showIncoming) {
+    return state.incomingSpaces || []
+  } else {
+    return state.outgoingSpaces
+  }
+})
+const shouldShowSpaces = computed(() => {
+  return !state.loading && spaces.value.length
+})
 const changeSpace = (space) => {
   spaceStore.changeSpace(space)
   globalStore.closeAllDialogs()
@@ -136,7 +135,7 @@ const toggleShowIncoming = (value) => {
           span Outgoing
   section.results-section(v-if="shouldShowSpaces" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
-      :spaces="filteredSpaces"
+      :spaces="spaces"
       :showUser="true"
       @selectSpace="changeSpace"
       :parentIsPinned="props.parentIsPinned"
