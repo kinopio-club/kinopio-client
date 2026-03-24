@@ -84,7 +84,8 @@ AboutJsonLd
           source(src="@/assets/page/about/hero/vid.mp4")
         p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
-          span . Designed to work the way your mind works.
+          span .
+          //- Designed to work the way your mind works.
         p Free for 100 cards. No sign up required.
 
         //- cta

@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import GroupLabel from '@/components/GroupLabel.vue'
+
 const videoElement = ref(null)
 
 const state = reactive({
   videoIsPaused: false
 })
+
+// video
 
 const toggleVideoIsPaused = () => {
   const value = !state.videoIsPaused
@@ -25,6 +29,28 @@ const playVideo = () => {
   element.play()
 }
 
+// groups
+
+const groups = computed(() => {
+  return [
+    {
+      id: 1,
+      name: 'Product',
+      color: '#d5bdff'
+    },
+    {
+      id: 2,
+      name: 'Marketing',
+      color: '#edb185'
+      // emoji: '🐇'
+    },
+    {
+      id: 3,
+      name: 'Sales',
+      color: '#b1f49a'
+    }
+  ]
+})
 </script>
 
 <template lang="pug">
@@ -35,7 +61,7 @@ section.for-work
   .for-work-wrap
     p
       em If only
-      span {{' '}}projects went neartly from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockups.
+      span {{' '}}projects went smoothly from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
     //- ??? A // myth of the perfect plan -> B // no surprises or learning
 
     //-   .row
@@ -55,26 +81,36 @@ section.for-work
 
       video(autoplay loop muted playsinline aria-label="moodboard space" ref="videoElement")
         source(src="@/assets/page/about/examples/moodboard.mp4")
-      //- [ big squarish collab vid: grid bk: ideas, link ideas,
+      //- [ big squarish collab vid: grid or gradient bk: ideas, link ideas,
       //- > There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true. – Steve Jobs
       //- put some in lists: (Doing, Deferred) , painting and turning things into tasks, checking things off ]
       //- drag in image and resize and connect to
+      //- labels, directions
+      //- codeblock
 
     p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
-    //- feature-wrap , f1
-    //- feature-wrap , f2
+    .row.feature-wrap
+      .feature
+        h3 Groups
+        .row.group-label-row
+          template(v-for="group in groups" :key="group.id")
+            GroupLabel(:group="group" :showName="true")
+        p Create and manage shared spaces for teams, projects, or clients.
+      .feature
+        h3 Flexible Collaboration
+        p Whether working through ideas together in real-time, organizing spaces on mobile, or contributing async, Kinopio is designed for every kind of thinker.
 
-    //- ?? gdpr.. trust and security
+    //- ?? best in class security. gdpr.. trust and security
 
 </template>
 
 <style lang="stylus">
 section.for-work
   .for-work-wrap
-    background-color var(--for-work-background)
-    // background-color rgb(6, 73, 107)
-    // color white
+    // background-color var(--for-work-background)
+    background-color #002c43
+    color white
     border-radius var(--page-entity-radius)
     padding 2rem
     video
@@ -134,5 +170,20 @@ section.for-work
         pointer-events none
         width 7px
         margin-bottom 2px
+  .row
+    display flex
+    flex-wrap wrap
+  .feature-wrap
+    margin-top 1rem
+    justify-content space-between
+    .feature
+      padding 0 1rem
+      border-radius calc(var(--entity-radius) * 2)
+      // background-color #618aa0 // for-work-feature-background
+      border 1px solid #3a5c6e
+      max-width calc(50% - 10px)
+      gap 0 10px
+      p
+        margin-bottom 1rem
 
 </style>
