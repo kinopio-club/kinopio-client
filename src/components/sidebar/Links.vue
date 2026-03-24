@@ -92,7 +92,10 @@ const updateSpaces = async () => {
   debouncedUpdateSpaces()
 }
 const updateOutgoingSpaces = () => {
-  console.log('🫐🫐🫐', cardStore.getAllCards) // todo computed getter
+  const cards = cardStore.getCardsWithLinkToSpaceId
+  const spaceIds = cards.map(card => card.linkToSpaceId)
+  const spaces = spaceIds.map(spaceId => globalStore.getOtherSpaceById(spaceId))
+  state.outgoingSpaces = spaces
 }
 const debouncedUpdateSpaces = debounce(async function () {
   const spaceId = spaceStore.id
