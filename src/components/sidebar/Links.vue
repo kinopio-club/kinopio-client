@@ -25,14 +25,14 @@ let unsubscribes
 const resultsElement = ref(null)
 
 onMounted(() => {
-  updateLinks()
+  updateSpaces()
   updateResultsSectionHeight()
   window.addEventListener('resize', updateResultsSectionHeight)
 
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
-        updateLinks()
+        updateSpaces()
       }
     }
   )
@@ -53,14 +53,16 @@ const state = reactive({
   resultsSectionHeight: null,
   links: [],
   loading: false,
-  spaces: [],
+  incomingSpaces: [],
+  outgoingSpaces: [],
   prevSpaceId: '',
-  currentUserSpacesIsVisibleOnly: false
+  currentUserSpacesIsVisibleOnly: false,
+  showIncoming: true
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    updateLinks()
+    updateSpaces()
     updateResultsSectionHeight()
   }
 })
@@ -68,21 +70,25 @@ watch(() => state.loading, (value, prevValue) => {
   updateResultsSectionHeight()
 })
 
+const spaces = computed(() => {
+  return state.incomingSpaces
+})
+
 const shouldShowSpaces = computed(() => {
-  const spaces = state.spaces || []
+  const spaces = state.incomingSpaces || []
   return !state.loading && spaces.length
 })
 const filteredSpaces = computed(() => {
   if (state.currentUserSpacesIsVisibleOnly) {
-    return state.spaces.filter(space => space.userId === userStore.id)
+    return state.incomingSpaces.filter(space => space.userId === userStore.id)
   } else {
-    return state.spaces
+    return state.incomingSpaces
   }
 })
 const userSpacesToggleShouldBeVisible = computed(() => {
-  const otherUserSpaces = state.spaces.filter(space => space.userId !== userStore.id) || []
+  const otherUserSpaces = state.incomingSpaces.filter(space => space.userId !== userStore.id) || []
   const isOtherUserSpaces = Boolean(otherUserSpaces.length)
-  const shouldForceToggleVisible = !isOtherUserSpaces && state.spaces.length
+  const shouldForceToggleVisible = !isOtherUserSpaces && state.incomingSpaces.length
   if (isOtherUserSpaces || shouldForceToggleVisible) {
     return true
   } else {
@@ -97,14 +103,17 @@ const changeSpace = (space) => {
   spaceStore.changeSpace(space)
   globalStore.closeAllDialogs()
 }
-const updateLinks = async () => {
+const updateSpaces = async () => {
   const spaceId = spaceStore.id
   if (state.prevSpaceId === spaceId) { return }
-  state.spaces = []
+  state.incomingSpaces = []
   state.loading = true
-  debouncedUpdateLinks()
+  debouncedUpdateSpaces()
 }
-const debouncedUpdateLinks = debounce(async function () {
+const updateOutgoingSpaces = () => {
+  console.log('🫐🫐🫐', cardStore.getAllCards) // todo computed getter
+}
+const debouncedUpdateSpaces = debounce(async function () {
   const spaceId = spaceStore.id
   const links = await apiStore.getCardsWithLinkToSpaceId(spaceId)
   state.loading = false
@@ -112,14 +121,21 @@ const debouncedUpdateLinks = debounce(async function () {
   if (!links) { return }
   if (!links.spaces.length) { return }
   if (links.spaces.length) {
-    state.spaces = links.spaces
+    state.incomingSpaces = links.spaces
   }
+  updateOutgoingSpaces()
 }, 350, { leading: true })
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
+}
+
+// incoming, outgoing
+
+const toggleShowIncoming = (value) => {
+  state.showIncoming = value
 }
 </script>
 
@@ -130,6 +146,12 @@ const updateResultsSectionHeight = async () => {
       div
         span Backlinks
         Loader(:visible="state.loading" :isSmall="true")
+    .row
+      .segmented-buttons
+        button(:class="{ active: state.showIncoming }" @click="toggleShowIncoming(true)")
+          span Incoming
+        button(:class="{ active: !state.showIncoming }" @click="toggleShowIncoming(false)")
+          span Outgoing
   section.results-section(v-if="shouldShowSpaces" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="filteredSpaces"
