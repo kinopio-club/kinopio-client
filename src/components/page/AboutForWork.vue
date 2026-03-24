@@ -1,5 +1,30 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+const videoElement = ref(null)
+
+const state = reactive({
+  videoIsPaused: false
+})
+
+const toggleVideoIsPaused = () => {
+  const value = !state.videoIsPaused
+  state.videoIsPaused = value
+  if (value) {
+    pauseVideo()
+  } else {
+    playVideo()
+  }
+}
+const pauseVideo = () => {
+  const element = videoElement.value
+  element.pause()
+}
+const playVideo = () => {
+  const element = videoElement.value
+  element.play()
+}
+
 </script>
 
 <template lang="pug">
@@ -8,50 +33,39 @@ section.for-work
   //- see love wall
   //- p The collaboration tool for new ideas and hard problems that teams enjoy using.
   .for-work-wrap
-    p We need to work together but we can't read minds.
+    p
+      em If only
+      span {{' '}}projects went neartly from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockups.
+    //- ??? A // myth of the perfect plan -> B // no surprises or learning
 
-    //- maybe put this in a card vid?
-    //- p There’s always been this myth that really neat, fun people at home all of [a] sudden get very dull and boring and serious when they come to work, and it’s simply not true.
-    //- p – Steve Jobs
+    //-   .row
+    //-     .side.left
+    //-       h3 Paint Select and Multi-Edit
+    //-       p 11111111111111111111 111111111111111111111 11111111111
+    //-     .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
-  //- .how-to-wrap
-  //-   .row
-  //-     .side.left
-  //-       h3 Cards and Connections
-  //-       p To create cards, tap anywhere and start typing. Format with markdown, paste URLs to create links and play YouTube videos, add images, colors and more. Connect related cards by dragging from the connector to another card.
-  //-     //- video in .right
-  //-     .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+    p Instead, Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
 
-  //-   .row
-  //-     .side.left
-  //-       h3 Paint Select and Multi-Edit
-  //-       p 11111111111111111111 111111111111111111111 11111111111
-  //-     .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+    //- TODO add play/pause button?
+    .video-wrap
+      .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
+        button.small-button(title="Pause or Play Video")
+          img.icon.play(v-if="state.videoIsPaused" src="@/assets/play.svg")
+          img.icon.stop(v-else src="@/assets/box-filled.svg")
 
-  //-   .row
-  //-     .side.left
-  //-       h3 Boxes, Lists, and Lines
-  //-       p 11111111111111111111 111111111111111111111 11111111111
-  //-     .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+      video(autoplay loop muted playsinline aria-label="moodboard space" ref="videoElement")
+        source(src="@/assets/page/about/examples/moodboard.mp4")
+      //- [ big squarish collab vid: grid bk: ideas, link ideas,
+      //- > There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true. – Steve Jobs
+      //- put some in lists: (Doing, Deferred) , painting and turning things into tasks, checking things off ]
+      //- drag in image and resize and connect to
 
-  //-   .row
-  //-     .side.left
-  //-       h3 Sharing and Collaboration
-  //-       p 11111111111111111111 111111111111111111111 11111111111
-  //-     .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
+    p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
-  //- TODO to AboutForWork component
-  //- details
-  //-   summary Why should I use Kinopio for work?
-  //-   section.subsection
-  //-     blockquote
-  //-       p There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true.
-  //-       p – Steve Jobs
-  //-     p Exploring big ideas and tackling hard problems is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
-  //-     p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
-  //-     p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
+    //- feature-wrap , f1
+    //- feature-wrap , f2
 
-//- gdpr.. trust and security
+    //- ?? gdpr.. trust and security
 
 </template>
 
@@ -63,6 +77,18 @@ section.for-work
     // color white
     border-radius var(--page-entity-radius)
     padding 2rem
+    video
+      border-radius calc(var(--entity-radius) * 2)
+
+    p
+      max-width 460px
+    > p:first-child
+      margin-top 0
+    // blockquote
+    //   margin-left 0
+    //   margin-right 0
+    //   border-left 1px solid black
+    //   padding-left 10px
     @media(max-width 460px)
       padding 1rem
   //   .row
@@ -85,4 +111,28 @@ section.for-work
   //   margin-bottom 0
   // .button-badge.badge.active
   //   box-shadow var(--example-button-active-inset-shadow)
+  .video-wrap
+    position relative
+    margin-top 1rem
+  .play-button-wrap
+    flex-shrink 0
+    padding 0
+    height fit-content
+    margin-top 7px
+    margin-left 8px
+    margin-right 0
+    position absolute
+    top 0
+    button
+      width 23px
+      background transparent
+      padding-left 7px
+      .icon.play
+        pointer-events none
+        vertical-align 1px
+      .icon.stop
+        pointer-events none
+        width 7px
+        margin-bottom 2px
+
 </style>

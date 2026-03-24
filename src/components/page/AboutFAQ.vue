@@ -69,7 +69,7 @@ section.faq
       p You can import and export spaces in a variety of formats, including as open{{' '}}
         a(href="https://jsoncanvas.org/") JSON Canvas
         span {{' '}}files, and you can download a backup of all your spaces together.
-      p There is a comprehensive{{' '}}
+      p There is also a comprehensive{{' '}}
         a(href="/help/api") public API
         span {{' '}} so that you can build your own custom integrations and tooling.
       p And if you'd like, you can{{' '}}
@@ -89,10 +89,10 @@ section.faq
     padding 12px !important
     padding-top 2px !important
     margin-bottom 0.5rem
-    blockquote
-      border-left 1px solid var(--tertiary-hover-background)
-      margin-left 0
-      padding-left 1rem
+    // blockquote
+    //   border-left 1px solid var(--tertiary-hover-background)
+    //   margin-left 0
+    //   padding-left 1rem
     table
       td
         padding 5px 10px
