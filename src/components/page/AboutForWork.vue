@@ -77,7 +77,7 @@ section.for-work
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
         button.small-button(title="Pause or Play Video")
           img.icon.play(v-if="state.videoIsPaused" src="@/assets/play.svg")
-          img.icon.stop(v-else src="@/assets/box-filled.svg")
+          img.icon.pause(v-else src="@/assets/pause.svg")
 
       video(autoplay loop muted playsinline aria-label="moodboard space" ref="videoElement")
         source(src="@/assets/page/about/examples/moodboard.mp4")
@@ -166,10 +166,9 @@ section.for-work
       .icon.play
         pointer-events none
         vertical-align 1px
-      .icon.stop
+      .icon.pause
         pointer-events none
-        width 7px
-        margin-bottom 2px
+        margin-bottom 1px
   .row
     display flex
     flex-wrap wrap
