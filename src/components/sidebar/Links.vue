@@ -56,7 +56,6 @@ const state = reactive({
   incomingSpaces: [],
   outgoingSpaces: [],
   prevSpaceId: '',
-  currentUserSpacesIsVisibleOnly: false,
   showIncoming: true
 })
 
@@ -79,26 +78,9 @@ const shouldShowSpaces = computed(() => {
   return !state.loading && spaces.length
 })
 const filteredSpaces = computed(() => {
-  if (state.currentUserSpacesIsVisibleOnly) {
-    return state.incomingSpaces.filter(space => space.userId === userStore.id)
-  } else {
-    return state.incomingSpaces
-  }
-})
-const userSpacesToggleShouldBeVisible = computed(() => {
-  const otherUserSpaces = state.incomingSpaces.filter(space => space.userId !== userStore.id) || []
-  const isOtherUserSpaces = Boolean(otherUserSpaces.length)
-  const shouldForceToggleVisible = !isOtherUserSpaces && state.incomingSpaces.length
-  if (isOtherUserSpaces || shouldForceToggleVisible) {
-    return true
-  } else {
-    return false
-  }
+  return spaces.value
 })
 const parentDialog = computed(() => 'links')
-const toggleCurrentUserSpacesIsVisibleOnly = () => {
-  state.currentUserSpacesIsVisibleOnly = !state.currentUserSpacesIsVisibleOnly
-}
 const changeSpace = (space) => {
   spaceStore.changeSpace(space)
   globalStore.closeAllDialogs()
