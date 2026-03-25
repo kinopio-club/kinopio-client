@@ -126,7 +126,7 @@ const buttonLabel = computed(() => {
 
 // copy text
 
-const copyText = async () => {
+const copyText = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
@@ -136,6 +136,22 @@ const copyText = async () => {
     console.warn('🚑 copyText', error)
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
+}
+
+// copy to note
+
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const copyToNote = (event) => {
+  const position = utils.cursorPositionInPage(event)
+  const note = spaceStore.note
+  let newValue
+  if (note) {
+    newValue = `${note}\n\n${text.value}`
+  } else {
+    newValue = text.value
+  }
+  spaceStore.updateSpace({ note: newValue })
+  globalStore.addNotificationWithPosition({ message: 'Copied to Sidebar → Note', position, type: 'success', layer: 'app', icon: 'checkmark' })
 }
 
 // copy or move
@@ -235,10 +251,17 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
   section.title-section
     .row.title-row
       span {{actionLabelCapitalized}} to
-      .button-wrap(v-if="!actionIsMove && text")
-        button.small-button(@click.left="copyText")
-          img.icon.cut(src="@/assets/cut.svg")
-          span Clipboard
+      div
+        //- copy to note
+        .button-wrap(v-if="!actionIsMove && text && canEditSpace")
+          button.small-button(@click.left="copyToNote")
+            //- img.icon.cut(src="@/assets/cut.svg")
+            span N
+        //- copy to clipboard
+        .button-wrap(v-if="!actionIsMove && text")
+          button.small-button(@click.left="copyText")
+            img.icon.cut(src="@/assets/cut.svg")
+            span Clipboard
 
   section
     //- space picker
