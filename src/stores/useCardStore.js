@@ -178,6 +178,10 @@ export const useCardStore = defineStore('cards', {
       return cards.filter(card => {
         return card.y <= consts.edgeThreshold
       })
+    },
+    getCardsWithLinkToSpaceId () {
+      const cards = this.getAllCards
+      return cards.filter(card => card.linkToSpaceId)
     }
   },
 
