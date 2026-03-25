@@ -1934,7 +1934,7 @@ export default {
     return spaces
   },
   newHelloSpace (user) {
-    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
+    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey', 'note']
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
     const userId = user?.id || consts.moderatorUserId

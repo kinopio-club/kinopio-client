@@ -1,28 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 
-// import { useGlobalStore } from '@/stores/useGlobalStore'
-// import { useCardStore } from '@/stores/useCardStore'
-// import { useConnectionStore } from '@/stores/useConnectionStore'
-// import { useBoxStore } from '@/stores/useBoxStore'
-// import { useUserStore } from '@/stores/useUserStore'
+import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-// import { useApiStore } from '@/stores/useApiStore'
 
-// import Loader from '@/components/Loader.vue'
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
-// const globalStore = useGlobalStore()
-// const cardStore = useCardStore()
-// const connectionStore = useConnectionStore()
-// const boxStore = useBoxStore()
-// const userStore = useUserStore()
+const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-// const apiStore = useApiStore()
+
+const textareaElement = ref(null)
 
 // let unsubscribes
 
-// onMounted(() => {
+onMounted(() => {
 //   loadFavoriteUsers()
 //   const globalActionUnsubscribe = globalStore.$onAction(
 //     ({ name, args }) => {
@@ -34,7 +25,9 @@ const spaceStore = useSpaceStore()
 //   unsubscribes = () => {
 //     globalActionUnsubscribe()
 //   }
-// })
+  focusTextarea()
+  textareaSizes()
+})
 // onBeforeUnmount(() => {
 //   unsubscribes()
 // })
@@ -44,25 +37,39 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    // loadFavoriteUsers()
-    // focusTextarea()
+    focusTextarea()
+    textareaSizes()
   }
 })
 
-// const state = reactive({
-//   isLoadingFavorites: false,
-//   favoriteUsers: []
-// })
+watch(() => userStore.sidebarResizeWidth, (value, prevValue) => {
+  textareaSizes()
+})
 
-// const currentSpace = computed(() => spaceStore.getSpaceAllState)
-// const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
+const focusTextarea = async () => {
+  await nextTick()
+  const element = textareaElement.value
+  const length = spaceNote.value.length
+  utils.focusTextarea(element)
+}
+
+const textareaSizes = async () => {
+  await nextTick()
+  await nextTick()
+  await nextTick()
+  const element = textareaElement.value
+  if (!element) { return }
+  element.style.height = 'auto'
+  element.style.height = element.scrollHeight + 2 + 'px' // +2 for chromium scrollbar fix
+}
 
 const spaceNote = computed({
   get () {
     return spaceStore.note
   },
   set (newValue) {
-    spaceStore.update({ note: newValue })
+    spaceStore.updateSpace({ note: newValue })
+    textareaSizes()
   }
 })
 
@@ -74,13 +81,14 @@ section.note(v-if="visible")
     div
       img.icon.lock-icon(src="@/assets/lock.svg")
       span Private Note
-  //- .badge.secondary.tips(v-if="!spaceNote")
-  //-   p
-  //-     img.icon.lock-icon(src="@/assets/lock.svg")
-  //-     span note for this space, collaborators can't see this, only be seen by you
 
-  textarea(
+  textarea.name(
+    data-1p-ignore
+    autocomplete="off"
+    ref="textareaElement"
+    rows="3"
     placeholder="Type here note for this space, collaborators can't see this, only be seen by you"
+    v-model="spaceNote"
   )
 </template>
 
