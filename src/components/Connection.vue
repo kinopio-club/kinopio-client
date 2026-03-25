@@ -148,11 +148,9 @@ const typeName = computed(() => {
 // items
 
 const items = computed(() => {
-  const cards = cardStore.getAllCards
-  const boxes = boxStore.getAllBoxes
-  const items = cards.concat(boxes)
-  const startItem = items.find(item => item.id === props.connection.startItemId)
-  const endItem = items.find(item => item.id === props.connection.endItemId)
+  const { startItemId, endItemId } = props.connection
+  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
+  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
   return { startItem, endItem }
 })
 const isConnectedToCommentCard = computed(() => {
