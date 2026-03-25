@@ -350,6 +350,8 @@ const focusLine = (line) => {
   border-top-left-radius 0
   border-bottom-left-radius 0
   left 0
+  scroll-margin-top 175px // consts.minLineYOutdent
+  scroll-margin-bottom 175px // consts.minLineYOutdent
   &.is-outdented
     left 50px
     transition left 0.1s
