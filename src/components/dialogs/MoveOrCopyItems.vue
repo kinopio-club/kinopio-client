@@ -151,7 +151,7 @@ const copyToNote = (event) => {
     newValue = text.value
   }
   spaceStore.updateSpace({ note: newValue })
-  globalStore.addNotificationWithPosition({ message: 'Copied to Sidebar → Note', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  globalStore.addNotificationWithPosition({ message: 'Copied to Sidebar → Note', position, type: 'success', layer: 'app', icon: 'checkmark' }) // TODO note icon
 }
 
 // copy or move
