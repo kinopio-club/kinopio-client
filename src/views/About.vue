@@ -80,6 +80,7 @@ AboutJsonLd
     .page-wrap
       section.intro
         h1.wordmark Kinopio
+        p Spatial Thinking for Mindmaps, Moodboards, Whiteboards, Research, and Notes.
         video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
           source(src="@/assets/page/about/hero/vid.mp4")
         p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}

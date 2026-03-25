@@ -1,35 +1,65 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+
+import utils from '@/utils.js'
+
+// safari can't play webm with alpha transparency
+// https://caniuse.com/?search=webm
+const isSafari = computed(() => utils.isSafari() || utils.isIPhone())
 </script>
 
 <template lang="pug">
 section.how-to
   h2 Bend Information into Knowledge
-  //- p Kinopio gives you the tools to combine creative expression with focused productivity.
   .how-to-wrap
     .row
       .side.left
         h3 Cards and Connections
         p To create cards, tap anywhere and start typing. Format with markdown, paste URLs to create links and play YouTube videos, add images, colors and more. Connect related cards by dragging from the connector to another card.
-      //- TODO vid
-      .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
+      .side.right
+        video(
+          autoplay
+          loop
+          muted
+          playsinline
+          aria-label="Showing clicking anywhere, typing to add cards, connecting cards together, and dragging them around"
+          poster="@/assets/page/about/how-to/1.webp"
+        )
+          source(v-if="isSafari" src="@/assets/page/about/how-to/1.mp4")
+          source(v-else src="@/assets/page/about/how-to/1.webm")
     .row
       .side.left
         h3 Boxes and Lists
         p When you’re ready to add structure, use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
-      //- TODO vid
-      .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
+      .side.right
+        video(
+          autoplay
+          loop
+          muted
+          playsinline
+          aria-label="Showing moving boxes, adding cards to list, and rearranging"
+          poster="@/assets/page/about/how-to/2.webp"
+        )
+          source(v-if="isSafari" src="@/assets/page/about/how-to/2.mp4")
+          source(v-else src="@/assets/page/about/how-to/2.webm")
     .row
       .side.left
         h3 Paint Select and Multi-Edit
         p Drag from an empty area to paint over items you want to move or edit them together. First-class bulk edits are one of Kinopio's most powerful features.
-      //- TODO vid
-      .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
 
-    //- TODO help site link?
-
+      .side.right
+        video(
+          autoplay
+          loop
+          muted
+          playsinline
+          aria-label="Showing paint select cards, dragging them together, and making them into a list, then paint selecting other cards and making them tasks and checking them off"
+          poster="@/assets/page/about/how-to/3.webp"
+        )
+          source(v-if="isSafari" src="@/assets/page/about/how-to/3.mp4")
+          source(v-else src="@/assets/page/about/how-to/3.webm")
 </template>
 
 <style lang="stylus">
