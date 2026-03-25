@@ -195,6 +195,7 @@ const toolbarIsVisible = computed(() => {
   if (userCanOnlyComment.value) { return }
   return userCanEditSpace.value
 })
+const isSpaceNote = computed(() => Boolean(spaceStore.note))
 
 // new stuff
 
@@ -767,6 +768,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .button-wrap
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
             img.icon.sidebar(src="@/assets/sidebar.svg")
+          .label-badge-row.sidebar-label-badge-row
+            //- note
+            .label-badge(v-if="isSpaceNote")
+              span N
           Sidebar(:visible="state.sidebarIsVisible")
 
   Toolbar(:visible="toolbarIsVisible")
@@ -959,7 +964,9 @@ header
         font-size 11px
         vertical-align 0px
         margin-right 3px
-
+  .sidebar-label-badge-row
+    left initial
+    right 2px
   .invisible
     visibility hidden
 

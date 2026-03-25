@@ -15,6 +15,7 @@ import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
 import Todos from '@/components/sidebar/Todos.vue'
+import Note from '@/components/sidebar/Note.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -64,7 +65,8 @@ const state = reactive({
   statsIsVisible: false,
   favoritesIsVisible: false,
   historyIsVisible: false,
-  todosIsVisible: false
+  todosIsVisible: false,
+  noteIsVisible: false
 })
 
 const clearVisible = () => {
@@ -76,6 +78,7 @@ const clearVisible = () => {
   state.favoritesIsVisible = false
   state.historyIsVisible = false
   state.todosIsVisible = false
+  state.noteIsVisible = false
 }
 
 const updateDialogHeight = async () => {
@@ -110,7 +113,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = userStore.lastSidebarSection
-  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'todos'] // listed in api docs
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'todos', 'note'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -159,6 +162,8 @@ dialog#sidebar.sidebar.is-pinnable(
         .segmented-buttons
           button(@click.left="toggleSection('todos')" :class="{ active: state.todosIsVisible}" title="Todos")
             span Todos
+          button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
+            span N
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
             img.icon.time(src="@/assets/time.svg")
@@ -181,6 +186,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
   Todos(:visible="state.todosIsVisible")
+  Note(:visible="state.noteIsVisible")
 
 </template>
 
