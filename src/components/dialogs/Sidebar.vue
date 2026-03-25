@@ -69,6 +69,10 @@ const state = reactive({
   noteIsVisible: false
 })
 
+watch(() => userStore.sidebarResizeWidth, (value, prevValue) => {
+  updateDialogHeight()
+})
+
 const clearVisible = () => {
   state.linksIsVisible = false
   state.tagsIsVisible = false
