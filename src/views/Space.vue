@@ -925,41 +925,7 @@ const handleTouchEnd = (event) => {
   globalStore.isTouchScrolling = false
   stopInteractions(event)
 }
-const stopInteractions = async (event) => {
-  console.info('💣 stopInteractions')
-  updateIconsNotDraggable()
-  blurButtonClick(event)
-  if (event.touches) {
-    globalStore.triggerUpdateHeaderAndFooterPosition()
-  }
-  checkIfShouldHideFooter(event)
-  await checkIfShouldRemoveFromList()
-  await checkIfShouldSnapToBox(event)
-  await checkIfShouldSnapToCard(event)
-  await checkIfShouldSnapToListTop(event)
-  await checkIfShouldSnapBackToList()
-  await checkIfShouldUpdateCardPositionsInEdgeLists()
-  globalStore.clearSnapGuides()
-  globalStore.preventItemSnapping = false
-  if (shouldCancelInteraction(event)) {
-    globalStore.currentUserIsResizingCardDetails = false
-    return
-  }
-  addOrCloseCard(event)
-  unselectCardsInDraggedBox()
-  showMultipleSelectedActions(event)
-  showBoxDetails(event)
-  showListDetails(event)
-  globalStore.preventMultipleSelectedActionsIsVisible = false
-  globalStore.importArenaChannelIsVisible = false
-  globalStore.shouldAddCard = false
-  globalStore.preventDraggedCardFromShowingDetails = false
-  globalStore.preventDraggedBoxFromShowingDetails = false
-  globalStore.preventDraggedListFromShowingDetails = false
-  stopResizingCards()
-  stopTiltingCards()
-  stopResizingBoxes()
-  stopResizingLists()
+const resetGlobalStoreState = () => {
   globalStore.shouldSnapBackToList = false
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
@@ -978,6 +944,43 @@ const stopInteractions = async (event) => {
   globalStore.currentUserIsResizingCardDetails = false
   prevCursor = undefined
   globalStore.clearDraggingItems()
+}
+const stopInteractions = async (event) => {
+  console.info('💣 stopInteractions')
+  updateIconsNotDraggable()
+  blurButtonClick(event)
+  if (event.touches) {
+    globalStore.triggerUpdateHeaderAndFooterPosition()
+  }
+  checkIfShouldHideFooter(event)
+  await checkIfShouldRemoveFromList()
+  await checkIfShouldSnapToBox(event)
+  await checkIfShouldSnapToCard(event)
+  await checkIfShouldSnapToListTop(event)
+  await checkIfShouldSnapBackToList()
+  await checkIfShouldUpdateCardPositionsInEdgeLists()
+  globalStore.clearSnapGuides()
+  globalStore.preventItemSnapping = false
+  if (shouldCancelInteraction(event)) {
+    resetGlobalStoreState()
+    return
+  }
+  addOrCloseCard(event)
+  unselectCardsInDraggedBox()
+  showMultipleSelectedActions(event)
+  showBoxDetails(event)
+  showListDetails(event)
+  globalStore.preventMultipleSelectedActionsIsVisible = false
+  globalStore.importArenaChannelIsVisible = false
+  globalStore.shouldAddCard = false
+  globalStore.preventDraggedCardFromShowingDetails = false
+  globalStore.preventDraggedBoxFromShowingDetails = false
+  globalStore.preventDraggedListFromShowingDetails = false
+  stopResizingCards()
+  stopTiltingCards()
+  stopResizingBoxes()
+  stopResizingLists()
+  resetGlobalStoreState()
   await nextTick()
   await nextTick()
   globalStore.clearShouldExplicitlyRenderCardIds()

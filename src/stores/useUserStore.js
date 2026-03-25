@@ -55,7 +55,6 @@ export const useUserStore = defineStore('user', {
     shouldShowMultipleSelectedLineActions: false,
     shouldShowMultipleSelectedBoxActions: false,
     shouldShowMultipleSelectedListActions: false,
-    shouldDisableRightClickToPan: false,
     shouldShowCurrentSpaceTags: false,
     showInExploreUpdatedAt: null, // date
     defaultSpaceBackground: undefined,
