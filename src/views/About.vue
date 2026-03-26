@@ -81,9 +81,16 @@ AboutJsonLd
       section.intro
         h1.wordmark Kinopio
         p Spatial Thinking for Mindmaps, Moodboards, Whiteboards, Research, and Notes.
-        video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
+        video(
+          autoplay
+          loop
+          muted
+          playsinline
+          poster="@/assets/page/about/hero/placeholder.webp"
+          aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit."
+        )
           source(src="@/assets/page/about/hero/vid.mp4")
-        p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
+        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
           //- Designed to work the way your mind works.
@@ -118,6 +125,9 @@ AboutJsonLd
           span , a designer, engineer, and tool-maker. I started Kinopio in 2018 to help people{{' '}}
           a(href="https://pketh.org/dream-of-being-understood.html") understand each other
           span , and themselves.
+        p Previously, I was the co-creator and designer of {{' '}}
+          a(href="https://pketh.org/the-first-four-years-of-glitch.html") Glitch
+          span .
         p If you're curious, I wrote{{' '}}
           a(href="https://pketh.org/how-kinopio-is-made.html")
             span How Kinopio is Made
