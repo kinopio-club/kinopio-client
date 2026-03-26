@@ -86,9 +86,9 @@ section.for-work
         playsinline
         aria-label="xyz"
         ref="videoElement"
-        poster="@/assets/page/about/at-work/3.webp"
+        poster="@/assets/page/about/at-work/4.webp"
       )
-        source(src="@/assets/page/about/at-work/3.mp4")
+        source(src="@/assets/page/about/at-work/4.mp4")
       //- [ big squarish collab vid: grid or gradient bk: ideas, link ideas,
       //- > There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true. – Steve Jobs
       //- put some in lists: (Doing, Deferred) , painting and turning things into tasks, checking things off ]
