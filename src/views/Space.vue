@@ -944,6 +944,10 @@ const resetGlobalStoreState = () => {
   globalStore.currentUserIsResizingCardDetails = false
   prevCursor = undefined
   globalStore.clearDraggingItems()
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteCardsDragging' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteBoxesDragging' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteListsDragging' })
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
