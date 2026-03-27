@@ -53,7 +53,7 @@ const createSPAPlugin = () => {
 }
 
 export default defineConfig(async ({ command, mode }) => {
-  // sitemap routes, matches utils.urlIsPage
+  // sitemap routes
   const routes = [
     '/about',
     '/api',
