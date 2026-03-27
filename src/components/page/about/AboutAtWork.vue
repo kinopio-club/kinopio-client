@@ -90,12 +90,11 @@ section.for-work
       span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
     p Instead, Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
 
-    .video-wrap
+    figure
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
         button.small-button(title="Pause or Play Video")
           img.icon.play(v-if="state.videoIsPaused" src="@/assets/play.svg")
           img.icon.pause(v-else src="@/assets/pause.svg")
-
       video(
         autoplay
         loop
@@ -106,8 +105,8 @@ section.for-work
         poster="https://updates.kinopio.club/page/about/at-work/1.webp"
       )
         source(src="https://updates.kinopio.club/page/about/at-work/1.mp4")
-
-    p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
+      figcaption
+        p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
     .row.feature-wrap
       .feature
@@ -146,9 +145,14 @@ section.for-work
       margin-top 0
     @media(max-width 460px)
       padding 1rem
-  .video-wrap
+  figure
     position relative
+    margin 0
     margin-top 1rem
+    figcaption
+      p
+        opacity 0.5
+        font-size 13px
   .play-button-wrap
     flex-shrink 0
     padding 0
