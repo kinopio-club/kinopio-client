@@ -25,6 +25,7 @@ let observer
 
 const connectionElement = ref(null)
 const connectionPathElement = ref(null)
+const observerTarget = ref(null)
 
 onMounted(() => {
   initViewportObserver()
@@ -147,11 +148,9 @@ const typeName = computed(() => {
 // items
 
 const items = computed(() => {
-  const cards = cardStore.getAllCards
-  const boxes = boxStore.getAllBoxes
-  const items = cards.concat(boxes)
-  const startItem = items.find(item => item.id === props.connection.startItemId)
-  const endItem = items.find(item => item.id === props.connection.endItemId)
+  const { startItemId, endItemId } = props.connection
+  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
+  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
   return { startItem, endItem }
 })
 const isConnectedToCommentCard = computed(() => {
@@ -477,7 +476,7 @@ const initViewportObserver = async () => {
         }
       })
     }
-    const target = connectionElement.value
+    const target = observerTarget.value
     if (!target) { return }
     observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
@@ -486,14 +485,20 @@ const initViewportObserver = async () => {
   }
 }
 const removeViewportObserver = () => {
-  const target = connectionElement.value
+  const target = observerTarget.value
   if (!observer) { return }
   observer.unobserve(target)
 }
 </script>
 
 <template lang="pug">
+div.connection-observer-target(
+  ref="observerTarget"
+  :style="connectionStyles"
+  aria-hidden="true"
+)
 svg.connection(
+  v-if="state.isVisibleInViewport"
   :style="connectionStyles"
   :data-id="connection.id"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
@@ -559,6 +564,13 @@ svg.connection(
 </template>
 
 <style lang="stylus">
+.connection-observer-target
+  position absolute
+  pointer-events none
+  visibility hidden
+  min-width 5px
+  min-height 5px
+
 svg.connection
   position absolute
   overflow visible
