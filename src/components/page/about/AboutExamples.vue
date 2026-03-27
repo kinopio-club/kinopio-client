@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import ProgressCircle from '@/components/ProgressCircle.vue'
+
 const parentElement = ref(null)
 
 onMounted(() => {
@@ -8,6 +10,7 @@ onMounted(() => {
 })
 
 const state = reactive({
+  // timerValue: // ms
   example: 'whiteboard'
 })
 
@@ -29,6 +32,12 @@ const toggleExample = (value) => {
   resetVideos()
   playVideo(value)
 }
+
+// timer
+
+// max
+// seconds to ms
+
 </script>
 
 <template lang="pug">
@@ -36,6 +45,16 @@ section.examples(ref="parentElement")
   h2 Create Lively Freeform Spaces
   .examples-wrap
     .row
+      //- every n seconds togglenext , other toggles cancel timer and hide circle
+
+      //- ProgressCircle(
+      //-   v-if="todoListCards.length"
+      //-   :value="todoListCardsCompleted.length"
+      //-   :max="todoListCards.length"
+      //-   :title="todoListCardsCompletedPercent"
+      //-   :backgroundColor="color"
+      //-   :count="todoListCardsRemainingCount"
+      //- )
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
@@ -58,6 +77,7 @@ section.examples(ref="parentElement")
     //- 970 width, 693 height
 
     .example.whiteboard(v-show="state.example === 'whiteboard'")
+      //- to vid showing alignment btn
       img(src="https://updates.kinopio.club/page/about/examples/whiteboard.webp" alt="computing happiness whiteboard space")
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate together in real-time.
