@@ -100,7 +100,7 @@ section.examples(ref="parentElement")
     //- 970 width, 693 height
 
     .example.whiteboard(v-show="state.example === 'whiteboard'")
-      //- to vid showing alignment btn
+      //- TODO vid showing alignment btn
       img(src="https://updates.kinopio.club/page/about/examples/whiteboard.webp" alt="computing happiness whiteboard space")
       p Gather notes, and connect them to their source URLs. Drag in files, like PDFs, to keep everything together. Label concepts with backlinked [[tags]].
       p Invite friends and group members to collaborate together in real-time.
@@ -115,10 +115,13 @@ section.examples(ref="parentElement")
       video(autoplay loop muted playsinline aria-label="moodboard space")
         source(src="https://updates.kinopio.club/page/about/examples/moodboard.webm")
       p Collect quotes and visual inspiration to guide the direction of your next big project. Real-time collaboration and comment cards help keep everyone aligned.
-      p You can also import your Are.na channels.
+      p
+        img.icon.arena(src="@/assets/arena.svg")
+        span You can also import your Are.na channels.
 
     .example.research(v-show="state.example === 'research'")
       img(src="https://updates.kinopio.club/page/about/examples/research.webp" alt="research space")
+      //- TODO vid zoom out and back in
       p Spatially organized information that’s easy to retrieve helps you get over the hump of anxiety and procrastination.
       p Invite collaborators to collect ideas and comments. Use backlinked [[tags]] to connect themes across spaces.
 
