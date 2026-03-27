@@ -102,9 +102,9 @@ section.for-work
         playsinline
         aria-label="xyz"
         ref="videoElement"
-        poster="https://updates.kinopio.club/page/about/at-work/1.webp"
+        poster="@/assets/page/about/at-work/1.webp"
       )
-        source(src="https://updates.kinopio.club/page/about/at-work/1.mp4")
+        source(src="@/assets/page/about/at-work/1.mp4")
       figcaption
         p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
