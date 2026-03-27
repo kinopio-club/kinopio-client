@@ -40,8 +40,6 @@ const business = computed(() => 'And by designers, engineers, and PMs, at ● Di
 
 <template lang="pug">
 section.social-proof
-  img.wreath.left(src="@/assets/page/about/wreath.svg")
-  img.wreath.right(src="@/assets/page/about/wreath.svg")
   section.subsection
 
     .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
@@ -67,15 +65,6 @@ section.social-proof
 
 <style lang="stylus">
 section.social-proof
-  position relative
-  .wreath
-    position absolute
-    top 0
-    left 8px
-    &.right
-      transform scaleX(-1)
-      left initial
-      right 8px
   section.subsection
     border-radius var(--page-entity-radius)
     padding 2rem
@@ -115,8 +104,6 @@ section.social-proof
   .static-row
     p
       line-height 1.5
-      &:first-child
-        margin-top 0
 @keyframes marquee
   0%
     transform translate(0px)
