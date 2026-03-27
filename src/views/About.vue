@@ -121,7 +121,7 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
-      section.who-makes-this
+      section.about-me
         p Hi I'm{{' '}}
           a(href="https://pketh.org/about") Piri
           span , a designer, engineer, and tool-maker. I started Kinopio in 2018 to help people{{' '}}
