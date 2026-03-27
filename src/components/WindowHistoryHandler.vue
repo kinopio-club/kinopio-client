@@ -40,10 +40,9 @@ onBeforeUnmount(() => {
 // handles browser back/forward
 
 const loadSpaceOnBackOrForward = () => {
-  const url = window.location.href
-  console.log('🫐🫐🫐', url, utils.urlIsSpace(url))
-  if (!utils.urlIsSpace(url)) { return }
-  const spaceId = utils.spaceIdFromUrl(url)
+  const url = new URL(window.location)
+  if (!utils.urlIsSpace(url.href)) { return }
+  const spaceId = utils.spaceIdFromUrl(url.href)
   spaceStore.loadSpace({ id: spaceId })
 }
 
