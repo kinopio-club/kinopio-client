@@ -12,13 +12,13 @@ const userStore = useUserStore()
 
 const videoElement = ref(null)
 
-onMounted(() => {
-  updateRandomUsers()
-})
-
 const state = reactive({
   videoIsPaused: false,
-  randomUsers: []
+  randomUsers: [
+    { color: '#eeffad' },
+    { color: '#efab79' },
+    { color: '#aaacef' }
+  ]
 })
 
 // video
@@ -66,9 +66,8 @@ const groups = computed(() => {
 
 // users
 
-const currentUser = computed(() => userStore.getUserAllState)
 const updateRandomUsers = () => {
-  const times = [1, 2]
+  const times = [1, 2, 3]
   const users = []
   times.forEach(function (i) {
     const luminosity = userStore.theme
@@ -117,10 +116,10 @@ section.for-work
       .feature
         h3 Flexible Collaboration
         .users(@click="updateRandomUsers")
-          User(:user="currentUser" :isClickable="false" :isMedium="true" :hideYouLabel="true")
           template(v-if="state.randomUsers.length")
             User(:user="state.randomUsers[0]" :isClickable="false" :isMedium="true" :hideYouLabel="true")
             User(:user="state.randomUsers[1]" :isClickable="false" :isMedium="true" :hideYouLabel="true")
+            User(:user="state.randomUsers[2]" :isClickable="false" :isMedium="true" :hideYouLabel="true")
 
         p Work through ideas together in real-time, organize spaces on mobile, or contribute async.
 
