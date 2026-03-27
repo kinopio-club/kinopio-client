@@ -86,12 +86,12 @@ AboutJsonLd
           loop
           muted
           playsinline
-          poster="@/assets/page/about/hero/1.webp"
+          poster="https://updates.kinopio.club/page/about/hero/1.webp"
           aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit."
           width="715"
           height="511"
         )
-          source(src="@/assets/page/about/hero/1.webm")
+          source(src="https://updates.kinopio.club/page/about/hero/1.webm")
         p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
