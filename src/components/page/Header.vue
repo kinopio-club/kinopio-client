@@ -8,7 +8,6 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
-import Templates from '@/components/dialogs/Templates.vue'
 
 const globalStore = useGlobalStore()
 let unsubscribes
@@ -40,8 +39,7 @@ const state = reactive({
   aboutIsVisible: false,
   keyboardShortcutsIsVisible: false,
   donateIsVisible: false,
-  appsAndExtensionsIsVisible: false,
-  templatesIsVisible: false
+  appsAndExtensionsIsVisible: false
 })
 
 const closeDialogs = () => {
@@ -49,7 +47,6 @@ const closeDialogs = () => {
   state.keyboardShortcutsIsVisible = false
   state.donateIsVisible = false
   state.appsAndExtensionsIsVisible = false
-  state.templatesIsVisible = false
 }
 
 const toggleAboutIsVisible = () => {
@@ -74,11 +71,6 @@ const toggleAppsAndExtensionsIsVisible = () => {
   globalStore.closeAllDialogs()
   state.appsAndExtensionsIsVisible = !isVisible
 }
-const toggleTemplatesIsVisible = () => {
-  const isVisible = state.templatesIsVisible
-  globalStore.closeAllDialogs()
-  state.templatesIsVisible = !isVisible
-}
 
 </script>
 
@@ -94,11 +86,6 @@ const toggleTemplatesIsVisible = () => {
               About(:visible="state.aboutIsVisible")
               KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
               Donate(:visible="state.donateIsVisible")
-          .button-wrap
-            button.translucent-button.templates-button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: state.templatesIsVisible }")
-              img.icon.templates(src="@/assets/templates.svg")
-              span Templates
-            Templates(:visible="state.templatesIsVisible" :hideMySpacesButton="true")
         .right
           .button-wrap
             button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
@@ -190,9 +177,4 @@ header
     &.active
       .down-arrow
         transform translateY(2px)
-
-  .templates-button
-    @media(max-width 450px)
-      span
-        display none
 </style>
