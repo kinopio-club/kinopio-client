@@ -2381,8 +2381,24 @@ export default {
     url = new URL(url)
     return url.pathname === '/group/invite'
   },
+  urlIsPage (url) {
+    const path = new URL(url).pathname
+    // matches vite.config.js
+    const routes = [
+      '/about',
+      '/api',
+      '/blog',
+      '/changelog',
+      '/discord',
+      '/forum',
+      '/help',
+      '/roadmap'
+    ]
+    return routes.includes(path)
+  },
   urlIsSpace (url) {
     if (!url) { return }
+    if (this.urlIsPage(url)) { return }
     if (this.urlIsGroupInvite(url)) { return }
     if (this.urlIsSpaceInvite(url)) { return true }
     let spaceUrlPattern
