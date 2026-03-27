@@ -13,15 +13,15 @@ section.faq
     section.subsection
       p Physical whiteboards are so productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas and shared understanding.
       p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with a maze through endless toolbars and sticky notes in one of five designer-approved pastel shades.
-      p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and experimentation.
+      p Taking a different approach, Kinopio's just-click-and-type design and visual customizability is designed to encourage creativity and experimentation.
       p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
         a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
-        span {{' '}}and conceptual – ideal for problem solving and consensus building.
+        span {{' '}}and conceptual – ideal for problem solving, and for turning debates into discussions.
       p The other major difference is that Kinopio is{{' '}}
         a(href="https://pketh.org/organic-software.html") organic software
         span , paid for by the people who use it, rather than by VC investors looking for an{{' '}}
         a(href="https://ourincrediblejourney.tumblr.com/") easy exit
-        span .
+        span {{' '}}that leaves users high and dry.
       table
         thead
           tr
@@ -37,11 +37,11 @@ section.faq
             td Miro
             td $476,300,000 Series C
           tr
-            td Milanote
-            td $780,000
-          tr
             td Mural
             td $196,600,000 Series C
+          tr
+            td Padlet
+            td $12,700,000 Series A
           tr
             td Whimsical
             td $30,000,000 Series A
