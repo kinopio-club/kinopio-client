@@ -95,7 +95,7 @@ const toggleTemplatesIsVisible = () => {
               KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
               Donate(:visible="state.donateIsVisible")
           .button-wrap
-            button.translucent-button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: state.templatesIsVisible }")
+            button.translucent-button.templates-button(@click.left.stop="toggleTemplatesIsVisible" :class="{ active: state.templatesIsVisible }")
               img.icon.templates(src="@/assets/templates.svg")
               span Templates
             Templates(:visible="state.templatesIsVisible" :hideMySpacesButton="true")
@@ -190,4 +190,9 @@ header
     &.active
       .down-arrow
         transform translateY(2px)
+
+  .templates-button
+    @media(max-width 450px)
+      span
+        display none
 </style>
