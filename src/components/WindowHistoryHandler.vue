@@ -18,6 +18,7 @@ const router = useRouter()
 let unsubscribes
 
 onMounted(() => {
+  window.addEventListener('popstate', loadSpaceOnBackOrForward)
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateWindowHistory') {
@@ -32,8 +33,21 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('popstate', loadSpaceOnBackOrForward)
   unsubscribes()
 })
+
+// handles browser back/forward
+
+const loadSpaceOnBackOrForward = () => {
+  const url = window.location.href
+  console.log('🫐🫐🫐', url, utils.urlIsSpace(url))
+  if (!utils.urlIsSpace(url)) { return }
+  const spaceId = utils.spaceIdFromUrl(url)
+  spaceStore.loadSpace({ id: spaceId })
+}
+
+// update browser history/title when space loads
 
 const update = async () => {
   await updateWindowHistory()
@@ -69,8 +83,3 @@ const updateWindowTitle = () => {
   document.title = title
 }
 </script>
-
-<template lang="pug">
-</template>
-<style lang="stylus">
-</style>
