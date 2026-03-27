@@ -104,7 +104,7 @@ section.for-work
         ref="videoElement"
         poster="@/assets/page/about/at-work/1.webp"
       )
-        source(src="@/assets/page/about/at-work/1.mp4")
+        source(src="@/assets/page/about/at-work/1.webm")
       figcaption
         p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 

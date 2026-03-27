@@ -66,13 +66,13 @@ section.examples(ref="parentElement")
 
     .example.mindmap(v-show="state.example === 'mindmap'")
       video(autoplay loop muted playsinline aria-label="mindmap space")
-        source(src="@/assets/page/about/examples/mindmap.mp4")
+        source(src="@/assets/page/about/examples/mindmap.webm")
       p Unlike traditional mind maps and outliners, Kinopio lets you make your spaces truly yours with backgrounds, images, GIFs, MP3s, Youtube or Spotify URLs.
       p Draw anywhere to decorate or emphasize specific areas.
 
     .example.moodboard(v-show="state.example === 'moodboard'")
       video(autoplay loop muted playsinline aria-label="moodboard space")
-        source(src="@/assets/page/about/examples/moodboard.mp4")
+        source(src="@/assets/page/about/examples/moodboard.webm")
       p Collect quotes and visual inspiration to guide the direction of your next big project. Real-time collaboration and comment cards help keep everyone aligned.
       p You can also import your Are.na channels.
 
@@ -83,18 +83,18 @@ section.examples(ref="parentElement")
 
     .example.plan(v-show="state.example === 'plan'")
       video(autoplay loop muted playsinline aria-label="planning space")
-        source(src="@/assets/page/about/examples/plan.mp4")
+        source(src="@/assets/page/about/examples/plan.webm")
       p Build roadmaps, diagrams, storyboards, specs, and project plans, that let you track project progress – while also making it easy to adapt to unexpected changes, new insight, or new ideas.
       p Move from idea to actions by turning cards or boxes into trackable Todos.
 
     .example.present(v-show="state.example === 'present'")
       video(autoplay loop muted playsinline aria-label="presentation space")
-        source(src="@/assets/page/about/examples/present.mp4")
+        source(src="@/assets/page/about/examples/present.webm")
       p Engage with audiences and students by presenting from interactive, animated spaces instead of boring static slides. Use boxes to represent slides, chapters, or major themes and quickly jump between them with the minimap.
 
     .example.notes(v-show="state.example === 'notes'")
       video(autoplay loop muted playsinline aria-label="note-taking space")
-        source(src="@/assets/page/about/examples/notes.mp4")
+        source(src="@/assets/page/about/examples/notes.webm")
       p Note taking in Kinopio is an effective way to build spatial memory that sticks with you. Spatial memory is the magic that makes big ideas easier to recall and reason about.
       p Browser extensions let you quick capture ideas and URLs. If you can see it on the internet, you can put it inside Kinopio.
 

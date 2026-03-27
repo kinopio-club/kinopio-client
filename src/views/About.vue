@@ -91,7 +91,7 @@ AboutJsonLd
           width="715"
           height="511"
         )
-          source(src="@/assets/page/about/hero/1.mp4")
+          source(src="@/assets/page/about/hero/1.webm")
         p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
