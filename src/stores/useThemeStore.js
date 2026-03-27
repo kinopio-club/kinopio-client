@@ -44,10 +44,7 @@ const themes = {
       'badge-donor': '#ff9dff',
       'badge-upgraded': 'springgreen',
       // /about page sections
-      // 'how-to-background': '#a45871',
-      'example-background': '#889e9a',
-      'for-work-background': '#ADCBDB'
-      // 'for-work-feature-background': '#84aabe'
+      'example-background': '#889e9a'
     }
   },
   dark: {
@@ -87,10 +84,7 @@ const themes = {
       'badge-moderator': 'olive',
       'badge-ambassador': '#0f9189',
       // /about page sections
-      // 'how-to-background': '#43091b',
-      'example-background': '#14292d',
-      'for-work-background': '#002c43'
-      // 'for-work-feature-background': '#84aabe'
+      'example-background': '#14292d'
     }
   }
 }

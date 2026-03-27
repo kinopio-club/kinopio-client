@@ -1,13 +1,25 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useUserStore } from '@/stores/useUserStore'
+
 import GroupLabel from '@/components/GroupLabel.vue'
+import User from '@/components/User.vue'
 import consts from '@/consts.js'
+
+import randomColor from 'randomcolor'
+
+const userStore = useUserStore()
 
 const videoElement = ref(null)
 
+onMounted(() => {
+  updateRandomUsers()
+})
+
 const state = reactive({
-  videoIsPaused: false
+  videoIsPaused: false,
+  randomUsers: []
 })
 
 // video
@@ -52,6 +64,21 @@ const groups = computed(() => {
     }
   ]
 })
+
+// users
+
+const currentUser = computed(() => userStore.getUserAllState)
+const updateRandomUsers = () => {
+  const times = [1, 2]
+  const users = []
+  times.forEach(function (i) {
+    const luminosity = userStore.theme
+    const color = randomColor({ luminosity })
+    users.push({ color })
+  })
+  state.randomUsers = users
+}
+
 </script>
 
 <template lang="pug">
@@ -108,9 +135,11 @@ section.for-work
         p Create and manage shared spaces for teams, projects, or clients.
       .feature
         h3 Flexible Collaboration
-        //- TODO useruseruser
-        //-       User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-        //- User(:user="props.randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+        .users(@click="updateRandomUsers")
+          User(:user="currentUser" :isClickable="false" :isMedium="true" :hideYouLabel="true")
+          template(v-if="state.randomUsers.length")
+            User(:user="state.randomUsers[0]" :isClickable="false" :isMedium="true" :hideYouLabel="true")
+            User(:user="state.randomUsers[1]" :isClickable="false" :isMedium="true" :hideYouLabel="true")
 
         p Work through ideas together in real-time, organize spaces on mobile, or contribute async.
 
@@ -201,5 +230,6 @@ section.for-work
       gap 0 10px
       p
         margin-bottom 1rem
-
+  .users
+    cursor pointer
 </style>
