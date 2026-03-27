@@ -25,10 +25,10 @@ section.how-to
           muted
           playsinline
           aria-label="Showing clicking anywhere, typing to add cards, connecting cards together, and dragging them around"
-          poster="https://updates.kinopio.club/page/about/how-to/1.webp"
+          poster="@/assets/page/about/how-to/1.webp"
         )
-          source(v-if="isSafari" src="https://updates.kinopio.club/page/about/how-to/1.mp4")
-          source(v-else src="https://updates.kinopio.club/page/about/how-to/1.webm")
+          source(v-if="isSafari" src="@/assets/page/about/how-to/1.mp4")
+          source(v-else src="@/assets/page/about/how-to/1.webm")
     .row
       .side.left
         h3 Boxes and Lists
@@ -41,10 +41,10 @@ section.how-to
           muted
           playsinline
           aria-label="Showing moving boxes, adding cards to list, and rearranging"
-          poster="https://updates.kinopio.club/page/about/how-to/2.webp"
+          poster="@/assets/page/about/how-to/2.webp"
         )
-          source(v-if="isSafari" src="https://updates.kinopio.club/page/about/how-to/2.mp4")
-          source(v-else src="https://updates.kinopio.club/page/about/how-to/2.webm")
+          source(v-if="isSafari" src="@/assets/page/about/how-to/2.mp4")
+          source(v-else src="@/assets/page/about/how-to/2.webm")
     .row
       .side.left
         h3 Paint Select and Multi-Edit
@@ -57,10 +57,10 @@ section.how-to
           muted
           playsinline
           aria-label="Showing paint select cards, dragging them together, and making them into a list, then paint selecting other cards and making them tasks and checking them off"
-          poster="https://updates.kinopio.club/page/about/how-to/3.webp"
+          poster="@/assets/page/about/how-to/3.webp"
         )
-          source(v-if="isSafari" src="https://updates.kinopio.club/page/about/how-to/3.mp4")
-          source(v-else src="https://updates.kinopio.club/page/about/how-to/3.webm")
+          source(v-if="isSafari" src="@/assets/page/about/how-to/3.mp4")
+          source(v-else src="@/assets/page/about/how-to/3.webm")
 </template>
 
 <style lang="stylus">
