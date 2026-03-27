@@ -1,7 +1,5 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-
-import consts from '@/consts.js'
 </script>
 
 <template lang="pug">

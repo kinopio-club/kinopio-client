@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import consts from '@/consts.js'
 import utils from '@/utils.js'
 
 // safari can't play webm with alpha transparency

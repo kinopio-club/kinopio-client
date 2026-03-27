@@ -5,7 +5,6 @@ import { useUserStore } from '@/stores/useUserStore'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 import User from '@/components/User.vue'
-import consts from '@/consts.js'
 
 import randomColor from 'randomcolor'
 
