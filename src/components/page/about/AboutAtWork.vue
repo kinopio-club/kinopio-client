@@ -15,9 +15,9 @@ const videoElement = ref(null)
 const state = reactive({
   videoIsPaused: false,
   randomUsers: [
-    { color: '#eeffad' },
-    { color: '#efab79' },
-    { color: '#aaacef' }
+    { color: '#e0f27d' },
+    { color: '#b382ec' },
+    { color: '#f2a893' }
   ]
 })
 
