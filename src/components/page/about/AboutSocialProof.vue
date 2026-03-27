@@ -93,14 +93,10 @@ section.social-proof
     animation-duration 45s
     &.row-2
       animation-duration 40s
-    &.row-3
-      animation-duration 35s
     @media(max-width 500px)
       animation-duration 30s
       &.row-2
         animation-duration 25s
-      &.row-3
-        animation-duration 20s
   .static-row
     p
       line-height 1.5
