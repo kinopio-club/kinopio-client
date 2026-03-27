@@ -30,7 +30,7 @@ section.how-to
           source(v-else src="https://updates.kinopio.club/page/about/how-to/1.webm")
     .row
       .side.left
-        h3 Boxes and Lists
+        h3 Boxes and Lists to Organize
         p When you’re ready to add structure, use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
 
       .side.right
@@ -46,7 +46,7 @@ section.how-to
           source(v-else src="https://updates.kinopio.club/page/about/how-to/2.webm")
     .row
       .side.left
-        h3 Paint Select and Multi-Edit
+        h3 Paint Select to Edit Multiple
         p Drag from an empty area to paint over items you want to move or edit them together. First-class bulk edits are one of Kinopio's most powerful features.
 
       .side.right
