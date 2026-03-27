@@ -104,7 +104,7 @@ AboutJsonLd
 
       AboutHowTo
 
-      //- AboutMoreFeatures
+      AboutMoreFeatures
 
       AboutExamples
 
