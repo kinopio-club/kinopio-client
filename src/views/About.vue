@@ -5,14 +5,14 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useUserStore } from '@/stores/useUserStore'
 
-import AboutJsonLd from '@/components/page/AboutJsonLd.vue'
+import AboutJsonLd from '@/components/page/about/AboutJsonLd.vue'
 import Header from '@/components/page/Header.vue'
-import AboutSocialProof from '@/components/page/AboutSocialProof.vue'
-import AboutHowTo from '@/components/page/AboutHowTo.vue'
-import AboutExamples from '@/components/page/AboutExamples.vue'
-import AboutMoreFeatures from '@/components/page/AboutMoreFeatures.vue'
-import AboutAtWork from '@/components/page/AboutAtWork.vue'
-import AboutFAQ from '@/components/page/AboutFAQ.vue'
+import AboutSocialProof from '@/components/page/about/AboutSocialProof.vue'
+import AboutHowTo from '@/components/page/about/AboutHowTo.vue'
+import AboutExamples from '@/components/page/about/AboutExamples.vue'
+import AboutMoreFeatures from '@/components/page/about/AboutMoreFeatures.vue'
+import AboutAtWork from '@/components/page/about/AboutAtWork.vue'
+import AboutFAQ from '@/components/page/about/AboutFAQ.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
 import consts from '@/consts.js'
@@ -86,10 +86,12 @@ AboutJsonLd
           loop
           muted
           playsinline
-          poster="@/assets/page/about/hero/placeholder.webp"
+          poster="@/assets/page/about/hero/1.webp"
           aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit."
+          width="715"
+          height="511"
         )
-          source(src="@/assets/page/about/hero/vid.mp4")
+          source(src="@/assets/page/about/hero/1.mp4")
         p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
