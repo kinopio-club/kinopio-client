@@ -100,6 +100,4 @@ section.how-to
       margin-bottom 0
     @media(max-width 460px)
       padding 1rem
-    // @media(max-width 540px)
-    //   padding 1rem
 </style>

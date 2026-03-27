@@ -84,23 +84,12 @@ const updateRandomUsers = () => {
 <template lang="pug">
 section.for-work
   h2 Kinopio at Work
-  //- see love wall
-  //- p The collaboration tool for new ideas and hard problems that teams enjoy using.
   .for-work-wrap
     p
       em If only
       span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
-    //- ??? A // myth of the perfect plan -> B // no surprises or learning
-
-    //-   .row
-    //-     .side.left
-    //-       h3 Paint Select and Multi-Edit
-    //-       p 11111111111111111111 111111111111111111111 11111111111
-    //-     .side.right full width VID 2222222222222 22222222222222222222222222222 222222222222222 2222222222222222222222 2
-
     p Instead, Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
 
-    //- TODO add play/pause button?
     .video-wrap
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
         button.small-button(title="Pause or Play Video")
@@ -117,12 +106,6 @@ section.for-work
         poster="https://updates.kinopio.club/page/about/at-work/1.webp"
       )
         source(src="https://updates.kinopio.club/page/about/at-work/1.mp4")
-      //- [ big squarish collab vid: grid or gradient bk: ideas, link ideas,
-      //- > There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true. – Steve Jobs
-      //- put some in lists: (Doing, Deferred) , painting and turning things into tasks, checking things off ]
-      //- drag in image and resize and connect to
-      //- labels, directions
-      //- codeblock
 
     p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
@@ -150,13 +133,8 @@ section.for-work
 <style lang="stylus">
 section.for-work
   .for-work-wrap
-    // background-color var(--for-work-background)
-    // light color is less hackery , more biz trust
-
     background-color #002c43
     color white
-    // background-color #84AABE
-    // color black
     border-radius var(--page-entity-radius)
     padding 2rem
     video
@@ -166,33 +144,8 @@ section.for-work
       max-width 460px
     > p:first-child
       margin-top 0
-    // blockquote
-    //   margin-left 0
-    //   margin-right 0
-    //   border-left 1px solid black
-    //   padding-left 10px
     @media(max-width 460px)
       padding 1rem
-  //   .row
-  //     display flex
-  //     flex-wrap wrap
-  //     justify-content space-between
-  //     // 40 / 60??
-  //     .left
-  //       max-width calc(50% - var(--how-to-column-gap))
-  //       margin-right var(--how-to-column-gap)
-  //     .right
-  //       max-width 50%
-  //   .row + .row
-  //     margin-top 20px
-  // h3
-  //   margin-top 0
-  // img,
-  // video
-  //   border-radius calc(var(--entity-radius) * 2)
-  //   margin-bottom 0
-  // .button-badge.badge.active
-  //   box-shadow var(--example-button-active-inset-shadow)
   .video-wrap
     position relative
     margin-top 1rem
@@ -224,7 +177,6 @@ section.for-work
     .feature
       padding 0 1rem
       border-radius calc(var(--entity-radius) * 3)
-      // background-color #94BCD2 // for-work-feature-background
       border 1px solid #38596a
       max-width calc(50% - 10px)
       gap 0 10px

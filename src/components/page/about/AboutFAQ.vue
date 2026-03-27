@@ -91,10 +91,6 @@ section.faq
     padding 12px !important
     padding-top 2px !important
     margin-bottom 0.5rem
-    // blockquote
-    //   border-left 1px solid var(--tertiary-hover-background)
-    //   margin-left 0
-    //   padding-left 1rem
     table
       td
         padding 5px 10px
