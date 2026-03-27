@@ -132,6 +132,7 @@ const closeChildDialogs = () => {
 .user
   display inline-block
   position relative
+  user-select none
   &:hover,
   &:active
     outline none

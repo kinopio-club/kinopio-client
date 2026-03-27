@@ -2,10 +2,24 @@ import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import consts from './consts.js'
 import utils from './utils.js'
+
+// ensures space will load properly after
+const resetStoresForStaticPage = () => {
+  useGlobalStore().$reset()
+  useSpaceStore().$reset()
+  useCardStore().$reset()
+  useBoxStore().$reset()
+  useLineStore().$reset()
+  useListStore().$reset()
+}
 
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
@@ -30,7 +44,11 @@ const router = {
       path: '/',
       alias: '/about',
       name: 'about',
-      component: () => import('./views/About.vue')
+      component: () => import('./views/About.vue'),
+      beforeEnter: (to, from, next) => {
+        resetStoresForStaticPage()
+        next()
+      }
     }, {
       path: '/app',
       name: 'space',
