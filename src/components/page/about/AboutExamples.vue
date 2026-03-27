@@ -1,24 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import ProgressCircle from '@/components/ProgressCircle.vue'
-
 const parentElement = ref(null)
 
 onMounted(() => {
   resetVideos()
-  startTimer()
 })
-
-onBeforeUnmount(() => {
-  cancelTimer()
-})
-
-const timerMax = 15 * 1000 // 15s
-const timerId = ref(null)
 
 const state = reactive({
-  timerValue: 0,
   example: 'whiteboard'
 })
 
@@ -39,31 +28,7 @@ const toggleExample = (value) => {
   state.example = value
   resetVideos()
   playVideo(value)
-  cancelTimer()
 }
-
-// timer
-
-const examples = ['whiteboard', 'mindmap', 'moodboard', 'research', 'plan', 'present', 'notes', 'websites']
-const startTimer = () => {
-  state.timerValue = 0
-  timerId.value = setInterval(() => {
-    state.timerValue += 50
-    if (state.timerValue >= timerMax) {
-      const nextIndex = (examples.indexOf(state.example) + 1) % examples.length
-      state.example = examples[nextIndex]
-      resetVideos()
-      playVideo(examples[nextIndex])
-      state.timerValue = -150 // offsets duration of reset animation
-    }
-  }, 50)
-}
-
-const cancelTimer = () => {
-  clearInterval(timerId.value)
-  timerId.value = null
-}
-
 </script>
 
 <template lang="pug">
@@ -71,13 +36,6 @@ section.examples(ref="parentElement")
   h2 Create Lively Freeform Spaces
   .examples-wrap
     .row
-      //- every n seconds togglenext , other toggles cancel timer and hide circle
-
-      ProgressCircle(
-        v-if="timerId"
-        :value="timerMax - state.timerValue"
-        :max="timerMax"
-      )
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
