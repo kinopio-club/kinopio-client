@@ -58,23 +58,10 @@ const copyText = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const normalizeSpace = (space) => {
-  const spacePrivateKeys = [
-    'clients',
-    'spectators',
-    'users',
-    'collaborators',
-    'collaboratorKey',
-    'groupId',
-    'readOnlyKey'
-  ]
-  spacePrivateKeys.forEach(key => delete space[key])
-  return space
-}
 const downloadLocalJson = () => {
   globalStore.triggerUpdateDrawingStrokes()
   let space = utils.clone(currentSpace.value)
-  space = normalizeSpace(space)
+  space = utils.deletePrivateSpaceMeta(space)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(space))
   const name = fileName()
   const downloadAnchor = document.getElementById('export-downlaod-anchor')
@@ -137,7 +124,7 @@ const pdf = async () => {
 
 const downloadLocalCanvas = () => {
   let space = utils.clone(currentSpace.value)
-  space = normalizeSpace(space)
+  space = utils.deletePrivateSpaceMeta(space)
   const canvas = convertToCanvas(space)
   console.info('🧚 canvas to download', canvas)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))
