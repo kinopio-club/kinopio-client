@@ -89,6 +89,8 @@ section.how-to
         .right
           max-width 100%
           margin-right initial
+        video
+          margin-top 1rem
     .row + .row
       margin-top 20px
     h3
