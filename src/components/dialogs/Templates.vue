@@ -28,7 +28,8 @@ onMounted(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  hideMySpacesButton: Boolean
 })
 
 const state = reactive({
@@ -179,7 +180,7 @@ dialog.templates(
       span
         span Templates
         Loader(:visible="isLoading" :isSmall="true")
-      button.small-button(@click="showSpaceDetailsDialog")
+      button.small-button(v-if="!props.hideMySpacesButton" @click="showSpaceDetailsDialog")
         span My Spaces
     //- categories
     .categories

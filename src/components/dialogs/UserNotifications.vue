@@ -81,6 +81,9 @@ const spaceUrl = (notification) => {
   if (!notification.space) { return }
   return `${consts.kinopioDomain()}/${notification.space?.id}`
 }
+const spaceName = (name) => {
+  return utils.truncated(name)
+}
 
 // card
 
@@ -235,7 +238,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                 //- space
                 span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }")
                   img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
-                  span.space-name {{notification.space.name}}
+                  span.space-name {{spaceName(notification.space.name)}}
             //- add to explore button
             .row.add-to-explore-row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore" :isSmall="true")

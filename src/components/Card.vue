@@ -2164,7 +2164,7 @@ const toggleVideoIsPaused = () => {
           )
             button.small-button
               img.icon.play(v-if="props.card.videoIsPaused" src="@/assets/play.svg" :class="colorClasses")
-              img.icon.stop(v-else src="@/assets/box-filled.svg" :class="colorClasses")
+              img.icon.pause(v-else src="@/assets/pause.svg" :class="colorClasses")
           //- [·]
           ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
@@ -2417,10 +2417,9 @@ const toggleVideoIsPaused = () => {
           .icon.play
             pointer-events none
             vertical-align 1px
-          .icon.stop
+          .icon.pause
             pointer-events none
-            width 7px
-            margin-bottom 2px
+            margin-bottom 1px
 
     .name-wrap
       min-width 40px

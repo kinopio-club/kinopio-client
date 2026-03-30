@@ -60,8 +60,8 @@ const copyText = async (event) => {
 }
 const downloadLocalJson = () => {
   globalStore.triggerUpdateDrawingStrokes()
-  const space = utils.clone(currentSpace.value)
-  delete space.clients
+  let space = utils.clone(currentSpace.value)
+  space = utils.deletePrivateSpaceMeta(space)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(space))
   const name = fileName()
   const downloadAnchor = document.getElementById('export-downlaod-anchor')
@@ -123,8 +123,8 @@ const pdf = async () => {
 // https://jsoncanvas.org/spec/1.0/
 
 const downloadLocalCanvas = () => {
-  const space = utils.clone(currentSpace.value)
-  delete space.clients
+  let space = utils.clone(currentSpace.value)
+  space = utils.deletePrivateSpaceMeta(space)
   const canvas = convertToCanvas(space)
   console.info('🧚 canvas to download', canvas)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))

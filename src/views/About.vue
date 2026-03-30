@@ -5,14 +5,16 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useUserStore } from '@/stores/useUserStore'
 
-import { useHead } from '@unhead/vue'
-
+import AboutJsonLd from '@/components/page/about/AboutJsonLd.vue'
 import Header from '@/components/page/Header.vue'
-import AboutExamples from '@/components/page/AboutExamples.vue'
-import AboutFeatures from '@/components/page/AboutFeatures.vue'
+import AboutSocialProof from '@/components/page/about/AboutSocialProof.vue'
+import AboutHowTo from '@/components/page/about/AboutHowTo.vue'
+import AboutExamples from '@/components/page/about/AboutExamples.vue'
+import AboutMoreFeatures from '@/components/page/about/AboutMoreFeatures.vue'
+import AboutAtWork from '@/components/page/about/AboutAtWork.vue'
+import AboutFAQ from '@/components/page/about/AboutFAQ.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
-import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -29,141 +31,6 @@ if (!consts.isStaticPrerenderingPage) {
     window.userStore = useUserStore()
   }
 }
-
-// JSON-LD Structured Data
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Physical whiteboards are productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas. But typical software whiteboards are designed around neatness and conformity. Kinopio spaces encourage creativity and experimentation with customizable backgrounds, colors, and embedded videos. Unlike competitors with hundreds of millions in VC funding, Kinopio is organic software, paid for by the people who use it. The result is a product that embraces individuality and personality, made for people, not drones.'
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'Why doesn\'t Kinopio have AI features?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Because Kinopio is solely supported by the people who love it, we only add features that truly help users. With whiteboarding and mind-mapping, the journey of placing ideas, making connections, and figuring out groupings yourself is vitally important to building up your own spatial memory. This is the magic that makes big ideas easier to recall and reason about.'
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'Why should I use Kinopio for work?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Exploring big ideas and tackling hard problems is a messy and chaotic process that uses both creative and analytical sides of your brain. Using tools that embrace creativity prevents group-think and encourages collaborators to solve hard problems in new ways. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans. Kinopio is designed for nimble teams that want to build shared understanding and work better together.'
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'Can I export my data?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes, of course – what you write inside Kinopio belongs only to you. There are export options in a variety of formats, and you can download a backup of all your spaces together. There is also a public API available.'
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'Who else uses Kinopio?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Kinopio is used by students, teachers, and researchers at NYU, The New School (Parsons), Yale, MIT, Stanford, Berkeley, Columbia, and School for Poetic Computation. It\'s also used by designers, engineers, and PMs at Discord, Brilliant, Cisco, Wikimedia, Atlassian, Spotify, and Moving Brands. Kinopio has been featured in The Verge and App Stacks, and was the ProductHunt #1 Product of the Day.'
-      }
-    }
-  ]
-}
-const softwareSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'Kinopio',
-  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.',
-  applicationCategory: 'ProductivityApplication',
-  operatingSystem: 'Web browser',
-  url: 'https://kinopio.club',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-    description: 'Free for 100 cards'
-  }
-}
-const orgSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  '@id': 'https://kinopio.club/#organization',
-  name: 'Kinopio',
-  url: 'https://kinopio.club',
-  logo: 'https://kinopio.club/favicon-32x32.png',
-  foundingDate: '2018',
-  founder: {
-    '@type': 'Person',
-    name: 'Piri',
-    url: 'https://pketh.org'
-  },
-  sameAs: [
-    'https://twitter.com/KinopioClub',
-    'https://discord.gg/h2sR45Nby8',
-    'https://forum.kinopio.club'
-  ]
-}
-const websiteSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Kinopio',
-  url: 'https://kinopio.club',
-  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings.',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: 'https://kinopio.club/explore?search={search_term_string}',
-    'query-input': 'required name=search_term_string'
-  }
-}
-const aboutPageSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'AboutPage',
-  name: 'About Kinopio',
-  url: 'https://kinopio.club',
-  description: 'Learn about Kinopio, a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings.',
-  mainEntity: {
-    '@id': 'https://kinopio.club/#organization'
-  }
-}
-const productSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Product',
-  name: 'Kinopio',
-  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.',
-  url: 'https://kinopio.club',
-  brand: {
-    '@id': 'https://kinopio.club/#organization'
-  },
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-    description: 'Free for 100 cards',
-    availability: 'https://schema.org/InStock'
-  }
-}
-useHead({
-  link: [{
-    rel: 'canonical',
-    href: 'https://kinopio.club'
-  }],
-  script: [
-    { type: 'application/ld+json', innerHTML: JSON.stringify(faqSchema) },
-    { type: 'application/ld+json', innerHTML: JSON.stringify(softwareSchema) },
-    { type: 'application/ld+json', innerHTML: JSON.stringify(orgSchema) },
-    { type: 'application/ld+json', innerHTML: JSON.stringify(websiteSchema) },
-    { type: 'application/ld+json', innerHTML: JSON.stringify(aboutPageSchema) },
-    { type: 'application/ld+json', innerHTML: JSON.stringify(productSchema) }
-  ]
-})
 
 onMounted(() => {
   if (!consts.isStaticPrerenderingPage) {
@@ -203,135 +70,74 @@ const logSystemThemeChange = (event) => {
 const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
-
 </script>
 
 <template lang="pug">
-  .page(:class="{ 'is-dark-theme': isThemeDark }")
-    Header
-    main.page(@click="closeAllDialogs")
-      .page-wrap
-        section.intro
-          h1.wordmark Kinopio
-          video(autoplay loop muted playsinline poster="@/assets/page/about/hero/placeholder.webp" aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit.")
-            source(src="@/assets/page/about/hero/vid.mp4")
-          p Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.
-          p Free for 100 cards. No sign up required.
+AboutJsonLd
+.page(:class="{ 'is-dark-theme': isThemeDark }")
+  Header
+  main.page(@click="closeAllDialogs")
+    .page-wrap
+      section.intro
+        h1.wordmark Kinopio
+        p Spatial Thinking for Mindmaps, Moodboards, Whiteboards, Research, and Notes.
+        video(
+          autoplay
+          loop
+          muted
+          playsinline
+          poster="https://updates.kinopio.club/page/about/hero/1.webp"
+          aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit."
+          width="715"
+          height="511"
+        )
+          source(src="https://updates.kinopio.club/page/about/hero/1.webm")
+        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
+          a(href="https://pketh.org/organic-software.html") built for the long-term
+          span .
+        p Free for 100 cards. No sign up required.
 
-          //- cta
-          .button-wrap
-            router-link(to="/app")
-              button.success Open Kinopio
+        //- cta
+        .button-wrap
+          router-link(to="/app")
+            button.success Open Kinopio
 
-        AboutExamples
-        AboutFeatures
+      AboutHowTo
 
-        section.faq
-          h2 FAQ
+      AboutMoreFeatures
 
-          WhoMakesKinopio(title="Who makes Kinopio")
+      AboutExamples
 
-          details
-            summary How does Kinopio compare to Miro, Milanote, Whimsical, and other whiteboard apps?
-            section.subsection
-              p Physical whiteboards are so productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas and shared understanding.
-              p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with toolbars and sticky notes in one of 5 designer-approved pastel shades.
-              p From customizable backgrounds, to colors, to embedding youtube videos, Kinopio spaces encourage creativity and experimentation.
-              p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
-                a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
-                span {{' '}}and conceptual – ideal for problem solving and consensus building.
-              p The other major difference is that Kinopio is{{' '}}
-                a(href="https://pketh.org/organic-software.html") organic software
-                span , paid for by the people who use it, rather than by VC investors looking for an{{' '}}
-                a(href="https://ourincrediblejourney.tumblr.com/") easy exit
-                span .
-              table
-                thead
-                  tr
-                    td
-                      strong Company
-                    td
-                      strong VC Funding
-                tbody
-                  tr
-                    td Figjam
-                    td $1,400,000,000 Series F
-                  tr
-                    td Miro
-                    td $476,300,000 Series C
-                  tr
-                    td Milanote
-                    td $780,000
-                  tr
-                    td Mural
-                    td $196,600,000 Series C
-                  tr
-                    td Whimsical
-                    td $30,000,000 Series A
-                  tr
-                    td.badge.info Kinopio
-                    td.badge.info $0
-              p The result? Kinopio is a product that embraces individuality and personality. Made for people, not drones.
-              p To see how this plays out IRL, here's a video by a customer comparing{{' '}}
-                a(href="https://www.youtube.com/watch?v=Colow9UCPqM") Kinopio vs Milanote
-                span .
+      AboutAtWork
 
-          details
-            summary Why doesn't Kinopio have AI features?
-            section.subsection
-              p Because Kinopio is solely supported by the people who love it, I have the insane privilege of being able to only add features that fit into the product and truly help its users.
-              p
-                span With whiteboarding, mind-mapping, or mood-boarding, the journey of placing ideas and images, making connections, and figuring out what things should be grouped together yourself is vitally important to building up your own{{' '}}
-                a(href="https://en.wikipedia.org/wiki/Spatial_memory") spatial memory
-                span . This is the magic that makes big ideas easier to recall and reason about.
+      AboutFAQ
 
-          details
-            summary Why should I use Kinopio for work?
-            section.subsection
-              blockquote
-                p There’s always been this myth that really neat, fun people at home all of a sudden get very dull and boring and serious when they come to work, and it’s simply not true.
-                p – Steve Jobs
-              p Exploring big ideas and tackling hard problems is anything but linear, it's a messy and chaotic process that uses both the creative (R) and analytical (L) sides of your brain.
-              p Using tools that embrace creativity and individuality prevents group-think and encourages collaborators to come up with new ways to solve hard problems. Features like trackable tasks and shared groups help turn brainstorming sessions into actionable project plans.
-              p Kinopio is designed for nimble teams that want to build shared understanding, get projects started faster, be more flexible to change, and work better together.
+      AboutSocialProof
 
-          details
-            summary Can I export my data?
-            section.subsection
-              p Yes, of course – what you write inside Kinopio belongs only to you. There are export options in a variety of formats, and you can download a backup of all your spaces together.
-              p
-                span There is also a {{' '}}
-                a(href="/api") public API
-                span {{' '}}available.
+      section
+        //- cta
+        .button-wrap
+          router-link(to="/app")
+            button.success Open Kinopio
 
-          details
-            summary Who else uses Kinopio?
-            section.subsection
-              p
-                span Over the years, it’s been amazing to hear how people use Kinopio to map out and make sense of their ideas, feelings, and plans. I recently started capturing the nice things people are saying about it on the{{' '}}
-                a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") Community Love Wall
-                span .
-              p Used by students, teachers, and researchers, at ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ●{{' '}}
-                  a(href="https://x.com/sfpc/status/1597727116556390404") School for Poetic Computation
-              p And by designers, engineers, and PMs, at ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands
-              p Kinopio has also been featured in{{' '}}
-                a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
-                span ,{{' '}}
-                a(href="https://appstacks.club/kinopio") App Stacks
-                span , and was the{{' '}}
-                a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
-                span .
-
-        section
-          //- cta
-          .button-wrap
-            router-link(to="/app")
-              button.success Open Kinopio
-          p I hope you enjoy using Kinopio and find it invaluable,
-          img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
-
-        FooterSitemap
-    Footer
+      section.about-me
+        p Hi I'm{{' '}}
+          a(href="https://pketh.org/about") Piri
+          span , a designer, engineer, and tool-maker. I started Kinopio in 2018 to help people{{' '}}
+          a(href="https://pketh.org/dream-of-being-understood.html") understand each other
+          span , and themselves.
+        p Previously, I was the co-creator and designer of {{' '}}
+          a(href="https://pketh.org/the-first-four-years-of-glitch.html") Glitch
+          span .
+        p If you're curious, I wrote{{' '}}
+          a(href="https://pketh.org/how-kinopio-is-made.html")
+            span How Kinopio is Made
+          span . I hope you enjoy using Kinopio and find it invaluable,
+        img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
+        .row
+          a(href="mailto:hi@kinopio.club") hi@kinopio.club
+      FooterSitemap
+  Footer
 </template>
 
 <style lang="stylus">
@@ -351,7 +157,7 @@ main.page
   .page-wrap
     margin-left auto
     margin-right auto
-    max-width 730px
+    max-width 755px
     @media(max-width 760px)
       max-width 600px
 
@@ -389,19 +195,6 @@ main.page
       video
         border-radius calc(var(--entity-radius) * 2)
 
-    > section.faq
-      max-width 480px
-      section.subsection
-        padding 12px !important
-        padding-top 2px !important
-        margin-bottom 0.5rem
-        blockquote
-          border-left 1px solid var(--tertiary-hover-background)
-          margin-left 0
-          padding-left 1rem
-        table
-          td
-            padding 5px 10px
     .signature
       width 70px
       margin 0

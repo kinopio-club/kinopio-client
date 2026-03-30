@@ -155,7 +155,6 @@ onMounted(async () => {
   window.addEventListener('message', addCardFromOutsideAppContext)
   // load space tasks
   window.addEventListener('beforeunload', unloadPage)
-  window.addEventListener('popstate', loadSpaceOnBackOrForward)
   document.fonts.ready.then(event => {
     globalStore.webfontIsLoaded = true
   })
@@ -216,7 +215,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', handleTouchEnd)
   window.removeEventListener('beforeunload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
-  window.removeEventListener('popstate', loadSpaceOnBackOrForward)
   window.removeEventListener('touchend', updateViewportSizes)
   window.removeEventListener('gesturecancel', updateViewportSizes)
   window.removeEventListener('resize', updateViewportSizes)
@@ -330,15 +328,6 @@ const styles = computed(() => {
   }
 })
 
-// page history
-
-const loadSpaceOnBackOrForward = (event) => {
-  const url = window.location.href
-  if (!utils.urlIsSpace(url)) { return }
-  const spaceId = utils.spaceIdFromUrl(url)
-  const space = { id: spaceId }
-  spaceStore.loadSpace(space)
-}
 const unloadPage = () => {
   const user = userStore.id
   broadcastStore.leaveSpaceRoom({ user, type: 'userLeftRoom' })
@@ -944,6 +933,10 @@ const resetGlobalStoreState = () => {
   globalStore.currentUserIsResizingCardDetails = false
   prevCursor = undefined
   globalStore.clearDraggingItems()
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteCardsDragging' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteBoxesDragging' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteListsDragging' })
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')

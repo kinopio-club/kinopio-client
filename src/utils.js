@@ -1712,6 +1712,19 @@ export default {
       groupId: null
     }
   },
+  deletePrivateSpaceMeta (space) {
+    const spacePrivateKeys = [
+      'clients',
+      'spectators',
+      'users',
+      'collaborators',
+      'collaboratorKey',
+      'groupId',
+      'readOnlyKey'
+    ]
+    spacePrivateKeys.forEach(key => delete space[key])
+    return space
+  },
   resetSpaceMeta ({ space, user, type }) {
     space.originSpaceId = space.id
     space.id = nanoid()
@@ -1726,7 +1739,6 @@ export default {
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.isTemplate = false
-    space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null
     space.groupId = null
