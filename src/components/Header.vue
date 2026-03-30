@@ -108,6 +108,8 @@ onMounted(() => {
         updateTemplatesIsVisible(true)
       } else if (name === 'triggerRemovedIsVisible') {
         updateSidebarIsVisible(true)
+      } else if (name === 'triggerNoteIsVisible') {
+        updateSidebarIsVisible(true)
       } else if (name === 'triggerImportIsVisible') {
         updateImportIsVisible(true)
       } else if (name === 'triggerClearUserNotifications') {

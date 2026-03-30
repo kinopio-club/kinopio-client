@@ -36,7 +36,8 @@ const state = reactive({
   selectedSpace: {},
   spacePickerIsVisible: false,
   loading: false,
-  cardsCreatedIsOverLimit: false
+  cardsCreatedIsOverLimit: false,
+  isCopiedToNote: false
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -46,6 +47,7 @@ watch(() => props.visible, async (value, prevValue) => {
     closeDialogs()
     scrollIntoView()
     updateSpaces()
+    state.isCopiedToNote = false
   }
 })
 
@@ -141,8 +143,7 @@ const copyText = async (event) => {
 // copy to note
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const copyToNote = (event) => {
-  const position = utils.cursorPositionInPage(event)
+const copyToNote = () => {
   const note = spaceStore.note
   let newValue
   if (note) {
@@ -151,7 +152,10 @@ const copyToNote = (event) => {
     newValue = text.value
   }
   spaceStore.updateSpace({ note: newValue })
-  globalStore.addNotificationWithPosition({ message: 'Copied to Sidebar → Note', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  state.isCopiedToNote = true
+}
+const openNote = () => {
+  globalStore.triggerNoteIsVisible()
 }
 
 // copy or move
@@ -261,7 +265,11 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
           button.small-button(@click.left="copyText" title="Copy to Clipboard")
             img.icon.copy(src="@/assets/copy.svg")
             span Clipboard
-
+    .row.badge.success.copied-to-note(v-if="state.isCopiedToNote")
+      p Copied to Note
+      button.small-button(title="Open Sidebar Note" @click="openNote")
+        img.icon.note(src="@/assets/note.svg")
+        span Open
   section
     //- space picker
     .row
@@ -304,4 +312,10 @@ dialog.more-or-copy-items
     // top -100px
     .results-section
       max-height 250px
+  .copied-to-note
+    margin-right 0
+    justify-content space-between
+    button
+      margin 0
+      margin-left 6px
 </style>

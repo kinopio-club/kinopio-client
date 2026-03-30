@@ -518,6 +518,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateUrlPreview (cardId) {},
     triggerUpdateUrlPreviewComplete (cardId) {},
     triggerRemovedIsVisible () {},
+    triggerNoteIsVisible () {},
     triggerJumpToIsVisible () {},
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},

@@ -31,6 +31,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerRemovedIsVisible') {
         toggleSection('removed')
+      } else if (name === 'triggerNoteIsVisible') {
+        toggleSection('note')
       }
     }
   )
