@@ -142,7 +142,7 @@ const itemsRemaningCount = computed(() => {
     section.subsection(v-if="!isItems")
       span Prepend cards or boxes with
         span.badge.info [ ]
-        span to create checkbox cards that you can track here.
+        span to create todo cards that you can track here.
 
   section.results-section(v-if="isItems")
     BoxList(
