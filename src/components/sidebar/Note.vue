@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -73,6 +75,17 @@ const spaceNote = computed({
   }
 })
 
+const copyText = async (event) => {
+  globalStore.clearNotificationsWithPosition()
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(spaceNote.value)
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
 </script>
 
 <template lang="pug">
@@ -80,7 +93,7 @@ section.note(v-if="visible")
   .row.title-row
     div
       span Private Note
-    button.small-button(title="Copy to Clipboard" @click="copyToClipboard")
+    button.small-button(title="Copy to Clipboard" @click="copyText")
       img.icon.copy(src="@/assets/copy.svg")
       span Copy
 
