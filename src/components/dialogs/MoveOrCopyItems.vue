@@ -254,13 +254,12 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
       div
         //- copy to note
         .button-wrap(v-if="!actionIsMove && text && canEditSpace")
-          button.small-button(@click.left="copyToNote")
-            //- img.icon.cut(src="@/assets/cut.svg")
-            span N
+          button.small-button(@click.left="copyToNote" title="Copy to Sidebar Note")
+            img.icon.note(src="@/assets/note.svg")
         //- copy to clipboard
         .button-wrap(v-if="!actionIsMove && text")
-          button.small-button(@click.left="copyText")
-            img.icon.cut(src="@/assets/cut.svg")
+          button.small-button(@click.left="copyText" title="Copy to Clipboard")
+            img.icon.copy(src="@/assets/copy.svg")
             span Clipboard
 
   section

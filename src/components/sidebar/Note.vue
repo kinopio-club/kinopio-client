@@ -79,15 +79,17 @@ const spaceNote = computed({
 section.note(v-if="visible")
   .row.title-row
     div
-      img.icon.lock-icon(src="@/assets/lock.svg")
       span Private Note
+    button.small-button(title="Copy to Clipboard" @click="copyToClipboard")
+      img.icon.copy(src="@/assets/copy.svg")
+      span Copy
 
   textarea.name(
     data-1p-ignore
     autocomplete="off"
     ref="textareaElement"
-    rows="3"
-    placeholder="Type here note for this space, collaborators can't see this, only be seen by you"
+    rows="2"
+    placeholder="Type a personal space note here. Only you can see this."
     v-model="spaceNote"
   )
 </template>

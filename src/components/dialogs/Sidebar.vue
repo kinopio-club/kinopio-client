@@ -167,7 +167,7 @@ dialog#sidebar.sidebar.is-pinnable(
           button(@click.left="toggleSection('todos')" :class="{ active: state.todosIsVisible}" title="Todos")
             span Todos
           button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
-            span N
+            img.icon.note(src="@/assets/note.svg")
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
             img.icon.time(src="@/assets/time.svg")

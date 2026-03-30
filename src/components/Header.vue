@@ -771,7 +771,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .label-badge-row.sidebar-label-badge-row
             //- note
             .label-badge(v-if="isSpaceNote")
-              span N
+              img.icon.note(src="@/assets/note.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
   Toolbar(:visible="toolbarIsVisible")
