@@ -179,10 +179,9 @@ dialog#sidebar.sidebar.is-pinnable(
             img.icon.remove-undo(src="@/assets/undo.svg")
 
       //- Pin
-      .title-row
-        .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
-          button.small-button(:class="{active: dialogIsPinned}")
-            img.icon.pin.right-pin(src="@/assets/pin.svg")
+      .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+        button.small-button(:class="{active: dialogIsPinned}")
+          img.icon.pin.right-pin(src="@/assets/pin.svg")
 
   Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
   Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
@@ -223,6 +222,11 @@ dialog#sidebar.sidebar.is-pinnable(
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
+
+  .pin-button-wrap
+    position absolute
+    right 0
+    top 0
 
   .segmented-buttons-wrap
     .segmented-buttons

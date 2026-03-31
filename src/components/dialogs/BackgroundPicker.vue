@@ -589,7 +589,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         ul.results-list.gradients-list
           li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)" :key="gradient.id" :class="{ active: gradientIsActive(gradient) }")
             SpaceBackgroundGradients(:visible="true" :layers="gradient")
-        .right-side-button-wrap(@click="refreshGradients")
+        .refresh-button-wrap(@click="refreshGradients")
           button.small-button
             img.refresh.icon(src="@/assets/refresh.svg")
       //- built-in backgrounds
@@ -723,7 +723,10 @@ dialog.background-picker
   .right-side-button-wrap
     pointer cursor
     padding-right 4px
-
+  .refresh-button-wrap
+    position absolute
+    right 8px
+    top 10px
   .gradients-list
     display flex
     flex-wrap nowrap
