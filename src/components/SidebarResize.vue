@@ -45,7 +45,8 @@ const remove = (event) => {
     .inline-button-wrap
       margin-right 0
       margin-top 0
-      padding-top 0
+      padding 12px
+      padding-left 0
       padding-bottom 0
       z-index 1
       cursor ew-resize
