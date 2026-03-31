@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import Links from '@/components/sidebar/Links.vue'
 import Tags from '@/components/sidebar/Tags.vue'
@@ -50,15 +51,6 @@ onBeforeUnmount(() => {
 const props = defineProps({
   visible: Boolean
 })
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    restoreUserLastSidebarSection()
-    updateDialogHeight()
-    globalStore.shouldExplicitlyHideFooter = true
-  } else {
-    globalStore.shouldExplicitlyHideFooter = false
-  }
-})
 
 const state = reactive({
   dialogHeight: null,
@@ -71,6 +63,16 @@ const state = reactive({
   historyIsVisible: false,
   todosIsVisible: false,
   noteIsVisible: false
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    restoreUserLastSidebarSection()
+    updateDialogHeight()
+    globalStore.shouldExplicitlyHideFooter = true
+  } else {
+    globalStore.shouldExplicitlyHideFooter = false
+  }
 })
 
 watch(() => userStore.sidebarResizeWidth, (value, prevValue) => {
@@ -88,7 +90,6 @@ const clearVisible = () => {
   state.todosIsVisible = false
   state.noteIsVisible = false
 }
-
 const updateSubsectionHeight = () => {
   const element = titleElement.value
   const rect = element.getBoundingClientRect()
@@ -144,6 +145,18 @@ const updateUserLastSidebarSection = (name) => {
   userStore.updateUser({ lastSidebarSection: name })
 }
 
+// styles
+
+const styles = computed(() => {
+  const minWidth = consts.defaultDialogWidth
+  let width = userStore.sidebarResizeWidth || minWidth
+  width = `${width}px`
+  return {
+    width,
+    maxHeight: state.dialogHeight + 'px'
+  }
+})
+
 </script>
 
 <template lang="pug">
@@ -152,7 +165,7 @@ dialog#sidebar.sidebar.is-pinnable(
   :open="visible"
   @click.left.stop="closeDialogs"
   ref="dialogElement"
-  :style="{'max-height': state.dialogHeight + 'px'}"
+  :style="styles"
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )

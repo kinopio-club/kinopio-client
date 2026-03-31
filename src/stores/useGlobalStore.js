@@ -99,6 +99,7 @@ export const useGlobalStore = defineStore('global', {
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
     currentUserIsResizingCardDetails: false,
+    currentUserIsResizingSidebar: false,
 
     // drawing
     drawingEraserIsActive: false,
