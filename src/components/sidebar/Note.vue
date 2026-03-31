@@ -32,6 +32,9 @@ watch(() => props.visible, (value, prevValue) => {
 watch(() => userStore.sidebarResizeWidth, (value, prevValue) => {
   textareaSizes()
 })
+watch(() => spaceStore.id, (value, prevValue) => {
+  textareaSizes()
+})
 
 const styles = computed(() => {
   return {
