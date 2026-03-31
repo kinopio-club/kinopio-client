@@ -21,11 +21,6 @@ const resultsElement = ref(null)
 
 onMounted(() => {
   clearPreviousResultItem()
-  updateResultsSectionHeight()
-  window.addEventListener('resize', updateResultsSectionHeight)
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateResultsSectionHeight)
 })
 
 const props = defineProps({
@@ -33,32 +28,19 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  resultsSectionHeight: null,
   shouldShowCompleted: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     clearPreviousResultItem()
-    updateResultsSectionHeight()
   }
 })
 
 const spaceIsLoaded = computed(() => !globalStore.isLoadingSpace)
-watch(() => spaceIsLoaded.value, (value, prevValue) => {
-  if (value) {
-    updateResultsSectionHeight()
-  }
-})
 
 const clearPreviousResultItem = () => {
   globalStore.clearPreviousResultItem()
-}
-const updateResultsSectionHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const styles = computed(() => {
   return {

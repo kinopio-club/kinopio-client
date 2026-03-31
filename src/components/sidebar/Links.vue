@@ -26,9 +26,6 @@ const resultsElement = ref(null)
 
 onMounted(() => {
   updateSpaces()
-  updateResultsSectionHeight()
-  window.addEventListener('resize', updateResultsSectionHeight)
-
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
@@ -41,7 +38,6 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateResultsSectionHeight)
   unsubscribes()
 })
 
@@ -51,7 +47,6 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  resultsSectionHeight: null,
   links: [],
   loading: false,
   incomingSpaces: [],
@@ -63,11 +58,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateSpaces()
-    updateResultsSectionHeight()
   }
-})
-watch(() => state.loading, (value, prevValue) => {
-  updateResultsSectionHeight()
 })
 
 const styles = computed(() => {
@@ -115,12 +106,6 @@ const debouncedUpdateSpaces = debounce(async function () {
   }
   updateOutgoingSpaces()
 }, 350, { leading: true })
-const updateResultsSectionHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
-}
 
 // incoming, outgoing
 
@@ -142,13 +127,12 @@ const toggleShowIncoming = (value) => {
           span Incoming
         button(:class="{ active: !state.showIncoming }" @click="toggleShowIncoming(false)")
           span Outgoing
-  section.results-section(v-if="shouldShowSpaces" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section(v-if="shouldShowSpaces" ref="resultsElement")
     SpaceList(
       :spaces="spaces"
       :showUser="true"
       @selectSpace="changeSpace"
       :parentIsPinned="props.parentIsPinned"
-      :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
       :disableListOptimizations="true"
     )

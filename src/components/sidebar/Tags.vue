@@ -15,16 +15,6 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
-const resultsElement = ref(null)
-
-onMounted(() => {
-  window.addEventListener('resize', updateResultsSectionHeight)
-  init()
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateResultsSectionHeight)
-})
-
 const props = defineProps({
   visible: Boolean,
   parentIsPinned: Boolean,
@@ -32,21 +22,7 @@ const props = defineProps({
 })
 
 const state = reactive({
-  resultsSectionHeight: null,
   isLoading: false
-})
-
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    init()
-  }
-})
-const init = () => {
-  updateResultsSectionHeight()
-}
-
-watch(() => state.isLoading, (value, prevValue) => {
-  updateResultsSectionHeight()
 })
 
 const styles = computed(() => {
@@ -54,12 +30,6 @@ const styles = computed(() => {
     maxHeight: props.subsectionHeight + 'px'
   }
 })
-const updateResultsSectionHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
-}
 const tags = computed(() => globalStore.getTags)
 const filteredTags = computed(() => {
   let tags = globalStore.getTags
@@ -94,7 +64,7 @@ const toggleShouldShowCurrentSpaceTags = () => {
         span.badge.secondary [[
         span when editing a card to create tags.
   //- tags list
-  section.results-section(v-if="tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section(v-if="tags.length")
     TagList(:tags="filteredTags" :isLoading="state.isLoading" :parentIsPinned="props.parentIsPinned" :positionTagsOnLeftSide="true")
 </template>
 
