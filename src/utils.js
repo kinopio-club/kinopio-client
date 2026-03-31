@@ -1709,7 +1709,8 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      groupId: null
+      groupId: null,
+      note: ''
     }
   },
   deletePrivateSpaceMeta (space) {
