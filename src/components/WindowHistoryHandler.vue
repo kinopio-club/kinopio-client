@@ -37,6 +37,10 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
+watch(() => globalStore.userNotifications, (value, prevValue) => {
+  updateWindowTitle()
+})
+
 // handles browser back/forward
 
 const loadSpaceOnBackOrForward = () => {
@@ -69,6 +73,7 @@ const updateWindowHistory = async () => {
 const updateWindowTitle = () => {
   const space = spaceStore.getSpaceAllState
   let title
+  // name
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
   } else if (space.name) {
@@ -76,8 +81,15 @@ const updateWindowTitle = () => {
   } else {
     title = 'Kinopio'
   }
+  // dev
   if (consts.isDevelopment()) {
     title = `[DEV] ${title}`
+  }
+  // notification count
+  const unread = globalStore.userNotifications.filter(notification => !notification.isRead)
+  const count = unread.length || 0
+  if (count) {
+    title = `(${count}) ${title}`
   }
   document.title = title
 }

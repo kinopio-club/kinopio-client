@@ -100,6 +100,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsDrawing: false,
     currentUserIsResizingCardDetails: false,
     currentUserIsResizingSidebar: false,
+    userNotifications: [],
 
     // drawing
     drawingEraserIsActive: false,

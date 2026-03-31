@@ -147,7 +147,6 @@ const state = reactive({
   spaceStatusIsVisible: false,
   position: {},
   readOnlyJiggle: false,
-  notifications: [],
   notificationsIsLoading: true,
   isHidden: false,
   templatesIsVisible: false,
@@ -312,8 +311,7 @@ const clearSearchAndFilters = () => {
 // notifications
 
 const notificationsUnreadCount = computed(() => {
-  if (!state.notifications) { return 0 }
-  const unread = state.notifications.filter(notification => !notification.isRead)
+  const unread = globalStore.userNotifications.filter(notification => !notification.isRead)
   return unread.length || 0
 })
 
@@ -559,11 +557,11 @@ const updatePositionInVisualViewport = () => {
 const updateNotifications = async () => {
   state.notificationsIsLoading = true
   const notifications = await apiStore.getNotifications() || []
-  state.notifications = sortBy(notifications, 'isRead')
+  globalStore.userNotifications = sortBy(notifications, 'isRead')
   state.notificationsIsLoading = false
 }
 const markAllAsRead = () => {
-  const notifications = state.notifications.filter(notification => !notification.isRead)
+  const notifications = globalStore.userNotifications.filter(notification => !notification.isRead)
   const notificationIds = notifications.map(notification => notification.id)
   updateNotificationsIsRead(notificationIds)
 }
@@ -572,7 +570,7 @@ const markAsRead = (notificationId) => {
 }
 const updateNotificationsIsRead = async (notificationIds) => {
   if (!notificationIds.length) { return }
-  state.notifications = state.notifications.map(notification => {
+  globalStore.userNotifications = globalStore.userNotifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
       notification.isRead = true
     }
@@ -584,7 +582,7 @@ const updateNotificationsIsRead = async (notificationIds) => {
   })
 }
 const clearNotifications = () => {
-  state.notifications = []
+  globalStore.userNotifications = []
 }
 </script>
 
@@ -669,7 +667,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           Share(:visible="state.shareIsVisible")
-          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
+          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="globalStore.userNotifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
     .row
