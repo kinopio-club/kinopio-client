@@ -27,7 +27,8 @@ onBeforeUnmount(() => {
 
 const props = defineProps({
   visible: Boolean,
-  parentIsPinned: Boolean
+  parentIsPinned: Boolean,
+  subsectionHeight: Number
 })
 
 const state = reactive({
@@ -48,6 +49,11 @@ watch(() => state.isLoading, (value, prevValue) => {
   updateResultsSectionHeight()
 })
 
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
@@ -72,7 +78,7 @@ const toggleShouldShowCurrentSpaceTags = () => {
 </script>
 
 <template lang="pug">
-.tags(v-if="props.visible")
+.tags(v-if="props.visible" :style="styles")
   section
     .row.title-row
       span Tags
@@ -95,4 +101,10 @@ const toggleShouldShowCurrentSpaceTags = () => {
 <style lang="stylus">
 .tags
   border-top 1px solid var(--primary-border)
+  overflow auto
+  section
+    &:first-child
+      border-top-left-radius 0
+      border-top-right-radius 0
+
 </style>

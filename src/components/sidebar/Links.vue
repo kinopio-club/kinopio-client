@@ -47,7 +47,8 @@ onBeforeUnmount(() => {
 
 const props = defineProps({
   visible: Boolean,
-  parentIsPinned: Boolean
+  parentIsPinned: Boolean,
+  subsectionHeight: Number
 })
 const state = reactive({
   resultsSectionHeight: null,
@@ -69,6 +70,11 @@ watch(() => state.loading, (value, prevValue) => {
   updateResultsSectionHeight()
 })
 
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 const parentDialog = computed(() => 'links')
 const spaces = computed(() => {
   if (state.showIncoming) {
@@ -124,7 +130,7 @@ const toggleShowIncoming = (value) => {
 </script>
 
 <template lang="pug">
-.links(v-if="props.visible")
+.links(v-if="props.visible" :style="styles")
   section
     .row.title-row
       div
@@ -158,6 +164,7 @@ const toggleShowIncoming = (value) => {
 <style lang="stylus">
 .links
   border-top 1px solid var(--primary-border)
+  overflow auto
   .button-wrap
     margin 0
   .tips-section

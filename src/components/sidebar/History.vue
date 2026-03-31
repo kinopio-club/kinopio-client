@@ -40,7 +40,8 @@ onBeforeUnmount(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -62,6 +63,11 @@ const updatePrevPosition = (event) => {
   prevPosition = utils.cursorPositionInPage(event)
 }
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 
 // operations
 
@@ -142,26 +148,27 @@ const copyOperation = async (event, operation) => {
 </script>
 
 <template lang="pug">
-template(v-if="props.visible")
-  section.history
+section.history(v-if="props.visible" :style="styles")
+  section
     .row.title-row
       div
         span Space History
         Loader(:visible="state.isLoading" :isSmall="true")
       div
         .button-wrap(v-if="!state.isLoading")
-          button.small-button(@click="refreshOperations" title="Refresh")
+          button.small-button(@click="refreshOperations" title="Refresh latest history")
             img.icon(src="@/assets/refresh.svg")
         .button-wrap(v-if="!state.isLoading" title="Copy All JSON")
           button.small-button(@click="copyOperations")
             img.icon(src="@/assets/copy.svg")
+            span Data
     .row
       .badge.info While History is in Beta, it is mainly for debug purposes
     .row(v-if="!currentUserIsSignedIn")
       .badge.info Sign in to record space history
     OfflineBadge
 
-  section.results-section.history
+  section.results-section
     ul.results-list
       template(v-for="operation in state.operations" :key="operation.id")
         li(@click="select(operation)" :class="{active: isSelected(operation)}")
@@ -184,6 +191,8 @@ template(v-if="props.visible")
 
 <style lang="stylus">
 section.history
+  overflow auto
+  padding 0
   .loader
     margin-left 6px
     vertical-align -2px

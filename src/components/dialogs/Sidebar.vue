@@ -22,6 +22,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
+const titleElement = ref(null)
 let unsubscribes
 
 onMounted(() => {
@@ -87,11 +88,19 @@ const clearVisible = () => {
   state.noteIsVisible = false
 }
 
+const updateSubsectionHeight = () => {
+  const element = titleElement.value
+  const rect = element.getBoundingClientRect()
+  const height = rect.height
+  state.subsectionHeight = state.dialogHeight - height
+}
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+  await nextTick()
+  updateSubsectionHeight()
 }
 
 // pin dialog
@@ -143,7 +152,7 @@ dialog#sidebar.sidebar.is-pinnable(
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section.title-section
+  section.title-section(ref="titleElement")
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
         //- first row
@@ -183,15 +192,15 @@ dialog#sidebar.sidebar.is-pinnable(
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
 
-  Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
-  Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
-  Removed(:visible="state.removedIsVisible")
-  Stats(:visible="state.statsIsVisible")
-  Inbox(:visible="state.inboxIsVisible")
-  Favorites(:visible="state.favoritesIsVisible")
-  History(:visible="state.historyIsVisible")
-  Todos(:visible="state.todosIsVisible")
-  Note(:visible="state.noteIsVisible")
+  Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned" :subsectionHeight="state.subsectionHeight")
+  Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned" :subsectionHeight="state.subsectionHeight")
+  Removed(:visible="state.removedIsVisible" :subsectionHeight="state.subsectionHeight")
+  Stats(:visible="state.statsIsVisible" :subsectionHeight="state.subsectionHeight")
+  Inbox(:visible="state.inboxIsVisible" :subsectionHeight="state.subsectionHeight")
+  Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
+  History(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
+  Todos(:visible="state.todosIsVisible" :subsectionHeight="state.subsectionHeight")
+  Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight")
 
 </template>
 
@@ -201,7 +210,7 @@ dialog#sidebar.sidebar.is-pinnable(
   left initial
   right 8px
   max-height calc(100vh - 25px)
-  overflow auto
+  overflow hidden
   &.is-pinned
     top -36px
     right 0
@@ -209,11 +218,6 @@ dialog#sidebar.sidebar.is-pinnable(
     align-items flex-start
   .right-pin
     transform rotate(180deg)
-  .tags
-    section
-      &:first-child
-        border-top-left-radius 0
-        border-top-right-radius 0
   .icon.flower
     vertical-align -1px
     height 11px

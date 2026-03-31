@@ -29,7 +29,8 @@ onBeforeUnmount(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 const state = reactive({
   resultsSectionHeight: null,
@@ -59,6 +60,11 @@ const updateResultsSectionHeight = async () => {
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 
 // items
 
@@ -128,7 +134,7 @@ const itemsRemaningCount = computed(() => {
 </script>
 
 <template lang="pug">
-.todos(v-if="props.visible")
+.todos(v-if="props.visible" :style="styles")
   section
     .row.title-row
       div
@@ -159,6 +165,7 @@ const itemsRemaningCount = computed(() => {
 <style lang="stylus">
 .todos
   border-top 1px solid var(--primary-border)
+  overflow auto
   .button-wrap
     margin 0
   .tips-section

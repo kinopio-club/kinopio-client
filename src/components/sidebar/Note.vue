@@ -13,29 +13,14 @@ const spaceStore = useSpaceStore()
 
 const textareaElement = ref(null)
 
-// let unsubscribes
-
 onMounted(() => {
-//   loadFavoriteUsers()
-//   const globalActionUnsubscribe = globalStore.$onAction(
-//     ({ name, args }) => {
-//       if (name === 'triggerCloseChildDialogs') {
-//         closeDialogs()
-//       }
-//     }
-//   )
-//   unsubscribes = () => {
-//     globalActionUnsubscribe()
-//   }
   focusTextarea()
   textareaSizes()
 })
-// onBeforeUnmount(() => {
-//   unsubscribes()
-// })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -46,6 +31,12 @@ watch(() => props.visible, (value, prevValue) => {
 
 watch(() => userStore.sidebarResizeWidth, (value, prevValue) => {
   textareaSizes()
+})
+
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
 })
 
 const focusTextarea = async () => {
@@ -78,6 +69,7 @@ const spaceNote = computed({
 const copyText = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
+  position.x = position.x - 30
   try {
     await navigator.clipboard.writeText(spaceNote.value)
     globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
@@ -89,7 +81,7 @@ const copyText = async (event) => {
 </script>
 
 <template lang="pug">
-section.note(v-if="visible")
+section.note(v-if="visible" :style="styles")
   .row.title-row
     div
       span Private Note
@@ -109,8 +101,7 @@ section.note(v-if="visible")
 
 <style lang="stylus">
 section.note
+  overflow auto
   .tips
     margin-bottom 10px
-  // .icon.lock-icon
-  //   vertical-align -1px
 </style>
