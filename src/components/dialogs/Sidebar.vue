@@ -16,6 +16,7 @@ import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
 import Todos from '@/components/sidebar/Todos.vue'
 import Note from '@/components/sidebar/Note.vue'
+import SidebarResize from '@/components/SidebarResize.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -205,6 +206,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Todos(:visible="state.todosIsVisible" :subsectionHeight="state.subsectionHeight")
   Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight")
 
+  SidebarResize
 </template>
 
 <style lang="stylus">
