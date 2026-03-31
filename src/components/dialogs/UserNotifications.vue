@@ -26,6 +26,7 @@ const apiStore = useApiStore()
 const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
+const titleElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -38,6 +39,13 @@ const props = defineProps({
   loading: Boolean,
   notifications: Array
 })
+
+const state = reactive({
+  filteredNotifications: null,
+  dialogHeight: null,
+  resultsHeight: null
+})
+
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
@@ -49,6 +57,7 @@ watch(() => props.visible, (value, prevValue) => {
     state.filteredNotifications = null
   }
 })
+
 watch(() => props.loading, (value, prevValue) => {
   updateDialogHeight()
 })
@@ -57,16 +66,18 @@ watch(() => props.notifications, (value, prevValue) => {
   state.filteredNotifications = props.notifications
 })
 
-const state = reactive({
-  filteredNotifications: null,
-  dialogHeight: null
-})
-
+const updateResultsHeight = () => {
+  const element = titleElement.value
+  const rect = element.getBoundingClientRect()
+  state.resultsHeight = state.dialogHeight - rect.height
+}
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+  updateResultsHeight()
+  await nextTick()
 }
 
 const currentUser = computed(() => userStore.getUserAllState)
@@ -200,8 +211,8 @@ const updateAddToExplore = async (space) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight -50 + 'px'}")
-  section.title-section
+dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+  section.title-section(ref="titleElement")
     .row.title-row
       div
         span Notifications
@@ -215,7 +226,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
   section(v-if="!props.loading && !state.filteredNotifications.length")
     p Cards added to your spaces by collaborators can be found here
 
-  section.results-section(v-if="state.filteredNotifications.length" :style="{'max-height': state.dialogHeight + 'px'}")
+  section.results-section(v-if="state.filteredNotifications.length" :style="{'max-height': state.resultsHeight + 'px'}")
     ul.results-list(v-if="state.filteredNotifications.length")
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
@@ -223,7 +234,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
             .row
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
-              div
+              .message
                 //- icon
                 img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
                 img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
@@ -236,9 +247,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                 template(v-if="notification.type === 'addSpaceToGroup'")
                   GroupLabel(:group="notification.group")
                 //- space
+                img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
                 span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-                  img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
-                  span.space-name {{spaceName(notification.space.name)}}
+                  span {{spaceName(notification.space.name)}}
             //- add to explore button
             .row.add-to-explore-row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore" :isSmall="true")
@@ -257,7 +268,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
   left initial
   right 8px
   max-height calc(100vh - 25px)
-  overflow auto
+  overflow hidden
   section
     width 100%
   .results-section
@@ -277,6 +288,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       li
         border-bottom 0
 
+  .message
+    display flex
+    flex-wrap wrap
   .notification-info
     margin-top 4px
     .button-badge
@@ -335,9 +349,6 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       margin-right 0
   .user-label-inline
     margin-right 3px
-  .space-name-wrap
-    display inline
-    white-space normal
   .new-unread-badge
     position absolute
     top 0
@@ -349,12 +360,12 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     margin-right 5px
     position relative
   .preview-thumbnail-image
-    width 24px
-    height 22px
+    width 20px
+    height 18px
     overflow hidden
     object-fit cover
     object-position 0 0
-    border-radius var(--entity-radius)
+    border-radius var(--small-entity-radius)
     image-rendering crisp-edges
     flex-shrink 0
     margin-right 3px
