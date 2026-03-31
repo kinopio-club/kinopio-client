@@ -109,6 +109,9 @@ const dialogIsPinned = computed(() => globalStore.sidebarIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
   globalStore.sidebarIsPinned = isPinned
+  setTimeout(() => {
+    updateDialogHeight()
+  }, 100) // wait for pinned dialog transition
 }
 const closeDialogs = () => {
   globalStore.tagDetailsIsVisible = false
