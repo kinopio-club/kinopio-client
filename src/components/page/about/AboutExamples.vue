@@ -138,6 +138,11 @@ section.examples
   video
     border-radius calc(var(--entity-radius) * 2)
     margin-bottom 0
-  .button-badge.badge.active
-    box-shadow var(--example-button-active-inset-shadow)
+  .button-badge
+    &:not(.active)
+      transition transform 0.1s
+      &:hover
+        transform translateY(-1px)
+    &.active
+      box-shadow var(--example-button-active-inset-shadow)
 </style>
