@@ -8,7 +8,6 @@ let observer
 
 const animationStagger = 140 // ms
 const animationClass = 'playing'
-let hasAnimated
 
 onMounted(() => {
   resetVideos()
@@ -44,15 +43,13 @@ const toggleExample = (value) => {
 // trigger piano fade animation
 
 const playRow = (row) => {
-  if (hasAnimated) { return }
-  hasAnimated = true
   const badges = Array.from(row.querySelectorAll('.badge'))
-  badges.forEach((badge, i) => {
+  badges.forEach((badge, index) => {
     setTimeout(() => {
       badge.classList.remove(animationClass)
       badge.classList.add(animationClass)
       badge.addEventListener('animationend', () => badge.classList.remove(animationClass), { once: true })
-    }, i * animationStagger)
+    }, index * animationStagger)
   })
 }
 
