@@ -97,7 +97,7 @@ section.note(v-if="visible" :style="styles")
     autocomplete="off"
     ref="textareaElement"
     rows="2"
-    placeholder="Type a personal space note here. Only you can see this."
+    placeholder="Type a note for this space here. Only you can see this."
     v-model="spaceNote"
   )
 </template>
