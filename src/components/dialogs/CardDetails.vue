@@ -1504,7 +1504,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
           //- Image
           .button-wrap
-            button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
+            button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Add or Upload Image")
               img.icon.flower(src="@/assets/flower.svg")
             ImagePicker(:visible="state.imagePickerIsVisible" :initialSearch="state.initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
           //- Toggle Style Actions
