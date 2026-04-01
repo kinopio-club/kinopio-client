@@ -573,7 +573,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         .button-wrap
           button(@click.left.stop="selectFile")
             span Upload
-          input.hidden(type="file" ref="inputElement" @change="uploadFile" accept="image/*")
+          input.hidden(type="file" ref="inputElement" @change="uploadFile" accept="image/*,.avif,image/avif")
         //- Stretch
         .button-wrap(v-if="stretchIsVisible")
           label.show-users(title="Stretch Background" :class="{active: backgroundIsStretch}" @click.left.prevent.stop="toggleBackgroundIsStretch" @keydown.stop.enter="toggleBackgroundIsStretch")
