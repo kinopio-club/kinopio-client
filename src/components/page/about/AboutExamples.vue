@@ -2,9 +2,20 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 const parentElement = ref(null)
+const badgeRow = ref(null)
+
+let observer
+
+const animationStagger = 140 // ms
+const animationClass = 'playing'
+let hasAnimated
 
 onMounted(() => {
   resetVideos()
+  initViewportObserver()
+})
+onBeforeUnmount(() => {
+  removeViewportObserver()
 })
 
 const state = reactive({
@@ -29,13 +40,57 @@ const toggleExample = (value) => {
   resetVideos()
   playVideo(value)
 }
+
+// trigger piano fade animation
+
+const playRow = (row) => {
+  if (hasAnimated) { return }
+  hasAnimated = true
+  const badges = Array.from(row.querySelectorAll('.badge'))
+  badges.forEach((badge, i) => {
+    setTimeout(() => {
+      badge.classList.remove(animationClass)
+      badge.classList.add(animationClass)
+      badge.addEventListener('animationend', () => badge.classList.remove(animationClass), { once: true })
+    }, i * animationStagger)
+  })
+}
+
+const initViewportObserver = async () => {
+  removeViewportObserver()
+  await nextTick()
+  try {
+    const callback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          playRow(entry.target)
+        }
+      })
+    }
+    const target = badgeRow.value
+    if (!target) { return }
+    observer = new IntersectionObserver(callback, {
+      root: null,
+      rootMargin: '-20% 0px -20% 0px',
+      threshold: 0.2
+    })
+    observer.observe(target)
+  } catch (error) {
+    console.error('🚒 badgeRow initViewportObserver', error)
+  }
+}
+const removeViewportObserver = () => {
+  const target = badgeRow.value
+  if (!observer) { return }
+  observer.unobserve(target)
+}
 </script>
 
 <template lang="pug">
 section.examples(ref="parentElement")
   h2 Create Lively Freeform Spaces
   .examples-wrap
-    .row
+    .row.badge-row(ref="badgeRow")
       span.badge.info.button-badge(:class="{active: state.example === 'whiteboard'}" @click="toggleExample('whiteboard')")
         span Whiteboard
       span.badge.info.button-badge(:class="{active: state.example === 'mindmap'}" @click="toggleExample('mindmap')")
@@ -145,4 +200,13 @@ section.examples
         transform translateY(-1px)
     &.active
       box-shadow var(--example-button-active-inset-shadow)
+    &.playing
+      animation pianoFlash 0.55s ease-in-out forwards
+@keyframes pianoFlash
+  0%
+      opacity 1
+  50%
+      opacity 0.3
+  100%
+    opacity 1
 </style>
