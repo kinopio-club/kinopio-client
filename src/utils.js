@@ -2282,7 +2282,7 @@ export default {
     // then '.', or ':' + portnumbers
     // followed by at least 1 alphanumeric, '=', or '.'
     // then optional trailing '/' or '-'
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.]+\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.!]+\/?-?/igm)
     const localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
