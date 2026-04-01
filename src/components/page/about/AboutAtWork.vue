@@ -140,6 +140,7 @@ section.for-work
 
         p Work through ideas together in real-time, organize spaces on mobile, or contribute async.
 
+    //- built in slack, etc. integrations https://claude.ai/share/8da0beb0-110a-4b61-a2b1-e34f05843a48
     //- ?? best in class security. gdpr.. trust and security
 
 </template>

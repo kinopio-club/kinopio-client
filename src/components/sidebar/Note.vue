@@ -81,6 +81,12 @@ const copyText = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
+
+const isSignedIn = computed(() => userStore.getUserIsSignedIn)
+const triggerSignUpOrInIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
+}
 </script>
 
 <template lang="pug">
@@ -88,11 +94,18 @@ section.note(v-if="visible" :style="styles")
   .row.title-row
     div
       span Private Note
-    button.small-button(title="Copy to Clipboard" @click="copyText")
+    button.small-button(v-if="isSignedIn" title="Copy to Clipboard" @click="copyText")
       img.icon.copy(src="@/assets/copy.svg")
       span Copy
 
+  p(v-if="!isSignedIn")
+    p
+      span.badge.info Sign Up or In
+      span to write private space notes
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
   textarea.name(
+    v-if="isSignedIn"
     data-1p-ignore
     autocomplete="off"
     ref="textareaElement"

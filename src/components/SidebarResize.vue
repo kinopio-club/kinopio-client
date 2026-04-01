@@ -37,12 +37,13 @@ const remove = (event) => {
 <style lang="stylus">
 .sidebar
   .sidebar-resize-wrap
-    pointer-events all
+    pointer-events none
     position absolute
     left -7px
     bottom 2px
     display flex
     .inline-button-wrap
+      pointer-events all
       margin-right 0
       margin-top 0
       padding 12px
