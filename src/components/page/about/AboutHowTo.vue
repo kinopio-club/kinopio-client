@@ -15,7 +15,7 @@ section.how-to
     .row
       .side.left
         h3 Cards and Connections
-        p To create cards, tap anywhere and start typing. Format with markdown, paste URLs to create links and play YouTube videos, add images, colors and more. Connect related cards by dragging from the connector to another card.
+        p Tap anywhere and start typing. Paste URLs to create links and play YouTube videos, add images, colors and more. Connect related ideas by dragging from the connector.
 
       .side.right
         video(
@@ -31,7 +31,7 @@ section.how-to
     .row
       .side.left
         h3 Boxes and Lists to Organize
-        p When you’re ready to add structure, use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
+        p Use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
 
       .side.right
         video(
