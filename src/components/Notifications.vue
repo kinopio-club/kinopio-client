@@ -165,6 +165,8 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
         deltaMinutes
       })
       state.notifySpaceOutOfSync = true
+      await spaceStore.reloadCurrentSpace()
+      state.notifySpaceOutOfSync = false
     }
   } catch (error) {
     console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)

@@ -543,6 +543,20 @@ export const useSpaceStore = defineStore('space', {
       }
       cardStore.alignLeftAddedCardsInInbox()
     },
+
+    async reloadCurrentSpace () {
+      const globalStore = useGlobalStore()
+      try {
+        globalStore.isLoadingSpace = true
+        const remoteSpace = await this.loadRemoteSpace({ id: this.id })
+        await this.restoreSpaceRemote(remoteSpace)
+        this.saveSpaceToCache()
+        // this.editedAt = new Date().toISOString()
+        globalStore.isLoadingSpace = false
+      } catch (error) {
+        console.error('🚒 Error fetching remoteSpace', error)
+      }
+    },
     async loadInboxSpace () {
       const apiStore = useApiStore()
       try {
