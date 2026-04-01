@@ -97,12 +97,13 @@ const updateRandomUsers = () => {
 
 <template lang="pug">
 section.for-work
-  h2 Kinopio at Work
+  h2 Connect at Work
   .for-work-wrap
-    p
-      em If only
-      span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
-    p Instead, Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
+    //- p
+    //-   em If only
+    //-   span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
+    p Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
+    p Capture and connect ideas together, build them up into plans and list tasks, and share progress on them all in the same space.
 
     figure
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
@@ -119,8 +120,8 @@ section.for-work
         poster="https://updates.kinopio.club/page/about/at-work/1.webp"
       )
         source(src="https://updates.kinopio.club/page/about/at-work/1.webm")
-      figcaption
-        p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
+      //- figcaption
+      //-   p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
     .row.feature-wrap
       .feature
