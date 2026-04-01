@@ -524,7 +524,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.info(v-if="state.notifySpaceOutOfSync")
     p
       Loader(:visible="true" :isSmall="true")
-      span Updating out of sync space…
+      span Refreshing data…
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     button.button-only.small-button(@click.left="duplicateSpace")
