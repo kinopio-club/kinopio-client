@@ -44,7 +44,8 @@ const themes = {
       'badge-donor': '#ff9dff',
       'badge-upgraded': 'springgreen',
       // /about page sections
-      'example-background': '#889e9a'
+      'example-background': '#889e9a',
+      'at-work-background': '#94b5c7'
     }
   },
   dark: {
@@ -84,7 +85,8 @@ const themes = {
       'badge-moderator': 'olive',
       'badge-ambassador': '#0f9189',
       // /about page sections
-      'example-background': '#14292d'
+      'example-background': '#14292d',
+      'at-work-background': '#002c43'
     }
   }
 }

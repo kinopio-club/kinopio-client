@@ -237,6 +237,7 @@ const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
 const isResizingCardDetails = computed(() => globalStore.currentUserIsResizingCardDetails)
+const isResizingSidebar = computed(() => globalStore.currentUserIsResizingSidebar)
 const isTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => globalStore.currentUserIsDraggingCard)
 const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
@@ -275,6 +276,7 @@ const updatePageSizes = async (value) => {
 }
 const updateViewportSizes = () => {
   globalStore.updateViewportSizes()
+  updateSidebarWidth()
 }
 
 // user
@@ -364,7 +366,7 @@ const addOrCloseCard = (event) => {
     // add card
     addCard(event)
   // don't close if resizing card details dialog
-  } else if (isResizingCardDetails.value) {
+  } else if (isResizingCardDetails.value || isResizingSidebar.value) {
   // close item details
   } else if ((globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
     globalStore.closeAllDialogs()
@@ -735,6 +737,25 @@ const updateCardDetailsWidth = (event) => {
   width = Math.max(width, consts.defaultDialogWidth)
   userStore.updateUser({ cardDetailsResizeWidth: width })
 }
+const updateSidebarWidth = (event) => {
+  // !event if sidebarWidth is updated from window resize
+  if (!prevCursor) { return }
+  if (event) {
+    if (utils.isMultiTouch(event)) { return }
+  }
+  const dialogElement = document.querySelector('dialog#sidebar')
+  if (!dialogElement) { return }
+  const viewportWidth = globalStore.viewportWidth - 30
+  const rect = dialogElement.getBoundingClientRect()
+  const rectInSpace = utils.cursorPositionInSpace(event, rect)
+  let width = rect.x + rect.width - endCursor.x
+  if (!event) {
+    width = rect.width
+  }
+  width = Math.max(width, consts.defaultDialogWidth)
+  width = Math.min(width, viewportWidth)
+  userStore.updateUser({ sidebarResizeWidth: width })
+}
 
 // interactions
 
@@ -747,7 +768,8 @@ const isInteracting = computed(() => {
     isDraggingBox.value ||
     isDraggingLine.value ||
     isDraggingList.value ||
-    isResizingCardDetails.value
+    isResizingCardDetails.value ||
+    isResizingSidebar.value
   )
 })
 watch(() => isInteracting.value, (value, prevValue) => {
@@ -858,6 +880,8 @@ const interact = (event) => {
     dragItems()
   } else if (isResizingCardDetails.value) {
     updateCardDetailsWidth(event)
+  } else if (isResizingSidebar.value) {
+    updateSidebarWidth(event)
   } else if (isDraggingDialog.value) {
     globalStore.moveMultipleSelectedActions({ endCursor, prevCursor })
   }
@@ -931,6 +955,7 @@ const resetGlobalStoreState = () => {
   globalStore.currentUserIsResizingCardIds = []
   globalStore.prevCursorPosition = utils.cursorPositionInPage(event)
   globalStore.currentUserIsResizingCardDetails = false
+  globalStore.currentUserIsResizingSidebar = false
   prevCursor = undefined
   globalStore.clearDraggingItems()
   broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteCardsDragging' })

@@ -1709,7 +1709,8 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      groupId: null
+      groupId: null,
+      note: ''
     }
   },
   deletePrivateSpaceMeta (space) {
@@ -1946,7 +1947,7 @@ export default {
     return spaces
   },
   newHelloSpace (user) {
-    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
+    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey', 'note']
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
     const userId = user?.id || consts.moderatorUserId
@@ -2359,7 +2360,7 @@ export default {
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
-    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm)(?:\n| |\?|&)/igm)
+    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm|\.avif)(?:\n| |\?|&)/igm)
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
   },

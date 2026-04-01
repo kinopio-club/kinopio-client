@@ -41,19 +41,6 @@ onMounted(() => {
   if (consts.isDevelopment()) {
     document.title = '[DEV] Kinopio'
   }
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'closeAllDialogs') {
-        // closeDialogs()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  unsubscribes()
 })
 
 const closeAllDialogs = () => {

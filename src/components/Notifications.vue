@@ -165,6 +165,8 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
         deltaMinutes
       })
       state.notifySpaceOutOfSync = true
+      await spaceStore.restoreCurrentSpaceFromRemote()
+      state.notifySpaceOutOfSync = false
     }
   } catch (error) {
     console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
@@ -519,13 +521,10 @@ aside.notifications(@click.left="closeAllDialogs")
           button
             span Email Support
 
-  .persistent-item.danger(v-if="state.notifySpaceOutOfSync")
-    p Space is out of sync, please refresh
-    .row
-      .button-wrap
-        button(@click.left="refreshBrowser")
-          img.refresh.icon(src="@/assets/refresh.svg")
-          span Refresh
+  .persistent-item.info(v-if="state.notifySpaceOutOfSync")
+    p
+      Loader(:visible="true" :isSmall="true")
+      span Refreshing data…
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     button.button-only.small-button(@click.left="duplicateSpace")

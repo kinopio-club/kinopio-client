@@ -15,45 +15,21 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
-const resultsElement = ref(null)
-
-onMounted(() => {
-  window.addEventListener('resize', updateResultsSectionHeight)
-  init()
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateResultsSectionHeight)
-})
-
 const props = defineProps({
   visible: Boolean,
-  parentIsPinned: Boolean
+  parentIsPinned: Boolean,
+  subsectionHeight: Number
 })
 
 const state = reactive({
-  resultsSectionHeight: null,
   isLoading: false
 })
 
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    init()
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
   }
 })
-const init = () => {
-  updateResultsSectionHeight()
-}
-
-watch(() => state.isLoading, (value, prevValue) => {
-  updateResultsSectionHeight()
-})
-
-const updateResultsSectionHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
-}
 const tags = computed(() => globalStore.getTags)
 const filteredTags = computed(() => {
   let tags = globalStore.getTags
@@ -72,7 +48,7 @@ const toggleShouldShowCurrentSpaceTags = () => {
 </script>
 
 <template lang="pug">
-.tags(v-if="props.visible")
+.tags(v-if="props.visible" :style="styles")
   section
     .row.title-row
       span Tags
@@ -88,11 +64,17 @@ const toggleShouldShowCurrentSpaceTags = () => {
         span.badge.secondary [[
         span when editing a card to create tags.
   //- tags list
-  section.results-section(v-if="tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section(v-if="tags.length")
     TagList(:tags="filteredTags" :isLoading="state.isLoading" :parentIsPinned="props.parentIsPinned" :positionTagsOnLeftSide="true")
 </template>
 
 <style lang="stylus">
 .tags
   border-top 1px solid var(--primary-border)
+  overflow auto
+  section
+    &:first-child
+      border-top-left-radius 0
+      border-top-right-radius 0
+
 </style>
