@@ -83,6 +83,8 @@ const copyText = async (event) => {
 }
 
 const isSignedIn = computed(() => userStore.getUserIsSignedIn)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
+const canEdit = computed(() => isSignedIn.value && isSpaceMember.value)
 const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
@@ -94,18 +96,20 @@ section.note(v-if="visible" :style="styles")
   .row.title-row
     div
       span Private Note
-    button.small-button(v-if="isSignedIn" title="Copy to Clipboard" @click="copyText")
+    button.small-button(v-if="canEdit" title="Copy to Clipboard" @click="copyText")
       img.icon.copy(src="@/assets/copy.svg")
       span Copy
 
-  p(v-if="!isSignedIn")
+  section.subsection(v-if="!isSignedIn")
     p
       span.badge.info Sign Up or In
-      span to write private space notes
+      span to write private notes for this space
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+  section.subsection(v-else-if="!isSpaceMember")
+    p Only members of this space can write private notes
 
   textarea.name(
-    v-if="isSignedIn"
+    v-if="canEdit"
     data-1p-ignore
     autocomplete="off"
     ref="textareaElement"
@@ -120,4 +124,6 @@ section.note
   overflow auto
   .tips
     margin-bottom 10px
+  textarea
+    margin-bottom 0
 </style>
