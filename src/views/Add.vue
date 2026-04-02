@@ -195,7 +195,7 @@ const addCard = async () => {
       userId: user.id
     }
     const url = utils.urlFromString(newName)
-    if (url) {
+    if (utils.urlIsWebsite(url)) {
       card.urlPreviewUrl = url
       card.shouldUpdateUrlPreview = true
     }
