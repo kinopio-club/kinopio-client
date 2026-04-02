@@ -186,9 +186,6 @@ section.note(v-if="visible" :style="styles")
 </template>
 
 <style lang="stylus">
-:root
-  --textarea-focus-padding 16px
-
 section.note
   overflow auto
   .tips
@@ -204,9 +201,9 @@ section.note
 
   @keyframes focusing
     100%
-      left calc(-1 * var(--textarea-focus-padding) / 2)
-      top calc(-1 * var(--textarea-focus-padding) / 2)
-      width calc(100% + var(--textarea-focus-padding))
-      height: calc(100% + var(--textarea-focus-padding))
+      left calc(-1 * var(--small-focus-padding) / 2)
+      top calc(-1 * var(--small-focus-padding) / 2)
+      width calc(100% + var(--small-focus-padding))
+      height: calc(100% + var(--small-focus-padding))
       border-radius calc(2 * var(--entity-radius))
 </style>
