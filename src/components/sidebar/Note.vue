@@ -16,12 +16,22 @@ const textareaElement = ref(null)
 onMounted(() => {
   focusTextarea()
   textareaSizes()
+  window.addEventListener('pointerup', clearCurrentConnection)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerup', clearCurrentConnection)
 })
 
 const props = defineProps({
   visible: Boolean,
   subsectionHeight: Number
 })
+
+const state = reactive({
+  backgroundColor: null
+})
+
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     focusTextarea()
@@ -89,6 +99,56 @@ const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
 }
+
+const textareaStyles = computed(() => {
+  let borderRadius = 0
+  if (state.backgroundColor) {
+    borderRadius = utils.cssVariable('entity-radius')
+  }
+  return {
+    backgroundColor: state.backgroundColor,
+    borderRadius
+  }
+})
+
+// connect to copy
+
+const clearCurrentConnection = () => {
+  state.backgroundColor = null
+}
+const mouseenter = (event) => {
+  if (!globalStore.currentUserIsDrawingConnection) { return }
+  state.backgroundColor = globalStore.currentConnectionColor
+}
+const mouseleave = (event) => {
+  clearCurrentConnection()
+}
+const copyCurrentConnectionItemNamesToNote = (event) => {
+  if (!globalStore.currentUserIsDrawingConnection) { return }
+  globalStore.closeAllDialogs()
+  // item names
+  const items = globalStore.currentConnectionStartItemIds.map(id => spaceStore.getSpaceItemById(id))
+  let newText = ''
+  items.forEach((item, index) => {
+    let itemName = ''
+    if (index) {
+      itemName = '\n\n'
+    }
+    itemName += item.name
+    newText += itemName
+  })
+  // append to note
+  const note = spaceNote.value
+  let newValue
+  if (note) {
+    newValue = `${note}\n\n${newText}`
+  } else {
+    newValue = newText
+  }
+  spaceNote.value = newValue
+  clearCurrentConnection()
+  focusTextarea()
+}
 </script>
 
 <template lang="pug">
@@ -108,22 +168,45 @@ section.note(v-if="visible" :style="styles")
   section.subsection(v-else-if="!isSpaceMember")
     p Only members of this space can write private notes
 
-  textarea.name(
-    v-if="canEdit"
-    data-1p-ignore
-    autocomplete="off"
-    ref="textareaElement"
-    rows="2"
-    placeholder="Type a note for this space here. Only you can see this."
-    v-model="spaceNote"
-  )
+  .textarea-wrap
+    textarea.name(
+      v-if="canEdit"
+      data-1p-ignore
+      autocomplete="off"
+      ref="textareaElement"
+      rows="2"
+      placeholder="Type a note for this space here. Only you can see this."
+      v-model="spaceNote"
+      @mouseenter="mouseenter"
+      @mouseleave="mouseleave"
+      @mouseup.left="copyCurrentConnectionItemNamesToNote"
+      :style="textareaStyles"
+    )
+    .focusing-frame(v-if="state.backgroundColor" :style="{backgroundColor: state.backgroundColor}")
 </template>
 
 <style lang="stylus">
+:root
+  --textarea-focus-padding 16px
+
 section.note
   overflow auto
   .tips
     margin-bottom 10px
-  textarea
-    margin-bottom 0
+  .textarea-wrap
+    position relative
+    textarea
+      margin-bottom 0
+    .focusing-frame
+      animation-iteration-count 400 // infinite
+      width 100%
+      height 100%
+
+  @keyframes focusing
+    100%
+      left calc(-1 * var(--textarea-focus-padding) / 2)
+      top calc(-1 * var(--textarea-focus-padding) / 2)
+      width calc(100% + var(--textarea-focus-padding))
+      height: calc(100% + var(--textarea-focus-padding))
+      border-radius calc(2 * var(--entity-radius))
 </style>
