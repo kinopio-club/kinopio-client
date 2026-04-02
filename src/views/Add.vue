@@ -116,6 +116,16 @@ const checkIsMissingInboxSpace = async () => {
     state.error.isMissingInboxSpace = true
   }
 }
+const nameImageUrl = computed(() => {
+  const url = utils.urlFromString(state.newName)
+  if (!url) { return }
+  const isImage = utils.urlIsImage(url)
+  if (isImage) {
+    return url
+  } else {
+    return null
+  }
+})
 
 // postmesage
 
@@ -304,6 +314,7 @@ main.add-page
             span Add to Inbox
           .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
+        img.preview-image(v-if="nameImageUrl" :src="nameImageUrl")
       Transition(name="fadeIn")
         .row(v-if="state.success")
           .badge.success
@@ -420,4 +431,9 @@ main.add-page
   justify-content space-between
   align-items center
 
+.preview-image
+  width auto
+  height 31px
+  margin-left 6px
+  border-radius var(--entity-radius)
 </style>
