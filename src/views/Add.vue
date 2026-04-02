@@ -58,10 +58,12 @@ onMounted(async () => {
   initCardTextarea()
   restoreValue()
   checkIsMissingInboxSpace()
+  window.addEventListener('resize', updateTextareaSize)
 })
 
 onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
+  window.removeEventListener('resize', updateTextareaSize)
 })
 
 const isOffline = computed(() => !globalStore.isOnline)
@@ -338,7 +340,6 @@ main.add-page
   min-height 100vh
   height 100%
   margin-top 6px
-  margin-bottom 2rem
   background var(--primary-background)
   section
     position relative
