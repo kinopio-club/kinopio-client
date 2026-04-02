@@ -5,8 +5,10 @@ import { useUserStore } from '@/stores/useUserStore'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 import User from '@/components/User.vue'
+import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
+import sampleSize from 'lodash-es/sampleSize'
 
 const userStore = useUserStore()
 
@@ -15,10 +17,32 @@ const videoElement = ref(null)
 const state = reactive({
   videoIsPaused: false,
   randomUsers: [
-    { color: '#e0f27d' },
-    { color: '#b382ec' },
-    { color: '#f2a893' }
+    { color: '#f4d075' },
+    { color: '#f29f96' },
+    { color: '#7899e5' }
+  ],
+  randomGroups: [
+    {
+      id: 1,
+      name: 'Product',
+      color: '#d8ef7c'
+    },
+    {
+      id: 2,
+      name: 'Marketing',
+      color: '#fcc7f8'
+    },
+    {
+      id: 3,
+      name: 'Sales',
+      color: '#8ef2d9'
+    }
   ]
+})
+
+watch(() => userStore.theme, (value, prevValue) => {
+  updateRandomGroups()
+  updateRandomUsers()
 })
 
 // video
@@ -41,31 +65,24 @@ const playVideo = () => {
   element.play()
 }
 
-// groups
+// random
 
-const groups = computed(() => {
-  return [
-    {
-      id: 1,
-      name: 'Product',
-      color: '#d5bdff'
-    },
-    {
-      id: 2,
-      name: 'Marketing',
-      color: '#edb185'
-      // emoji: '🐇'
-    },
-    {
-      id: 3,
-      name: 'Sales',
-      color: '#b1f49a'
-    }
-  ]
-})
-
-// users
-
+const updateRandomGroups = () => {
+  let names = ['product', 'marketing', 'sales', 'newClient', 'SEO', 'research', 'design', 'engineering', 'accountServices']
+  names = sampleSize(names, 3)
+  names = names.map(name => utils.capitalizeFirstLetter(name))
+  const groups = []
+  names.forEach((name, index) => {
+    const luminosity = userStore.theme
+    const color = randomColor({ luminosity })
+    groups.push({
+      id: index,
+      name,
+      color
+    })
+  })
+  state.randomGroups = groups
+}
 const updateRandomUsers = () => {
   const times = [1, 2, 3]
   const users = []
@@ -76,17 +93,17 @@ const updateRandomUsers = () => {
   })
   state.randomUsers = users
 }
-
 </script>
 
 <template lang="pug">
 section.for-work
-  h2 Kinopio at Work
+  h2 Connect at Work
   .for-work-wrap
-    p
-      em If only
-      span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
-    p Instead, Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
+    //- p
+    //-   em If only
+    //-   span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
+    p Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
+    p Capture and connect ideas together, build them up into plans and list tasks, and share progress on them all in the same space.
 
     figure
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
@@ -103,14 +120,14 @@ section.for-work
         poster="https://updates.kinopio.club/page/about/at-work/1.webp"
       )
         source(src="https://updates.kinopio.club/page/about/at-work/1.webm")
-      figcaption
-        p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
+      //- figcaption
+      //-   p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
 
     .row.feature-wrap
       .feature
         h3 Group Workspaces
-        .row.group-label-row
-          template(v-for="group in groups" :key="group.id")
+        .row.groups(@click="updateRandomGroups")
+          template(v-for="group in state.randomGroups" :key="group.id")
             GroupLabel(:group="group" :showName="true")
         p Create and manage shared spaces for teams, projects, or clients.
       .feature
@@ -123,6 +140,7 @@ section.for-work
 
         p Work through ideas together in real-time, organize spaces on mobile, or contribute async.
 
+    //- built in slack, etc. integrations https://claude.ai/share/8da0beb0-110a-4b61-a2b1-e34f05843a48
     //- ?? best in class security. gdpr.. trust and security
 
 </template>
@@ -130,8 +148,7 @@ section.for-work
 <style lang="stylus">
 section.for-work
   .for-work-wrap
-    background-color #002c43
-    color white
+    background-color var(--at-work-background)
     border-radius var(--page-entity-radius)
     padding 2rem
     video
@@ -179,11 +196,12 @@ section.for-work
     .feature
       padding 0 1rem
       border-radius calc(var(--entity-radius) * 3)
-      border 1px solid #38596a
+      border 1px solid var(--primary-border)
       max-width calc(50% - 10px)
       gap 0 10px
       p
         margin-bottom 1rem
-  .users
+  .users,
+  .groups
     cursor pointer
 </style>

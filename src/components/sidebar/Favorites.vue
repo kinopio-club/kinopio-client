@@ -22,7 +22,8 @@ onMounted(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   if (!value) {
@@ -54,6 +55,11 @@ const hideSpaces = () => {
   state.spacesIsVisible = false
   closeDialogs()
 }
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 
 // spaces
 
@@ -143,8 +149,8 @@ const updateFavoriteSpaceIsEdited = async () => {
 </script>
 
 <template lang="pug">
-template(v-if="visible")
-  section.favorites
+section.favorites(v-if="visible" :style="styles")
+  section
     p
       span Favorites
       Loader(:visible="loading" :isSmall="true")
@@ -176,7 +182,7 @@ template(v-if="visible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails")
 
   //- blank state
-  section.favorites.tips-section(v-if="isEmpty && !loading")
+  section.tips-section(v-if="isEmpty && !loading")
     section.subsection
       p(v-if="state.spacesIsVisible")
         img.icon(src="@/assets/heart.svg")
@@ -187,17 +193,18 @@ template(v-if="visible")
 </template>
 
 <style lang="stylus">
-.favorites
+section.favorites
   overflow auto
   left initial
   right 8px
+  padding 0
   .user-filter-button
     .user
       vertical-align -3px
   .loader
     margin-left 5px
     vertical-align -2px
-  &.tips-section
+  .tips-section
     border none
     padding-top 0
   section.actions

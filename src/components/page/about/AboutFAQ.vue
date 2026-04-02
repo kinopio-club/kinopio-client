@@ -63,7 +63,7 @@ section.faq
         span . This is the magic that makes big ideas easier to recall and reason about.
 
   details
-    summary Do I Have Full Control Over My Data?
+    summary Do I have full control over my data?
     section.subsection
       p Yes. Your data belongs to you and will never be sold.
       p You can import and export spaces in a variety of formats, including as open{{' '}}

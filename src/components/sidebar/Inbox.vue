@@ -32,7 +32,8 @@ onMounted(() => {
   window.addEventListener('pointerdown', updatePrevPosition)
 })
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -53,6 +54,11 @@ const updatePrevPosition = (event) => {
   prevPosition = utils.cursorPositionInPage(event)
 }
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 
 // list cards
 
@@ -141,9 +147,9 @@ const addCard = (card) => {
 </script>
 
 <template lang="pug">
-template(v-if="visible")
+section.inbox(v-if="visible" :style="styles")
   AddToInbox(:visible="isOnline" @addCard="addCard")
-  section.inbox
+  section
     .row.title-row
       div
         span Move from Inbox
@@ -163,10 +169,13 @@ template(v-if="visible")
 
 <style lang="stylus">
 section.inbox
+  padding 0
+  overflow auto
+  .add-to-inbox
+    padding 8px
   .loader
     margin-left 6px
     vertical-align -2px
-  .subsection
-    margin 4px
-    margin-top 0
+  .results-section
+    padding 0 4px
 </style>

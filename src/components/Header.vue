@@ -108,6 +108,8 @@ onMounted(() => {
         updateTemplatesIsVisible(true)
       } else if (name === 'triggerRemovedIsVisible') {
         updateSidebarIsVisible(true)
+      } else if (name === 'triggerNoteIsVisible') {
+        updateSidebarIsVisible(true)
       } else if (name === 'triggerImportIsVisible') {
         updateImportIsVisible(true)
       } else if (name === 'triggerClearUserNotifications') {
@@ -145,7 +147,6 @@ const state = reactive({
   spaceStatusIsVisible: false,
   position: {},
   readOnlyJiggle: false,
-  notifications: [],
   notificationsIsLoading: true,
   isHidden: false,
   templatesIsVisible: false,
@@ -195,6 +196,7 @@ const toolbarIsVisible = computed(() => {
   if (userCanOnlyComment.value) { return }
   return userCanEditSpace.value
 })
+const isSpaceNote = computed(() => Boolean(spaceStore.note))
 
 // new stuff
 
@@ -309,8 +311,7 @@ const clearSearchAndFilters = () => {
 // notifications
 
 const notificationsUnreadCount = computed(() => {
-  if (!state.notifications) { return 0 }
-  const unread = state.notifications.filter(notification => !notification.isRead)
+  const unread = globalStore.userNotifications.filter(notification => !notification.isRead)
   return unread.length || 0
 })
 
@@ -556,11 +557,11 @@ const updatePositionInVisualViewport = () => {
 const updateNotifications = async () => {
   state.notificationsIsLoading = true
   const notifications = await apiStore.getNotifications() || []
-  state.notifications = sortBy(notifications, 'isRead')
+  globalStore.userNotifications = sortBy(notifications, 'isRead')
   state.notificationsIsLoading = false
 }
 const markAllAsRead = () => {
-  const notifications = state.notifications.filter(notification => !notification.isRead)
+  const notifications = globalStore.userNotifications.filter(notification => !notification.isRead)
   const notificationIds = notifications.map(notification => notification.id)
   updateNotificationsIsRead(notificationIds)
 }
@@ -569,7 +570,7 @@ const markAsRead = (notificationId) => {
 }
 const updateNotificationsIsRead = async (notificationIds) => {
   if (!notificationIds.length) { return }
-  state.notifications = state.notifications.map(notification => {
+  globalStore.userNotifications = globalStore.userNotifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
       notification.isRead = true
     }
@@ -581,7 +582,7 @@ const updateNotificationsIsRead = async (notificationIds) => {
   })
 }
 const clearNotifications = () => {
-  state.notifications = []
+  globalStore.userNotifications = []
 }
 </script>
 
@@ -666,7 +667,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           Share(:visible="state.shareIsVisible")
-          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
+          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="globalStore.userNotifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
     .row
@@ -767,6 +768,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .button-wrap
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
             img.icon.sidebar(src="@/assets/sidebar.svg")
+          .label-badge-row.sidebar-label-badge-row
+            //- note
+            .label-badge(v-if="isSpaceNote")
+              img.icon.note(src="@/assets/note.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
   Toolbar(:visible="toolbarIsVisible")
@@ -959,7 +964,9 @@ header
         font-size 11px
         vertical-align 0px
         margin-right 3px
-
+  .sidebar-label-badge-row
+    left initial
+    right 2px
   .invisible
     visibility hidden
 

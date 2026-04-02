@@ -99,6 +99,8 @@ export const useGlobalStore = defineStore('global', {
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
     currentUserIsResizingCardDetails: false,
+    currentUserIsResizingSidebar: false,
+    userNotifications: [],
 
     // drawing
     drawingEraserIsActive: false,
@@ -518,6 +520,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateUrlPreview (cardId) {},
     triggerUpdateUrlPreviewComplete (cardId) {},
     triggerRemovedIsVisible () {},
+    triggerNoteIsVisible () {},
     triggerJumpToIsVisible () {},
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},

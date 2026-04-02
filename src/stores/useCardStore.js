@@ -19,6 +19,7 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
+import last from 'lodash-es/last'
 import { generateNKeysBetween } from 'fractional-indexing'
 
 let tallestCardHeight = 0
@@ -1053,6 +1054,14 @@ export const useCardStore = defineStore('cards', {
         targetPositionIndex = cards[0].listPositionIndex
       }
       await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: true })
+    },
+    async appendCardToList (card, list) {
+      let targetPositionIndex = null
+      const cards = this.getCardsByList(list.id)
+      if (cards.length) {
+        targetPositionIndex = last(cards).listPositionIndex
+      }
+      await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: false })
     },
     checkIfShouldUpdatePrevListDimensions (cards, list) {
       const listStore = useListStore()

@@ -381,6 +381,11 @@ const listBackgroundStyles = computed(() => {
   const styles = utils.clone(listStyles.value)
   delete styles.zIndex
   styles.backgroundColor = color.value
+  // list-info-bottom
+  if (listCards.value.length) {
+    const listInfoBottomOffset = 26
+    styles.height = parseInt(styles.height) + listInfoBottomOffset + 'px'
+  }
   return styles
 })
 const addSizeClasses = (classes) => {
@@ -459,7 +464,7 @@ const updateIsCollapsed = async (value) => {
   }
   connectionStore.updateConnectionPathsByItemIds(cardIds)
 }
-const addCard = async () => {
+const addCard = async (event, shouldAppend) => {
   if (globalStore.preventDraggedListFromShowingDetails) { return }
   cancelLocking()
   updateIsCollapsed(false)
@@ -472,7 +477,11 @@ const addCard = async () => {
     width
   }
   cardStore.createCard(card)
-  cardStore.prependCardToList(card, props.list)
+  if (shouldAppend) {
+    cardStore.appendCardToList(card, props.list)
+  } else {
+    cardStore.prependCardToList(card, props.list)
+  }
 }
 
 // resize
@@ -658,6 +667,27 @@ const clearFocus = () => {
             tabindex="-1"
           )
             img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+
+  .list-info.list-info-bottom(
+    v-if="listCards.length && !props.list.isCollapsed"
+    :class="infoClasses"
+    @mouseover="updateIsHover(true)"
+    @mouseleave="updateIsHover(false)"
+    @mousedown.left="startListInfoInteraction"
+
+    @mouseup.left="endListInfoInteraction"
+    @keyup.stop.enter="endListInfoInteraction"
+
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
+    @touchend="endListInfoInteractionTouch"
+  )
+    .row.list-info-row
+      //- add card to bottom
+      .inline-button-wrap(title="Add Card to Bottom" @click.left.stop="addCard($event, true)" @touchend.stop="addCard($event, true)")
+        button.small-button.inline-button
+          img.icon.add(src="@/assets/add.svg")
+
 </template>
 
 <style lang="stylus">
@@ -821,6 +851,15 @@ const clearFocus = () => {
   .focusing-frame
     &.infinite-focusing-frame
       animation-iteration-count 100 // animation plays effectively infinite
+
+.list-info-bottom
+  position absolute
+  bottom -26px // 34 - 8
+  border-top-left-radius 0
+  border-top-right-radius 0
+  .row
+    flex-direction row-reverse
+
 @keyframes listSnapGuide
   50%
     transform scaleY(175%)

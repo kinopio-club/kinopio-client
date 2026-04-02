@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import Links from '@/components/sidebar/Links.vue'
 import Tags from '@/components/sidebar/Tags.vue'
@@ -15,12 +16,15 @@ import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
 import Todos from '@/components/sidebar/Todos.vue'
+import Note from '@/components/sidebar/Note.vue'
+import SidebarResize from '@/components/SidebarResize.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
+const titleElement = ref(null)
 let unsubscribes
 
 onMounted(() => {
@@ -30,6 +34,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerRemovedIsVisible') {
         toggleSection('removed')
+      } else if (name === 'triggerNoteIsVisible') {
+        toggleSection('note')
       }
     }
   )
@@ -45,15 +51,6 @@ onBeforeUnmount(() => {
 const props = defineProps({
   visible: Boolean
 })
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    restoreUserLastSidebarSection()
-    updateDialogHeight()
-    globalStore.shouldExplicitlyHideFooter = true
-  } else {
-    globalStore.shouldExplicitlyHideFooter = false
-  }
-})
 
 const state = reactive({
   dialogHeight: null,
@@ -64,7 +61,22 @@ const state = reactive({
   statsIsVisible: false,
   favoritesIsVisible: false,
   historyIsVisible: false,
-  todosIsVisible: false
+  todosIsVisible: false,
+  noteIsVisible: false
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    restoreUserLastSidebarSection()
+    updateDialogHeight()
+    globalStore.shouldExplicitlyHideFooter = true
+  } else {
+    globalStore.shouldExplicitlyHideFooter = false
+  }
+})
+
+watch(() => userStore.sidebarResizeWidth, (value, prevValue) => {
+  updateDialogHeight()
 })
 
 const clearVisible = () => {
@@ -76,13 +88,21 @@ const clearVisible = () => {
   state.favoritesIsVisible = false
   state.historyIsVisible = false
   state.todosIsVisible = false
+  state.noteIsVisible = false
 }
-
+const updateSubsectionHeight = () => {
+  const element = titleElement.value
+  const rect = element.getBoundingClientRect()
+  const height = rect.height
+  state.subsectionHeight = state.dialogHeight - height
+}
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+  await nextTick()
+  updateSubsectionHeight()
 }
 
 // pin dialog
@@ -91,6 +111,9 @@ const dialogIsPinned = computed(() => globalStore.sidebarIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
   globalStore.sidebarIsPinned = isPinned
+  setTimeout(() => {
+    updateDialogHeight()
+  }, 100) // wait for pinned dialog transition
 }
 const closeDialogs = () => {
   globalStore.tagDetailsIsVisible = false
@@ -110,7 +133,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = userStore.lastSidebarSection
-  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'todos'] // listed in api docs
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'todos', 'note'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -122,6 +145,18 @@ const updateUserLastSidebarSection = (name) => {
   userStore.updateUser({ lastSidebarSection: name })
 }
 
+// styles
+
+const styles = computed(() => {
+  const minWidth = consts.defaultDialogWidth
+  let width = userStore.sidebarResizeWidth || minWidth
+  width = `${width}px`
+  return {
+    width,
+    maxHeight: state.dialogHeight + 'px'
+  }
+})
+
 </script>
 
 <template lang="pug">
@@ -130,11 +165,11 @@ dialog#sidebar.sidebar.is-pinnable(
   :open="visible"
   @click.left.stop="closeDialogs"
   ref="dialogElement"
-  :style="{'max-height': state.dialogHeight + 'px'}"
+  :style="styles"
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section.title-section
+  section.title-section(ref="titleElement")
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
         //- first row
@@ -159,6 +194,8 @@ dialog#sidebar.sidebar.is-pinnable(
         .segmented-buttons
           button(@click.left="toggleSection('todos')" :class="{ active: state.todosIsVisible}" title="Todos")
             span Todos
+          button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
+            img.icon.note(src="@/assets/note.svg")
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
             img.icon.time(src="@/assets/time.svg")
@@ -168,20 +205,21 @@ dialog#sidebar.sidebar.is-pinnable(
             img.icon.remove-undo(src="@/assets/undo.svg")
 
       //- Pin
-      .title-row
-        .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
-          button.small-button(:class="{active: dialogIsPinned}")
-            img.icon.pin.right-pin(src="@/assets/pin.svg")
+      .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+        button.small-button(:class="{active: dialogIsPinned}")
+          img.icon.pin.right-pin(src="@/assets/pin.svg")
 
-  Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
-  Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
-  Removed(:visible="state.removedIsVisible")
-  Stats(:visible="state.statsIsVisible")
-  Inbox(:visible="state.inboxIsVisible")
-  Favorites(:visible="state.favoritesIsVisible")
-  History(:visible="state.historyIsVisible")
-  Todos(:visible="state.todosIsVisible")
+  Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned" :subsectionHeight="state.subsectionHeight")
+  Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned" :subsectionHeight="state.subsectionHeight")
+  Removed(:visible="state.removedIsVisible" :subsectionHeight="state.subsectionHeight")
+  Stats(:visible="state.statsIsVisible" :subsectionHeight="state.subsectionHeight")
+  Inbox(:visible="state.inboxIsVisible" :subsectionHeight="state.subsectionHeight")
+  Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
+  History(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
+  Todos(:visible="state.todosIsVisible" :subsectionHeight="state.subsectionHeight")
+  Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight")
 
+  SidebarResize
 </template>
 
 <style lang="stylus">
@@ -190,7 +228,7 @@ dialog#sidebar.sidebar.is-pinnable(
   left initial
   right 8px
   max-height calc(100vh - 25px)
-  overflow auto
+  overflow hidden
   &.is-pinned
     top -36px
     right 0
@@ -198,11 +236,6 @@ dialog#sidebar.sidebar.is-pinnable(
     align-items flex-start
   .right-pin
     transform rotate(180deg)
-  .tags
-    section
-      &:first-child
-        border-top-left-radius 0
-        border-top-right-radius 0
   .icon.flower
     vertical-align -1px
     height 11px
@@ -211,6 +244,11 @@ dialog#sidebar.sidebar.is-pinnable(
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
+
+  .pin-button-wrap
+    position absolute
+    right 0
+    top 0
 
   .segmented-buttons-wrap
     .segmented-buttons
