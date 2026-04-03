@@ -11,7 +11,7 @@ import AboutSocialProof from '@/components/page/about/AboutSocialProof.vue'
 import AboutHowTo from '@/components/page/about/AboutHowTo.vue'
 import AboutExamples from '@/components/page/about/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/page/about/AboutMoreFeatures.vue'
-import AboutAtWork from '@/components/page/about/AboutAtWork.vue'
+import AboutCollaborate from '@/components/page/about/AboutCollaborate.vue'
 import AboutFAQ from '@/components/page/about/AboutFAQ.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
@@ -95,7 +95,7 @@ AboutJsonLd
 
       AboutExamples
 
-      AboutAtWork
+      AboutCollaborate
 
       AboutFAQ
 
