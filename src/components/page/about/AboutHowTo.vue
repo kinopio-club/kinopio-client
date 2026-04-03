@@ -10,7 +10,7 @@ const isSafari = computed(() => utils.isSafari() || utils.isIPhone())
 
 <template lang="pug">
 section.how-to
-  h2 Bend Information into Knowledge
+  h2 How to Turn Information into Knowledge
   .how-to-wrap
     .row
       .side.left
@@ -78,10 +78,10 @@ section.how-to
       flex-wrap wrap
       justify-content space-between
       .left
-        max-width calc(50% - var(--how-to-column-gap))
+        max-width calc(45% - var(--how-to-column-gap))
         margin-right var(--how-to-column-gap)
       .right
-        max-width 50%
+        max-width 55%
       @media(max-width 600px)
         flex-wrap nowrap
         flex-direction column
