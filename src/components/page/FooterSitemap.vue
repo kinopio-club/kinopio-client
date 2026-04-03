@@ -34,7 +34,6 @@ footer.sitemap
   border-radius var(--page-entity-radius)
   max-width 100%
   margin 2rem 12px
-  margin-bottom 0
   width max-content
   p
     margin-top 0
