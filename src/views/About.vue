@@ -40,6 +40,8 @@ onMounted(() => {
   }
   if (consts.isDevelopment()) {
     document.title = '[DEV] Kinopio'
+  } else {
+    document.title = 'Kinopio'
   }
 })
 
