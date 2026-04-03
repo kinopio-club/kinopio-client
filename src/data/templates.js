@@ -70,7 +70,7 @@ export default {
       {
         name: 'Time Tracking',
         id: '-ou2kHxO40-rDFZymIn1A',
-        categoryId: 1
+        categoryId: 2
       }
     ]
   },
