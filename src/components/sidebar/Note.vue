@@ -127,7 +127,8 @@ const copyCurrentConnectionItemNamesToNote = (event) => {
   if (!globalStore.currentUserIsDrawingConnection) { return }
   globalStore.closeAllDialogs()
   // item names
-  const items = globalStore.currentConnectionStartItemIds.map(id => spaceStore.getSpaceItemById(id))
+  let items = globalStore.currentConnectionStartItemIds.map(id => spaceStore.getSpaceItemById(id))
+  items = utils.sortByY(items)
   let newText = ''
   items.forEach((item, index) => {
     let itemName = ''
