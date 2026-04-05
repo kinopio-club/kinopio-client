@@ -51,6 +51,14 @@ const props = defineProps({
   width: Number,
   height: Number
 })
+
+const state = reactive({
+  imageUrl: null,
+  imageProxySrcSet: null
+})
+
+const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
+
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
     state.imageUrl = null
@@ -72,43 +80,12 @@ watch(() => props.pendingUploadDataUrl, (url) => {
     state.imageUrl = url
   }
 })
-watch(() => props.videoIsPaused, (value) => {
-  if (!props.video) { return }
-  if (value) {
-    pauseVideo()
-  } else {
-    playVideo()
-  }
-})
 watch(() => props.width, (width) => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
 })
 watch(() => props.height, (height) => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
 })
-
-const state = reactive({
-  imageUrl: null,
-  imageProxySrcSet: null
-})
-
-const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
-watch(() => isTouching.value, (value) => {
-  if (value) {
-    pause()
-  } else {
-    play()
-  }
-})
-const pause = () => {
-  pauseVideo()
-  pauseGif()
-}
-const play = () => {
-  playVideo()
-  playGif()
-}
-
 watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
   if (value) { return }
   removeCanvasSelectedClass()
@@ -124,6 +101,22 @@ const lazyLoading = computed(() => {
 
 // video
 
+watch(() => props.videoIsPaused, (value) => {
+  if (!props.video) { return }
+  if (value) {
+    pauseVideo()
+  } else {
+    playVideo()
+  }
+})
+const pause = () => {
+  pauseVideo()
+  pauseGif()
+}
+const play = () => {
+  playVideo()
+  playGif()
+}
 const pauseVideo = () => {
   if (!props.video) { return }
   const element = videoElement.value
@@ -137,6 +130,13 @@ const playVideo = () => {
 
 // gif
 
+watch(() => isTouching.value, (value) => {
+  if (value) {
+    pause()
+  } else {
+    play()
+  }
+})
 const imageIsGif = computed(() => {
   const url = state.imageUrl
   if (!url) { return }
