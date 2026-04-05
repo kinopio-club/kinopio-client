@@ -222,7 +222,7 @@ dialog.templates(
           :hideTodayBadge="true"
           :hideExploreBadge="true"
         )
-      //- Work & School
+      //- Work
       section.results-section.results-section-border-top(v-if="categoryIsVisible('Work & School')")
         p.category
           span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}

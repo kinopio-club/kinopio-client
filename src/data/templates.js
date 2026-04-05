@@ -14,7 +14,7 @@ export default {
       },
       {
         id: 2,
-        name: 'Work & School',
+        name: 'Work',
         color: '#6fff6f'
       }
     ]
