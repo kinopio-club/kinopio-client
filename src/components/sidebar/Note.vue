@@ -194,7 +194,7 @@ section.note
   .textarea-wrap
     position relative
     textarea
-      margin-bottom 0
+      margin-bottom 100px
     .focusing-frame
       animation-iteration-count 400 // infinite
       width 100%
