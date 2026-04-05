@@ -819,8 +819,15 @@ const remoteCardPendingUpload = computed(() => {
   })
 })
 const pendingUploadDataUrl = computed(() => {
-  if (!cardPendingUpload.value || isComment.value) { return }
-  return cardPendingUpload.value.imageDataUrl
+  if (isComment.value) { return }
+  const sessionUpload = uploadStore.getSessionUploadByItemId(props.card.id)
+  if (cardPendingUpload.value) {
+    return cardPendingUpload.value.imageDataUrl
+  } else if (sessionUpload) {
+    return sessionUpload.imageDataUrl
+  } else {
+    return null
+  }
 })
 const selectedColorUpload = computed(() => {
   const color = currentUserColor.value

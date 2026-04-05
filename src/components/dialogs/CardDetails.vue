@@ -405,7 +405,7 @@ const closeCard = async () => {
   globalStore.shouldPreventNextEnterKey = false
   if (!item) { return }
   const cardHasName = Boolean(item.name)
-  const cardHasPendingUpload = uploadStore.hasPendingUploadForCardId(cardId)
+  const cardHasPendingUpload = uploadStore.getPendingUploadByItemId(cardId)
   if (!cardHasName && !cardHasPendingUpload) {
     cardStore.removeCard(cardId)
   }

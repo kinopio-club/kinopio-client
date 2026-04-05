@@ -3,11 +3,11 @@ import { defineStore } from 'pinia'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -16,11 +16,15 @@ import { nanoid } from 'nanoid'
 
 export const useUploadStore = defineStore('upload', {
   state: () => ({
-    pendingUploads: []
+    pendingUploads: [],
+    sessionUploadDataUrl: {}
   }),
   actions: {
-    hasPendingUploadForCardId (id) {
-      return this.pendingUploads.some(item => item.cardId === id)
+    getPendingUploadByItemId (id) {
+      return this.pendingUploads.find(item => item.cardId === id)
+    },
+    getSessionUploadByItemId (id) {
+      return this.sessionUploadDataUrl[id]
     },
     s3Policy (value) {
       utils.typeCheck({ value, type: 'object', origin: 's3Policy' })
@@ -41,9 +45,20 @@ export const useUploadStore = defineStore('upload', {
         }
         return item
       })
-      this.pendingUploads = this.pendingUploads.filter(item => item.percentComplete !== 100)
+      if (percentComplete === 100) {
+        this.updateCardSessionUploadDataUrl(cardId)
+      }
+      this.pendingUploads = this.pendingUploads.filter(item => item.percentComplete < 100)
+    },
+    updateCardSessionUploadDataUrl (cardId) {
+      if (!cardId) { return }
+      const cardStore = useCardStore()
+      const upload = this.getPendingUploadByItemId(cardId)
+      if (!upload) { return }
+      this.sessionUploadDataUrl[cardId] = upload
     },
     removePendingUpload ({ cardId, spaceId, boxId }) {
+      this.updateCardSessionUploadDataUrl(cardId)
       this.pendingUploads = this.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId || item.boxId !== boxId))
     },
 
