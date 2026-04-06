@@ -335,7 +335,8 @@ export const useListStore = defineStore('lists', {
       // list has cards
       if (cards.length) {
         const card = last(cards)
-        const listHeight = (card.y - list.y) + card.height + consts.listPadding
+        const listInfoBottomOffset = 26
+        const listHeight = (card.y - list.y) + card.height + consts.listPadding + listInfoBottomOffset
         this.updateList({
           id: list.id,
           height: listHeight

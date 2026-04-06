@@ -381,11 +381,6 @@ const listBackgroundStyles = computed(() => {
   const styles = utils.clone(listStyles.value)
   delete styles.zIndex
   styles.backgroundColor = color.value
-  // list-info-bottom
-  if (listCards.value.length) {
-    const listInfoBottomOffset = 26
-    styles.height = parseInt(styles.height) + listInfoBottomOffset + 'px'
-  }
   return styles
 })
 const addSizeClasses = (classes) => {
@@ -671,6 +666,7 @@ const clearFocus = () => {
   .list-info.list-info-bottom(
     v-if="listCards.length && !props.list.isCollapsed"
     :class="infoClasses"
+    :style="{ backgroundColor: color }"
     @mouseover="updateIsHover(true)"
     @mouseleave="updateIsHover(false)"
     @mousedown.left="startListInfoInteraction"
@@ -854,7 +850,7 @@ const clearFocus = () => {
 
 .list-info-bottom
   position absolute
-  bottom -26px // 34 - 8
+  bottom 0
   border-top-left-radius 0
   border-top-right-radius 0
   .row
