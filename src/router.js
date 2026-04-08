@@ -21,6 +21,9 @@ const resetStoresForStaticPage = () => {
   useListStore().$reset()
 }
 
+const affiliateRefferers = ['/foxy']
+const aboutPaths = ['/about', ...affiliateRefferers]
+
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
@@ -42,11 +45,16 @@ const router = {
       }
     }, {
       path: '/',
-      alias: '/about',
+      alias: aboutPaths,
       name: 'about',
       component: () => import('./views/About.vue'),
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         resetStoresForStaticPage()
+        if (affiliateRefferers.includes(to.path.toLowerCase())) {
+          const affiliateReferrerId = to.path.replace('/', '')
+          globalStore.currentUserAffiliateReferrerId = affiliateReferrerId
+        }
         next()
       }
     }, {

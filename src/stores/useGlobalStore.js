@@ -101,6 +101,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsResizingCardDetails: false,
     currentUserIsResizingSidebar: false,
     userNotifications: [],
+    currentUserAffiliateReferrerId: '',
 
     // drawing
     drawingEraserIsActive: false,
