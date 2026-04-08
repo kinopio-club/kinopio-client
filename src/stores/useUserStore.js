@@ -371,9 +371,9 @@ export const useUserStore = defineStore('user', {
     },
     checkIfShouldApplyAffiliateReferrer () {
       const globalStore = useGlobalStore()
-      if (!globalStore.currentUserAffiliateReferrerId) { return }
+      if (!globalStore.currentUserAffiliatePromoCode) { return }
       this.updateUser({
-        affiliateReferrerId: globalStore.currentUserAffiliateReferrerId
+        affiliatePromoCode: globalStore.currentUserAffiliatePromoCode
       })
     },
     async initializeUser () {

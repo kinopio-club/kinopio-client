@@ -52,8 +52,8 @@ const router = {
         const globalStore = useGlobalStore()
         resetStoresForStaticPage()
         if (affiliateRefferers.includes(to.path.toLowerCase())) {
-          const affiliateReferrerId = to.path.replace('/', '')
-          globalStore.currentUserAffiliateReferrerId = affiliateReferrerId
+          const affiliatePromoCode = to.path.replace('/', '')
+          globalStore.currentUserAffiliatePromoCode = affiliatePromoCode
           globalStore.notifyAffiliateReferrer = true
         }
         next()
