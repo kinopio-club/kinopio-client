@@ -369,6 +369,13 @@ export const useUserStore = defineStore('user', {
         globalStore.notifySignUpToJoinGroup = true
       }
     },
+    checkIfShouldApplyAffiliateReferrer () {
+      const globalStore = useGlobalStore()
+      if (!globalStore.currentUserAffiliateReferrerId) { return }
+      this.updateUser({
+        affiliateReferrerId: globalStore.currentUserAffiliateReferrerId
+      })
+    },
     async initializeUser () {
       const globalStore = useGlobalStore()
       const themeStore = useThemeStore()
