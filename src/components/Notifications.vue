@@ -418,7 +418,8 @@ aside.notifications(@click.left="closeAllDialogs")
         span Feels Good
 
   .persistent-item.success(v-if="notifyAffiliateReferrer")
-    p Referral discount has been applied
+    p
+      span 10% off referral discount has been applied
     .row
       button(@click="removeNotifyAffiliateReferrer")
         img.icon.cancel(src="@/assets/add.svg")
