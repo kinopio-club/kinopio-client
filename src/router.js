@@ -54,6 +54,7 @@ const router = {
         if (affiliateRefferers.includes(to.path.toLowerCase())) {
           const affiliateReferrerId = to.path.replace('/', '')
           globalStore.currentUserAffiliateReferrerId = affiliateReferrerId
+          globalStore.notifyAffiliateReferrer = true
         }
         next()
       }

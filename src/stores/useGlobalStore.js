@@ -294,6 +294,7 @@ export const useGlobalStore = defineStore('global', {
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
+    notifyAffiliateReferrer: false,
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
     notifyIsDuplicatingSpace: false,
