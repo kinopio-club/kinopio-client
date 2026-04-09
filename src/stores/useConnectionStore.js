@@ -487,6 +487,7 @@ export const useConnectionStore = defineStore('connections', {
           let endItem = utils.itemElementDimensions({ id: connection.endItemId })
           startItem = spaceStore.updateItemWithItemType(startItem)
           endItem = spaceStore.updateItemWithItemType(endItem)
+          if (!endItem || !startItem) { return }
 
           const { path, point1Cardinal, point2Cardinal } = this.getConnectionPathBetweenItems({
             startItem,
