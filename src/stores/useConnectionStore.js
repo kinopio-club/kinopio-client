@@ -20,6 +20,9 @@ import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
 import sortBy from 'lodash-es/sortBy'
 
+let isAnimatingInterpolation
+const duration = 100 // ms
+
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
@@ -495,13 +498,25 @@ export const useConnectionStore = defineStore('connections', {
             controlPoint: connection.controlPoint
           })
           if (!path) { return }
-          const update = {
-            id: connection.id,
-            path,
-            point1Cardinal,
-            point2Cardinal
+          // determine if should animate snapping between points
+          const prevPoint1Cardinal = connection.point1Cardinal
+          const prevPoint2Cardinal = connection.point2Cardinal
+          const shouldInterpolatePoint1 = prevPoint1Cardinal !== point1Cardinal
+          const shouldInterpolatePoint2 = prevPoint2Cardinal !== point2Cardinal
+          const shouldAnimateInterpolation = shouldInterpolatePoint1 || shouldInterpolatePoint2
+          if (shouldAnimateInterpolation || isAnimatingInterpolation) {
+            // isAnimatingInterpolation = true
+            // TODO animate lerp
+            console.log('💁‍♀️💁‍♀️v')
+          } else {
+            const update = {
+              id: connection.id,
+              path,
+              point1Cardinal,
+              point2Cardinal
+            }
+            updates.push(update)
           }
-          updates.push(update)
         })
         if (userStore.getUserCanEditSpace) {
           this.updateConnections(updates)
