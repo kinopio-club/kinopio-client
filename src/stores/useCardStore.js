@@ -867,13 +867,11 @@ export const useCardStore = defineStore('cards', {
     },
     async clearResizeCards (ids, shouldRemoveResizeWidth) {
       const connectionStore = useConnectionStore()
-      const userStore = useUserStore()
       const updates = []
       ids.forEach(id => {
         const update = { id, width: null }
         if (shouldRemoveResizeWidth) {
-          const resizeWidth = userStore.cardSettingsCardWrapWidth
-          update.resizeWidth = resizeWidth
+          update.resizeWidth = null
         }
         updates.push(update)
         utils.clearAllCardDimensions({ id })
