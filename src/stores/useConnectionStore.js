@@ -20,6 +20,8 @@ import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
 import sortBy from 'lodash-es/sortBy'
 
+const cardinalDebounceTimers = new Map()
+
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
@@ -501,15 +503,48 @@ export const useConnectionStore = defineStore('connections', {
           const shouldInterpolatePoint2 = prevPoint2Cardinal !== point2Cardinal
           const shouldAnimateInterpolation = shouldInterpolatePoint1 || shouldInterpolatePoint2
           if (shouldAnimateInterpolation) {
-            globalStore.triggerConnectionSnapAnimation({ id: connection.id, fromPath: connection.path, toPath: path })
+            // compute path using previous cardinals so the line stays stable during debounce
+            const paddedRect1 = closestPoints.updateRectWithPadding(closestPoints.normalizeRect(startItem), startItem.itemType)
+            const paddedRect2 = closestPoints.updateRectWithPadding(closestPoints.normalizeRect(endItem), endItem.itemType)
+            const cardinalPoints1 = closestPoints.getCardinalPoints(paddedRect1)
+            const cardinalPoints2 = closestPoints.getCardinalPoints(paddedRect2)
+            let prevPoint1 = cardinalPoints1[prevPoint1Cardinal]
+            let prevPoint2 = cardinalPoints2[prevPoint2Cardinal]
+            // mirror box override from getshortestConnectionPathBetweenItems
+            if (startItem.itemType === 'box') { prevPoint1 = utils.estimatedItemConnectorPosition(startItem) }
+            if (endItem.itemType === 'box') { prevPoint2 = utils.estimatedItemConnectorPosition(endItem) }
+            const stablePath = (prevPoint1 && prevPoint2)
+              ? this.getConnectionPathBetweenCoords(prevPoint1, prevPoint2, connection.controlPoint)
+              : path
+            // debounce the actual cardinal update and snap animation
+            if (!cardinalDebounceTimers.has(connection.id)) {
+              const connectionId = connection.id
+              const timer = setTimeout(() => {
+                cardinalDebounceTimers.delete(connectionId)
+                // read current path at fire time – connection.path has been updated each frame during the debounce window
+                const fromPath = this.byId[connectionId]?.path
+                const cardinalUpdate = [{ id: connectionId, point1Cardinal, point2Cardinal }]
+                if (userStore.getUserCanEditSpace) {
+                  this.updateConnections(cardinalUpdate)
+                } else {
+                  this.updateConnectionsState(cardinalUpdate)
+                }
+                if (fromPath) {
+                  globalStore.triggerConnectionSnapAnimation({ id: connectionId, fromPath })
+                }
+              }, 200)
+              cardinalDebounceTimers.set(connection.id, timer)
+            }
+            // use stable path (old cardinals, new positions) during debounce window
+            updates.push({ id: connection.id, path: stablePath })
+          } else {
+            // cardinals stable or reverted – cancel any pending debounce
+            if (cardinalDebounceTimers.has(connection.id)) {
+              clearTimeout(cardinalDebounceTimers.get(connection.id))
+              cardinalDebounceTimers.delete(connection.id)
+            }
+            updates.push({ id: connection.id, path, point1Cardinal, point2Cardinal })
           }
-          const update = {
-            id: connection.id,
-            path,
-            point1Cardinal,
-            point2Cardinal
-          }
-          updates.push(update)
         })
         if (userStore.getUserCanEditSpace) {
           this.updateConnections(updates)
