@@ -130,7 +130,6 @@ export const useConnectionStore = defineStore('connections', {
     },
     getshortestConnectionPathBetweenItems (startItem, endItem, controlPoint) {
       let { point1, point2, point1Cardinal, point2Cardinal } = closestPoints.findClosestPoints(startItem, endItem)
-      console.log(point1, point2, point1Cardinal, point2Cardinal)
       if (startItem.itemType === 'box') {
         point1 = utils.estimatedItemConnectorPosition(startItem)
       }
@@ -504,19 +503,19 @@ export const useConnectionStore = defineStore('connections', {
           const shouldInterpolatePoint1 = prevPoint1Cardinal !== point1Cardinal
           const shouldInterpolatePoint2 = prevPoint2Cardinal !== point2Cardinal
           const shouldAnimateInterpolation = shouldInterpolatePoint1 || shouldInterpolatePoint2
-          if (shouldAnimateInterpolation || isAnimatingInterpolation) {
-            // isAnimatingInterpolation = true
-            // TODO animate lerp
-            console.log('💁‍♀️💁‍♀️v')
-          } else {
-            const update = {
-              id: connection.id,
-              path,
-              point1Cardinal,
-              point2Cardinal
-            }
-            updates.push(update)
+          // if (shouldAnimateInterpolation || isAnimatingInterpolation) {
+          // isAnimatingInterpolation = true
+          // TODO animate lerp
+          console.log('💁‍♀️💁‍♀️v, path')
+          // } else {
+          const update = {
+            id: connection.id,
+            path,
+            point1Cardinal,
+            point2Cardinal
           }
+          updates.push(update)
+          // }
         })
         if (userStore.getUserCanEditSpace) {
           this.updateConnections(updates)

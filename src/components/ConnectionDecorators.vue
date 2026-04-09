@@ -69,7 +69,7 @@ const reverseConnections = () => {
   props.connections.forEach(connection => {
     const startItemId = connection.endItemId
     const endItemId = connection.startItemId
-    const path = connectionStore.getConnectionPathBetweenItems({
+    const { path } = connectionStore.getConnectionPathBetweenItems({
       startItemId,
       endItemId,
       controlPoint: connection.controlPoint
@@ -115,7 +115,7 @@ const togglePathIsStraight = (isStraight) => {
   }
   const updates = []
   props.connections.forEach(connection => {
-    const path = connectionStore.getConnectionPathBetweenItems({
+    const { path } = connectionStore.getConnectionPathBetweenItems({
       startItemId: connection.startItemId,
       endItemId: connection.endItemId,
       controlPoint

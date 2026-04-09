@@ -164,7 +164,7 @@ const addConnections = async (event) => {
   cardStore.updateCardsDimensions(startItemIds)
   startItemIds.forEach(startItemId => {
     const controlPoint = userStore.defaultConnectionControlPoint
-    const path = connectionStore.getConnectionPathBetweenItems({
+    const { path } = connectionStore.getConnectionPathBetweenItems({
       startItemId,
       endItemId,
       controlPoint,

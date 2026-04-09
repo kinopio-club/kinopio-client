@@ -267,7 +267,7 @@ const connectItems = (event) => {
       const endItemId = itemIds[index + 1]
       const id = nanoid()
       const controlPoint = consts.straightLineConnectionPathControlPoint
-      const path = connectionStore.getConnectionPathBetweenItems({
+      const { path } = connectionStore.getConnectionPathBetweenItems({
         startItemId,
         endItemId,
         controlPoint
