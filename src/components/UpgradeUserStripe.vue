@@ -36,6 +36,12 @@ const clearState = () => {
 const isLifetimePlan = computed(() => props.price.period === 'life')
 const referralDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
 
+const handleError = (error) => {
+  console.log(error.response)
+  // const data = await response.json()
+  state.error.unknownServerError = true
+}
+
 // subscribe
 
 const subscribeUrl = async () => {
@@ -71,7 +77,7 @@ const subscribe = async () => {
   } catch (error) {
     console.error('🚒 subscribe', error)
     clearState()
-    state.error.unknownServerError = true
+    handleError(error)
   }
 }
 
