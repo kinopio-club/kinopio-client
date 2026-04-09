@@ -126,7 +126,8 @@ export const useConnectionStore = defineStore('connections', {
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
     getshortestConnectionPathBetweenItems (startItem, endItem, controlPoint) {
-      let { point1, point2 } = closestPoints.findClosestPoints(startItem, endItem)
+      let { point1, point2, point1Cardinal, point2Cardinal } = closestPoints.findClosestPoints(startItem, endItem)
+      console.log(point1, point2, point1Cardinal, point2Cardinal)
       if (startItem.itemType === 'box') {
         point1 = utils.estimatedItemConnectorPosition(startItem)
       }

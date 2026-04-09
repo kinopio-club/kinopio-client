@@ -47,7 +47,6 @@ export default {
   },
 
   findClosestPoints (item1, item2) {
-    console.log(item1, item2.name)
     // Normalize and add padding to rectangles
     let rect1 = this.normalizeRect(item1)
     let rect2 = this.normalizeRect(item2)
@@ -63,15 +62,17 @@ export default {
     let closestPair = { point1: null, point2: null }
 
     // Iterate through all point pairs
-    Object.values(points1).forEach(point1 => {
-      Object.values(points2).forEach(point2 => {
+    Object.values(points1).forEach((point1, p1Index) => {
+      Object.values(points2).forEach((point2, p2Index) => {
         const dx = point1.x - point2.x
         const dy = point1.y - point2.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
         if (distance < minDistance) {
           minDistance = distance
-          closestPair = { point1: { ...point1 }, point2: { ...point2 } }
+          const point1Cardinal = Object.keys(points1)[p1Index]
+          const point2Cardinal = Object.keys(points2)[p2Index]
+          closestPair = { point1: { ...point1 }, point2: { ...point2 }, point1Cardinal, point2Cardinal }
         }
       })
     })
