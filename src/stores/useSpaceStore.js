@@ -736,6 +736,7 @@ export const useSpaceStore = defineStore('space', {
             z: 0,
             name: 'Get your thoughts, ideas and feelings out',
             width: 200,
+            resizeWidth: 200,
             height: 51
           },
           {
@@ -745,6 +746,7 @@ export const useSpaceStore = defineStore('space', {
             name: 'Connect them together\n[Help and Tutorials](https://help.kinopio.club)',
             z: 3,
             width: 193,
+            resizeWidth: 193,
             height: 69
           }
         ]
