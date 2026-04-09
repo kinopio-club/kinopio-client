@@ -28,7 +28,8 @@ onMounted(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -78,6 +79,11 @@ const init = async () => {
   await updateRemovedSpaces()
   updateResultsSectionHeight()
 }
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 
 // restore
 
@@ -246,7 +252,7 @@ const items = computed(() => {
 </script>
 
 <template lang="pug">
-.removed(v-if="visible")
+.removed(v-if="visible" :style="styles")
   section
     .row
       span Restore Removed Items
@@ -318,6 +324,7 @@ const items = computed(() => {
 .removed
   overflow auto
   border-top 1px solid var(--primary-border)
+  padding 0
   .results-section
     max-height initial
     .button-wrap

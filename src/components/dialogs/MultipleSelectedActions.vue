@@ -6,13 +6,16 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import CardActions from '@/components/subsections/CardActions.vue'
+import BoxActions from '@/components/subsections/BoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
+import ListActions from '@/components/subsections/ListActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 
@@ -25,6 +28,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -35,7 +39,8 @@ let prevCards, prevBoxes
 const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
-  cardsIsConnected: false
+  cardsIsConnected: false,
+  isPointerDown: false
 })
 
 const closeAllDialogs = () => {
@@ -50,6 +55,7 @@ const multipleConnectionsSelectedIds = computed(() => globalStore.multipleConnec
 const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
 const multipleLinesSelectedIds = computed(() => globalStore.multipleLinesSelectedIds)
+const multipleListsSelectedIds = computed(() => globalStore.multipleListsSelectedIds)
 
 const visible = computed(() => {
   const isSelectedItems = globalStore.getIsMultipleItemsSelected
@@ -59,7 +65,7 @@ watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
     globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-    scrollIntoView()
+    updatePositionClamped()
     closeDialogs()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
@@ -67,27 +73,60 @@ watch(() => visible.value, async (value, prevValue) => {
   }
 })
 
-const scrollIntoView = () => {
-  const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element })
-}
-
 const isThemeDarkAndUserColorLight = computed(() => {
   const isThemeDark = userStore.theme === 'dark'
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const colorClasses = computed(() => {
-  return utils.colorClasses({ backgroundColor: userColor.value })
+const classes = computed(() => {
+  const value = utils.colorClasses({ backgroundColor: userColor.value })
+  if (globalStore.currentUserIsDraggingMultipleSelectedActionsDialog) {
+    value.push('is-dragging')
+  }
+  if (state.isPointerDown) {
+    value.push('is-pointer-down')
+  }
+  return value
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
 const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
-
+const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
-const cardBoxOrConnectionIsSelected = computed(() => cardOrBoxIsSelected.value || editableConnections.value.length)
+const cardBoxOrListIsSelected = computed(() => cardOrBoxIsSelected.value || lists.value.length)
+const ItemIsSelected = computed(() => Boolean(utils.countArrayItems(selectedItems.value)))
+
+// position
+
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  globalStore.scrollElementIntoView({ element })
+}
+const updatePositionClamped = () => {
+  let { x, y } = globalStore.multipleSelectedActionsPosition
+  const element = dialogElement.value
+  const rect = element.getBoundingClientRect()
+  const { height, width } = rect
+  const margin = 16
+  const viewportWidth = globalStore.viewportWidth + window.scrollX
+  const viewportHeight = globalStore.viewportHeight + window.scrollY
+  const maxX = viewportWidth - width - margin
+  const maxY = viewportHeight - height - margin
+  if (x < 0) {
+    x = 0
+  } else if (x > maxX) {
+    x = maxX
+  }
+  if (y < 0) {
+    y = 0
+  } else if (y > maxY) {
+    y = maxY
+  }
+  globalStore.multipleSelectedActionsPosition = { x, y }
+}
+
 // items
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
@@ -97,18 +136,33 @@ const canEditAsNonMember = computed(() => {
   return spaceIsOpen && !isSpaceMember
 })
 const canEditAll = computed(() => {
-  if (isSpaceMember.value) { return { cards: true, connections: true, all: true } }
+  if (isSpaceMember.value) {
+    return {
+      cards: true,
+      connections: true,
+      boxes: true,
+      lines: true,
+      lists: true,
+      all: true
+    }
+  }
   const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
   const lines = userStore.getUserIsSpaceMember
-  const all = cards && connections && boxes && lines
-  return { cards, connections, boxes, lines, all }
+  const lists = userStore.getUserIsSpaceMember
+  const all = cards && connections && boxes && lines && lists
+  return { cards, connections, boxes, lines, lists, all }
 })
-const multipleCardOrBoxesIsSelected = computed(() => {
-  const cards = multipleCardsIsSelected.value
-  const boxes = multipleBoxesSelectedIds.value.length > 1
-  return cards || boxes
+const alignableItemsIsSelected = computed(() => {
+  let cardIds = multipleCardsSelectedIds.value
+  const boxIds = multipleBoxesSelectedIds.value
+  const listIds = multipleListsSelectedIds.value
+  cardIds = cardIds.filter(id => {
+    const isInSelectedList = multipleListsSelectedIds.value.includes(id)
+    return !isInSelectedList
+  })
+  return (cardIds.length + boxIds.length + listIds.length) > 1
 })
 const selectedItemsIsEditableByCurrentUser = computed(() => {
   const isCards = editableCards.value.length === cards.value.length
@@ -168,14 +222,6 @@ const styles = computed(() => {
 })
 
 // cards
-
-const moreCardOptionsLabel = computed(() => {
-  if (multipleCardsSelectedIds.value.length > 1) {
-    return 'CARDS'
-  } else {
-    return 'CARD'
-  }
-})
 
 const cardCanBeSplit = computed(() => {
   if (!oneCardIsSelected.value) { return }
@@ -245,7 +291,7 @@ const disconnectItems = () => {
 // connections
 
 const moreLineOptionsLabel = computed(() => 'LINE')
-const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
+const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value && !listsIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
   return multipleConnectionsSelectedIds.value.map(id => connectionStore.getConnection(id))
@@ -273,7 +319,7 @@ const connectionType = (event) => {
 
 // boxes
 
-const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value)
+const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value && !listsIsSelected.value)
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
   let boxes = multipleBoxesSelectedIds.value.map(boxId => {
@@ -293,6 +339,27 @@ const editableBoxes = computed(() => {
   }
 })
 
+// list
+
+const onlyListsIsSelected = computed(() => listsIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value && !boxesIsSelected.value)
+const listsIsSelected = computed(() => multipleListsSelectedIds.value.length > 0)
+const lists = computed(() => {
+  let lists = multipleListsSelectedIds.value.map(listId => {
+    return listStore.getList(listId)
+  })
+  lists = lists.filter(list => Boolean(list))
+  // prevLists = lists
+  return lists
+})
+const cardsIsInListTogether = computed(() => {
+  if (!cards.value.length) { return }
+  return cardStore.cardsIsInListTogether(cards)
+})
+const toggleListCards = async () => {
+  const cards = cardsSortedByY()
+  cardStore.toggleListCards(cards)
+}
+
 // split and merge
 
 const splitCard = () => {
@@ -305,13 +372,12 @@ const splitCard = () => {
   globalStore.triggerSplitCard(cardId)
 }
 const positionNewCards = async (newCards) => {
-  const spaceBetweenCards = 12
   await nextTick()
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
     const rect = utils.cardElementDimensions(prevCard)
-    card.y = rect.y + rect.height + spaceBetweenCards
+    card.y = rect.y + rect.height + consts.spaceBetweenCards
     return card
   })
   newCards = newCards.map(card => {
@@ -399,28 +465,30 @@ const toggleMoveItemsIsVisible = () => {
 // more options
 
 const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
+
+// connection line collapse/expand
+
 const shouldShowMultipleSelectedLineActions = computed(() => userStore.shouldShowMultipleSelectedLineActions)
+const connectionCollapseExpandIsVisible = computed(() => {
+  if (onlyConnectionsIsSelected.value) return
+  return connectionsIsSelected.value
+})
+
+// box collapse/expand
+
 const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShowMultipleSelectedBoxActions)
-const toggleShouldShowMultipleSelectedLineActions = async () => {
-  closeDialogs()
-  const value = !shouldShowMultipleSelectedLineActions.value
-  await userStore.updateUser({
-    shouldShowMultipleSelectedLineActions: value
-  })
-  nextTick(() => {
-    scrollIntoView()
-  })
-}
-const toggleShouldShowMultipleSelectedBoxActions = async () => {
-  closeDialogs()
-  const value = !shouldShowMultipleSelectedBoxActions.value
-  await userStore.updateUser({
-    shouldShowMultipleSelectedBoxActions: value
-  })
-  nextTick(() => {
-    scrollIntoView()
-  })
-}
+const boxCollapseExpandIsVisible = computed(() => {
+  if (onlyBoxesIsSelected.value) return
+  return boxesIsSelected.value
+})
+
+// list collapse/expand
+
+const shouldShowMultipleSelectedListActions = computed(() => userStore.shouldShowMultipleSelectedListActions)
+const listCollapseExpandIsVisible = computed(() => {
+  if (onlyListsIsSelected.value) return
+  return listsIsSelected.value
+})
 
 // remove
 
@@ -434,9 +502,24 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   }
   if (isSpaceMember.value) {
     lineStore.removeLines(multipleLinesSelectedIds.value)
+    listStore.removeLists(multipleListsSelectedIds.value)
   }
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
+}
+
+// dragging dialog
+
+const toggleDraggingDialog = (value) => {
+  if (value && state.isPointerDown) {
+    globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+  } else if (!value) {
+    globalStore.currentUserIsDraggingMultipleSelectedActionsDialog = value
+    state.isPointerDown = false
+  }
+}
+const toggleIsPointerDown = () => {
+  state.isPointerDown = true
 }
 
 </script>
@@ -448,52 +531,73 @@ dialog.narrow.multiple-selected-actions(
   ref="dialogElement"
   @click.left="closeDialogs"
   :style="styles"
-  :class="colorClasses"
+  :class="classes"
+  @pointermove="toggleDraggingDialog(true)"
+  @pointerdown.stop="toggleIsPointerDown"
+  @pointerup.stop="toggleDraggingDialog(false)"
 )
+  .drag-area
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
     button.small-button.inline-button
       img.icon.cancel(src="@/assets/add.svg")
-  section(v-if="cardBoxOrConnectionIsSelected")
+  section(v-if="ItemIsSelected")
 
     //- Edit Cards
     .row(v-if="cardOrBoxIsSelected")
       //- [·]
       ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
-      //- Connect
-      button(v-if="multipleItemsIsSelected" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all" title="Connect/Disconnect Cards")
-        img.connect-items.icon(src="@/assets/connect-items.svg")
-      //- LINE Options
-      .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
-          span Line
-          img.icon.down-arrow(src="@/assets/down-arrow.svg")
-      //- BOX options
-      .button-wrap(v-if="boxesIsSelected && !onlyBoxesIsSelected")
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedBoxActions" :class="{active : shouldShowMultipleSelectedBoxActions}" title="More Box Options")
-          span Box
-          img.icon.down-arrow(src="@/assets/down-arrow.svg")
-
-    CardOrBoxActions(
+      .segmented-buttons
+        //- Connect
+        button(v-if="multipleItemsIsSelected" title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
+          img.connect.icon(src="@/assets/connect.svg")
+        //- List
+        button(title="Merge/Split Cards into List" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
+          img.icon.list-icon(src="@/assets/list.svg")
+    //- card options
+    CardActions(
       :visible="cardsIsSelected && canEditAll.all"
       :cards="cards"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
       :labelIsVisible="true"
     )
-    CardOrBoxActions(
+    //- box options
+    BoxActions(
       :labelIsVisible="true"
-      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected && canEditAll.all"
+      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected"
       :boxes="boxes"
       @closeDialogs="closeDialogs"
       :backgroundColor="userColor"
+      :collapseExpandIsVisible="boxCollapseExpandIsVisible"
+      @scrollIntoView="scrollIntoView"
     )
-    ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+    //- connection line options
+    ConnectionActions(
+      :visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected"
+      :connections="editableConnections"
+      @closeDialogs="closeDialogs"
+      :canEditAll="canEditAll"
+      :backgroundColor="userColor"
+      :label="moreLineOptionsLabel"
+      :collapseExpandIsVisible="connectionCollapseExpandIsVisible"
+      @scrollIntoView="scrollIntoView"
+    )
+    //- list options
+    ListActions(
+      :visible="(shouldShowMultipleSelectedListActions || onlyListsIsSelected) && listsIsSelected"
+      :lists="lists"
+      @closeDialogs="closeDialogs"
+      :backgroundColor="userColor"
+      label="LIST"
+      :collapseExpandIsVisible="listCollapseExpandIsVisible"
+      @scrollIntoView="scrollIntoView"
+    )
 
   section
-    .row(v-if="cardOrBoxIsSelected")
+    .row(v-if="cardBoxOrListIsSelected")
       //- Align And Distribute
-      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+      AlignAndDistribute(:visible="alignableItemsIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes" :lists="lists")
       //- Move/Copy
       .segmented-buttons.move-or-copy-wrap
         button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
@@ -503,7 +607,7 @@ dialog.narrow.multiple-selected-actions(
           span Move
           MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
     //- More Options
-    AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+    AlignAndDistribute(:visible="alignableItemsIsSelected && moreOptionsIsVisible" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes" :lists="lists")
 
     .row
       //- Remove
@@ -528,6 +632,10 @@ dialog.narrow.multiple-selected-actions(
 <style lang="stylus">
 .multiple-selected-actions
   transform-origin top left
+  cursor grab
+  &.is-dragging,
+  &.is-pointer-down
+    cursor grabbing
   .segmented-colors
     display inline-block
     vertical-align middle
@@ -569,14 +677,11 @@ dialog.narrow.multiple-selected-actions(
   .style-actions + .connection-actions
     border-top 1px solid var(--primary-border)
 
-  .down-arrow
-    vertical-align 2px
-
   .segmented-buttons + .segmented-buttons
     margin-left 0
 
-  .icon.connect-items
-    height 12px
+  .icon.list-icon,
+  .icon.connect
     vertical-align -1px
 
   &.is-background-light
@@ -589,7 +694,8 @@ dialog.narrow.multiple-selected-actions(
       border-color var(--primary-border-on-dark-background)
     section.subsection + section.subsection
       border-top 1px solid var(--primary-border-on-dark-background)
-  .close-button-wrap
+  .close-button-wrap,
+  .collapse-expand-button-wrap
     cursor pointer
     position absolute
     left initial
@@ -602,4 +708,34 @@ dialog.narrow.multiple-selected-actions(
     button
       cursor pointer
       background-color var(--primary-background)
+      &:active,
+      &.active
+        box-shadow var(--button-active-inset-shadow)
+        color var(--primary)
+        background-color var(--secondary-active-background)
+
+  .collapse-expand-button-wrap
+    right 1px
+    .icon.down-arrow
+      padding 0
+      vertical-align 1px
+      padding-left 1px
+
+  .drag-area
+    position absolute
+    width 100%
+    height 8px
+    top 0
+    left 0
+    background-image url('../../assets/drag-area.svg')
+    background-repeat: repeat-x
+    border-top-left-radius var(--entity-radius)
+    border-top-right-radius var(--entity-radius)
+    opacity 0.3
+  &.is-background-dark
+    .drag-area
+      background-image url('../../assets/drag-area-invert.svg')
+  &.is-dragging
+    .drag-area
+      opacity 0.6
 </style>

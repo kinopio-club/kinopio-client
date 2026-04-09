@@ -43,7 +43,8 @@ onBeforeUnmount(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  subsectionHeight: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -58,6 +59,11 @@ const state = reactive({
 
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
+const styles = computed(() => {
+  return {
+    maxHeight: props.subsectionHeight + 'px'
+  }
+})
 
 // visits
 
@@ -139,71 +145,71 @@ const showUserDetails = async (event, user) => {
 </script>
 
 <template lang="pug">
-section.stats(v-if="visible")
-  p Space Stats
-  p(v-if="isLoadingSpace")
-    Loader(:visible="true")
-  template(v-if="!isLoadingSpace")
-    table
-      tbody
-        tr.table-header
-          td Visits
-        tr
-          td {{visits}}
-    table
-      tbody
-        tr.table-header
-          td Cards
-          td Lines
-          td Boxes
-          td Tags
-        tr
-          td {{cards.length}}
-          td {{connections.length}}
-          td {{boxes.length}}
-          td {{tags.length}}
-    table
-      tbody
-        tr.table-header
-          td Created
-          td(v-if="currentSpace.editedAt")
-            span Last Edited
-        tr
-          td
-            .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
-              span {{date(currentSpace.createdAt)}}
-          td(v-if="currentSpace.editedAt")
-            .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
-              span {{date(currentSpace.editedAt)}}
-    table
-      tbody
-        tr.table-header
-          td Word Count
-        tr
-          td {{wordCount}}
+section.stats(v-if="visible" :style="styles")
+  section
+    .row.title-row
+      div
+        span Space Stats
+        Loader(:visible="isLoadingSpace" :isSmall="true")
 
-section(v-if="visible")
-  p
-    img.icon(src="@/assets/heart.svg")
-    span Favorited by
-    Loader(:visible="state.isLoadingFavorites" :isSmall="true")
+    template(v-if="!isLoadingSpace")
+      table
+        tbody
+          tr.table-header
+            td Visits
+          tr
+            td {{visits}}
+      table
+        tbody
+          tr.table-header
+            td Cards
+            td Lines
+            td Boxes
+            td Tags
+          tr
+            td {{cards.length}}
+            td {{connections.length}}
+            td {{boxes.length}}
+            td {{tags.length}}
+      table
+        tbody
+          tr.table-header
+            td Created
+            td(v-if="currentSpace.editedAt")
+              span Last Edited
+          tr
+            td
+              .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
+                span {{date(currentSpace.createdAt)}}
+            td(v-if="currentSpace.editedAt")
+              .badge.button-badge.secondary(@click.stop="toggleFilterShowAbsoluteDates")
+                span {{date(currentSpace.editedAt)}}
+      table
+        tbody
+          tr.table-header
+            td Word Count
+          tr
+            td {{wordCount}}
 
-section.results-section(v-if="!state.isLoadingFavorites && visible")
-  template(v-if="state.favoriteUsers.length")
-    UserList(:users="state.favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails")
-  template(v-else)
-    .badge.secondary
-      span Try sharing the public url, or adding this space to explore.
+  section(v-if="visible")
+    p
+      img.icon(src="@/assets/heart.svg")
+      span Favorited by
+      Loader(:visible="state.isLoadingFavorites" :isSmall="true")
+
+  section.results-section(v-if="!state.isLoadingFavorites && visible")
+    template(v-if="state.favoriteUsers.length")
+      UserList(:users="state.favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails")
+    template(v-else)
+      .badge.secondary
+        span Try sharing the public url, or adding this space to explore.
 </template>
 
 <style lang="stylus">
-// .stats
-//   overflow auto
-//   table
-//     margin-top 10px
-//     border-collapse collapse
-//     td
-//       border 1px solid var(--secondary-active-background)
-//       padding 5px
-//       user-select text
+section.stats
+  padding 0
+  overflow auto
+  .loader
+    margin-left 5px
+    vertical-align -1px
 </style>

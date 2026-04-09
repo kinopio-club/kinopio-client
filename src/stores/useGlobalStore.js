@@ -6,6 +6,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
@@ -16,6 +17,7 @@ import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
+import uniq from 'lodash-es/uniq'
 import last from 'lodash-es/last'
 import dayjs from 'dayjs'
 
@@ -48,7 +50,7 @@ export const useGlobalStore = defineStore('global', {
     offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
-    prevSpaceIdInSessionPagePosition: {},
+    prevSpacePagePosition: {},
     outsideSpaceBackgroundColor: '',
     groupsIsVisible: false,
     dateImageUrl: null,
@@ -79,9 +81,10 @@ export const useGlobalStore = defineStore('global', {
 
     // current user state
     currentUserIsDrawingConnection: false,
-    currentUserIsPainting: false,
-    currentUserIsPaintingLocked: false,
+    currentUserIsPaintSelecting: false,
+    currentUserIsPaintSelectingLocked: false,
     currentUserIsDraggingCard: false,
+    currentUserIsDraggingDuplicateItem: false,
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
     currentUserIsHoveringOverBoxId: '',
@@ -90,11 +93,14 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsHoveringOverUrlButtonCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
-    currentUserToolbar: 'card', // card, box, drawing
+    currentUserToolbar: 'card', // card, box, drawing, line, list
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for copy paste kinopio items
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
+    currentUserIsResizingCardDetails: false,
+    currentUserIsResizingSidebar: false,
+    userNotifications: [],
 
     // drawing
     drawingEraserIsActive: false,
@@ -114,6 +120,7 @@ export const useGlobalStore = defineStore('global', {
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
     remoteBoxDetailsVisible: [],
+    boxIsSnappingTransition: false,
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],
@@ -170,8 +177,29 @@ export const useGlobalStore = defineStore('global', {
     remoteLinesDragging: [],
     preventDraggedLineFromShowingDetails: false,
 
+    // lists
+    focusOnListId: '',
+    listDetailsIsVisibleForListId: '',
+    multipleListsSelectedIds: [],
+    remoteListDetailsVisible: [],
+    currentListIsNew: false,
+    // dragging lists
+    currentDraggingListId: '',
+    listsWereDragged: false,
+    currentUserIsDraggingList: false,
+    currentUserIsDraggingListIds: [],
+    remoteListsDragging: [],
+    preventDraggedListFromShowingDetails: false,
+    multipleListIdsWereDraggedToEdge: [],
+    // resizing lists
+    currentUserIsResizingList: false,
+    currentUserIsResizingListIds: [],
+    remoteUserResizingLists: [],
+
     // draggingItems
     shouldSnapToGrid: false,
+    preventItemSnapping: false,
+    shouldSnapBackToList: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -183,14 +211,15 @@ export const useGlobalStore = defineStore('global', {
     remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
     remoteLinesSelected: [], // [{ lineId, userId }, …]
+    remoteListsSelected: [], // [{ listId, userId }, …]
     multipleConnectionsSelectedIds: [],
-    previousMultipleBoxesSelectedIds: [],
     isSelectingX: false,
     isSelectingY: false,
     multipleCardsSelectedIdsToLoad: [],
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
     multipleConnectionTypesSelectedIdsToLoad: [],
+    currentUserIsDraggingMultipleSelectedActionsDialog: false,
 
     // connections
     currentConnectionStartItemIds: [],
@@ -221,7 +250,7 @@ export const useGlobalStore = defineStore('global', {
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
-    minimapIsPinned: false,
+    jumpToIsPinned: false,
     searchIsPinned: false,
     userSettingsIsPinned: false,
 
@@ -267,7 +296,8 @@ export const useGlobalStore = defineStore('global', {
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
     notifyIsDuplicatingSpace: false,
-    notifyBoxSnappingIsReady: false,
+    itemSnappingIsReady: false,
+    itemSnappingIsWaiting: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -285,6 +315,7 @@ export const useGlobalStore = defineStore('global', {
     sendingQueue: [],
     currentUserIsInvitedButCannotEditCurrentSpace: false,
     moderatorIsLoadingRestartServer: false,
+    sessionDate: 0,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
@@ -292,7 +323,7 @@ export const useGlobalStore = defineStore('global', {
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    snapGuideLinesOrigin: {}
+    axisGuideLinesOrigin: {}
   }),
   getters: {
     getGlobalAllState () {
@@ -314,14 +345,40 @@ export const useGlobalStore = defineStore('global', {
       return transform
     },
     getIsInteractingWithItem () {
-      return this.currentUserIsDraggingCard || this.currentUserIsDrawingConnection || this.currentUserIsResizingCard || this.currentUserIsResizingBox || this.currentUserIsDraggingBox
+      return (
+        this.getIsResizingItem ||
+        this.currentUserIsDraggingCard ||
+        this.currentUserIsDrawingConnection ||
+        this.currentUserIsDraggingBox ||
+        this.currentUserIsDraggingList ||
+        this.currentUserIsDraggingMultipleSelectedActionsDialog
+      )
+    },
+    getInteractingWithItemType () {
+      if (this.currentUserIsDraggingCard) {
+        return 'card'
+      } else if (this.currentUserIsDrawingConnection) {
+        return 'connection'
+      } else if (this.currentUserIsDraggingBox) {
+        return 'box'
+      } else if (this.currentUserIsDraggingList) {
+        return 'list'
+      }
+    },
+    getIsResizingItem () {
+      return (
+        this.currentUserIsResizingCard ||
+        this.currentUserIsResizingBox ||
+        this.currentUserIsResizingList
+      )
     },
     getMultipleItemsSelected () {
       return [
         ...this.multipleCardsSelectedIds,
         ...this.multipleConnectionsSelectedIds,
         ...this.multipleBoxesSelectedIds,
-        ...this.multipleLinesSelectedIds
+        ...this.multipleLinesSelectedIds,
+        ...this.multipleListsSelectedIds
       ]
     },
     getIsMultipleItemsSelected () {
@@ -341,8 +398,10 @@ export const useGlobalStore = defineStore('global', {
     getToolbarIsBox () {
       return this.currentUserToolbar === 'box'
     },
+    getToolbarIsList () {
+      return this.currentUserToolbar === 'list'
+    },
     getTags () {
-      const apiStore = useApiStore()
       const spaceStore = useSpaceStore()
       const tags = spaceStore.tags.concat(this.tags)
       return uniqBy(tags, 'name')
@@ -356,17 +415,18 @@ export const useGlobalStore = defineStore('global', {
     },
     getShouldScrollAtEdges (event) {
       if (window.visualViewport.scale > 1) { return }
-      let isPainting
+      let isPaintSelecting
       if (event.touches) {
-        isPainting = this.currentUserIsPaintingLocked
+        isPaintSelecting = this.currentUserIsPaintSelectingLocked
       } else {
-        isPainting = this.currentUserIsPainting
+        isPaintSelecting = this.currentUserIsPaintSelecting
       }
       const isDrawingConnection = this.currentUserIsDrawingConnection
       const isDraggingCard = this.currentUserIsDraggingCard
       const isDraggingBox = this.currentUserIsDraggingBox
       const isDraggingLine = this.currentUserIsDraggingLine
-      return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox || isDraggingLine
+      const isDraggingList = this.currentUserIsDraggingList
+      return isPaintSelecting || isDrawingConnection || isDraggingCard || isDraggingBox || isDraggingLine || isDraggingList
     },
     getOtherUserById (userId) {
       return this.otherUsers[userId]
@@ -377,8 +437,12 @@ export const useGlobalStore = defineStore('global', {
       return space
     },
     getOtherCardById (cardId) {
+      const cardStore = useCardStore()
       const otherCards = this.otherItems.cards.filter(Boolean)
       const card = otherCards.find(otherCard => otherCard.id === cardId)
+      if (card?.backgroundColor) {
+        card.backgroundColor = cardStore.normalizeCardBackgroundColor(card.backgroundColor)
+      }
       return card
     },
     getNewTag ({ name, defaultColor, cardId, spaceId }) {
@@ -407,6 +471,9 @@ export const useGlobalStore = defineStore('global', {
         styles.borderRadius = `${radius * 2}px`
       }
       return styles
+    },
+    updateSessionDate () {
+      this.sessionDate = new Date().toISOString()
     },
 
     // subscribe triggers
@@ -443,7 +510,7 @@ export const useGlobalStore = defineStore('global', {
     triggerShowNextSearchCard () {},
     triggerShowPreviousSearchCard () {},
     triggerMoreFiltersIsNotVisible () {},
-    triggerConnectionDetailsIsVisible (connectionId) {},
+    triggerConnectionDetailsIsVisible (options) {},
     triggerUpdateWindowHistory (options) {},
     triggerAddCard (options) {},
     triggerAddChildCard (options) {},
@@ -453,7 +520,8 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateUrlPreview (cardId) {},
     triggerUpdateUrlPreviewComplete (cardId) {},
     triggerRemovedIsVisible () {},
-    triggerMinimapIsVisible () {},
+    triggerNoteIsVisible () {},
+    triggerJumpToIsVisible () {},
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},
     triggerUpdateLockedItemButtonPositionCardId (cardId) {},
@@ -482,6 +550,7 @@ export const useGlobalStore = defineStore('global', {
     triggerPanningStart () {},
     triggerClearUserNotifications () {},
     triggerAddBox (event) {},
+    triggerAddList (event) {},
     // select all below
     triggerSelectAllItemsBelowCursor (position) {},
     triggerSelectAllItemsAboveCursor (position) {},
@@ -498,10 +567,12 @@ export const useGlobalStore = defineStore('global', {
     triggerDraw (event) {},
     triggerDrawingUndo () {},
     triggerDrawingRedo () {},
-    triggerAddRemoteDrawingStroke (updates) {},
-    triggerRemoveRemoteDrawingStroke (updates) {},
+    triggerAddDrawingStroke (updates) {},
+    triggerRemoveDrawingStroke (updates) {},
     triggerEndDrawing () {},
     triggerUpdateDrawingDataUrl () {},
+    triggerUpdateDrawingStrokes () {},
+    triggerIsSnappingToList () {},
 
     resetPageSizes () {
       this.triggerDrawingReset()
@@ -534,9 +605,11 @@ export const useGlobalStore = defineStore('global', {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       const spaceStore = useSpaceStore()
       const cards = cardStore.getAllCards
       const boxes = boxStore.getAllBoxes
+      const lists = listStore.getAllLists
       let lines = lineStore.getAllLines
       lines = lines.map(line => {
         return {
@@ -545,7 +618,7 @@ export const useGlobalStore = defineStore('global', {
           height: 25
         }
       })
-      const items = cards.concat(boxes).concat(lines)
+      const items = cards.concat(boxes).concat(lines).concat(lists)
       items.push({
         x: 0, y: 0, width: 500, height: 500 // minimum page size
       })
@@ -560,7 +633,7 @@ export const useGlobalStore = defineStore('global', {
       this.viewportHeight = Math.round(viewport.height)
     },
 
-    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter }) {
+    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter, positionIsTop }) {
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const smallCardCharacterLimit = 300
@@ -570,6 +643,9 @@ export const useGlobalStore = defineStore('global', {
       if (sidebarIsVisible || positionIsCenter) {
         horizontal = 'center'
         vertical = 'center'
+      }
+      if (positionIsTop) {
+        vertical = 'start'
       }
       if (sidebarIsVisible && isViewportNarrow) {
         horizontal = 'start'
@@ -609,12 +685,14 @@ export const useGlobalStore = defineStore('global', {
         this.prevSpaceIdInSession = value
       }
     },
-    updatePrevSpaceIdInSessionPagePosition (position) {
-      position = {
+    updatePrevSpacePagePosition (spaceId) {
+      const position = {
         x: window.scrollX,
-        y: window.scrollY
+        y: window.scrollY,
+        pageHeight: this.pageHeight,
+        pageWidth: this.pageWidth
       }
-      const prevSpaceIdInSessionPagePosition = position
+      this.prevSpacePagePosition[spaceId] = position
     },
     clearSearch () {
       if (this.searchIsVisible) { return }
@@ -795,6 +873,36 @@ export const useGlobalStore = defineStore('global', {
       this.remoteLineDetailsVisible = this.remoteLineDetailsVisible.filter(line => line.userId !== update.userId) || []
     },
 
+    // Lists
+
+    updateListDetailsIsVisibleForListId (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.listDetailsIsVisibleForListId = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
+    },
+    updateRemoteListDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let listDetailsVisible = utils.clone(this.remoteListDetailsVisible)
+      listDetailsVisible = listDetailsVisible.filter(list => list.id !== update.listId) || []
+      listDetailsVisible.push(update)
+      this.remoteListDetailsVisible = listDetailsVisible
+    },
+    clearRemoteListDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteListDetailsVisible = this.remoteListDetailsVisible.filter(list => list.userId !== update.userId) || []
+    },
+    removeRemoteUserResizingLists (update) {
+      this.remoteUserResizingLists = this.remoteUserResizingLists.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+
+    updateRemoteUserResizingLists (update) {
+      this.remoteUserResizingLists = this.remoteUserResizingLists.filter(remoteUser => remoteUser.userId !== update.userId)
+      this.remoteUserResizingLists = this.remoteUserResizingLists.concat(update)
+    },
+
     // drawing
 
     addToDrawingStrokeColors (color) {
@@ -846,7 +954,7 @@ export const useGlobalStore = defineStore('global', {
 
     // Dragging Lines
 
-    addtoRemoteLinesDragging (update) {
+    addToRemoteLinesDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.userId)
       this.remoteLinesDragging = this.remoteLinesDragging.concat(update)
@@ -854,6 +962,25 @@ export const useGlobalStore = defineStore('global', {
     clearRemoteLinesDragging (update) {
       utils.typeCheck({ value: update, type: 'object' })
       this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.userId) || []
+    },
+
+    // Dragging Lists
+
+    addToRemoteListsDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteListsDragging = this.remoteListsDragging.filter(list => list.userId !== update.userId)
+      this.remoteListsDragging = this.remoteListsDragging.concat(update)
+    },
+    clearRemoteListsDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteListsDragging = this.remoteListsDragging.filter(list => list.userId !== update.userId) || []
+    },
+    updateMultipleListIdsWereDraggedToEdge (list, x, y) {
+      const isX = x === 0
+      const isY = y === 0
+      if (isX || isY) {
+        this.multipleListIdsWereDraggedToEdge.push(list.id)
+      }
     },
 
     // Tags
@@ -891,6 +1018,8 @@ export const useGlobalStore = defineStore('global', {
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''
+      this.currentDraggingListId = ''
+      this.itemSnappingIsReady = false
     },
     multipleSelectedItemsToLoad (items) {
       utils.typeCheck({ value: items, type: 'object' })
@@ -908,6 +1037,56 @@ export const useGlobalStore = defineStore('global', {
       this.multipleConnectionsSelectedIdsToLoad = []
       this.multipleConnectionTypesSelectedIdsToLoad = []
       this.multipleBoxesSelectedIdsToLoad = []
+    },
+    async clearAllSelected () {
+      this.clearDraggingItems()
+      await nextTick()
+      this.clearMultipleSelected()
+    },
+    selectListsFromMultipleSelectedItems () {
+      const cardStore = useCardStore()
+      const currentCard = cardStore.getCard(this.currentDraggingCardId)
+      // get cards, excluding currently dragging card
+      let cards = cardStore.getCardsSelected
+
+      cards = cards.filter(card => card.id !== currentCard?.id)
+      // get card lists
+      let listIds = []
+      cards.forEach(card => {
+        if (card.listId) {
+          listIds.push(card.listId)
+        }
+      })
+      listIds = uniq(listIds)
+      // exclude list from current card list
+      if (currentCard?.listId) {
+        listIds = listIds.filter(listId => currentCard.listId !== listId)
+      }
+      this.addMultipleToMultipleListsSelected(listIds)
+      // select list cards
+      listIds.forEach(listId => {
+        const cards = cardStore.getCardsByList(listId)
+        const listCardIds = cards.map(card => card.id)
+        this.addMultipleToMultipleCardsSelected(listCardIds)
+      })
+    },
+    moveMultipleSelectedActions ({ endCursor, prevCursor, delta }) {
+      if (!endCursor || !prevCursor) { return }
+      const zoom = this.getSpaceCounterZoomDecimal
+      delta = delta || {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      delta = {
+        x: delta.x * zoom,
+        y: delta.y * zoom
+      }
+      let { x, y } = this.multipleSelectedActionsPosition
+      x = Math.round(x + delta.x)
+      x = Math.max(0, x)
+      y = Math.round(y + delta.y)
+      y = Math.max(0, y)
+      this.multipleSelectedActionsPosition = { x, y }
     },
 
     // multiple cards
@@ -973,6 +1152,8 @@ export const useGlobalStore = defineStore('global', {
       this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== update.user.id)
       this.remoteLinesSelected = this.remoteLinesSelected.filter(line => line.userId !== update.user.id)
       this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.user.id)
+      this.remoteListsSelected = this.remoteListsSelected.filter(list => list.userId !== update.user.id)
+      this.remoteListsDragging = this.remoteListsDragging.filter(list => list.userId !== update.user.id)
     },
     previousMultipleConnectionsSelectedIds (connectionIds) {
       utils.typeCheck({ value: connectionIds, type: 'array' })
@@ -981,10 +1162,6 @@ export const useGlobalStore = defineStore('global', {
 
     // multiple boxes
 
-    previousMultipleBoxesSelectedIds (boxIds) {
-      utils.typeCheck({ value: boxIds, type: 'array' })
-      this.previousMultipleBoxesSelectedIds = boxIds
-    },
     removeFromRemoteBoxesSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1008,10 +1185,6 @@ export const useGlobalStore = defineStore('global', {
 
     // multiple lines
 
-    previousMultipleLinesSelectedIds (lineIds) {
-      utils.typeCheck({ value: lineIds, type: 'array' })
-      this.previousMultipleLinesSelectedIds = lineIds
-    },
     removeFromRemoteLinesSelected (update) {
       utils.typeCheck({ value: update, type: 'object' })
       delete update.type
@@ -1050,6 +1223,53 @@ export const useGlobalStore = defineStore('global', {
         lineIds
       }
       broadcastStore.update({ updates, action: 'updateRemoteLinesSelected' })
+    },
+
+    // multiple lists
+
+    previousMultipleListsSelectedIds (listIds) {
+      utils.typeCheck({ value: listIds, type: 'array' })
+      this.previousMultipleListsSelectedIds = listIds
+    },
+    removeFromRemoteListsSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      this.remoteListsSelected = this.remoteListsSelected.filter(list => {
+        const listIsSelected = list.listId === update.listId
+        const selectedByUser = list.userId === update.userId
+        const listIsUpdate = listIsSelected && selectedByUser
+        return !listIsUpdate
+      })
+    },
+    updateRemoteListsSelected (update) {
+      this.remoteListsSelected = this.remoteListsSelected.filter(list => list.userId !== update.userId)
+      const updates = update.listIds.map(listId => {
+        return {
+          userId: update.userId,
+          listId
+        }
+      })
+      this.remoteListsSelected = this.remoteListsSelected.concat(updates)
+    },
+    addMultipleToMultipleListsSelected (listIds) {
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      if (!userStore.getUserCanEditSpace) { return }
+      utils.typeCheck({ value: listIds, type: 'array' })
+      if (!listIds.length) { return }
+      const set1 = new Set(listIds)
+      const set2 = new Set(this.multipleListsSelectedIds)
+      // Combine sets
+      const combinedSet = new Set([...set1, ...set2])
+      // Convert back to array
+      listIds = [...combinedSet]
+      postMessage.sendHaptics({ name: 'selection' })
+      this.multipleListsSelectedIds = listIds
+      const updates = {
+        userId: userStore.id,
+        listIds
+      }
+      broadcastStore.update({ updates, action: 'updateRemoteListsSelected' })
     },
 
     // Loading
@@ -1114,13 +1334,27 @@ export const useGlobalStore = defineStore('global', {
     },
     clearAllInteractingWithAndSelected () {
       this.currentUserIsDraggingCard = false
+      this.currentUserIsDraggingDuplicateItem = false
       this.currentUserIsDrawingConnection = false
       this.currentUserIsResizingCard = false
       this.currentUserIsResizingBox = false
       this.currentUserIsDraggingBox = false
+      this.currentUserIsResizingList = false
+      this.currentUserIsDraggingList = false
+      this.currentUserIsDraggingMultipleSelectedActionsDialog = false
       this.multipleCardsSelectedIds = []
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []
+      this.currentUserIsResizingListIds = []
+    },
+    clearSnapGuides () {
+      const boxStore = useBoxStore()
+      const cardStore = useCardStore()
+      const listStore = useListStore()
+      boxStore.boxSnapGuides = []
+      cardStore.cardSnapGuides = []
+      listStore.listSnapGuides = {}
+      listStore.currentListChildPlaceholderCardIds = []
     },
     updateNotifySpaceNotFound (value) {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1306,6 +1540,12 @@ export const useGlobalStore = defineStore('global', {
       this.focusOnLineId = lineId
       if (!lineId) { return }
       const element = utils.lineElementFromId(lineId)
+      this.scrollElementIntoView({ element, positionIsTop: true })
+    },
+    updateFocusOnListId (listId) {
+      this.focusOnListId = listId
+      if (!listId) { return }
+      const element = utils.listElementFromId(listId)
       this.scrollElementIntoView({ element, positionIsCenter: true })
     },
     checkIfItemShouldIncreasePageSize (item) {
@@ -1334,14 +1574,21 @@ export const useGlobalStore = defineStore('global', {
       this.clearSpaceFilters()
       userStore.clearUserFilters()
     },
+    updateUserPresence (updates) {
+      const spaceStore = useSpaceStore()
+      spaceStore.updateUserPresence(updates.user)
+      this.updateOtherUsers(updates.user)
+    },
     closeAllDialogs (origin = 'closeAllDialogs') {
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const user = userStore.getUserPublicMeta
-      broadcastStore.update({ updates: user, name: 'updateUserPresence' })
+      broadcastStore.update({ updates: user, action: 'updateUserPresence' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteCardDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteConnectionDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteBoxDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteListDetailsVisible' })
+      broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteLineDetailsVisible' })
       this.passwordResetIsVisible = false
       this.updateFocusOnCardId('')
       this.updateFocusOnBoxId('')
@@ -1362,6 +1609,7 @@ export const useGlobalStore = defineStore('global', {
       this.connectionDetailsIsVisibleForConnectionId = ''
       this.boxDetailsIsVisibleForBoxId = ''
       this.lineDetailsIsVisibleForLineId = ''
+      this.listDetailsIsVisibleForListId = ''
       this.tagDetailsIsVisible = false
       this.tagDetailsIsVisibleFromTagList = false
       this.currentSelectedTag = {}
@@ -1370,6 +1618,7 @@ export const useGlobalStore = defineStore('global', {
       this.cardsWereDragged = false
       this.boxesWereDragged = false
       this.linesWereDragged = false
+      this.listsWereDragged = false
       this.userDetailsIsVisible = false
       this.pricingIsVisible = false
       this.codeLanguagePickerIsVisible = false
@@ -1459,7 +1708,17 @@ export const useGlobalStore = defineStore('global', {
       }
       broadcastStore.update({ updates, action: 'updateRemoteLinesSelected' })
     },
-
+    updateMultipleListsSelectedIds (listIds) {
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      utils.typeCheck({ value: listIds, type: 'array' })
+      this.multipleListsSelectedIds = listIds || []
+      const updates = {
+        userId: userStore.id,
+        listIds
+      }
+      broadcastStore.update({ updates, action: 'updateRemoteListsSelected' })
+    },
     clearMultipleSelected () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -1468,6 +1727,7 @@ export const useGlobalStore = defineStore('global', {
       this.multipleConnectionsSelectedIds = []
       this.multipleBoxesSelectedIds = []
       this.multipleLinesSelectedIds = []
+      this.multipleListsSelectedIds = []
       broadcastStore.update({ action: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected (connectionId) {
@@ -1600,11 +1860,11 @@ export const useGlobalStore = defineStore('global', {
     async updateCurrentUserIsInvitedButCannotEditCurrentSpace (space) {
       const userStore = useUserStore()
       space = space || this.currentSpace
-      const currentUserIsSignedIn = userStore.getUserIsSignedIn
+      const isSignedIn = userStore.getUserIsSignedIn
       const invitedSpaces = await cache.invitedSpaces()
       const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
       const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
-      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      const inviteRequiresSignIn = !isSignedIn && isInvitedToSpace
       const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
       this.currentUserIsInvitedButCannotEditCurrentSpace = value
     },

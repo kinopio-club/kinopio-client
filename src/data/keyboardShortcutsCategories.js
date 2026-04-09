@@ -14,6 +14,10 @@ const categories = [
     color: '#88cefa'
   },
   {
+    name: 'Drawing',
+    color: 'khaki'
+  },
+  {
     name: 'Navigate',
     color: '#ffbfcb'
   },
@@ -34,7 +38,7 @@ const categories = [
     color: '#65cdaa'
   },
   {
-    name: 'Search and Jump',
+    name: 'Search',
     color: '#8fbb8f'
   }
 

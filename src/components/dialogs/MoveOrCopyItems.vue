@@ -36,7 +36,8 @@ const state = reactive({
   selectedSpace: {},
   spacePickerIsVisible: false,
   loading: false,
-  cardsCreatedIsOverLimit: false
+  cardsCreatedIsOverLimit: false,
+  isCopiedToNote: false
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -46,6 +47,7 @@ watch(() => props.visible, async (value, prevValue) => {
     closeDialogs()
     scrollIntoView()
     updateSpaces()
+    state.isCopiedToNote = false
   }
 })
 
@@ -89,14 +91,8 @@ const selectedSpaceIsRecentSpace = (space) => {
 
 // items
 
-const multipleCardsSelectedIds = computed(() => globalStore.multipleCardsSelectedIds)
-const multipleBoxesSelectedIds = computed(() => globalStore.multipleBoxesSelectedIds)
-const multipleCardsIsSelected = computed(() => {
-  const numberOfCards = multipleCardsSelectedIds.value.length
-  return Boolean(numberOfCards > 1)
-})
-const itemsCount = computed(() => multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length)
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
+const itemsCount = computed(() => utils.countArrayItems(selectedItems.value))
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const sortedByY = (items) => {
   items = items.sort((a, b) => {
@@ -120,7 +116,7 @@ const actionLabel = computed(() => {
   }
 })
 const pluralItem = computed(() => {
-  const condition = multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length !== 1
+  const condition = itemsCount.value !== 1
   return utils.pluralize('item', condition)
 })
 const actionLabelCapitalized = computed(() => utils.capitalizeFirstLetter(actionLabel.value))
@@ -132,7 +128,7 @@ const buttonLabel = computed(() => {
 
 // copy text
 
-const copyText = async () => {
+const copyText = async (event) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
   try {
@@ -144,12 +140,29 @@ const copyText = async () => {
   }
 }
 
+// copy to note
+
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const copyToNote = () => {
+  const note = spaceStore.note
+  let newValue
+  if (note) {
+    newValue = `${note}\n\n${text.value}`
+  } else {
+    newValue = text.value
+  }
+  spaceStore.updateSpace({ note: newValue })
+  state.isCopiedToNote = true
+}
+const openNote = () => {
+  globalStore.triggerNoteIsVisible()
+}
+
 // copy or move
 
 const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
-  const selectedSpaceisCurrentSpace = selectedSpaceId === spaceStore.id
   newItems = await spaceStore.getNewItems(items, selectedSpaceId)
   // update cache
   const space = await cache.space(selectedSpaceId).cards
@@ -158,15 +171,11 @@ const copyToSelectedSpace = async (items) => {
     await cache.saveSpace({ id: selectedSpaceId })
   }
   await cache.addToSpace(newItems, selectedSpaceId)
-  // update current space
-  if (selectedSpaceisCurrentSpace) {
-    const shouldOffsetPosition = true
-    cardStore.createCards(newItems.cards, shouldOffsetPosition)
-    newItems.connectionTypes.forEach(connectionType => connectionStore.createConnectionType(connectionType))
-    newItems.connections.forEach(connection => connectionStore.createConnection(connection))
-    newItems.boxes.forEach(box => boxStore.createBox(box))
-  }
   // update server
+  for (const list of newItems.lists) {
+    list.shouldUpdateList = true
+    await apiStore.addToQueue({ name: 'createList', body: list, spaceId: selectedSpaceId })
+  }
   for (const card of newItems.cards) {
     await apiStore.addToQueue({ name: 'createCard', body: card, spaceId: selectedSpaceId })
   }
@@ -178,6 +187,9 @@ const copyToSelectedSpace = async (items) => {
   }
   for (const box of newItems.boxes) {
     await apiStore.addToQueue({ name: 'createBox', body: box, spaceId: selectedSpaceId })
+  }
+  for (const line of newItems.lines) {
+    await apiStore.addToQueue({ name: 'createLine', body: line, spaceId: selectedSpaceId })
   }
   console.info('🚚 copies created', newItems)
   state.loading = false
@@ -241,8 +253,23 @@ const notifyNewSpaceSuccess = (newSpace) => {
 <template lang="pug">
 dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeDialogs")
   section.title-section
-    .row
-      p {{actionLabelCapitalized}} to
+    .row.title-row
+      span {{actionLabelCapitalized}} to
+      div
+        //- copy to note
+        .button-wrap(v-if="!actionIsMove && text && canEditSpace")
+          button.small-button(@click.left="copyToNote" title="Copy to Sidebar Note")
+            img.icon.note(src="@/assets/note.svg")
+        //- copy to clipboard
+        .button-wrap(v-if="!actionIsMove && text")
+          button.small-button(@click.left="copyText" title="Copy to Clipboard")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Clipboard
+    .row.badge.success.copied-to-note(v-if="state.isCopiedToNote")
+      p Copied to Note
+      button.small-button(title="Open Sidebar Note" @click="openNote")
+        img.icon.note(src="@/assets/note.svg")
+        span Open
   section
     //- space picker
     .row
@@ -253,21 +280,15 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true" :shouldExcludeCurrentSpace="true")
     //- recent spaces
-    .row.recent-spaces-row(v-if="recentSpaces.length")
-      .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
-        span {{recentSpace.name}}
+    //- .row.recent-spaces-row(v-if="recentSpaces.length")
+    //-   .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
+    //-     span {{recentSpace.name}}
     //- submit button
     button(@click.left="moveOrCopyToSpace" :class="{active: state.loading}")
       img.icon.cut(v-if="actionIsMove" src="@/assets/cut.svg")
       img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
       Loader(:visible="state.loading")
-
-  //- section(v-if="!actionIsMove && text")
-  //-   //- Copy Card Names
-  //-   button.button-small(@click.left="copyText")
-  //-     img.icon.copy(src="@/assets/copy.svg")
-  //-     span Copy Card Names
 
   //- error
   section.error-card-limit(v-if="state.cardsCreatedIsOverLimit")
@@ -291,4 +312,10 @@ dialog.more-or-copy-items
     // top -100px
     .results-section
       max-height 250px
+  .copied-to-note
+    margin-right 0
+    justify-content space-between
+    button
+      margin 0
+      margin-left 6px
 </style>

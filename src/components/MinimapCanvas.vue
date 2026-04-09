@@ -6,10 +6,12 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 import throttle from 'lodash-es/throttle'
@@ -20,6 +22,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -63,6 +66,11 @@ onMounted(async () => {
     'updateLines',
     'removeLines'
   ]
+  const listStoreActions = [
+    'createList',
+    'updateLists',
+    'removeLists'
+  ]
   const spaceStoreActions = [
     'loadSpace'
   ]
@@ -102,6 +110,13 @@ onMounted(async () => {
       }
     }
   )
+  const listActionUnsubscribe = listStore.$onAction(
+    ({ name, args }) => {
+      if (listStoreActions.includes(name)) {
+        initThrottle()
+      }
+    }
+  )
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
@@ -115,6 +130,7 @@ onMounted(async () => {
     connectionActionUnsubscribe()
     boxActionUnsubscribe()
     lineActionUnsubscribe()
+    listActionUnsubscribe()
     spaceActionUnsubscribe()
   }
 })
@@ -197,6 +213,7 @@ const init = async () => {
   await drawDrawing()
   drawBoxes()
   drawConnections()
+  drawLists()
   drawCards()
   drawLines()
 }
@@ -312,6 +329,31 @@ const drawLines = () => {
     context.moveTo(0, y)
     context.lineTo(width, y)
     context.stroke()
+  })
+}
+
+// lists
+
+const mapLists = computed(() => {
+  return props.space?.lists || listStore.getAllLists
+})
+const drawLists = () => {
+  let lists = mapLists.value
+  lists = utils.clone(lists)
+  lists = lists.map(list => {
+    const width = list.resizeWidth || consts.normalCardWrapWidth
+    const height = list.height || consts.listEmptyHeight
+    list.x = list.x * ratio.value
+    list.y = list.y * ratio.value
+    list.width = width * ratio.value
+    list.height = height * ratio.value
+    return list
+  })
+  lists.forEach(list => {
+    const rect = new Path2D()
+    rect.roundRect(list.x, list.y, list.width, list.height, itemRadius)
+    context.fillStyle = list.color
+    context.fill(rect)
   })
 }
 

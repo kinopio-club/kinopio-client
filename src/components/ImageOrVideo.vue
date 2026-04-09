@@ -11,14 +11,32 @@ const globalStore = useGlobalStore()
 const videoElement = ref(null)
 const imageElement = ref(null)
 
+let unsubscribes
+
 onMounted(() => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
+
+  const globalActionUnsubscribe = globalStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'triggerUploadComplete') {
+        const { url, fileName } = args[0]
+        if (props.video.includes(fileName)) {
+          await nextTick()
+          videoElement.value.load()
+        }
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', updateCanvasSelectedClass)
   window.removeEventListener('touchmove', updateCanvasSelectedClass)
+  unsubscribes()
 })
 
 const emit = defineEmits(['loadSuccess'])
@@ -28,10 +46,19 @@ const props = defineProps({
   pendingUploadDataUrl: String,
   image: String,
   video: String,
+  videoIsPaused: Boolean,
   cardId: String,
   width: Number,
   height: Number
 })
+
+const state = reactive({
+  imageUrl: null,
+  imageProxySrcSet: null
+})
+
+const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
+
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
     state.imageUrl = null
@@ -59,34 +86,27 @@ watch(() => props.width, (width) => {
 watch(() => props.height, (height) => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
 })
-
-const state = reactive({
-  imageUrl: null,
-  imageProxySrcSet: null
+watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
+  if (value) { return }
+  removeCanvasSelectedClass()
 })
 
-const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
-const isInteracting = computed(() => {
-  const isResizing = globalStore.currentUserIsResizingCardIds.includes(props.cardId)
-  if (isResizing) { return }
-  const isInteractingWithItem = globalStore.getIsInteractingWithItem
-  const isPainting = globalStore.currentUserIsPainting
-  const isPanning = globalStore.currentUserIsPanningReady
-  const isDrawing = globalStore.currentUserIsDrawing
-  return isInteractingWithItem || isPainting || isPanning || isDrawing
-})
-watch(() => isInteracting.value, (value) => {
-  if (value) {
-    pause()
+const lazyLoading = computed(() => {
+  if (globalStore.disableViewportOptimizations) {
+    return 'eager' // default
   } else {
-    play()
+    return 'lazy'
   }
 })
-watch(() => isTouching.value, (value) => {
+
+// video
+
+watch(() => props.videoIsPaused, (value) => {
+  if (!props.video) { return }
   if (value) {
-    pause()
+    pauseVideo()
   } else {
-    play()
+    playVideo()
   }
 })
 const pause = () => {
@@ -97,14 +117,6 @@ const play = () => {
   playVideo()
   playGif()
 }
-
-watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
-  if (value) { return }
-  removeCanvasSelectedClass()
-})
-
-// video
-
 const pauseVideo = () => {
   if (!props.video) { return }
   const element = videoElement.value
@@ -118,6 +130,13 @@ const playVideo = () => {
 
 // gif
 
+watch(() => isTouching.value, (value) => {
+  if (value) {
+    pause()
+  } else {
+    play()
+  }
+})
 const imageIsGif = computed(() => {
   const url = state.imageUrl
   if (!url) { return }
@@ -164,7 +183,7 @@ const playGif = () => {
   imageElement.value.style.opacity = 1
 }
 const updateCanvasSelectedClass = () => {
-  if (!globalStore.currentUserIsPainting) { return }
+  if (!globalStore.currentUserIsPaintSelecting) { return }
   const canvas = canvasElement()
   if (!canvas) { return }
   const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
@@ -207,8 +226,8 @@ const handleError = (event) => {
 
 <template lang="pug">
 //- Video
-video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
-  source(:src="video")
+video(v-if="Boolean(props.video)" :autoplay="!props.videoIsPaused" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
+  source(:src="props.video")
 //- Image
 img.image(
   v-if="state.imageUrl"
@@ -217,7 +236,7 @@ img.image(
   :class="{selected: isSelectedOrDragging}"
   @load="handleSuccess"
   @error="handleError"
-  loading="lazy"
+  :loading="lazyLoading"
 )
 </template>
 
@@ -228,6 +247,7 @@ img.image(
     border-radius var(--entity-radius)
     display block
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
+    content-visibility auto
     &.selected
       mix-blend-mode color-burn
 </style>

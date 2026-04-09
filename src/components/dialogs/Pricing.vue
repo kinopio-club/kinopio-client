@@ -13,6 +13,7 @@ import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
+import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -47,7 +48,8 @@ onBeforeUnmount(() => {
 const state = reactive({
   dialogHeight: null,
   upgradeFAQIsVisible: false,
-  aboutGroupsIsVisible: false
+  aboutGroupsIsVisible: false,
+  freeLimitFAQIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -87,12 +89,18 @@ const toggleAboutGroupsIsVisible = () => {
   closeDialogs()
   state.aboutGroupsIsVisible = value
 }
+const toggleFreeLimitFAQIsVisible = () => {
+  const value = !state.freeLimitFAQIsVisible
+  closeDialogs()
+  state.freeLimitFAQIsVisible = value
+}
 const closeDialogs = () => {
   globalStore.triggerCloseChildDialogs()
 }
 const closeChildDialogs = () => {
   state.upgradeFAQIsVisible = false
   state.aboutGroupsIsVisible = false
+  state.freeLimitFAQIsVisible = false
 }
 
 // free cards from space member
@@ -109,12 +117,21 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
   section.title-section
     p Pricing
   section
-    .row.title-row
+    .row.title-row.free-limit-row
       //- price
       template(v-if="isSecureAppContextIOS")
-        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year.
+        p Kinopio is free for
+          button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
+            span {{freeCardsCreatedLimit}} cards
+          span afterwards it's ${{monthlyPrice}}/month or ${{yearlyPrice}}/year.
       template(v-else)
-        p Kinopio is free for {{freeCardsCreatedLimit}} cards, afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifetimePrice}}/life.
+        p Kinopio is free for
+          button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
+            span {{freeCardsCreatedLimit}} cards
+          span afterwards it's ${{monthlyPrice}}/month, ${{yearlyPrice}}/year, or ${{lifetimePrice}}/life.
+
+      FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
+
       .button-wrap
         button.small-button(@click.stop="toggleUpgradeFAQIsVisible" :class="{active: state.upgradeFAQIsVisible}")
           span ?
@@ -175,4 +192,10 @@ dialog.pricing
   dialog.about-groups
     top -100px
     right 16px
+  .free-limit-row
+    button
+      margin-left 5px
+    dialog.free-limit-faq
+      top 18px
+
 </style>

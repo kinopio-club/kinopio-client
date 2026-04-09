@@ -31,6 +31,10 @@ const toolbarIsBox = computed(() => {
   if (globalStore.currentUserIsResizingBox) { return }
   return globalStore.getToolbarIsBox
 })
+const toolbarIsList = computed(() => {
+  if (globalStore.currentUserIsResizingList) { return }
+  return globalStore.getToolbarIsList
+})
 const toolbarIsDrawing = computed(() => {
   return globalStore.getToolbarIsDrawing
 })
@@ -45,6 +49,13 @@ const addLine = () => {
   globalStore.updateCurrentUserToolbar('card')
   lineStore.createLine()
 }
+const DrawingLabel = computed(() => {
+  if (globalStore.drawingEraserIsActive) {
+    return 'Eraser (E)'
+  } else {
+    return 'Drawing (D)'
+  }
+})
 </script>
 
 <template lang="pug">
@@ -52,14 +63,15 @@ nav#toolbar.toolbar(v-if="visible")
   DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
     .segmented-buttons
-      //- line
+      //- Line
       .button-wrap
         button(
           @click="addLine"
-          title="Add Line Divider (L)"
+          title="Add Line Divider (-)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
-          img.icon(src="@/assets/line.svg")
+          img.icon.line-icon(src="@/assets/line.svg")
+
       //- Box
       .button-wrap
         button(
@@ -71,6 +83,17 @@ nav#toolbar.toolbar(v-if="visible")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
           span Draw Box (B)
 
+      //- List
+      .button-wrap
+        button(
+          title="Draw List (L)"
+          :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
+          @click="toggleToolbar('list')"
+        )
+          img.icon.list-icon(src="@/assets/list.svg")
+        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
+          span Draw List (L)
+
       //- Drawing
       .button-wrap
         button.drawing-button(
@@ -80,7 +103,7 @@ nav#toolbar.toolbar(v-if="visible")
         )
           img.icon.pencil-icon(src="@/assets/pencil.svg")
         .label-badge.toolbar-badge-wrap.jiggle(v-if="toolbarIsDrawing")
-          span Drawing (D)
+          span {{DrawingLabel}}
 </template>
 
 <style lang="stylus">
@@ -103,21 +126,24 @@ nav.toolbar
       display flex
       flex-flow column
       > .button-wrap
-        button
+        > button
           border-radius 0
-          width 32px
+          width 30px
           z-index -1
+          padding 5px 8px
         &:first-child
-          button
+          > button
             border-radius 0
             border-top-left-radius var(--entity-radius)
             border-top-right-radius var(--entity-radius)
         &:last-child
-          button
+          > button
             border-radius 0
             border-bottom-left-radius var(--entity-radius)
             border-bottom-right-radius var(--entity-radius)
       > .button-wrap + .button-wrap
         margin 0
         margin-top -1px
+      .icon.line-icon
+        vertical-align -2px
 </style>

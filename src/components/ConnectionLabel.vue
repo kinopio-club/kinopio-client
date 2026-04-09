@@ -109,15 +109,13 @@ const toggleConnectionDetails = (event) => {
     wasDragged = false
     globalStore.closeAllDialogs()
   } else {
-    globalStore.triggerConnectionDetailsIsVisible(id.value)
+    globalStore.triggerConnectionDetailsIsVisible({ id: id.value, event })
   }
 }
 const items = computed(() => {
-  const cards = cardStore.getAllCards
-  const boxes = boxStore.getAllBoxes
-  const items = cards.concat(boxes)
-  const startItem = items.find(item => item.id === props.connection.startItemId)
-  const endItem = items.find(item => item.id === props.connection.endItemId)
+  const { startItemId, endItemId } = props.connection
+  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
+  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
   return { startItem, endItem }
 })
 
@@ -140,13 +138,11 @@ const isConnectionFilteredByType = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
-  const cards = cardStore.getAllCards
-  const startItemId = props.connection.startItemId
-  const endItemId = props.connection.endItemId
-  const startCard = cards.filter(card => card.id === startItemId)[0]
-  const endCard = cards.filter(card => card.id === endItemId)[0]
-  const startCardInFilter = frameIds.includes(startCard.frameId)
-  const endCardInFilter = frameIds.includes(endCard.frameId)
+  const { startItemId, endItemId } = props.connection
+  const startCard = cardStore.byId[startItemId]
+  const endCard = cardStore.byId[endItemId]
+  const startCardInFilter = frameIds.includes(startCard?.frameId)
+  const endCardInFilter = frameIds.includes(endCard?.frameId)
   return startCardInFilter || endCardInFilter
 })
 const isFiltered = computed(() => {

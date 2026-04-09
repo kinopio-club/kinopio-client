@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
@@ -24,6 +25,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const lineStore = useLineStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
@@ -67,6 +69,7 @@ let selectableBoxesInViewport = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
 let selectableLines = []
+let selectableLists = []
 
 let unsubscribes
 
@@ -151,7 +154,7 @@ const clearRect = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 const triggerHideTouchInterface = () => {
-  if (!globalStore.currentUserIsPaintingLocked) { return }
+  if (!globalStore.currentUserIsPaintSelectingLocked) { return }
   globalStore.triggerHideTouchInterface()
 }
 const isCanvasScope = (event) => {
@@ -171,6 +174,7 @@ const isPanning = computed(() => globalStore.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => globalStore.currentUserToolbar === 'card')
 const toolbarIsBox = computed(() => globalStore.getToolbarIsBox)
+const toolbarIsList = computed(() => globalStore.getToolbarIsList)
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
@@ -244,6 +248,24 @@ const updateSelectableLines = () => {
     selectableLines.push(value)
   })
 }
+const updateSelectableLists = () => {
+  selectableLists = []
+  const lists = listStore.getAllLists
+  lists.forEach(list => {
+    const element = utils.listInfoElementFromId(list.id)
+    if (!element) { return }
+    // if (element.dataset.isVisibleInViewport === 'false') { return }
+    const rect = element.getBoundingClientRect()
+    const value = {
+      id: list.id,
+      x: list.x,
+      y: list.y,
+      width: Math.round(rect.width),
+      height: Math.round(rect.height)
+    }
+    selectableLists.push(value)
+  })
+}
 
 // position
 
@@ -263,7 +285,7 @@ const userScroll = () => {
     shouldCancelPostScroll = true
   }
   // update selectable cards during paint autoscroll at edges
-  if (globalStore.currentUserIsPainting) {
+  if (globalStore.currentUserIsPaintSelecting) {
     updateSelectableCardsInViewport()
     updateSelectableBoxesInViewport()
     updateSelectableConnectionsInViewport()
@@ -384,8 +406,8 @@ const stopPainting = (event) => {
   const shouldAddCard = globalStore.shouldAddCard
   currentUserIsLocking = false
   shouldCancelLocking = false
-  globalStore.currentUserIsPaintingLocked = false
-  globalStore.currentUserIsPainting = false
+  globalStore.currentUserIsPaintSelectingLocked = false
+  globalStore.currentUserIsPaintSelecting = false
   if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
     globalStore.shouldAddCard = true
     event.preventDefault()
@@ -421,6 +443,10 @@ const selectItems = (points) => {
   matches = collisionDetection.checkPointsInRects(points, selectableLines)
   const lineIds = matches.map(match => match.id)
   globalStore.addMultipleToMultipleLinesSelected(lineIds)
+  // lists
+  matches = collisionDetection.checkPointsInRects(points, selectableLists)
+  const listIds = matches.map(match => match.id)
+  globalStore.addMultipleToMultipleListsSelected(listIds)
 }
 
 // Post Scrolling (for android)
@@ -457,10 +483,10 @@ const endPostScroll = () => {
 
 const createPaintingCircle = (event) => {
   const isTouch = Boolean(event.touches)
-  const isPaintingLocked = globalStore.currentUserIsPaintingLocked
-  if (isTouch && !isPaintingLocked) { return }
+  const isPaintSelectingLocked = globalStore.currentUserIsPaintSelectingLocked
+  if (isTouch && !isPaintSelectingLocked) { return }
   if (isBoxSelecting.value) { return }
-  if (isTouch && !isPaintingLocked) { return }
+  if (isTouch && !isPaintSelectingLocked) { return }
   if (utils.isMultiTouch(event)) { return }
   createPaintingCircles(event)
   const position = utils.cursorPositionInSpace(event)
@@ -494,14 +520,15 @@ const startPainting = (event) => {
   updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
   updateSelectableLines()
+  updateSelectableLists()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
   if (utils.isMultiTouch(event)) { return }
   startLocking()
   if (event.touches) {
-    globalStore.currentUserIsPainting = false
+    globalStore.currentUserIsPaintSelecting = false
   } else {
-    globalStore.currentUserIsPainting = true
+    globalStore.currentUserIsPaintSelecting = true
     createInitialCircle()
   }
   const multipleCardsIsSelected = Boolean(globalStore.multipleCardsSelectedIds.length)
@@ -512,6 +539,10 @@ const startPainting = (event) => {
   // add box
   } else if (shouldAdd && toolbarIsBox.value) {
     globalStore.triggerAddBox(event)
+    return
+  // add list
+  } else if (shouldAdd && toolbarIsList.value) {
+    globalStore.triggerAddList(event)
     return
   }
   // clear selected
@@ -601,11 +632,11 @@ const startPaintingCirclesTimer = () => {
   }
 }
 const painting = (event) => {
-  const isPainting = globalStore.currentUserIsPainting
+  const isPaintSelecting = globalStore.currentUserIsPaintSelecting
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
   if (!toolbarIsCard.value) { return }
-  if (!isPainting) { return }
+  if (!isPaintSelecting) { return }
   if (globalStore.isPinchZooming) { return }
   if (globalStore.getShouldScrollAtEdges(event) && event.cancelable) {
     event.preventDefault() // prevents touch swipe viewport scrolling
@@ -623,7 +654,7 @@ const painting = (event) => {
 // Initial Circles
 
 const createInitialCircle = (circle) => {
-  if (toolbarIsBox.value) { return }
+  if (toolbarIsBox.value || toolbarIsList.value) { return }
   const initialCircle = {
     x: startCursor.x,
     y: startCursor.y,
@@ -674,7 +705,7 @@ const cancelLocking = () => {
   shouldCancelLocking = true
 }
 const startLocking = () => {
-  if (toolbarIsBox.value) { return }
+  if (toolbarIsBox.value || toolbarIsList.value) { return }
   currentUserIsLocking = true
   shouldCancelLocking = false
   setTimeout(() => {
@@ -716,8 +747,8 @@ const lockingAnimationFrame = (timestamp) => {
     }
     drawCircle(circle, context)
   } else if (lockingPercentComplete >= 1) {
-    globalStore.currentUserIsPainting = true
-    globalStore.currentUserIsPaintingLocked = true
+    globalStore.currentUserIsPaintSelecting = true
+    globalStore.currentUserIsPaintSelectingLocked = true
     console.info('🔒 lockingAnimationFrame locked')
     postMessage.sendHaptics({ name: 'softImpact' })
     cancelLocking()
@@ -729,8 +760,8 @@ const lockingAnimationFrame = (timestamp) => {
 
 const shouldPreventSelectionOnMobile = () => {
   const isMobile = utils.isMobile()
-  const isPaintingLocked = globalStore.currentUserIsPaintingLocked
-  return isMobile && !isPaintingLocked
+  const isPaintSelectingLocked = globalStore.currentUserIsPaintSelectingLocked
+  return isMobile && !isPaintSelectingLocked
 }
 const selectItemsBetweenCurrentAndPrevPosition = (position) => {
   if (!prevPosition) {

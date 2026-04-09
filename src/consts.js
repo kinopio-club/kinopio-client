@@ -12,20 +12,23 @@ export default {
   defaultCardWidth: 58,
   defaultCardHeight: 70,
   minItemXY: 70,
-  minLineY: 150,
-  normalCardMaxWidth: 200,
-  wideCardMaxWidth: 390,
+  minLineY: 90,
+  minLineYOutdent: 175,
+  minListWidth: 200,
+  normalCardWrapWidth: 200,
+  wideCardWrapWidth: 390,
   minCardIframeWidth: 310,
   freeCardsCreatedLimit: 100,
   freeUploadSizeLimit: 5, // 5mb
+  upgradedUploadSizeLimit: 256, // 256mb
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },
-
+  defaultDialogWidth: 250,
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,
-  boxSnapGuideWaitingDuration: 100,
+  itemSnapGuideWaitingDuration: 200,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   straightLineConnectionPathControlPoint: 'q00,00',
@@ -40,11 +43,16 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/squiggle-background-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
-  itemTypesWithPositions: ['boxes', 'cards'],
+  itemTypesWithPositions: ['boxes', 'cards', 'lists', 'lines'],
   nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
-  itemDetailsDebugIsVisible: true,
   isStaticPrerenderingPage: env.SSR,
   lineInfoOffset: 11,
+  listPadding: 8,
+  listInfoHeight: 34,
+  listEmptyHeight: 56,
+  itemSnapOpacity: 0.5,
+  edgeThreshold: 30,
+  itemTypes: ['cards', 'connections', 'connectionTypes', 'boxes', 'lists', 'lines', 'drawingStrokes'],
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
@@ -59,9 +67,9 @@ export default {
     }
     return domain
   },
-  apiHost () {
+  apiHost (shouldUseProduction) {
     let host = 'https://api.kinopio.club'
-    if (this.isDevelopment()) {
+    if (this.isDevelopment() && !shouldUseProduction) {
       host = 'https://kinopio.local:3000'
     }
     return host

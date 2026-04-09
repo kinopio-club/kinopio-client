@@ -21,7 +21,7 @@ import dayjs from 'dayjs'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support, 2014
 import uniqBy from 'lodash-es/uniqBy'
 
-export const useUserStore = defineStore('users', {
+export const useUserStore = defineStore('user', {
   state: () => ({
     id: nanoid(),
     lastSpaceId: '',
@@ -54,7 +54,7 @@ export const useUserStore = defineStore('users', {
     shouldShowItemActions: false,
     shouldShowMultipleSelectedLineActions: false,
     shouldShowMultipleSelectedBoxActions: false,
-    shouldDisableRightClickToPan: false,
+    shouldShowMultipleSelectedListActions: false,
     shouldShowCurrentSpaceTags: false,
     showInExploreUpdatedAt: null, // date
     defaultSpaceBackground: undefined,
@@ -62,7 +62,6 @@ export const useUserStore = defineStore('users', {
     defaultSpaceBackgroundTint: undefined,
     defaultCardBackgroundColor: undefined,
     defaultConnectionControlPoint: consts.straightLineConnectionPathControlPoint,
-    downgradeAt: null,
     shouldUseStickyCards: true,
     shouldIncreaseUIContrast: false,
     shouldPauseConnectionDirections: false,
@@ -72,17 +71,25 @@ export const useUserStore = defineStore('users', {
     themeIsSystem: false,
     outsideSpaceBackgroundIsStatic: false,
     shouldDisableHapticFeedback: false,
-    appleAppAccountToken: null,
-    appleSubscriptionIsActive: null,
+    isDebugMode: false,
     studentDiscountIsAvailable: false,
     lastSidebarSection: '',
     prevInviteEmails: '',
     prevHeaderFontId: 0,
     cardSettingsShiftEnterShouldAddChildCard: true,
-    cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
+    cardSettingsCardWrapWidth: consts.normalCardWrapWidth,
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
     shouldShowMinimapJumpToList: true,
+    cardDetailsResizeWidth: null,
+
+    // billing
+
+    downgradeAt: null,
+    appleAppAccountToken: null,
+    appleSubscriptionIsActive: null,
+    stripePlanIsPurchased: null,
+    stripeSubscriptionId: null,
 
     // space filters
 
@@ -148,10 +155,11 @@ export const useUserStore = defineStore('users', {
     },
     getUserIsSpaceUser () {
       const spaceStore = useSpaceStore()
-      let userIsInSpace = Boolean(spaceStore.users?.find(user => {
+      const space = spaceStore.getSpaceAllState
+      let userIsInSpace = Boolean(space.users?.find(user => {
         return user.id === this.id
       }))
-      userIsInSpace = userIsInSpace || spaceStore.userId === this.id
+      userIsInSpace = userIsInSpace || space.userId === this.id
       return userIsInSpace
     },
     getUserIsSpaceCollaborator () {
@@ -300,12 +308,14 @@ export const useUserStore = defineStore('users', {
     },
     async restoreRemoteUser () {
       const apiStore = useApiStore()
+      const themeStore = useThemeStore()
       if (!this.getUserIsSignedIn) { return }
       const user = await apiStore.getUser()
       if (!user) { return }
       user.updatedAt = utils.unixTime(user.updatedAt)
       console.info('🌸 Initialize user from remote', user)
       this.initializeUserState(user)
+      themeStore.restoreTheme()
     },
     async restoreUserAssociatedData () {
       const globalStore = useGlobalStore()
@@ -511,6 +521,7 @@ export const useUserStore = defineStore('users', {
       if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
+      cache.updateUser({ cardsCreatedCount: count, cardsCreatedCountRaw: count })
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }

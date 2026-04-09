@@ -18,12 +18,20 @@ const props = defineProps({
   visible: Boolean
 })
 
+const toggleUserSettings = () => {
+  globalStore.closeAllDialogs()
+  globalStore.userSettingsIsVisible = true
+}
 </script>
 
 <template lang="pug">
 dialog.narrow.user-settings-cards-dialog(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
-  //- section.title-section
-  //-   p Card Settings
+  section.title-section.title-row
+    span Card Settings
+    .button-wrap
+      button.small-button(@click="toggleUserSettings")
+        img.settings.icon(src="@/assets/settings.svg")
+        span All
   UserSettingsCards(:visible="props.visible")
 </template>
 
@@ -33,6 +41,6 @@ dialog.narrow.user-settings-cards-dialog(v-if="props.visible" :open="props.visib
   right 8px
   &.narrow
     width 200px
-  // .title-section
-  //   border-bottom 1px solid var(--primary-border)
+  .title-section
+    border-bottom 1px solid var(--primary-border)
 </style>

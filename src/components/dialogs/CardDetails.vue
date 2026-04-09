@@ -5,13 +5,14 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useApiStore } from '@/stores/useApiStore'
 
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import CardActions from '@/components/subsections/CardActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -20,7 +21,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
-import MediaPreview from '@/components/MediaPreview.vue'
+import FilePreview from '@/components/FilePreview.vue'
 import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareItem from '@/components/dialogs/ShareItem.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
@@ -28,17 +29,18 @@ import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import CardDetailsResize from '@/components/CardDetailsResize.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
-import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const listStore = useListStore()
 const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
@@ -164,6 +166,9 @@ watch(() => visible.value, (value, prevValue) => {
     closeCard()
   }
 })
+watch(() => userStore.cardDetailsResizeWidth, (value, prevValue) => {
+  textareaSizes()
+})
 
 const parentElement = computed(() => dialogElement.value)
 const closeCardAndFocus = (event) => {
@@ -223,11 +228,15 @@ const styles = computed(() => {
     // on iOS, keyboard focus zooms
     zoom = 1
   }
+  const minWidth = consts.defaultDialogWidth
+  let width = userStore.cardDetailsResizeWidth || minWidth
+  width = Math.max(width, minWidth)
+  width = `${width}px`
   const transform = `scale(${zoom})`
   const offset = 8
   const left = `${card.value.x + offset}px`
   const top = `${card.value.y + offset}px`
-  return { transform, left, top }
+  return { transform, left, top, width }
 })
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
@@ -336,29 +345,6 @@ const updateCompositionEventEndTime = (event) => {
   // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
   compositionEventEndTime = event.timeStamp
 }
-const handleEnterKey = (event) => {
-  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  console.info('🎹 enter', {
-    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
-    pickersIsVisible
-  })
-  if (globalStore.shouldPreventNextEnterKey) {
-    globalStore.shouldPreventNextEnterKey = false
-  } else if (pickersIsVisible) {
-    triggerPickerSelectItem(event)
-    hidePickers()
-  } else if (state.insertedLineBreak) {
-    state.insertedLineBreak = false
-  // eslint-disable-next-line no-empty
-  } else if (isCompositionEvent) {
-  } else {
-    closeCard()
-    globalStore.closeAllDialogs()
-    globalStore.shouldPreventNextEnterKey = false
-    globalStore.triggerAddCard()
-  }
-}
 const removeCard = () => {
   if (!canEditCard.value) { return }
   cardStore.removeCards([cardId.value])
@@ -419,7 +405,7 @@ const closeCard = async () => {
   globalStore.shouldPreventNextEnterKey = false
   if (!item) { return }
   const cardHasName = Boolean(item.name)
-  const cardHasPendingUpload = uploadStore.hasPendingUploadForCardId(cardId)
+  const cardHasPendingUpload = uploadStore.getPendingUploadByItemId(cardId)
   if (!cardHasName && !cardHasPendingUpload) {
     cardStore.removeCard(cardId)
   }
@@ -1000,16 +986,7 @@ const hasUrls = computed(() => {
   return Boolean(validUrls.value.length)
 })
 const urlsIsVisible = computed(() => {
-  const urlsVisible = validUrls.value.filter(url => {
-    const queryString = utils.queryString(url)
-    if (queryString) {
-      const queryObject = qs.decode(queryString)
-      return queryObject.hidden || queryObject.kinopio
-    } else {
-      return false
-    }
-  })
-  return urlsVisible.length === validUrls.value.length
+  return !card.value.urlIsHidden
 })
 const cardUrlPreviewIsVisible = computed(() => {
   const isErrorUrl = card.value.urlPreviewErrorUrl && card.value.urlPreviewUrl === card.value.urlPreviewErrorUrl
@@ -1029,16 +1006,6 @@ const isLoadingUrlPreview = computed(() => {
   const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
   return Boolean(isLoading)
 })
-const toggleUrlsIsVisible = () => {
-  const isVisible = !urlsIsVisible.value
-  let newName
-  if (isVisible) {
-    newName = utils.addHiddenQueryStringToURLs(name.value)
-  } else {
-    newName = utils.removeHiddenQueryStringFromURLs(name.value)
-  }
-  updateCardName(newName)
-}
 const removeUrlPreview = async () => {
   const cardId = card.value.id || prevCardId
   const update = {
@@ -1063,7 +1030,7 @@ const groupInviteUrl = computed(() => {
 // media
 
 const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
-const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio))
+const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio || state.formats.file))
 const addImageOrFile = async (file) => {
   const cardId = card.value.id
   const spaceId = spaceStore.id
@@ -1088,6 +1055,7 @@ const updateMediaUrls = () => {
   state.formats.image = ''
   state.formats.video = ''
   state.formats.audio = ''
+  state.formats.file = ''
   state.formats.link = ''
   if (!urls) { return }
   if (!urls.length) { return }
@@ -1169,7 +1137,7 @@ const splitCards = (event, isPreview) => {
       y: card.value.y,
       frameId: card.value.frameId,
       backgroundColor: card.value.backgroundColor,
-      maxWidth: user.cardSettingsMaxCardWidth
+      maxWidth: user.cardSettingsCardWrapWidth
     }
     return newCard
   })
@@ -1216,18 +1184,80 @@ const updatePastedName = (event) => {
   cardStore.normalizeCardUrls(cardId.value)
 }
 
-// line break
+// enter key shortcuts
 
+const addCard = () => {
+  closeCard()
+  globalStore.closeAllDialogs()
+  globalStore.shouldPreventNextEnterKey = false
+  globalStore.triggerAddCard()
+}
+const addListCard = () => {
+  const list = listStore.getList(card.value.listId)
+  const newCard = {
+    id: nanoid(),
+    width: card.value.width,
+    resizeWidth: card.value.resizeWidth,
+    x: card.value.x,
+    y: card.value.y + card.value.height + consts.listPadding,
+    backgroundColor: card.value.backgroundColor
+  }
+  closeCard()
+  globalStore.closeAllDialogs()
+  globalStore.shouldPreventNextEnterKey = false
+  const prevCard = cardStore.getCard(prevCardId)
+  cardStore.createCard(newCard, true)
+  cardStore.addCardsToList({ cards: [newCard], list, targetPositionIndex: prevCard.listPositionIndex })
+  globalStore.parentCardId = newCard.id
+  globalStore.updateCardDetailsIsVisibleForCardId(newCard.id)
+}
+
+// 🎹 enter
+const handleEnterKey = (event) => {
+  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  console.info('🎹 enter', {
+    shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
+    pickersIsVisible
+  })
+  if (globalStore.shouldPreventNextEnterKey) {
+    globalStore.shouldPreventNextEnterKey = false
+  } else if (pickersIsVisible) {
+    triggerPickerSelectItem(event)
+    hidePickers()
+  } else if (state.insertedLineBreak) {
+    state.insertedLineBreak = false
+  // eslint-disable-next-line no-empty
+  } else if (isCompositionEvent) {
+  } else if (card.value.listId) {
+    addListCard()
+  } else {
+    addCard()
+  }
+}
+// 🎹 ctrl-enter, alt-enter
+const handleOptionEnterKey = (event) => {
+  const optionEnterChildCard = !userStore.cardSettingsShiftEnterShouldAddChildCard
+  if (optionEnterChildCard) {
+    globalStore.triggerAddChildCard()
+  } else {
+    insertLineBreak(event)
+  }
+}
+// 🎹 shift-enter
+const handleShiftEnterKey = (event) => {
+  const shiftEnterChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
+  if (shiftEnterChildCard) {
+    globalStore.triggerAddChildCard()
+  } else {
+    insertLineBreak(event)
+  }
+}
 const checkIfIsInsertLineBreak = (event) => {
   const lineBreakInserted = event.ctrlKey || event.altKey
   if (!lineBreakInserted) {
     state.insertedLineBreak = false
   }
-}
-const conditionalInsertLineBreak = (event) => {
-  const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
-  if (shouldAddChildCard) { return }
-  insertLineBreak(event)
 }
 const insertLineBreak = (event) => {
   const position = nameElement.value.selectionEnd
@@ -1409,9 +1439,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
-        @keydown.alt.enter.exact.stop="insertLineBreak"
-        @keydown.ctrl.enter.exact.stop="insertLineBreak"
-        @keydown.shift.enter.exact="conditionalInsertLineBreak"
+        @keydown.alt.enter.exact.stop="handleOptionEnterKey"
+        @keydown.ctrl.enter.exact.stop="handleOptionEnterKey"
+        @keydown.shift.enter.exact="handleShiftEnterKey"
 
         @keyup="updatePickerSearch(null)"
 
@@ -1457,132 +1487,131 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           span ?
       CardTips(:visible="state.cardTipsIsVisible")
 
-    .row(v-if="cardPendingUpload")
-      .badge.info
-        Loader(:visible="true")
-        span {{cardPendingUpload.percentComplete}}%
+    .rows
+      .row(v-if="cardPendingUpload")
+        .badge.info
+          Loader(:visible="true")
+          span {{cardPendingUpload.percentComplete}}%
 
-    .row
-      template(v-if="canEditCard")
-        //- Remove
-        .button-wrap
-          button.danger(@click.left="removeCard" title="Remove Card")
-            img.icon.remove(src="@/assets/remove.svg")
-            //- span Remove
-        //- [·]
-        ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
-        //- Image
-        .button-wrap
-          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
-            img.icon.flower(src="@/assets/flower.svg")
-          ImagePicker(:visible="state.imagePickerIsVisible" :initialSearch="state.initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
-        //- Toggle Style Actions
-        .button-wrap
-          button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
-            img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-      //- Share
-      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
-        button(:class="{active: state.shareItemIsVisible}")
-          span Share
-        ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
-
-    CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
-    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
-
-    .row(v-if="nameMetaRowIsVisible && canEditCard")
-      //- Split by Line Breaks
-      .button-wrap(v-if="state.nameSplitIntoCardsCount")
-        button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
-          img.icon(src="@/assets/split.svg")
-          span Split Card
-          span.badge.secondary.badge-in-button.small-button-text.badge-split-card-count {{state.nameSplitIntoCardsCount}}
-
-    .row.badges-row(v-if="badgesRowIsVisible")
-      //- Search result
-      span.badge.search(v-if="isInSearchResultsCards")
-        img.icon.search(src="@/assets/search.svg")
-      //- Tags
-      template(v-for="tag in tagsInCard")
-        Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-
-    .row.badges-row.other-items-row(v-if="otherCardIsVisible")
-      OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
-
-    MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
-
-    template(v-if="groupInviteUrl")
-      GroupInvitePreview(
-        :card="card"
-        :groupInviteUrl="groupInviteUrl"
-        :parentIsCardDetails="true"
-      )
-    template(v-else-if="urlPreviewIsVisible")
-      UrlPreview(
-        :visible="true"
-        :loading="isLoadingUrlPreview"
-        :card="card"
-        :urlsIsVisibleInName="urlsIsVisible"
-        @toggleUrlsIsVisible="toggleUrlsIsVisible"
-      )
-
-    //- other space
-    template(v-if="otherSpaceIsVisible")
-      OtherSpacePreview(
-        :otherSpace="otherSpace"
-        :url="otherSpaceUrl"
-        :card="card"
-      )
-
-    //- Read Only
-    template(v-if="!canEditCard")
-      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
-      .row.edit-message
-        template(v-if="spacePrivacyIsOpen")
-          span.badge.info
-            img.icon.open(src="@/assets/open.svg")
-            span In open spaces, you can only move and edit cards you created
-        template(v-else-if="isInvitedButCannotEditSpace")
-          span.badge.info
-            img.icon(src="@/assets/unlock.svg")
-            span To edit spaces you've been invited to, you'll need to sign up or in
-          .row
-            .button-wrap
-              button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-        template(v-else-if="spacePrivacyIsClosed")
-          span.badge.info
-            img.icon(src="@/assets/unlock.svg")
-            span Read Only
-
-    //- Info
-    template(v-if="showCharacterCount")
       .row
-        span.badge.secondary-on-dark-background
-          span {{currentCardLength}} / {{maxCardCharacterLimit}}
+        template(v-if="canEditCard")
+          //- Remove
+          .button-wrap
+            button.danger(@click.left="removeCard" title="Remove Card")
+              img.icon.remove(src="@/assets/remove.svg")
+              //- span Remove
+          //- [·]
+          ItemDetailsCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
+          //- Image
+          .button-wrap
+            button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Add or Upload Image")
+              img.icon.flower(src="@/assets/flower.svg")
+            ImagePicker(:visible="state.imagePickerIsVisible" :initialSearch="state.initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
+          //- Toggle Style Actions
+          .button-wrap
+            button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
+              img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+        //- Share
+        .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareItemIsVisible" )
+          button(:class="{active: state.shareItemIsVisible}")
+            span Share
+          ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
-    //- Errors
-    template(v-if="errorMaxCharacterLimit")
-      .row
-        span.badge.danger
-          img.icon.cancel(src="@/assets/add.svg")
-          span Max Length
-      p Cards can't be longer than {{maxCardCharacterLimit}} characters
-    template(v-if="state.error.signUpToUpload")
-      p
-        span To upload files,
-        span.badge.info you need to Sign Up or In
-      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    template(v-if="state.error.sizeLimit")
-      p
-        span.badge.danger
-          img.icon.cancel(src="@/assets/add.svg")
-          span Too Big
-      p
-        span To upload files over {{freeUploadSizeLimit}}mb,
-        span.badge.info upgrade for unlimited
-      button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-    template(v-if="state.error.unknownUploadError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    ItemDetailsDebug(:item="card" :keys="['x', 'y', 'backgroundColor']")
+      CardActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
+      CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+
+      .row(v-if="nameMetaRowIsVisible && canEditCard")
+        //- Split by Line Breaks
+        .button-wrap(v-if="state.nameSplitIntoCardsCount")
+          button.small-button(:disabled="!canEditCard" @click.left.stop="splitCards")
+            img.icon(src="@/assets/split.svg")
+            span Split Card
+            span.badge.secondary.badge-in-button.small-button-text.badge-split-card-count {{state.nameSplitIntoCardsCount}}
+
+      .row.badges-row(v-if="badgesRowIsVisible")
+        //- Search result
+        span.badge.search(v-if="isInSearchResultsCards")
+          img.icon.search(src="@/assets/search.svg")
+        //- Tags
+        template(v-for="tag in tagsInCard")
+          Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
+
+      .row.badges-row.other-items-row(v-if="otherCardIsVisible")
+        OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
+
+      FilePreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
+
+      template(v-if="groupInviteUrl")
+        GroupInvitePreview(
+          :card="card"
+          :groupInviteUrl="groupInviteUrl"
+          :parentIsCardDetails="true"
+        )
+      template(v-else-if="urlPreviewIsVisible")
+        UrlPreview(
+          :visible="true"
+          :loading="isLoadingUrlPreview"
+          :card="card"
+        )
+
+      //- other space
+      template(v-if="otherSpaceIsVisible")
+        OtherSpacePreview(
+          :otherSpace="otherSpace"
+          :url="otherSpaceUrl"
+          :card="card"
+        )
+
+      //- Read Only
+      template(v-if="!canEditCard")
+        .row.edit-message
+          template(v-if="spacePrivacyIsOpen")
+            span.badge.info
+              img.icon.open(src="@/assets/open.svg")
+              span In open spaces, you can only move and edit cards you created
+          template(v-else-if="isInvitedButCannotEditSpace")
+            span.badge.info
+              img.icon(src="@/assets/unlock.svg")
+              span To edit spaces you've been invited to, you'll need to sign up or in
+              .row
+                .button-wrap
+                  button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+          template(v-else-if="spacePrivacyIsClosed")
+            span.badge.info
+              img.icon(src="@/assets/unlock.svg")
+              span Read Only
+
+      //- Info
+      template(v-if="showCharacterCount")
+        .row
+          span.badge.secondary-on-dark-background
+            span {{currentCardLength}} / {{maxCardCharacterLimit}}
+
+      //- Errors
+      template(v-if="errorMaxCharacterLimit")
+        .row
+          span.badge.danger
+            img.icon.cancel(src="@/assets/add.svg")
+            span Max Length
+        p Cards can't be longer than {{maxCardCharacterLimit}} characters
+      template(v-if="state.error.signUpToUpload")
+        p
+          span To upload files,
+          span.badge.info you need to Sign Up or In
+        button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+      template(v-if="state.error.sizeLimit")
+        p
+          span.badge.danger
+            img.icon.cancel(src="@/assets/add.svg")
+            span Too Big
+        p
+          span To upload files over {{freeUploadSizeLimit}}mb,
+          span.badge.info upgrade for unlimited
+        button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      template(v-if="state.error.unknownUploadError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      ItemDetailsDebug(:item="card" :keys="['urlPreviewUrl', 'linkToSpaceId', 'y']")
+    CardDetailsResize
 </template>
 
 <style lang="stylus">

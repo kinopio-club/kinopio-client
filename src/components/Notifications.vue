@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.currentUserIsPainting, (value, prevValue) => {
+watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
   if (value) {
     addReadOnlyJiggle()
   }
@@ -94,7 +94,7 @@ const closeAllDialogs = () => {
 
 // user
 
-const currentUserIsPaintingLocked = computed(() => globalStore.currentUserIsPaintingLocked)
+const currentUserIsPaintSelectingLocked = computed(() => globalStore.currentUserIsPaintSelectingLocked)
 const currentUserIsResizingCard = computed(() => globalStore.currentUserIsResizingCard)
 const currentUserIsResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 const currentUserIsTiltingCard = computed(() => globalStore.currentUserIsTiltingCard)
@@ -104,6 +104,11 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
 const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
+const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
+
+// group
+
+const groupToJoin = computed(() => globalStore.groupToJoinOnLoad.group)
 
 // space
 
@@ -144,24 +149,24 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (globalStore.isLoadingSpace) { return }
   try {
     if (!currentUserIsSignedIn.value) { return }
-    if (!spaceStore.updatedAt) {
-      return
-    } // don't check unloaded spaces
     const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
     if (!remoteSpace) { return }
-    const space = spaceStore.getSpaceAllState
-    const spaceeditedAt = dayjs(space.editedAt)
-    const remoteSpaceeditedAt = dayjs(remoteSpace.editedAt)
-    const deltaMinutes = remoteSpaceeditedAt.diff(spaceeditedAt, 'minute')
-    const editedAtIsChanged = deltaMinutes >= 1
+    const spaceEditedAt = dayjs(spaceStore.editedAt)
+    const remoteSpaceEditedAt = dayjs(remoteSpace.editedAt)
+    const deltaMinutes = remoteSpaceEditedAt.diff(spaceEditedAt, 'minute')
+    const editedAtIsChanged = deltaMinutes >= 15
     if (editedAtIsChanged) {
       console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
         editedAtIsChanged,
-        spaceeditedAt: spaceeditedAt.fromNow(),
-        remoteSpaceeditedAt: remoteSpaceeditedAt.fromNow(),
+        spaceEditedAt: spaceStore.editedAt,
+        remoteSpaceEditedAt: remoteSpace.editedAt,
+        spaceEditedAtFromNow: spaceEditedAt.fromNow(),
+        remoteSpaceEditedAtFromNow: remoteSpaceEditedAt.fromNow(),
         deltaMinutes
       })
       state.notifySpaceOutOfSync = true
+      await spaceStore.restoreCurrentSpaceFromRemote()
+      state.notifySpaceOutOfSync = false
     }
   } catch (error) {
     console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
@@ -187,6 +192,9 @@ const hideNotifyServerCouldNotSave = () => {
 const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => {
+  const space = spaceStore.getSpaceAllState
+  const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
+  if (isReadOnlyInvitedToSpace) { return }
   return globalStore.notifySignUpToEditSpace || globalStore.currentUserIsInvitedButCannotEditCurrentSpace
 })
 const notifyCardsCreatedIsNearLimit = computed(() => globalStore.notifyCardsCreatedIsNearLimit)
@@ -201,7 +209,6 @@ const notifySpaceIsUnavailableOffline = computed(() => globalStore.currentSpaceI
 const notifyIsJoiningGroup = computed(() => globalStore.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => globalStore.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => globalStore.notifyIsDuplicatingSpace)
-const notifyBoxSnappingIsReady = computed(() => globalStore.notifyBoxSnappingIsReady)
 const notifificationClasses = (item) => {
   const classes = {
     danger: item.type === 'danger',
@@ -322,7 +329,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   globalStore.multipleSelectedItemsToLoad(items)
   changeSpace(spaceId)
 }
-const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
 const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle
@@ -371,7 +378,7 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Tilt
 
-  .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
+  .persistent-item.info(v-if="currentUserIsPaintSelectingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
     span Drag to Paint
 
@@ -383,9 +390,9 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/constrain-axis.svg")
     span Snap to Grid
 
-  .persistent-item.info(v-if="notifyBoxSnappingIsReady")
-    img.icon(src="@/assets/box-snap.svg")
-    span Snap to Box
+  .persistent-item.info(v-if="itemSnappingIsReady")
+    img.icon(src="@/assets/merge.svg")
+    span Release to Snap
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
@@ -491,7 +498,9 @@ aside.notifications(@click.left="closeAllDialogs")
           img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
-    p Error saving changes to server
+    p
+      img.icon.offline(src="@/assets/offline.svg")
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
@@ -512,13 +521,10 @@ aside.notifications(@click.left="closeAllDialogs")
           button
             span Email Support
 
-  .persistent-item.danger(v-if="state.notifySpaceOutOfSync")
-    p Space is out of sync, please refresh
-    .row
-      .button-wrap
-        button(@click.left="refreshBrowser")
-          img.refresh.icon(src="@/assets/refresh.svg")
-          span Refresh
+  .persistent-item.info(v-if="state.notifySpaceOutOfSync")
+    p
+      Loader(:visible="true" :isSmall="true")
+      span Refreshing data…
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     button.button-only.small-button(@click.left="duplicateSpace")
@@ -554,7 +560,10 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item(v-if="notifySignUpToJoinGroup" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     .row
       p
-        img.icon.group(src="@/assets/group.svg")
+        template(v-if="groupToJoin")
+          GroupLabel(:group="groupToJoin" :showName="true")
+        template(v-else)
+          img.icon.group(src="@/assets/group.svg")
         span You've been invited to a group
     .row
       p

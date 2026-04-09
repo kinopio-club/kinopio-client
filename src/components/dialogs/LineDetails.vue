@@ -37,7 +37,7 @@ watch(() => visible.value, async (value, prevValue) => {
   await nextTick()
   if (value) {
     closeDialogs()
-    // broadcastShowBoxDetails()
+    broadcastShowLineDetails()
     scrollIntoViewAndFocus()
     textareaSizes()
     globalStore.preventMultipleSelectedActionsIsVisible = false
@@ -93,6 +93,7 @@ const styles = computed(() => {
   return styles
 })
 const broadcastShowLineDetails = () => {
+  if (canEditSpace.value) { return }
   const updates = {
     lineId: currentLine.value.id,
     userId: userStore.id
@@ -154,7 +155,7 @@ const textareaSizes = () => {
 
 // colors
 
-const itemColors = computed(() => spaceStore.getSpaceItemColors)
+const itemColors = computed(() => spaceStore.getSpaceItemColors.line)
 const colorisDark = computed(() => {
   const color = currentLine.value.color
   return utils.colorIsDark(color)
@@ -208,7 +209,7 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
         )
       //- name
       .textarea-wrap
-        textarea.name(
+        textarea.name.on-background-color(
           :disabled="!canEditSpace"
           ref="nameElement"
           rows="1"
@@ -230,24 +231,17 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
             img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
           button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
             img.icon.down-arrow(src="@/assets/down-arrow.svg")
+    .row(v-if="!canEditSpace")
+      span.badge.info
+        img.icon(src="@/assets/unlock.svg")
+        span Read Only
+
     ItemDetailsDebug(:item="currentLine" :keys="['y', 'color']")
 </template>
 
 <style lang="stylus">
 dialog.link-details
   transform-origin top left
-  textarea.name
-    margin-left 6px
-    margin-top 2px
-    margin-bottom 0
-    width calc(100% - 6px)
-    border-color var(--primary-border)
-    &.is-dark
-      color var(--primary-on-dark-background)
-      border-color var(--primary-border-on-dark-background)
-    &.is-light
-      color var(--primary-on-light-background)
-      border-color var(--primary-border-on-light-background)
   .info-row
     align-items flex-start
   .up-arrow

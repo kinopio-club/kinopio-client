@@ -58,10 +58,12 @@ onMounted(async () => {
   initCardTextarea()
   restoreValue()
   checkIsMissingInboxSpace()
+  window.addEventListener('resize', updateTextareaSize)
 })
 
 onBeforeUnmount(() => {
   cache.clearPrevAddPageValue()
+  window.removeEventListener('resize', updateTextareaSize)
 })
 
 const isOffline = computed(() => !globalStore.isOnline)
@@ -114,11 +116,24 @@ const checkIsMissingInboxSpace = async () => {
     state.error.isMissingInboxSpace = true
   }
 }
+const nameImageUrl = computed(() => {
+  const url = utils.urlFromString(state.newName)
+  if (!url) { return }
+  const isImage = utils.urlIsImage(url)
+  if (isImage) {
+    return url
+  } else {
+    return null
+  }
+})
 
 // postmesage
 
 const restoreValue = async (value) => {
   await nextTick()
+  // iOS app sets `window.sharedCardName` before Vue initializes
+  value = value || window.sharedCardName
+  delete window.sharedCardName
   value = value || await cache.prevAddPageValue()
   state.newName = value
   console.info('🏬 restored value', value)
@@ -190,7 +205,7 @@ const addCard = async () => {
       userId: user.id
     }
     const url = utils.urlFromString(newName)
-    if (url) {
+    if (utils.urlIsWebsite(url)) {
       card.urlPreviewUrl = url
       card.shouldUpdateUrlPreview = true
     }
@@ -294,16 +309,12 @@ main.add-page
       //- buttons
       .row
         .button-wrap
-          a(:href="inboxUrl")
-            button(:disabled="state.error.isMissingInboxSpace")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
-              span Inbox
-        .button-wrap
           button.success(@pointerup="addCard" :disabled="state.error.maxLength || state.error.isMissingInboxSpace")
             img.icon.add-icon(src="@/assets/add.svg")
-            span Add
+            span Add to Inbox
           .badge.label-badge.enter-badge(v-if="state.keyboardShortcutTipIsVisible")
             span Enter
+        img.preview-image(v-if="nameImageUrl" :src="nameImageUrl")
       Transition(name="fadeIn")
         .row(v-if="state.success")
           .badge.success
@@ -340,7 +351,6 @@ main.add-page
   min-height 100vh
   height 100%
   margin-top 6px
-  margin-bottom 2rem
   background var(--primary-background)
   section
     position relative
@@ -421,4 +431,9 @@ main.add-page
   justify-content space-between
   align-items center
 
+.preview-image
+  width auto
+  height 31px
+  margin-left 6px
+  border-radius var(--entity-radius)
 </style>

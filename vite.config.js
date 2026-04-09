@@ -112,6 +112,7 @@ export default defineConfig(async ({ command, mode }) => {
             // Exclude exact route only
             /^\/security\.txt$/,
             /^\/robots\.txt$/,
+            /^\/llms\.txt$/,
             /^\/sitemap\.xml$/,
             /^\/changelog$/,
             /^\/roadmap$/,
@@ -160,6 +161,8 @@ export default defineConfig(async ({ command, mode }) => {
       }
     },
     build: {
+      // generates and deploys .map files
+      sourcemap: true,
       // skip non-important build warnings
       rollupOptions: {
         onwarn (warning, warn) {

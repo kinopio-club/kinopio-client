@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 
 import frames from '@/data/frames.js'
 import FrameBadge from '@/components/FrameBadge.vue'
@@ -10,6 +11,7 @@ import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
+const listStore = useListStore()
 
 const dialogElement = ref(null)
 
@@ -21,7 +23,18 @@ const emit = defineEmits(['updateCount'])
 
 const props = defineProps({
   visible: Boolean,
-  cards: Array
+  cards: {
+    type: Array,
+    default: () => {
+      return []
+    }
+  },
+  lists: {
+    type: Array,
+    default: () => {
+      return []
+    }
+  }
 })
 const state = reactive({
   dialogHeight: null
@@ -49,10 +62,16 @@ const scrollIntoView = () => {
 
 // frames
 
-const changeCardFrame = (frame) => {
+const updateFrame = (frame) => {
+  // check if shouldClear
   let shouldClear
   props.cards.forEach(card => {
     if (card.frameId === frame.id) {
+      shouldClear = true
+    }
+  })
+  props.lists.forEach(list => {
+    if (list.frameId === frame.id) {
       shouldClear = true
     }
   })
@@ -62,6 +81,7 @@ const changeCardFrame = (frame) => {
       name: 'None'
     }
   }
+  // update items
   props.cards.forEach(card => {
     const update = {
       frameId: frame.id,
@@ -70,10 +90,19 @@ const changeCardFrame = (frame) => {
     }
     cardStore.updateCard(update)
   })
+  props.lists.forEach(list => {
+    const update = {
+      frameId: frame.id,
+      frameName: frame.name,
+      id: list.id
+    }
+    listStore.updateList(update)
+  })
 }
 const frameIsSelected = (frame) => {
   const cardFrameIds = props.cards.map(card => card.frameId)
-  return cardFrameIds.includes(frame.id)
+  const listFrameIds = props.lists.map(list => list.frameId)
+  return cardFrameIds.includes(frame.id) || listFrameIds.includes(frame.id)
 }
 </script>
 
@@ -82,7 +111,7 @@ dialog.narrow.frame-picker(v-if="visible" :open="visible" ref="dialogElement" @c
   section.results-section
     ul.results-list
       template(v-for="frame in frames" :key="frame.id")
-        li(:class="{active: frameIsSelected(frame)}" @click.left="changeCardFrame(frame)" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
+        li(:class="{active: frameIsSelected(frame)}" @click.left="updateFrame(frame)" tabindex="0" v-on:keyup.enter="updateFrame(frame)")
           FrameBadge(:frame="frame")
           .name {{frame.name}}
 </template>

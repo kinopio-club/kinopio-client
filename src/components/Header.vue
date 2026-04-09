@@ -108,6 +108,8 @@ onMounted(() => {
         updateTemplatesIsVisible(true)
       } else if (name === 'triggerRemovedIsVisible') {
         updateSidebarIsVisible(true)
+      } else if (name === 'triggerNoteIsVisible') {
+        updateSidebarIsVisible(true)
       } else if (name === 'triggerImportIsVisible') {
         updateImportIsVisible(true)
       } else if (name === 'triggerClearUserNotifications') {
@@ -125,7 +127,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.currentUserIsPainting, (value, prevValue) => {
+watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
   if (value) {
     addReadOnlyJiggle()
   }
@@ -145,7 +147,6 @@ const state = reactive({
   spaceStatusIsVisible: false,
   position: {},
   readOnlyJiggle: false,
-  notifications: [],
   notificationsIsLoading: true,
   isHidden: false,
   templatesIsVisible: false,
@@ -195,6 +196,7 @@ const toolbarIsVisible = computed(() => {
   if (userCanOnlyComment.value) { return }
   return userCanEditSpace.value
 })
+const isSpaceNote = computed(() => Boolean(spaceStore.note))
 
 // new stuff
 
@@ -205,6 +207,7 @@ const shouldShowChangelogIsUpdated = computed(() => {
 
 // current space
 
+const currentSpace = computed(() => spaceStore)
 const currentSpaceUrl = computed(() => spaceStore.getSpaceUrl)
 const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
 const currentSpaceName = computed(() => {
@@ -236,6 +239,7 @@ const currentSpaceIsTemplate = computed(() => {
   return templateSpaceIds.includes(spaceStore.id)
 })
 const currentSpaceIsInbox = computed(() => spaceStore.name === 'Inbox')
+const currentSpaceIsPrivateOrOpen = computed(() => spaceStore.getSpaceIsPrivate || spaceStore.getSpaceIsOpen)
 const shouldShowInExplore = computed(() => {
   if (spaceStore.getSpaceIsPrivate) { return false }
   return spaceStore.showInExplore
@@ -307,8 +311,7 @@ const clearSearchAndFilters = () => {
 // notifications
 
 const notificationsUnreadCount = computed(() => {
-  if (!state.notifications) { return 0 }
-  const unread = state.notifications.filter(notification => !notification.isRead)
+  const unread = globalStore.userNotifications.filter(notification => !notification.isRead)
   return unread.length || 0
 })
 
@@ -554,11 +557,11 @@ const updatePositionInVisualViewport = () => {
 const updateNotifications = async () => {
   state.notificationsIsLoading = true
   const notifications = await apiStore.getNotifications() || []
-  state.notifications = sortBy(notifications, 'isRead')
+  globalStore.userNotifications = sortBy(notifications, 'isRead')
   state.notificationsIsLoading = false
 }
 const markAllAsRead = () => {
-  const notifications = state.notifications.filter(notification => !notification.isRead)
+  const notifications = globalStore.userNotifications.filter(notification => !notification.isRead)
   const notificationIds = notifications.map(notification => notification.id)
   updateNotificationsIsRead(notificationIds)
 }
@@ -567,7 +570,7 @@ const markAsRead = (notificationId) => {
 }
 const updateNotificationsIsRead = async (notificationIds) => {
   if (!notificationIds.length) { return }
-  state.notifications = state.notifications.map(notification => {
+  globalStore.userNotifications = globalStore.userNotifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
       notification.isRead = true
     }
@@ -579,7 +582,7 @@ const updateNotificationsIsRead = async (notificationIds) => {
   })
 }
 const clearNotifications = () => {
-  state.notifications = []
+  globalStore.userNotifications = []
 }
 </script>
 
@@ -591,10 +594,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
-        GroupLabel(:group="spaceGroup")
-        span {{currentSpaceName}}{{' '}}
-        img.icon.visit(src="@/assets/visit.svg")
+        span {{currentSpaceName}}
       .label-badge-row.row
+        .label-badge.group-label-badge(v-if="spaceGroup")
+          GroupLabel(:group="spaceGroup")
         .label-badge
           span(:class="{'invisible': state.readOnlyJiggle}")
             span Read Only
@@ -664,7 +667,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           Share(:visible="state.shareIsVisible")
-          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
+          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="globalStore.userNotifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
     .row
@@ -682,14 +685,16 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .space-name-wrap(:class="{'space-is-hidden': currentSpaceIsHidden}")
-                  GroupLabel(:group="spaceGroup")
                   img.icon.inbox-icon(v-if="currentSpaceIsInbox" src="@/assets/inbox.svg")
-
-                  //- span(v-if="currentSpaceIsTemplate")
-                  //-   img.icon.templates(src="@/assets/templates.svg")
-                  //- span
+                  //- name
                   span.space-name {{currentSpaceName}}
-                  //- PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+                  .space-name-icons
+                    //- template
+                    span(v-if="currentSpaceIsTemplate")
+                      img.icon.templates(src="@/assets/templates.svg")
+                    //- private
+                    template(v-if="currentSpaceIsPrivateOrOpen")
+                      PrivacyIcon(:privacy="currentSpace.privacy")
 
                 //- img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
                 //- span as
@@ -709,6 +714,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 //- .label-badge
                 //-   //- (v-if="currentSpaceIsTemplate")
                 //-   img.icon.templates(src="@/assets/templates.svg")
+
+                .label-badge.group-label-badge(v-if="spaceGroup")
+                  GroupLabel(:group="spaceGroup")
 
                 //- read only badge
                 .label-badge(v-if="!userCanEditSpace")
@@ -760,6 +768,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .button-wrap
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
             img.icon.sidebar(src="@/assets/sidebar.svg")
+          .label-badge-row.sidebar-label-badge-row
+            //- note
+            .label-badge(v-if="isSpaceNote")
+              img.icon.note(src="@/assets/note.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
   Toolbar(:visible="toolbarIsVisible")
@@ -832,7 +844,7 @@ header
       @media(max-width 550px)
         display none
     .label-badge
-      transform translateY(10px)
+      transform translateY(3px)
     &:active,
     &.active
       .down-arrow
@@ -860,6 +872,11 @@ header
     > .search
       vertical-align 0
 
+  .space-name-icons
+    margin-left 5px
+    span + img
+      margin-left 5px
+
   .space-details-button
     display flex !important
   .space-name-wrap
@@ -870,6 +887,8 @@ header
     white-space nowrap
     overflow hidden
     text-overflow ellipsis
+    .icon
+      margin-left 6px
 
   // should not bubble down into dialogs
   .space-details-row,
@@ -919,8 +938,6 @@ header
     .icon.explore
       width 16px
       vertical-align -2px
-    .icon.templates
-      width 11px
     .label-badge
       width max-content
       pointer-events none
@@ -934,7 +951,22 @@ header
         background-color var(--success-background)
       &.secondary
         background-color var(--secondary-background)
-
+    .group-label-badge
+      background-color transparent
+      padding 0
+      .group-badge
+        padding 0 5px
+        font-size 12px
+        vertical-align 0
+      .icon.group
+        height 9px
+      .emoji
+        font-size 11px
+        vertical-align 0px
+        margin-right 3px
+  .sidebar-label-badge-row
+    left initial
+    right 2px
   .invisible
     visibility hidden
 

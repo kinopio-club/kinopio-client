@@ -22,10 +22,12 @@
   "tags": [],
   "boxes": [],
   "lines": [],  
+  "lists": [],
   "visits": 0,
   "isRemoved": false,
   "groupId": null,
   "group": null,
   "drawingStrokes": [],
-  "drawingImage": ""
+  "drawingImage": "",
+  "note": ""
 }

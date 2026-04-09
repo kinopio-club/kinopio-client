@@ -175,13 +175,15 @@ dialog.email-invites(v-if="visible" :open="visible" @click.left.stop="hideUserDe
           button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
         template(v-if="currentUserIsUpgraded")
           //- from
-          p.field-title From
-          UserLabelInline(:user="currentUser" :isClickable="true")
-          span.badge.danger.add-your-name(v-if="!currentUser.name")
-            span Add Your Name
+          .row
+            span.field-title From:
+            UserLabelInline(:user="currentUser" :isClickable="true")
+            span.badge.danger.add-your-name(v-if="!currentUser.name")
+              span Add Your Name
           //- to
           .row.title-row
-            p.field-title To
+            p
+              span.field-title  To:
           Textarea(
             @updateName="updateEmailsWithMatches"
             :defaultValue="state.defaultEmailsValue"
@@ -240,6 +242,7 @@ dialog.email-invites
     margin-left 6px !important
   .field-title
     margin-bottom 2px
+    margin-right 5px
   .button-row
     margin-top 10px
 </style>

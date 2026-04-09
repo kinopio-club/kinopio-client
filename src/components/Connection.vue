@@ -25,6 +25,7 @@ let observer
 
 const connectionElement = ref(null)
 const connectionPathElement = ref(null)
+const observerTarget = ref(null)
 
 onMounted(() => {
   initViewportObserver()
@@ -36,14 +37,14 @@ onMounted(() => {
         const selected = selectedIds.includes(props.connection.id) || globalStore.connectionDetailsIsVisibleForConnectionId === props.connection.id
         if (!selected) {
           cancelAnimation()
-        } else if (name === 'triggerConnectionDetailsIsVisible') {
-          const connectionId = args[0]
-          if (connectionId !== props.connection.id) { return }
-          const isFromStore = true
-          showConnectionDetails(args[0].event, isFromStore)
-        } else if (name === 'closeAllDialogs') {
-          updatePathWhileDragging(null)
         }
+      } else if (name === 'triggerConnectionDetailsIsVisible') {
+        const { id, event } = args[0]
+        if (id !== props.connection.id) { return }
+        const isFromStore = true
+        showConnectionDetails(event, isFromStore)
+      } else if (name === 'closeAllDialogs') {
+        updatePathWhileDragging(null)
       }
     }
   )
@@ -147,11 +148,9 @@ const typeName = computed(() => {
 // items
 
 const items = computed(() => {
-  const cards = cardStore.getAllCards
-  const boxes = boxStore.getAllBoxes
-  const items = cards.concat(boxes)
-  const startItem = items.find(item => item.id === props.connection.startItemId)
-  const endItem = items.find(item => item.id === props.connection.endItemId)
+  const { startItemId, endItemId } = props.connection
+  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
+  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
   return { startItem, endItem }
 })
 const isConnectedToCommentCard = computed(() => {
@@ -444,7 +443,7 @@ watch(() => isActive.value, (value, prevValue) => {
   }, 10)
 })
 const isHovered = computed(() => {
-  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) { return }
   return props.connection.id === globalStore.currentUserIsHoveringOverConnectionId ||
     props.connection.id === globalStore.currentUserIsDraggingConnectionIdLabel ||
     isHoveredOverConnectedItem.value
@@ -477,7 +476,7 @@ const initViewportObserver = async () => {
         }
       })
     }
-    const target = connectionElement.value
+    const target = observerTarget.value
     if (!target) { return }
     observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
@@ -486,14 +485,20 @@ const initViewportObserver = async () => {
   }
 }
 const removeViewportObserver = () => {
-  const target = connectionElement.value
+  const target = observerTarget.value
   if (!observer) { return }
   observer.unobserve(target)
 }
 </script>
 
 <template lang="pug">
+div.connection-observer-target(
+  ref="observerTarget"
+  :style="connectionStyles"
+  aria-hidden="true"
+)
 svg.connection(
+  v-if="state.isVisibleInViewport"
   :style="connectionStyles"
   :data-id="connection.id"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
@@ -559,6 +564,13 @@ svg.connection(
 </template>
 
 <style lang="stylus">
+.connection-observer-target
+  position absolute
+  pointer-events none
+  visibility hidden
+  min-width 5px
+  min-height 5px
+
 svg.connection
   position absolute
   overflow visible

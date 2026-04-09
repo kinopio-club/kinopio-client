@@ -4,24 +4,21 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useApiStore } from '@/stores/useApiStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
-import UserDeveloperInfo from '@/components/dialogs/UserDeveloperInfo.vue'
+import UserAPIInfo from '@/components/dialogs/UserAPIInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
+import DeleteAllConfirmation from '@/components/dialogs/DeleteAllConfirmation.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
-import Loader from '@/components/Loader.vue'
-import cache from '@/cache.js'
 import User from '@/components/User.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const apiStore = useApiStore()
 
 let unsubscribes
 
@@ -45,8 +42,6 @@ const props = defineProps({
   visible: Boolean
 })
 
-const isSignedIn = computed(() => userStore.getUserIsSignedIn)
-const isUpgraded = computed(() => userStore.isUpgraded)
 const currentUser = computed(() => userStore.getUserAllState)
 const isModerator = computed(() => userStore.isModerator)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -55,11 +50,8 @@ const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
   deleteAllConfirmationVisible: false,
-  userDeveloperInfoIsVisible: false,
+  userAPIInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
-  loading: {
-    deleteUserPermanent: false
-  },
   notificationSettingsIsVisible: false,
   themeSettingsIsVisible: false
 })
@@ -71,65 +63,53 @@ const closeDialogs = () => {
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
-  state.userDeveloperInfoIsVisible = false
+  state.userAPIInfoIsVisible = false
   state.moderatorActionsSettingsIsVisible = false
+  state.deleteAllConfirmationVisible = false
 }
 
 // child dialog state
 
-const closeConfirmations = () => {
-  state.deleteAllConfirmationVisible = false
-}
 const toggleDeleteAllConfirmationVisible = () => {
   state.deleteAllConfirmationVisible = !state.deleteAllConfirmationVisible
 }
 const toggleUserBillingSettingsIsVisible = () => {
   const isVisible = state.userBillingSettingsIsVisible
   closeDialogs()
-
   state.userBillingSettingsIsVisible = !isVisible
 }
 const toggleUserAccountSettingsIsVisible = () => {
   const isVisible = state.userAccountSettingsIsVisible
   closeDialogs()
-  closeConfirmations()
   state.userAccountSettingsIsVisible = !isVisible
 }
 const toggleNotificationSettingsIsVisible = () => {
   const isVisible = state.notificationSettingsIsVisible
   closeDialogs()
-  closeConfirmations()
   state.notificationSettingsIsVisible = !isVisible
 }
 const toggleThemeSettingsIsVisible = () => {
   const isVisible = state.themeSettingsIsVisible
   closeDialogs()
-  closeConfirmations()
   state.themeSettingsIsVisible = !isVisible
 }
-const toggleUserDeveloperInfoIsVisible = () => {
-  const isVisible = state.userDeveloperInfoIsVisible
+const toggleUserAPIInfoIsVisible = () => {
+  const isVisible = state.userAPIInfoIsVisible
   closeDialogs()
-  closeConfirmations()
-  state.userDeveloperInfoIsVisible = !isVisible
+  state.userAPIInfoIsVisible = !isVisible
 }
 const toggleModeratorActionsSettingsIsVisible = () => {
   const isVisible = state.moderatorActionsSettingsIsVisible
   closeDialogs()
-  closeConfirmations()
   state.moderatorActionsSettingsIsVisible = !isVisible
 }
 
-// delete user
+// debug mode
 
-const deleteUserPermanent = async () => {
-  state.loading.deleteUserPermanent = true
-  await apiStore.deleteUserPermanent()
-  await cache.removeAll()
-  // clear history wipe state from vue-router
-  window.history.replaceState({}, 'Kinopio', '/')
-  location.reload()
-  state.loading.deleteUserPermanent = false
+const isDebugMode = computed(() => { return userStore.isDebugMode })
+const toggleIsDebugMode = () => {
+  const value = !isDebugMode.value
+  userStore.updateUser({ isDebugMode: value })
 }
 </script>
 
@@ -166,57 +146,37 @@ const deleteUserPermanent = async () => {
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
         UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+  section
     .row
-      //- Developer Info
+      //- API/Developer Info
       .button-wrap
-        button(@click.left.stop="toggleUserDeveloperInfoIsVisible" :class="{active: state.userDeveloperInfoIsVisible}")
+        button(@click.left.stop="toggleUserAPIInfoIsVisible" :class="{active: state.userAPIInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
-          span Developer
-        UserDeveloperInfo(:visible="state.userDeveloperInfoIsVisible")
-      //- Moderator Actions
-      .button-wrap(v-if="isModerator")
+          span API
+        UserAPIInfo(:visible="state.userAPIInfoIsVisible")
+      .button-wrap
+        label(:class="{active: isDebugMode}" @click.left.prevent="toggleIsDebugMode" @keydown.stop.enter="toggleIsDebugMode")
+          input(type="checkbox" v-model="isDebugMode")
+          span Debug Mode
+    //- Moderator Actions
+    .row(v-if="isModerator")
+      .button-wrap
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
         ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
   //- Delete Account
   section.delete-account
     .row
-      button.danger(v-if="!state.deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
-        img.icon(src="@/assets/remove.svg")
-        span Delete Account
-      span(v-if="state.deleteAllConfirmationVisible")
-        p.badge.danger
-          span(v-if="isSignedIn") Permanently Delete your account and all your spaces from this computer and Kinopio's servers?
-          span(v-else) all your spaces and user data from this computer?
-          br
-          br
-          span There is no going back. Please be certain.
-        section.subsection(v-if="isUpgraded")
-          span Or cancel paid subscription
-          .row.billing-cancel
-            button(@click.left.stop="toggleUserBillingSettingsIsVisible")
-              span Billing
-
-        .segmented-buttons
-          button(@click.left="toggleDeleteAllConfirmationVisible")
-            img.icon.cancel(src="@/assets/add.svg")
-            span Cancel
-          button.danger(@click.left="deleteUserPermanent")
-            img.icon(src="@/assets/remove.svg")
-            span Delete All
-            Loader(:visible="state.loading.deleteUserPermanent")
+      .button-wrap
+        button.danger(@click.left.stop="toggleDeleteAllConfirmationVisible" :class="{ active: state.deleteAllConfirmationVisible }")
+          img.icon(src="@/assets/remove.svg")
+          span Delete Account
+        DeleteAllConfirmation(:visible="state.deleteAllConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
 </template>
 
 <style lang="stylus">
 .user-settings-general
-  .billing-cancel
-    margin-top 2px
-    padding-bottom 2px
-  .delete-account
-    .subsection
-      margin-top 10px
-      margin-bottom 10px
-  > section:not(.subsection)
+  section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
 </style>

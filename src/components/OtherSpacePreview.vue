@@ -59,6 +59,13 @@ const otherSpaceIsPrivate = computed(() => {
 
 // preview image
 
+const previewImage = computed(() => {
+  let url = props.otherSpace?.previewImage
+  if (url) {
+    url = url + `?date=${utils.unixTime()}` // cache bust
+  }
+  return url
+})
 const previewImageIsVisible = computed(() => {
   if (!props.otherSpace) { return }
   return props.card?.shouldShowOtherSpacePreviewImage && props.otherSpace?.previewImage
@@ -96,7 +103,7 @@ const previewImageHover = (value) => {
           button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
             span Text
     a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)")
-      img.preview-image.clickable-item(:src="otherSpace?.previewImage")
+      img.preview-image.clickable-item(:src="previewImage")
     div
       template(v-if="!isLoadingOtherItems || !otherSpace")
         a(:href="url" :class="{ hover: state.previewImageIsHover }")

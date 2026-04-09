@@ -84,6 +84,7 @@ const remoteLineDraggingColor = computed(() => {
 
 // styles
 
+const isOutdented = computed(() => props.line.y < consts.minLineYOutdent)
 const color = computed(() => {
   let color = props.line.color
   const remoteColor = remoteLineDetailsVisibleColor.value || remoteSelectedColor.value || remoteLineDraggingColor.value
@@ -128,7 +129,7 @@ const selectAllBelow = () => {
   globalStore.triggerSelectAllItemsBelowCursor(position)
 }
 
-// card focus
+// focus
 
 const isFocusing = computed(() => props.line.id === globalStore.focusOnLineId)
 const clearFocus = () => {
@@ -163,7 +164,7 @@ const startLineInfoInteraction = (event) => {
     lineId: props.line.id,
     userId: userStore.id
   }
-  broadcastStore.update({ updates, action: 'addtoRemoteLinesDragging' })
+  broadcastStore.update({ updates, action: 'addToRemoteLinesDragging' })
 }
 
 // line details
@@ -172,11 +173,6 @@ const endLineInfoInteraction = (event) => {
   if (isMultiTouch) { return }
   globalStore.clearMultipleSelected()
   broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
-  // read only
-  if (!userIsSpaceMember.value) {
-    globalStore.triggerReadOnlyJiggle()
-    return
-  }
   // touch button fix
   const isButton = event.target.closest('button')
   if (isButton) {
@@ -296,6 +292,14 @@ const lockingAnimationFrame = (timestamp) => {
   }
 }
 
+// jump to
+
+const nextLine = computed(() => lineStore.getNextLine(props.line.y))
+const prevLine = computed(() => lineStore.getPrevLine(props.line.y))
+const focusLine = (line) => {
+  globalStore.updateFocusOnLineId(line.id)
+  globalStore.clearAllSelected()
+}
 </script>
 
 <template lang="pug">
@@ -303,6 +307,7 @@ const lockingAnimationFrame = (timestamp) => {
 .line-info.badge.button-badge(
     :data-line-id="props.line.id"
     :style="infoStyles"
+    :class="{ 'is-outdented': isOutdented }"
     @mousedown.left="startLineInfoInteraction"
     @mouseup.left="endLineInfoInteraction"
     @keyup.stop.enter="endLineInfoInteraction"
@@ -311,8 +316,19 @@ const lockingAnimationFrame = (timestamp) => {
 
     @touchend="endLineInfoInteractionTouch"
   )
-  button.small-button.translucent-button(v-if="userIsSpaceMember" @click.stop="selectAllBelow")
-    img.icon(src="@/assets/brush-y.svg")
+  //- select all below
+  .button-wrap
+    button.small-button.translucent-button(v-if="userIsSpaceMember" @click.stop="selectAllBelow")
+      img.icon(src="@/assets/brush-y.svg")
+  //- jump to
+  .button-wrap.jump-to-button-wrap
+    .segmented-buttons
+      button.small-button.translucent-button(@click.left="focusLine(prevLine)" :disabled="!prevLine" title="Jump to Previous Line")
+        img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
+      button.small-button.translucent-button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
+        img.icon.down-arrow(src="@/assets/down-arrow.svg")
+
+  //- name
   span.name(:class="colorClasses") {{props.line.name}}
   .focusing-frame(v-if="isFocusing || state.isLocking" :style="{backgroundColor: props.line.color}" @animationend="clearFocus")
 </template>
@@ -334,6 +350,12 @@ const lockingAnimationFrame = (timestamp) => {
   border-top-left-radius 0
   border-bottom-left-radius 0
   left 0
+  scroll-margin-top 175px // consts.minLineYOutdent
+  scroll-margin-bottom 175px // consts.minLineYOutdent
+  &.is-outdented
+    left 50px
+    transition left 0.1s
+    border-radius var(--entity-radius)
   &.button-badge
     box-shadow none
   .name
@@ -341,7 +363,11 @@ const lockingAnimationFrame = (timestamp) => {
       color var(--primary-on-light-background)
     &.is-background-dark
       color var(--primary-on-dark-background)
-  button
-    margin-right 5px
-
+  .jump-to-button-wrap
+    margin-right 6px
+    .up-arrow
+      transform rotate(180deg)
+    .down-arrow
+      padding 0
+      vertical-align 2px
 </style>

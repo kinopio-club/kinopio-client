@@ -21,7 +21,7 @@ export default {
       },
       {
         name: 'private',
-        friendlyName: 'Private',
+        friendlyName: 'Private Space',
         description: 'Only collaborators can view and edit.',
         descriptionGroup: 'Only group members and collaborators can view and edit.',
         color: 'danger',

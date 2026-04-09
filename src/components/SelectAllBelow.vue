@@ -5,13 +5,20 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const lineStore = useLineStore()
+const boxStore = useBoxStore()
+const cardStore = useCardStore()
+const listStore = useListStore()
 
 onMounted(() => {
   window.addEventListener('mousedown', updateIsMetaKey)
@@ -43,6 +50,7 @@ const isVisible = computed(() => {
   if (globalStore.isSelectingX) { return }
   if (globalStore.currentUserIsPanning || globalStore.currentUserIsPanningReady) { return }
   if (globalStore.lineDetailsIsVisibleForLineId) { return }
+  if (globalStore.listDetailsIsVisibleForListId) { return }
   return state.isVisible
 })
 
@@ -62,35 +70,88 @@ const updateIsMetaKey = (event) => {
 
 // position
 
-const handleMouseMove = (event) => {
-  if (!event.target.closest) { return }
-  if (!canEditSpace.value) { return }
-  if (globalStore.currentUserIsPainting) { return }
-  if (globalStore.currentUserIsDraggingCard) { return }
-  if (globalStore.currentUserIsDraggingBox) { return }
-  if (globalStore.isEmbedMode) { return }
-  updateIsMetaKey(event)
-  const position = utils.cursorPositionInViewport(event)
-  const pagePosition = utils.cursorPositionInSpace(event)
-  // check if near line
-  let isLine
+const isNearLine = (position) => {
   const lines = lineStore.getAllLines
-  lines.forEach(line => {
-    const isNearLine = utils.isBetween({
-      value: pagePosition.y,
+  const line = lines.find(line => {
+    return utils.isBetween({
+      value: position.y,
       min: line.y - 12,
       max: line.y + 12
     })
-    if (isNearLine) {
-      isLine = true
-    }
   })
-  if (isLine) {
+  if (line) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearBoxInfo = (position) => {
+  const boxes = boxStore.getBoxesNearLeftEdge
+  const box = boxes.find(box => {
+    const rect = utils.boxInfoPositionFromId(box.id)
+    if (!rect) { return }
+    return utils.isBetween({
+      value: position.y,
+      min: box.y,
+      max: box.y + rect.infoHeight
+    })
+  })
+  if (box) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearListInfo = (position) => {
+  const lists = listStore.getListsNearLeftEdge
+  const list = lists.find(list => {
+    const rect = utils.listInfoRectFromId(list.id)
+    if (!rect) { return }
+    return utils.isBetween({
+      value: position.y,
+      min: list.y,
+      max: list.y + rect.height
+    })
+  })
+  if (list) {
+    state.isVisible = false
+    return true
+  }
+}
+const isNearCard = (position) => {
+  const cards = cardStore.getCardsNearLeftEdge
+  const card = cards.find(card => {
+    return utils.isBetween({
+      value: position.y,
+      min: card.y,
+      max: card.y + card.height
+    })
+  })
+  if (card) {
+    state.isVisible = false
+    return true
+  }
+}
+const handleMouseMove = (event) => {
+  if (!event.target.closest) { return }
+  if (!canEditSpace.value) { return }
+  if (globalStore.currentUserIsPaintSelecting) { return }
+  if (globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingList) { return }
+  if (globalStore.isEmbedMode) { return }
+  updateIsMetaKey(event)
+  const position = utils.cursorPositionInViewport(event)
+  const isInThreshold = position.x <= consts.edgeThreshold
+  if (!isInThreshold) {
     state.isVisible = false
     return
   }
+  // check if over items
+  const pagePosition = utils.cursorPositionInSpace(event)
+  if (isNearLine(pagePosition)) { return }
+  if (isNearBoxInfo(pagePosition)) { return }
+  if (isNearCard(pagePosition)) { return }
+  if (isNearListInfo(pagePosition)) { return }
   // check if between controls
-  const edgeThreshold = 30
   const toolbar = document.querySelector('#toolbar')?.getBoundingClientRect()
   if (!toolbar) { return }
   let footer = document.querySelector('.footer-wrap footer')
@@ -100,14 +161,13 @@ const handleMouseMove = (event) => {
     footer = 0
   }
   const viewport = utils.visualViewport()
-  const isInThreshold = position.x <= edgeThreshold
   const isBetweenControls = utils.isBetween({
     value: position.y,
     min: toolbar.y + toolbar.height,
     max: viewport.height - footer
   })
   const isInPosition = isInThreshold && isBetweenControls
-  const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('.card-wrap'))
+  const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('.card-wrap') || event.target.closest('dialog'))
   const shouldShow = isInPosition && !isCancelledByHover
   if (shouldShow || isSelectingY.value) {
     state.positionY = position.y

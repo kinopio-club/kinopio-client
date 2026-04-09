@@ -1,9 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useUserStore } from '@/stores/useUserStore'
+
 import consts from '@/consts.js'
 
-const isHidden = false
+const userStore = useUserStore()
 
 const props = defineProps({
   item: Object,
@@ -13,11 +15,8 @@ const props = defineProps({
   }
 })
 
-const visible = computed(() => {
-  if (isHidden) { return }
-  return consts.isDevelopment() && consts.itemDetailsDebugIsVisible
-})
-
+const visible = computed(() => userStore.isDebugMode)
+const isDevelopment = computed(() => consts.isDevelopment())
 </script>
 
 <template lang="pug">
@@ -27,9 +26,10 @@ const visible = computed(() => {
       tr
         td id
         td {{ props.item.id }}
-      tr(v-for="key in props.keys")
-        td {{ key }}
-        td {{ props.item[key] }}
+      template(v-if="isDevelopment")
+        tr(v-for="key in props.keys")
+          td {{ key }}
+          td {{ props.item[key] }}
 </template>
 
 <style lang="stylus">

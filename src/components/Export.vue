@@ -59,8 +59,9 @@ const copyText = async (event) => {
   }
 }
 const downloadLocalJson = () => {
-  const space = utils.clone(currentSpace.value)
-  delete space.clients
+  globalStore.triggerUpdateDrawingStrokes()
+  let space = utils.clone(currentSpace.value)
+  space = utils.deletePrivateSpaceMeta(space)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(space))
   const name = fileName()
   const downloadAnchor = document.getElementById('export-downlaod-anchor')
@@ -122,8 +123,8 @@ const pdf = async () => {
 // https://jsoncanvas.org/spec/1.0/
 
 const downloadLocalCanvas = () => {
-  const space = utils.clone(currentSpace.value)
-  delete space.clients
+  let space = utils.clone(currentSpace.value)
+  space = utils.deletePrivateSpaceMeta(space)
   const canvas = convertToCanvas(space)
   console.info('🧚 canvas to download', canvas)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))
@@ -216,33 +217,37 @@ template(v-if="visible")
           img.icon.file(src="@/assets/file.svg")
           span PDF
       .button-wrap
-        button(@click.left="downloadLocalCanvas")
-          img.icon.json-canvas(src="@/assets/json-canvas.svg")
-          span Canvas
-    p(v-if="state.pdfIsVisible")
-      span.badge.success PDF Sent to your Email
-    .row
-      .button-wrap
         button(@click.left="downloadLocalJson")
           img.icon.file(src="@/assets/file.svg")
-          span Kinopio JSON
+          span Space JSON
+    .row(v-if="state.pdfIsVisible")
+      span.badge.success PDF Sent to your Email
 
-  section.export
-    // anon user
-    template(v-if="!currentUserIsSignedIn")
-      p
-        span Sign Up or In for more export options
-      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    // signed in user
-    template(v-if="currentUserIsSignedIn")
-      button(@click.left="downloadAllSpacesRemote" :class="{ active: state.isLoadingAllSpaces }")
-        span Download All Spaces Backup (JSON and TXT)
-        Loader(:visible="state.isLoadingAllSpaces")
-    a#export-downlaod-anchor.hidden
-    .info-container(v-if="state.isLoadingAllSpaces")
-      .badge.info This will take a minute or so…
-    .info-container(v-if="state.unknownServerError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    details
+      summary Other Formats
+      section.subsection
+        .row
+          .button-wrap
+            button(@click.left="downloadLocalCanvas")
+              img.icon.json-canvas(src="@/assets/json-canvas.svg")
+              span Canvas
+
+        //- download all spaces
+        // anon user
+        template(v-if="!currentUserIsSignedIn")
+          p
+            span Sign Up or In for more export options
+          button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+        // signed in user
+        template(v-if="currentUserIsSignedIn")
+          button(@click.left="downloadAllSpacesRemote" :class="{ active: state.isLoadingAllSpaces }")
+            span Download All Spaces Backup (JSON and TXT)
+            Loader(:visible="state.isLoadingAllSpaces")
+        a#export-downlaod-anchor.hidden
+        .info-container(v-if="state.isLoadingAllSpaces")
+          .badge.info This will take a minute or so…
+        .info-container(v-if="state.unknownServerError")
+          .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">
@@ -265,4 +270,6 @@ section.export
     display none
   .info-container
     margin-top 10px
+  details
+    margin-top -4px
 </style>

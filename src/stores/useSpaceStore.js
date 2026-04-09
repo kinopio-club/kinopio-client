@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -49,12 +50,17 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+      const lineStore = useLineStore()
+      const listStore = useListStore()
       const space = this.getSpaceAllState
       if (!space) { return }
       space.cards = cardStore.getAllCards
       space.connections = connectionStore.getAllConnections
       space.connectionTypes = connectionStore.getAllConnectionTypes
       space.boxes = boxStore.getAllBoxes
+      space.lines = lineStore.getAllLines
+      space.lists = listStore.getAllLists
+      space.drawingStrokes = this.drawingStrokes || []
       return space
     },
     getSpaceIsPrivate () {
@@ -69,7 +75,7 @@ export const useSpaceStore = defineStore('space', {
       return `${domain}/${spaceUrl}`
     },
     getSpaceCreator () {
-      return this.getSpaceMemberById(this.userId) || this.users[0]
+      return this.getSpaceCollaboratorById(this.userId) || this.users[0]
     },
     getSpaceCreatorIsUpgraded () {
       const creatorUser = this.getSpaceCreator
@@ -88,9 +94,8 @@ export const useSpaceStore = defineStore('space', {
     getSpaceIsRemote () {
       const userStore = useUserStore()
       const isSpaceMember = userStore.getUserIsSpaceMember
-      const isOtherSpace = !isSpaceMember
       const isSignedIn = userStore.getUserIsSignedIn
-      return isOtherSpace || isSignedIn
+      return !isSpaceMember || isSignedIn
     },
     getSpaceAllUsers () {
       const userStore = useUserStore()
@@ -127,35 +132,55 @@ export const useSpaceStore = defineStore('space', {
       return this.name === 'Hello Kinopio'
     },
     getSpaceSelectedItems () {
+      const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const globalStore = useGlobalStore()
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      // card
       const cards = globalStore.multipleCardsSelectedIds.map(cardId => {
         return cardStore.getCard(cardId)
       })
+      // box
       const boxes = globalStore.multipleBoxesSelectedIds.map(boxId => {
         return boxStore.getBox(boxId)
       })
-      const connections = connectionStore.getAllConnections.filter(connection => {
+      // connection
+      let connections = connectionStore.getAllConnections.filter(connection => {
         const selectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
         const isStartCardMatch = selectedIds.includes(connection.startItemId)
         const isEndCardMatch = selectedIds.includes(connection.endItemId)
         return isStartCardMatch && isEndCardMatch
       })
+      const selectedConnections = globalStore.multipleConnectionsSelectedIds.map(connectionId => {
+        return connectionStore.getConnection(connectionId)
+      })
+      connections = connections.concat(selectedConnections)
+      connections = uniqBy(connections, 'id')
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = connectionTypeIds.map(id => connectionStore.getConnectionType(id))
-      return { cards, connectionTypes, connections, boxes }
+      // line
+      const lines = globalStore.multipleLinesSelectedIds.map(lineId => {
+        return lineStore.getLine(lineId)
+      })
+      // list
+      const lists = globalStore.multipleListsSelectedIds.map(listId => {
+        return listStore.getList(listId)
+      })
+      return { cards, connectionTypes, connections, boxes, lines, lists }
     },
     getSpaceItemColors () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
-      const cardColors = cardStore.getCardColors
-      const boxColors = boxStore.getboxColors
-      const lineColors = lineStore.getLineColors
-      const colors = cardColors.concat(boxColors).concat(lineColors)
-      return uniq(colors)
+      const listStore = useListStore()
+      return {
+        card: cardStore.getCardColors,
+        box: boxStore.getBoxColors,
+        line: lineStore.getLineColors,
+        list: listStore.getListColors
+      }
     },
     getSpaceTags () {
       return uniqBy(this.tags, 'name') || []
@@ -239,9 +264,17 @@ export const useSpaceStore = defineStore('space', {
 
     // user getters
 
-    getSpaceMemberById (userId) {
+    getSpaceCollaboratorById (userId) {
+      const groupStore = useGroupStore()
       const members = this.getSpaceMembers
-      return members.find(member => member.id === userId)
+      // in space
+      const member = members.find(member => member.id === userId)
+      if (member) {
+        return member
+      }
+      // in group
+      const groupUser = groupStore.getGroupUser({ userId })
+      return groupUser
     },
     getSpaceUserById (userId) {
       const globalStore = useGlobalStore()
@@ -251,19 +284,16 @@ export const useSpaceStore = defineStore('space', {
       if (userStore.id === userId) {
         return userStore
       }
-      // collaborators
-      const user = this.getSpaceMemberById(userId)
+      // space or group members
+      const user = this.getSpaceCollaboratorById(userId)
       if (user?.id === userId) {
         return user
       }
-      // commenters
+      // commenters and readonly
       const otherUser = globalStore.getOtherUserById(userId)
       if (otherUser) {
         return otherUser
       }
-      // group user
-      const groupUser = groupStore.getGroupUser({ userId })
-      return groupUser
     },
     getSpaceReadOnlyKey (space) {
       const globalStore = useGlobalStore()
@@ -326,7 +356,6 @@ export const useSpaceStore = defineStore('space', {
     async loadPrevSpaceInSession () {
       const globalStore = useGlobalStore()
       const prevSpaceIdInSession = globalStore.prevSpaceIdInSession
-      const prevSpacePosition = globalStore.prevSpaceIdInSessionPagePosition
       if (!prevSpaceIdInSession) { return }
       let space = await cache.space(prevSpaceIdInSession)
       if (space.id) {
@@ -335,11 +364,6 @@ export const useSpaceStore = defineStore('space', {
         space = { id: prevSpaceIdInSession }
         await this.changeSpace(space)
       }
-      window.scroll({
-        left: prevSpacePosition.x,
-        top: prevSpacePosition.y,
-        behavior: 'instant'
-      })
     },
     restoreSpace (space) {
       const globalStore = useGlobalStore()
@@ -347,6 +371,7 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       space = utils.removeRemovedCardsFromSpace(space)
       // initialize items
       cardStore.initializeCards(space?.cards)
@@ -354,6 +379,7 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
       lineStore.initializeLines(space?.lines)
+      listStore.initializeLists(space?.lists)
       // initialize space
       this.$state = space
       console.log('🍍 restoreSpace', this.getSpaceAllState)
@@ -375,7 +401,7 @@ export const useSpaceStore = defineStore('space', {
         } else if (collaboratorKey) {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await apiStore.getSpaceAnonymously(space)
-          cache.saveInvitedSpace(remoteSpace)
+          await cache.saveInvitedSpace(remoteSpace)
           globalStore.clearSpaceCollaboratorKeys()
         } else if (this.getSpaceIsRemote) {
           remoteSpace = await apiStore.getSpaceAnonymously(space)
@@ -400,17 +426,19 @@ export const useSpaceStore = defineStore('space', {
           globalStore.updateNotifySpaceNotFound(true)
           return
         }
+        // space not found
         if (error.status === 404) {
           globalStore.updateNotifySpaceNotFound(true)
-          this.loadLastSpace(space) //
+          this.loadLastSpace(space)
         }
+        // space unauthorized
         if (error.status === 401) {
           globalStore.updateNotifySpaceNotFound(true)
-          this.removeLocalSpaceIfUserIsRemoved(space) //
-          this.loadLastSpace(space) //
+          this.loadLastSpace(space)
           cache.removeInvitedSpace(space)
           userStore.updateUserFavoriteSpace(space, false)
         }
+        // server error
         if (error.status === 500) {
           globalStore.updateNotifyConnectionError(true)
         }
@@ -423,12 +451,29 @@ export const useSpaceStore = defineStore('space', {
       if (remoteSpace.id !== this.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
+    async restorePrevPagePosition (space) {
+      const globalStore = useGlobalStore()
+      const position = globalStore.prevSpacePagePosition[space?.id]
+      if (position) {
+        globalStore.pageHeight = position.pageHeight
+        globalStore.pageWidth = position.pageWidth
+        await nextTick()
+        window.scroll({
+          left: position.x,
+          top: position.y,
+          behavior: 'instant'
+        })
+      } else {
+        window.scrollTo(0, 0)
+      }
+    },
     restoreSpaceLocal (space) {
       const historyStore = useHistoryStore()
       const emptySpace = utils.emptySpace(space.id)
       this.restoreSpace(emptySpace)
       historyStore.reset()
       this.restoreSpace(space)
+      this.restorePrevPagePosition(space)
       console.info('🎑 local space', space)
       return space
     },
@@ -439,6 +484,7 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const connectionStore = useConnectionStore()
       const lineStore = useLineStore()
+      const listStore = useListStore()
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
@@ -448,13 +494,14 @@ export const useSpaceStore = defineStore('space', {
       connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
       connectionStore.initializeRemoteConnections(space.connections)
       lineStore.initializeRemoteLines(space.lines)
+      listStore.initializeRemoteLists(space.lists)
       globalStore.updatePageSizes()
       // init space
       historyStore.redoLocalUpdates()
       this.$state = space
       historyStore.reset()
       // clean up unused keys
-      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines']
+      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines', 'lists']
       itemKeys.forEach(key => {
         delete this[key]
       })
@@ -480,11 +527,13 @@ export const useSpaceStore = defineStore('space', {
           this.restoreSpaceLocal(space),
           this.loadRemoteSpace(space)
         ])
-        window.scrollTo(0, 0)
         // restore remote space
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
-        if (!remoteSpace) { return }
+        if (!remoteSpace) {
+          globalStore.triggerDrawingInitialize()
+          return
+        }
         globalStore.triggerUpdateWindowTitle()
         groupStore.loadGroup(remoteSpace)
         this.updateSpacePreviewImage()
@@ -493,6 +542,7 @@ export const useSpaceStore = defineStore('space', {
         this.saveSpaceToCache()
         this.notifySpaceIsOpen()
         this.updateUserLastSpaceId()
+        this.editedAt = new Date().toISOString()
         globalStore.isLoadingSpace = false
         globalStore.triggerDrawingInitialize()
         globalStore.updateTags()
@@ -508,6 +558,18 @@ export const useSpaceStore = defineStore('space', {
         globalStore.triggerScrollCardIntoView(cardId)
       }
       cardStore.alignLeftAddedCardsInInbox()
+    },
+    async restoreCurrentSpaceFromRemote () {
+      const globalStore = useGlobalStore()
+      try {
+        globalStore.isLoadingSpace = true
+        const remoteSpace = await this.loadRemoteSpace({ id: this.id })
+        await this.restoreSpaceRemote(remoteSpace)
+        this.saveSpaceToCache()
+        globalStore.isLoadingSpace = false
+      } catch (error) {
+        console.error('🚒 Error fetching remoteSpace', error)
+      }
     },
     async loadInboxSpace () {
       const apiStore = useApiStore()
@@ -564,7 +626,7 @@ export const useSpaceStore = defineStore('space', {
           return
         }
         globalStore.updatePrevSpaceIdInSession(this.id)
-        globalStore.updatePrevSpaceIdInSessionPagePosition()
+        globalStore.updatePrevSpacePagePosition(this.id)
         globalStore.clearAllInteractingWithAndSelected()
         console.info('🚟 Change space', space)
         globalStore.isLoadingSpace = true
@@ -606,6 +668,7 @@ export const useSpaceStore = defineStore('space', {
       this.incrementCardsCreatedCountFromSpace(space)
       globalStore.isLoadingSpace = false
       globalStore.triggerUpdateWindowHistory()
+      globalStore.triggerDrawingInitialize()
       await apiStore.addToQueue({
         name: 'createSpace',
         body: space
@@ -655,7 +718,7 @@ export const useSpaceStore = defineStore('space', {
       space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
-      space.editedAt = new Date()
+      space.editedAt = new Date().toISOString()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
       const shouldHideTutorialCards = userStore.shouldHideTutorialCards
@@ -730,13 +793,13 @@ export const useSpaceStore = defineStore('space', {
       isLoadingRemoteSpace = false
       await this.restoreSpace(uniqueNewSpace)
     },
-    async createSpace () {
+    async createSpace (name) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
       const user = { id: userStore.id }
       broadcastStore.leaveSpaceRoom({ user: { id: user.id }, type: 'userLeftRoom' })
-      await this.createNewSpace()
+      await this.createNewSpace(name)
       await this.saveSpace()
       this.updateUserLastSpaceId()
       globalStore.notifySignUpToEditSpace = false
@@ -785,6 +848,7 @@ export const useSpaceStore = defineStore('space', {
         await cache.updateIdsInSpace(space, nullCardUsers)
       }
       globalStore.triggerUpdateWindowTitle()
+      globalStore.triggerDrawingInitialize()
     },
     async createNewInboxSpace (shouldCreateWithoutLoading) {
       const globalStore = useGlobalStore()
@@ -793,7 +857,7 @@ export const useSpaceStore = defineStore('space', {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
-      space.editedAt = new Date()
+      space.editedAt = new Date().toISOString()
       space.userId = userStore.id
       space.cards = space.cards.map(card => {
         card.id = nanoid()
@@ -837,7 +901,7 @@ export const useSpaceStore = defineStore('space', {
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       const response = await apiStore.updateSpacePreviewImage(this.id)
-      console.info('🙈 updated space preview image', response?.urls)
+      console.info('🙈 space preview image added to queue')
     }, 10 * 1000), // 10 seconds
     updateUserLastSpaceId () {
       const userStore = useUserStore()
@@ -876,6 +940,14 @@ export const useSpaceStore = defineStore('space', {
       } catch (error) {
         console.warn('🚑 updateOtherUsers', error)
       }
+    },
+    broadcastUpdateSpace (update) {
+      const broadcastStore = useBroadcastStore()
+      const ignoreKeys = ['id', 'editedAt', 'editedByUserId']
+      const keys = Object.keys(update)
+      const shouldPrevent = keys.every(key => ignoreKeys.includes(key))
+      if (shouldPrevent) { return }
+      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
     },
     async updateOtherItems (options) {
       const globalStore = useGlobalStore()
@@ -923,13 +995,12 @@ export const useSpaceStore = defineStore('space', {
     async updateSpace (update) {
       const apiStore = useApiStore()
       const keys = Object.keys(update)
-      const broadcastStore = useBroadcastStore()
       for (const key of keys) {
         this[key] = update[key]
       }
       update.id = this.id
       if (update.isFromBroadcast) { return }
-      broadcastStore.update({ updates: update, store: 'spaceStore', action: 'updateSpace' })
+      this.broadcastUpdateSpace(update)
       await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
@@ -941,8 +1012,9 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
+      const editedAt = new Date().toISOString()
       await this.updateSpace({
-        editedAt: new Date(),
+        editedAt,
         editedByUserId: userStore.id
       })
     },
@@ -1036,7 +1108,7 @@ export const useSpaceStore = defineStore('space', {
     },
     updateUserPresence (update) {
       const newUser = update.user || update
-      const member = this.getSpaceMemberById(newUser.id)
+      const member = this.getSpaceCollaboratorById(newUser.id)
       if (member) {
         this.updateSpaceClients([newUser])
       } else {
@@ -1196,7 +1268,11 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
-      const { cards, boxes, connections, connectionTypes, tags } = items
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      const { cards, boxes, connections, connectionTypes, tags, lines, lists } = items
+      lines.forEach(line => lineStore.createLine(line))
+      lists.forEach(list => listStore.createList({ list }))
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
       for (const connection of connections) {

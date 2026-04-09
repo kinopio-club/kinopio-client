@@ -129,7 +129,6 @@ section.filters
   .badge
     display inline-block
     vertical-align middle
-    margin-right 0
   .user-label-inline
     height 16px
     pointer-events none

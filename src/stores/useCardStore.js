@@ -2,11 +2,13 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
@@ -17,13 +19,16 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
+import last from 'lodash-es/last'
+import { generateNKeysBetween } from 'fractional-indexing'
 
 let tallestCardHeight = 0
 
 export const useCardStore = defineStore('cards', {
   state: () => ({
     byId: {},
-    allIds: []
+    allIds: [],
+    cardSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
   getters: {
@@ -33,25 +38,25 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getAllCardsSortedByX () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'x')
       return cards
     },
     getAllCardsSortedByY () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards
     },
     getAllRemovedCards () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => card.isRemoved)
       return cards
     },
     getCardsSelectableByY () {
       const globalStore = useGlobalStore()
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       // filter
       cards = cards.filter(card => {
         if (card.isLocked) { return }
@@ -69,11 +74,11 @@ export const useCardStore = defineStore('cards', {
       }
     },
     getCardsIsLocked () {
-      const cards = this.allIds.map(id => this.byId[id])
+      const cards = this.getAllCards
       return cards.filter(card => Boolean(card) && card.isLocked && !card.isRemoved)
     },
     getCardsIsNotLocked () {
-      const cards = this.allIds.map(id => this.byId[id])
+      const cards = this.getAllCards
       return cards.filter(card => Boolean(card) && !card.isLocked && !card.isRemoved)
     },
     getCardsSelected () {
@@ -85,6 +90,18 @@ export const useCardStore = defineStore('cards', {
       ids = ids.filter(id => Boolean(id))
       const cards = ids.map(id => this.byId[id])
       return cards
+    },
+    getCardIdsGroupedByList () {
+      const cards = this.getAllCards
+      const result = {}
+      for (const card of cards) {
+        if (!card.listId) continue
+        if (!result[card.listId]) {
+          result[card.listId] = []
+        }
+        result[card.listId].push(card.id)
+      }
+      return result // { listId: [cardId1, cardId2], .. }
     },
     getCommentCards () {
       const cards = this.getAllCards.filter(card => {
@@ -109,7 +126,7 @@ export const useCardStore = defineStore('cards', {
       const cardIds = []
       const spaceIds = []
       const invites = []
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards.forEach(card => {
         const cardIdIsValid = utils.idIsValid(card.linkToCardId)
@@ -146,10 +163,26 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardsIsTodoSortedByY () {
-      let cards = this.allIds.map(id => this.byId[id])
+      let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards.filter(card => utils.checkboxFromString(card.name))
+    },
+    getCardsNearLeftEdge () {
+      const cards = this.getAllCards
+      return cards.filter(card => {
+        return card.x <= consts.edgeThreshold
+      })
+    },
+    getCardsNearTopEdge () {
+      const cards = this.getAllCards
+      return cards.filter(card => {
+        return card.y <= consts.edgeThreshold
+      })
+    },
+    getCardsWithLinkToSpaceId () {
+      const cards = this.getAllCards
+      return cards.filter(card => card.linkToSpaceId)
     }
   },
 
@@ -158,23 +191,32 @@ export const useCardStore = defineStore('cards', {
     getCard (id) {
       return this.byId[id]
     },
+    getCardsByList (listId) {
+      const cardsByList = this.getCardIdsGroupedByList
+      const cardIds = cardsByList[listId]
+      if (!cardIds) { return [] }
+      let cards = cardIds.map(id => this.getCard(id))
+      cards = sortBy(cards, 'listPositionIndex')
+      return cards
+    },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
     },
-    getVerticallyAlignedCardsBelow (cards, id, deltaHeight = 0) {
-      const card = this.byId[id]
-      const parentCard = {
-        y: card.y,
-        x: card.x,
-        height: card.height - deltaHeight
+    getCurrentDraggingCard () {
+      const globalStore = useGlobalStore()
+      const cardId = globalStore.currentDraggingCardId
+      return this.getCard(cardId)
+    },
+    getVerticallyAlignedCardsBelow (cardId, deltaHeight = 0) {
+      let cards = this.getAllCardsSortedByX
+      let parentCard = this.byId[cardId]
+      parentCard = {
+        y: parentCard.y,
+        x: parentCard.x,
+        height: parentCard.height - deltaHeight
       }
       cards = cards.filter(card => {
         const isAlignedX = card.x === parentCard.x
-        // utils.isBetween({
-        //   value: card.x,
-        //   min: parentCard.x - 10,
-        //   max: parentCard.x + 10
-        // })
         const isBelow = card.y > parentCard.y
         return isAlignedX && isBelow
       })
@@ -233,6 +275,7 @@ export const useCardStore = defineStore('cards', {
         if (element.dataset.isLocked === 'true') { return }
         const id = element.dataset.cardId
         const data = this.getCard(id)
+        const { tilt, listId, listPositionIndex } = data
         const rect = element.getBoundingClientRect()
         const card = {
           id: data.id,
@@ -240,7 +283,9 @@ export const useCardStore = defineStore('cards', {
           y: data.y,
           width: Math.round(rect.width || data.width),
           height: Math.round(rect.height || data.height),
-          tilt: data.tilt
+          tilt,
+          listId,
+          listPositionIndex
         }
         cards.push(card)
       })
@@ -253,6 +298,7 @@ export const useCardStore = defineStore('cards', {
       const byId = {}
       const allIds = []
       cards.forEach(card => {
+        card.backgroundColor = this.normalizeCardBackgroundColor(card.backgroundColor)
         byId[card.id] = card
         allIds.push(card.id)
       })
@@ -282,10 +328,20 @@ export const useCardStore = defineStore('cards', {
       addItems.forEach(card => this.addCardToState(card))
       removeItems.forEach(card => this.removeCardFromState(card))
     },
+    normalizeCardBackgroundColor (color) {
+      const themeStore = useThemeStore()
+      if (color) {
+        const colorIsDefault = themeStore.isCardColorThemeDefault(color)
+        if (colorIsDefault) {
+          color = null
+        }
+      }
+      return color
+    },
 
     // create
 
-    normailzeNewCard (card) {
+    normalizeNewCard (card) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -302,14 +358,16 @@ export const useCardStore = defineStore('cards', {
       card.name = name || ''
       card.frameId = 0
       card.userId = userStore.id
+      card.urlIsHidden = true
       card.urlPreviewIsVisible = true
       card.width = Math.round(width) || consts.emptyCard().width
       card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
+      card.backgroundColor = this.normalizeCardBackgroundColor(card.backgroundColor)
       card.isRemoved = false
       card.headerFontId = userStore.prevHeaderFontId || 0
-      card.maxWidth = Math.round(card.maxWidth) || userStore.cardSettingsMaxCardWidth
+      card.maxWidth = Math.round(card.maxWidth) || userStore.cardSettingsCardWrapWidth
       card.spaceId = spaceStore.id // currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
@@ -330,7 +388,7 @@ export const useCardStore = defineStore('cards', {
         globalStore.updateNotifyCardsCreatedIsOverLimit(true)
         return
       }
-      card = this.normailzeNewCard(card)
+      card = this.normalizeNewCard(card)
       this.addCardToState(card)
       if (card.isFromBroadcast) { return }
       if (!skipCardDetailsIsVisible) {
@@ -356,7 +414,7 @@ export const useCardStore = defineStore('cards', {
           x += offset
           y += offset
         }
-        card = this.normailzeNewCard(card)
+        card = this.normalizeNewCard(card)
         card.shouldUpdateUrlPreview = true
         card.urlPreviewIsVisible = true
         return card
@@ -370,6 +428,9 @@ export const useCardStore = defineStore('cards', {
 
     async updateCardsState (updates) {
       updates = updates.map(update => { // normalize
+        if (update.backgroundColor) {
+          update.backgroundColor = this.normalizeCardBackgroundColor(update.backgroundColor)
+        }
         delete update.user
         return update
       })
@@ -379,6 +440,16 @@ export const useCardStore = defineStore('cards', {
           ...update
         }
       })
+    },
+    shouldUpdateSpaceEditedAt (updates) {
+      const ignoreKeys = ['id', 'z']
+      let keys = []
+      for (const card of updates) {
+        Object.keys(card).forEach(key => keys.push(key))
+      }
+      keys = uniq(keys)
+      keys = keys.filter(key => !ignoreKeys.includes(key))
+      return Boolean(keys.length)
     },
     async updateCards (updates) {
       const apiStore = useApiStore()
@@ -398,6 +469,9 @@ export const useCardStore = defineStore('cards', {
         let cards = this.getAllCards
         cards = utils.clone(cards)
         await cache.updateSpace('cards', cards, spaceStore.id)
+        if (this.shouldUpdateSpaceEditedAt(updates)) {
+          spaceStore.updateSpaceEditedAt()
+        }
       } catch (error) {
         console.error('🚒 updateCards', error, updates)
       }
@@ -443,13 +517,18 @@ export const useCardStore = defineStore('cards', {
       const connectionStore = useConnectionStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const listStore = useListStore()
       const updates = []
       const cardsToRemove = []
       const cardsToDelete = []
       const cards = ids.map(id => this.getCard(id))
+      let listIds = []
       cards.forEach(card => {
         if (!card) { return }
         spaceStore.removeTagsByCard(card)
+        if (card.listId) {
+          listIds.push(card.listId)
+        }
         if (card.name) {
           cardsToRemove.push(card)
         } else {
@@ -466,6 +545,11 @@ export const useCardStore = defineStore('cards', {
       this.deleteCards(cardsToDelete)
       connectionStore.removeConnectionsFromItems(ids)
       userStore.updateUserCardsCreatedCount(cards, true)
+      listIds = uniq(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        this.updateCardPositionsInList(list)
+      })
     },
     removeCard (id) {
       this.removeCards([id])
@@ -500,12 +584,13 @@ export const useCardStore = defineStore('cards', {
         globalStore.pageWidth = cardX
       }
     },
-    moveCards ({ endCursor, prevCursor, delta }) {
+    moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
+      const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
-      if (!endCursor || !prevCursor) { return }
+      if ((!endCursor || !prevCursor) && !delta) { return }
       if (globalStore.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
@@ -518,7 +603,7 @@ export const useCardStore = defineStore('cards', {
         x: delta.x * zoom,
         y: delta.y * zoom
       }
-      let cards = this.getCardsSelected
+      cards = cards || this.getCardsSelected
       cards = cards.map(card => {
         let x = Math.round(card.x + delta.x)
         x = Math.max(0, x)
@@ -534,7 +619,11 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
       cards = cards.map(card => this.getCard(card.id))
-      boxStore.updateBoxSnapGuides({ items: cards, isCards: true, cursor: endCursor })
+      if (endCursor) {
+        boxStore.updateBoxSnapGuides({ items: cards, isChildren: true, cursor: endCursor })
+        this.updateCardSnapGuides({ items: cards, cursor: endCursor })
+      }
+      listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -614,16 +703,22 @@ export const useCardStore = defineStore('cards', {
         index += 1
       }
     },
-    async updateBelowCardsPosition (updates) {
+    async updateCardsBelowPosition (updates) {
+      const listStore = useListStore()
+      let listIds = []
       for (const update of updates) {
         // calc height delta
         const card = this.getCard(update.id)
         if (!card) { return }
         const deltaHeight = update.height - update.prevHeight
         if (deltaHeight === 0) { return }
+        // skip lists
+        if (card.listId) {
+          listIds.push(card.listId)
+          continue
+        }
         // distributeVertically aligned cards below
-        const cards = this.getAllCards
-        const alignedCards = this.getVerticallyAlignedCardsBelow(cards, card.id, deltaHeight)
+        const alignedCards = this.getVerticallyAlignedCardsBelow(card.id, deltaHeight)
         if (!alignedCards.length) { return }
         alignedCards.unshift(card)
         await this.distributeCardsVertically(alignedCards)
@@ -631,6 +726,11 @@ export const useCardStore = defineStore('cards', {
         const connectionStore = useConnectionStore()
         connectionStore.updateConnectionPathsByItemIds(cardIds)
       }
+      listIds = uniq(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        this.updateCardPositionsInList(list)
+      })
     },
     async updateCardsDimensions (ids) {
       const globalStore = useGlobalStore()
@@ -645,8 +745,8 @@ export const useCardStore = defineStore('cards', {
       globalStore.updateShouldExplicitlyRenderCardIds(ids)
       const updates = []
       cards.forEach(card => {
-        card.prevWidth = card.width
-        card.prevHeight = card.height
+        card.prevWidth = Math.round(card.width)
+        card.prevHeight = Math.round(card.height)
         const element = utils.cardElement(card)
         if (!element) { return }
         const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
@@ -677,7 +777,7 @@ export const useCardStore = defineStore('cards', {
         this.updateTallestCardHeight(card)
       })
       await this.updateCards(updates)
-      await this.updateBelowCardsPosition(updates)
+      await this.updateCardsBelowPosition(updates)
     },
     async updateCardDimensions (id) {
       await this.updateCardsDimensions([id])
@@ -767,17 +867,19 @@ export const useCardStore = defineStore('cards', {
     },
     async clearResizeCards (ids, shouldRemoveResizeWidth) {
       const connectionStore = useConnectionStore()
+      const userStore = useUserStore()
       const updates = []
       ids.forEach(id => {
         const update = { id, width: null }
         if (shouldRemoveResizeWidth) {
-          update.resizeWidth = null
+          const resizeWidth = userStore.cardSettingsCardWrapWidth
+          update.resizeWidth = resizeWidth
         }
         updates.push(update)
         utils.clearAllCardDimensions({ id })
       })
       this.updateCards(updates)
-      this.updateCardsDimensions(ids)
+      await this.updateCardsDimensions(ids)
       await nextTick()
       await nextTick()
       connectionStore.updateConnectionPathsByItemIds(ids)
@@ -908,14 +1010,291 @@ export const useCardStore = defineStore('cards', {
       this.updateCard(update)
     },
     getCardsWithTagName (tagName) {
-      const cards = this.getAllCards
+      let cards = this.getAllCards
+      cards = utils.clone(cards)
       return cards.filter(card => {
         const tags = utils.tagsFromStringWithoutBrackets(card.name)
         if (tags) {
           return tags.includes(tagName)
         }
       })
-    }
+    },
 
+    // list
+
+    async updateCardPositionsInList (list) {
+      const listStore = useListStore()
+      const globalStore = useGlobalStore()
+      if (!list) { return }
+      const cards = this.getCardsByList(list.id)
+      const updates = []
+      const prevCards = []
+      const originY = list.y + consts.listInfoHeight
+      cards.forEach((card, index) => {
+        const update = {
+          id: card.id,
+          x: list.x + consts.listPadding,
+          y: originY,
+          height: card.height
+        }
+        if (index > 0) {
+          const prevCard = prevCards[index - 1]
+          update.y = prevCard.y + prevCard.height + consts.listPadding
+        }
+        const cardIsUnchanged = ['x', 'y', 'height'].every(key => card[key] === update[key])
+        prevCards.push(update)
+        if (cardIsUnchanged) { return }
+        updates.push(update)
+      })
+      this.updateCards(updates)
+      listStore.updateListDimensions(list)
+    },
+    async prependCardToList (card, list) {
+      let targetPositionIndex = null
+      const cards = this.getCardsByList(list.id)
+      if (cards.length) {
+        targetPositionIndex = cards[0].listPositionIndex
+      }
+      await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: true })
+    },
+    async appendCardToList (card, list) {
+      let targetPositionIndex = null
+      const cards = this.getCardsByList(list.id)
+      if (cards.length) {
+        targetPositionIndex = last(cards).listPositionIndex
+      }
+      await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: false })
+    },
+    checkIfShouldUpdatePrevListDimensions (cards, list) {
+      const listStore = useListStore()
+      let prevListIds = []
+      // get moved cards prev listIds
+      cards.forEach(card => {
+        if (!card.listId) { return }
+        if (card.listId !== list.id) {
+          prevListIds.push(card.listId)
+        }
+      })
+      // update lists
+      prevListIds = uniq(prevListIds)
+      prevListIds.forEach(id => {
+        const list = listStore.getList(id)
+        listStore.updateListDimensions(list)
+      })
+    },
+    async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend }) {
+      const globalStore = useGlobalStore()
+      try {
+        cards = utils.sortByY(cards)
+        const ids = cards.map(card => card.id)
+        this.updateCardsDimensions(ids)
+        // use prev listCards to determine sibling position
+        const listCards = this.getCardsByList(list.id)
+        const siblingPositionIndex = utils.listSiblingPositionIndex(listCards, targetPositionIndex, shouldPrepend)
+        // get new cards positions
+        let newPositionIndexes
+        if (shouldPrepend) {
+          newPositionIndexes = generateNKeysBetween(siblingPositionIndex, targetPositionIndex, cards.length)
+        } else {
+          newPositionIndexes = generateNKeysBetween(targetPositionIndex, siblingPositionIndex, cards.length)
+        }
+        // add cards to list
+        const resizeWidth = utils.listChildWidth(list.resizeWidth)
+        const updates = cards.map((card, index) => {
+          return {
+            id: card.id,
+            listId: list.id,
+            listPositionIndex: newPositionIndexes[index],
+            tilt: 0,
+            resizeWidth,
+            width: resizeWidth
+          }
+        })
+        globalStore.triggerIsSnappingToList()
+        this.updateCards(updates)
+        this.updateCardsDimensions(ids)
+        this.updateCardPositionsInList(list)
+        this.checkIfShouldUpdatePrevListDimensions(cards, list)
+
+        globalStore.clearAllSelected()
+      } catch (error) {
+        console.error('🚒 addCardsToList', error)
+      }
+    },
+    async removeCardsFromLists (cards) {
+      const listStore = useListStore()
+      let listIds = []
+      const ids = cards.map(card => {
+        if (card.listId) {
+          listIds.push(card.listId)
+        }
+        return card.id
+      })
+      listIds = uniq(listIds)
+      const updates = ids.map(id => {
+        return {
+          id,
+          listId: null,
+          listPositionIndex: null,
+          resizeWidth: null,
+          width: null
+        }
+      })
+      this.updateCards(updates)
+      this.clearResizeCards(ids, true)
+      for (const listId of listIds) {
+        const list = listStore.getList(listId)
+        await this.updateCardPositionsInList(list)
+        listStore.updateListDimensions(list)
+      }
+    },
+    async removeCardsFromListsByLists (listIds) {
+      listIds.forEach(id => {
+        const cards = this.getCardsByList(id)
+        this.removeCardsFromLists(cards)
+      })
+    },
+    cardsIsInListTogether (cards) {
+      if (!cards.length) { return }
+      const listId = cards[0].listId
+      if (!listId) { return }
+      const value = cards.every(card => card.listId === listId)
+      return value
+    },
+    async toggleListCards (cards) {
+      const globalStore = useGlobalStore()
+      const listStore = useListStore()
+      let list
+      let listCards = []
+      let listHasOtherCards = []
+
+      if (this.cardsIsInListTogether(cards)) {
+        list = listStore.getList(cards[0].listId)
+      }
+      if (list) {
+        listCards = this.getCardsByList(list.id)
+        listHasOtherCards = listCards.length !== cards.length
+      }
+      // move cards out of list
+      if (this.cardsIsInListTogether(cards) && listHasOtherCards) {
+        const x = list.x + list.resizeWidth + consts.listPadding
+        const updates = cards.map(card => {
+          return {
+            id: card.id,
+            x
+          }
+        })
+        this.removeCardsFromLists(cards)
+        this.updateCards(updates)
+      // remove list
+      } else if (this.cardsIsInListTogether(cards)) {
+        listStore.removeList(list.id)
+      // create list, add cards to list
+      } else {
+        const card = cards[0]
+        const list = {
+          id: nanoid(),
+          y: card.y - consts.listInfoHeight,
+          x: card.x - consts.listPadding
+        }
+        listStore.createList({ list })
+        await nextTick()
+        await this.addCardsToList({ cards, list, targetPositionIndex: null })
+      }
+      globalStore.clearMultipleSelected()
+      globalStore.closeAllDialogs()
+      globalStore.multipleSelectedActionsIsVisible = false
+    },
+
+    // snap guides
+
+    distanceCursorToCardEdge ({ cursor, targetCard, edgeY }) {
+      const nearestEdgeX = Math.max(targetCard.x, Math.min(cursor.x, targetCard.x + targetCard.width))
+      const dx = cursor.x - nearestEdgeX
+      const dy = cursor.y - edgeY
+      return Math.sqrt(dx * dx + dy * dy)
+    },
+    createCardSnapGuide ({ side, item, targetCard, cursor }) {
+      const edgeParams = {
+        top: {
+          edgeY: targetCard.y,
+          sizeOutside: Math.abs(targetCard.y - item.y)
+        },
+        bottom: {
+          edgeY: targetCard.y + targetCard.height,
+          sizeOutside: Math.abs((targetCard.y + targetCard.height) - (item.y + item.height))
+        }
+      }
+      if (!edgeParams[side]) { return }
+      const { edgeY, sizeOutside } = edgeParams[side]
+      const prevGuide = this.cardSnapGuides.find(guide => guide.side === side)
+      const time = prevGuide ? prevGuide.time : Date.now()
+      const distance = this.distanceCursorToCardEdge({ cursor, targetCard, edgeY })
+      return { side, item, target: targetCard, time, distance, sizeOutside }
+    },
+    updateCardSnapGuides ({ items, cursor }) {
+      const globalStore = useGlobalStore()
+      const listStore = useListStore()
+      if (globalStore.preventItemSnapping) { return }
+      if (!items.length) { return }
+      if (globalStore.shouldSnapToGrid) { return }
+      const snapThreshold = 10
+      const spaceEdgeThreshold = 100
+      const targetCards = this.getCardsSelectableInViewport()
+      const prevSnapGuides = globalStore.snapGuides
+      let snapGuides = []
+      // find
+      const card = this.getCard(globalStore.currentDraggingCardId) // only current dragging card can snap
+      if (!card) { return }
+      targetCards.forEach(target => {
+        if (target.id === card.id) { return }
+        if (!target.listId) { return } // only snap to list cards
+        const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
+        if (isTargetSelected) { return }
+        // assign card sides
+        const cardLeft = card.x
+        const cardRight = card.x + card.width
+        const cardTop = card.y
+        const cardBottom = card.y + card.height
+        // assign target sides
+        const targetLeft = target.x
+        const targetRight = target.x + target.width
+        const targetTop = target.y
+        const targetBottom = target.y + target.height
+        const targetIsMinX = target.x <= spaceEdgeThreshold
+        const targetIsMinY = target.y <= spaceEdgeThreshold
+        // card side is on target edge
+        const cardOverlapsTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
+        const cardOverlapsTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })
+        const cardOverlapsTargetX = cardLeft < targetRight && cardRight > targetLeft
+        const cardOverlapsTargetY = cardTop < targetBottom && cardBottom > targetTop
+        const cardOverlapsTarget = cardOverlapsTargetX && cardOverlapsTargetY
+        // card is in list if snapping to list
+        let cardIsValidListSnap = true
+        if (listStore.listSnapGuides.listId) {
+          cardIsValidListSnap = listStore.listSnapGuides.listId === card.listId
+        }
+        const isSnapable = cardOverlapsTarget && cardIsValidListSnap
+        // snap top
+        if (cardOverlapsTargetTop && isSnapable) {
+          const snapGuide = this.createCardSnapGuide({ side: 'top', item: card, targetCard: target, cursor })
+          snapGuides.push(snapGuide)
+        }
+        // snap bottom
+        if (cardOverlapsTargetBottom && isSnapable) {
+          const snapGuide = this.createCardSnapGuide({ side: 'bottom', item: card, targetCard: target, cursor })
+          snapGuides.push(snapGuide)
+        }
+      })
+      if (!snapGuides.length) {
+        this.cardSnapGuides = []
+        return
+      }
+      snapGuides = sortBy(snapGuides, ['distance', 'sizeOutside'])
+      // limit snap to closest target
+      snapGuides = [snapGuides[0]]
+      this.cardSnapGuides = snapGuides
+    }
   }
+
 })

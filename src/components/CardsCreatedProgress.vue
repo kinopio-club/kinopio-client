@@ -88,4 +88,6 @@ section.subsection.cards-created-progress(@click="closeChildDialogs")
   progress
     margin-bottom 10px
     margin-top 10px
+  dialog.free-limit-faq
+    top -120px
 </style>

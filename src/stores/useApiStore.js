@@ -151,18 +151,16 @@ export const useApiStore = defineStore('api', {
         return
       }
       const data = await response.json()
-      const operations = data.operations
       console.warn('🚑 serverOperationsError', data)
+      const { operations, errors } = data
       const nonCriticalErrorStatusCodes = [400, 401, 404]
-      operations.forEach(operation => {
-        const error = operation.error
-        if (!error) { return }
+      errors.forEach(error => {
         const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
         if (isCritical) {
-          console.error('🚒 critical serverOperationsError operation', operation)
+          console.error('🚒 critical serverOperationsError operation', error)
           globalStore.updateNotifyServerCouldNotSave(true)
         } else {
-          console.warn('🚑 non-critical serverOperationsError operation', operation)
+          console.warn('🚑 non-critical serverOperationsError operation', error)
         }
       })
     },
@@ -209,10 +207,10 @@ export const useApiStore = defineStore('api', {
       }
     }, 500),
 
-    async addToQueue ({ name, body, spaceId }) {
+    async addToQueue ({ name, body, spaceId, allowNonMember }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      if (!userStore.getUserCanEditSpace) { return }
+      if (!allowNonMember && !userStore.getUserCanEditSpace) { return }
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || spaceStore.id
@@ -226,7 +224,7 @@ export const useApiStore = defineStore('api', {
       }
       // try to to merge new item into matching prev one
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      const shouldNotMergeOperations = ['createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
+      const shouldNotMergeOperations = ['createList', 'createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
       let isPrevItem
       const newQueue = sessionQueue.map(prevItem => {
         const isOperationName = prevItem.name === newItem.name
@@ -779,6 +777,17 @@ export const useApiStore = defineStore('api', {
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'search', error })
+      }
+    },
+    async getPublicSpaces (spaceIds, shouldUseProduction) {
+      try {
+        spaceIds = spaceIds.join(',')
+        console.info('🛬 getting remote public spaces', spaceIds)
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetchWithTimeout(`${consts.apiHost(shouldUseProduction)}/space/public/multiple?spaceIds=${spaceIds}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getPublicSpaces', error })
       }
     },
     async createSpaces () {
@@ -1458,6 +1467,16 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getGroup', error })
       }
     },
+    async getGroupPublicMeta (groupId) {
+      try {
+        console.info('🛬 getting remote group public meta', groupId)
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetch(`${consts.apiHost()}/group/${groupId}/public-meta`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getGroupPublicMeta', error })
+      }
+    },
     async createGroup (body) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
@@ -1534,7 +1553,7 @@ export const useApiStore = defineStore('api', {
     async moderatorRestartServer () {
       try {
         const options = await this.requestOptions({ method: 'POST' })
-        const response = await fetch(`${consts.helperServerHost()}/restart-server`, options)
+        const response = await fetch(`${consts.helperServerHost()}/moderator/restart-server`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 moderatorRestartServer', error)

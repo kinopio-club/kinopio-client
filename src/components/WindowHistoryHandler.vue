@@ -18,6 +18,7 @@ const router = useRouter()
 let unsubscribes
 
 onMounted(() => {
+  window.addEventListener('popstate', loadSpaceOnBackOrForward)
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerUpdateWindowHistory') {
@@ -32,8 +33,24 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('popstate', loadSpaceOnBackOrForward)
   unsubscribes()
 })
+
+watch(() => globalStore.userNotifications, (value, prevValue) => {
+  updateWindowTitle()
+})
+
+// handles browser back/forward
+
+const loadSpaceOnBackOrForward = () => {
+  const url = new URL(window.location)
+  if (!utils.urlIsSpace(url.href)) { return }
+  const spaceId = utils.spaceIdFromUrl(url.href)
+  spaceStore.loadSpace({ id: spaceId })
+}
+
+// update browser history/title when space loads
 
 const update = async () => {
   await updateWindowHistory()
@@ -56,6 +73,7 @@ const updateWindowHistory = async () => {
 const updateWindowTitle = () => {
   const space = spaceStore.getSpaceAllState
   let title
+  // name
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
   } else if (space.name) {
@@ -63,14 +81,16 @@ const updateWindowTitle = () => {
   } else {
     title = 'Kinopio'
   }
+  // dev
   if (consts.isDevelopment()) {
     title = `[DEV] ${title}`
+  }
+  // notification count
+  const unread = globalStore.userNotifications.filter(notification => !notification.isRead)
+  const count = unread.length || 0
+  if (count) {
+    title = `(${count}) ${title}`
   }
   document.title = title
 }
 </script>
-
-<template lang="pug">
-</template>
-<style lang="stylus">
-</style>

@@ -11,6 +11,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -39,6 +40,7 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
+import uniq from 'lodash-es/uniq'
 
 dayjs.extend(isToday)
 extend([namesPlugin])
@@ -53,6 +55,7 @@ const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const broadcastStore = useBroadcastStore()
 const uploadStore = useUploadStore()
+const themeStore = useThemeStore()
 
 const cardElement = ref(null)
 
@@ -74,8 +77,6 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 let stickyMap
-
-let prevIsLoadingUrlPreview
 
 let observer
 
@@ -114,6 +115,8 @@ onMounted(async () => {
         updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
       } else if (name === 'triggerCancelLocking') {
         cancelLocking()
+      } else if (name === 'triggerIsSnappingToList') {
+        state.isSnappingToList = true
       }
     }
   )
@@ -164,13 +167,17 @@ const state = reactive({
   isVisibleInViewport: false,
   shouldRenderParent: false,
   safeColors: {},
-  urls: []
+  urls: [],
+  isSnappingToList: false
 })
 watch(() => props.card.name, (value, prevValue) => {
   updateUrls()
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
+})
+watch(() => globalStore.currentUserIsDraggingList, (value, prevValue) => {
+  state.isSnappingToList = false
 })
 const updateUrlData = () => {
   updateOtherItems()
@@ -231,35 +238,19 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 const updateDefaultBackgroundColor = (color) => {
   state.defaultBackgroundColor = color
 }
-const cardBackgroundColor = computed(() => {
-  let color = props.card.backgroundColor
-  if (color) {
-    const hexColor = colord(color).toHex()
-    let defaultOtherThemeColor = '#262626'
-    if (isThemeDark.value) {
-      defaultOtherThemeColor = '#e3e3e3'
-    }
-    const colorIsDefault = hexColor === defaultOtherThemeColor
-    if (colorIsDefault) {
-      color = state.defaultBackgroundColor
-    }
-  }
-  return color
-})
 const currentBackgroundColor = computed(() => {
-  return selectedColor.value || remoteSelectedColor.value || cardBackgroundColor.value
+  return selectedColor.value || remoteSelectedColor.value || props.card.backgroundColor
 })
-
 const backgroundColor = computed(() => {
   let nameColor
   if (nameIsColor.value) {
     nameColor = props.card.name.trim()
   }
-  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || cardBackgroundColor.value
+  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
   return color
 })
 const backgroundColorIsDark = computed(() => {
-  const color = cardBackgroundColor.value || state.defaultBackgroundColor
+  const color = props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 const nameIsColor = computed(() => {
@@ -267,9 +258,13 @@ const nameIsColor = computed(() => {
   return colord(name).isValid()
 })
 const currentBackgroundColorIsDark = computed(() => {
-  const color = backgroundColor.value || cardBackgroundColor.value || state.defaultBackgroundColor
+  const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
+
+// list
+
+const isInList = computed(() => Boolean(props.card.listId))
 
 // comment
 
@@ -414,6 +409,14 @@ const safeColor = (color) => {
 
 // styles
 
+const cardWrapTransitionEnd = () => {
+  state.isSnappingToList = false
+}
+const shouldSkipWidth = computed(() => isComment.value && !isInList.value)
+const isSnappingToItem = computed(() => {
+  const shouldSnap = globalStore.itemSnappingIsReady || globalStore.shouldSnapBackToList
+  return shouldSnap && currentCardIsBeingDragged.value
+})
 const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
@@ -434,12 +437,21 @@ const cardWrapStyle = computed(() => {
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
+  }
+  if (state.isSnappingToList) {
+    styles.transition = 'all 0.1s ease-out'
+  }
+  if (globalStore.boxIsSnappingTransition) {
+    styles.transition = 'all 0.2s ease-out'
+  }
   styles = updateStylesWithWidth(styles)
   return styles
 })
 const cardStyle = computed(() => {
   let nameColor
-  const backgroundColor = cardBackgroundColor.value
+  const backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
@@ -532,15 +544,17 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
-  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
+  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || userStore.cardSettingsCardWrapWidth || consts.normalCardWrapWidth
   let cardWidth = resizeWidth.value
   if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
-  if (isComment.value) { return styles }
+  if (shouldSkipWidth.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
-  styles.width = cardWidth + 'px'
+  if (cardWidth) {
+    styles.width = cardWidth + 'px'
+  }
   return styles
 }
 const updatePreviousResultItem = () => {
@@ -555,6 +569,14 @@ const updatePreviousResultItem = () => {
 const nameSegmentsStyles = computed(() => {
   if (!isImageCard.value) { return }
   return { background: currentBackgroundColor.value }
+})
+const colorClasses = computed(() => {
+  const recomputeOnThemeChange = isThemeDark.value // used to force recompute
+  let color = currentBackgroundColor.value
+  if (!color) {
+    color = utils.cssVariable('secondary-background')
+  }
+  return utils.colorClasses({ backgroundColor: color })
 })
 
 // position and dimensions
@@ -576,7 +598,7 @@ const width = computed(() => {
   return width
 })
 const resizeWidth = computed(() => {
-  if (isComment.value) { return }
+  if (shouldSkipWidth.value) { return }
   let resizeWidth = props.card.resizeWidth
   if (iframeIsVisible.value) {
     resizeWidth = resizeWidth || consts.minCardIframeWidth
@@ -592,6 +614,7 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
+  if (isInList.value) { return }
   if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
@@ -684,12 +707,15 @@ const isUrlPreviewError = computed(() => {
   return props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl
 })
 const urlButtonIsVisible = computed(() => {
+  if (isLocked.value) { return }
   if (!cardButtonUrl.value) { return }
   if (isComment.value) { return true }
   if (isUrlPreviewError.value) { return true }
   if (state.formats.file) { return true }
   const isPreviewImageOnly = props.card.urlPreviewIsVisible && props.card.shouldHideUrlPreviewInfo
   if (isPreviewImageOnly) { return true }
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
+  if (urlIsSpace) { return true }
   return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
@@ -746,7 +772,7 @@ const dateUpdatedAt = computed(() => {
   const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
-      return new Date(date).toLocaleString()
+      return dayjs(date).toISOString()
     } else {
       return utils.shortRelativeTime(date)
     }
@@ -793,8 +819,15 @@ const remoteCardPendingUpload = computed(() => {
   })
 })
 const pendingUploadDataUrl = computed(() => {
-  if (!cardPendingUpload.value || isComment.value) { return }
-  return cardPendingUpload.value.imageDataUrl
+  if (isComment.value) { return }
+  const sessionUpload = uploadStore.getSessionUploadByItemId(props.card.id)
+  if (cardPendingUpload.value) {
+    return cardPendingUpload.value.imageDataUrl
+  } else if (sessionUpload) {
+    return sessionUpload.imageDataUrl
+  } else {
+    return null
+  }
 })
 const selectedColorUpload = computed(() => {
   const color = currentUserColor.value
@@ -904,8 +937,8 @@ const uploadFile = async (event) => {
 const hasTextSegments = computed(() => {
   return nameSegments.value.find(segment => segment.isText && segment.content)
 })
+// name without urls, checkbox text, and hidden urls
 const normalizedName = computed(() => {
-  // name without urls and checkbox text
   let newName = props.card.name
   if (!newName) { return }
   if (newName === ' ') { return }
@@ -918,10 +951,12 @@ const normalizedName = computed(() => {
   const link = state.formats.link
   let isHidden
   const markdownLinks = newName.match(utils.markdown().linkPattern)
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
   if (markdownLinks) {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
-  } else if (link?.includes('hidden=true')) {
+  }
+  if (!props.card.urlIsVisible && !urlIsSpace) {
     isHidden = true
   }
   if (isHidden) {
@@ -936,8 +971,15 @@ const normalizedName = computed(() => {
   newName = removeCommentBrackets(newName)
   return newName.trim()
 })
+const nameIsOnlySpaceLink = computed(() => {
+  if (!state.formats.link) { return }
+  const urlIsSpace = utils.urlIsSpace(state.formats.link)
+  const nameIsOnlyUrl = normalizedName.value.trim() === state.formats.link
+  return urlIsSpace && nameIsOnlyUrl
+})
 const isNormalizedNameOrHiddenUrl = computed(() => {
   const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
+  if (nameIsOnlySpaceLink.value) { return }
   if (urlPreviewIsHidden) { return true }
   return normalizedName.value
 })
@@ -982,9 +1024,8 @@ const nameSegments = computed(() => {
 // tags
 
 const newTagColor = () => {
-  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
-  if (isThemeDark) {
+  if (themeStore.getIsThemeDark) {
     color = randomColor({ luminosity: 'dark' })
   }
   return color
@@ -1007,7 +1048,6 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   if (isMultiTouch) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
-  cardStore.incrementCardZ(props.card.id)
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingCard = false
   const tagRect = event.target.getBoundingClientRect()
@@ -1058,17 +1098,8 @@ const cardUrlPreviewIsVisible = computed(() => {
   // return Boolean(props.card.urlPreviewIsVisible && props.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
 })
 const isLoadingUrlPreview = computed(() => {
-  let isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
-  isLoading = Boolean(isLoading)
-  if (isLoading) {
-    prevIsLoadingUrlPreview = true
-  } else if (prevIsLoadingUrlPreview) {
-    // connectionStore.updateConnectionPathByItemId(props.card.id)
-  }
-  return isLoading
-  // if (!isLoading) { return }
-  // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
-  // return isLoading && !isErrorUrl
+  const isLoading = globalStore.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
+  return Boolean(isLoading)
 })
 const updateUrlPreviewOnload = async () => {
   if (!props.card.shouldUpdateUrlPreview) { return }
@@ -1105,7 +1136,7 @@ const updateUrlPreview = () => {
 const updateUrlPreviewOnline = async () => {
   globalStore.addUrlPreviewLoadingForCardIds(props.card.id)
   const cardId = props.card.id
-  let url = webUrl.value
+  const url = webUrl.value
   if (!url) {
     globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
@@ -1116,7 +1147,6 @@ const updateUrlPreviewOnline = async () => {
     return
   }
   try {
-    url = utils.removeHiddenQueryStringFromURLs(url)
     const response = await apiStore.urlPreview({ url, card: props.card })
     if (!response) { throw 'urlPreview request failed' }
     const { data, host } = response
@@ -1130,14 +1160,13 @@ const updateUrlPreviewOnline = async () => {
 const updateUrlPreviewSuccess = async (url, data) => {
   if (!nameIncludesUrl(url)) { return }
   const cardId = data.id || props.card.id
+  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
   if (!cardId) {
     console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
-    globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
-  data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   cardStore.updateCard(data)
-  globalStore.removeUrlPreviewLoadingForCardIds(cardId)
+  cardStore.updateCardDimensions(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025
@@ -1209,16 +1238,48 @@ const remoteCardDraggingColor = computed(() => {
     return undefined
   }
 })
-const checkIfShouldDragMultipleCards = (event) => {
+const checkIfShouldDragMultipleCards = (event, cardId = props.card.id) => {
   if (event.shiftKey) { return }
   // if the current dragging card is not already selected then clear selection
   const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
-  if (!multipleCardsSelectedIds.includes(props.card.id)) {
+  if (!multipleCardsSelectedIds.includes(cardId)) {
     globalStore.clearMultipleSelected()
   }
 }
-const startDraggingCard = (event) => {
+const startDraggingDuplicateItems = async (event) => {
+  globalStore.currentUserIsDraggingDuplicateItem = true
+  checkIfShouldDragMultipleCards(event)
+  let cardIds = globalStore.multipleCardsSelectedIds.concat([props.card.id])
+  cardIds = uniq(cardIds)
+  const cards = cardIds.map(id => cardStore.getCard(id))
+  const index = cardIds.findIndex(id => id === props.card.id) || 0
+  const boxes = globalStore.multipleBoxesSelectedIds.map(id => boxStore.getBox(id))
+  globalStore.clearMultipleSelected()
+  // create new items
+  const newItems = await utils.uniqueSpaceItems({
+    cards: utils.clone(cards),
+    boxes: utils.clone(boxes)
+  })
+  const newCards = newItems.cards.map(card => {
+    card.z += 1
+    return card
+  })
+  const newBoxes = newItems.boxes.map(box => {
+    box.z += 1
+    return box
+  })
+  const newCurrentCard = newCards[index]
+  newCards.forEach(card => cardStore.createCard(card, true))
+  newBoxes.forEach(box => boxStore.createBox(box, true))
+  // select new items
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  return newCurrentCard.id
+}
+const startDraggingCard = async (event) => {
   isMultiTouch = false
+  let cardId = props.card.id
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPanningReady) { return }
@@ -1227,25 +1288,29 @@ const startDraggingCard = (event) => {
     return
   }
   if (!canEditCard.value) {
-    cardStore.incrementCardZ(props.card.id)
+    await cardStore.incrementCardZ(cardId)
     return
   }
   event.preventDefault()
   if (globalStore.currentUserIsDrawingConnection) { return }
   globalStore.closeAllDialogs()
   globalStore.clearDraggingItems()
+  if (event.altKey) {
+    cardId = await startDraggingDuplicateItems(event)
+  }
   globalStore.currentUserIsDraggingCard = true
-  globalStore.currentDraggingCardId = props.card.id
+  globalStore.currentDraggingCardId = cardId
   postMessage.sendHaptics({ name: 'softImpact' })
   const updates = {
-    cardId: props.card.id,
+    cardId,
     userId: userStore.id
   }
   broadcastStore.update({ updates, action: 'addToRemoteCardsDragging' })
-  globalStore.parentCardId = props.card.id
+  globalStore.parentCardId = cardId
   globalStore.childCardId = ''
-  checkIfShouldDragMultipleCards(event)
-  cardStore.incrementCardZ(props.card.id)
+  checkIfShouldDragMultipleCards(event, cardId)
+  cardStore.incrementCardZ(cardId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
@@ -1427,11 +1492,12 @@ const remoteCardDetailsVisibleColor = computed(() => {
 const showCardDetails = (event) => {
   if (globalStore.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
-  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsPaintSelecting) { return }
   if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
   if (globalStore.shouldSnapToGrid) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
@@ -1623,6 +1689,12 @@ const handleMouseEnterUrlButton = () => {
 const handleMouseLeaveUrlButton = () => {
   globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
 }
+const handleMouseEnterPlayButton = () => {
+  globalStore.preventDraggedCardFromShowingDetails = true
+}
+const handleMouseLeavePlayButton = () => {
+  globalStore.preventDraggedCardFromShowingDetails = false
+}
 
 // sticky
 
@@ -1634,7 +1706,21 @@ const shouldNotStick = computed(() => {
   if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
-  return userIsConnecting || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || globalStore.currentUserIsResizingCard || globalStore.currentUserIsTiltingCard || isLocked.value
+  return (
+    userIsConnecting ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsResizingBox ||
+    currentUserIsPanning ||
+    currentCardDetailsIsVisible.value ||
+    isRemoteCardDetailsVisible.value ||
+    isRemoteCardDragging.value ||
+    currentCardIsBeingDragged.value ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsTiltingCard ||
+    isLocked.value ||
+    globalStore.currentUserIsDraggingList ||
+    globalStore.currentUserIsResizingList
+  )
 })
 const updateShouldNotStickMap = () => {
   stickyMap = []
@@ -1950,6 +2036,23 @@ const focusColor = computed(() => {
 const clearFocus = () => {
   globalStore.focusOnCardId = ''
 }
+
+// meta
+
+const metaContainerStyles = computed(() => {
+  const padding = 8
+  return {
+    left: `${props.card.x + padding}px`,
+    top: `${props.card.y + props.card.height - 6}px`
+  }
+})
+const toggleVideoIsPaused = () => {
+  const update = {
+    id: props.card.id,
+    videoIsPaused: !props.card.videoIsPaused
+  }
+  cardStore.updateCard(update)
+}
 </script>
 
 <template lang="pug">
@@ -1973,6 +2076,7 @@ const clearFocus = () => {
   :key="card.id"
   ref="cardElement"
   :class="cardWrapClasses"
+  @transitionend="cardWrapTransitionEnd"
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
@@ -2015,7 +2119,7 @@ const clearFocus = () => {
       img(src="@/assets/anon-avatar.svg")
 
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    Frames(:card="card")
+    Frames(:item="card")
 
     template(v-if="isVisualCard || pendingUploadDataUrl")
       ImageOrVideo(
@@ -2023,6 +2127,7 @@ const clearFocus = () => {
         :pendingUploadDataUrl="pendingUploadDataUrl"
         :image="state.formats.image"
         :video="state.formats.video"
+        :videoIsPaused="props.card.videoIsPaused"
         @loadSuccess="updateDimensionsAndPaths"
         :cardId="card.id"
         :width="props.card.width"
@@ -2042,11 +2147,9 @@ const clearFocus = () => {
           img.icon.view(src="@/assets/comment.svg")
           //- User
           UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
-          //- Url →
-        a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-          .url.inline-button-wrap
-            button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+        //- Vote Counter
+        .card-vote-wrap(v-if="props.card.counterIsVisible" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+          CardVote(:card="card")
 
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
@@ -2054,20 +2157,39 @@ const clearFocus = () => {
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
+          //- video pause
+          .button-wrap.play-button-wrap.badge.secondary(
+            v-if="state.formats.video && canEditCard"
+            @mousedown.stop
+            @touchstart.stop
+            @mouseup.stop.prevent
+            @click.stop="toggleVideoIsPaused"
+            @touchend.stop="toggleVideoIsPaused"
+            @mouseenter="handleMouseEnterPlayButton"
+            @mouseleave="handleMouseLeavePlayButton"
+            :style="{ backgroundColor: currentBackgroundColor }"
+          )
+            button.small-button
+              img.icon.play(v-if="props.card.videoIsPaused" src="@/assets/play.svg" :class="colorClasses")
+              img.icon.pause(v-else src="@/assets/pause.svg" :class="colorClasses")
           //- [·]
           ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
-            Loader(:visible="isLoadingUrlPreview")
-          //- Url →
-          a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-            .url.inline-button-wrap
-              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+        //- Vote Counter
+        .card-vote-wrap(v-if="props.card.counterIsVisible")
+          CardVote(:card="card")
+
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
+        //- Url →
+        a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+          .url.inline-button-wrap
+            button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+
         //- Lock
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
@@ -2127,6 +2249,10 @@ const clearFocus = () => {
           :selectedColor="selectedColor"
           :isImageCard="isImageCard"
         )
+    //- url preview loading
+    .status-container(v-if="isLoadingUrlPreview")
+      .badge.info
+        Loader(:visible="true")
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -2156,32 +2282,32 @@ const clearFocus = () => {
         span Space is Read Only
 
   //- Meta Info
-  .meta-container(v-if="state.isVisibleInViewport")
-    //- Search result
-    span.badge.search(v-if="isInSearchResultsCards")
-      img.icon.search(src="@/assets/search.svg")
-    //- Vote Counter
-    CardVote(:card="card")
-    //- Created Through API
-    .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
-      img.icon.system(src="@/assets/system.svg")
-    //- User
-    .badge-wrap(v-if="filterShowUsers")
-      UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
-    //- Date
-    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
-      img.icon.time(src="@/assets/time.svg")
-      .name {{dateUpdatedAt}}
+  teleport(to="#card-meta-containers")
+    .card-meta-container(v-if="state.isVisibleInViewport" :style="metaContainerStyles")
+      //- Search result
+      span.badge.search(v-if="isInSearchResultsCards")
+        img.icon.search(src="@/assets/search.svg")
+      //- Created Through API
+      .badge.secondary(v-if="card.isCreatedThroughPublicApi && filterShowUsers" title="Created via public API")
+        img.icon.system(src="@/assets/system.svg")
+      //- User
+      .badge-wrap(v-if="filterShowUsers")
+        UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
+      //- Date
+      .badge.secondary.button-badge.date-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
+        img.icon.time(src="@/assets/time.svg")
+        .name {{dateUpdatedAt}}
 
 </template>
 
 <style lang="stylus">
 .card-wrap
-  --card-width 200px // consts.normalCardMaxWidth
+  --card-width 200px // consts.normalCardWrapWidth
   pointer-events all
   position absolute
   max-width var(--card-width)
   -webkit-touch-callout none
+  transition opacity 0.2s // same as consts.itemSnapGuideWaitingDuration ms
   &.is-resizing,
   &.is-tilting
     *
@@ -2213,6 +2339,10 @@ const clearFocus = () => {
     &.is-comment
       opacity 0.5
 
+    .card-vote-wrap
+      margin 8px
+      margin-top 0
+
     .card-comment
       > .badge
         margin 0
@@ -2228,6 +2358,9 @@ const clearFocus = () => {
         height 15px
         img
           vertical-align 4px
+      .card-vote-wrap
+        margin 4px
+        margin-right 0
 
     .card-content-wrap
       display flex
@@ -2274,8 +2407,27 @@ const clearFocus = () => {
           h3
             text-decoration line-through
         &.has-checkbox
+          width calc(100% - 32px) // - width of checkbox
           .audio
             width 132px
+      > .play-button-wrap
+        flex-shrink 0
+        padding 0
+        height fit-content
+        margin-top 7px
+        margin-left 8px
+        margin-right 0
+        button
+          width 23px
+          background transparent
+          padding-left 7px
+          .icon.play
+            pointer-events none
+            vertical-align 1px
+          .icon.pause
+            pointer-events none
+            margin-bottom 1px
+
     .name-wrap
       min-width 40px
     .connector,
@@ -2291,7 +2443,7 @@ const clearFocus = () => {
     .url-wrap
       padding 0
       margin 0
-      padding-left 8px
+      padding-left 6px
       vertical-align -1px
       .url
         display inline-block
@@ -2300,6 +2452,8 @@ const clearFocus = () => {
         padding-right 0
         button
           cursor pointer
+      &:only-child
+        padding-right 6px
     span + .url-wrap,
     p + .url-wrap,
     .badge + .url-wrap
@@ -2315,19 +2469,16 @@ const clearFocus = () => {
       left 5px
       top 3.5px
 
-    .is-light-in-dark-theme
-      border-color var(--primary-on-light-background)
-      .icon
-        filter none
-    .is-dark-in-light-theme
-      border-color var(--primary-on-dark-background)
-      .icon
-        filter invert()
-
-    .uploading-container
+    .uploading-container,
+    .status-container
       position absolute
       top 6px
       left 6px
+      .loader
+        margin-left 0
+    .status-container
+      .loader
+        margin 0
 
     &.media-card
       background-color transparent
@@ -2351,6 +2502,9 @@ const clearFocus = () => {
         justify-content space-between
         .name
           background-color var(--secondary-background)
+          margin-bottom 0
+        .card-vote-wrap
+          margin-top 8px
 
     &.audio-card
       .card-content-wrap
@@ -2385,38 +2539,9 @@ const clearFocus = () => {
     pointer-events all
     cursor pointer
     position relative
+    padding 8px 4px
     button
       cursor pointer
-
-  .meta-container
-    transform translateY(-6px)
-    display -webkit-box
-    padding 8px
-    padding-top 0
-    position absolute
-    .user-label-inline
-      margin-right 0
-      width max-content
-    .user-badge
-      display flex
-      margin 0
-      .label-badge
-        padding 0 10px
-    .badge
-      width max-content
-      &.secondary
-        display flex
-        .icon
-          margin-right 5px
-          margin-top 3px
-        .icon.system
-          margin 0
-
-    .badge + .badge,
-    .badge-wrap + .badge
-      margin-left 6px
-    .date-is-today
-      background-color var(--info-background)
 
   .comment-user-badge
     display inline
@@ -2464,6 +2589,32 @@ const clearFocus = () => {
   .is-in-checked-box,
   .is-checked
     opacity var(--is-checked-opacity)
+
+.card-meta-container
+  pointer-events all
+  z-index var(--max-z)
+  display flex
+  position absolute
+  .user-label-inline
+    margin-right 0
+    width max-content
+  .user-badge
+    display flex
+    margin 0
+    .label-badge
+      padding 0 10px
+  .badge
+    width max-content
+  .badge + .badge,
+  .badge-wrap + .badge
+    margin-left 6px
+  .date-is-today
+    background-color var(--info-background)
+  .date-badge
+    display flex
+    align-items center
+    .icon
+      margin-right 4px
 
 @keyframes bounce
   0%

@@ -244,8 +244,8 @@ export default {
     return {
       x: Math.round(rectPosition.x * zoom),
       y: Math.round(rectPosition.y * zoom),
-      width: Math.round(rect.width || rect.resizeWidth * zoom),
-      height: Math.round(rect.height || rect.resizeHeight * zoom)
+      width: Math.round((rect.width || rect.resizeWidth) * zoom),
+      height: Math.round((rect.height || rect.resizeHeight) * zoom)
     }
   },
   isPositionOutsideOfSpace (position) {
@@ -378,6 +378,20 @@ export default {
       return true
     }
   },
+  oppositeSide (side) {
+    if (side === 'left') {
+      return 'right'
+    }
+    if (side === 'right') {
+      return 'left'
+    }
+    if (side === 'top') {
+      return 'bottom'
+    }
+    if (side === 'bottom') {
+      return 'top'
+    }
+  },
   numberOfLeadingTabs (string) {
     // https://regexr.com/6dl8u
     // matches /t tab characters at start of string
@@ -420,6 +434,15 @@ export default {
       }
     }
     return false
+  },
+  countArrayItems (obj) {
+    let total = 0
+    for (const value of Object.values(obj)) {
+      if (Array.isArray(value)) {
+        total += value.length
+      }
+    }
+    return total
   },
   longestStringInArray (array) {
     this.typeCheck({ value: array, type: 'array', origin: 'longestStringInArray' })
@@ -468,11 +491,15 @@ export default {
     return object
   },
   objectPickKeys (object, keys) {
-    const result = {}
-    keys.forEach(key => {
-      result[key] = object[key]
-    })
-    return result
+    try {
+      const result = {}
+      keys.forEach(key => {
+        result[key] = object[key]
+      })
+      return result
+    } catch (error) {
+      console.error('🚒 objectPickKeys', error, object, keys)
+    }
   },
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color', 'description', 'website']
@@ -582,7 +609,7 @@ export default {
   },
   optionKey () {
     if (this.isMacOrIpad() || this.isIPhone()) {
-      return 'Option'
+      return 'Opt'
     } else {
       return 'Alt'
     }
@@ -731,7 +758,7 @@ export default {
   },
   unixTime (date) {
     date = date || new Date()
-    return new Date(date).getTime()
+    return new Date(date).toISOString()
   },
   shortRelativeTime (date) {
     if (!date) { return }
@@ -896,6 +923,11 @@ export default {
   denormalizeItems (normalizedItems) {
     return Object.values(normalizedItems)
   },
+  stringToBoolean (string) {
+    if (string === 'true') {
+      return true
+    }
+  },
 
   // items (cards or boxes)
 
@@ -908,11 +940,14 @@ export default {
     if (!item) { return }
     const card = this.cardElementFromId(item.id)
     const box = this.boxElementFromId(item.id)
+    const list = this.listElementFromId(item.id)
     let rect
     if (card) {
       rect = this.cardElementDimensions(item)
     } else if (box) {
       rect = this.boxElementDimensions(item)
+    } else if (list) {
+      rect = this.listElementDimensions(item)
     }
     return rect
   },
@@ -1014,7 +1049,8 @@ export default {
     const element = this.cardElement(card)
     if (!element) { return }
     const cardId = card.id
-    card.shouldRender = element.dataset.shouldRender
+    card.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
+    card.isLocked = this.stringToBoolean(element.dataset.isLocked)
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -1022,13 +1058,15 @@ export default {
     card.width = Math.ceil(width)
     card.height = Math.ceil(height)
     card.id = cardId
+    card.itemType = 'card'
     return card
   },
   boxElementDimensions (box) {
     if (!box) { return }
     const element = this.boxElementFromId(box.id)
     if (!element) { return }
-    box.shouldRender = element.dataset.shouldRender
+    box.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
+    box.isLocked = this.stringToBoolean(element.dataset.isLocked)
     box.x = parseInt(element.dataset.x)
     box.y = parseInt(element.dataset.y)
     box.resizeWidth = parseInt(element.dataset.resizeWidth)
@@ -1037,7 +1075,23 @@ export default {
     box.height = parseInt(element.dataset.resizeHeight)
     box.infoWidth = parseInt(element.dataset.infoWidth)
     box.infoHeight = parseInt(element.dataset.infoHeight)
+    box.itemType = 'box'
     return box
+  },
+  listElementDimensions (list) {
+    if (!list) { return }
+    const element = this.listElementFromId(list.id)
+    if (!element) { return }
+    // list.shouldRender = element.dataset.shouldRender
+    list.x = parseInt(element.dataset.x)
+    list.y = parseInt(element.dataset.y)
+    list.width = parseInt(element.dataset.width)
+    list.height = parseInt(element.dataset.height)
+    if (element.dataset.isCollapsed === 'true') {
+      list.height = consts.listInfoHeight
+    }
+    list.itemType = 'list'
+    return list
   },
   clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
@@ -1145,18 +1199,57 @@ export default {
     return document.querySelector(`.line-info[data-line-id="${lineId}"]`)
   },
 
+  // lists
+
+  listElementFromId (listId) {
+    return document.querySelector(`.list[data-list-id="${listId}"]`)
+  },
+  listInfoElementFromId (listId) {
+    return document.querySelector(`.list-info[data-list-id="${listId}"]`)
+  },
+  listInfoRectFromId (listId) {
+    const element = document.querySelector(`.list-info[data-list-id="${listId}"]`)
+    const rect = element.getBoundingClientRect()
+    return this.rectDimensions(rect)
+  },
+  listSiblingPositionIndex (listCards, targetPositionIndex, shouldPrepend) {
+    let index = listCards.findIndex(card => card.listPositionIndex === targetPositionIndex)
+    if (shouldPrepend) {
+      index -= 1
+    } else {
+      index += 1
+    }
+    if (index < 0) { return null }
+    const siblingCard = listCards[index]
+    if (!siblingCard) {
+      return null
+    } else {
+      return siblingCard.listPositionIndex
+    }
+  },
+  listChildPlaceholderRectFromCardId (cardId) {
+    const element = document.querySelector(`.list-placeholder[data-card-id="${cardId}"]`)
+    if (!element) { return }
+    const rect = element.getBoundingClientRect()
+    return rect
+  },
+  listChildWidth (listWidth) {
+    listWidth = listWidth || consts.minListWidth
+    return listWidth - (consts.listPadding * 2)
+  },
+
   // rect
 
-  isPointInsideRect (point, rect) {
+  isPointInsideRect (point, rect, threshold = 0) {
     const xIsInside = this.isBetween({
       value: point.x,
-      min: rect.x,
-      max: rect.x + rect.width
+      min: rect.x + threshold,
+      max: rect.x + (rect.width || rect.resizeWidth) - threshold
     })
     const yIsInside = this.isBetween({
       value: point.y,
-      min: rect.y,
-      max: rect.y + rect.height
+      min: rect.y + threshold,
+      max: rect.y + rect.height - threshold
     })
     return xIsInside && yIsInside
   },
@@ -1170,17 +1263,23 @@ export default {
     }
     return this.isRectAInsideRectB(rect, viewportRect)
   },
-  isRectAInsideRectB (rectA, rectB) {
-    // udpate rects to support space zoom
-    rectA = this.rectDimensions(rectA)
-    rectB = this.rectDimensions(rectB)
+  isNormalizedRectAInsideRectB (rectA, rectB) {
     // Check if any part of rectA intersects with rectB
+    rectA.width = rectA.width || rectA.resizeWidth
+    rectB.width = rectB.width || rectB.resizeWidth
     return (
       rectA.x < rectB.x + rectB.width &&
       rectA.x + rectA.width > rectB.x &&
       rectA.y < rectB.y + rectB.height &&
       rectA.y + rectA.height > rectB.y
     )
+  },
+  isRectAInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // Check if any part of rectA intersects with rectB
+    return this.isNormalizedRectAInsideRectB(rectA, rectB)
   },
   isRectACompletelyInsideRectB (rectA, rectB) {
     // udpate rects to support space zoom
@@ -1318,6 +1417,9 @@ export default {
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15
+    if (item.itemType === 'box' && item.isLocked) {
+      item.infoWidth = item.resizeWidth
+    }
     const width = item.infoWidth || item.resizeWidth || item.width
     const rightSide = item.x + width
     let x = rightSide
@@ -1457,6 +1559,21 @@ export default {
     rect.height = rect.height + controlPointMax.y
     return rect
   },
+  rectFromDrawingStrokePath (path) {
+    const coords = path.d.match(/[-\d.]+/g).map(Number)
+    const xs = coords.filter((_, i) => i % 2 === 0)
+    const ys = coords.filter((_, i) => i % 2 === 1)
+    const minX = Math.min(...xs)
+    const maxX = Math.max(...xs)
+    const minY = Math.min(...ys)
+    const maxY = Math.max(...ys)
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY
+    }
+  },
   integerCoords (coords) {
     return {
       x: parseInt(coords.x),
@@ -1582,6 +1699,7 @@ export default {
       connectionTypes: [],
       boxes: [],
       lines: [],
+      lists: [],
       tags: [],
       users: [],
       userId: '',
@@ -1591,8 +1709,22 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      groupId: null
+      groupId: null,
+      note: ''
     }
+  },
+  deletePrivateSpaceMeta (space) {
+    const spacePrivateKeys = [
+      'clients',
+      'spectators',
+      'users',
+      'collaborators',
+      'collaboratorKey',
+      'groupId',
+      'readOnlyKey'
+    ]
+    spacePrivateKeys.forEach(key => delete space[key])
+    return space
   },
   resetSpaceMeta ({ space, user, type }) {
     space.originSpaceId = space.id
@@ -1608,13 +1740,12 @@ export default {
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.isTemplate = false
-    space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null
     space.groupId = null
     space.group = null
     space.createdAt = new Date()
-    space.editedAt = new Date()
+    space.editedAt = new Date().toISOString()
     space.collaboratorKey = nanoid()
     space.readOnlyKey = nanoid()
     space.cards = space.cards.map(card => {
@@ -1642,9 +1773,16 @@ export default {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = await cache.user()
-    let { cards, connections, connectionTypes, boxes, tags } = items
-    tags = tags || []
-    boxes = boxes || []
+    let {
+      cards = [],
+      connections = [],
+      connectionTypes = [],
+      boxes = [],
+      tags = [],
+      lines = [],
+      lists = [],
+      drawingStrokes = []
+    } = items
     cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
@@ -1666,6 +1804,34 @@ export default {
       box.id = newId
       box.userId = userId
       return box
+    })
+    lists = lists.map(list => {
+      const userId = this.itemUserId(user, list, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: list.id,
+        newId
+      })
+      list.id = newId
+      list.userId = userId
+      return list
+    })
+    lines = lines.map(line => {
+      const userId = this.itemUserId(user, line, nullItemUsers)
+      const newId = nanoid()
+      line.id = newId
+      line.userId = userId
+      return line
+    })
+    drawingStrokes = drawingStrokes.map(strokes => {
+      strokes = strokes.map(point => {
+        const userId = this.itemUserId(user, point, nullItemUsers)
+        const newId = nanoid()
+        point.id = newId
+        point.userId = userId
+        return point
+      })
+      return strokes
     })
     connectionTypes = uniqBy(connectionTypes, 'id')
     connectionTypes = connectionTypes.map(type => {
@@ -1695,7 +1861,11 @@ export default {
       tag.userId = userId
       return tag
     })
-    items = { cards, connections, connectionTypes, boxes, tags }
+    cards = cards.map(card => {
+      card.listId = this.updateAllIds(card, 'listId', itemIdDeltas)
+      return card
+    })
+    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes, lists }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1752,8 +1922,7 @@ export default {
     })
   },
   updateSpaceItemsUserId (space, userId) {
-    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes']
-    itemTypes.forEach(itemType => {
+    consts.itemTypes.forEach(itemType => {
       if (!space[itemType]) { return }
       space[itemType] = space[itemType].map(item => {
         const shouldUpdate = item.userId !== null && item.userId !== consts.rootUserId // ensures corect free card count
@@ -1778,7 +1947,7 @@ export default {
     return spaces
   },
   newHelloSpace (user) {
-    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey']
+    const emptyStringKeys = ['id', 'collaboratorKey', 'readOnlyKey', 'note']
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
     const userId = user?.id || consts.moderatorUserId
@@ -1927,7 +2096,7 @@ export default {
   spaceUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey }) {
     let url
     if (collaboratorKey || readOnlyKey) {
-      url = this.inviteUrl({ spaceId, spaceName, collaboratorKey, readOnlyKey })
+      url = this.spaceInviteUrl({ spaceId, spaceName, collaboratorKey, readOnlyKey })
     } else {
       url = this.url({ name: spaceName, id: spaceId })
     }
@@ -1944,29 +2113,28 @@ export default {
     }
     return url
   },
-  inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
+  spaceInviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
     if (!spaceId) { return }
     spaceName = this.normalizeString(spaceName)
     spaceName = this.truncated(spaceName, 20, '-')
-    let invite = ''
-    let comment = ''
+    let inviteQuery = ''
     if (collaboratorKey) {
-      invite = `collaboratorKey=${collaboratorKey}`
+      inviteQuery = `collaboratorKey=${collaboratorKey}`
     } else if (readOnlyKey) {
-      invite = `readOnlyKey=${readOnlyKey}`
+      inviteQuery = `readOnlyKey=${readOnlyKey}`
     }
+    let url = `${consts.kinopioDomain()}/space/invite/${spaceId}?${inviteQuery}&name=${spaceName}`
     if (isCommentMode) {
-      comment = '&comment=true'
+      url = url + '&comment=true'
     }
-    const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}${comment}`
     return url
   },
   groupInviteUrl ({ groupId, groupName, collaboratorKey }) {
     if (!groupId || !collaboratorKey) { return }
     groupName = this.normalizeString(groupName)
     groupName = this.truncated(groupName, 20, '-')
-    const invite = `collaboratorKey=${collaboratorKey}`
-    const url = `${consts.kinopioDomain()}/group/invite?groupId=${groupId}&${invite}&name=${groupName}`
+    const inviteQuery = `collaboratorKey=${collaboratorKey}`
+    const url = `${consts.kinopioDomain()}/group/invite/${groupId}?${inviteQuery}&name=${groupName}`
     return url
   },
   urlSearchParamsToObject (searchParams) {
@@ -2114,7 +2282,7 @@ export default {
     // then '.', or ':' + portnumbers
     // followed by at least 1 alphanumeric, '=', or '.'
     // then optional trailing '/' or '-'
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.]+\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.!]+\/?-?/igm)
     const localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
@@ -2192,7 +2360,7 @@ export default {
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
-    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm)(?:\n| |\?|&)/igm)
+    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm|\.avif)(?:\n| |\?|&)/igm)
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
   },
@@ -2272,7 +2440,6 @@ export default {
   },
   fileNameFromUrl (url) {
     if (!url) { return }
-    if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
     const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+(\?[A-z.0-9-=]*)*$/gim)
@@ -2346,37 +2513,6 @@ export default {
       keysToRemove.forEach(key => delete queryObject[key])
       const newUrl = qs.encode(domain, queryObject)
       name = name.replace(url, newUrl)
-    })
-    return name
-  },
-  addHiddenQueryStringToURLs (name) {
-    const urls = this.urlsFromString(name)
-    if (!urls) { return name }
-    urls.forEach(url => {
-      if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
-      const prevUrl = url.trim()
-      if (!this.urlIsWebsite(prevUrl)) { return }
-
-      url = this.newUrl(prevUrl)
-      if (!url) { return }
-
-      url.searchParams.set('hidden', 'true')
-      let newUrl = url.toString()
-      if (url.pathname === '/') {
-        newUrl = newUrl.replace(`${url.host}/`, url.host)
-      }
-      name = name.replace(prevUrl, newUrl)
-    })
-    return name
-  },
-  removeHiddenQueryStringFromURLs (name) {
-    const urls = this.urlsFromString(name)
-    if (!urls) { return name }
-    urls.forEach(url => {
-      const prevUrl = url
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
-      name = name.replace(prevUrl, url)
     })
     return name
   },
@@ -2465,10 +2601,11 @@ export default {
   // Upload
 
   isFileTooBig ({ file, userIsUpgraded }) {
-    const sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
-    if (file.size > sizeLimit && !userIsUpgraded) {
-      return true
+    let sizeLimit = 1024 * 1024 * consts.freeUploadSizeLimit // 5mb
+    if (userIsUpgraded) {
+      sizeLimit = 1024 * 1024 * consts.upgradedUploadSizeLimit // 256
     }
+    return file.size > sizeLimit
   },
   async dataFromClipboard () {
     let text, file
@@ -2684,6 +2821,9 @@ export default {
       h2Pattern: /^## ()(.+$)/gmi,
       h3Pattern: /^### ()(.+$)/gmi,
       h4Pattern: /^#### ()(.+$)/gmi,
+      // https://regexr.com/65i1l
+      // matches > text
+      blockquotePattern: /^> ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -2729,6 +2869,9 @@ export default {
         }, {
           type: 'h4',
           result: markdown.h4Pattern.exec(text)
+        }, {
+          type: 'blockquote',
+          result: markdown.blockquotePattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)

@@ -86,7 +86,6 @@ const toggleAppsAndExtensionsIsVisible = () => {
               About(:visible="state.aboutIsVisible")
               KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
               Donate(:visible="state.donateIsVisible")
-
         .right
           .button-wrap
             button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
@@ -102,10 +101,11 @@ const toggleAppsAndExtensionsIsVisible = () => {
 </template>
 
 <style lang="stylus">
-header
-  dialog.apps
-    left initial
-    right 8px
+.page
+  header
+    dialog.apps
+      left initial
+      right 8px
 
 // same as components/Header.vue
 header

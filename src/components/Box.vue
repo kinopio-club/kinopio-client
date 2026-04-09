@@ -19,6 +19,7 @@ import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { colord, extend } from 'colord'
+import uniq from 'lodash-es/uniq'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -85,10 +86,7 @@ const state = reactive({
   remoteConnectionColor: ''
 })
 
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
-const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserColor = computed(() => userStore.color)
 const name = computed(() => props.box.name)
 const currentBoxIsSelected = computed(() => {
   const selected = globalStore.multipleBoxesSelectedIds
@@ -98,17 +96,15 @@ const currentBoxIsSelected = computed(() => {
 // normalize
 
 const normalizedBox = computed(() => {
-  return normalizeBox(props.box)
-})
-const normalizeBox = (box) => {
+  const box = props.box
   box.resizeWidth = box.resizeWidth || consts.minItemXY
   box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
-  box.color = box.color || randomColor({ luminosity: 'light' })
+  box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
   return box
-}
+})
 const normalizedName = computed(() => {
   // name without checkbox text
   let newName = name.value
@@ -169,6 +165,7 @@ const removeViewportObserver = () => {
 
 // styles
 
+const isSnappingToItem = computed(() => (globalStore.itemSnappingIsReady || globalStore.itemSnappingIsWaiting) && currentBoxIsBeingDragged.value)
 const fillColor = computed(() => {
   let value = color.value
   value = colord(value).alpha(0.5).toRgbString()
@@ -189,6 +186,9 @@ const boxStyles = computed(() => {
   if (hasFill.value && !background) {
     styles.backgroundColor = fillColor.value
   }
+  if (isSnappingToItem.value) {
+    styles.borderColor = colord(color.value).alpha(0.3).toRgbString()
+  }
   return styles
 })
 const infoStyles = computed(() => {
@@ -202,6 +202,9 @@ const infoStyles = computed(() => {
   }
   if (isLocked.value) {
     styles.pointerEvents = 'none'
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
@@ -219,6 +222,9 @@ const backgroundStyles = computed(() => {
   }
   if (props.box.backgroundIsStretch) {
     styles.backgroundSize = 'cover'
+  }
+  if (isSnappingToItem.value) {
+    styles.opacity = consts.itemSnapOpacity
   }
   return styles
 })
@@ -238,7 +244,7 @@ const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
   const classList = []
-  if (isPainting.value) {
+  if (isPaintSelecting.value) {
     classList.push('unselectable')
   }
   if (colorIsDark.value) {
@@ -253,6 +259,16 @@ const infoClasses = computed(() => {
   if (fontSizeModifier) {
     classList.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
+  if (globalStore.boxIsSnappingTransition) {
+    classList.push('transition')
+  }
+  return classList
+})
+const backgroundClasses = computed(() => {
+  const classList = []
+  if (globalStore.boxIsSnappingTransition) {
+    classList.push('transition')
+  }
   return classList
 })
 const classes = computed(() => {
@@ -261,11 +277,14 @@ const classes = computed(() => {
     active: currentBoxIsBeingDragged.value,
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
-    'is-checked': isChecked.value || isInCheckedBox.value,
+    'is-checked': isChecked.value,
     filtered: isFiltered.value,
     transition: !globalStore.currentBoxIsNew || !globalStore.currentUserIsResizingBox
   }
 })
+const handleTransitionEnd = () => {
+  globalStore.boxIsSnappingTransition = false
+}
 
 // space filters
 
@@ -314,7 +333,7 @@ const startResizing = (event) => {
   broadcastStore.update({ updates, action: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
-const resizeColorClass = computed(() => {
+const resizeButtonColorClass = computed(() => {
   const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
   return [colorClass]
 })
@@ -329,16 +348,16 @@ const shrinkToDefaultBoxSize = () => {
 }
 const shrink = () => {
   prevSelectedBox = props.box
-  const { cards, boxes } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
+  const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(prevSelectedBox)
   prevSelectedBox = null
-  const items = cards.concat(boxes)
+  const items = cards.concat(boxes, lists)
   if (!items.length) {
     shrinkToDefaultBoxSize()
     return
   }
   const rect = utils.boundaryRectFromItems(items)
-  const padding = consts.spaceBetweenCards
-  const paddingTop = 30 + padding
+  const padding = consts.spaceBetweenCards * 2
+  const paddingTop = 25 + padding
   const update = { id: props.box.id }
   update.x = rect.x - padding
   update.y = rect.y - paddingTop
@@ -353,7 +372,7 @@ const isLocked = computed(() => props.box.isLocked)
 
 // interacting
 
-const isPainting = computed(() => globalStore.currentUserIsPainting)
+const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentBoxIsBeingDragged = computed(() => {
   const isDragging = globalStore.currentUserIsDraggingBox
@@ -365,7 +384,40 @@ const isResizing = computed(() => {
   const isCurrent = globalStore.currentUserIsResizingBoxIds.includes(props.box.id)
   return isResizing && isCurrent
 })
-const startBoxInfoInteraction = (event) => {
+const startDraggingDuplicateItems = async (event) => {
+  globalStore.currentUserIsDraggingDuplicateItem = true
+  // select box
+  boxStore.selectItemsInSelectedBoxes(props.box)
+  let boxIds = globalStore.multipleBoxesSelectedIds.concat([props.box.id])
+  boxIds = uniq(boxIds)
+  const boxes = boxIds.map(id => boxStore.getBox(id))
+  const index = boxIds.findIndex(id => id === props.box.id) || 0
+
+  const cards = globalStore.multipleCardsSelectedIds.map(id => cardStore.getCard(id))
+  globalStore.clearMultipleSelected()
+  // create new items
+  const newItems = await utils.uniqueSpaceItems({
+    cards: utils.clone(cards),
+    boxes: utils.clone(boxes)
+  })
+  const newCards = newItems.cards.map(card => {
+    card.z += 1
+    return card
+  })
+  const newBoxes = newItems.boxes.map(box => {
+    box.z += 1
+    return box
+  })
+  const newCurrentBox = newBoxes[index]
+  newCards.forEach(card => cardStore.createCard(card, true))
+  newBoxes.forEach(box => boxStore.createBox(box))
+  // select new items
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
+  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
+  return newCurrentBox.id
+}
+const startBoxInfoInteraction = async (event) => {
   if (event.target.closest('.connector')) {
     return
   }
@@ -376,12 +428,17 @@ const startBoxInfoInteraction = (event) => {
   globalStore.currentDraggingBoxId = ''
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingBox = true
-  globalStore.currentDraggingBoxId = props.box.id
-  boxStore.incrementBoxZ(props.box.id)
+  let boxId = props.box.id
+  if (event.altKey) {
+    boxId = await startDraggingDuplicateItems(event)
+  }
+  globalStore.currentDraggingBoxId = boxId
+  boxStore.incrementBoxZ(boxId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingBox) { return }
-  if (isPainting.value) { return }
+  if (isPaintSelecting.value) { return }
   state.isHover = value
   if (value) {
     globalStore.currentUserIsHoveringOverBoxId = props.box.id
@@ -393,15 +450,14 @@ const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
-  if (globalStore.currentUserIsPainting) { return }
+  if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
+  if (globalStore.getIsResizingItem) { return }
   if (!canEditBox.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteBoxesDragging' })
   globalStore.closeAllDialogs()
   if (isMeta) {
-    globalStore.updateMultipleBoxesSelectedIds([props.box.id])
-    boxStore.selectItemsInSelectedBoxes()
     globalStore.updateMultipleBoxesSelectedIds([])
     globalStore.currentUserIsDraggingBox = false
     globalStore.shouldCancelNextMouseUpInteraction = true
@@ -409,6 +465,7 @@ const endBoxInfoInteraction = (event) => {
     globalStore.clearMultipleSelected()
   }
   if (globalStore.preventDraggedBoxFromShowingDetails) { return }
+  if (globalStore.currentUserIsDraggingDuplicateItem) { return }
   if (isMeta) { return }
   globalStore.updateBoxDetailsIsVisibleForBoxId(props.box.id)
   event.stopPropagation() // prevent stopInteractions() from closing boxDetails
@@ -649,30 +706,6 @@ const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
   return Boolean(utils.checkboxFromString(name.value))
 })
-const containingBoxes = computed(() => {
-  if (!state.isVisibleInViewport) { return }
-  if (globalStore.currentUserIsDraggingBox) { return }
-  if (currentBoxIsBeingDragged.value) { return }
-  if (currentBoxIsSelected.value) { return }
-  if (isResizing.value) { return }
-  if (globalStore.boxDetailsIsVisibleForBoxId) { return }
-  let boxes = boxStore.getAllBoxes
-  boxes = utils.clone(boxes)
-  boxes = boxes.filter(box => {
-    const currentBox = utils.clone(props.box)
-    const isInsideBox = utils.isRectACompletelyInsideRectB(currentBox, box)
-    const boxArea = box.resizeWidth * box.resizeHeight
-    const currentBoxArea = currentBox.resizeWidth * currentBox.resizeHeight
-    const boxIsParent = boxArea > currentBoxArea
-    return isInsideBox && boxIsParent
-  })
-  return boxes
-})
-const isInCheckedBox = computed(() => {
-  if (!containingBoxes.value) { return }
-  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
-  return Boolean(checkedBox)
-})
 
 // box focus
 
@@ -703,7 +736,7 @@ const clearFocus = () => {
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: fillColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
-    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
+    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles" classes="backgroundClasses")
   teleport(to="#box-infos")
     //- name
     .box-info(
@@ -712,6 +745,7 @@ const clearFocus = () => {
       :data-is-visible-in-viewport="state.isVisibleInViewport"
       :style="infoStyles"
       :class="infoClasses"
+      @transitionend="handleTransitionEnd"
       tabindex="0"
 
       @mouseover="updateIsHover(true)"
@@ -767,7 +801,7 @@ const clearFocus = () => {
       )
 
   //- resize
-  .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
+  .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
     .inline-button-wrap(
         @pointerover="updateIsHover(true)"
         @pointerleave="updateIsHover(false)"
@@ -778,7 +812,7 @@ const clearFocus = () => {
       button.inline-button(
         tabindex="-1"
       )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 </template>
 
 <style lang="stylus">
@@ -821,12 +855,24 @@ const clearFocus = () => {
         left 0
 
 .box-info
+  --ease-out-circ cubic-bezier(0, 0.55, 0.45, 1) // https://easings.net/#easeOutCirc
   --header-font var(--header-font-0)
   z-index 1
   border-radius 4px
+  border-bottom-right-radius var(--entity-radius)
   display flex
   align-items center
   width max-content
+  pointer-events all
+  position absolute
+  cursor pointer
+  word-break break-word
+  color var(--primary-on-light-background)
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2
@@ -864,12 +910,6 @@ const clearFocus = () => {
       font-size 52px
     h3
       font-size 36px
-  pointer-events all
-  position absolute
-  cursor pointer
-  border-bottom-right-radius var(--entity-radius)
-  word-break break-word
-  color var(--primary-on-light-background)
   &:hover
     box-shadow var(--hover-shadow)
   &:active
@@ -939,5 +979,4 @@ const clearFocus = () => {
     img
       width 10px
       height 10px
-
 </style>

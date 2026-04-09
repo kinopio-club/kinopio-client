@@ -1,24 +1,19 @@
 import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
 const apiHost = 'https://api.kinopio.club'
+const siteHost = 'https://kinopio.club'
 const timeout = 5000 // 5s
 const inviteDescription = 'Work on shared spaces together'
-const privateSpaceDescription = 'Space is private or could not be found'
-
-// utils
-
-const spaceIdFromUrl = (url) => {
-  const uuidLength = 21
-  const path = url.pathname
-  const id = path.substring(path.length - uuidLength)
-  const idIsInvalid = id.includes('/') || id.includes('.') || id.length !== uuidLength
-  if (idIsInvalid) { return }
-  console.info('🌷 spaceId', id)
-  return id
-}
 
 // space
 
+const spaceIdFromString = (string) => {
+  const uuidLength = 21
+  const id = string.substring(string.length - uuidLength)
+  const idIsInvalid = id.includes('/') || id.includes('.') || id.length !== uuidLength
+  if (idIsInvalid) { return }
+  return id
+}
 const normalizeResponse = async (response) => {
   const success = [200, 201, 202, 204]
   if (success.includes(response.status)) {
@@ -28,7 +23,7 @@ const normalizeResponse = async (response) => {
     throw { response, status: response.status }
   }
 }
-const spacePublicMeta = async (context, spaceId) => {
+const spacePublicMeta = async (spaceId) => {
   try {
     const url = `${apiHost}/space/${spaceId}/public-meta`
     const response = await fetch(url, { signal: AbortSignal.timeout(timeout) })
@@ -42,10 +37,13 @@ const spacePublicMeta = async (context, spaceId) => {
 
 // title
 
-const pageTitle = (context, space) => {
+const pageTitle = (space) => {
   let title
+  const spaceIsPrivate = !space.cards
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
+  } else if (space.name && spaceIsPrivate) {
+    title = `[Private] ${space.name} – Kinopio`
   } else if (space.name) {
     title = `${space.name} – Kinopio`
   } else {
@@ -57,85 +55,89 @@ const pageTitle = (context, space) => {
 // json-ld for crawlers
 // https://json-ld.org/
 
-const pageJsonLD = (context, space) => {
+const pageJsonLD = (space) => {
+  if (!space.cards) { return }
   let items = space.cards.concat(space.boxes)
+  // sort by y then x for reading order (top-to-bottom, left-to-right)
+  items.sort((a, b) => a.y - b.y || a.x - b.x)
   items = items.map(item => {
     return {
       '@type': 'CreativeWork',
-      name: item.name,
-      position: {
-        '@type': 'Place',
-        x: item.x,
-        y: item.y
-      }
+      name: item.name
     }
   })
   let jsonLD = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
-    name: pageTitle(context, space),
+    name: pageTitle(space),
     description: space.description,
+    thumbnailUrl: space.previewImage,
     dateCreated: space.createdAt,
-    contentUrl: space.previewImage,
-    hasPart: {
-      '@type': 'ItemList',
-      itemListElement: items
-    }
+    hasPart: items
   }
   jsonLD = JSON.stringify(jsonLD)
   return jsonLD
 }
 
-// invites
-
-const urlIsSpaceInvite = (url) => {
-  return url.pathname === '/invite'
-}
-const urlIsGroupInvite = (url) => {
-  return url.pathname === '/group/invite'
-}
 const nameFromUrl = (url) => {
-  return url.searchParams.get('name')
+  return url.searchParams.get('name') || ''
 }
 
+// handle url
 export default async (request, context) => {
   try {
+    // normalize or skip url
     let url = request.url
+    if (url.includes('netlify-prerender-function')) {
+      url = new URL(url).searchParams.get('url')
+    }
     url = url.replaceAll('?hidden=true', '')
-    console.info('🕊️ edge function request', url)
     url = new URL(url)
-    const isGroupInvite = urlIsGroupInvite(url)
-    const isSpaceInvite = urlIsSpaceInvite(url)
+    const requestIsFontFile = url.pathname.startsWith('/fonts/')
+    if (requestIsFontFile) { return }
+    console.info('🕊️ edge function request', url.href)
+    const isGroupInvite = url.pathname.startsWith('/group/invite/')
+    const isSpaceInvite = url.pathname.startsWith('/space/invite/')
+    const name = nameFromUrl(url)
     // group invite url
     if (isGroupInvite) {
-      const groupName = nameFromUrl(url)
-      const title = `[Group Invite] ${groupName}`
-      return rewriteIndexHtml({ context, title, description: inviteDescription })
+      return rewriteIndexHtml({
+        context,
+        title: `[Group Invite] ${name}`,
+        description: inviteDescription
+      })
     }
     // space invite url
     if (isSpaceInvite) {
-      const spaceName = nameFromUrl(url)
-      const title = `[Invite] ${spaceName}`
-      return rewriteIndexHtml({ context, title })
+      const spaceId = spaceIdFromString(url.pathname)
+      const space = await spacePublicMeta(spaceId)
+      let inviteLabel = '[Invite]'
+      if (url.searchParams.get('readOnlyKey')) {
+        inviteLabel = '[Read Only Invite]'
+      }
+      return rewriteIndexHtml({
+        context,
+        title: `${inviteLabel} ${pageTitle(space)}`,
+        previewImage: space.previewImage,
+        description: inviteDescription
+      })
     }
     // space url
-    const spaceId = spaceIdFromUrl(url)
+    const spaceId = spaceIdFromString(url.pathname)
     if (!spaceId) {
-      console.info('👻 edge function skipped')
+      console.info('👻 edge function skipped', url.href)
       return
     }
-    const space = await spacePublicMeta(context, spaceId)
-    // public space
-    if (space) {
-      const title = pageTitle(context, space)
-      const description = space.description
-      const previewImage = space.previewImage
-      const jsonLD = pageJsonLD(context, space)
-      return rewriteIndexHtml({ context, title, description, previewImage, jsonLD })
-    // private space
-    } else {
-      return rewriteIndexHtml({ context, description: privateSpaceDescription })
-    }
+    const space = await spacePublicMeta(spaceId)
+    const { description, previewImage } = space
+    return rewriteIndexHtml({
+      context,
+      title: pageTitle(space),
+      description,
+      previewImage,
+      jsonLD: pageJsonLD(space),
+      canonicalUrl: siteHost + url.pathname
+    })
   } catch (error) {
     console.error('🚑 pageMeta, 👻 skipped', error)
   }

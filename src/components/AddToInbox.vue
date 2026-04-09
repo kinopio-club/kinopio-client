@@ -151,8 +151,6 @@ section.add-to-inbox(v-if="props.visible")
   .row.badge.danger(v-if="state.error.isMissingInboxSpace")
     span Could not find space named Inbox
   section.subsection
-    .row
-      p Add to Inbox
     .textarea-wrap
       textarea.name(
         name="cardName"
@@ -170,7 +168,7 @@ section.add-to-inbox(v-if="props.visible")
     .row
       button(@click="addCard" :disabled="state.error.isMissingInboxSpace")
         img.icon.add-icon(src="@/assets/add.svg")
-        span Add
+        span Add to Inbox
       .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
         span Upgrade for more cards
       .badge.error-badge.danger(v-if="state.error.maxLength")

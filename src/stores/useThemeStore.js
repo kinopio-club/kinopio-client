@@ -6,6 +6,8 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 
+import { colord } from 'colord'
+
 const themes = {
   light: {
     name: 'light',
@@ -41,7 +43,7 @@ const themes = {
       // user badges
       'badge-donor': '#ff9dff',
       'badge-upgraded': 'springgreen',
-      // pages
+      // /about page sections
       'example-background': '#889e9a'
     }
   },
@@ -81,9 +83,8 @@ const themes = {
       'badge-upgraded': 'green',
       'badge-moderator': 'olive',
       'badge-ambassador': '#0f9189',
-      // pages
+      // /about page sections
       'example-background': '#14292d'
-
     }
   }
 }
@@ -114,7 +115,6 @@ export const useThemeStore = defineStore('theme', {
       const themeName = this.getThemeName
       return themes[themeName].colors
     }
-
   },
 
   actions: {
@@ -126,6 +126,12 @@ export const useThemeStore = defineStore('theme', {
         this.systemTheme = 'light'
       }
       this.restoreTheme()
+    },
+    isCardColorThemeDefault (color) {
+      color = colord(color).toHex()
+      const lightThemeColor = '#e3e3e3'
+      const darkThemeColor = '#262626'
+      return color === lightThemeColor || color === darkThemeColor
     },
 
     // theme is system
