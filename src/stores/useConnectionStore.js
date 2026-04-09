@@ -519,11 +519,25 @@ export const useConnectionStore = defineStore('connections', {
             // debounce the actual cardinal update and snap animation
             if (!cardinalDebounceTimers.has(connection.id)) {
               const connectionId = connection.id
-              const timer = setTimeout(() => {
+              const flush = () => {
                 cardinalDebounceTimers.delete(connectionId)
-                // read current path at fire time – connection.path has been updated each frame during the debounce window
+                const currentConnection = this.byId[connectionId]
+                if (!currentConnection) { return }
+                // recalculate cardinals from current item positions at flush time
+                let flushStartItem = utils.itemElementDimensions({ id: currentConnection.startItemId })
+                let flushEndItem = utils.itemElementDimensions({ id: currentConnection.endItemId })
+                if (!flushStartItem || !flushEndItem) { return }
+                flushStartItem = spaceStore.updateItemWithItemType(flushStartItem)
+                flushEndItem = spaceStore.updateItemWithItemType(flushEndItem)
+                const { point1Cardinal: currentPoint1Cardinal, point2Cardinal: currentPoint2Cardinal } = this.getConnectionPathBetweenItems({
+                  startItem: flushStartItem,
+                  startItemId: currentConnection.startItemId,
+                  endItem: flushEndItem,
+                  endItemId: currentConnection.endItemId,
+                  controlPoint: currentConnection.controlPoint
+                })
                 const fromPath = this.byId[connectionId]?.path
-                const cardinalUpdate = [{ id: connectionId, point1Cardinal, point2Cardinal }]
+                const cardinalUpdate = [{ id: connectionId, point1Cardinal: currentPoint1Cardinal, point2Cardinal: currentPoint2Cardinal }]
                 if (userStore.getUserCanEditSpace) {
                   this.updateConnections(cardinalUpdate)
                 } else {
@@ -532,15 +546,16 @@ export const useConnectionStore = defineStore('connections', {
                 if (fromPath) {
                   globalStore.triggerConnectionSnapAnimation({ id: connectionId, fromPath })
                 }
-              }, 200)
-              cardinalDebounceTimers.set(connection.id, timer)
+              }
+              const timer = setTimeout(flush, 50)
+              cardinalDebounceTimers.set(connection.id, { timer, flush })
             }
             // use stable path (old cardinals, new positions) during debounce window
             updates.push({ id: connection.id, path: stablePath })
           } else {
             // cardinals stable or reverted – cancel any pending debounce
             if (cardinalDebounceTimers.has(connection.id)) {
-              clearTimeout(cardinalDebounceTimers.get(connection.id))
+              clearTimeout(cardinalDebounceTimers.get(connection.id).timer)
               cardinalDebounceTimers.delete(connection.id)
             }
             updates.push({ id: connection.id, path, point1Cardinal, point2Cardinal })
@@ -558,6 +573,12 @@ export const useConnectionStore = defineStore('connections', {
     },
     updateConnectionPathByItemId (itemId) {
       this.updateConnectionPathsByItemIds([itemId])
+    },
+    flushCardinalDebounceTimers () {
+      cardinalDebounceTimers.forEach(({ timer, flush }) => {
+        clearTimeout(timer)
+        flush()
+      })
     },
 
     // label
