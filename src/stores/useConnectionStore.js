@@ -501,7 +501,7 @@ export const useConnectionStore = defineStore('connections', {
           const shouldInterpolatePoint2 = prevPoint2Cardinal !== point2Cardinal
           const shouldAnimateInterpolation = shouldInterpolatePoint1 || shouldInterpolatePoint2
           if (shouldAnimateInterpolation) {
-            console.log('💁‍♀️💁‍♀️ shouldAnimateInterpolation')
+            globalStore.triggerConnectionSnapAnimation({ id: connection.id, fromPath: connection.path, toPath: path })
           }
           const update = {
             id: connection.id,
