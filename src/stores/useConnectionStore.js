@@ -134,7 +134,8 @@ export const useConnectionStore = defineStore('connections', {
       if (endItem.itemType === 'box') {
         point2 = utils.estimatedItemConnectorPosition(endItem)
       }
-      return this.getConnectionPathBetweenCoords(point1, point2, controlPoint)
+      const path = this.getConnectionPathBetweenCoords(point1, point2, controlPoint)
+      return { path, point1Cardinal, point2Cardinal }
     },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
       const listStore = useListStore()
@@ -148,15 +149,15 @@ export const useConnectionStore = defineStore('connections', {
         if (list.id === endItem.listId) { endItem = list }
       })
 
-      let path
+      let path, point1Cardinal, point2Cardinal
       if (controlPoint === consts.straightLineConnectionPathControlPoint) {
-        path = this.getshortestConnectionPathBetweenItems(startItem, endItem, controlPoint)
+        ({ path, point1Cardinal, point2Cardinal } = this.getshortestConnectionPathBetweenItems(startItem, endItem, controlPoint))
       } else {
         const start = utils.estimatedItemConnectorPosition(startItem)
         const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
         path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
       }
-      return path
+      return { path, point1Cardinal, point2Cardinal }
     },
     getConnectionTypeByName (name) {
       const types = this.getAllConnectionTypes
@@ -486,7 +487,7 @@ export const useConnectionStore = defineStore('connections', {
           startItem = spaceStore.updateItemWithItemType(startItem)
           endItem = spaceStore.updateItemWithItemType(endItem)
 
-          const path = this.getConnectionPathBetweenItems({
+          const { path, point1Cardinal, point2Cardinal } = this.getConnectionPathBetweenItems({
             startItem,
             startItemId: connection.startItemId,
             endItem,
@@ -496,7 +497,9 @@ export const useConnectionStore = defineStore('connections', {
           if (!path) { return }
           const update = {
             id: connection.id,
-            path
+            path,
+            point1Cardinal,
+            point2Cardinal
           }
           updates.push(update)
         })

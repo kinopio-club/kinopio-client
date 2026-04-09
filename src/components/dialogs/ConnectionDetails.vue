@@ -295,7 +295,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         span Read Only
 
     //- debug
-    ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
+    ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'point1Cardinal', 'point2Cardinal']")
 
   section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
     //- Use Last Type
