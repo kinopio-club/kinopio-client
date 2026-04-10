@@ -34,9 +34,9 @@ const canvasElement = ref(null)
 let unsubscribes
 
 onMounted(async () => {
-  init()
+  update()
   window.addEventListener('scroll', updateScroll)
-  window.addEventListener('resize', init)
+  window.addEventListener('resize', update)
   window.addEventListener('pointerup', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
 
@@ -78,49 +78,49 @@ onMounted(async () => {
     async ({ name, args }) => {
       if (globalStoreActions.includes(name)) {
         await nextTick()
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const cardActionUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const connectionActionUnsubscribe = connectionStore.$onAction(
     ({ name, args }) => {
       if (connectionStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const boxActionUnsubscribe = boxStore.$onAction(
     ({ name, args }) => {
       if (boxStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const lineActionUnsubscribe = lineStore.$onAction(
     ({ name, args }) => {
       if (lineStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const listActionUnsubscribe = listStore.$onAction(
     ({ name, args }) => {
       if (listStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
@@ -136,7 +136,7 @@ onMounted(async () => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
-  window.removeEventListener('resize', init)
+  window.removeEventListener('resize', update)
   window.removeEventListener('pointerup', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
   unsubscribes()
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
 
 watch(() => globalStore.isLoadingSpace, async (value, prevValue) => {
   await nextTick()
-  init()
+  update()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -168,17 +168,17 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    init()
+    update()
   }
 })
 watch(() => props.space, (value, prevValue) => {
   if (value) {
-    init()
+    update()
   }
 })
 watch(() => props.size, (value, prevValue) => {
   if (value) {
-    init()
+    update()
   }
 })
 
@@ -206,14 +206,14 @@ const styles = computed(() => {
 
 // canvas
 
-const initThrottle = throttle((color) => {
-  init()
+const updateThrottle = throttle((color) => {
+  update()
 }, 100) // 10fps
 
-const init = async () => {
+const update = async () => {
   await nextTick()
   if (!props.visible) { return }
-  await initCanvas()
+  await updateCanvas()
   if (!canvas) { return }
   await drawDrawing()
   drawBoxes()
@@ -222,7 +222,7 @@ const init = async () => {
   drawCards()
   drawLines()
 }
-const initCanvas = async () => {
+const updateCanvas = async () => {
   await nextTick()
   state.pageWidth = Math.round(pageWidth.value * ratio.value)
   state.pageHeight = Math.round(pageHeight.value * ratio.value)
@@ -268,6 +268,8 @@ const drawConnections = () => {
   const connectionTypes = mapConnectionTypes.value
   const connections = mapConnections.value
   for (const connection of connections) {
+    const isValid = connectionStore.getConnectionIsValid(connection)
+    if (!isValid) { continue }
     context.lineWidth = 1
     context.lineCap = 'round'
     const type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)

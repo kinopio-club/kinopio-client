@@ -146,6 +146,12 @@ export const useConnectionStore = defineStore('connections', {
       const type = types.find(type => type.name === name)
       return type
     },
+    getConnectionIsValid (connection) {
+      const spaceStore = useSpaceStore()
+      const startItem = spaceStore.getSpaceItemById(connection.startItemId)
+      const endItem = spaceStore.getSpaceItemById(connection.endItemId)
+      return Boolean(startItem && endItem)
+    },
 
     // init
 
