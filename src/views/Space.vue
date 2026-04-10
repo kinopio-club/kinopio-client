@@ -722,7 +722,10 @@ const showMultipleSelectedActions = (event) => {
 
 // minimap
 
-const minimapIsVisible = computed(() => globalStore.minimapIsVisible || isPanningReady.value || isPanning.value)
+const minimapIsVisible = computed(() => {
+  if (globalStore.shouldExplicitlyHideFooter) { return }
+  return globalStore.minimapIsVisible || isPanningReady.value || isPanning.value
+})
 const minimapSize = computed(() => {
   if (isPanningReady.value || isPanning.value) {
     return 200
