@@ -619,7 +619,7 @@ export const useCardStore = defineStore('cards', {
         boxStore.updateBoxSnapGuides({ items: cards, isChildren: true, cursor: endCursor })
         this.updateCardSnapGuides({ items: cards, cursor: endCursor })
       }
-      this.updateItemSnapAlignGuides({ items: cards })
+      globalStore.updateItemSnapAlignGuides()
       listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
@@ -1289,112 +1289,8 @@ export const useCardStore = defineStore('cards', {
       // limit snap to closest target
       snapGuides = [snapGuides[0]]
       this.cardSnapGuides = snapGuides
-    },
-
-    updateItemSnapAlignGuides ({ items }) {
-      const globalStore = useGlobalStore()
-      const snapThreshold = 1
-      const shouldPrevent = !globalStore.shouldSnapAlign || globalStore.preventItemSnapping || !items.length
-      if (shouldPrevent) {
-        globalStore.itemSnapAlignGuides = []
-        return
-      }
-      const card = this.getCard(globalStore.currentDraggingCardId)
-      if (!card) {
-        globalStore.itemSnapAlignGuides = []
-        return
-      }
-      let nearestX = null // { snapTo: number, guideAt: number, dist: number }
-      let nearestY = null // { snapTo: number, guideAt: number, dist: number }
-      // card sides
-      const cardTop = card.y
-      const cardCenterY = card.y + card.height / 2
-      const cardBottom = card.y + card.height
-      const cardLeft = card.x
-      const cardCenterX = card.x + card.width / 2
-      const cardRight = card.x + card.width
-      // only compare nearest cards
-      let viewportCards = this.getCardsSelectableInViewport()
-      viewportCards = viewportCards.filter(target => {
-        if (target.id === card.id) { return }
-        if (target.listId) { return }
-        return !globalStore.multipleCardsSelectedIds.includes(target.id)
-      })
-      const nearestCards = utils.nearestItems(card, viewportCards)
-      // get nearest
-      nearestCards.forEach(target => {
-        if (target.id === card.id) { return }
-        const targetTop = target.y
-        const targetCenterY = target.y + target.height / 2
-        const targetBottom = target.y + target.height
-        const targetLeft = target.x
-        const targetCenterX = target.x + target.width / 2
-        const targetRight = target.x + target.width
-        // y sides
-        const yChecks = [
-          { cardEdge: cardTop, targetEdge: targetTop, snapY: targetTop },
-          { cardEdge: cardTop, targetEdge: targetCenterY, snapY: targetCenterY },
-          { cardEdge: cardTop, targetEdge: targetBottom, snapY: targetBottom },
-          { cardEdge: cardCenterY, targetEdge: targetTop, snapY: targetTop - card.height / 2 },
-          { cardEdge: cardCenterY, targetEdge: targetCenterY, snapY: targetCenterY - card.height / 2 },
-          { cardEdge: cardCenterY, targetEdge: targetBottom, snapY: targetBottom - card.height / 2 },
-          { cardEdge: cardBottom, targetEdge: targetTop, snapY: targetTop - card.height },
-          { cardEdge: cardBottom, targetEdge: targetCenterY, snapY: targetCenterY - card.height },
-          { cardEdge: cardBottom, targetEdge: targetBottom, snapY: targetBottom - card.height }
-        ]
-        yChecks.forEach(({ cardEdge, targetEdge, snapY }) => {
-          const dist = Math.abs(cardEdge - targetEdge)
-          if (dist <= snapThreshold) {
-            if (!nearestY || dist < nearestY.dist) {
-              nearestY = { snapTo: Math.round(snapY), guideAt: targetEdge, dist }
-            }
-          }
-        })
-        // x sides
-        const xChecks = [
-          { cardEdge: cardLeft, targetEdge: targetLeft, snapX: targetLeft },
-          { cardEdge: cardLeft, targetEdge: targetCenterX, snapX: targetCenterX },
-          { cardEdge: cardLeft, targetEdge: targetRight, snapX: targetRight },
-          { cardEdge: cardCenterX, targetEdge: targetLeft, snapX: targetLeft - card.width / 2 },
-          { cardEdge: cardCenterX, targetEdge: targetCenterX, snapX: targetCenterX - card.width / 2 },
-          { cardEdge: cardCenterX, targetEdge: targetRight, snapX: targetRight - card.width / 2 },
-          { cardEdge: cardRight, targetEdge: targetLeft, snapX: targetLeft - card.width },
-          { cardEdge: cardRight, targetEdge: targetCenterX, snapX: targetCenterX - card.width },
-          { cardEdge: cardRight, targetEdge: targetRight, snapX: targetRight - card.width }
-        ]
-        xChecks.forEach(({ cardEdge, targetEdge, snapX }) => {
-          const dist = Math.abs(cardEdge - targetEdge)
-          if (dist <= snapThreshold) {
-            if (!nearestX || dist < nearestX.dist) {
-              nearestX = { snapTo: Math.round(snapX), guideAt: targetEdge, dist }
-            }
-          }
-        })
-      })
-      // apply snaps and collect guide lines
-      const guides = []
-      let deltaX = 0
-      let deltaY = 0
-      if (nearestX) {
-        deltaX = nearestX.snapTo - card.x
-      }
-      if (nearestY) {
-        deltaY = nearestY.snapTo - card.y
-      }
-      if (deltaX !== 0 || deltaY !== 0) {
-        const snapped = items.map(item => {
-          return {
-            id: item.id,
-            x: Math.max(0, item.x + deltaX),
-            y: Math.max(0, item.y + deltaY)
-          }
-        })
-        this.updateCards(snapped)
-      }
-      if (nearestY) { guides.push({ axis: 'y', position: nearestY.guideAt }) }
-      if (nearestX) { guides.push({ axis: 'x', position: nearestX.guideAt }) }
-      globalStore.itemSnapAlignGuides = guides
     }
+
   }
 
 })
