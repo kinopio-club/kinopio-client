@@ -1020,12 +1020,22 @@ export const useGlobalStore = defineStore('global', {
         deltaY = nearestY.snapTo - item.y
       }
       if (deltaX !== 0 || deltaY !== 0) {
-        const items = spaceStore.getSpaceSelectedItems
-        // snap dragging cards
-        const cards = items.cards
-        if (this.getInteractingWithItemType === 'card') {
-          cards.push(item)
-        }
+        let { cards, boxes, lists } = spaceStore.getSpaceSelectedAndDraggingItems
+        // include items contained in boxes
+        boxes.forEach(box => {
+          const items = boxStore.getItemsContainedInSelectedBoxes()
+          cards = cards.concat(items.cards)
+          boxes = boxes.concat(items.boxes)
+          lists = lists.concat(items.lists)
+        })
+        boxes = uniqBy(boxes, 'id')
+        lists = uniqBy(lists, 'id')
+        // include items contained in lists
+        lists.forEach(list => {
+          cards = cards.concat(cardStore.getCardsByList(list.id))
+        })
+        cards = uniqBy(cards, 'id')
+        // snap cards
         const snappedCards = cards.map(item => {
           return {
             id: item.id,
@@ -1034,13 +1044,24 @@ export const useGlobalStore = defineStore('global', {
           }
         })
         cardStore.updateCards(snappedCards)
-
-        // snap boxes and contained items
-        // const snappedBoxes =
-
-        // getItemsContainedInSelectedBoxes
-
-        // if list then include all cards in it
+        // snap boxes
+        const snappedBoxes = boxes.map(item => {
+          return {
+            id: item.id,
+            x: Math.max(0, item.x + deltaX),
+            y: Math.max(0, item.y + deltaY)
+          }
+        })
+        boxStore.updateBoxes(snappedBoxes)
+        // snap lists
+        const snappedLists = lists.map(item => {
+          return {
+            id: item.id,
+            x: Math.max(0, item.x + deltaX),
+            y: Math.max(0, item.y + deltaY)
+          }
+        })
+        listStore.updateLists(snappedLists)
       }
     },
     updateItemSnapAlignGuides () {
