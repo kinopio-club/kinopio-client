@@ -1297,32 +1297,19 @@ export const useCardStore = defineStore('cards', {
 
     updateCardAlignmentGuides ({ items }) {
       const globalStore = useGlobalStore()
-      if (globalStore.preventItemSnapping) {
-        globalStore.cardAlignGuides = []
-        return
-      }
-      if (!items.length) {
-        globalStore.cardAlignGuides = []
-        return
-      }
-      if (globalStore.shouldSnapToGrid) {
-        globalStore.cardAlignGuides = []
-        return
-      }
       const snapThreshold = 1
-      // use the primary dragging card for alignment checks
-      const draggingCardId = globalStore.currentDraggingCardId
-      if (!draggingCardId) {
+      const card = this.getCard(globalStore.currentDraggingCardId)
+      const shouldPrevent = globalStore.preventItemSnapping ||
+        !items.length ||
+        globalStore.shouldSnapToGrid ||
+        !card
+      if (shouldPrevent) {
         globalStore.cardAlignGuides = []
         return
       }
+
       // get the dragging card with actual rendered dimensions from viewport
       let viewportCards = this.getCardsSelectableInViewport()
-      const card = this.getCard(draggingCardId)
-      if (!card) {
-        globalStore.cardAlignGuides = []
-        return
-      }
       const cardTop = card.y
       const cardCenterY = card.y + card.height / 2
       const cardBottom = card.y + card.height
@@ -1337,7 +1324,7 @@ export const useCardStore = defineStore('cards', {
       // for each cardinal side of the dragging card, find the nearest viewport card
       // "nearest" = minimum axis distance between that side's coordinate and any edge of the target on the same axis
       viewportCards = viewportCards.filter(target => {
-        if (target.id === draggingCardId) { return }
+        if (target.id === card.id) { return }
         if (target.listId) { return }
         return !globalStore.multipleCardsSelectedIds.includes(target.id)
       })
@@ -1349,7 +1336,7 @@ export const useCardStore = defineStore('cards', {
       //   centerX: cardCenterX,
       //   right: cardRight
       // }
-      let nearest
+      // let nearest
       const nearestCards = utils.nearestItems(card, viewportCards)
       // let nearestCards = Object.fromEntries(
       //   Object.entries(cardinalSides).map(([side, sidePos]) => {
@@ -1377,7 +1364,7 @@ export const useCardStore = defineStore('cards', {
       // nearestCards = Object.values(nearestCards)
 
       nearestCards.forEach(target => {
-        if (target.id === draggingCardId) { return }
+        if (target.id === card.id) { return }
         // const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
         // if (isTargetSelected) { return }
         const targetTop = target.y
