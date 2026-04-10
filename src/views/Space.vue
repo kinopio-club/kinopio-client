@@ -1156,7 +1156,7 @@ const updateMetaRSSFeed = () => {
   TagDetails
   UserDetails
   #space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
-    MinimapCanvas(:visible="true" :size="minimapSize")
+    MinimapCanvas(:visible="true" :size="minimapSize" :preventAnimation="!(isPanning || isPanningReady)")
   //- handlers
   WindowHistoryHandler
   KeyboardShortcutsHandler

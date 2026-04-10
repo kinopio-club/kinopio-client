@@ -159,7 +159,8 @@ const props = defineProps({
   space: Object,
   viewportIsHidden: Boolean,
   backgroundColor: String,
-  parentIsDialog: Boolean
+  parentIsDialog: Boolean,
+  preventAnimation: Boolean
 })
 const state = reactive({
   scrollX: 0,
@@ -529,7 +530,7 @@ const viewportIsVisible = computed(() => {
 <template lang="pug">
 .minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   canvas#minimap-canvas(ref="canvasElement")
-  .viewport.blink(v-if="viewportIsVisible" :style="viewportStyle")
+  .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
 </template>
 
 <style lang="stylus">
