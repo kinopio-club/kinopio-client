@@ -591,10 +591,6 @@ export const useCardStore = defineStore('cards', {
       const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if ((!endCursor || !prevCursor) && !delta) { return }
-      if (globalStore.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -623,7 +619,7 @@ export const useCardStore = defineStore('cards', {
         boxStore.updateBoxSnapGuides({ items: cards, isChildren: true, cursor: endCursor })
         this.updateCardSnapGuides({ items: cards, cursor: endCursor })
       }
-      this.updateCardAlignmentGuides({ items: cards })
+      this.updateItemSnapAlignGuides({ items: cards })
       listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
@@ -1236,7 +1232,7 @@ export const useCardStore = defineStore('cards', {
       const listStore = useListStore()
       if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
-      if (globalStore.shouldSnapToGrid) { return }
+      if (globalStore.shouldSnapAlign) { return }
       const snapThreshold = 10
       const spaceEdgeThreshold = 100
       const targetCards = this.getCardsSelectableInViewport()
@@ -1295,16 +1291,17 @@ export const useCardStore = defineStore('cards', {
       this.cardSnapGuides = snapGuides
     },
 
-    updateCardAlignmentGuides ({ items }) {
+    updateItemSnapAlignGuides ({ items }) {
       const globalStore = useGlobalStore()
       const snapThreshold = 1
-      const card = this.getCard(globalStore.currentDraggingCardId)
-      const shouldPrevent = globalStore.preventItemSnapping ||
-        !items.length ||
-        globalStore.shouldSnapToGrid ||
-        !card
+      const shouldPrevent = !globalStore.shouldSnapAlign || globalStore.preventItemSnapping || !items.length
       if (shouldPrevent) {
-        globalStore.cardAlignGuides = []
+        globalStore.itemSnapAlignGuides = []
+        return
+      }
+      const card = this.getCard(globalStore.currentDraggingCardId)
+      if (!card) {
+        globalStore.itemSnapAlignGuides = []
         return
       }
       let nearestX = null // { snapTo: number, guideAt: number, dist: number }
@@ -1396,7 +1393,7 @@ export const useCardStore = defineStore('cards', {
       }
       if (nearestY) { guides.push({ axis: 'y', position: nearestY.guideAt }) }
       if (nearestX) { guides.push({ axis: 'x', position: nearestX.guideAt }) }
-      globalStore.cardAlignGuides = guides
+      globalStore.itemSnapAlignGuides = guides
     }
   }
 

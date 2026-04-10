@@ -9,23 +9,13 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-const isVisible = computed(() => globalStore.shouldSnapToGrid)
-const origin = computed(() => {
-  return {
-    x: globalStore.axisGuideLinesOrigin.x + 'px',
-    y: globalStore.axisGuideLinesOrigin.y + 'px'
-  }
-})
+const isVisible = computed(() => globalStore.shouldSnapAlign)
 const color = computed(() => userStore.color)
-const cardAlignGuides = computed(() => globalStore.cardAlignGuides)
+const itemSnapAlignGuides = computed(() => globalStore.itemSnapAlignGuides)
 </script>
 
 <template lang="pug">
-//- grid snap guide lines
-.axis-guide-lines.x-line(v-if="isVisible" :style="{ top: origin.y, background: color }")
-.axis-guide-lines.y-line(v-if="isVisible" :style="{ left: origin.x, background: color }")
-//- card alignment snap guide lines
-template(v-for="guide in cardAlignGuides" :key="guide.axis + guide.position")
+template(v-if="isVisible" v-for="guide in itemSnapAlignGuides" :key="guide.axis + guide.position")
   .axis-guide-lines.x-line.is-card-align-guide(
     v-if="guide.axis === 'y'"
     :style="{ top: guide.position + 'px', background: color }"

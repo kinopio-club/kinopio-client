@@ -836,8 +836,8 @@ const initInteractions = (event) => {
   state.startCursor = utils.cursorPositionInViewport(event)
   updateCurrentInteractingItem()
 }
-const updateShouldSnapToGrid = (event) => {
-  let shouldSnap = (
+const updateshouldSnapAlign = (event) => {
+  const shouldSnap = (
     isDraggingCard.value ||
     isDraggingBox.value ||
     isDraggingList.value ||
@@ -845,22 +845,12 @@ const updateShouldSnapToGrid = (event) => {
     isResizingBox.value ||
     isResizingList.value
   )
-  shouldSnap = shouldSnap && event.shiftKey
-  // update snap guide line origin
-  if (!globalStore.shouldSnapToGrid && shouldSnap) {
-    const item = state.currentInteractingItem
-    globalStore.axisGuideLinesOrigin = {
-      x: item.x,
-      y: item.y
-    }
-  }
-  // should snap to grid
-  globalStore.shouldSnapToGrid = shouldSnap
+  globalStore.shouldSnapAlign = shouldSnap && event.shiftKey
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
   endSpaceCursor = utils.cursorPositionInSpace(event)
-  updateShouldSnapToGrid(event)
+  updateshouldSnapAlign(event)
   if (isDraggingCard.value) {
     dragItems()
   } else if (isDraggingBox.value) {
@@ -939,7 +929,7 @@ const handleTouchEnd = (event) => {
   stopInteractions(event)
 }
 const resetGlobalStoreState = () => {
-  globalStore.cardAlignGuides = []
+  globalStore.itemSnapAlignGuides = []
   globalStore.shouldSnapBackToList = false
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
@@ -1003,7 +993,7 @@ const stopInteractions = async (event) => {
   await nextTick()
   await nextTick()
   globalStore.clearShouldExplicitlyRenderCardIds()
-  globalStore.shouldSnapToGrid = false
+  globalStore.shouldSnapAlign = false
   // runs after child component interaction methods
   setTimeout(() => {
     listStore.triggerClearShouldPreventNextListInfoButton()

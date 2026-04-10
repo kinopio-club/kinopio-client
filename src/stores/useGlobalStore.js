@@ -197,7 +197,7 @@ export const useGlobalStore = defineStore('global', {
     remoteUserResizingLists: [],
 
     // draggingItems
-    shouldSnapToGrid: false,
+    shouldSnapAlign: false,
     preventItemSnapping: false,
     shouldSnapBackToList: false,
 
@@ -323,8 +323,7 @@ export const useGlobalStore = defineStore('global', {
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    axisGuideLinesOrigin: {},
-    cardAlignGuides: [] // [{ axis: 'x'|'y', position: number }, ...]
+    itemSnapAlignGuides: [] // [{ axis: 'x'|'y', position: number }, …]
   }),
   getters: {
     getGlobalAllState () {
@@ -1626,7 +1625,7 @@ export const useGlobalStore = defineStore('global', {
       this.offlineIsVisible = false
       this.importArenaChannelIsVisible = false
       this.groupsIsVisible = false
-      this.shouldSnapToGrid = false
+      this.shouldSnapAlign = false
     },
     toggleCardSelected (cardId) {
       const previousMultipleCardsSelectedIds = this.previousMultipleCardsSelectedIds

@@ -248,8 +248,8 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
         .row
           .badge.title
             img.icon(src="@/assets/constrain-axis.svg")
-            span Snap Card or Box to Grid
-          .badge.keyboard-shortcut Shift-Drag Drag or Resize Item
+            span Snap Align to Nearby Items
+          .badge.keyboard-shortcut Shift-Drag Item
 
       //- article
       //-   .row

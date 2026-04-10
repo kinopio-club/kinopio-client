@@ -185,7 +185,7 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
-      if (globalStore.shouldSnapToGrid) { return }
+      if (globalStore.shouldSnapAlign) { return }
       this.updateShouldSnapBackToList()
       const card = cardStore.getCurrentDraggingCard()
       const lists = this.getAllLists
@@ -263,10 +263,6 @@ export const useListStore = defineStore('lists', {
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if ((!endCursor || !prevCursor) && !delta) { return }
-      if (globalStore.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y

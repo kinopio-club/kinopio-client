@@ -229,13 +229,6 @@ export default {
     }
     return position
   },
-  cursorPositionSnapToGrid (position) {
-    const gridSpacing = consts.spaceBetweenCards
-    return {
-      x: this.roundToNearest(position.x, gridSpacing),
-      y: this.roundToNearest(position.y, gridSpacing)
-    }
-  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX

@@ -546,7 +546,7 @@ const updateStylesWithWidth = (styles) => {
   const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || userStore.cardSettingsCardWrapWidth || consts.normalCardWrapWidth
   let cardWidth = resizeWidth.value
-  if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
+  if (globalStore.shouldSnapAlign && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
@@ -1498,7 +1498,7 @@ const showCardDetails = (event) => {
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
   if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
-  if (globalStore.shouldSnapToGrid) { return }
+  if (globalStore.shouldSnapAlign) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {
