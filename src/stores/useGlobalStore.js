@@ -1077,7 +1077,7 @@ export const useGlobalStore = defineStore('global', {
       }
       if (deltaX !== 0 || deltaY !== 0) {
         // TODO get all current dragging and selected items
-        const snapped = cardStore.getCurrentDraggingAndSelectedCards.map(item => {
+        const snapped = cardStore.getCardsSelected.map(item => {
           return {
             id: item.id,
             x: Math.max(0, item.x + deltaX),

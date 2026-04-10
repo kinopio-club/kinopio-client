@@ -96,15 +96,6 @@ export const useCardStore = defineStore('cards', {
       const cardId = globalStore.currentDraggingCardId
       return this.getCard(cardId)
     },
-    getCurrentDraggingAndSelectedCards () {
-      const currentCard = this.getCurrentDraggingCard
-      const cards = this.getCardsSelected || []
-      const currentCardIsSelected = cards.find(card => card.id === currentCard.id)
-      if (!currentCardIsSelected) {
-        cards.push(currentCard)
-      }
-      return cards
-    },
     getCardIdsGroupedByList () {
       const cards = this.getAllCards
       const result = {}
