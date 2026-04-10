@@ -1307,73 +1307,33 @@ export const useCardStore = defineStore('cards', {
         globalStore.cardAlignGuides = []
         return
       }
-
-      // get the dragging card with actual rendered dimensions from viewport
-      let viewportCards = this.getCardsSelectableInViewport()
+      let nearestX = null // { snapTo: number, guideAt: number, dist: number }
+      let nearestY = null // { snapTo: number, guideAt: number, dist: number }
+      // card sides
       const cardTop = card.y
       const cardCenterY = card.y + card.height / 2
       const cardBottom = card.y + card.height
       const cardLeft = card.x
       const cardCenterX = card.x + card.width / 2
       const cardRight = card.x + card.width
-
-      let bestX = null // { snapTo: number, guideAt: number, dist: number }
-      let bestY = null // { snapTo: number, guideAt: number, dist: number }
-
-      // const nearestCards =
-      // for each cardinal side of the dragging card, find the nearest viewport card
-      // "nearest" = minimum axis distance between that side's coordinate and any edge of the target on the same axis
+      // only compare nearest cards
+      let viewportCards = this.getCardsSelectableInViewport()
       viewportCards = viewportCards.filter(target => {
         if (target.id === card.id) { return }
         if (target.listId) { return }
         return !globalStore.multipleCardsSelectedIds.includes(target.id)
       })
-      // const cardinalSides = {
-      //   top: cardTop,
-      //   centerY: cardCenterY,
-      //   bottom: cardBottom,
-      //   left: cardLeft,
-      //   centerX: cardCenterX,
-      //   right: cardRight
-      // }
-      // let nearest
       const nearestCards = utils.nearestItems(card, viewportCards)
-      // let nearestCards = Object.fromEntries(
-      //   Object.entries(cardinalSides).map(([side, sidePos]) => {
-      //     const isYSide = side === 'top' || side === 'centerY' || side === 'bottom'
-      //     let nearest = null
-      //     let nearestDist = Infinity
-      //     viewportCards.forEach(target => {
-
-      //       let targetEdges
-      //       if (isYSide) {
-      //         targetEdges = [target.y, target.y + target.height / 2, target.y + target.height];
-      //       } else {
-      //         targetEdges = [target.x, target.x + target.width / 2, target.x + target.width];
-      //       }
-      //       const dist = Math.min(...targetEdges.map(edge => Math.abs(sidePos - edge)))
-      //       if (dist < nearestDist) {
-      //         nearestDist = dist
-      //         nearest = target
-      //       }
-      //     })
-      //     return [side, nearest]
-      //   })
-      // )
-      console.log('💦💦💦💦💦', nearestCards, nearestCards.length, viewportCards.length)
-      // nearestCards = Object.values(nearestCards)
-
+      // get nearest
       nearestCards.forEach(target => {
         if (target.id === card.id) { return }
-        // const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
-        // if (isTargetSelected) { return }
         const targetTop = target.y
         const targetCenterY = target.y + target.height / 2
         const targetBottom = target.y + target.height
         const targetLeft = target.x
         const targetCenterX = target.x + target.width / 2
         const targetRight = target.x + target.width
-        // y-axis alignment checks: [card edge, target edge, resulting card.y if snapped]
+        // y sides
         const yChecks = [
           { cardEdge: cardTop, targetEdge: targetTop, snapY: targetTop },
           { cardEdge: cardTop, targetEdge: targetCenterY, snapY: targetCenterY },
@@ -1388,12 +1348,12 @@ export const useCardStore = defineStore('cards', {
         yChecks.forEach(({ cardEdge, targetEdge, snapY }) => {
           const dist = Math.abs(cardEdge - targetEdge)
           if (dist <= snapThreshold) {
-            if (!bestY || dist < bestY.dist) {
-              bestY = { snapTo: Math.round(snapY), guideAt: targetEdge, dist }
+            if (!nearestY || dist < nearestY.dist) {
+              nearestY = { snapTo: Math.round(snapY), guideAt: targetEdge, dist }
             }
           }
         })
-        // x-axis alignment checks
+        // x sides
         const xChecks = [
           { cardEdge: cardLeft, targetEdge: targetLeft, snapX: targetLeft },
           { cardEdge: cardLeft, targetEdge: targetCenterX, snapX: targetCenterX },
@@ -1408,26 +1368,34 @@ export const useCardStore = defineStore('cards', {
         xChecks.forEach(({ cardEdge, targetEdge, snapX }) => {
           const dist = Math.abs(cardEdge - targetEdge)
           if (dist <= snapThreshold) {
-            if (!bestX || dist < bestX.dist) {
-              bestX = { snapTo: Math.round(snapX), guideAt: targetEdge, dist }
+            if (!nearestX || dist < nearestX.dist) {
+              nearestX = { snapTo: Math.round(snapX), guideAt: targetEdge, dist }
             }
           }
         })
       })
       // apply snaps and collect guide lines
       const guides = []
-      const deltaX = bestX ? bestX.snapTo - card.x : 0
-      const deltaY = bestY ? bestY.snapTo - card.y : 0
+      let deltaX = 0
+      let deltaY = 0
+      if (nearestX) {
+        deltaX = nearestX.snapTo - card.x
+      }
+      if (nearestY) {
+        deltaY = nearestY.snapTo - card.y
+      }
       if (deltaX !== 0 || deltaY !== 0) {
-        const snapped = items.map(c => ({
-          id: c.id,
-          x: Math.max(0, c.x + deltaX),
-          y: Math.max(0, c.y + deltaY)
-        }))
+        const snapped = items.map(item => {
+          return {
+            id: item.id,
+            x: Math.max(0, item.x + deltaX),
+            y: Math.max(0, item.y + deltaY)
+          }
+        })
         this.updateCards(snapped)
       }
-      if (bestY) { guides.push({ axis: 'y', position: bestY.guideAt }) }
-      if (bestX) { guides.push({ axis: 'x', position: bestX.guideAt }) }
+      if (nearestY) { guides.push({ axis: 'y', position: nearestY.guideAt }) }
+      if (nearestX) { guides.push({ axis: 'x', position: nearestX.guideAt }) }
       globalStore.cardAlignGuides = guides
     }
   }
