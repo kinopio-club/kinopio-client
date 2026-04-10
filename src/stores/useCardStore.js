@@ -1317,7 +1317,7 @@ export const useCardStore = defineStore('cards', {
         return
       }
       // get the dragging card with actual rendered dimensions from viewport
-      const viewportCards = this.getCardsSelectableInViewport()
+      let viewportCards = this.getCardsSelectableInViewport()
       const card = this.getCard(draggingCardId)
       if (!card) {
         globalStore.cardAlignGuides = []
@@ -1334,11 +1334,52 @@ export const useCardStore = defineStore('cards', {
       let bestY = null // { snapTo: number, guideAt: number, dist: number }
 
       // const nearestCards =
-
-      viewportCards.forEach(target => {
+      // for each cardinal side of the dragging card, find the nearest viewport card
+      // "nearest" = minimum axis distance between that side's coordinate and any edge of the target on the same axis
+      viewportCards = viewportCards.filter(target => {
         if (target.id === draggingCardId) { return }
-        const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
-        if (isTargetSelected) { return }
+        if (target.listId) { return }
+        return !globalStore.multipleCardsSelectedIds.includes(target.id)
+      })
+      // const cardinalSides = {
+      //   top: cardTop,
+      //   centerY: cardCenterY,
+      //   bottom: cardBottom,
+      //   left: cardLeft,
+      //   centerX: cardCenterX,
+      //   right: cardRight
+      // }
+      let nearest
+      const nearestCards = utils.nearestItems(card, viewportCards)
+      // let nearestCards = Object.fromEntries(
+      //   Object.entries(cardinalSides).map(([side, sidePos]) => {
+      //     const isYSide = side === 'top' || side === 'centerY' || side === 'bottom'
+      //     let nearest = null
+      //     let nearestDist = Infinity
+      //     viewportCards.forEach(target => {
+
+      //       let targetEdges
+      //       if (isYSide) {
+      //         targetEdges = [target.y, target.y + target.height / 2, target.y + target.height];
+      //       } else {
+      //         targetEdges = [target.x, target.x + target.width / 2, target.x + target.width];
+      //       }
+      //       const dist = Math.min(...targetEdges.map(edge => Math.abs(sidePos - edge)))
+      //       if (dist < nearestDist) {
+      //         nearestDist = dist
+      //         nearest = target
+      //       }
+      //     })
+      //     return [side, nearest]
+      //   })
+      // )
+      console.log('💦💦💦💦💦', nearestCards, nearestCards.length, viewportCards.length)
+      // nearestCards = Object.values(nearestCards)
+
+      nearestCards.forEach(target => {
+        if (target.id === draggingCardId) { return }
+        // const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
+        // if (isTargetSelected) { return }
         const targetTop = target.y
         const targetCenterY = target.y + target.height / 2
         const targetBottom = target.y + target.height
@@ -1348,13 +1389,13 @@ export const useCardStore = defineStore('cards', {
         // y-axis alignment checks: [card edge, target edge, resulting card.y if snapped]
         const yChecks = [
           { cardEdge: cardTop, targetEdge: targetTop, snapY: targetTop },
-          // { cardEdge: cardTop, targetEdge: targetCenterY, snapY: targetCenterY },
-          // { cardEdge: cardTop, targetEdge: targetBottom, snapY: targetBottom },
-          // { cardEdge: cardCenterY, targetEdge: targetTop, snapY: targetTop - card.height / 2 },
+          { cardEdge: cardTop, targetEdge: targetCenterY, snapY: targetCenterY },
+          { cardEdge: cardTop, targetEdge: targetBottom, snapY: targetBottom },
+          { cardEdge: cardCenterY, targetEdge: targetTop, snapY: targetTop - card.height / 2 },
           { cardEdge: cardCenterY, targetEdge: targetCenterY, snapY: targetCenterY - card.height / 2 },
-          // { cardEdge: cardCenterY, targetEdge: targetBottom, snapY: targetBottom - card.height / 2 },
-          // { cardEdge: cardBottom, targetEdge: targetTop, snapY: targetTop - card.height },
-          // { cardEdge: cardBottom, targetEdge: targetCenterY, snapY: targetCenterY - card.height },
+          { cardEdge: cardCenterY, targetEdge: targetBottom, snapY: targetBottom - card.height / 2 },
+          { cardEdge: cardBottom, targetEdge: targetTop, snapY: targetTop - card.height },
+          { cardEdge: cardBottom, targetEdge: targetCenterY, snapY: targetCenterY - card.height },
           { cardEdge: cardBottom, targetEdge: targetBottom, snapY: targetBottom - card.height }
         ]
         yChecks.forEach(({ cardEdge, targetEdge, snapY }) => {
@@ -1368,13 +1409,13 @@ export const useCardStore = defineStore('cards', {
         // x-axis alignment checks
         const xChecks = [
           { cardEdge: cardLeft, targetEdge: targetLeft, snapX: targetLeft },
-          // { cardEdge: cardLeft, targetEdge: targetCenterX, snapX: targetCenterX },
-          // { cardEdge: cardLeft, targetEdge: targetRight, snapX: targetRight },
-          // { cardEdge: cardCenterX, targetEdge: targetLeft, snapX: targetLeft - card.width / 2 },
+          { cardEdge: cardLeft, targetEdge: targetCenterX, snapX: targetCenterX },
+          { cardEdge: cardLeft, targetEdge: targetRight, snapX: targetRight },
+          { cardEdge: cardCenterX, targetEdge: targetLeft, snapX: targetLeft - card.width / 2 },
           { cardEdge: cardCenterX, targetEdge: targetCenterX, snapX: targetCenterX - card.width / 2 },
-          // { cardEdge: cardCenterX, targetEdge: targetRight, snapX: targetRight - card.width / 2 },
-          // { cardEdge: cardRight, targetEdge: targetLeft, snapX: targetLeft - card.width },
-          // { cardEdge: cardRight, targetEdge: targetCenterX, snapX: targetCenterX - card.width },
+          { cardEdge: cardCenterX, targetEdge: targetRight, snapX: targetRight - card.width / 2 },
+          { cardEdge: cardRight, targetEdge: targetLeft, snapX: targetLeft - card.width },
+          { cardEdge: cardRight, targetEdge: targetCenterX, snapX: targetCenterX - card.width },
           { cardEdge: cardRight, targetEdge: targetRight, snapX: targetRight - card.width }
         ]
         xChecks.forEach(({ cardEdge, targetEdge, snapX }) => {
