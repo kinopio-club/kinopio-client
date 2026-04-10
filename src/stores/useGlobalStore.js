@@ -323,7 +323,8 @@ export const useGlobalStore = defineStore('global', {
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    axisGuideLinesOrigin: {}
+    axisGuideLinesOrigin: {},
+    cardAlignGuides: [] // [{ axis: 'x'|'y', position: number }, ...]
   }),
   getters: {
     getGlobalAllState () {
@@ -511,6 +512,7 @@ export const useGlobalStore = defineStore('global', {
     triggerShowPreviousSearchCard () {},
     triggerMoreFiltersIsNotVisible () {},
     triggerConnectionDetailsIsVisible (options) {},
+    triggerConnectionSnapAnimation (options) {},
     triggerUpdateWindowHistory (options) {},
     triggerAddCard (options) {},
     triggerAddChildCard (options) {},

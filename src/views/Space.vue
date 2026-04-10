@@ -939,6 +939,7 @@ const handleTouchEnd = (event) => {
   stopInteractions(event)
 }
 const resetGlobalStoreState = () => {
+  globalStore.cardAlignGuides = []
   globalStore.shouldSnapBackToList = false
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false
@@ -965,6 +966,7 @@ const resetGlobalStoreState = () => {
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
+  connectionStore.flushCardinalDebounceTimers()
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {

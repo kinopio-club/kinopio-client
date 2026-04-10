@@ -791,6 +791,16 @@ export default {
     })
     return total / numbers.length
   },
+  nearestItems (currentItem, items) {
+    const max = 6
+    items = items.map(item => {
+      item.distance = this.distanceBetweenTwoPoints(item, currentItem)
+      return item
+    })
+    items = sortBy(items, ['distance'])
+    items = items.slice(0, max)
+    return items
+  },
   distanceBetweenTwoPoints (point1, point2) {
     if (!point1 || !point2) { return }
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php

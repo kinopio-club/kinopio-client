@@ -162,7 +162,7 @@ template(v-if="visible")
     .row
       button(@click.left="selectFile('json')" :class="{active: isLoadingJson}")
         img.icon.file(src="@/assets/file.svg")
-        span Space JSON
+        span Kinopio JSON
         Loader(:visible="isLoadingJson")
 
     details

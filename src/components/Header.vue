@@ -834,7 +834,7 @@ header
     cursor pointer
     display flex
     .label-badge
-      bottom -2px
+      bottom 5px
 
     img
       vertical-align middle

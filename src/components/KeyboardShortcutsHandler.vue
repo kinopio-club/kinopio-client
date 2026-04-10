@@ -612,7 +612,7 @@ const addConnection = (baseCardId, position) => {
   if (!baseCard) { return }
   const controlPoint = userStore.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
-  const path = connectionStore.getConnectionPathBetweenItems({
+  const { path } = connectionStore.getConnectionPathBetweenItems({
     startItemId: baseCardId,
     endItemId: endCurrentCardId,
     controlPoint,
