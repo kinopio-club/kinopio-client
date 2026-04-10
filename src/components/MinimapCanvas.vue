@@ -27,7 +27,8 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 let canvas, context
-let offscreenCanvas
+let offscreenCanvas, offscreenContext
+let cachedDrawingImage, cachedDrawingDataUrl
 let startPanningPosition
 const itemRadius = 1
 const canvasElement = ref(null)
@@ -218,7 +219,7 @@ const update = async () => {
   if (!canvas) { return }
   // draw everything to the offscreen canvas so all layers are composited before anything appears on screen.
   const visibleContext = context
-  context = offscreenCanvas.getContext('2d')
+  context = offscreenContext
   await drawDrawing()
   drawBoxes()
   drawConnections()
@@ -248,26 +249,40 @@ const updateCanvas = async () => {
     context = canvas.getContext('2d')
     context.scale(window.devicePixelRatio, window.devicePixelRatio)
   }
-  // Create a fresh offscreen canvas for this frame
-  offscreenCanvas = new OffscreenCanvas(targetWidth, targetHeight)
-  const offCtx = offscreenCanvas.getContext('2d')
-  offCtx.scale(window.devicePixelRatio, window.devicePixelRatio)
+  // Reuse offscreen canvas when dimensions match, just clear it
+  if (!offscreenCanvas || offscreenCanvas.width !== targetWidth || offscreenCanvas.height !== targetHeight) {
+    offscreenCanvas = new OffscreenCanvas(targetWidth, targetHeight)
+    offscreenContext = offscreenCanvas.getContext('2d')
+    offscreenContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  } else {
+    offscreenContext.clearRect(0, 0, state.pageWidth, state.pageHeight)
+  }
 }
 
 // drawing
 
 const drawDrawing = () => {
+  const dataUrl = globalStore.drawingDataUrl
+  if (!dataUrl) { return Promise.resolve() }
+  // Reuse cached image if the data URL hasn't changed
+  if (cachedDrawingImage && cachedDrawingDataUrl === dataUrl) {
+    const width = cachedDrawingImage.width * ratio.value
+    const height = cachedDrawingImage.height * ratio.value
+    context.drawImage(cachedDrawingImage, 0, 0, width, height)
+    return Promise.resolve()
+  }
   return new Promise((resolve) => {
-    if (!globalStore.drawingDataUrl) { return resolve() }
     const image = new Image()
     image.onload = () => {
+      cachedDrawingImage = image
+      cachedDrawingDataUrl = dataUrl
       const width = image.width * ratio.value
       const height = image.height * ratio.value
       context.drawImage(image, 0, 0, width, height)
       resolve()
     }
     image.onerror = resolve
-    image.src = globalStore.drawingDataUrl
+    image.src = dataUrl
   })
 }
 
@@ -279,33 +294,29 @@ const mapConnections = computed(() => {
 const mapConnectionTypes = computed(() => {
   return props.space?.connectionTypes || connectionStore.getAllConnectionTypes
 })
-const updatePointWithRatio = (point) => {
-  point.x = point.x * ratio.value
-  point.y = point.y * ratio.value
-  return point
-}
 const drawConnections = () => {
   const connectionTypes = mapConnectionTypes.value
   const connections = mapConnections.value
+  if (!connections.length) { return }
+  const r = ratio.value
+  // Build a lookup map so we don't linear-scan types per connection
+  const typeMap = new Map()
+  for (const type of connectionTypes) {
+    typeMap.set(type.id, type)
+  }
+  context.lineWidth = 1
+  context.lineCap = 'round'
   for (const connection of connections) {
-    const isValid = connectionStore.getConnectionIsValid(connection)
-    if (!isValid) { continue }
-    context.lineWidth = 1
-    context.lineCap = 'round'
-    const type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
+    if (!connectionStore.getConnectionIsValid(connection)) { continue }
+    const type = typeMap.get(connection.connectionTypeId)
     if (!type) { continue }
+    const pathStr = connection.path
+    if (!pathStr) { continue }
     context.strokeStyle = type.color
-    // update path with ratio
-    let path = connection.path
-    if (!path) { continue }
-    let startCoords = utils.startCoordsFromConnectionPath(path)
-    let endCoords = utils.endCoordsFromConnectionPath(path)
-    let controlPoint = utils.curveControlPointFromPath(path)
-    startCoords = updatePointWithRatio(startCoords)
-    endCoords = updatePointWithRatio(endCoords)
-    controlPoint = updatePointWithRatio(controlPoint)
-    path = `m${startCoords.x},${startCoords.y} q${controlPoint.x},${controlPoint.y} ${endCoords.x},${endCoords.y}`
-    path = new Path2D(path)
+    const startCoords = utils.startCoordsFromConnectionPath(pathStr)
+    const endCoords = utils.endCoordsFromConnectionPath(pathStr)
+    const controlPoint = utils.curveControlPointFromPath(pathStr)
+    const path = new Path2D(`m${startCoords.x * r},${startCoords.y * r} q${controlPoint.x * r},${controlPoint.y * r} ${endCoords.x * r},${endCoords.y * r}`)
     context.stroke(path)
   }
 }
@@ -316,20 +327,17 @@ const mapBoxes = computed(() => {
   return props.space?.boxes || boxStore.getAllBoxes
 })
 const drawBoxes = () => {
-  let boxes = mapBoxes.value
-  boxes = utils.clone(boxes)
-  boxes = boxes.map(box => {
-    box.x = box.x * ratio.value
-    box.y = box.y * ratio.value
-    box.width = box.resizeWidth * ratio.value
-    box.height = box.resizeHeight * ratio.value
-    return box
-  })
-  boxes.forEach(box => {
+  const boxes = mapBoxes.value
+  const r = ratio.value
+  context.lineWidth = 1
+  for (const box of boxes) {
+    const x = box.x * r
+    const y = box.y * r
+    const width = box.resizeWidth * r
+    const height = box.resizeHeight * r
     const rect = new Path2D()
-    rect.roundRect(box.x, box.y, box.width, box.height, itemRadius)
+    rect.roundRect(x, y, width, height, itemRadius)
     context.strokeStyle = box.color
-    context.lineWidth = 1
     context.stroke(rect)
     if (box.fill === 'filled') {
       context.fillStyle = box.color
@@ -337,7 +345,7 @@ const drawBoxes = () => {
       context.fill(rect)
       context.globalAlpha = 1
     }
-  })
+  }
 }
 
 // lines
@@ -347,16 +355,18 @@ const mapLines = computed(() => {
 })
 const drawLines = () => {
   const lines = mapLines.value
-  lines.forEach(line => {
-    const width = Math.floor(globalStore.pageWidth * ratio.value)
-    const y = Math.floor(line.y * ratio.value)
+  if (!lines.length) { return }
+  const r = ratio.value
+  const width = Math.floor(globalStore.pageWidth * r)
+  context.lineWidth = 1
+  for (const line of lines) {
+    const y = Math.floor(line.y * r)
     context.strokeStyle = line.color
-    context.lineWidth = 1
     context.beginPath()
     context.moveTo(0, y)
     context.lineTo(width, y)
     context.stroke()
-  })
+  }
 }
 
 // lists
@@ -365,23 +375,18 @@ const mapLists = computed(() => {
   return props.space?.lists || listStore.getAllLists
 })
 const drawLists = () => {
-  let lists = mapLists.value
-  lists = utils.clone(lists)
-  lists = lists.map(list => {
-    const width = list.resizeWidth || consts.normalCardWrapWidth
-    const height = list.height || consts.listEmptyHeight
-    list.x = list.x * ratio.value
-    list.y = list.y * ratio.value
-    list.width = width * ratio.value
-    list.height = height * ratio.value
-    return list
-  })
-  lists.forEach(list => {
+  const lists = mapLists.value
+  const r = ratio.value
+  for (const list of lists) {
+    const x = list.x * r
+    const y = list.y * r
+    const width = (list.resizeWidth || consts.normalCardWrapWidth) * r
+    const height = (list.height || consts.listEmptyHeight) * r
     const rect = new Path2D()
-    rect.roundRect(list.x, list.y, list.width, list.height, itemRadius)
+    rect.roundRect(x, y, width, height, itemRadius)
     context.fillStyle = list.color
     context.fill(rect)
-  })
+  }
 }
 
 // cards
@@ -391,23 +396,18 @@ const mapCards = computed(() => {
 })
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
-  let cards = mapCards.value
-  cards = utils.clone(cards)
-  cards = cards.map(card => {
-    const width = card.width || 200
-    const height = card.height || 50
-    card.x = card.x * ratio.value
-    card.y = card.y * ratio.value
-    card.width = width * ratio.value
-    card.height = height * ratio.value
-    return card
-  })
-  cards.forEach(card => {
+  const cards = mapCards.value
+  const r = ratio.value
+  for (const card of cards) {
+    const x = card.x * r
+    const y = card.y * r
+    const width = (card.width || 200) * r
+    const height = (card.height || 50) * r
     const rect = new Path2D()
-    rect.roundRect(card.x, card.y, card.width, card.height, itemRadius)
+    rect.roundRect(x, y, width, height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
     context.fill(rect)
-  })
+  }
 }
 
 // viewport
