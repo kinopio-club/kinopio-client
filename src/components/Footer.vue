@@ -10,7 +10,7 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
-import JumpTo from '@/components/dialogs/JumpTo.vue'
+import Toc from '@/components/dialogs/Toc.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -37,11 +37,11 @@ onMounted(() => {
       } else if (name === 'triggerHideTouchInterface') {
         hideOnTouch()
       } else if (name === 'closeAllDialogs') {
-        if (!globalStore.jumpToIsPinned) {
-          hideJumpTo()
+        if (!globalStore.tocIsPinned) {
+          hideToc()
         }
-      } else if (name === 'triggerJumpToIsVisible') {
-        toggleJumpTo()
+      } else if (name === 'triggerTocIsVisible') {
+        toggleTocIsVisible()
       }
     }
   )
@@ -121,7 +121,7 @@ const leftControlsIsVisible = computed(() => {
 })
 const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
-  if (globalStore.jumpToIsPinned) { return true }
+  if (globalStore.tocIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
   // const isTouchDevice = globalStore.isTouchDevice
   // if (!isTouchDevice) { return true }
@@ -143,10 +143,10 @@ const togglePresentationMode = () => {
 
 // jumpTo
 
-const hideJumpTo = () => {
+const hideToc = () => {
   state.jumpToIsVisible = false
 }
-const toggleJumpTo = () => {
+const toggleTocIsVisible = () => {
   state.jumpToIsVisible = !state.jumpToIsVisible
 }
 
@@ -258,10 +258,10 @@ const updatePositionInVisualViewport = () => {
     //- jumpTo minimap
     .segmented-buttons
       button.small-button(
-        @click.stop="toggleJumpTo"
+        @click.stop="toggleTocIsVisible"
         @touchend.stop
         :class="{'hidden': state.isHiddenOnTouch, 'active': state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-        title="Toggle Jump To (J)"
+        title="Toggle TOC (C)"
       )
         img.icon.toc(src="@/assets/toc.svg")
       button.small-button(
@@ -270,7 +270,7 @@ const updatePositionInVisualViewport = () => {
         title="Toggle Minimap (M)"
       )
         img.icon.minimap(src="@/assets/minimap.svg")
-    JumpTo(:visible="state.jumpToIsVisible")
+    Toc(:visible="state.jumpToIsVisible")
 </template>
 
 <style lang="stylus">

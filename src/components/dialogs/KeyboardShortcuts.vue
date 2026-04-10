@@ -192,8 +192,8 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
         .row
           .badge.title
             img.icon.toc(src="@/assets/toc.svg")
-            span Toggle Jump To
-          .badge.keyboard-shortcut J
+            span Toggle TOC
+          .badge.keyboard-shortcut C
       article
         .row
           .badge.title

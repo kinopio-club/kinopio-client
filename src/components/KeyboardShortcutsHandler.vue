@@ -143,7 +143,7 @@ const handleShortcutsOnKeyUp = (event) => {
   const keyL = key === 'l' || keyCode === 'KeyL'
   const keyN = key === 'n' || keyCode === 'KeyN'
   const keyM = key === 'm' || keyCode === 'KeyM' // depcrecated for JumpTo Mar 2026
-  const keyJ = key === 'j' || keyCode === 'KeyJ'
+  const keyC = key === 'c' || keyCode === 'KeyC'
   const keyT = key === 't' || keyCode === 'KeyT'
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
@@ -161,8 +161,8 @@ const handleShortcutsOnKeyUp = (event) => {
     globalStore.addNotification({ message: 'New space created (N)', icon: 'add', type: 'success' })
     globalStore.triggerSpaceDetailsInfoIsVisible()
   // m
-  } else if ((keyM || keyJ) && (isSpaceScope || isJumpToDialogScope)) {
-    globalStore.triggerJumpToIsVisible()
+  } else if ((keyM || keyC) && (isSpaceScope || isJumpToDialogScope)) {
+    globalStore.triggerTocIsVisible()
   // t
   } else if (keyT && isSpaceScope) {
     globalStore.addNotification({ message: 'Theme toggled (T)', type: 'info' })
