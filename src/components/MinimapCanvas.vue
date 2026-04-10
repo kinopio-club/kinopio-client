@@ -27,6 +27,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 let canvas, context
+let offscreenCanvas
 let startPanningPosition
 const itemRadius = 1
 const canvasElement = ref(null)
@@ -215,12 +216,19 @@ const update = async () => {
   if (!props.visible) { return }
   await updateCanvas()
   if (!canvas) { return }
+  // draw everything to the offscreen canvas so all layers are composited before anything appears on screen.
+  const visibleContext = context
+  context = offscreenCanvas.getContext('2d')
   await drawDrawing()
   drawBoxes()
   drawConnections()
   drawLists()
   drawCards()
   drawLines()
+  // Blit the fully-composited offscreen canvas to the visible canvas to prevent flickering
+  context = visibleContext
+  context.clearRect(0, 0, state.pageWidth, state.pageHeight)
+  context.drawImage(offscreenCanvas, 0, 0, state.pageWidth, state.pageHeight)
 }
 const updateCanvas = async () => {
   await nextTick()
@@ -229,26 +237,38 @@ const updateCanvas = async () => {
   updateScroll()
   canvas = canvasElement.value
   if (!canvas) { return }
-  context = canvas.getContext('2d')
-  canvas.width = state.pageWidth * window.devicePixelRatio
-  canvas.height = state.pageHeight * window.devicePixelRatio
-  canvas.style.width = state.pageWidth + 'px'
-  canvas.style.height = state.pageHeight + 'px'
-  context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  context.clearRect(0, 0, canvas.width, canvas.height)
+  const targetWidth = state.pageWidth * window.devicePixelRatio
+  const targetHeight = state.pageHeight * window.devicePixelRatio
+  // only resize when dimensions change to prevent flickering
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+    canvas.style.width = state.pageWidth + 'px'
+    canvas.style.height = state.pageHeight + 'px'
+    context = canvas.getContext('2d')
+    context.scale(window.devicePixelRatio, window.devicePixelRatio)
+  }
+  // Create a fresh offscreen canvas for this frame
+  offscreenCanvas = new OffscreenCanvas(targetWidth, targetHeight)
+  const offCtx = offscreenCanvas.getContext('2d')
+  offCtx.scale(window.devicePixelRatio, window.devicePixelRatio)
 }
 
 // drawing
 
-const drawDrawing = async () => {
-  if (!globalStore.drawingDataUrl) { return }
-  const image = new Image()
-  image.onload = () => {
-    const width = image.width * ratio.value
-    const height = image.height * ratio.value
-    context.drawImage(image, 0, 0, width, height)
-  }
-  image.src = globalStore.drawingDataUrl
+const drawDrawing = () => {
+  return new Promise((resolve) => {
+    if (!globalStore.drawingDataUrl) { return resolve() }
+    const image = new Image()
+    image.onload = () => {
+      const width = image.width * ratio.value
+      const height = image.height * ratio.value
+      context.drawImage(image, 0, 0, width, height)
+      resolve()
+    }
+    image.onerror = resolve
+    image.src = globalStore.drawingDataUrl
+  })
 }
 
 // connections
