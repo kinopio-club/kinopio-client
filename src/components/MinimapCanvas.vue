@@ -176,6 +176,11 @@ watch(() => props.space, (value, prevValue) => {
     init()
   }
 })
+watch(() => props.size, (value, prevValue) => {
+  if (value) {
+    init()
+  }
+})
 
 const pageHeight = computed(() => {
   return props.pageHeight || globalStore.pageHeight
