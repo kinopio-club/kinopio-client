@@ -57,6 +57,7 @@ export const useGlobalStore = defineStore('global', {
     currentSpaceIsUnavailableOffline: false,
     cardVotes: new Map(),
     spaceComponentIsMounted: false,
+    minimapIsVisible: true,
 
     // zoom and scroll
     spaceZoomPercent: 100,

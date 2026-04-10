@@ -722,7 +722,7 @@ const showMultipleSelectedActions = (event) => {
 
 // minimap
 
-const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
+const minimapIsVisible = computed(() => true)// isPanningReady.value || isPanning.value)
 
 // resize dialog
 
@@ -1149,7 +1149,7 @@ const updateMetaRSSFeed = () => {
   TagDetails
   UserDetails
   #space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
-    MinimapCanvas(:visible="true" :size="200")
+    MinimapCanvas(:visible="true" :size="120")
   //- handlers
   WindowHistoryHandler
   KeyboardShortcutsHandler
@@ -1180,7 +1180,7 @@ const updateMetaRSSFeed = () => {
 .minimap-canvas-wrap
   position fixed
   right 8px
-  bottom 50px
+  bottom 42px
 
 #box-backgrounds,
 #box-infos

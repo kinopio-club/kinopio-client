@@ -112,7 +112,7 @@ dialog.narrow.jump-to.is-pinnable(
 dialog.jump-to
   overflow auto
   right 8px
-  bottom 28px
+  bottom 34px
   top initial
   left initial
   text-align left
