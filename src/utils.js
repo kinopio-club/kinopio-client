@@ -800,46 +800,6 @@ export default {
     items = sortBy(items, ['distance'])
     items = items.slice(0, max)
     return items
-
-    // let nearest = { top: null, bottom: null, left: null, right: null }
-    // const distances = { top: Infinity, bottom: Infinity, left: Infinity, right: Infinity }
-    // items.forEach(item => {
-    //   if (item.id === currentItem.id) { return }
-    //   const distance = this.distanceBetweenTwoPoints(item, currentItem)
-    //   // orientation
-    //   const itemCenterX = item.x + item.width / 2
-    //   const itemCenterY = item.y + item.height / 2
-    //   const currentCenterX = currentItem.x + currentItem.width / 2
-    //   const currentCenterY = currentItem.y + currentItem.height / 2
-    //   const offsetX = itemCenterX - currentCenterX
-    //   const offsetY = itemCenterY - currentCenterY
-    //   const isAboveOrBelow = Math.abs(offsetY) >= Math.abs(offsetX)
-    //   // nearest distance item
-    //   if (isAboveOrBelow) {
-    //     const isTop = offsetY < 0 && distance < distances.top
-    //     const isBelow = offsetY > 0 && distance < distances.bottom
-    //     if (isTop) {
-    //       distances.top = distance
-    //       nearest.top = item
-    //     } else if (isBelow) {
-    //       distances.bottom = distance
-    //       nearest.bottom = item
-    //     }
-    //   } else {
-    //     const isLeft = offsetX < 0 && distance < distances.left
-    //     const isRight = offsetX > 0 && distance < distances.right
-    //     if (isLeft) {
-    //       distances.left = distance
-    //       nearest.left = item
-    //     } else if (isRight) {
-    //       distances.right = distance
-    //       nearest.right = item
-    //     }
-    //   }
-    // })
-    // nearest = Object.values(nearest)
-    // nearest = nearest.filter(item => Boolean(item))
-    // return nearest
   },
   distanceBetweenTwoPoints (point1, point2) {
     if (!point1 || !point2) { return }
