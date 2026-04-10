@@ -365,6 +365,18 @@ export const useGlobalStore = defineStore('global', {
         return 'list'
       }
     },
+    getCurrentDraggingItem () {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      if (this.currentUserIsDraggingCard) {
+        return cardStore.getCurrentDraggingCard
+      } else if (this.currentUserIsDraggingBox) {
+        return boxStore.getCurrentDraggingBox
+      } else if (this.currentUserIsDraggingList) {
+        return listStore.getCurrentDraggingList
+      }
+    },
     getIsResizingItem () {
       return (
         this.currentUserIsResizingCard ||
@@ -985,15 +997,61 @@ export const useGlobalStore = defineStore('global', {
 
     // Snap Align
 
-    updateItemSnapAlignGuides () {
+    getItemsSelectableInViewport () {
       const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      const cards = cardStore.getCardsSelectableInViewport()
+      const boxes = boxStore.getBoxesSelectableInViewport()
+      const lists = listStore.getAllLists
+      return cards.concat(boxes, lists)
+    },
+    snapSelectedItemsToPosition (item, nearestX, nearestY) {
+      const spaceStore = useSpaceStore()
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      let deltaX = 0
+      let deltaY = 0
+      if (nearestX) {
+        deltaX = nearestX.snapTo - item.x
+      }
+      if (nearestY) {
+        deltaY = nearestY.snapTo - item.y
+      }
+      if (deltaX !== 0 || deltaY !== 0) {
+        const items = spaceStore.getSpaceSelectedItems
+        // snap dragging cards
+        const cards = items.cards
+        if (this.getInteractingWithItemType === 'card') {
+          cards.push(item)
+        }
+        const snappedCards = cards.map(item => {
+          return {
+            id: item.id,
+            x: Math.max(0, item.x + deltaX),
+            y: Math.max(0, item.y + deltaY)
+          }
+        })
+        cardStore.updateCards(snappedCards)
+
+        // snap boxes and contained items
+        // const snappedBoxes =
+
+        // getItemsContainedInSelectedBoxes
+
+        // if list then include all cards in it
+      }
+    },
+    updateItemSnapAlignGuides () {
+      const spaceStore = useSpaceStore()
       const snapThreshold = 1
       const shouldPrevent = !this.shouldSnapAlign || this.preventItemSnapping
       if (shouldPrevent) {
         this.itemSnapAlignGuides = []
         return
       }
-      const item = cardStore.getCard(this.currentDraggingCardId) // TODO get selected item
+      const item = this.getCurrentDraggingItem
       if (!item) {
         this.itemSnapAlignGuides = []
         return
@@ -1008,7 +1066,7 @@ export const useGlobalStore = defineStore('global', {
       const itemCenterX = item.x + item.width / 2
       const itemRight = item.x + item.width
       // only compare nearest items
-      let viewportItems = cardStore.getCardsSelectableInViewport() // TODO viewportItems getItemsSelectableInViewport
+      let viewportItems = this.getItemsSelectableInViewport()
       viewportItems = viewportItems.filter(target => {
         if (target.id === item.id) { return }
         if (target.listId) { return }
@@ -1066,27 +1124,9 @@ export const useGlobalStore = defineStore('global', {
         })
       })
       // snap position
-      const guides = []
-      let deltaX = 0
-      let deltaY = 0
-      if (nearestX) {
-        deltaX = nearestX.snapTo - item.x
-      }
-      if (nearestY) {
-        deltaY = nearestY.snapTo - item.y
-      }
-      if (deltaX !== 0 || deltaY !== 0) {
-        // TODO get all current dragging and selected items
-        const snapped = cardStore.getCardsSelected.map(item => {
-          return {
-            id: item.id,
-            x: Math.max(0, item.x + deltaX),
-            y: Math.max(0, item.y + deltaY)
-          }
-        })
-        cardStore.updateCards(snapped)
-      }
+      this.snapSelectedItemsToPosition(item, nearestX, nearestY)
       // guide lines
+      const guides = []
       if (nearestY) { guides.push({ axis: 'y', position: nearestY.guideAt }) }
       if (nearestX) { guides.push({ axis: 'x', position: nearestX.guideAt }) }
       this.itemSnapAlignGuides = guides

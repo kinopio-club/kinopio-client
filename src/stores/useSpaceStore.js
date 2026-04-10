@@ -214,9 +214,11 @@ export const useSpaceStore = defineStore('space', {
       if (!itemId) { return }
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
+      const listStore = useListStore()
       const card = cardStore.getCard(itemId)
       const box = boxStore.getBox(itemId)
-      return card || box
+      const list = listStore.getList(itemId)
+      return card || box || list
     },
     getSpaceIsFavorite (spaceId) {
       const userStore = useUserStore()

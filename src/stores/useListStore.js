@@ -43,6 +43,11 @@ export const useListStore = defineStore('lists', {
       const lists = ids.map(id => this.byId[id])
       return lists
     },
+    getCurrentDraggingList () {
+      const globalStore = useGlobalStore()
+      const listId = globalStore.currentDraggingListId
+      return this.getList(listId)
+    },
     getListColors () {
       const lists = this.getAllLists
       const colors = lists.map(list => list.color)

@@ -61,6 +61,11 @@ export const useBoxStore = defineStore('boxes', {
         yIndex
       }
     },
+    getCurrentDraggingBox () {
+      const globalStore = useGlobalStore()
+      const boxId = globalStore.currentDraggingBoxId
+      return this.getBox(boxId)
+    },
     getBoxesResizing () {
       const globalStore = useGlobalStore()
       const ids = globalStore.currentUserIsResizingBoxIds
