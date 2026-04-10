@@ -91,6 +91,20 @@ export const useCardStore = defineStore('cards', {
       const cards = ids.map(id => this.byId[id])
       return cards
     },
+    getCurrentDraggingCard () {
+      const globalStore = useGlobalStore()
+      const cardId = globalStore.currentDraggingCardId
+      return this.getCard(cardId)
+    },
+    getCurrentDraggingAndSelectedCards () {
+      const currentCard = this.getCurrentDraggingCard
+      const cards = this.getCardsSelected || []
+      const currentCardIsSelected = cards.find(card => card.id === currentCard.id)
+      if (!currentCardIsSelected) {
+        cards.push(currentCard)
+      }
+      return cards
+    },
     getCardIdsGroupedByList () {
       const cards = this.getAllCards
       const result = {}
@@ -201,11 +215,6 @@ export const useCardStore = defineStore('cards', {
     },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
-    },
-    getCurrentDraggingCard () {
-      const globalStore = useGlobalStore()
-      const cardId = globalStore.currentDraggingCardId
-      return this.getCard(cardId)
     },
     getVerticallyAlignedCardsBelow (cardId, deltaHeight = 0) {
       let cards = this.getAllCardsSortedByX

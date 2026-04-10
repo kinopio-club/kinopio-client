@@ -172,7 +172,7 @@ export const useListStore = defineStore('lists', {
     updateShouldSnapBackToList () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
-      const card = cardStore.getCurrentDraggingCard()
+      const card = cardStore.getCurrentDraggingCard
       if (!card) { return }
       if (!card.listId) { return }
       const list = this.getList(card.listId)
@@ -187,7 +187,7 @@ export const useListStore = defineStore('lists', {
       if (!globalStore.currentUserIsDraggingCard) { return }
       if (globalStore.shouldSnapAlign) { return }
       this.updateShouldSnapBackToList()
-      const card = cardStore.getCurrentDraggingCard()
+      const card = cardStore.getCurrentDraggingCard
       const lists = this.getAllLists
       const list = lists.find(listRect => {
         // if list has cards, list height is list-info only

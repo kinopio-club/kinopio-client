@@ -1076,11 +1076,14 @@ export const useGlobalStore = defineStore('global', {
         deltaY = nearestY.snapTo - card.y
       }
       if (deltaX !== 0 || deltaY !== 0) {
-        cardStore.updateCard({
-          id: card.id,
-          x: Math.max(0, card.x + deltaX),
-          y: Math.max(0, card.y + deltaY)
+        const snapped = cardStore.getCurrentDraggingAndSelectedCards.map(card => {
+          return {
+            id: card.id,
+            x: Math.max(0, card.x + deltaX),
+            y: Math.max(0, card.y + deltaY)
+          }
         })
+        cardStore.updateCards(snapped)
       }
       // guide lines
       if (nearestY) { guides.push({ axis: 'y', position: nearestY.guideAt }) }
