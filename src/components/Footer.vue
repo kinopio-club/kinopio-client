@@ -239,14 +239,14 @@ const updatePositionInVisualViewport = () => {
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
-    //- jumpTo
-    .button-wrap.footer-button-wrap(@click.stop="toggleJumpTo" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Jump To (J)")
-        img.icon.toc(src="@/assets/toc.svg")
     //- presentation mode
     .button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
         img.icon.presentation(src="@/assets/presentation.svg")
+    //- jumpTo
+    .button-wrap.footer-button-wrap(@click.stop="toggleJumpTo" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Jump To (J)")
+        img.icon.toc(src="@/assets/toc.svg")
       JumpTo(:visible="state.jumpToIsVisible")
 
 </template>
