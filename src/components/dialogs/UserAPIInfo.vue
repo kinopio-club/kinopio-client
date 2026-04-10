@@ -71,7 +71,7 @@ const copy = async (event, type) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
       span API
@@ -109,7 +109,7 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
 </template>
 
 <style lang="stylus">
-dialog.user-developer-info
+dialog.user-api-info
   overflow auto
   .copy-api-keys
     padding-top 4px
