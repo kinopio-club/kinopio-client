@@ -417,13 +417,15 @@ const updateScroll = () => {
   state.scrollY = window.scrollY
 }
 const viewportStyle = computed(() => {
-  const zoom = globalStore.getSpaceCounterZoomDecimal
+  const counterZoom = globalStore.getSpaceCounterZoomDecimal
+  const origin = globalStore.zoomOrigin
   const color = userStore.color
-  // viewport box
-  let width = (globalStore.viewportWidth * zoom) * ratio.value
-  let height = (globalStore.viewportHeight * zoom) * ratio.value
-  let left = (state.scrollX * zoom) * ratio.value
-  let top = (state.scrollY * zoom) * ratio.value
+  // viewport size in space coordinates (correct regardless of origin)
+  let width = (globalStore.viewportWidth * counterZoom) * ratio.value
+  let height = (globalStore.viewportHeight * counterZoom) * ratio.value
+  // convert scroll position to space coordinates, accounting for zoom origin offset
+  let left = (state.scrollX * counterZoom - origin.x * (counterZoom - 1)) * ratio.value
+  let top = (state.scrollY * counterZoom - origin.y * (counterZoom - 1)) * ratio.value
   // constraints
   if (Math.round(left + width) > state.pageWidth) {
     left = Math.min(left, state.pageWidth)
@@ -458,9 +460,20 @@ const positionInSpace = (event) => {
   y = y / ratio.value
   return { x, y }
 }
+const spaceToScroll = (spacePos) => {
+  // convert a space coordinate to a scroll position, inverse of the viewport mapping
+  const zoom = globalStore.getSpaceZoomDecimal
+  const origin = globalStore.zoomOrigin
+  return {
+    x: origin.x * (1 - zoom) + zoom * spacePos.x,
+    y: origin.y * (1 - zoom) + zoom * spacePos.y
+  }
+}
 const positionInViewportCenter = (position) => {
-  let x = position.x - (globalStore.viewportWidth / 2)
-  let y = position.y - (globalStore.viewportHeight / 2)
+  const counterZoom = globalStore.getSpaceCounterZoomDecimal
+  // offset by half the visible area in space coordinates
+  let x = position.x - (globalStore.viewportWidth * counterZoom / 2)
+  let y = position.y - (globalStore.viewportHeight * counterZoom / 2)
   x = Math.max(0, x)
   y = Math.max(0, y)
   return { x, y }
@@ -480,9 +493,11 @@ const startPanningViewport = (event) => {
 const panToPosition = (event) => {
   const position = positionInSpace(event)
   const centerPosition = positionInViewportCenter(position)
+  // convert space coordinates back to scroll coordinates
+  const scroll = spaceToScroll(centerPosition)
   window.scrollTo({
-    top: centerPosition.y,
-    left: centerPosition.x,
+    top: scroll.y,
+    left: scroll.x,
     behavior: 'smooth'
   })
   state.prevPosition = position
@@ -497,7 +512,9 @@ const panViewport = (event) => {
     x: position.x - state.prevPosition.x,
     y: position.y - state.prevPosition.y
   }
-  window.scrollBy(delta.x, delta.y, 'instant')
+  // delta is in space coordinates, scale to scroll coordinates
+  const zoom = globalStore.getSpaceZoomDecimal
+  window.scrollBy(delta.x * zoom, delta.y * zoom, 'instant')
   state.prevPosition = position
 }
 const endPanningViewport = (event) => {
