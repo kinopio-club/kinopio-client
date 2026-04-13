@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import Header from '@/components/page/Header.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -31,7 +32,8 @@ const state = reactive({
     currentUserIsNotSignedIn: false,
     currentUserIsNotAffiliate: false,
     unknownServerError: false
-  }
+  },
+  filterPendingOnly: false
 })
 
 const isThemeDark = computed(() => themeStore.getIsThemeDark)
@@ -61,9 +63,17 @@ const update = async () => {
   }
 }
 
-// const commissionsFiltered = computed(() => {
-// // filter pending (unpaid only)
-// })
+const promoUrl = computed(() => `${consts.kinopioDomain()}/${state.affiliate.promoCode}`)
+const toggleFilterPendingOnly = (value) => {
+  state.filterPendingOnly = value
+}
+const commissionsFiltered = computed(() => {
+  if (state.filterPendingOnly) {
+    return state.commissions.filter(item => !item.isPaid)
+  } else {
+    return state.commissions
+  }
+})
 
 </script>
 
@@ -81,14 +91,44 @@ const update = async () => {
 
       section.affiliate-info(v-if="isAffiliate")
         section.subsection
-          span Affiliate
-          //- span.badge.secondary
-          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
-          span {{currentUser.name}}
+          table
+            tbody
+              tr.table-header
+                td Affiliate
+                td PromoCode
+                td Referral URL
+              tr
+                td
+                  .user
+                    User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+                    span {{currentUser.name}}
+                td {{ state.affiliate.promoCode }}
+                td
+                  .badge.info {{ promoUrl }}
 
       section.commissions(v-if="isAffiliate")
-        //- p skdf
-      //- section testing.......
+        h2 Commissions
+        section.subsection.commissions-status
+          .row
+            span.badge.success $234
+            span Total Pending Payout (paid on the first of the each month)
+        .row
+          .segmented-buttons
+            button(:class="{ active: !state.filterPendingOnly }" @click="toggleFilterPendingOnly(false)")
+              span All
+            button(:class="{ active: state.filterPendingOnly }" @click="toggleFilterPendingOnly(true)")
+              span Pending
+
+        table
+          tbody
+            tr.table-header
+              td Status
+              //- td Customer
+
+            //- v-for state.commissionsFiltered
+            tr
+              td
+                .badge.success Pending
 </template>
 
 <style lang="stylus">
@@ -123,16 +163,25 @@ main.page
       section.subsection
         display flex
         align-items center
-    .affiliate-info
+
+    table
+      margin 0
+      .table-header
+        td
+          border-bottom 0
       .user
-        margin 0 6px
-    // h1
-    //   font-family var(--header-font-9)
-    //   font-size 66px
-    //   margin-block initial
-    //   margin-bottom 1rem
-    //   max-width 400px
+        margin-right 6px
+        display flex
+        align-items center
+
     h2
       font-size 21px
       max-width 400px
+
+    .commissions
+      .commissions-status
+        margin-bottom 10px
+      table
+        margin-top 1rem
+
 </style>
