@@ -33,7 +33,9 @@ onBeforeUnmount(() => {
 })
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  isAboutPage: Boolean,
+  isGroupPage: Boolean
 })
 const state = reactive({
   aboutIsVisible: false,
@@ -87,14 +89,15 @@ const toggleAppsAndExtensionsIsVisible = () => {
               KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
               Donate(:visible="state.donateIsVisible")
         .right
-          .button-wrap
-            button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
-              span Pricing
-            Pricing(:visible="pricingIsVisible" :parentIsPage="true")
-          .button-wrap#download
-            button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
-              span Apps
-            AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
+          template(v-if="props.isAboutPage")
+            .button-wrap
+              button.translucent-button(@click.left.stop="togglePricingIsVisible" :class="{ active: pricingIsVisible }")
+                span Pricing
+              Pricing(:visible="pricingIsVisible" :parentIsPage="true")
+            .button-wrap#download
+              button.translucent-button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}" ref="appsButtonElement")
+                span Apps
+              AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
           .button-wrap
             router-link(to="/app")
               button.success Open Kinopio

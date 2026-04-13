@@ -209,6 +209,16 @@ const router = {
         next()
       }
     }, {
+      path: '/group/:groupId',
+      name: 'group',
+      component: () => import('./views/Group.vue'),
+      beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
+        const groupId = to.params.groupId
+        globalStore.groupIdPageToLoad = groupId
+        next()
+      }
+    }, {
       path: '/:space',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {

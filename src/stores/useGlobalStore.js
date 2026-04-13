@@ -258,6 +258,7 @@ export const useGlobalStore = defineStore('global', {
     isLoadingSpace: false,
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
+    groupIdPageToLoad: null,
     groupToJoinOnLoad: null, // { groupId, collaboratorKey }
     spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
