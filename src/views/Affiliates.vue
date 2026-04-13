@@ -21,7 +21,11 @@ const themeStore = useThemeStore()
 
 onMounted(() => {
   update()
-  document.title = 'Kinopio Affiliates'
+  if (consts.isDevelopment()) {
+    document.title = '[DEV] Affiliate Dashboard – Kinopio'
+  } else {
+    document.title = 'Affiliate Dashboard – Kinopio'
+  }
 })
 
 const state = reactive({
@@ -32,8 +36,7 @@ const state = reactive({
     currentUserIsNotSignedIn: false,
     currentUserIsNotAffiliate: false,
     unknownServerError: false
-  },
-  filterPendingOnly: false
+  }
 })
 
 const isThemeDark = computed(() => themeStore.getIsThemeDark)
@@ -43,6 +46,13 @@ const closeAllDialogs = () => {
 const currentUser = computed(() => userStore.getUserAllState)
 const isAffiliate = computed(() => utils.objectHasKeys(state.affiliate))
 
+const handleErrors = (error) => {
+  if (error.status === 401) {
+    state.error.currentUserIsNotAffiliate = true
+  } else {
+    state.error.unknownServerError = true
+  }
+}
 const update = async () => {
   try {
     if (!userStore.getUserIsSignedIn) {
@@ -53,28 +63,35 @@ const update = async () => {
     const data = await apiStore.getAffiliate()
     state.affiliate = data.affiliate
     state.commissions = data.commissions
-    console.log('❤️', userStore.name, userStore.getUserIsSignedIn, globalStore.isSpacePage, state.affiliate, state.commissions)
+    console.log('🦚 update', state.affiliate, state.commissions)
   } catch (error) {
-    console.error('🚒 update', error)
-    // currentUserIsNotAffiliate
-    // unknownServerError
+    console.error('🚒 update', error, error.status)
+    handleErrors(error)
   } finally {
     state.isLoading = false
   }
 }
+const formatDate = (date) => {
+  return utils.shortAbsoluteDate(date)
+}
+
+// affiliate info
 
 const promoUrl = computed(() => `${consts.kinopioDomain()}/${state.affiliate.promoCode}`)
-const toggleFilterPendingOnly = (value) => {
-  state.filterPendingOnly = value
-}
-const commissionsFiltered = computed(() => {
-  if (state.filterPendingOnly) {
-    return state.commissions.filter(item => !item.isPaid)
-  } else {
-    return state.commissions
-  }
-})
 
+// commissions
+
+const total = (items) => {
+  let total = 0
+  items.forEach(item => {
+    total += parseFloat(item.amountAffiliatePayout)
+  })
+  return total.toFixed(2)
+}
+const commissionsPending = computed(() => state.commissions.filter(item => !item.isPaid))
+const commissionsPaid = computed(() => state.commissions.filter(item => item.isPaid))
+const totalPendingPayout = computed(() => total(commissionsPending.value))
+const totalCommissionsPaid = computed(() => total(commissionsPaid.value))
 </script>
 
 <template lang="pug">
@@ -83,9 +100,16 @@ const commissionsFiltered = computed(() => {
   main.page(@click="closeAllDialogs")
     .page-wrap
       section
-        //- TODO errors
-        .badge.danger(v-if="state.error.currentUserIsNotSignedIn")
-          span To access this page you must be signed in and part of the affiliate program
+        h1 Affiliate Dashboard
+        .errors
+          .badge.danger(v-if="state.error.currentUserIsNotSignedIn")
+            span To access this page you must be signed in
+          .badge.danger(v-if="state.error.currentUserIsNotAffiliate")
+            span To access this page you must be a member of the Kinopio affiliate program.{{' '}}
+            //- TODO update help page link
+            a(href="/help/affiliate-program") (More Info)
+          .badge.danger(v-if="state.error.unknownServerError")
+            span (シ_ _)シ Something went wrong, Please try again or contact support
 
         Loader(:visible="state.isLoading")
 
@@ -107,34 +131,62 @@ const commissionsFiltered = computed(() => {
                   .badge.info {{ promoUrl }}
 
       section.commissions(v-if="isAffiliate")
-        h2 Commissions
-        section.subsection.commissions-status
-          .row
-            span.badge.success $234
-            span Total Pending Payout (paid on the first of the each month)
+        h2 Commissions Awaiting Payout
         .row
-          .segmented-buttons
-            button(:class="{ active: !state.filterPendingOnly }" @click="toggleFilterPendingOnly(false)")
-              span All
-            button(:class="{ active: state.filterPendingOnly }" @click="toggleFilterPendingOnly(true)")
-              span Pending
-
-        table
+          span.badge.success ${{totalPendingPayout}} Pending Payout
+          span (paid on the first of the each month)
+        table(v-if="commissionsPending.length")
           tbody
             tr.table-header
               td Status
-              //- td Customer
-
-            //- v-for state.commissionsFiltered
-            tr
+              td User
+              td Amount Affiliate Payout
+              td Amount User Paid
+              td Date
+            tr(v-for="item in commissionsPending")
               td
-                .badge.success Pending
+                .badge.secondary(v-if="item.isPaid") Paid
+                .badge.success(v-else) Pending
+              td
+                .user
+                  User(:user="item.user" :isClickable="false" :key="item.user.id" :isMedium="true" :hideYouLabel="true")
+                  span {{item.user.name}}
+              td
+                span ${{item.amountAffiliatePayout}}
+              td
+                span ${{item.amountUserPaid}}
+              td
+                span {{formatDate(item.createdAt)}}
+
+        h2 Commissions Paid
+        .row
+          span.badge.info ${{totalCommissionsPaid}} Total Paid Out
+        //- same as table above
+        table(v-if="commissionsPaid.length")
+          tbody
+            tr.table-header
+              td Status
+              td User
+              td Amount Affiliate Payout
+              td Amount User Paid
+              td Date
+            tr(v-for="item in commissionsPaid")
+              td
+                .badge.secondary(v-if="item.isPaid") Paid
+                .badge.success(v-else) Pending
+              td
+                .user
+                  User(:user="item.user" :isClickable="false" :key="item.user.id" :isMedium="true" :hideYouLabel="true")
+                  span {{item.user.name}}
+              td
+                span ${{item.amountAffiliatePayout}}
+              td
+                span ${{item.amountUserPaid}}
+              td
+                span {{formatDate(item.createdAt)}}
 </template>
 
 <style lang="stylus">
-// :root
-//   --page-entity-radius 16px
-
 header
   z-index 1
 
@@ -147,11 +199,8 @@ main.page
   background-color var(--primary-background)
   min-height 100dvh
   .page-wrap
-    // background pink
     margin-left auto
     margin-right auto
-    // margin-left 2rem
-    // margin-right 2rem
     max-width 755px
     @media(max-width 760px)
       max-width 600px
@@ -159,7 +208,7 @@ main.page
     > section
       width 100%
       margin-bottom 2rem
-      padding 0 20px // TODO remove if pagewrap has margin
+      padding 0 20px
       section.subsection
         display flex
         align-items center
@@ -174,9 +223,12 @@ main.page
         display flex
         align-items center
 
+    h1,
     h2
       font-size 21px
       max-width 400px
+    h1
+      font-size 24px
 
     .commissions
       .commissions-status
