@@ -185,6 +185,14 @@ const router = {
         globalStore.groupToJoinOnLoad.group = group
       }
     }, {
+      path: '/affiliates',
+      name: 'affiliates',
+      component: () => import('./views/Affiliates.vue'),
+      beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
+        next()
+      }
+    }, {
       path: '/space/invite/:spaceId',
       name: 'invite',
       component: () => import('./views/Space.vue'),
