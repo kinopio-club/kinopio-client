@@ -126,9 +126,10 @@ const totalCommissionsPaid = computed(() => total(commissionsPaid.value))
                   .user
                     User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
                     span {{currentUser.name}}
-                td {{ state.affiliate.promoCode }}
                 td
-                  .badge.info {{ promoUrl }}
+                  span.badge.info {{ state.affiliate.promoCode }}
+                td
+                  span.badge.info {{ promoUrl }}
 
       section.commissions(v-if="isAffiliate")
         h2 Commissions Awaiting Payout
@@ -160,7 +161,7 @@ const totalCommissionsPaid = computed(() => total(commissionsPaid.value))
 
         h2 Commissions Paid
         .row
-          span.badge.info ${{totalCommissionsPaid}} Total Paid Out
+          span.badge.secondary ${{totalCommissionsPaid}} Total Paid Out
         //- same as table above
         table(v-if="commissionsPaid.length")
           tbody
@@ -215,9 +216,8 @@ main.page
 
     table
       margin 0
-      .table-header
-        td
-          border-bottom 0
+      td
+        padding 8px
       .user
         margin-right 6px
         display flex
