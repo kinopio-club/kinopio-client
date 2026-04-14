@@ -77,7 +77,7 @@ const formatDate = (date) => {
 
 // affiliate info
 
-const promoUrl = computed(() => `${consts.kinopioDomain()}/${state.affiliate.promoCode}`)
+const promoUrl = computed(() => `${consts.kinopioDomain()}/from/${state.affiliate.promoCode}`)
 
 // commissions
 
