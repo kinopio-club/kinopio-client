@@ -370,7 +370,7 @@ export const useUserStore = defineStore('user', {
         globalStore.notifySignUpToJoinGroup = true
       }
     },
-    checkIfShouldApplyAffiliateReferrer () {
+    checkIfShouldApplyAffiliatePromo () {
       const globalStore = useGlobalStore()
       if (!globalStore.currentUserAffiliatePromoCode) { return }
       this.updateUser({

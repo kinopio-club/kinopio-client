@@ -207,7 +207,7 @@ const notifySpaceIsHidden = computed(() => globalStore.notifySpaceIsHidden)
 const notifyCurrentSpaceIsNowRemoved = computed(() => globalStore.notifyCurrentSpaceIsNowRemoved)
 const notifyThanksForDonating = computed(() => globalStore.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => globalStore.notifyThanksForUpgrading)
-const notifyAffiliateReferrer = computed(() => globalStore.notifyAffiliateReferrer)
+const notifyAffiliatePromo = computed(() => globalStore.notifyAffiliatePromo)
 const notifySpaceIsUnavailableOffline = computed(() => globalStore.currentSpaceIsUnavailableOffline)
 const notifyIsJoiningGroup = computed(() => globalStore.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => globalStore.notifySignUpToJoinGroup)
@@ -252,8 +252,8 @@ const removeNotifyThanks = () => {
   globalStore.notifyThanksForDonating = false
   globalStore.notifyThanksForUpgrading = false
 }
-const removeNotifyAffiliateReferrer = () => {
-  globalStore.notifyAffiliateReferrer = false
+const removeNotifyAffiliatePromo = () => {
+  globalStore.notifyAffiliatePromo = false
 }
 const update = async () => {
   await nextTick()
@@ -417,11 +417,11 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon.cancel(src="@/assets/add.svg")
         span Feels Good
 
-  .persistent-item.success(v-if="notifyAffiliateReferrer")
+  .persistent-item.success(v-if="notifyAffiliatePromo")
     p
-      span 10% off referral discount has been applied
+      span 10% off discount has been applied
     .row
-      button(@click="removeNotifyAffiliateReferrer")
+      button(@click="removeNotifyAffiliatePromo")
         img.icon.cancel(src="@/assets/add.svg")
         span Feels Good
 

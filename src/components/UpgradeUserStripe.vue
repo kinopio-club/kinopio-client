@@ -34,7 +34,7 @@ const clearState = () => {
   state.error.unknownServerError = false
 }
 const isLifetimePlan = computed(() => props.price.period === 'life')
-const referralDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
+const affiliateDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
 
 const handleError = (error) => {
   console.log(error.response)
@@ -98,8 +98,8 @@ const subscribe = async () => {
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
       span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscribe")
-  .row(v-if="referralDiscountIsAvailable && !isLifetimePlan")
-    .badge.success An additional 10% referral discount off your first year will be applied during checkout (first-time customers only)
+  .row(v-if="affiliateDiscountIsAvailable && !isLifetimePlan")
+    .badge.success An additional 10% discount off your first year will be applied during checkout (first-time customers only)
   .badge.danger(v-if="state.error.unknownServerError")
     span (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
 

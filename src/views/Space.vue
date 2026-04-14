@@ -120,7 +120,7 @@ const init = async () => {
   checkIfShouldShowExploreOnLoad()
   historyStore.init()
   changelogStore.init()
-  userStore.checkIfShouldApplyAffiliateReferrer()
+  userStore.checkIfShouldApplyAffiliatePromo()
 }
 
 onMounted(async () => {

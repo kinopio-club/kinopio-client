@@ -67,7 +67,7 @@ const closeUpgradeFAQ = () => {
   state.upgradeFAQIsVisible = false
 }
 const studentDiscountIsAvailable = computed(() => userStore.studentDiscountIsAvailable)
-const referralDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
+const affiliateDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
 const paymentProcessor = computed(() => {
   if (isSecureAppContextIOS.value) {
     return 'Apple'
@@ -128,7 +128,7 @@ const closeChildDialogs = () => {
 
 const discountIsAvailableOnWeb = computed(() => {
   const isStudentDiscount = studentDiscountIsAvailable.value && isSecureAppContextIOS.value
-  const isReferralDiscount = referralDiscountIsAvailable.value && isSecureAppContextIOS.value
+  const isReferralDiscount = affiliateDiscountIsAvailable.value && isSecureAppContextIOS.value
   return isStudentDiscount || isReferralDiscount
 })
 </script>
@@ -145,7 +145,7 @@ dialog.upgrade-user.wide(v-if="props.visible" :open="props.visible" @click.left.
 
     //- discount info
     .row(v-if="discountIsAvailableOnWeb")
-      .badge.danger Your account qualifies for a student or referral discount but you have to upgrade via the web to use it
+      .badge.danger Your account qualifies for a student or promo discount but you have to upgrade via the web to use it
     .row(v-else-if="studentDiscountIsAvailable")
       .badge.success Your account qualifies for a student discount
 
