@@ -100,7 +100,7 @@ export const useSpaceStore = defineStore('space', {
     getSpaceAllUsers () {
       const userStore = useUserStore()
       let users = this.getSpaceMembers
-      users = users.concat(this.spectators)
+      users = users.concat(this.spectators, this.getSpaceGroupUsers)
       return users
     },
     getSpaceMembers () {
