@@ -15,6 +15,7 @@ import AboutCollaborate from '@/components/page/about/AboutCollaborate.vue'
 import AboutFAQ from '@/components/page/about/AboutFAQ.vue'
 import FooterSitemap from '@/components/page/FooterSitemap.vue'
 import Footer from '@/components/page/Footer.vue'
+import Notifications from '@/components/Notifications.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -127,6 +128,9 @@ AboutJsonLd
           a(href="mailto:hi@kinopio.club") hi@kinopio.club
       FooterSitemap
   Footer
+.notifications-wrap
+  .left
+    Notifications
 </template>
 
 <style lang="stylus">
@@ -187,4 +191,15 @@ main.page
     .signature
       width 70px
       margin 0
+
+.notifications-wrap
+  position fixed
+  left 0
+  right 0
+  bottom 40px
+  padding 8px
+  max-width 100%
+  pointer-events none
+  transform-origin left bottom
+  margin-bottom env(safe-area-inset-bottom)
 </style>

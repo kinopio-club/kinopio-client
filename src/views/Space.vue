@@ -120,6 +120,7 @@ const init = async () => {
   checkIfShouldShowExploreOnLoad()
   historyStore.init()
   changelogStore.init()
+  userStore.checkIfShouldApplyAffiliatePromo()
 }
 
 onMounted(async () => {
