@@ -94,3 +94,8 @@ const updateWindowTitle = () => {
   document.title = title
 }
 </script>
+
+<template lang="pug">
+</template>
+<style lang="stylus">
+</style>

@@ -52,6 +52,7 @@ onMounted(() => {
       } else if (name === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
         checkIfShouldNotifySpaceOutOfSync()
       } else if (name === 'triggerNotifyCouldNotSave') {
+        if (!globalStore.isSpacePage) { return }
         state.notifiyCouldNotSave = true
       }
     }
@@ -144,6 +145,7 @@ const toggleNotifySpaceOutOfSync = (value) => {
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (document.visibilityState !== 'visible') { return }
+  if (!globalStore.isSpacePage) { return }
   if (state.notifySpaceOutOfSync) { return }
   if (globalStore.isLoadingSpace) { return }
   try {
@@ -204,6 +206,7 @@ const notifySpaceIsHidden = computed(() => globalStore.notifySpaceIsHidden)
 const notifyCurrentSpaceIsNowRemoved = computed(() => globalStore.notifyCurrentSpaceIsNowRemoved)
 const notifyThanksForDonating = computed(() => globalStore.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => globalStore.notifyThanksForUpgrading)
+const notifyAffiliatePromo = computed(() => globalStore.notifyAffiliatePromo)
 const notifySpaceIsUnavailableOffline = computed(() => globalStore.currentSpaceIsUnavailableOffline)
 const notifyIsJoiningGroup = computed(() => globalStore.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => globalStore.notifySignUpToJoinGroup)
@@ -247,6 +250,9 @@ const toggleNotifyCardsCreatedIsOverLimit = (value) => {
 const removeNotifyThanks = () => {
   globalStore.notifyThanksForDonating = false
   globalStore.notifyThanksForUpgrading = false
+}
+const removeNotifyAffiliatePromo = () => {
+  globalStore.notifyAffiliatePromo = false
 }
 const update = async () => {
   await nextTick()
@@ -407,6 +413,14 @@ aside.notifications(@click.left="closeAllDialogs")
     p Thank you for upgrading, I deeply appreciate your support
     .row
       button(@click="removeNotifyThanks")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Feels Good
+
+  .persistent-item.success(v-if="notifyAffiliatePromo")
+    p
+      span 10% off discount has been applied
+    .row
+      button(@click="removeNotifyAffiliatePromo")
         img.icon.cancel(src="@/assets/add.svg")
         span Feels Good
 

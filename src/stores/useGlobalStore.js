@@ -101,6 +101,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsResizingCardDetails: false,
     currentUserIsResizingSidebar: false,
     userNotifications: [],
+    currentUserAffiliatePromoCode: '',
 
     // drawing
     drawingEraserIsActive: false,
@@ -293,6 +294,7 @@ export const useGlobalStore = defineStore('global', {
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
+    notifyAffiliatePromo: false,
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
     notifyIsDuplicatingSpace: false,
