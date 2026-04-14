@@ -36,12 +36,6 @@ const clearState = () => {
 const isLifetimePlan = computed(() => props.price.period === 'life')
 const affiliateDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
 
-const handleError = (error) => {
-  console.log(error.response)
-  // const data = await response.json()
-  state.error.unknownServerError = true
-}
-
 // subscribe
 
 const subscribeUrl = async () => {
@@ -52,7 +46,6 @@ const subscribeUrl = async () => {
   })
   return result
 }
-
 const checkoutUrl = async () => {
   const result = await apiStore.checkoutUrl({
     priceId: props.price.stripePriceId,
@@ -61,7 +54,6 @@ const checkoutUrl = async () => {
   })
   return result
 }
-
 const subscribe = async () => {
   if (state.loading.subscribe) { return }
   try {
@@ -77,10 +69,9 @@ const subscribe = async () => {
   } catch (error) {
     console.error('🚒 subscribe', error)
     clearState()
-    handleError(error)
+    state.error.unknownServerError = true
   }
 }
-
 </script>
 
 <template lang="pug">
