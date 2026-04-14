@@ -325,7 +325,7 @@ export const useGlobalStore = defineStore('global', {
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    itemSnapAlignGuides: [] // [{ axis: 'x'|'y', position: number }, …]
+    itemSnapAlignGuides: {} // x, y
   }),
   getters: {
     getGlobalAllState () {
@@ -1071,12 +1071,12 @@ export const useGlobalStore = defineStore('global', {
       const snapThreshold = 1
       const shouldPrevent = !this.shouldSnapAlign || this.preventItemSnapping
       if (shouldPrevent) {
-        this.itemSnapAlignGuides = []
+        this.itemSnapAlignGuides = {}
         return
       }
       const item = this.getCurrentDraggingItem
       if (!item) {
-        this.itemSnapAlignGuides = []
+        this.itemSnapAlignGuides = {}
         return
       }
       let nearestX = null // { snapTo: number, guideAt: number, dist: number }
@@ -1146,13 +1146,8 @@ export const useGlobalStore = defineStore('global', {
           }
         })
       })
-      // snap position
-      this.snapSelectedItemsToPosition(item, nearestX, nearestY)
-      // guide lines
-      const guides = []
-      if (nearestY) { guides.push({ axis: 'y', position: nearestY.guideAt }) }
-      if (nearestX) { guides.push({ axis: 'x', position: nearestX.guideAt }) }
-      this.itemSnapAlignGuides = guides
+      this.itemSnapAlignGuides.y = nearestY?.guideAt
+      this.itemSnapAlignGuides.x = nearestX?.guideAt
     },
 
     // Tags

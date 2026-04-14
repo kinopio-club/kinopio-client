@@ -930,7 +930,7 @@ const handleTouchEnd = (event) => {
   stopInteractions(event)
 }
 const resetGlobalStoreState = () => {
-  globalStore.itemSnapAlignGuides = []
+  globalStore.itemSnapAlignGuides = {}
   globalStore.shouldSnapBackToList = false
   globalStore.currentUserIsPaintSelecting = false
   globalStore.currentUserIsPaintSelectingLocked = false

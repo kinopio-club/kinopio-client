@@ -11,18 +11,18 @@ const spaceStore = useSpaceStore()
 
 const isVisible = computed(() => globalStore.shouldSnapAlign)
 const color = computed(() => userStore.color)
-const itemSnapAlignGuides = computed(() => globalStore.itemSnapAlignGuides)
+const guides = computed(() => globalStore.itemSnapAlignGuides) // { x, y }
 </script>
 
 <template lang="pug">
-template(v-if="isVisible" v-for="guide in itemSnapAlignGuides" :key="guide.axis + guide.position")
-  .axis-guide-lines.x-line.is-card-align-guide(
-    v-if="guide.axis === 'y'"
-    :style="{ top: guide.position + 'px', background: color }"
+template(v-if="isVisible")
+  .axis-guide-lines.x-line(
+    v-if="guides.y"
+    :style="{ top: guides.y + 'px', background: color }"
   )
-  .axis-guide-lines.y-line.is-card-align-guide(
-    v-if="guide.axis === 'x'"
-    :style="{ left: guide.position + 'px', background: color }"
+  .axis-guide-lines.y-line(
+    v-if="guides.x"
+    :style="{ left: guides.x + 'px', background: color }"
   )
 </template>
 
@@ -38,6 +38,4 @@ template(v-if="isVisible" v-for="guide in itemSnapAlignGuides" :key="guide.axis 
     width 1px
     height 100%
     top 0
-  // &.is-card-align-guide
-  //   opacity 0.6
 </style>
