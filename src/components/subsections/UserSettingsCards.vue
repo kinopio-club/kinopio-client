@@ -4,7 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
+import UserSettingsNewSpaceCards from '@/components/subsections/UserSettingsNewSpaceCards.vue'
 
 import consts from '@/consts.js'
 import utils from '@/utils.js'
@@ -114,8 +114,8 @@ const customValue = computed({
   //- new spaces
   section(v-if="parentIsUserSettings")
     .row
-      span New Spaces
-    UserSettingsNewSpaces
+      span New Space Cards
+    UserSettingsNewSpaceCards
 </template>
 
 <style lang="stylus">
