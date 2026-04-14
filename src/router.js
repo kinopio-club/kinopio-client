@@ -21,8 +21,8 @@ const resetStoresForStaticPage = () => {
   useListStore().$reset()
 }
 
-const affiliateRefferers = ['/foxy']
-const aboutPaths = ['/about', ...affiliateRefferers]
+const affiliatePromoCodes = ['foxy']
+const aboutPaths = ['/about', '/from/:promoCode', '/from']
 
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
@@ -51,9 +51,9 @@ const router = {
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
         resetStoresForStaticPage()
-        if (affiliateRefferers.includes(to.path.toLowerCase())) {
-          const affiliatePromoCode = to.path.replace('/', '')
-          globalStore.currentUserAffiliatePromoCode = affiliatePromoCode
+        const promoCode = to.params.promoCode
+        if (affiliatePromoCodes.includes(promoCode)) {
+          globalStore.currentUserAffiliatePromoCode = promoCode
           globalStore.notifyAffiliatePromo = true
         }
         next()
