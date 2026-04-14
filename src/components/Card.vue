@@ -533,6 +533,7 @@ const cardClasses = computed(() => {
   return classes
 })
 const shouldJiggle = computed(() => {
+  if (globalStore.shouldSnapAlign) { return }
   const max = 500
   const cardIsTooBig = width.value > max || props.card.height > max
   if (cardIsTooBig) { return }
