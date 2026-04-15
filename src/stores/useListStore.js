@@ -351,7 +351,7 @@ export const useListStore = defineStore('lists', {
         })
       }
     },
-    selectItemsInSelectedLists (selectedList) {
+    selectItemsInSelectedLists () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
       const lists = this.getListsSelected
