@@ -86,7 +86,7 @@ const focusItem = (item) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.toc.is-pinnable(
+dialog.narrow.toc.is-pinnable#toc(
   v-if="props.visible"
   :open="props.visible"
   @click.left.stop
