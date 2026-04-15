@@ -528,7 +528,7 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   canvas#minimap-canvas(ref="canvasElement")
   .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
 </template>
