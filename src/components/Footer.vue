@@ -152,10 +152,12 @@ const toggleTocIsVisible = () => {
 
 // minimap
 
-const minimapIsVisible = computed(() => globalStore.minimapIsVisible)
+const minimapIsVisible = computed(() => userStore.shouldShowMinimap)
 const toggleMinimap = () => {
-  globalStore.minimapIsVisible = !globalStore.minimapIsVisible
+  const value = !userStore.shouldShowMinimap
+  userStore.updateUser({ shouldShowMinimap: value })
 }
+
 // hide
 
 const hideOnTouch = (event) => {

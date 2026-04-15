@@ -165,7 +165,8 @@ const handleShortcutsOnKeyUp = (event) => {
     globalStore.triggerTocIsVisible()
   // m
   } else if (keyM && isSpaceScope) {
-    globalStore.minimapIsVisible = !globalStore.minimapIsVisible
+    const value = !userStore.shouldShowMinimap
+    userStore.updateUser({ shouldShowMinimap: value })
   // t
   } else if (keyT && isSpaceScope) {
     globalStore.addNotification({ message: 'Theme toggled (T)', type: 'info' })
