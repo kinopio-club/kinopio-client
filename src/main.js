@@ -18,8 +18,6 @@ export const createApp = ViteSSG(
     const pinia = createPinia()
     pinia.use(webSocketPlugin())
 
-    router.push('/')
-    app.use(router)
     app.use(pinia)
 
     if (isClient) {

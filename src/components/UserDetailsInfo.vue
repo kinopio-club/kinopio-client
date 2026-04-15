@@ -128,7 +128,7 @@ const updateUserColor = (newValue) => {
         input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
       //- description
       .row
-        textarea(ref="descriptionElement" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
+        textarea(ref="descriptionElement" placeholder="Describe yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
       //- website
       .row
         input(ref="website" placeholder="Website" v-model="userWebsite" name="Website" maxlength=200 rows="1")

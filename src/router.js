@@ -21,6 +21,9 @@ const resetStoresForStaticPage = () => {
   useListStore().$reset()
 }
 
+const affiliatePromoCodes = ['foxy']
+const aboutPaths = ['/about', '/from/:promoCode', '/from']
+
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
 
@@ -42,11 +45,17 @@ const router = {
       }
     }, {
       path: '/',
-      alias: '/about',
+      alias: aboutPaths,
       name: 'about',
       component: () => import('./views/About.vue'),
       beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
         resetStoresForStaticPage()
+        const promoCode = to.params.promoCode
+        if (affiliatePromoCodes.includes(promoCode)) {
+          globalStore.currentUserAffiliatePromoCode = promoCode
+          globalStore.notifyAffiliatePromo = true
+        }
         next()
       }
     }, {
@@ -174,6 +183,14 @@ const router = {
         next()
         const group = await apiStore.getGroupPublicMeta(groupId)
         globalStore.groupToJoinOnLoad.group = group
+      }
+    }, {
+      path: '/affiliates',
+      name: 'affiliates',
+      component: () => import('./views/Affiliates.vue'),
+      beforeEnter: (to, from, next) => {
+        const globalStore = useGlobalStore()
+        next()
       }
     }, {
       path: '/space/invite/:spaceId',

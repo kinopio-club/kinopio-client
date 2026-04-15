@@ -365,12 +365,25 @@ textarea.name.on-background-color
 
 table
   margin-top 10px
-  border-collapse collapse
+  border-spacing 0
+  border-collapse separate
+  overflow hidden
+  border-radius var(--entity-radius)
+  border 1px solid var(--secondary-active-background)
+  tr.table-header,
+  th
+    background-color var(--secondary-background)
   td
-    border 1px solid var(--secondary-active-background)
+    border-right 1px solid var(--secondary-active-background)
+    border-bottom 1px solid var(--secondary-active-background)
     color var(--primary)
-    padding var(--subsection-padding)
+    padding 4px 8px
     user-select text
+    &:last-child
+      border-right none
+  tr:last-child
+    td
+      border-bottom none
 
 select
   max-width 100%

@@ -83,6 +83,7 @@ export const useUserStore = defineStore('user', {
     shouldShowMinimapJumpToList: true,
     cardDetailsResizeWidth: null,
     shouldShowMinimap: false,
+    affiliatePromoCode: null,
 
     // billing
 
@@ -369,6 +370,13 @@ export const useUserStore = defineStore('user', {
       } else {
         globalStore.notifySignUpToJoinGroup = true
       }
+    },
+    checkIfShouldApplyAffiliatePromo () {
+      const globalStore = useGlobalStore()
+      if (!globalStore.currentUserAffiliatePromoCode) { return }
+      this.updateUser({
+        affiliatePromoCode: globalStore.currentUserAffiliatePromoCode
+      })
     },
     async initializeUser () {
       const globalStore = useGlobalStore()

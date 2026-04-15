@@ -34,6 +34,7 @@ const clearState = () => {
   state.error.unknownServerError = false
 }
 const isLifetimePlan = computed(() => props.price.period === 'life')
+const affiliateDiscountIsAvailable = computed(() => userStore.affiliatePromoCode && !userStore.studentDiscountIsAvailable)
 
 // subscribe
 
@@ -45,7 +46,6 @@ const subscribeUrl = async () => {
   })
   return result
 }
-
 const checkoutUrl = async () => {
   const result = await apiStore.checkoutUrl({
     priceId: props.price.stripePriceId,
@@ -54,7 +54,6 @@ const checkoutUrl = async () => {
   })
   return result
 }
-
 const subscribe = async () => {
   if (state.loading.subscribe) { return }
   try {
@@ -73,7 +72,6 @@ const subscribe = async () => {
     state.error.unknownServerError = true
   }
 }
-
 </script>
 
 <template lang="pug">
@@ -91,6 +89,8 @@ const subscribe = async () => {
       User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
       span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscribe")
+  .row(v-if="affiliateDiscountIsAvailable && !isLifetimePlan")
+    .badge.success An additional 10% discount off your first year will be applied during checkout (first-time customers only)
   .badge.danger(v-if="state.error.unknownServerError")
     span (シ_ _)シ Something went wrong, Please try again or contact support. Your transaction was not processed.
 
