@@ -1559,6 +1559,24 @@ export const useApiStore = defineStore('api', {
         console.error('🚒 moderatorRestartServer', error)
         throw new Error(error)
       }
+    },
+
+    // Affiliates
+
+    async getAffiliate () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        console.info('🛬 getting affiliate')
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetch(`${consts.apiHost()}/affiliate`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getAffiliate', error })
+      }
     }
 
   }

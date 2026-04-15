@@ -778,6 +778,10 @@ export default {
     time = time.replace(' years', 'y')
     return time
   },
+  shortAbsoluteDate (date) {
+    if (!date) { return }
+    return dayjs(date).format('MMMM D, YYYY')
+  },
   isEvenNumber (number) {
     if (number % 2 === 0) {
       return true
