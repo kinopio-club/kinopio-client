@@ -147,16 +147,19 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
             img.icon.box-icon(src="@/assets/line.svg")
             span Insert Line Divider
           .badge.keyboard-shortcut –
+      article
         .row
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Draw Box
           .badge.keyboard-shortcut B
+      article
         .row
           .badge.title
             img.icon.list-icon(src="@/assets/list.svg")
             span Draw List
           .badge.keyboard-shortcut L
+      article
         .row
           .badge.title
             img.icon.pencil(src="@/assets/pencil.svg")
@@ -173,11 +176,13 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
             img.icon.brush-size(src="@/assets/brush-size-l.svg")
             span Cycle Brush Size
           .badge.keyboard-shortcut S
+      article
         .row
           .badge.title
             img.icon.eraser(src="@/assets/eraser.svg")
             span Toggle Eraser
           .badge.keyboard-shortcut E
+      article
         .row
           .badge.title
             img.icon(src="@/assets/constrain-axis.svg")
@@ -194,6 +199,12 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
             img.icon.toc(src="@/assets/toc.svg")
             span Toggle TOC
           .badge.keyboard-shortcut C
+      article
+        .row
+          .badge.title
+            img.icon.toc(src="@/assets/minimap.svg")
+            span Toggle Minimap
+          .badge.keyboard-shortcut M
       article
         .row
           .badge.title
@@ -372,13 +383,8 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
           .badge.title
             img.icon.connector-icon(src="@/assets/connector-open.svg")
             span Use {{lastOrNewConnectionTypeControlSetting}} Connection Type
-          .badge.keyboard-shortcut Shift-Click on
+          .badge.keyboard-shortcut Shift-Click or Drag on
             img.icon.connector-icon(src="@/assets/connector-open.svg")
-        p
-          span.badge.keyboard-shortcut Shift-Drag
-          span card connector or
-          span.badge.keyboard-shortcut Shift-Click
-          span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
 
     //- Search
     template(v-if="categoryIsVisible('Search')")
@@ -406,7 +412,7 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
 </template>
 
 <style lang="stylus">
-.keyboard-shortcuts
+dialog.keyboard-shortcuts
   user-select text
   overflow auto
   max-height calc(100vh - 60px)
