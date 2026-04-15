@@ -221,6 +221,7 @@ const update = async () => {
   // draw everything to the offscreen canvas so all layers are composited before anything appears on screen.
   const visibleContext = context
   context = offscreenContext
+  if (!context) { return }
   await drawDrawing()
   drawBoxes()
   drawConnections()
@@ -241,6 +242,7 @@ const updateCanvas = async () => {
   if (!canvas) { return }
   const targetWidth = state.pageWidth * window.devicePixelRatio
   const targetHeight = state.pageHeight * window.devicePixelRatio
+  if (!targetWidth || !targetHeight) { return }
   // only resize when dimensions change to prevent flickering
   if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
     canvas.width = targetWidth
@@ -251,7 +253,7 @@ const updateCanvas = async () => {
     context.scale(window.devicePixelRatio, window.devicePixelRatio)
   }
   // Reuse offscreen canvas when dimensions match, just clear it
-  if (!offscreenCanvas || offscreenCanvas.width !== targetWidth || offscreenCanvas.height !== targetHeight) {
+  if (!offscreenCanvas || offscreenCanvas?.width !== targetWidth || offscreenCanvas?.height !== targetHeight) {
     offscreenCanvas = new OffscreenCanvas(targetWidth, targetHeight)
     offscreenContext = offscreenCanvas.getContext('2d')
     offscreenContext.scale(window.devicePixelRatio, window.devicePixelRatio)
