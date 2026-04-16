@@ -599,7 +599,6 @@ export const useCardStore = defineStore('cards', {
         if (card.shouldSnapAlignToYDisplay && card.yDisplay) {
           update.y = card.yDisplay
         }
-        console.log(update)
         return update
       })
       this.updateCards(updates)

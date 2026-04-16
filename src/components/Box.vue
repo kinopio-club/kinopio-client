@@ -103,6 +103,8 @@ const normalizedBox = computed(() => {
   box.height = box.resizeHeight
   box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
+  box.x = box.xDisplay || box.x
+  box.y = box.yDisplay || box.y
   return box
 })
 const normalizedName = computed(() => {

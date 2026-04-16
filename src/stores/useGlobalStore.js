@@ -999,14 +999,18 @@ export const useGlobalStore = defineStore('global', {
 
     // Snap Align
 
-    getItemsSelectableInViewport () {
+    getSnapAlignItems () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const listStore = useListStore()
-      const cards = cardStore.getCardsSelectableInViewport()
-      const boxes = boxStore.getBoxesSelectableInViewport()
-      const lists = listStore.getAllLists
-      return cards.concat(boxes, lists)
+      const itemType = this.getInteractingWithItemType
+      if (itemType === 'card') {
+        return cardStore.getCardsSelectableInViewport()
+      } else if (itemType === 'box') {
+        return boxStore.getBoxesSelectableInViewport()
+      } else if (itemType === 'list') {
+        return listStore.getAllLists
+      }
     },
     nearestSnapAlignGuide (checks) {
       const snapThreshold = consts.itemSnapAlignThreshold
@@ -1023,6 +1027,10 @@ export const useGlobalStore = defineStore('global', {
         }
       })
       return nearest
+    },
+    normalizeSnapAlignChecks (checks) {
+      if (this.getInteractingWithItemType === 'card') { return checks }
+      return checks.filter(check => check.targetSide !== 'center')
     },
     updateItemSnapAlignGuides () {
       const spaceStore = useSpaceStore()
@@ -1046,7 +1054,7 @@ export const useGlobalStore = defineStore('global', {
       const itemCenterX = item.x + item.width / 2
       const itemRight = item.x + item.width
       // only compare nearest items
-      let viewportItems = this.getItemsSelectableInViewport()
+      let viewportItems = this.getSnapAlignItems()
       viewportItems = viewportItems.filter(target => {
         if (target.id === item.id) { return }
         if (target.listId) { return }
@@ -1063,7 +1071,7 @@ export const useGlobalStore = defineStore('global', {
         const targetCenterX = target.x + target.width / 2
         const targetRight = target.x + target.width
         // y sides
-        const yChecks = [
+        let yChecks = [
           { targetSide: 'top', itemSide: 'top', itemEdge: itemTop, targetEdge: targetTop, snapTo: targetTop },
           { targetSide: 'top', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetTop, snapTo: targetTop - item.height / 2 },
           { targetSide: 'top', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetTop, snapTo: targetTop - item.height },
@@ -1074,12 +1082,13 @@ export const useGlobalStore = defineStore('global', {
           { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - item.height / 2 },
           { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - item.height }
         ]
+        yChecks = this.normalizeSnapAlignChecks(yChecks)
         const nearestYCandidate = this.nearestSnapAlignGuide(yChecks)
         if (nearestYCandidate && (!nearestY || nearestYCandidate.distance < nearestY.distance)) {
           nearestY = nearestYCandidate
         }
         // x sides
-        const xChecks = [
+        let xChecks = [
           { targetSide: 'left', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetLeft, snapTo: targetLeft },
           { targetSide: 'left', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetLeft, snapTo: targetLeft - item.width / 2 },
           { targetSide: 'left', itemSide: 'right', itemEdge: itemRight, targetEdge: targetLeft, snapTo: targetLeft - item.width },
@@ -1090,6 +1099,7 @@ export const useGlobalStore = defineStore('global', {
           { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - item.width / 2 },
           { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - item.width }
         ]
+        xChecks = this.normalizeSnapAlignChecks(xChecks)
         const nearestXCandidate = this.nearestSnapAlignGuide(xChecks)
         if (nearestXCandidate && (!nearestX || nearestXCandidate.distance < nearestX.distance)) {
           nearestX = nearestXCandidate
@@ -1181,9 +1191,12 @@ export const useGlobalStore = defineStore('global', {
     },
     clearDraggingItems () {
       const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      // const listStore = useListStore()
       const cardIds = [this.currentDraggingCardId].concat(this.multipleCardsSelectedIds)
+      const boxIds = [this.currentDraggingBoxId].concat(this.multipleBoxesSelectedIds)
       cardStore.checkIfShouldSnapAlignCards(cardIds)
-      // TODO checkalign for boxes, lists
+      boxStore.checkIfShouldSnapAlignBoxes(boxIds)
 
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''

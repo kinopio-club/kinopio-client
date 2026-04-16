@@ -282,6 +282,26 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.pageWidth = boxX
       }
     },
+    checkIfShouldSnapAlignBoxes (boxIds) {
+      boxIds = boxIds.filter(id => Boolean(id))
+      const updates = boxIds.map(id => {
+        const box = this.getBox(id)
+        const update = {
+          id,
+          xDisplay: undefined,
+          yDisplay: undefined
+        }
+        if (box.shouldSnapAlignToXDisplay && box.xDisplay) {
+          update.x = box.xDisplay
+        }
+        if (box.shouldSnapAlignToYDisplay && box.yDisplay) {
+          update.y = box.yDisplay
+        }
+        return update
+      })
+      this.updateBoxes(updates)
+    },
+
     moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor, boxes }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
@@ -312,6 +332,7 @@ export const useBoxStore = defineStore('boxes', {
         updates.push(update)
         this.updatePageSize(update)
       })
+      updates = globalStore.moveItemsUpdateSnapAlignDisplayPosition(updates)
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
