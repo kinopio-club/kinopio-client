@@ -628,7 +628,7 @@ const tiltResizeIsVisible = computed(() => {
   return true
 })
 const x = computed(() => {
-  const x = props.card.x
+  const x = props.card.xDisplay || props.card.x
   if (x === undefined || x === null) {
     return defaultCardPosition
   } else {
@@ -636,7 +636,7 @@ const x = computed(() => {
   }
 })
 const y = computed(() => {
-  const y = props.card.y
+  const y = props.card.yDisplay || props.card.y
   if (y === undefined || y === null) {
     return defaultCardPosition
   } else {
@@ -2068,6 +2068,10 @@ const toggleVideoIsPaused = () => {
   :data-sticky-stretch-resistance="state.stickyStretchResistance"
   :data-x="x"
   :data-y="y"
+  :data-card-x="props.card.x"
+  :data-card-y="props.card.y"
+  :data-card-x-display="props.card.xDisplay"
+  :data-card-y-display="props.card.yDisplay"
   :data-resize-width="resizeWidth"
   :data-width="resizeWidth || card.width"
   :data-height="card.height"

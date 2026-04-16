@@ -11,23 +11,25 @@ const spaceStore = useSpaceStore()
 
 const isVisible = computed(() => globalStore.shouldSnapAlign)
 const color = computed(() => userStore.color)
-const guides = computed(() => globalStore.itemSnapAlignGuides) // { x, y }
+// const guides = computed(() => globalStore.itemSnapAlignGuides) // { x: { targetSide, snapTo, guideAt, distance } , y: {} }
+const verticalLine = computed(() => globalStore.itemSnapAlignGuides.x?.guideAt)
+const horizontalLine = computed(() => globalStore.itemSnapAlignGuides.y?.guideAt)
 </script>
 
 <template lang="pug">
 template(v-if="isVisible")
-  .axis-guide-lines.x-line(
-    v-if="guides.y"
-    :style="{ top: guides.y + 'px', background: color }"
+  .snap-align-guide-lines.x-line(
+    v-if="horizontalLine"
+    :style="{ top: horizontalLine + 'px', background: color }"
   )
-  .axis-guide-lines.y-line(
-    v-if="guides.x"
-    :style="{ left: guides.x + 'px', background: color }"
+  .snap-align-guide-lines.y-line(
+    v-if="verticalLine"
+    :style="{ left: verticalLine + 'px', background: color }"
   )
 </template>
 
 <style lang="stylus">
-.axis-guide-lines
+.snap-align-guide-lines
   pointer-events none
   position absolute
   &.x-line

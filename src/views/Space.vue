@@ -34,7 +34,7 @@ import Lines from '@/components/Lines.vue'
 import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
-import AxisGuideLines from '@/components/AxisGuideLines.vue'
+import ItemSnapAlignGuideLines from '@/components/ItemSnapAlignGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
@@ -1130,7 +1130,7 @@ const updateMetaRSSFeed = () => {
     ScrollAtEdgesHandler
     NotificationsWithPosition(layer="space")
     BoxSelecting
-    AxisGuideLines
+    ItemSnapAlignGuideLines
   aside
     PaintSelectCanvas
     DrawingHandler

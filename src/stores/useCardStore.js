@@ -442,7 +442,7 @@ export const useCardStore = defineStore('cards', {
       })
     },
     shouldUpdateSpaceEditedAt (updates) {
-      const ignoreKeys = ['id', 'z']
+      const ignoreKeys = ['id', 'z', 'xDisplay', 'yDisplay']
       let keys = []
       for (const card of updates) {
         Object.keys(card).forEach(key => keys.push(key))
@@ -584,6 +584,63 @@ export const useCardStore = defineStore('cards', {
         globalStore.pageWidth = cardX
       }
     },
+    clearCardsDisplayPositionByIds (cardIds) {
+      console.log('🍒🍒🍒🍒🍒🍒🍒🍒🍒clearCardsDisplayPositionByIds🍒', cardIds)
+      cardIds = cardIds.filter(id => Boolean(id))
+      const updates = cardIds.map(id => {
+        return {
+          id,
+          xDisplay: undefined,
+          yDisplay: undefined
+        }
+      })
+      this.updateCards(updates)
+    },
+    moveCardsUpdateDisplayPosition (cards) {
+      const globalStore = useGlobalStore()
+      if (!globalStore.shouldSnapAlign) { return cards }
+      const { x, y } = globalStore.itemSnapAlignGuides
+      cards = cards.map(card => {
+        // if (x) {
+        //   const shouldSnap = Math.abs(x - card.x) < consts.itemSnapAlignThreshold
+        //   if (shouldSnap) {
+        //     card.xDisplay = x
+        //   } else {
+        //     card.xDisplay = null
+        //   }
+        // }
+
+        if (y) {
+          const { targetSide, snapTo, guideAt, distance } = y
+          // doesn't know if snapguide is top , middle , or bottom : assumes top . that's why only the top snaps
+          let ySnapPoint, yDisplay
+          if (targetSide === 'top') {
+            ySnapPoint = card.y
+            yDisplay = guideAt
+          } else if (targetSide === 'center') {
+            ySnapPoint = card.y + (card.height / 2)
+            yDisplay = guideAt - (card.height / 2)
+          } else if (targetSide === 'bottom') {
+            ySnapPoint = card.y + card.height
+            yDisplay = guideAt - card.height
+          }
+          const shouldSnap = Math.abs(guideAt - ySnapPoint) < consts.itemSnapAlignThreshold
+
+          console.warn('❤️❤️moveCardsUpdateDisplayPosition y', targetSide, { guideAt, ySnapPoint, yDisplay: Math.round(yDisplay), snapTo, shouldSnap })
+
+          if (shouldSnap) {
+            card.yDisplay = Math.round(yDisplay)
+          } else {
+            card.yDisplay = null
+          }
+        }
+        return card
+      })
+      return cards
+
+      // if itemSnapAlignGuides
+      // snapSelectedItemsToPosition
+    },
     moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
@@ -608,9 +665,19 @@ export const useCardStore = defineStore('cards', {
         return {
           id: card.id,
           x,
-          y
+          y,
+          width: card.width,
+          height: card.height
         }
       })
+
+      this.moveCardsUpdateDisplayPosition(cards)
+
+      console.log('❤️❤️❤️moveCards', globalStore.itemSnapAlignGuides.y, cards[0].y, cards[0].yDisplay)
+
+      // calc snapPosition card.xDisplay
+      // on stop, card.xDisplay = null
+
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true

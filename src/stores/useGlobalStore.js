@@ -1008,67 +1008,9 @@ export const useGlobalStore = defineStore('global', {
       const lists = listStore.getAllLists
       return cards.concat(boxes, lists)
     },
-    snapSelectedItemsToPosition (item, nearestX, nearestY) {
-      const spaceStore = useSpaceStore()
-      const cardStore = useCardStore()
-      const boxStore = useBoxStore()
-      const listStore = useListStore()
-      let deltaX = 0
-      let deltaY = 0
-      if (nearestX) {
-        deltaX = nearestX.snapTo - item.x
-      }
-      if (nearestY) {
-        deltaY = nearestY.snapTo - item.y
-      }
-      if (deltaX !== 0 || deltaY !== 0) {
-        let { cards, boxes, lists } = spaceStore.getSpaceSelectedAndDraggingItems
-        // include items contained in boxes
-        boxes.forEach(box => {
-          const items = boxStore.getItemsContainedInSelectedBoxes()
-          cards = cards.concat(items.cards)
-          boxes = boxes.concat(items.boxes)
-          lists = lists.concat(items.lists)
-        })
-        boxes = uniqBy(boxes, 'id')
-        lists = uniqBy(lists, 'id')
-        // include items contained in lists
-        lists.forEach(list => {
-          cards = cards.concat(cardStore.getCardsByList(list.id))
-        })
-        cards = uniqBy(cards, 'id')
-        // snap cards
-        const snappedCards = cards.map(item => {
-          return {
-            id: item.id,
-            x: Math.max(0, item.x + deltaX),
-            y: Math.max(0, item.y + deltaY)
-          }
-        })
-        cardStore.updateCards(snappedCards)
-        // snap boxes
-        const snappedBoxes = boxes.map(item => {
-          return {
-            id: item.id,
-            x: Math.max(0, item.x + deltaX),
-            y: Math.max(0, item.y + deltaY)
-          }
-        })
-        boxStore.updateBoxes(snappedBoxes)
-        // snap lists
-        const snappedLists = lists.map(item => {
-          return {
-            id: item.id,
-            x: Math.max(0, item.x + deltaX),
-            y: Math.max(0, item.y + deltaY)
-          }
-        })
-        listStore.updateLists(snappedLists)
-      }
-    },
     updateItemSnapAlignGuides () {
       const spaceStore = useSpaceStore()
-      const snapThreshold = 1
+      const snapThreshold = consts.itemSnapAlignThreshold
       const shouldPrevent = !this.shouldSnapAlign || this.preventItemSnapping
       if (shouldPrevent) {
         this.itemSnapAlignGuides = {}
@@ -1079,8 +1021,8 @@ export const useGlobalStore = defineStore('global', {
         this.itemSnapAlignGuides = {}
         return
       }
-      let nearestX = null // { snapTo: number, guideAt: number, dist: number }
-      let nearestY = null // { snapTo: number, guideAt: number, dist: number }
+      let nearestX = null // { targetSide, snapTo, guideAt, distance }
+      let nearestY = null
       // item sides
       const itemTop = item.y
       const itemCenterY = item.y + item.height / 2
@@ -1107,49 +1049,48 @@ export const useGlobalStore = defineStore('global', {
         const targetRight = target.x + target.width
         // y sides
         const yChecks = [
-          { itemEdge: itemTop, targetEdge: targetTop, snapY: targetTop },
-          { itemEdge: itemTop, targetEdge: targetCenterY, snapY: targetCenterY },
-          { itemEdge: itemTop, targetEdge: targetBottom, snapY: targetBottom },
-          { itemEdge: itemCenterY, targetEdge: targetTop, snapY: targetTop - item.height / 2 },
-          { itemEdge: itemCenterY, targetEdge: targetCenterY, snapY: targetCenterY - item.height / 2 },
-          { itemEdge: itemCenterY, targetEdge: targetBottom, snapY: targetBottom - item.height / 2 },
-          { itemEdge: itemBottom, targetEdge: targetTop, snapY: targetTop - item.height },
-          { itemEdge: itemBottom, targetEdge: targetCenterY, snapY: targetCenterY - item.height },
-          { itemEdge: itemBottom, targetEdge: targetBottom, snapY: targetBottom - item.height }
+          { targetSide: 'top', itemEdge: itemTop, targetEdge: targetTop, snapY: targetTop },
+          { targetSide: 'top', itemEdge: itemCenterY, targetEdge: targetTop, snapY: targetTop - item.height / 2 },
+          { targetSide: 'top', itemEdge: itemBottom, targetEdge: targetTop, snapY: targetTop - item.height },
+          { targetSide: 'center', itemEdge: itemTop, targetEdge: targetCenterY, snapY: targetCenterY },
+          { targetSide: 'center', itemEdge: itemCenterY, targetEdge: targetCenterY, snapY: targetCenterY - item.height / 2 },
+          { targetSide: 'center', itemEdge: itemBottom, targetEdge: targetCenterY, snapY: targetCenterY - item.height },
+          { targetSide: 'bottom', itemEdge: itemTop, targetEdge: targetBottom, snapY: targetBottom },
+          { targetSide: 'bottom', itemEdge: itemCenterY, targetEdge: targetBottom, snapY: targetBottom - item.height / 2 },
+          { targetSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapY: targetBottom - item.height }
         ]
-        yChecks.forEach(({ itemEdge, targetEdge, snapY }) => {
-          const dist = Math.abs(itemEdge - targetEdge)
-          if (dist <= snapThreshold) {
-            if (!nearestY || dist < nearestY.dist) {
-              nearestY = { snapTo: Math.round(snapY), guideAt: targetEdge, dist }
+        yChecks.forEach(({ targetSide, itemEdge, targetEdge, snapY }) => {
+          const distance = Math.abs(itemEdge - targetEdge)
+          if (distance <= snapThreshold) {
+            if (!nearestY || distance < nearestY.distance) {
+              nearestY = { snapTo: Math.round(snapY), targetSide, guideAt: targetEdge, distance }
             }
           }
         })
         // x sides
         const xChecks = [
-          { itemEdge: itemLeft, targetEdge: targetLeft, snapX: targetLeft },
-          { itemEdge: itemLeft, targetEdge: targetCenterX, snapX: targetCenterX },
-          { itemEdge: itemLeft, targetEdge: targetRight, snapX: targetRight },
-          { itemEdge: itemCenterX, targetEdge: targetLeft, snapX: targetLeft - item.width / 2 },
-          { itemEdge: itemCenterX, targetEdge: targetCenterX, snapX: targetCenterX - item.width / 2 },
-          { itemEdge: itemCenterX, targetEdge: targetRight, snapX: targetRight - item.width / 2 },
-          { itemEdge: itemRight, targetEdge: targetLeft, snapX: targetLeft - item.width },
-          { itemEdge: itemRight, targetEdge: targetCenterX, snapX: targetCenterX - item.width },
-          { itemEdge: itemRight, targetEdge: targetRight, snapX: targetRight - item.width }
+          { targetSide: 'left', itemEdge: itemLeft, targetEdge: targetLeft, snapX: targetLeft },
+          { targetSide: 'left', itemEdge: itemCenterX, targetEdge: targetLeft, snapX: targetLeft - item.width / 2 },
+          { targetSide: 'left', itemEdge: itemRight, targetEdge: targetLeft, snapX: targetLeft - item.width },
+          { targetSide: 'center', itemEdge: itemLeft, targetEdge: targetCenterX, snapX: targetCenterX },
+          { targetSide: 'center', itemEdge: itemCenterX, targetEdge: targetCenterX, snapX: targetCenterX - item.width / 2 },
+          { targetSide: 'center', itemEdge: itemRight, targetEdge: targetCenterX, snapX: targetCenterX - item.width },
+          { targetSide: 'right', itemEdge: itemLeft, targetEdge: targetRight, snapX: targetRight },
+          { targetSide: 'right', itemEdge: itemCenterX, targetEdge: targetRight, snapX: targetRight - item.width / 2 },
+          { targetSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapX: targetRight - item.width }
         ]
-        xChecks.forEach(({ itemEdge, targetEdge, snapX }) => {
-          const dist = Math.abs(itemEdge - targetEdge)
-          if (dist <= snapThreshold) {
-            if (!nearestX || dist < nearestX.dist) {
-              nearestX = { snapTo: Math.round(snapX), guideAt: targetEdge, dist }
+        xChecks.forEach(({ targetSide, itemEdge, targetEdge, snapX }) => {
+          const distance = Math.abs(itemEdge - targetEdge)
+          if (distance <= snapThreshold) {
+            if (!nearestX || distance < nearestX.distance) {
+              nearestX = { snapTo: Math.round(snapX), targetSide, guideAt: targetEdge, distance }
             }
           }
         })
       })
-      this.itemSnapAlignGuides.y = nearestY?.guideAt
-      this.itemSnapAlignGuides.x = nearestX?.guideAt
+      this.itemSnapAlignGuides.y = nearestY
+      this.itemSnapAlignGuides.x = nearestX
     },
-
     // Tags
 
     async updateTags () {
@@ -1182,6 +1123,12 @@ export const useGlobalStore = defineStore('global', {
       }
     },
     clearDraggingItems () {
+      console.error('🔥🔥🔥🔥')
+      const cardStore = useCardStore()
+      const cardIds = [this.currentDraggingCardId].concat(this.multipleCardsSelectedIds)
+      cardStore.clearCardsDisplayPositionByIds(cardIds)
+      // TODO clear display post for boxes, lists
+
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''
