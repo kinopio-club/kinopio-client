@@ -604,53 +604,6 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
-    moveCardsUpdateSnapAlignDisplayPosition (cards) {
-      const globalStore = useGlobalStore()
-      if (!globalStore.shouldSnapAlign) { return cards }
-      const { x, y } = globalStore.itemSnapAlignGuides
-      cards = cards.map(card => {
-        // x target snap align
-        if (x) {
-          const { targetSide, itemSide, snapTo, guideAt, distance } = x
-          let xDisplay
-          if (itemSide === 'left') {
-            xDisplay = guideAt
-          } else if (itemSide === 'center') {
-            xDisplay = guideAt - (card.width / 2)
-          } else if (itemSide === 'right') {
-            xDisplay = guideAt - card.width
-          }
-          const shouldSnap = Math.abs(xDisplay - card.x) < consts.itemSnapAlignThreshold
-          if (shouldSnap) {
-            card.xDisplay = Math.round(xDisplay)
-          } else {
-            card.xDisplay = null
-          }
-          card.shouldSnapAlignToXDisplay = shouldSnap
-        }
-        // y target snap align
-        if (y) {
-          const { targetSide, itemSide, snapTo, guideAt, distance } = y
-          let yDisplay
-          if (itemSide === 'top') {
-            yDisplay = guideAt
-          } else if (itemSide === 'center') {
-            yDisplay = guideAt - (card.height / 2)
-          } else if (itemSide === 'bottom') {
-            yDisplay = guideAt - card.height
-          }
-          const shouldSnap = Math.abs(yDisplay - card.y) < consts.itemSnapAlignThreshold
-          if (shouldSnap) {
-            card.yDisplay = Math.round(yDisplay)
-          } else {
-            card.yDisplay = null
-          }
-          card.shouldSnapAlignToYDisplay = shouldSnap
-        }
-        return card
-      })
-      return cards
-    },
     moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
@@ -681,7 +634,7 @@ export const useCardStore = defineStore('cards', {
         }
       })
 
-      this.moveCardsUpdateSnapAlignDisplayPosition(cards)
+      cards = globalStore.moveItemsUpdateSnapAlignDisplayPosition(cards)
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true

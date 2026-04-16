@@ -1101,6 +1101,56 @@ export const useGlobalStore = defineStore('global', {
       this.itemSnapAlignGuides.y = nearestY
       this.itemSnapAlignGuides.x = nearestX
     },
+    moveItemsUpdateSnapAlignDisplayPosition (items) {
+      const globalStore = useGlobalStore()
+      if (!globalStore.shouldSnapAlign) { return items }
+      const { x, y } = globalStore.itemSnapAlignGuides
+      items = items.map(item => {
+        const width = item.width || item.resizeWidth
+        const height = item.height || item.resizeHeight
+        // x target snap align
+        if (x) {
+          const { targetSide, itemSide, snapTo, guideAt, distance } = x
+          let xDisplay
+          if (itemSide === 'left') {
+            xDisplay = guideAt
+          } else if (itemSide === 'center') {
+            xDisplay = guideAt - (width / 2)
+          } else if (itemSide === 'right') {
+            xDisplay = guideAt - width
+          }
+          const shouldSnap = Math.abs(xDisplay - item.x) < consts.itemSnapAlignThreshold
+          if (shouldSnap) {
+            item.xDisplay = Math.round(xDisplay)
+          } else {
+            item.xDisplay = null
+          }
+          item.shouldSnapAlignToXDisplay = shouldSnap
+        }
+        // y target snap align
+        if (y) {
+          const { targetSide, itemSide, snapTo, guideAt, distance } = y
+          let yDisplay
+          if (itemSide === 'top') {
+            yDisplay = guideAt
+          } else if (itemSide === 'center') {
+            yDisplay = guideAt - (height / 2)
+          } else if (itemSide === 'bottom') {
+            yDisplay = guideAt - height
+          }
+          const shouldSnap = Math.abs(yDisplay - item.y) < consts.itemSnapAlignThreshold
+          if (shouldSnap) {
+            item.yDisplay = Math.round(yDisplay)
+          } else {
+            item.yDisplay = null
+          }
+          item.shouldSnapAlignToYDisplay = shouldSnap
+        }
+        return item
+      })
+      return items
+    },
+
     // Tags
 
     async updateTags () {
