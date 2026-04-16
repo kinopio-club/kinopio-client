@@ -1008,9 +1008,24 @@ export const useGlobalStore = defineStore('global', {
       const lists = listStore.getAllLists
       return cards.concat(boxes, lists)
     },
+    nearestSnapAlignGuide (checks) {
+      const snapThreshold = consts.itemSnapAlignThreshold
+      let nearest = null
+      checks.forEach(checkObject => {
+        const { itemEdge, targetEdge } = checkObject
+        const distance = Math.abs(itemEdge - targetEdge)
+        if (distance <= snapThreshold) {
+          if (!nearest || distance < nearest.distance) {
+            checkObject.guideAt = targetEdge
+            checkObject.snapTo = Math.round(checkObject.snapTo)
+            nearest = checkObject
+          }
+        }
+      })
+      return nearest
+    },
     updateItemSnapAlignGuides () {
       const spaceStore = useSpaceStore()
-      const snapThreshold = consts.itemSnapAlignThreshold
       const shouldPrevent = !this.shouldSnapAlign || this.preventItemSnapping
       if (shouldPrevent) {
         this.itemSnapAlignGuides = {}
@@ -1059,19 +1074,10 @@ export const useGlobalStore = defineStore('global', {
           { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - item.height / 2 },
           { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - item.height }
         ]
-
-        // TODO dry
-        yChecks.forEach(checkObject => {
-          const { itemEdge, targetEdge } = checkObject
-          const distance = Math.abs(itemEdge - targetEdge)
-          if (distance <= snapThreshold) {
-            if (!nearestY || distance < nearestY.distance) {
-              checkObject.guideAt = targetEdge
-              checkObject.snapTo = Math.round(checkObject.snapTo)
-              nearestY = checkObject
-            }
-          }
-        })
+        const nearestYCandidate = this.nearestSnapAlignGuide(yChecks)
+        if (nearestYCandidate && (!nearestY || nearestYCandidate.distance < nearestY.distance)) {
+          nearestY = nearestYCandidate
+        }
         // x sides
         const xChecks = [
           { targetSide: 'left', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetLeft, snapTo: targetLeft },
@@ -1084,19 +1090,10 @@ export const useGlobalStore = defineStore('global', {
           { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - item.width / 2 },
           { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - item.width }
         ]
-
-        // TODO dry
-        xChecks.forEach(checkObject => {
-          const { itemEdge, targetEdge } = checkObject
-          const distance = Math.abs(itemEdge - targetEdge)
-          if (distance <= snapThreshold) {
-            if (!nearestX || distance < nearestX.distance) {
-              checkObject.guideAt = targetEdge
-              checkObject.snapTo = Math.round(checkObject.snapTo)
-              nearestX = checkObject
-            }
-          }
-        })
+        const nearestXCandidate = this.nearestSnapAlignGuide(xChecks)
+        if (nearestXCandidate && (!nearestX || nearestXCandidate.distance < nearestX.distance)) {
+          nearestX = nearestXCandidate
+        }
       })
       this.itemSnapAlignGuides.y = nearestY
       this.itemSnapAlignGuides.x = nearestX
