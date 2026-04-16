@@ -301,7 +301,6 @@ export const useBoxStore = defineStore('boxes', {
       })
       this.updateBoxes(updates)
     },
-
     moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor, boxes }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()

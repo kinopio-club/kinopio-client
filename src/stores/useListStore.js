@@ -262,6 +262,25 @@ export const useListStore = defineStore('lists', {
       })
       this.listChildPlaceholders[list.id] = cards
     },
+    checkIfShouldSnapAlignLists (listIds) {
+      listIds = listIds.filter(id => Boolean(id))
+      const updates = listIds.map(id => {
+        const list = this.getList(id)
+        const update = {
+          id,
+          xDisplay: undefined,
+          yDisplay: undefined
+        }
+        if (list.shouldSnapAlignToXDisplay && list.xDisplay) {
+          update.x = list.xDisplay
+        }
+        if (list.shouldSnapAlignToYDisplay && list.yDisplay) {
+          update.y = list.yDisplay
+        }
+        return update
+      })
+      this.updateLists(updates)
+    },
     moveLists ({ endCursor, prevCursor, delta, lists }) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
@@ -292,7 +311,7 @@ export const useListStore = defineStore('lists', {
           height: list.height
         }
       })
-      // this.updatePageSize(lists[0]) // ??might automatically be done by cards inside
+      lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists)
       this.updateLists(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {

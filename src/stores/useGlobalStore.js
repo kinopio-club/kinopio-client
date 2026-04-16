@@ -1192,12 +1192,13 @@ export const useGlobalStore = defineStore('global', {
     clearDraggingItems () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
-      // const listStore = useListStore()
+      const listStore = useListStore()
       const cardIds = [this.currentDraggingCardId].concat(this.multipleCardsSelectedIds)
       const boxIds = [this.currentDraggingBoxId].concat(this.multipleBoxesSelectedIds)
+      const listIds = [this.currentDraggingListId].concat(this.multipleListsSelectedIds)
       cardStore.checkIfShouldSnapAlignCards(cardIds)
       boxStore.checkIfShouldSnapAlignBoxes(boxIds)
-
+      listStore.checkIfShouldSnapAlignLists(listIds)
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''

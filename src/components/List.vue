@@ -359,7 +359,9 @@ const colorIsDark = computed(() => {
 // })
 const listStyles = computed(() => {
   const isSnappingToBox = globalStore.itemSnappingIsReady && currentListIsBeingDragged.value
-  const { x, y, z } = props.list
+  let { x, y, z } = props.list
+  x = props.list.xDisplay || x
+  y = props.list.yDisplay || y
   const width = props.list.resizeWidth
   let height = props.list.height || consts.listEmptyHeight
   if (props.list.isCollapsed) {
