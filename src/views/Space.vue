@@ -836,6 +836,7 @@ const initInteractions = (event) => {
   if (spaceIsReadOnly.value) { return }
   state.startCursor = utils.cursorPositionInViewport(event)
   updateCurrentInteractingItem()
+  globalStore.preventItemSnapping = false
 }
 const updateshouldSnapAlign = (event) => {
   const shouldSnap = (
