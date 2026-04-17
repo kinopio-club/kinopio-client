@@ -80,7 +80,6 @@ export const useUserStore = defineStore('user', {
     cardSettingsCardWrapWidth: consts.normalCardWrapWidth,
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
-    shouldShowMinimapJumpToList: true,
     cardDetailsResizeWidth: null,
     affiliatePromoCode: null,
 
