@@ -121,6 +121,7 @@ export default defineConfig(async ({ command, mode }) => {
             // Exclude '/route' and all subpaths (e.g. /route/post)
             /^\/help(?:\/.*)?$/,
             /^\/about(?:\/.*)?$/,
+            /^\/affiliates(?:\/.*)?$/,
             /^\/api(?:\/.*)?$/,
             /^\/blog(?:\/.*)?$/,
             /^\/forum(?:\/.*)?$/,

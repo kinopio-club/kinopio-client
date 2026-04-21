@@ -755,7 +755,7 @@ const updateSidebarWidth = (event) => {
   }
   width = Math.max(width, consts.defaultDialogWidth)
   width = Math.min(width, viewportWidth)
-  userStore.updateUser({ sidebarResizeWidth: width })
+  userStore.updateUser({ sidebarResizeWidth: Math.round(width) })
 }
 
 // interactions
