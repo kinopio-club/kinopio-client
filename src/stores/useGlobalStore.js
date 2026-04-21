@@ -1199,6 +1199,10 @@ export const useGlobalStore = defineStore('global', {
       cardStore.checkIfShouldSnapAlignCards(cardIds)
       boxStore.checkIfShouldSnapAlignBoxes(boxIds)
       listStore.checkIfShouldSnapAlignLists(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        cardStore.updateCardPositionsInList(list)
+      })
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''

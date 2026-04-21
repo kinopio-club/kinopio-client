@@ -281,9 +281,29 @@ export const useListStore = defineStore('lists', {
       })
       this.updateLists(updates)
     },
+    updateSnapAlignListsCardsDisplay (lists) {
+      const cardStore = useCardStore()
+      const cardDisplayPositions = []
+      for (const list of lists) {
+        const listCards = cardStore.getCardsByList(list.id)
+        for (const card of listCards) {
+          let xDisplay = null
+          let yDisplay = null
+          if (list.xDisplay) {
+            xDisplay = list.xDisplay + (card.x - list.x)
+          }
+          if (list.yDisplay) {
+            yDisplay = list.yDisplay + (card.y - list.y)
+          }
+          cardDisplayPositions.push({ id: card.id, xDisplay, yDisplay })
+        }
+      }
+      if (cardDisplayPositions.length) {
+        cardStore.updateCardsState(cardDisplayPositions)
+      }
+    },
     moveLists ({ endCursor, prevCursor, delta, lists }) {
       const globalStore = useGlobalStore()
-      const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if ((!endCursor || !prevCursor) && !delta) { return }
@@ -313,6 +333,7 @@ export const useListStore = defineStore('lists', {
       })
       lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists)
       this.updateLists(lists)
+      this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
         boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
