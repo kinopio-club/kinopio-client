@@ -101,10 +101,8 @@ const isValidCanvas = (space) => {
 const isValidJson = (space) => {
   const schema = {
     name: 'string',
-    users: 'array',
     cards: 'array',
     connections: 'array',
-    connectionTypes: 'array',
     tags: 'array'
   }
   validateSchema(space, schema)
