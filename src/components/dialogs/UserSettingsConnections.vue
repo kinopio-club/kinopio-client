@@ -39,8 +39,7 @@ dialog.narrow.user-settings-connections-dialog(v-if="props.visible" :open="props
 .user-settings-connections-dialog
   left initial
   right 8px
-  &.narrow
-    width 200px
+  top 20px
   .title-section
     border-bottom 1px solid var(--primary-border)
 </style>

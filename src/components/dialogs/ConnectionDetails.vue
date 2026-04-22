@@ -7,9 +7,10 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import UserSettingsConnections from '@/components/dialogs/UserSettingsConnections.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -30,7 +31,8 @@ onMounted(() => {
 })
 
 const state = reactive({
-  colorPickerIsVisible: false
+  colorPickerIsVisible: false,
+  connectionSettingsIsVisible: false
 })
 
 // dialog
@@ -39,7 +41,7 @@ const visible = computed(() => Boolean(globalStore.connectionDetailsIsVisibleFor
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     updatePinchCounterZoomDecimal()
-    state.colorPickerIsVisible = false
+    closeDialogs()
     scrollIntoViewAndFocus()
   } else {
     const element = nameElement.value
@@ -96,6 +98,11 @@ const blur = () => {
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
+const closeDialogs = () => {
+  state.colorPickerIsVisible = false
+  state.connectionsSettingsIsVisible = false
+  globalStore.triggerCloseChildDialogs()
+}
 
 // space
 
@@ -138,6 +145,7 @@ const changeConnectionColor = (color) => {
 }
 
 // filters
+
 const isFilteredInSpace = computed({
   get () {
     const colors = globalStore.filteredConnectionColors
@@ -157,6 +165,12 @@ const toggleFilteredInSpace = () => {
   }
 }
 
+// settings
+
+const toggleConnectionsSettingsIsVisible = () => {
+  state.connectionsSettingsIsVisible = !state.connectionsSettingsIsVisible
+}
+
 // color
 
 const userColor = computed(() => userStore.color)
@@ -165,10 +179,6 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
 const recentColors = computed(() => connectionStore.getConnectionColors)
-const closeColorPicker = () => {
-  state.colorPickerIsVisible = false
-  globalStore.triggerCloseChildDialogs()
-}
 const updateColor = (newColor) => {
   const update = {
     id: currentConnection.value.id,
@@ -201,7 +211,7 @@ const focusName = async () => {
 </script>
 
 <template lang="pug">
-dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialogElement")
+dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left.stop="closeDialogs" ref="dialogElement")
   section.info-section(:style="{backgroundColor: color}" ref="infoSectionElement")
     .dark-theme-background-layer(v-if="isThemeDarkAndColorLight")
     //- color, name
@@ -222,9 +232,10 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
           img.icon(src="@/assets/filter.svg")
         //- Settings
-        button.small-button
-          //- (@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-          img.icon(src="@/assets/settings.svg")
+        .button-wrap
+          button.small-button(@click.left.stop="toggleConnectionsSettingsIsVisible" @keydown.stop.enter="toggleConnectionsSettingsIsVisible" :class="{active: state.connectionsSettingsIsVisible}")
+            img.icon(src="@/assets/settings.svg")
+        UserSettingsConnections(:visible="state.connectionsSettingsIsVisible")
 
     //- label, reverse etc.
     template(v-if="canEditConnection")
