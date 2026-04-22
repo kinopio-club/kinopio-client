@@ -490,7 +490,7 @@ export const useSpaceStore = defineStore('space', {
       const groupStore = useGroupStore()
       const cardStore = useCardStore()
       isLoadingRemoteSpace = false
-      space.connections = utils.migrationConnections(space.connections)
+      space = utils.migrateConnectionTypes(space)
       if (!globalStore.isEmbedMode) {
         globalStore.spaceZoomPercent = 100
       }

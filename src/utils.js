@@ -1442,20 +1442,18 @@ export default {
   connectionElementFromId (connectionId) {
     return document.querySelector(`.connection[data-id="${connectionId}"]`)
   },
-  migrationConnections (connections) { // migration added July 2024
-    if (!connections) { return }
-    connections = connections.filter(connection => Boolean(connection))
-    return connections.map(connection => {
-      if (connection.startCardId) {
-        connection.startItemId = connection.startCardId
+  migrateConnectionTypes (space) { // temp migration added april 2026
+    if (!space.connectionTypes) { return space }
+    space.connections = space.connections.map(connection => {
+      const type = space.connectionTypes.find(type => type.id === connection.connectionTypeId)
+      const typeDataIsMissing = !connection.name && !connection.color
+      if (type && typeDataIsMissing) {
+        connection.name = type.name
+        connection.color = type.color
       }
-      if (connection.endCardId) {
-        connection.endItemId = connection.endCardId
-      }
-      delete connection.startCardId
-      delete connection.endCardId
       return connection
     })
+    return space
   },
   spaceZoomDecimal () {
     const element = document.getElementById('space')
@@ -1963,6 +1961,7 @@ export default {
       }
       return card
     })
+    space = this.migrateConnectionTypes(space)
     return space
   },
   normalizeRemoteSpace (remoteSpace) {

@@ -133,7 +133,7 @@ const importSpace = async (space) => {
       space = utils.convertFromJsonCanvas(space, typeColor)
     }
     space = utils.resetSpaceMeta({ space, user, type: 'import' })
-    space.connections = utils.migrationConnections(space.connections)
+    space = utils.migrateConnectionTypes(space)
     const uniqueNewSpace = await cache.updateIdsInSpace(space)
     console.info('🧚 space to import', uniqueNewSpace)
     await spaceStore.saveImportSpace(uniqueNewSpace)
