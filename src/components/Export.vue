@@ -165,7 +165,6 @@ const convertToCanvas = (space) => {
       }
     })
     space.connections.forEach(connection => {
-      const type = connectionStore.getConnectionTypeByConnectionId(connection.id)
       // direction
       let toEnd = 'none'
       if (connection.directionIsVisible) {
@@ -174,14 +173,14 @@ const convertToCanvas = (space) => {
       // label
       let label
       if (connection.labelIsVisible) {
-        label = type.name
+        label = connection.name
       }
       const edge = {
         id: connection.id,
         fromNode: connection.startItemId,
         toNode: connection.endItemId,
         toEnd,
-        color: type.color,
+        color: connection.color,
         label
       }
       canvas.edges.push(edge)

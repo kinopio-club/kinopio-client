@@ -1109,37 +1109,6 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-    // ConnectionType
-
-    async updateConnectionTypes (body) {
-      const globalStore = useGlobalStore()
-      const userStore = useUserStore()
-      const apiKey = userStore.apiKey
-      const isOnline = globalStore.isOnline
-      if (!shouldRequest({ apiKey, isOnline })) { return }
-      try {
-        const options = await this.requestOptions({ body, method: 'PATCH' })
-        const response = await fetch(`${consts.apiHost()}/connection-type/multiple`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        this.handleServerError({ name: 'updateConnectionTypes', error })
-      }
-    },
-    async createConnectionTypes (body) {
-      const globalStore = useGlobalStore()
-      const userStore = useUserStore()
-      const apiKey = userStore.apiKey
-      const isOnline = globalStore.isOnline
-      if (!shouldRequest({ apiKey, isOnline })) { return }
-      try {
-        const options = await this.requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${consts.apiHost()}/connection-type/multiple`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        this.handleServerError({ name: 'createConnectionTypes', error })
-      }
-    },
-
     // Connection
 
     async updateConnections (body) {

@@ -1045,7 +1045,8 @@
       "updatedAt": "2026-03-27T17:13:03.046Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "ziachdbdRMllek6jxDBSg",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1062,7 +1063,8 @@
       "updatedAt": "2026-03-27T17:13:35.665Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "9k6LHo06UFJRWlAE2zTfy",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1079,7 +1081,8 @@
       "updatedAt": "2026-03-27T17:13:35.596Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "9k6LHo06UFJRWlAE2zTfy",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1096,7 +1099,8 @@
       "updatedAt": "2026-03-27T17:13:35.551Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "9k6LHo06UFJRWlAE2zTfy",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1113,7 +1117,8 @@
       "updatedAt": "2026-03-27T17:13:03.144Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "ziachdbdRMllek6jxDBSg",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1130,7 +1135,8 @@
       "updatedAt": "2026-03-27T17:13:03.154Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "ziachdbdRMllek6jxDBSg",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1147,7 +1153,8 @@
       "updatedAt": "2026-03-27T17:13:03.172Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "ziachdbdRMllek6jxDBSg",
+      "name": "How to Use",
+      "color": "rgb(123, 238, 159)",
       "nameUpdatedByUserId": null
     },
     {
@@ -1164,28 +1171,9 @@
       "updatedAt": "2026-03-27T17:13:03.201Z",
       "spaceId": "oAV3PEW1zmBY0Aod4jTra",
       "userId": "euGhpBrR9eBcjKnK16C_g",
-      "connectionTypeId": "ziachdbdRMllek6jxDBSg",
-      "nameUpdatedByUserId": null
-    }
-  ],
-  "connectionTypes": [
-    {
-      "id": "ziachdbdRMllek6jxDBSg",
       "name": "How to Use",
       "color": "rgb(123, 238, 159)",
-      "createdAt": "2022-07-18T21:47:23.401Z",
-      "updatedAt": "2026-03-27T17:13:02.978Z",
-      "spaceId": "oAV3PEW1zmBY0Aod4jTra",
-      "userId": "euGhpBrR9eBcjKnK16C_g"
-    },
-    {
-      "id": "9k6LHo06UFJRWlAE2zTfy",
-      "name": "Examples",
-      "color": "#ffca99",
-      "createdAt": "2022-07-18T21:47:23.409Z",
-      "updatedAt": "2026-03-27T17:13:03.023Z",
-      "spaceId": "oAV3PEW1zmBY0Aod4jTra",
-      "userId": "euGhpBrR9eBcjKnK16C_g"
+      "nameUpdatedByUserId": null
     }
   ],
   "cacheDate": 1774632447341,

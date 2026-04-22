@@ -500,7 +500,7 @@ export const useHistoryStore = defineStore('history', {
           // boxes
           case 'boxCreated':
             box = item.new
-            boxStore.removeBox(box)
+            boxStore.removeBox(box.id)
             break
           case 'boxRemoved':
             box = item.new
@@ -523,11 +523,6 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'connectionRemoved':
             connection = item.new
-            connection.connectionTypeId = connectionStore.getNewConnectionColor
-            if (!connection.connectionTypeId) {
-              connectionStore.createConnectionType()
-              connection.connectionTypeId = connectionStore.getNewConnectionColor
-            }
             connectionStore.createConnection(connection)
             break
           // lines
@@ -541,7 +536,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'lineRemoved':
             line = item.new
-            lineStore.createLine(line.id)
+            lineStore.createLine(line)
             break
           // lists
           case 'listUpdated':
@@ -557,7 +552,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'listRemoved':
             list = item.new
-            listStore.createList(list.id)
+            listStore.createList(list)
             break
         }
       }

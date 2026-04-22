@@ -1700,7 +1700,6 @@ export default {
       backgroundIsGradient: false,
       cards: [],
       connections: [],
-      connectionTypes: [],
       boxes: [],
       lines: [],
       lists: [],
@@ -2007,16 +2006,6 @@ export default {
       }
     })
     space.cards = cards
-    return space
-  },
-  removeUnusedKeysFromSpace (space) {
-    if (!space) { return }
-    const unusedKeys = ['cards', 'connections', 'connectionTypes']
-    unusedKeys.forEach(key => {
-      if (space[key]) {
-        delete space[key]
-      }
-    })
     return space
   },
   spaceReadDate (space, type) {

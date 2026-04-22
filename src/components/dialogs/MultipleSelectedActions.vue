@@ -304,17 +304,6 @@ const editableConnections = computed(() => {
     })
   }
 })
-const connectionType = (event) => {
-  let type = connectionStore.getNewConnectionColor
-  const shouldUseLastConnectionColor = userStore.shouldUseLastConnectionColor
-  const shiftKey = event.shiftKey
-  const shouldAddType = !type || (shouldUseLastConnectionColor && shiftKey) || (!shouldUseLastConnectionColor && !shiftKey)
-  if (shouldAddType) {
-    connectionStore.createConnectionType()
-  }
-  type = connectionStore.getNewConnectionColor
-  return type
-}
 
 // boxes
 
@@ -656,17 +645,6 @@ dialog.narrow.multiple-selected-actions(
     margin-left 4px
   .more-options
     margin-bottom 10px
-  .edit-connection-types
-    flex-wrap wrap
-    align-items flex-start
-    .change-color
-      display flex
-      overflow hidden
-      align-items center
-      .segmented-colors
-        max-width 14px
-        margin-top 1px
-        display flex
 
   .button-wrap.disabled
     opacity 0.5
