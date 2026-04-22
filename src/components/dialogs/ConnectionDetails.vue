@@ -157,28 +157,15 @@ const toggleFilteredInSpace = () => {
   }
 }
 
-// use last color
-
-const lastColor = computed(() => {
-  return connectionStore.getLastConnectionColor
-})
-const shouldUseLastConnectionColor = computed(() => userStore.shouldUseLastConnectionColor)
-const toggleShouldUseLastConnectionColor = () => {
-  const value = !shouldUseLastConnectionColor.value
-  userStore.updateUser({ shouldUseLastConnectionColor: value })
-}
-
 // color
 
 const userColor = computed(() => userStore.color)
 const color = computed(() => currentConnection.value.color)
 const toggleColorPicker = () => {
-  console.log('🍒', recentColors.value)
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
 const recentColors = computed(() => connectionStore.getConnectionColors)
 const closeColorPicker = () => {
-  console.log('🦚🦚')
   state.colorPickerIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
@@ -230,13 +217,14 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         //- Remove
         button.danger(@click.left="removeConnection")
           img.icon(src="@/assets/remove.svg")
-        //- use last color
-        button(:class="{active: shouldUseLastConnectionColor}" @click.left.prevent="toggleShouldUseLastConnectionColor" @keydown.stop.enter="toggleShouldUseLastConnectionColor")
-          .badge.badge-in-button(:style="{backgroundColor: lastColor}")
-          span Use Last Color
-      //- Filter
-      button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-        img.icon(src="@/assets/filter.svg")
+      div
+        //- Filter
+        button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+          img.icon(src="@/assets/filter.svg")
+        //- Settings
+        button.small-button
+          //- (@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+          img.icon(src="@/assets/settings.svg")
 
     //- label, reverse etc.
     template(v-if="canEditConnection")
@@ -265,17 +253,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
   .edit-message
     button
       margin-top 10px
-  .badge-in-button
-    margin 0
-    padding initial
-    vertical-align -2px
-    margin-right 5px
-    height 14px
-    display inline-block
-    width 14px
-    min-width initial
-    min-height initial
-    border-radius var(--small-entity-radius)
 
   .name
     color var(--primary)

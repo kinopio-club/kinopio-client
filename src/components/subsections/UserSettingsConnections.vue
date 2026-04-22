@@ -1,36 +1,54 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
-import { useSpaceStore } from '@/stores/useSpaceStore'
-import UserSettingsNewSpaceCards from '@/components/subsections/UserSettingsNewSpaceCards.vue'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
-import consts from '@/consts.js'
-import utils from '@/utils.js'
+import UserSettingsConnections from '@/components/dialogs/UserSettingsConnections.vue'
 
-const globalStore = useGlobalStore()
 const userStore = useUserStore()
-const spaceStore = useSpaceStore()
+const connectionStore = useConnectionStore()
 
 const customInputElement = ref(null)
 
 const props = defineProps({
-  visible: Boolean,
-  parentIsUserSettings: Boolean
+  visible: Boolean
 })
 
+const lastColor = computed(() => {
+  return connectionStore.getLastConnectionColor
+})
+const shouldUseLastConnectionColor = computed(() => userStore.shouldUseLastConnectionColor)
+const toggleShouldUseLastConnectionColor = () => {
+  const value = !shouldUseLastConnectionColor.value
+  userStore.updateUser({ shouldUseLastConnectionColor: value })
+}
 </script>
 
 <template lang="pug">
 .connections-settings(v-if="visible")
-  //- shift-enter
+  //- use last color
   section
     .row
-      span Shift-Enter
+      span New Connection Colors
+    .row
+      button(:class="{active: shouldUseLastConnectionColor}" @click.left.prevent="toggleShouldUseLastConnectionColor" @keydown.stop.enter="toggleShouldUseLastConnectionColor")
+        .badge.badge-in-button(:style="{backgroundColor: lastColor}")
+        span Use Last Color
 </template>
 
 <style lang="stylus">
 .connections-settings
   overflow auto
+  .badge-in-button
+    margin 0
+    padding initial
+    vertical-align -2px
+    margin-right 5px
+    height 14px
+    display inline-block
+    width 14px
+    min-width initial
+    min-height initial
+    border-radius var(--small-entity-radius)
 </style>
