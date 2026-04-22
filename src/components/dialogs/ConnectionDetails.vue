@@ -173,7 +173,7 @@ const toggleFilteredInSpace = () => {
 // use last color
 
 const lastColor = computed(() => {
-  return connectionStore.getConnectionColors[0]
+  return connectionStore.getLastConnectionColor
 })
 const shouldUseLastConnectionColor = computed(() => userStore.shouldUseLastConnectionColor)
 const toggleShouldUseLastConnectionColor = () => {

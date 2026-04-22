@@ -42,15 +42,18 @@ export const useConnectionStore = defineStore('connections', {
       const colors = connections.map(connection => connection.color)
       return colors.filter(color => Boolean(color))
     },
+    getLastConnectionColor () {
+      return last(this.getConnectionColors)
+    },
     getNewConnectionColor () {
       const userStore = useUserStore()
       const themeStore = useThemeStore()
       const userId = userStore.id
       const shouldUseLastConnectionColor = userStore.shouldUseLastConnectionColor
-      if (this.getConnectionColors.length) {
-        return this.getConnectionColors[0]
+      if (this.getConnectionColors.length && shouldUseLastConnectionColor) {
+        return this.getLastConnectionColor
       } else {
-        return themeStore.getRandomColor()
+        return themeStore.randomColor()
       }
     }
   },
@@ -233,7 +236,7 @@ export const useConnectionStore = defineStore('connections', {
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id
       connection.name = `Connection ${this.allIds.length + 1}`
-      connection.color = themeStore.randomColor()
+      connection.color = this.getNewConnectionColor
       this.addConnectionToState(connection)
       broadcastStore.update({ updates: connection, store: 'connectionStore', action: 'addConnectionToState' })
       await apiStore.addToQueue({ name: 'createConnection', body: connection })

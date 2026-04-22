@@ -107,13 +107,7 @@ const toggleColorPickerIsVisible = () => {
 const color = computed(() => {
   let colors = props.lists.map(item => item.color)
   colors = colors.filter(color => Boolean(color))
-  // const itemsHaveColors = colors.length === items.value.length
-  // const colorsAreEqual = uniq(colors).length === 1
-  // if (itemsHaveColors && colorsAreEqual) {
   return colors[0]
-  // } else {
-  //   return state.defaultColor
-  // }
 })
 const itemColors = computed(() => spaceStore.getSpaceItemColors.list)
 const updateColor = (color) => {

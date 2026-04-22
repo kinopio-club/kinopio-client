@@ -302,6 +302,7 @@ dialog.more-search-filters
   ul.results-grid
     display flex
     flex-direction row
+    flex-wrap wrap
     li
       width min-content
       .badge
