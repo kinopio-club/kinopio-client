@@ -250,10 +250,10 @@ const isHiddenByCommentFilter = computed(() => {
   return startItemIsComment || endItemIsComment || isConnectedToCommentCard.value
 })
 const filtersIsActive = computed(() => {
-  const types = globalStore.filteredConnectionTypeIds
+  const colors = globalStore.filteredConnectionColors
   const frames = globalStore.filteredFrameIds
   const tags = globalStore.filteredTagNames
-  return Boolean(types.length + frames.length + tags.length)
+  return Boolean(colors.length + frames.length + tags.length)
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
@@ -263,12 +263,10 @@ const isCardsFilteredByFrame = computed(() => {
   const endItemInFilter = frameIds.includes(endItem.frameId)
   return startItemInFilter || endItemInFilter
 })
-// TODO filteredbycolor
 const isConnectionFilteredByColor = computed(() => {
-  return false
-  // const typeIds = globalStore.filteredConnectionTypeIds
-  // if (!connectionType.value) { return }
-  // return typeIds.includes(connectionType.value.id)
+  const colors = globalStore.filteredConnectionColors
+  if (!colors) { return }
+  return colors.includes(props.connection.color)
 })
 const isFiltered = computed(() => {
   if (filtersIsActive.value) {

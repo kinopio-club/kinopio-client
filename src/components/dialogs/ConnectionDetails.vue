@@ -151,24 +151,23 @@ const changeConnectionColor = (color) => {
 }
 
 // filters
-const isFilteredInSpace = computed(() => false)
-// const isFilteredInSpace = computed({
-//   get () {
-//     // const types = globalStore.filteredConnectionTypeIds
-//     // return types.includes(currentConnectionType.value.id)
-//   },
-//   set () {
-//     // toggleFilteredInSpace()
-//   }
-// })
+const isFilteredInSpace = computed({
+  get () {
+    const colors = globalStore.filteredConnectionColors
+    return colors.includes(currentConnection.value.color)
+  },
+  set () {
+    toggleFilteredInSpace()
+  }
+})
 const toggleFilteredInSpace = () => {
-  // const filtered = globalStore.filteredConnectionTypeIds
-  // const typeId = currentConnectionType.value.id
-  // if (filtered.includes(typeId)) {
-  //   globalStore.removeFromFilteredConnectionTypeId(typeId)
-  // } else {
-  //   globalStore.addToFilteredConnectionTypeId(typeId)
-  // }
+  const filtered = globalStore.filteredConnectionColors
+  const color = currentConnection.value.color
+  if (filtered.includes(color)) {
+    globalStore.removeFromFilteredConnectionColor(color)
+  } else {
+    globalStore.addToFilteredConnectionColor(color)
+  }
 }
 
 // use last color

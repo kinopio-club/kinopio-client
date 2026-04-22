@@ -139,7 +139,7 @@ export const useUserStore = defineStore('user', {
         userFilters += 1
       }
       const tagNames = globalStore.filteredTagNames
-      const connections = globalStore.filteredConnectionTypeIds
+      const connections = globalStore.filteredConnectionColors
       const frames = globalStore.filteredFrameIds
       const boxes = globalStore.filteredBoxIds
       return userFilters + tagNames.length + connections.length + frames.length + boxes.length

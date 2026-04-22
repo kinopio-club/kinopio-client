@@ -1567,13 +1567,12 @@ const isFilteredByTags = computed(() => {
   return hasTag
 })
 const isFilteredByConnectionColor = computed(() => {
-  return false
-  // const typeIds = globalStore.filteredConnectionTypeIds
-  // if (!typeIds) { return }
-  // const filteredTypes = connectedConnectionTypes.value.filter(type => {
-  //   return typeIds.includes(type.id)
-  // })
-  // return Boolean(filteredTypes.length)
+  const colors = globalStore.filteredConnectionColors
+  if (!colors) { return }
+  const filteredColors = connectedConnections.value.filter(connection => {
+    return colors.includes(connection.color)
+  })
+  return Boolean(filteredColors.length)
 })
 const isFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds

@@ -305,7 +305,7 @@ export const useGlobalStore = defineStore('global', {
     notificationsWithPosition: [],
 
     // filters
-    filteredConnectionTypeIds: [],
+    filteredConnectionColors: [],
     filteredBoxIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
@@ -1421,18 +1421,18 @@ export const useGlobalStore = defineStore('global', {
     // Filters
 
     clearSpaceFilters () {
-      this.filteredConnectionTypeIds = []
+      this.filteredConnectionColors = []
       this.filteredFrameIds = []
       this.filteredTagNames = []
       this.filteredBoxIds = []
     },
-    addToFilteredConnectionTypeId (id) {
-      utils.typeCheck({ value: id, type: 'string' })
-      this.filteredConnectionTypeIds.push(id)
+    addToFilteredConnectionColor (color) {
+      utils.typeCheck({ value: color, type: 'string' })
+      this.filteredConnectionColors.push(color)
     },
-    removeFromFilteredConnectionTypeId (id) {
-      utils.typeCheck({ value: id, type: 'string' })
-      this.filteredConnectionTypeIds = this.filteredConnectionTypeIds.filter(typeId => typeId !== id)
+    removeFromFilteredConnectionColor (color) {
+      utils.typeCheck({ value: color, type: 'string' })
+      this.filteredConnectionColors = this.filteredConnectionColors.filter(connectionColor => connectionColor !== color)
     },
     addToFilteredFrameIds (id) {
       utils.typeCheck({ value: id, type: 'number' })

@@ -59,6 +59,7 @@ const toggleMultipleConnectionsPickerVisible = () => {
   closeDialogsAndEmit()
   state.multipleConnectionsPickerVisible = !isVisible
 }
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 
 // utils
 
@@ -105,7 +106,7 @@ section.subsection.connection-actions(
     .row.edit-connection-colors
       //- Color
       .button-wrap(v-if="!props.hideType")
-        button.change-color(:disabled="!canEditAllConnections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
           .segmented-colors.icon
             template(v-for="connection in connections")
               .current-color(:style="{ background: connection.color }")
