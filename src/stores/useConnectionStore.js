@@ -54,8 +54,7 @@ export const useConnectionStore = defineStore('connections', {
       const userStore = useUserStore()
       const themeStore = useThemeStore()
       const userId = userStore.id
-      const shouldUseLastConnectionColor = userStore.shouldUseLastConnectionColor
-      if (this.getConnectionColors.length && shouldUseLastConnectionColor) {
+      if (this.getConnectionColors.length && userStore.shouldUseLastConnectionColor) {
         return this.getLastConnectionColor
       } else {
         return themeStore.randomColor()

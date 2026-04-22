@@ -24,16 +24,13 @@ const spaceStore = useSpaceStore()
 const dialogElement = ref(null)
 const nameElement = ref(null)
 const infoSectionElement = ref(null)
-const resultsActionsElement = ref(null)
 
 onMounted(() => {
   updatePinchCounterZoomDecimal()
 })
 
 const state = reactive({
-  colorPickerIsVisible: false,
-  resultsSectionMaxHeight: undefined // number
-
+  colorPickerIsVisible: false
 })
 
 // dialog
@@ -44,9 +41,7 @@ watch(() => visible.value, (value, prevValue) => {
     updatePinchCounterZoomDecimal()
     state.colorPickerIsVisible = false
     scrollIntoViewAndFocus()
-    globalStore.updateLastInteractedConnectionColor(currentConnection.value.color)
   } else {
-    state.resultsSectionMaxHeight = undefined
     const element = nameElement.value
     if (!element) { return }
     element.blur()
@@ -72,23 +67,9 @@ const styles = computed(() => {
     transform: `scale(${zoom})`
   }
 })
-const updateResultsSectionMaxHeight = () => {
-  const pinchZoom = utils.visualViewport().scale
-  const position = globalStore.connectionDetailsPosition
-  if (!infoSectionElement.value) { return }
-  const infoSection = infoSectionElement.value.getBoundingClientRect()
-  const resultsActions = resultsActionsElement.value?.getBoundingClientRect()
-  const dialogInfoHeight = infoSection.height + (resultsActions?.height || 0)
-  const maxHeight = (globalStore.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
-  const minHeight = 300
-  let height = Math.max(minHeight, maxHeight)
-  height = Math.round(height)
-  state.resultsSectionMaxHeight = `calc(90vh - ${height}px)`
-}
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
-  updateResultsSectionMaxHeight()
   await nextTick()
   globalStore.scrollElementIntoView({ element })
 }
@@ -129,6 +110,11 @@ const currentConnection = computed(() => {
   const id = globalStore.connectionDetailsIsVisibleForConnectionId
   return connectionStore.getConnection(id)
 })
+watch(() => currentConnection.value, (value, prevValue) => {
+  if (!value) { return }
+  globalStore.updateLastInteractedConnectionColor(currentConnection.value.color)
+})
+
 const canEditConnection = computed(() => {
   const isSpaceMember = userStore.getUserIsSpaceMember
   const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(currentConnection.value)
@@ -238,10 +224,19 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateColor" :recentColors="recentColors")
       input.connection-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="name" ref="nameElement" @focus="focus" @blur="blur" :class="{'is-dark': colorisDark}" @keyup.enter.prevent="closeAllDialogs")
-    .row(v-if="canEditConnection")
-      //- Remove
-      button.danger(@click.left="removeConnection")
-        img.icon(src="@/assets/remove.svg")
+
+    .row.title-row(v-if="canEditConnection")
+      div
+        //- Remove
+        button.danger(@click.left="removeConnection")
+          img.icon(src="@/assets/remove.svg")
+        //- use last color
+        button(:class="{active: shouldUseLastConnectionColor}" @click.left.prevent="toggleShouldUseLastConnectionColor" @keydown.stop.enter="toggleShouldUseLastConnectionColor")
+          .badge.badge-in-button(:style="{backgroundColor: lastColor}")
+          span Use Last Color
+      //- Filter
+      button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+        img.icon(src="@/assets/filter.svg")
 
     //- label, reverse etc.
     template(v-if="canEditConnection")
@@ -254,17 +249,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
 
     //- debug
     ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
-
-  section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
-    //- Use Last color
-    .row.title-row
-      label(:class="{active: shouldUseLastConnectionColor}" @click.left.prevent="toggleShouldUseLastConnectionColor" @keydown.stop.enter="toggleShouldUseLastConnectionColor")
-        input(type="checkbox" v-model="shouldUseLastConnectionColor")
-        .badge.badge-in-button(:style="{backgroundColor: lastColor}")
-        span Use Last Color
-      //- Filter
-      button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
-        img.icon(src="@/assets/filter.svg")
 </template>
 
 <style lang="stylus">
@@ -281,17 +265,18 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
   .edit-message
     button
       margin-top 10px
-  .results-actions
-    .badge-in-button
-      margin-left 5px
-      padding 7px 7px
-      min-height initial
-      display inline-block
-      min-width initial
-      vertical-align middle
-    label
-      .badge-in-button
-        margin-left 0
+  .badge-in-button
+    margin 0
+    padding initial
+    vertical-align -2px
+    margin-right 5px
+    height 14px
+    display inline-block
+    width 14px
+    min-width initial
+    min-height initial
+    border-radius var(--small-entity-radius)
+
   .name
     color var(--primary)
   .info-section
