@@ -261,6 +261,7 @@ export const useConnectionStore = defineStore('connections', {
       })
     },
     async updateConnections (updates) {
+      const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -270,6 +271,9 @@ export const useConnectionStore = defineStore('connections', {
       broadcastStore.update({ updates, store: 'connectionStore', action: 'updateConnectionsState' })
       for (const connection of updates) {
         await apiStore.addToQueue({ name: 'updateConnection', body: connection })
+        if (connection.color) {
+          globalStore.lastInteractedConnectionColor = connection.color
+        }
       }
       await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },
