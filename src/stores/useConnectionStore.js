@@ -20,6 +20,7 @@ import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
 import sortBy from 'lodash-es/sortBy'
+import { colord, extend } from 'colord'
 
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
@@ -37,10 +38,10 @@ export const useConnectionStore = defineStore('connections', {
     },
     getConnectionColors () {
       let connections = this.getAllConnections
-      connections = uniqBy(connections, 'color')
+      connections = connections.filter(connection => connection.color)
       connections = utils.sortByUpdatedAt(connections)
-      const colors = connections.map(connection => connection.color)
-      return colors.filter(color => Boolean(color))
+      const colors = connections.map(connection => colord(connection.color).toHex())
+      return uniq(colors)
     },
     getLastConnectionColor () {
       return last(this.getConnectionColors)

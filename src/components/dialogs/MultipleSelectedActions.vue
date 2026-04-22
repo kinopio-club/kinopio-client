@@ -640,7 +640,6 @@ dialog.narrow.multiple-selected-actions(
     vertical-align middle
     .current-color
       display inline-block
-      vertical-align bottom
       border-radius 0
       &:first-child
         border-top-left-radius var(--small-entity-radius)

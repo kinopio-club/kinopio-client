@@ -235,6 +235,7 @@ const resetOpacity = () => {
   updateOpacity(100)
 }
 const updateOpacityFromCurrentColor = () => {
+  if (props.shouldHideOpacity) { return }
   const alpha = colord(props.currentColor).alpha()
   const opacity = alpha * 100
   updateOpacity(opacity)

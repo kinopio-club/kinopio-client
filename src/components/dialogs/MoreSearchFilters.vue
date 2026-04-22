@@ -261,7 +261,7 @@ dialog.more-search-filters.narrow(v-if="props.visible" :open="props.visible" ref
     //- Connection Colors
     ul.results-list.results-grid(v-if="items.connectionColors.length")
       template(v-for="color in items.connectionColors" :key="color")
-        li(:class="{ active: connectionColorIsActive(color) }" @click.left="toggleFilteredConnectionColor(color)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionColor(color)" title="Connection Color")
+        li(:class="{ active: connectionColorIsActive(color) }" @click.left="toggleFilteredConnectionColor(color)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionColor(color)" title="Connection Color" :data-color="color")
           .badge(:style="{backgroundColor: color}")
 </template>
 

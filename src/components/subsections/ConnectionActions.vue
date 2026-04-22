@@ -4,9 +4,10 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
-import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
@@ -15,6 +16,7 @@ import uniqBy from 'lodash-es/uniqBy'
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
@@ -47,19 +49,36 @@ const props = defineProps({
   collapseExpandIsVisible: Boolean
 })
 const state = reactive({
-  multipleConnectionsPickerVisible: false,
+  colorPickerVisible: false,
   isHover: false
 })
 
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const colorClasses = computed(() => {
   return utils.colorClasses({ backgroundColor: props.backgroundColor })
 })
-const toggleMultipleConnectionsPickerVisible = () => {
-  const isVisible = state.multipleConnectionsPickerVisible
+
+// color picker
+
+const toggleColorPickerVisible = () => {
+  const isVisible = state.colorPickerVisible
   closeDialogsAndEmit()
-  state.multipleConnectionsPickerVisible = !isVisible
+  state.colorPickerVisible = !isVisible
 }
-const canEditSpace = computed(() => userStore.getUserCanEditSpace)
+const connectionColorSwatches = computed(() => {
+  return uniqBy(props.connections, 'color')
+})
+const connectionColors = computed(() => connectionStore.getConnectionColors)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const updateColor = (color) => {
+  const updates = props.connections.map(connection => {
+    return {
+      id: connection.id,
+      color
+    }
+  })
+  connectionStore.updateConnections(updates)
+}
 
 // utils
 
@@ -68,7 +87,7 @@ const closeDialogsAndEmit = () => {
   emit('closeDialogs')
 }
 const closeDialogs = () => {
-  state.multipleConnectionsPickerVisible = false
+  state.colorPickerVisible = false
 }
 const updateIsHover = (value) => {
   state.isHover = value
@@ -106,11 +125,21 @@ section.subsection.connection-actions(
     .row.edit-connection-colors
       //- Color
       .button-wrap(v-if="!props.hideType")
-        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
-          .segmented-colors.icon
-            template(v-for="connection in connections")
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPickerVisible" :class="{active: state.colorPickerVisible}")
+          .segmented-colors
+            template(v-for="connection in connectionColorSwatches")
               .current-color(:style="{ background: connection.color }")
-        MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="props.connections")
+        //- ColorPicker
+        ColorPicker(
+          :visible="state.colorPickerVisible"
+          :removeIsVisible="false"
+          :recentColors="connectionColors"
+          :currentColor="connections[0].color"
+          :luminosityIsDark="isThemeDark"
+          :shouldHideOpacity="true"
+          @selectedColor="updateColor"
+        )
+    .row
       //- Label, Direction, Reverse, Curved
       ConnectionDecorators(:connections="props.connections")
   //- collapsed horizontal label
@@ -135,16 +164,13 @@ dialog section.connection-actions
     border-color var(--primary-border-on-light-background) !important
   &.is-background-dark
     border-color var(--primary-border-on-dark-background) !important
-
   .row
-    margin-top 0
-  .row.edit-connection-colors
-    margin-bottom 0
+    margin 0
   .button-wrap
     margin-left 0
     margin-right 4px
-    vertical-align middle
     margin-bottom 4px
+
   .label
     &.is-background-light
       color var(--primary-on-light-background)
