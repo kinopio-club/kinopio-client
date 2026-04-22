@@ -60,26 +60,6 @@ const toggleMultipleConnectionsPickerVisible = () => {
   state.multipleConnectionsPickerVisible = !isVisible
 }
 
-// connection types
-
-const canEditAllConnections = computed(() => {
-  return props.canEdit || props.canEditAll.connections
-})
-const connectionTypes = computed(() => {
-  const ids = globalStore.multipleConnectionsSelectedIds
-  let types = ids.map(id => {
-    return connectionStore.getConnectionTypeByConnectionId(id)
-  })
-  types = uniqBy(types, 'id')
-  types = uniqBy(types, 'color')
-  return types
-})
-const editableConnectionTypes = computed(() => {
-  return uniq(props.connections.map(connection => {
-    return connectionStore.getConnectionType(connection.connectionTypeId)
-  }))
-})
-
 // utils
 
 const closeDialogsAndEmit = () => {
@@ -122,15 +102,14 @@ section.subsection.connection-actions(
   template(v-if="props.visible")
     p.subsection-vertical-label(v-if="props.label" :style="{ background: props.backgroundColor }")
       span.label(:class="colorClasses") {{ props.label }}
-    .row.edit-connection-types
-      //- Type Color
+    .row.edit-connection-colors
+      //- Color
       .button-wrap(v-if="!props.hideType")
         button.change-color(:disabled="!canEditAllConnections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
           .segmented-colors.icon
-            template(v-for="type in connectionTypes")
-              .current-color(:style="{ background: type.color }")
-          span Type
-        MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="props.connections" :selectedConnectionTypes="editableConnectionTypes")
+            template(v-for="connection in connections")
+              .current-color(:style="{ background: connection.color }")
+        MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="props.connections")
       //- Label, Direction, Reverse, Curved
       ConnectionDecorators(:connections="props.connections")
   //- collapsed horizontal label
@@ -158,7 +137,7 @@ dialog section.connection-actions
 
   .row
     margin-top 0
-  .row.edit-connection-types
+  .row.edit-connection-colors
     margin-bottom 0
   .button-wrap
     margin-left 0

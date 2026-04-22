@@ -21,7 +21,6 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
 
-let prevType
 let unsubscribes
 
 onMounted(() => {
@@ -38,7 +37,6 @@ onMounted(() => {
       } else if (name === 'closeAllDialogs') {
         if (isDrawingConnection.value) {
           globalStore.updateCurrentUserIsDrawingConnection(false)
-          connectionStore.removeAllUnusedConnectionTypes()
         }
       }
     }
@@ -78,15 +76,13 @@ const drawCurrentConnection = (event) => {
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   const endItemId = checkCurrentConnectionSuccess(event)
+  const color = connectionStore.getNewConnectionColor
   state.currentConnectionPath = path
-  const connectionType = connectionStore.getNewConnectionType
-  prevType = connectionType
-  state.currentConnectionColor = connectionType.color
-  globalStore.currentConnectionColor = connectionType.color
+  state.currentConnectionColor = color
+  globalStore.currentConnectionColor = color
   const updates = {
     userId: userStore.id,
-    connectionTypeId: connectionType.id,
-    color: connectionType.color,
+    color,
     startItemId: props.startItemId,
     endItemId,
     path
@@ -170,7 +166,7 @@ const addConnections = async (event) => {
       controlPoint,
       estimatedEndItemConnectorPosition
     })
-    const connection = { startItemId, endItemId, path, controlPoint, connectionTypeId: prevType }
+    const connection = { startItemId, endItemId, path, controlPoint }
     connectionStore.createConnection(connection)
   })
 }

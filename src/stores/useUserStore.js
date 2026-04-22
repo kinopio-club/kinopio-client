@@ -50,7 +50,7 @@ export const useUserStore = defineStore('user', {
     shouldEmailBulletin: true,
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
-    shouldUseLastConnectionType: true,
+    shouldUseLastConnectionColor: true,
     shouldShowItemActions: false,
     shouldShowMultipleSelectedLineActions: false,
     shouldShowMultipleSelectedBoxActions: false,

@@ -7,7 +7,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
@@ -22,9 +21,8 @@ const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let prevConnectionType
 const dialogElement = ref(null)
-const typeNameElement = ref(null)
+const nameElement = ref(null)
 const infoSectionElement = ref(null)
 const resultsActionsElement = ref(null)
 
@@ -34,30 +32,30 @@ onMounted(() => {
 
 const state = reactive({
   colorPickerIsVisible: false,
-  resultsSectionMaxHeight: undefined, // number
-  nextConnectionTypeColor: ''
+  resultsSectionMaxHeight: undefined // number
+
 })
 
 // dialog
 
 const visible = computed(() => Boolean(globalStore.connectionDetailsIsVisibleForConnectionId))
-const isDevelopment = computed(() => consts.isDevelopment())
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     updatePinchCounterZoomDecimal()
-    updateNextConnectionColor()
+    state.colorPickerIsVisible = false
+    scrollIntoViewAndFocus()
   } else {
     state.resultsSectionMaxHeight = undefined
-    const element = typeNameElement.value
+    const element = nameElement.value
     if (!element) { return }
     element.blur()
+    globalStore.shouldHideConnectionOutline = false
   }
 })
 
-const isThemeDarkAndTypeColorLight = computed(() => {
+const isThemeDarkAndColorLight = computed(() => {
   const isThemeDark = userStore.theme === 'dark'
-  const typeColorIsLight = !utils.colorIsDark(typeColor.value)
-  return isThemeDark && typeColorIsLight
+  return isThemeDark && !colorisDark.value
 })
 const styles = computed(() => {
   const position = globalStore.connectionDetailsPosition
@@ -96,8 +94,8 @@ const scrollIntoView = async () => {
 const scrollIntoViewAndFocus = async () => {
   await scrollIntoView()
   if (utils.isMobile()) { return }
-  const element = typeNameElement.value
-  const length = typeName.value.length
+  const element = nameElement.value
+  const length = name.value.length
   await nextTick()
   focusName()
   if (length && element) {
@@ -112,7 +110,6 @@ const updatePinchCounterZoomDecimal = () => {
 }
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
-  const connectionType = utils.clone(currentConnectionType.value)
 }
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
@@ -131,30 +128,6 @@ const currentConnection = computed(() => {
   const id = globalStore.connectionDetailsIsVisibleForConnectionId
   return connectionStore.getConnection(id)
 })
-watch(() => currentConnection.value, async (value, prevValue) => {
-  connectionStore.removeAllUnusedConnectionTypes()
-  await nextTick()
-  if (visible.value) {
-    state.colorPickerIsVisible = false
-    scrollIntoViewAndFocus()
-    connectionStore.updatePrevConnectionTypeId(currentConnectionType.value.id)
-  } else {
-    globalStore.shouldHideConnectionOutline = false
-  }
-})
-const currentConnectionType = computed(() => {
-  if (!currentConnection.value) { return }
-  const connectionType = connectionStore.getConnectionTypeByConnectionId(currentConnection.value.id)
-  prevConnectionType = connectionType
-  return connectionType
-})
-
-// type
-
-const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
-const connectionTypesByUpdatedAt = computed(() => {
-  return connectionStore.getConnectionTypesByUpdatedAt()
-})
 const canEditConnection = computed(() => {
   const isSpaceMember = userStore.getUserIsSpaceMember
   const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(currentConnection.value)
@@ -163,107 +136,92 @@ const canEditConnection = computed(() => {
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false
 })
-const typeColorisDark = computed(() => {
-  return utils.colorIsDark(typeColor.value)
+const colorisDark = computed(() => {
+  return utils.colorIsDark(currentConnection.value.color)
 })
-const addConnectionType = () => {
-  connectionStore.createConnectionType({ color: state.nextConnectionTypeColor })
-  const types = utils.clone(connectionTypes.value)
-  const newType = last(types)
-  changeConnectionType(newType)
-  updateNextConnectionColor()
-}
 const removeConnection = () => {
   connectionStore.removeConnection(currentConnection.value.id)
   globalStore.closeAllDialogs()
-  connectionStore.removeAllUnusedConnectionTypes()
 }
-const changeConnectionType = (type) => {
+const changeConnectionColor = (color) => {
   connectionStore.updateConnection({
     id: currentConnection.value.id,
-    connectionTypeId: type.id
+    color
   })
-  connectionStore.updatePrevConnectionTypeId(type.id)
 }
 
 // filters
-
-const isFilteredInSpace = computed({
-  get () {
-    const types = globalStore.filteredConnectionTypeIds
-    return types.includes(currentConnectionType.value.id)
-  },
-  set () {
-    toggleFilteredInSpace()
-  }
-})
+const isFilteredInSpace = computed(() => false)
+// const isFilteredInSpace = computed({
+//   get () {
+//     // const types = globalStore.filteredConnectionTypeIds
+//     // return types.includes(currentConnectionType.value.id)
+//   },
+//   set () {
+//     // toggleFilteredInSpace()
+//   }
+// })
 const toggleFilteredInSpace = () => {
-  const filtered = globalStore.filteredConnectionTypeIds
-  const typeId = currentConnectionType.value.id
-  if (filtered.includes(typeId)) {
-    globalStore.removeFromFilteredConnectionTypeId(typeId)
-  } else {
-    globalStore.addToFilteredConnectionTypeId(typeId)
-  }
+  // const filtered = globalStore.filteredConnectionTypeIds
+  // const typeId = currentConnectionType.value.id
+  // if (filtered.includes(typeId)) {
+  //   globalStore.removeFromFilteredConnectionTypeId(typeId)
+  // } else {
+  //   globalStore.addToFilteredConnectionTypeId(typeId)
+  // }
 }
 
-// use last type
+// use last color
 
-const lastTypeColor = computed(() => {
-  const lastType = connectionStore.getPrevConnectionType
-  return lastType?.color
+const lastColor = computed(() => {
+  return connectionStore.getConnectionColors[0]
 })
-const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
-const toggleShouldUseLastConnectionType = () => {
-  const value = !shouldUseLastConnectionType.value
-  userStore.updateUser({ shouldUseLastConnectionType: value })
+const shouldUseLastConnectionColor = computed(() => userStore.shouldUseLastConnectionColor)
+const toggleShouldUseLastConnectionColor = () => {
+  const value = !shouldUseLastConnectionColor.value
+  userStore.updateUser({ shouldUseLastConnectionColor: value })
 }
 
 // color
 
 const userColor = computed(() => userStore.color)
-const typeColor = computed(() => currentConnectionType.value.color)
+const color = computed(() => currentConnection.value.color)
 const toggleColorPicker = () => {
+  console.log('🍒', recentColors.value)
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
+const recentColors = computed(() => connectionStore.getConnectionColors)
 const closeColorPicker = () => {
+  console.log('🦚🦚')
   state.colorPickerIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
-const updateTypeColor = (newColor) => {
+const updateColor = (newColor) => {
   const update = {
-    id: currentConnectionType.value.id,
+    id: currentConnection.value.id,
     color: newColor
   }
-  connectionStore.updateConnectionType(update)
-}
-const updateNextConnectionColor = () => {
-  const isThemeDark = userStore.theme === 'dark'
-  let color = randomColor({ luminosity: 'light' })
-  if (isThemeDark) {
-    color = randomColor({ luminosity: 'dark' })
-  }
-  state.nextConnectionTypeColor = color
+  connectionStore.updateConnection(update)
 }
 
 // name
 
-const typeName = computed({
+const name = computed({
   get () {
-    return currentConnectionType.value.name
+    return currentConnection.value.name
   },
   set (newName) {
     const update = {
-      id: currentConnectionType.value.id,
+      id: currentConnection.value.id,
       name: newName,
       updatedAt: new Date()
     }
-    connectionStore.updateConnectionType(update)
+    connectionStore.updateConnection(update)
   }
 })
 const focusName = async () => {
   await nextTick()
-  const element = typeNameElement.value
+  const element = nameElement.value
   if (!element) { return }
   element.focus()
 }
@@ -271,15 +229,15 @@ const focusName = async () => {
 
 <template lang="pug">
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialogElement")
-  section.info-section(:style="{backgroundColor: typeColor}" ref="infoSectionElement")
-    .dark-theme-background-layer(v-if="isThemeDarkAndTypeColorLight")
+  section.info-section(:style="{backgroundColor: color}" ref="infoSectionElement")
+    .dark-theme-background-layer(v-if="isThemeDarkAndColorLight")
     //- color, name
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
-          .current-color(:style="{backgroundColor: typeColor}")
-        ColorPicker(:currentColor="typeColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}" @keyup.enter.prevent="closeAllDialogs")
+          .current-color(:style="{backgroundColor: color}")
+        ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateColor" :recentColors="recentColors")
+      input.connection-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="name" ref="nameElement" @focus="focus" @blur="blur" :class="{'is-dark': colorisDark}" @keyup.enter.prevent="closeAllDialogs")
     .row(v-if="canEditConnection")
       //- Remove
       button.danger(@click.left="removeConnection")
@@ -298,29 +256,22 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
     ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
 
   section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
-    //- Use Last Type
+    //- Use Last color
     .row.title-row
-      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
-        input(type="checkbox" v-model="shouldUseLastConnectionType")
-        .badge.badge-in-button(:style="{backgroundColor: lastTypeColor}")
-        span Use Last Type
+      label(:class="{active: shouldUseLastConnectionColor}" @click.left.prevent="toggleShouldUseLastConnectionColor" @keydown.stop.enter="toggleShouldUseLastConnectionColor")
+        input(type="checkbox" v-model="shouldUseLastConnectionColor")
+        .badge.badge-in-button(:style="{backgroundColor: lastColor}")
+        span Use Last Color
       //- Filter
       button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
         img.icon(src="@/assets/filter.svg")
-    .row
-      button(@click.left="addConnectionType")
-        img.icon(src="@/assets/add.svg")
-        .badge.badge-in-button(:style="{backgroundColor: state.nextConnectionTypeColor}")
-        span Type
-  section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionMaxHeight}")
-    ConnectionTypeList(:connections="[currentConnection]" :connectionTypes="connectionTypesByUpdatedAt" @select="changeConnectionType" :canEditConnection="canEditConnection" @updateTypeColor="updateTypeColor" :resultsFilterIsVisible="canEditConnection")
 </template>
 
 <style lang="stylus">
 .connection-details
   z-index var(--max-z)
   transform-origin top left
-  .type-name
+  .connection-name
     margin-left 6px
     border-color var(--primary-on-light-background)
     color var(--primary-on-light-background)

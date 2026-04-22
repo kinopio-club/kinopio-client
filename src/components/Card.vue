@@ -675,7 +675,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
+const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
 
 // card buttons
 
@@ -687,7 +687,7 @@ const connectorIsVisible = computed(() => {
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (isMember || canEditCard.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditCard.value || connectedConnections.value.length) {
     isVisible = true
   }
   return isVisible
@@ -1566,13 +1566,14 @@ const isFilteredByTags = computed(() => {
   })
   return hasTag
 })
-const isFilteredByConnectionType = computed(() => {
-  const typeIds = globalStore.filteredConnectionTypeIds
-  if (!typeIds) { return }
-  const filteredTypes = connectedConnectionTypes.value.filter(type => {
-    return typeIds.includes(type.id)
-  })
-  return Boolean(filteredTypes.length)
+const isFilteredByConnectionColor = computed(() => {
+  return false
+  // const typeIds = globalStore.filteredConnectionTypeIds
+  // if (!typeIds) { return }
+  // const filteredTypes = connectedConnectionTypes.value.filter(type => {
+  //   return typeIds.includes(type.id)
+  // })
+  // return Boolean(filteredTypes.length)
 })
 const isFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
@@ -1600,7 +1601,7 @@ const isFiltered = computed(() => {
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
   if (!filtersIsActive.value) { return }
-  const isInFilter = isFilteredByTags.value || isFilteredByConnectionType.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
+  const isInFilter = isFilteredByTags.value || isFilteredByConnectionColor.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
   return !isInFilter
 })
 

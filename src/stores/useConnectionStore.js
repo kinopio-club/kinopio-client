@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useListStore } from '@/stores/useListStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -24,9 +25,7 @@ export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
     allIds: [],
-    typeById: {},
-    typeAllIds: [],
-    prevConnectionTypeId: '',
+    prevConnectionColor: '',
     // indexes
     byStartItemId: {}, // { itemId: [ id1, id2 ] }
     byEndItemId: {}
@@ -36,27 +35,23 @@ export const useConnectionStore = defineStore('connections', {
     getAllConnections () {
       return this.allIds.map(id => this.byId[id])
     },
-    getAllConnectionTypes () {
-      return this.typeAllIds.map(id => this.typeById[id])
+    getConnectionColors () {
+      let connections = this.getAllConnections
+      connections = uniqBy(connections, 'color')
+      connections = utils.sortByUpdatedAt(connections)
+      const colors = connections.map(connection => connection.color)
+      return colors.filter(color => Boolean(color))
     },
-    getNewConnectionType () {
+    getNewConnectionColor () {
       const userStore = useUserStore()
+      const themeStore = useThemeStore()
       const userId = userStore.id
-      const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
-      const connectionTypes = this.typeAllIds.map(id => this.typeById[id])
-      let prevConnectionType
-      if (this.prevConnectionTypeId) {
-        prevConnectionType = this.typeById[this.prevConnectionTypeId]
-      }
-      if (shouldUseLastConnectionType) {
-        return prevConnectionType || last(connectionTypes)
+      const shouldUseLastConnectionColor = userStore.shouldUseLastConnectionColor
+      if (this.getConnectionColors.length) {
+        return this.getConnectionColors[0]
       } else {
-        return last(connectionTypes)
+        return themeStore.getRandomColor()
       }
-    },
-    getPrevConnectionType () {
-      const id = this.prevConnectionTypeId
-      return this.typeById[id]
     }
   },
 
@@ -80,9 +75,6 @@ export const useConnectionStore = defineStore('connections', {
       connections = connections.filter(connection => Boolean(connection))
       return connections
     },
-    getConnectionType (id) {
-      return this.typeById[id]
-    },
     getConnectionByStartItemId (itemId) {
       const ids = this.byStartItemId[itemId] || []
       return ids.map(id => this.getConnection(id))
@@ -104,17 +96,6 @@ export const useConnectionStore = defineStore('connections', {
     },
     getConnectionsByItemId (itemId) {
       return this.getConnectionsByItemIds([itemId])
-    },
-    getItemConnectionTypes (itemId) {
-      const connections = this.getConnectionsByItemId(itemId)
-      const typeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = typeIds.map(id => this.getConnectionType(id))
-      return connectionTypes
-    },
-    getConnectionTypeByConnectionId (connectionId) {
-      const connection = this.getConnection(connectionId)
-      const type = this.getConnectionType(connection.connectionTypeId)
-      return type
     },
     getConnectionPathBetweenCoords (start, end, controlPoint) {
       if (!start || !end) { return }
@@ -140,11 +121,6 @@ export const useConnectionStore = defineStore('connections', {
       const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
       const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
       return path
-    },
-    getConnectionTypeByName (name) {
-      const types = this.getAllConnectionTypes
-      const type = types.find(type => type.name === name)
-      return type
     },
 
     // init
@@ -173,22 +149,6 @@ export const useConnectionStore = defineStore('connections', {
       this.byStartItemId = byStartItemId
       this.byEndItemId = byEndItemId
     },
-    initializeConnectionTypes (connectionTypes = []) {
-      const byId = {}
-      const allIds = []
-      connectionTypes.forEach(type => {
-        byId[type.id] = type
-        allIds.push(type.id)
-      })
-      this.typeById = byId
-      this.typeAllIds = allIds
-    },
-    getConnectionTypesByUpdatedAt (types) {
-      types = types || this.getAllConnectionTypes
-      types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
-      types.reverse()
-      return types
-    },
 
     // init remote
 
@@ -200,14 +160,6 @@ export const useConnectionStore = defineStore('connections', {
       addItems.forEach(connection => this.addConnectionToState(connection))
       const ids = removeItems.map(connection => connection.id)
       this.removeConnectionsFromState(ids)
-    },
-    initializeRemoteConnectionTypes (remoteTypes) {
-      const localTypes = utils.clone(this.getAllConnectionTypes)
-      const { updateItems, addItems, removeItems } = utils.syncItems(remoteTypes, localTypes)
-      console.info('🎑 remote connectionTypes', { updateItems, addItems, removeItems })
-      updateItems.forEach(type => this.updateConnectionTypeState(type))
-      addItems.forEach(type => this.addConnectionTypeToState(type))
-      removeItems.forEach(type => this.removeConnectionTypeFromState(type))
     },
 
     // indexes
@@ -262,15 +214,12 @@ export const useConnectionStore = defineStore('connections', {
       this.addToIndexes(connection)
       globalStore.removeRemoteCurrentConnection(connection)
     },
-    addConnectionTypeToState (type) {
-      this.typeById[type.id] = type
-      this.typeAllIds.push(type.id)
-    },
     async createConnection (connection) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const themeStore = useThemeStore()
       const broadcastStore = useBroadcastStore()
       const connections = this.getAllConnections
       const isExistingConnection = connections.find(item => {
@@ -280,52 +229,14 @@ export const useConnectionStore = defineStore('connections', {
       })
       if (isExistingConnection) { return }
       if (connection.startItemId === connection.endItemId) { return }
-      let type = connection.type || this.getNewConnectionType
-      if (!type) {
-        await this.createConnectionType()
-        type = this.getNewConnectionType
-      }
       connection.id = connection.id || nanoid()
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id
-      connection.connectionTypeId = type.id
+      connection.name = `Connection ${this.allIds.length + 1}`
+      connection.color = themeStore.randomColor()
       this.addConnectionToState(connection)
       broadcastStore.update({ updates: connection, store: 'connectionStore', action: 'addConnectionToState' })
       await apiStore.addToQueue({ name: 'createConnection', body: connection })
-    },
-    async createConnectionType (type) {
-      const apiStore = useApiStore()
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const broadcastStore = useBroadcastStore()
-      const isThemeDark = userStore.theme === 'dark'
-      if (type) {
-        const prevTypeInCurrentSpace = this.getConnectionTypeByName(type.name) || this.getConnectionType(type.id)
-        if (prevTypeInCurrentSpace) { return }
-      }
-      let color = randomColor({ luminosity: 'light' })
-      if (isThemeDark) {
-        color = randomColor({ luminosity: 'dark' })
-      }
-      const connectionType = {
-        id: nanoid(),
-        name: `Connection Type ${this.typeAllIds.length + 1}`,
-        color,
-        spaceId: spaceStore.id
-      }
-      if (type) {
-        const keys = Object.keys(type)
-        keys.forEach(key => {
-          connectionType[key] = type[key]
-        })
-      }
-      connectionType.userId = userStore.id
-      this.addConnectionTypeToState(connectionType)
-      this.prevConnectionTypeId = connectionType.id
-      if (connectionType.isFromBroadcast) { return }
-      broadcastStore.update({ updates: connectionType, store: 'connectionStore', action: 'addConnectionTypeToState' })
-      await apiStore.addToQueue({ name: 'createConnectionType', body: connectionType })
-      await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
     },
 
     // update
@@ -357,26 +268,6 @@ export const useConnectionStore = defineStore('connections', {
     },
     updateConnection (update) {
       this.updateConnections([update])
-    },
-    updatePrevConnectionTypeId (id) {
-      this.prevConnectionTypeId = id
-    },
-    updateConnectionTypeState (update) {
-      const connectionType = this.getConnectionType(update.id)
-      const keys = Object.keys(update)
-      keys.forEach(key => {
-        connectionType[key] = update[key]
-      })
-      this.typeById[connectionType.id] = connectionType
-    },
-    async updateConnectionType (update) {
-      const apiStore = useApiStore()
-      const spaceStore = useSpaceStore()
-      const broadcastStore = useBroadcastStore()
-      this.updateConnectionTypeState(update)
-      broadcastStore.update({ updates: update, store: 'connectionStore', action: 'updateConnectionTypeState' })
-      await apiStore.addToQueue({ name: 'updateConnectionType', body: update })
-      await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
     },
 
     // remove
@@ -414,33 +305,6 @@ export const useConnectionStore = defineStore('connections', {
     },
     async removeConnection (id) {
       await this.removeConnections([id])
-    },
-    removeConnectionTypesRemote (types) {
-      for (const type of types) {
-        const idIndex = this.typeAllIds.indexOf(type.id)
-        this.typeAllIds.splice(idIndex, 1)
-        delete this.typeById[type.id]
-      }
-    },
-    removeConnectionTypeFromState (type) {
-      const idIndex = this.typeAllIds.indexOf(type.id)
-      this.typeAllIds.splice(idIndex, 1)
-      delete this.typeById[type.id]
-    },
-    async removeAllUnusedConnectionTypes () {
-      const apiStore = useApiStore()
-      const broadcastStore = useBroadcastStore()
-      const connections = this.getAllConnections
-      if (!utils.arrayHasItems(connections)) { return }
-      const usedTypes = connections.map(connection => connection.connectionTypeId)
-      let types = this.getAllConnectionTypes
-      types = types.filter(type => Boolean(type))
-      const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
-      for (const type of typesToRemove) {
-        this.removeConnectionTypeFromState(type)
-        await apiStore.addToQueue({ name: 'removeConnectionType', body: type })
-      }
-      broadcastStore.update({ updates: typesToRemove, store: 'connectionStore', action: 'removeConnectionTypesRemote' })
     },
     removeConnectionsFromItems (itemIds) {
       const connections = this.getConnectionsByItemIds(itemIds)

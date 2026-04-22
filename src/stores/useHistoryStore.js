@@ -523,10 +523,10 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'connectionRemoved':
             connection = item.new
-            connection.connectionTypeId = connectionStore.getNewConnectionType
+            connection.connectionTypeId = connectionStore.getNewConnectionColor
             if (!connection.connectionTypeId) {
               connectionStore.createConnectionType()
-              connection.connectionTypeId = connectionStore.getNewConnectionType
+              connection.connectionTypeId = connectionStore.getNewConnectionColor
             }
             connectionStore.createConnection(connection)
             break

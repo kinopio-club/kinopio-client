@@ -595,9 +595,9 @@ const nonOverlappingCardPosition = (position) => {
 }
 
 const addConnectionType = () => {
-  const hasConnectionType = connectionStore.getNewConnectionType
-  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
-  if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
+  const hasConnectionType = connectionStore.getNewConnectionColor
+  const shouldUseLastConnectionColor = userStore.shouldUseLastConnectionColor
+  if ((shouldUseLastConnectionColor || useSiblingConnectionType) && hasConnectionType) { return }
   connectionStore.createConnectionType()
   useSiblingConnectionType = true
 }

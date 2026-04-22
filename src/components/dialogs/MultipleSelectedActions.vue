@@ -305,14 +305,14 @@ const editableConnections = computed(() => {
   }
 })
 const connectionType = (event) => {
-  let type = connectionStore.getNewConnectionType
-  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
+  let type = connectionStore.getNewConnectionColor
+  const shouldUseLastConnectionColor = userStore.shouldUseLastConnectionColor
   const shiftKey = event.shiftKey
-  const shouldAddType = !type || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
+  const shouldAddType = !type || (shouldUseLastConnectionColor && shiftKey) || (!shouldUseLastConnectionColor && !shiftKey)
   if (shouldAddType) {
     connectionStore.createConnectionType()
   }
-  type = connectionStore.getNewConnectionType
+  type = connectionStore.getNewConnectionColor
   return type
 }
 

@@ -44,9 +44,9 @@ const meta = computed(() => utils.metaKey())
 const option = computed(() => utils.optionKey())
 const currentUser = computed(() => userStore.getUserAllState)
 const isMobile = computed(() => utils.isMobile())
-const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
+const shouldUseLastConnectionColor = computed(() => userStore.shouldUseLastConnectionColor)
 const lastOrNewConnectionTypeControlSetting = computed(() => {
-  if (shouldUseLastConnectionType.value) {
+  if (shouldUseLastConnectionColor.value) {
     return 'New'
   } else {
     return 'Last'
