@@ -221,7 +221,7 @@ const tagIsActive = (tag) => {
 }
 const connectionColorIsActive = (color) => {
   const colors = globalStore.filteredConnectionColors
-  return colors.includes(color.id)
+  return colors.includes(color)
 }
 const frameIsActive = (frame) => {
   const frames = globalStore.filteredFrameIds
@@ -244,7 +244,6 @@ dialog.more-search-filters.narrow(v-if="props.visible" :open="props.visible" ref
       //- Boxes
       template(v-for="box in items.boxes" :key="box.id")
         li(:class="{ active: boxIsActive(box) }" @click.left="toggleFilteredBox(box)" tabindex="0" v-on:keyup.enter="toggleFilteredBox(box)")
-          input(type="checkbox" :checked="isSelected(box)")
           .box-badge.badge(:style="boxBadgeStyles(box)")
             .box-info(:style="{backgroundColor: box.color}")
             .box-fill(:style="{backgroundColor: box.color}")
@@ -252,25 +251,23 @@ dialog.more-search-filters.narrow(v-if="props.visible" :open="props.visible" ref
       //- Tags
       template(v-for="tag in items.tags" :key="tag.id")
         li(:class="{ active: tagIsActive(tag) }" @click.left="toggleFilteredTag(tag)" tabindex="0" v-on:keyup.enter="toggleFilteredTag(tag)")
-          input(type="checkbox" :checked="isSelected(tag)")
           .badge(:style="{backgroundColor: tag.color}") {{tag.name}}
       //- Frames
       template(v-for="(frame in items.frames" :key="frame.id")
         li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
-          input(type="checkbox" :checked="isSelected(frame)")
           .badge
             FrameBadge(:frame="frame")
           .name {{frame.name}}
-      //- Connection Colors
+    //- Connection Colors
+    ul.results-list.results-grid(v-if="items.connectionColors.length")
       template(v-for="color in items.connectionColors" :key="color")
-        li(:class="{ active: connectionColorIsActive(color) }" @click.left="toggleFilteredConnectionColor(color)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionColor(color)")
-          input(type="checkbox" :checked="isSelectedColor(color)")
+        li(:class="{ active: connectionColorIsActive(color) }" @click.left="toggleFilteredConnectionColor(color)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionColor(color)" title="Connection Color")
           .badge(:style="{backgroundColor: color}")
-          .name {{color}}
 </template>
 
 <style lang="stylus">
 dialog.more-search-filters
+  overflow auto
   @media(max-width 630px)
     left -100px
   @media(max-width 510px)
@@ -288,11 +285,6 @@ dialog.more-search-filters
       display inline-block
       img
         width 100%
-  .results-section
-    padding-bottom 0
-    overflow scroll
-  input[type="checkbox"]
-    margin-top 1px
   .total-filters-active
     margin 0
     margin-left 5px
@@ -300,7 +292,6 @@ dialog.more-search-filters
     transform translateY(2px)
   .box-badge
     padding 1px 4px
-    overflow hidden
     .box-fill
       top 0
       left 0
@@ -308,4 +299,13 @@ dialog.more-search-filters
       height 100%
       position absolute
       opacity 0.5
+  ul.results-grid
+    display flex
+    flex-direction row
+    li
+      width min-content
+      .badge
+        margin 0
+        width 18px
+
 </style>
