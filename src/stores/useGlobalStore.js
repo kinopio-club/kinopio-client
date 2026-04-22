@@ -20,6 +20,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import last from 'lodash-es/last'
 import dayjs from 'dayjs'
+import { colord } from 'colord'
 
 export const useGlobalStore = defineStore('global', {
   state: () => ({
@@ -102,6 +103,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsResizingSidebar: false,
     userNotifications: [],
     currentUserAffiliatePromoCode: '',
+    lastInteractedConnectionColor: '',
 
     // drawing
     drawingEraserIsActive: false,
@@ -1852,6 +1854,10 @@ export const useGlobalStore = defineStore('global', {
         this.triggerPanningStart()
       }
       this.currentUserIsPanning = value
+    },
+    updateLastInteractedConnectionColor (color) {
+      color = colord(color).toHex()
+      this.lastInteractedConnectionColor = color
     },
 
     // current space

@@ -44,6 +44,7 @@ watch(() => visible.value, (value, prevValue) => {
     updatePinchCounterZoomDecimal()
     state.colorPickerIsVisible = false
     scrollIntoViewAndFocus()
+    globalStore.updateLastInteractedConnectionColor(currentConnection.value.color)
   } else {
     state.resultsSectionMaxHeight = undefined
     const element = nameElement.value
