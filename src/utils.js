@@ -3046,7 +3046,7 @@ export default {
         newSpace.cards.push(newCard)
       })
       // edges → connections
-      const edgeColor = this.randomRGBA(1)
+      const edgeColor = randomColor({ luminosity: 'light' })
       space.edges.forEach((edge, index) => {
         const newConnection = {
           id: edge.id,

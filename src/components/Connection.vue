@@ -29,7 +29,7 @@ const observerTarget = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-
+  supplementConnectionPath()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearMultipleSelected') {
@@ -290,6 +290,19 @@ const directionIsVisible = computed(() => {
 
 // path
 
+const supplementConnectionPath = () => {
+  if (props.connection.path) { return }
+  const path = connectionStore.getConnectionPathBetweenItems({
+    startItemId: props.connection.startItemId,
+    endItemId: props.connection.endItemId,
+    controlPoint: props.connection.controlPoint
+  })
+  if (!path) { return }
+  connectionStore.updateConnection({
+    id: props.connection.id,
+    path
+  })
+}
 const remoteCardsIsDragging = computed(() => Boolean(globalStore.remoteCardsDragging.length))
 const remoteBoxesIsDragging = computed(() => Boolean(globalStore.remoteBoxesDragging.length))
 const remoteItemsIsDragging = computed(() => remoteCardsIsDragging.value || remoteBoxesIsDragging.value)
@@ -377,6 +390,7 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
 })
 const relativePath = computed(() => {
   if (!directionIsVisible.value) { return }
+  if (!props.connection.path) { return }
   const path = state.pathWhileDragging || state.pathWhileSelected || props.connection.path // jiggling
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
