@@ -49,7 +49,7 @@ const props = defineProps({
   collapseExpandIsVisible: Boolean
 })
 const state = reactive({
-  colorPickerVisible: false,
+  colorPickerIsVisible: false,
   isHover: false
 })
 
@@ -60,10 +60,10 @@ const colorClasses = computed(() => {
 
 // color picker
 
-const toggleColorPickerVisible = () => {
-  const isVisible = state.colorPickerVisible
+const toggleColorPickerIsVisible = () => {
+  const isVisible = state.colorPickerIsVisible
   closeDialogsAndEmit()
-  state.colorPickerVisible = !isVisible
+  state.colorPickerIsVisible = !isVisible
 }
 const connectionColorSwatches = computed(() => {
   return uniqBy(props.connections, 'color')
@@ -87,7 +87,7 @@ const closeDialogsAndEmit = () => {
   emit('closeDialogs')
 }
 const closeDialogs = () => {
-  state.colorPickerVisible = false
+  state.colorPickerIsVisible = false
 }
 const updateIsHover = (value) => {
   state.isHover = value
@@ -125,13 +125,13 @@ section.subsection.connection-actions(
     .row.edit-connection-colors
       //- Color
       .button-wrap(v-if="!props.hideType")
-        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPickerVisible" :class="{active: state.colorPickerVisible}")
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPickerIsVisible" :class="{active: state.colorPickerIsVisible}")
           .segmented-colors
             template(v-for="connection in connectionColorSwatches")
               .current-color(:style="{ background: connection.color }")
         //- ColorPicker
         ColorPicker(
-          :visible="state.colorPickerVisible"
+          :visible="state.colorPickerIsVisible"
           :removeIsVisible="false"
           :recentColors="connectionColors"
           :currentColor="connections[0].color"
