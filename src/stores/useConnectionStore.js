@@ -244,7 +244,6 @@ export const useConnectionStore = defineStore('connections', {
       connection.id = connection.id || nanoid()
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id
-      connection.name = `Connection ${this.allIds.length + 1}`
       connection.color = this.getNewConnectionColor
       globalStore.lastInteractedConnectionColor = connection.color
       this.addConnectionToState(connection)
