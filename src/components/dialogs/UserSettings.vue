@@ -8,6 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import UserSettingsGeneral from '@/components/subsections/UserSettingsGeneral.vue'
 import UserSettingsControls from '@/components/subsections/UserSettingsControls.vue'
 import UserSettingsCards from '@/components/subsections/UserSettingsCards.vue'
+import UserSettingsConnections from '@/components/subsections/UserSettingsConnections.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -51,6 +52,7 @@ const updateDialogHeight = async () => {
 const currentSettingsIsGeneral = computed(() => state.currentSettings === 'general')
 const currentSettingsIsControls = computed(() => state.currentSettings === 'controls')
 const currentSettingsIsCards = computed(() => state.currentSettings === 'cards')
+const currentSettingsIsConnections = computed(() => state.currentSettings === 'connections')
 const updateCurrentSettings = async (value) => {
   state.currentSettings = value
   await nextTick()
@@ -59,7 +61,7 @@ const updateCurrentSettings = async (value) => {
 }
 const restoreUserPrevSettingsSection = () => {
   const section = userStore.prevSettingsSection
-  const values = ['general', 'controls', 'cards'] // listed in api docs
+  const values = ['general', 'controls', 'cards', 'connections'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state.currentSettings = section
@@ -96,10 +98,14 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
         span Controls
       button(@click="updateCurrentSettings('cards')" :class="{ active: currentSettingsIsCards }")
         span Cards
+    .segmented-buttons
+      button(@click="updateCurrentSettings('connections')" :class="{ active: currentSettingsIsConnections }")
+        span Connections
 
   UserSettingsGeneral(:visible="currentSettingsIsGeneral")
   UserSettingsControls(:visible="currentSettingsIsControls")
   UserSettingsCards(:visible="currentSettingsIsCards" :parentIsUserSettings="true")
+  UserSettingsConnections(:visible="currentSettingsIsConnections")
 </template>
 
 <style lang="stylus">
@@ -113,8 +119,20 @@ dialog.user-settings
     right 8px
   .pin-button
     margin 0
-  .cards-settings
-    section
+  .cards-settings,
+  .connections-settings
+    section:not(.subsection)
       border-top 1px solid var(--primary-border)
       border-radius 0 !important
+
+  .segmented-buttons
+    &:nth-child(even)
+      button
+        border-bottom-left-radius 0
+    &:nth-child(odd)
+      margin-left 0
+      margin-top -1px
+      button
+        border-top-left-radius 0
+        border-top-right-radius 0
 </style>

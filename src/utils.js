@@ -1442,20 +1442,18 @@ export default {
   connectionElementFromId (connectionId) {
     return document.querySelector(`.connection[data-id="${connectionId}"]`)
   },
-  migrationConnections (connections) { // migration added July 2024
-    if (!connections) { return }
-    connections = connections.filter(connection => Boolean(connection))
-    return connections.map(connection => {
-      if (connection.startCardId) {
-        connection.startItemId = connection.startCardId
+  migrateConnectionTypes (space) { // temp migration added april 2026
+    if (!space.connectionTypes) { return space }
+    space.connections = space.connections.map(connection => {
+      const type = space.connectionTypes.find(type => type.id === connection.connectionTypeId)
+      const typeDataIsMissing = !connection.name && !connection.color
+      if (type && typeDataIsMissing) {
+        connection.name = type.name
+        connection.color = type.color
       }
-      if (connection.endCardId) {
-        connection.endItemId = connection.endCardId
-      }
-      delete connection.startCardId
-      delete connection.endCardId
       return connection
     })
+    return space
   },
   spaceZoomDecimal () {
     const element = document.getElementById('space')
@@ -1700,7 +1698,6 @@ export default {
       backgroundIsGradient: false,
       cards: [],
       connections: [],
-      connectionTypes: [],
       boxes: [],
       lines: [],
       lists: [],
@@ -1775,12 +1772,10 @@ export default {
   },
   async uniqueSpaceItems (items, nullItemUsers) {
     const itemIdDeltas = []
-    const connectionTypeIdDeltas = []
     const user = await cache.user()
     let {
       cards = [],
       connections = [],
-      connectionTypes = [],
       boxes = [],
       tags = [],
       lines = [],
@@ -1837,22 +1832,9 @@ export default {
       })
       return strokes
     })
-    connectionTypes = uniqBy(connectionTypes, 'id')
-    connectionTypes = connectionTypes.map(type => {
-      const userId = this.itemUserId(user, type, nullItemUsers)
-      const newId = nanoid()
-      connectionTypeIdDeltas.push({
-        prevId: type.id,
-        newId
-      })
-      type.id = newId
-      type.userId = userId
-      return type
-    })
     connections = connections.map(connection => {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
-      connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
       connection.startItemId = this.updateAllIds(connection, 'startItemId', itemIdDeltas)
       connection.endItemId = this.updateAllIds(connection, 'endItemId', itemIdDeltas)
       connection.userId = userId
@@ -1869,7 +1851,7 @@ export default {
       card.listId = this.updateAllIds(card, 'listId', itemIdDeltas)
       return card
     })
-    items = { cards, connections, connectionTypes, boxes, tags, lines, drawingStrokes, lists }
+    items = { cards, connections, boxes, tags, lines, drawingStrokes, lists }
     return items
   },
   updateSpaceItemsSpaceId (items, spaceId) {
@@ -1916,14 +1898,6 @@ export default {
       })
     })
     return items
-  },
-  updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
-    return connections.map(connection => {
-      if (connection.connectionTypeId === prevTypeId) {
-        connection.connectionTypeId = newTypeId
-      }
-      return connection
-    })
   },
   updateSpaceItemsUserId (space, userId) {
     consts.itemTypes.forEach(itemType => {
@@ -1978,11 +1952,7 @@ export default {
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
     if (!this.arrayHasItems(space.connections)) { return space }
-    const connections = space.connections.filter(connection => {
-      const hasTypeId = Boolean(connection?.connectionTypeId)
-      return hasTypeId
-    })
-    space.connections = connections || []
+    space.connections = space.connections || []
     space.cards = space.cards || []
     space.cards = space.cards.filter(card => card?.name) || []
     space.cards = space.cards.map(card => {
@@ -1991,6 +1961,7 @@ export default {
       }
       return card
     })
+    space = this.migrateConnectionTypes(space)
     return space
   },
   normalizeRemoteSpace (remoteSpace) {
@@ -2034,16 +2005,6 @@ export default {
       }
     })
     space.cards = cards
-    return space
-  },
-  removeUnusedKeysFromSpace (space) {
-    if (!space) { return }
-    const unusedKeys = ['cards', 'connections', 'connectionTypes']
-    unusedKeys.forEach(key => {
-      if (space[key]) {
-        delete space[key]
-      }
-    })
     return space
   },
   spaceReadDate (space, type) {
@@ -3021,7 +2982,7 @@ export default {
   // import
 
   // https://jsoncanvas.org
-  convertFromJsonCanvas (space, newTypeColor) {
+  convertFromJsonCanvas (space) {
     const minPositionValue = 150
     let date = dayjs(new Date())
     date = date.format(consts.nameDateFormat)
@@ -3032,7 +2993,6 @@ export default {
       newSpace.background = consts.defaultSpaceBackground
       newSpace.cards = []
       newSpace.connections = []
-      newSpace.connectionTypes = []
       // emsure node positions are positive 0,0
       const negativePositionOffset = {
         x: 0,
@@ -3085,15 +3045,8 @@ export default {
         }
         newSpace.cards.push(newCard)
       })
-      // connection type
-      const typeId = nanoid()
-      const newConnetionType = {
-        id: typeId,
-        color: newTypeColor,
-        name: 'Connection Type 0'
-      }
-      newSpace.connectionTypes.push(newConnetionType)
       // edges → connections
+      const edgeColor = randomColor({ luminosity: 'light' })
       space.edges.forEach((edge, index) => {
         const newConnection = {
           id: edge.id,
@@ -3101,8 +3054,9 @@ export default {
           endItemId: edge.toNode,
           controlPoint: consts.straightLineConnectionPathControlPoint,
           directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
-          connectionTypeId: typeId,
-          labelIsVisible: Boolean(edge.label)
+          labelIsVisible: Boolean(edge.label),
+          name: edge.label,
+          color: edgeColor
         }
         newSpace.connections.push(newConnection)
       })

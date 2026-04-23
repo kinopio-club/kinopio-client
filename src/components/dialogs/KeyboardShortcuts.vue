@@ -44,9 +44,9 @@ const meta = computed(() => utils.metaKey())
 const option = computed(() => utils.optionKey())
 const currentUser = computed(() => userStore.getUserAllState)
 const isMobile = computed(() => utils.isMobile())
-const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
-const lastOrNewConnectionTypeControlSetting = computed(() => {
-  if (shouldUseLastConnectionType.value) {
+const shouldUseLastConnectionColor = computed(() => userStore.shouldUseLastConnectionColor)
+const lastOrNewConnectionColorControlSetting = computed(() => {
+  if (shouldUseLastConnectionColor.value) {
     return 'New'
   } else {
     return 'Last'
@@ -371,14 +371,14 @@ dialog.keyboard-shortcuts.wide(v-if="visible" :open="visible" @click.left.stop r
         .row
           .badge.title
             img.icon.connector-icon(src="@/assets/connector-open.svg")
-            span Use {{lastOrNewConnectionTypeControlSetting}} Connection Type
+            span Use {{lastOrNewConnectionColorControlSetting}} Connection Color
           .badge.keyboard-shortcut Shift-Click on
             img.icon.connector-icon(src="@/assets/connector-open.svg")
         p
           span.badge.keyboard-shortcut Shift-Drag
           span card connector or
           span.badge.keyboard-shortcut Shift-Click
-          span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
+          span 'Connect' button to use {{lastOrNewConnectionColorControlSetting}} connection color
 
     //- Search
     template(v-if="categoryIsVisible('Search')")

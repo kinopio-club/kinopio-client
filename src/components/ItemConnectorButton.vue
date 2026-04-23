@@ -48,7 +48,7 @@ const canEditItem = computed(() => {
 
 // connections
 
-const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(item.value.id))
+const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(item.value.id))
 const itemConnections = computed(() => connectionStore.getConnectionsByItemId(item.value.id))
 const currentConnectionColor = computed(() => globalStore.currentConnectionColor)
 const connectionFromAnotherItemConnectedToCurrentItem = (anotherItemId) => {
@@ -72,10 +72,10 @@ const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   })
   return currentItemConnection
 }
-const connectionTypeColorisDark = computed(() => {
-  const type = last(connectedConnectionTypes.value)
-  if (!type) { return }
-  return utils.colorIsDark(type.color)
+const connectionColorisDark = computed(() => {
+  const connection = last(connectedConnections.value)
+  if (!connection) { return }
+  return utils.colorIsDark(connection.color)
 })
 const hasConnections = computed(() => {
   const connections = itemConnections.value
@@ -91,27 +91,11 @@ const createCurrentConnection = (event) => {
   globalStore.currentConnectionStartItemIds = itemIds
   globalStore.currentConnectionCursorStart = cursor
 }
-const addConnectionType = (event) => {
-  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
-  const shiftKey = event.shiftKey
-  const connectionType = connectionStore.getNewConnectionType
-  if (!connectionType) {
-    connectionStore.createConnectionType()
-  }
-  if (shouldUseLastConnectionType && shiftKey) {
-    connectionStore.createConnectionType()
-    return
-  }
-  if (shiftKey || shouldUseLastConnectionType) {
-    return
-  }
-  connectionStore.createConnectionType()
-}
 
 // connector button
 
 const isConnectorBackgroundColorLight = computed(() => {
-  if (connectionTypeColorisDark.value) { return !connectionTypeColorisDark.value }
+  if (connectionColorisDark.value) { return !connectionColorisDark.value }
   return !backgroundColorIsDark.value
 })
 const isImageCard = computed(() => {
@@ -144,7 +128,7 @@ const buttonStyles = computed(() => {
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
   if (globalStore.currentUserIsDraggingList) { return }
-  if (!utils.arrayHasItems(connectedConnectionTypes.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
+  if (!utils.arrayHasItems(connectedConnections.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
     connectedToAnotherItemBeingDraggedColor.value ||
     connectedToConnectionDetailsIsVisibleColor.value ||
@@ -158,8 +142,7 @@ const connectorGlowStyle = computed(() => {
 })
 const connectionColor = (connection) => {
   if (!connection) { return }
-  const connectionType = connectionStore.getConnectionType(connection.connectionTypeId)
-  return connectionType?.color
+  return connection?.color
 }
 // another item that is connected to this one is being edited
 const connectedToAnotherItemDetailsVisibleColor = computed(() => {
@@ -188,10 +171,8 @@ const connectedToAnotherItemBeingDraggedColor = computed(() => {
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = globalStore.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
-  const connectionWithDetailsVisible = itemConnections.value.find(connection => connection.id === connectionDetailsVisibleId)
-  if (!connectionWithDetailsVisible) { return }
-  const connectionType = connectionStore.getConnectionType(connectionWithDetailsVisible.connectionTypeId)
-  return connectionType?.color
+  const connection = itemConnections.value.find(connection => connection.id === connectionDetailsVisibleId)
+  return connection?.color
 })
 // a connection that is connected to this item connector that is being hovered over
 const currentUserIsHoveringOverConnectorColor = computed(() => {
@@ -246,7 +227,6 @@ const startConnecting = (event) => {
   globalStore.preventDraggedCardFromShowingDetails = true
   globalStore.preventDraggedBoxFromShowingDetails = true
   if (!globalStore.currentUserIsDrawingConnection) {
-    addConnectionType(event)
     createCurrentConnection(event)
   }
   globalStore.updateCurrentUserIsDrawingConnection(true)
@@ -277,8 +257,8 @@ const handleMouseLeaveConnector = () => {
       .color(:style="{ background: currentConnectionColor}")
     template(v-else-if="props.isRemoteConnecting")
       .color(:style="{ background: props.remoteConnectionColor }")
-    template(v-else v-for="type in connectedConnectionTypes")
-      .color(:style="{ background: type?.color}")
+    template(v-else v-for="connection in connectedConnections")
+      .color(:style="{ background: connection?.color}")
 
   button.inline-button.connector-button(
     :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light': isConnectorBackgroundColorLight, 'is-dark': !isConnectorBackgroundColorLight }"
@@ -286,7 +266,7 @@ const handleMouseLeaveConnector = () => {
     tabindex="-1"
   )
     template(v-if="hasConnections || props.isConnectingFrom || props.isConnectingTo")
-      img.connector-icon(src="@/assets/connector-closed-in-card.svg" :class="{ 'is-light': !connectionTypeColorisDark, 'is-dark': connectionTypeColorisDark }")
+      img.connector-icon(src="@/assets/connector-closed-in-card.svg" :class="{ 'is-light': !connectionColorisDark, 'is-dark': connectionColorisDark }")
 
 </template>
 

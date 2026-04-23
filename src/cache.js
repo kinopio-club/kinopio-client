@@ -179,22 +179,19 @@ export default {
     spaceUpdateQueue[spaceId] = next.catch(() => {}) // prevent a rejected promise from breaking the chain
     return next
   },
-  async addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
+  async addToSpace ({ cards, connections, boxes }, spaceId) {
     // space items
     const space = await this.space(spaceId)
     space.cards = space.cards || []
     space.connections = space.connections || []
-    space.connectionTypes = space.connectionTypes || []
     space.boxes = space.boxes || []
     // new items
     cards = cards || []
     connections = connections || []
-    connectionTypes = connectionTypes || []
     boxes = boxes || []
     // add new items
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
-    connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
     boxes.forEach(box => space.boxes.push(box))
     await this.saveSpace(space)
   },
@@ -215,7 +212,6 @@ export default {
   async updateIdsInSpace (space, nullCardUsers) {
     const items = {
       cards: space.cards,
-      connectionTypes: space.connectionTypes,
       connections: space.connections,
       tags: space.tags,
       boxes: space.boxes,
@@ -228,7 +224,6 @@ export default {
       card.spaceId = space.id
       return card
     })
-    space.connectionTypes = uniqueItems.connectionTypes
     space.connections = uniqueItems.connections
     space.tags = uniqueItems.tags.map(tag => {
       tag.spaceId = space.id

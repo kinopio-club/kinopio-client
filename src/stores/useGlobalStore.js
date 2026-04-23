@@ -20,6 +20,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import last from 'lodash-es/last'
 import dayjs from 'dayjs'
+import { colord } from 'colord'
 
 export const useGlobalStore = defineStore('global', {
   state: () => ({
@@ -102,6 +103,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsResizingSidebar: false,
     userNotifications: [],
     currentUserAffiliatePromoCode: '',
+    lastInteractedConnectionColor: '',
 
     // drawing
     drawingEraserIsActive: false,
@@ -219,7 +221,6 @@ export const useGlobalStore = defineStore('global', {
     multipleCardsSelectedIdsToLoad: [],
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
-    multipleConnectionTypesSelectedIdsToLoad: [],
     currentUserIsDraggingMultipleSelectedActionsDialog: false,
 
     // connections
@@ -232,6 +233,7 @@ export const useGlobalStore = defineStore('global', {
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
     currentItemConnections: [],
+    currentConnectionShiftKeyIsActive: false,
     // connection labels
     remoteUserDraggingConnectionLabel: [],
 
@@ -305,7 +307,7 @@ export const useGlobalStore = defineStore('global', {
     notificationsWithPosition: [],
 
     // filters
-    filteredConnectionTypeIds: [],
+    filteredConnectionColors: [],
     filteredBoxIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
@@ -1029,7 +1031,6 @@ export const useGlobalStore = defineStore('global', {
       this.multipleCardsSelectedIdsToLoad = items.cards.map(card => card.id)
       this.multipleConnectionsSelectedIdsToLoad = items.connections.map(connection => connection.id)
       this.multipleBoxesSelectedIdsToLoad = items.boxes.map(box => box.id)
-      this.multipleConnectionTypesSelectedIdsToLoad = items.connectionTypes.map(type => type.id)
     },
     restoreMultipleSelectedItemsToLoad () {
       this.multipleCardsSelectedIds = this.multipleCardsSelectedIdsToLoad
@@ -1037,7 +1038,6 @@ export const useGlobalStore = defineStore('global', {
       this.multipleBoxesSelectedIds = this.multipleBoxesSelectedIdsToLoad
       this.multipleCardsSelectedIdsToLoad = []
       this.multipleConnectionsSelectedIdsToLoad = []
-      this.multipleConnectionTypesSelectedIdsToLoad = []
       this.multipleBoxesSelectedIdsToLoad = []
     },
     async clearAllSelected () {
@@ -1421,18 +1421,18 @@ export const useGlobalStore = defineStore('global', {
     // Filters
 
     clearSpaceFilters () {
-      this.filteredConnectionTypeIds = []
+      this.filteredConnectionColors = []
       this.filteredFrameIds = []
       this.filteredTagNames = []
       this.filteredBoxIds = []
     },
-    addToFilteredConnectionTypeId (id) {
-      utils.typeCheck({ value: id, type: 'string' })
-      this.filteredConnectionTypeIds.push(id)
+    addToFilteredConnectionColor (color) {
+      utils.typeCheck({ value: color, type: 'string' })
+      this.filteredConnectionColors.push(color)
     },
-    removeFromFilteredConnectionTypeId (id) {
-      utils.typeCheck({ value: id, type: 'string' })
-      this.filteredConnectionTypeIds = this.filteredConnectionTypeIds.filter(typeId => typeId !== id)
+    removeFromFilteredConnectionColor (color) {
+      utils.typeCheck({ value: color, type: 'string' })
+      this.filteredConnectionColors = this.filteredConnectionColors.filter(connectionColor => connectionColor !== color)
     },
     addToFilteredFrameIds (id) {
       utils.typeCheck({ value: id, type: 'number' })
@@ -1855,6 +1855,10 @@ export const useGlobalStore = defineStore('global', {
         this.triggerPanningStart()
       }
       this.currentUserIsPanning = value
+    },
+    updateLastInteractedConnectionColor (color) {
+      color = colord(color).toHex()
+      this.lastInteractedConnectionColor = color
     },
 
     // current space

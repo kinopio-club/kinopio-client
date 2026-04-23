@@ -7,6 +7,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
+import randomColor from 'randomcolor'
 
 const themes = {
   light: {
@@ -216,6 +217,17 @@ export const useThemeStore = defineStore('theme', {
         background
       }
       return { isDarkTheme, theme }
+    },
+
+    // color
+
+    randomColor () {
+      const isDarkTheme = this.getIsThemeDark
+      let color = randomColor({ luminosity: 'light' })
+      if (isDarkTheme) {
+        color = randomColor({ luminosity: 'dark' })
+      }
+      return color
     }
   }
 })

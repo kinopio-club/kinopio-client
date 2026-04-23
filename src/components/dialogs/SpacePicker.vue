@@ -194,7 +194,6 @@ const createNewSpace = async () => {
   space.users.push(user)
   space.cards = []
   space.connections = []
-  space.connectionTypes = []
   space = utils.newSpaceBackground(space, currentUser)
   space.background = space.background || consts.defaultSpaceBackground
   space = await cache.updateIdsInSpace(space)

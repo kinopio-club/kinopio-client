@@ -179,9 +179,6 @@ const copyToSelectedSpace = async (items) => {
   for (const card of newItems.cards) {
     await apiStore.addToQueue({ name: 'createCard', body: card, spaceId: selectedSpaceId })
   }
-  for (const connectionType of newItems.connectionTypes) {
-    await apiStore.addToQueue({ name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId })
-  }
   for (const connection of newItems.connections) {
     await apiStore.addToQueue({ name: 'createConnection', body: connection, spaceId: selectedSpaceId })
   }
@@ -209,7 +206,6 @@ const moveOrCopyToSpace = async () => {
     items.isRemoved = true
   }
   userStore.updateUserCardsCreatedCount(items.cards)
-  connectionStore.removeAllUnusedConnectionTypes()
   globalStore.clearMultipleSelected()
   globalStore.closeAllDialogs()
 }
