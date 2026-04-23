@@ -121,7 +121,7 @@ dialog.user-settings
     margin 0
   .cards-settings,
   .connections-settings
-    section
+    section:not(.subsection)
       border-top 1px solid var(--primary-border)
       border-radius 0 !important
 

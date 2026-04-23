@@ -36,6 +36,15 @@ const toggleShouldUseLastConnectionColor = () => {
         input(type="checkbox" v-model="shouldUseLastConnectionColor")
         .badge.badge-in-button(:style="{backgroundColor: lastColor}")
         span Use Last Color
+    section.subsection
+      p(v-if="shouldUseLastConnectionColor")
+       span New connection color will be from connection last created, edited, or clicked on.
+      p(v-else) New connection color will be random.
+      p
+        img.icon.connector-icon(src="@/assets/connector-open.svg")
+        span Shift-Drag to use{{' '}}
+        span(v-if="shouldUseLastConnectionColor") random color
+        span(v-if="!shouldUseLastConnectionColor") last color
 </template>
 
 <style lang="stylus">
@@ -52,4 +61,7 @@ const toggleShouldUseLastConnectionColor = () => {
     min-width initial
     min-height initial
     border-radius var(--small-entity-radius)
+  section.subsection
+    p:first-child
+      margin-top 0
 </style>
