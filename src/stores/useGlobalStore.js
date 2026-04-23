@@ -233,6 +233,7 @@ export const useGlobalStore = defineStore('global', {
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
     currentItemConnections: [],
+    currentConnectionShiftKeyIsActive: false,
     // connection labels
     remoteUserDraggingConnectionLabel: [],
 

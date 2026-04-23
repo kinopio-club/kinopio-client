@@ -77,6 +77,7 @@ const drawCurrentConnection = (event) => {
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   const endItemId = checkCurrentConnectionSuccess(event)
   const color = connectionStore.getNewConnectionColor
+  globalStore.currentConnectionShiftKeyIsActive = event.shiftKey
   state.currentConnectionPath = path
   state.currentConnectionColor = color
   globalStore.currentConnectionColor = color
