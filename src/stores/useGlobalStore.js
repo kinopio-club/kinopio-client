@@ -302,6 +302,7 @@ export const useGlobalStore = defineStore('global', {
     notifyIsDuplicatingSpace: false,
     itemSnappingIsReady: false,
     itemSnappingIsWaiting: false,
+    notifySpaceOutOfSync: false,
 
     // notifications with position
     notificationsWithPosition: [],

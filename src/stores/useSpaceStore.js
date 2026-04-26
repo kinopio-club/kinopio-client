@@ -541,11 +541,13 @@ export const useSpaceStore = defineStore('space', {
     async restoreCurrentSpaceFromRemote () {
       const globalStore = useGlobalStore()
       try {
+        globalStore.notifySpaceOutOfSync = true
         globalStore.isLoadingSpace = true
         const remoteSpace = await this.loadRemoteSpace({ id: this.id })
         await this.restoreSpaceRemote(remoteSpace)
         this.saveSpaceToCache()
         globalStore.isLoadingSpace = false
+        globalStore.notifySpaceOutOfSync = false
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
