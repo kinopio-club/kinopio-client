@@ -731,7 +731,7 @@ const lockingAnimationFrame = (timestamp) => {
     lockingStartTime = undefined
     return
   }
-  if (lockingPercentComplete <= 1) {
+  if (lockingPercentComplete < 1) {
     const minSize = circleRadius
     const percentRemaining = Math.abs(lockingPercentComplete - 1)
     const circleRadiusDelta = initialLockCircleRadius - minSize
@@ -749,7 +749,7 @@ const lockingAnimationFrame = (timestamp) => {
   } else if (lockingPercentComplete >= 1) {
     globalStore.currentUserIsPaintSelecting = true
     globalStore.currentUserIsPaintSelectingLocked = true
-    console.info('🔒 lockingAnimationFrame locked')
+    console.info('🔒 paintSelect lockingAnimationFrame locked')
     postMessage.sendHaptics({ name: 'softImpact' })
     cancelLocking()
     lockingStartTime = undefined
