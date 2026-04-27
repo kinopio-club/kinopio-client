@@ -101,10 +101,8 @@ const isValidCanvas = (space) => {
 const isValidJson = (space) => {
   const schema = {
     name: 'string',
-    users: 'array',
     cards: 'array',
     connections: 'array',
-    connectionTypes: 'array',
     tags: 'array'
   }
   validateSchema(space, schema)
@@ -135,7 +133,7 @@ const importSpace = async (space) => {
       space = utils.convertFromJsonCanvas(space, typeColor)
     }
     space = utils.resetSpaceMeta({ space, user, type: 'import' })
-    space.connections = utils.migrationConnections(space.connections)
+    space = utils.migrateConnectionTypes(space)
     const uniqueNewSpace = await cache.updateIdsInSpace(space)
     console.info('🧚 space to import', uniqueNewSpace)
     await spaceStore.saveImportSpace(uniqueNewSpace)

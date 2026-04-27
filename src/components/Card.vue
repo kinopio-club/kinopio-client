@@ -533,6 +533,7 @@ const cardClasses = computed(() => {
   return classes
 })
 const shouldJiggle = computed(() => {
+  if (globalStore.shouldSnapAlign) { return }
   const max = 500
   const cardIsTooBig = width.value > max || props.card.height > max
   if (cardIsTooBig) { return }
@@ -546,7 +547,7 @@ const updateStylesWithWidth = (styles) => {
   const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || userStore.cardSettingsCardWrapWidth || consts.normalCardWrapWidth
   let cardWidth = resizeWidth.value
-  if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
+  if (globalStore.shouldSnapAlign && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
@@ -627,7 +628,7 @@ const tiltResizeIsVisible = computed(() => {
   return true
 })
 const x = computed(() => {
-  const x = props.card.x
+  const x = props.card.xDisplay || props.card.x
   if (x === undefined || x === null) {
     return defaultCardPosition
   } else {
@@ -635,7 +636,7 @@ const x = computed(() => {
   }
 })
 const y = computed(() => {
-  const y = props.card.y
+  const y = props.card.yDisplay || props.card.y
   if (y === undefined || y === null) {
     return defaultCardPosition
   } else {
@@ -675,7 +676,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
+const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
 
 // card buttons
 
@@ -687,7 +688,7 @@ const connectorIsVisible = computed(() => {
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (isMember || canEditCard.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditCard.value || connectedConnections.value.length) {
     isVisible = true
   }
   return isVisible
@@ -1498,7 +1499,7 @@ const showCardDetails = (event) => {
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
   if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
-  if (globalStore.shouldSnapToGrid) { return }
+  if (globalStore.shouldSnapAlign) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {
@@ -1566,13 +1567,13 @@ const isFilteredByTags = computed(() => {
   })
   return hasTag
 })
-const isFilteredByConnectionType = computed(() => {
-  const typeIds = globalStore.filteredConnectionTypeIds
-  if (!typeIds) { return }
-  const filteredTypes = connectedConnectionTypes.value.filter(type => {
-    return typeIds.includes(type.id)
+const isFilteredByConnectionColor = computed(() => {
+  const colors = globalStore.filteredConnectionColors
+  if (!colors) { return }
+  const filteredColors = connectedConnections.value.filter(connection => {
+    return colors.includes(connection.color)
   })
-  return Boolean(filteredTypes.length)
+  return Boolean(filteredColors.length)
 })
 const isFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
@@ -1600,7 +1601,7 @@ const isFiltered = computed(() => {
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
   if (!filtersIsActive.value) { return }
-  const isInFilter = isFilteredByTags.value || isFilteredByConnectionType.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
+  const isInFilter = isFilteredByTags.value || isFilteredByConnectionColor.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
   return !isInFilter
 })
 
@@ -2067,6 +2068,10 @@ const toggleVideoIsPaused = () => {
   :data-sticky-stretch-resistance="state.stickyStretchResistance"
   :data-x="x"
   :data-y="y"
+  :data-card-x="props.card.x"
+  :data-card-y="props.card.y"
+  :data-card-x-display="props.card.xDisplay"
+  :data-card-y-display="props.card.yDisplay"
   :data-resize-width="resizeWidth"
   :data-width="resizeWidth || card.width"
   :data-height="card.height"

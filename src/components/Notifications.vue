@@ -52,6 +52,7 @@ onMounted(() => {
       } else if (name === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
         checkIfShouldNotifySpaceOutOfSync()
       } else if (name === 'triggerNotifyCouldNotSave') {
+        if (!globalStore.isSpacePage) { return }
         state.notifiyCouldNotSave = true
       }
     }
@@ -84,7 +85,6 @@ watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
 const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
-  notifySpaceOutOfSync: false,
   notifiyCouldNotSave: false
 })
 
@@ -103,7 +103,6 @@ const currentUserIsPanningReady = computed(() => globalStore.currentUserIsPannin
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
-const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
 const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
 // group
@@ -141,11 +140,12 @@ const updatePageVisibilityChange = (event) => {
   checkIfShouldNotifySpaceOutOfSync()
 }
 const toggleNotifySpaceOutOfSync = (value) => {
-  state.notifySpaceOutOfSync = value
+  globalStore.notifySpaceOutOfSync = value
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (document.visibilityState !== 'visible') { return }
-  if (state.notifySpaceOutOfSync) { return }
+  if (!globalStore.isSpacePage) { return }
+  if (globalStore.notifySpaceOutOfSync) { return }
   if (globalStore.isLoadingSpace) { return }
   try {
     if (!currentUserIsSignedIn.value) { return }
@@ -164,13 +164,11 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
         remoteSpaceEditedAtFromNow: remoteSpaceEditedAt.fromNow(),
         deltaMinutes
       })
-      state.notifySpaceOutOfSync = true
       await spaceStore.restoreCurrentSpaceFromRemote()
-      state.notifySpaceOutOfSync = false
     }
   } catch (error) {
     console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
-    state.notifySpaceOutOfSync = true
+    globalStore.notifySpaceOutOfSync = true
   }
 }
 
@@ -205,6 +203,7 @@ const notifySpaceIsHidden = computed(() => globalStore.notifySpaceIsHidden)
 const notifyCurrentSpaceIsNowRemoved = computed(() => globalStore.notifyCurrentSpaceIsNowRemoved)
 const notifyThanksForDonating = computed(() => globalStore.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => globalStore.notifyThanksForUpgrading)
+const notifyAffiliatePromo = computed(() => globalStore.notifyAffiliatePromo)
 const notifySpaceIsUnavailableOffline = computed(() => globalStore.currentSpaceIsUnavailableOffline)
 const notifyIsJoiningGroup = computed(() => globalStore.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => globalStore.notifySignUpToJoinGroup)
@@ -248,6 +247,9 @@ const toggleNotifyCardsCreatedIsOverLimit = (value) => {
 const removeNotifyThanks = () => {
   globalStore.notifyThanksForDonating = false
   globalStore.notifyThanksForUpgrading = false
+}
+const removeNotifyAffiliatePromo = () => {
+  globalStore.notifyAffiliatePromo = false
 }
 const update = async () => {
   await nextTick()
@@ -330,7 +332,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   changeSpace(spaceId)
 }
 const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
-const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
+const snapAlignIsVisible = computed(() => globalStore.shouldSnapAlign && !dragToResizeIsVisible.value)
 
 // read-only jiggle
 
@@ -386,9 +388,9 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Drag to Pan
 
-  .persistent-item.info(v-if="snapToGridIsVisible")
+  .persistent-item.info(v-if="snapAlignIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Snap to Grid
+    span Snap Align
 
   .persistent-item.info(v-if="itemSnappingIsReady")
     img.icon(src="@/assets/merge.svg")
@@ -408,6 +410,14 @@ aside.notifications(@click.left="closeAllDialogs")
     p Thank you for upgrading, I deeply appreciate your support
     .row
       button(@click="removeNotifyThanks")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Feels Good
+
+  .persistent-item.success(v-if="notifyAffiliatePromo")
+    p
+      span 10% off discount has been applied
+    .row
+      button(@click="removeNotifyAffiliatePromo")
         img.icon.cancel(src="@/assets/add.svg")
         span Feels Good
 
@@ -521,7 +531,7 @@ aside.notifications(@click.left="closeAllDialogs")
           button
             span Email Support
 
-  .persistent-item.info(v-if="state.notifySpaceOutOfSync")
+  .persistent-item.info(v-if="globalStore.notifySpaceOutOfSync")
     p
       Loader(:visible="true" :isSmall="true")
       span Refreshing data…

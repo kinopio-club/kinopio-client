@@ -305,17 +305,6 @@ const editableConnections = computed(() => {
     })
   }
 })
-const connectionType = (event) => {
-  let type = connectionStore.getNewConnectionType
-  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
-  const shiftKey = event.shiftKey
-  const shouldAddType = !type || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
-  if (shouldAddType) {
-    connectionStore.createConnectionType()
-  }
-  type = connectionStore.getNewConnectionType
-  return type
-}
 
 // boxes
 
@@ -641,7 +630,6 @@ dialog.narrow.multiple-selected-actions(
     vertical-align middle
     .current-color
       display inline-block
-      vertical-align bottom
       border-radius 0
       &:first-child
         border-top-left-radius var(--small-entity-radius)
@@ -658,17 +646,6 @@ dialog.narrow.multiple-selected-actions(
     margin-left 4px
   .more-options
     margin-bottom 10px
-  .edit-connection-types
-    flex-wrap wrap
-    align-items flex-start
-    .change-color
-      display flex
-      overflow hidden
-      align-items center
-      .segmented-colors
-        max-width 14px
-        margin-top 1px
-        display flex
 
   .button-wrap.disabled
     opacity 0.5

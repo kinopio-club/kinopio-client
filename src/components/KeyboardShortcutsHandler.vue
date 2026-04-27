@@ -17,6 +17,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
+import uniq from 'lodash-es/uniq'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -30,7 +31,6 @@ const uploadStore = useUploadStore()
 const themeStore = useThemeStore()
 const historyStore = useHistoryStore()
 
-let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
@@ -534,7 +534,6 @@ const addCard = async (options) => {
 
 const addChildCard = async (options) => {
   options = options || {}
-  useSiblingConnectionType = false
   const spaceBetweenCards = consts.spaceBetweenCards
 
   const parentCardId = globalStore.parentCardId
@@ -593,14 +592,6 @@ const nonOverlappingCardPosition = (position) => {
   }
 }
 
-const addConnectionType = () => {
-  const hasConnectionType = connectionStore.getNewConnectionType
-  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
-  if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
-  connectionStore.createConnectionType()
-  useSiblingConnectionType = true
-}
-
 const addConnection = (baseCardId, position) => {
   const endCurrentCardId = globalStore.cardDetailsIsVisibleForCardId
   if (baseCardId) {
@@ -624,7 +615,6 @@ const addConnection = (baseCardId, position) => {
     path,
     controlPoint
   }
-  addConnectionType()
   connectionStore.createConnection(connection)
 }
 
@@ -698,7 +688,6 @@ const remove = () => {
       listStore.removeList(list.id)
     }
   })
-  connectionStore.removeAllUnusedConnectionTypes()
   clearAllSelectedCards()
   globalStore.closeAllDialogs()
 }
@@ -707,12 +696,12 @@ const remove = () => {
 
 const writeSelectedToClipboard = async (position) => {
   const selectedItems = spaceStore.getSpaceSelectedItems
-  let { cards, connectionTypes, connections, boxes, lines, lists } = selectedItems
+  let { cards, connections, boxes, lines, lists } = selectedItems
   // data
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
   lists = utils.sortByY(lists)
-  let data = { cards, connections, connectionTypes, boxes, lines, lists }
+  let data = { cards, connections, boxes, lines, lists }
   data = utils.updateSpaceItemsRelativeToOrigin(data, position)
   // text
   let items = cards.concat(boxes, lists, lines)
@@ -869,6 +858,12 @@ const handlePasteEvent = async (event) => {
 
 // Select Items Relative to cursor
 
+const cardListIdsToSelect = (cards) => {
+  let cardListIds = cards.filter(card => card.listId)
+  cardListIds = cards.map(card => card.listId)
+  cardListIds = uniq(cardListIds)
+  return cardListIds
+}
 const selectAllItemsBelowCursor = (position) => {
   let zoom
   if (position) {
@@ -892,10 +887,12 @@ const selectAllItemsBelowCursor = (position) => {
   const lineIds = lines.map(line => line.id)
   // lists
   let lists = listStore.getAllLists
-  lists = lists.filter(list => (list.y * zoom) > position.y)
+  const cardListIds = cardListIdsToSelect(cards)
+  lists = lists.filter(list => (list.y * zoom) > position.y || cardListIds.includes(list.id))
   const listIds = lists.map(list => list.id)
   // select
   selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
+  listStore.selectItemsInSelectedLists()
 }
 const selectAllItemsAboveCursor = (position) => {
   let zoom
@@ -920,10 +917,12 @@ const selectAllItemsAboveCursor = (position) => {
   const lineIds = lines.map(line => line.id)
   // lists
   let lists = listStore.getAllLists
-  lists = lists.filter(list => (list.y * zoom) < position.y)
+  const cardListIds = cardListIdsToSelect(cards)
+  lists = lists.filter(list => (list.y * zoom) < position.y || cardListIds.includes(list.id))
   const listIds = lists.map(list => list.id)
   // select
   selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
+  listStore.selectItemsInSelectedLists()
 }
 const selectAllItemsRightOfCursor = (position) => {
   let zoom
@@ -946,11 +945,13 @@ const selectAllItemsRightOfCursor = (position) => {
   const boxIds = boxes.map(box => box.id)
   // lists
   let lists = listStore.getAllLists
+  const cardListIds = cardListIdsToSelect(cards)
   lists = lists.filter(list => {
-    return (list.x * zoom) >= position.x
+    return (list.x * zoom) >= position.x || cardListIds.includes(list.id)
   })
   const listIds = lists.map(list => list.id)
   selectItemIds({ position, cardIds, boxIds, listIds })
+  listStore.selectItemsInSelectedLists()
 }
 const selectAllItemsLeftOfCursor = (position) => {
   let zoom
@@ -973,11 +974,13 @@ const selectAllItemsLeftOfCursor = (position) => {
   const boxIds = boxes.map(box => box.id)
   // lists
   let lists = listStore.getAllLists
+  const cardListIds = cardListIdsToSelect(cards)
   lists = lists.filter(list => {
-    return (list.x * zoom) <= position.x
+    return (list.x * zoom) <= position.x || cardListIds.includes(list.id)
   })
   const listIds = lists.map(list => list.id)
   selectItemIds({ position, cardIds, boxIds, listIds })
+  listStore.selectItemsInSelectedLists()
 }
 
 // Select All Cards, Connections, and Boxes

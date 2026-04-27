@@ -103,6 +103,8 @@ const normalizedBox = computed(() => {
   box.height = box.resizeHeight
   box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
+  box.x = box.xDisplay || box.x
+  box.y = box.yDisplay || box.y
   return box
 })
 const normalizedName = computed(() => {
@@ -666,14 +668,14 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.box.id)
 })
-const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
+const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.box.id))
 const connectorIsVisible = computed(() => {
   const isMember = userStore.getUserIsSpaceMember
   let isVisible
   if (isLocked.value) { return }
   if (state.isRemoteConnecting) {
     isVisible = true
-  } else if (isMember || canEditBox.value || connectedConnectionTypes.value.length) {
+  } else if (isMember || canEditBox.value || connectedConnections.value.length) {
     isVisible = true
   }
   return isVisible

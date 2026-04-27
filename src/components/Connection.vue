@@ -29,7 +29,7 @@ const observerTarget = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-
+  inferConnectionPath()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearMultipleSelected') {
@@ -135,18 +135,6 @@ const connectionPathClasses = computed(() => {
     'is-connected-to-checked-item': isConnectedToCheckedItem.value
   }
   return styles
-})
-
-// connection type
-
-const connectionType = computed(() => connectionStore.getConnectionType(props.connection.connectionTypeId))
-const typeColor = computed(() => {
-  if (!connectionType.value) { return }
-  return connectionType.value.color
-})
-const typeName = computed(() => {
-  if (!connectionType.value) { return }
-  return connectionType.value.name
 })
 
 // items
@@ -266,10 +254,10 @@ const isHiddenByCommentFilter = computed(() => {
   return startItemIsComment || endItemIsComment || isConnectedToCommentCard.value
 })
 const filtersIsActive = computed(() => {
-  const types = globalStore.filteredConnectionTypeIds
+  const colors = globalStore.filteredConnectionColors
   const frames = globalStore.filteredFrameIds
   const tags = globalStore.filteredTagNames
-  return Boolean(types.length + frames.length + tags.length)
+  return Boolean(colors.length + frames.length + tags.length)
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
@@ -279,14 +267,14 @@ const isCardsFilteredByFrame = computed(() => {
   const endItemInFilter = frameIds.includes(endItem.frameId)
   return startItemInFilter || endItemInFilter
 })
-const isConnectionFilteredByType = computed(() => {
-  const typeIds = globalStore.filteredConnectionTypeIds
-  if (!connectionType.value) { return }
-  return typeIds.includes(connectionType.value.id)
+const isConnectionFilteredByColor = computed(() => {
+  const colors = globalStore.filteredConnectionColors
+  if (!colors) { return }
+  return colors.includes(props.connection.color)
 })
 const isFiltered = computed(() => {
   if (filtersIsActive.value) {
-    const isInFilter = isCardsFilteredByFrame.value || isConnectionFilteredByType.value
+    const isInFilter = isCardsFilteredByFrame.value || isConnectionFilteredByColor.value
     if (isInFilter) {
       return false
     } else {
@@ -306,6 +294,19 @@ const directionIsVisible = computed(() => {
 
 // path
 
+const inferConnectionPath = () => {
+  if (props.connection.path) { return }
+  const path = connectionStore.getConnectionPathBetweenItems({
+    startItemId: props.connection.startItemId,
+    endItemId: props.connection.endItemId,
+    controlPoint: props.connection.controlPoint
+  })
+  if (!path) { return }
+  connectionStore.updateConnection({
+    id: props.connection.id,
+    path
+  })
+}
 const remoteCardsIsDragging = computed(() => Boolean(globalStore.remoteCardsDragging.length))
 const remoteBoxesIsDragging = computed(() => Boolean(globalStore.remoteBoxesDragging.length))
 const remoteItemsIsDragging = computed(() => remoteCardsIsDragging.value || remoteBoxesIsDragging.value)
@@ -432,6 +433,7 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
 })
 const relativePath = computed(() => {
   if (!directionIsVisible.value) { return }
+  if (!props.connection.path) { return }
   const path = state.pathWhileDragging || state.pathWhileSelected || props.connection.path // jiggling
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
@@ -452,7 +454,6 @@ const relativePath = computed(() => {
 const removeConnection = () => {
   if (!isSpaceMember.value) { return }
   connectionStore.removeConnection(props.connection.id)
-  connectionStore.removeAllUnusedConnectionTypes()
 }
 const focusOnDialog = async (event) => {
   await nextTick()
@@ -556,7 +557,7 @@ svg.connection(
   path.connection-path(
     v-if="visible"
     fill="none"
-    :stroke="typeColor"
+    :stroke="props.connection.color"
     stroke-linecap="round"
     stroke-width="5"
     ref="connectionPathElement"
@@ -570,8 +571,6 @@ svg.connection(
     :data-start-card="connection.startItemId"
     :data-end-card="connection.endItemId"
     :data-id="connection.id"
-    :data-type-name="typeName"
-    :data-type-id="connection.connectionTypeId"
     :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
     :data-label-is-visible="connection.labelIsVisible"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
@@ -588,12 +587,12 @@ svg.connection(
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
-    title {{typeName}}
+    title {{props.connection.name}}
 
   defs(v-if="state.isVisibleInViewport")
     linearGradient(:id="gradientId")
-      stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
-      stop(offset="90%" :stop-color="typeColor")
+      stop(offset="0%" :stop-color="props.connection.color" stop-opacity="0" fill-opacity="0")
+      stop(offset="90%" :stop-color="props.connection.color")
 
   circle(
     v-if="directionIsVisible"

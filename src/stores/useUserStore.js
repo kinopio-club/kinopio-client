@@ -50,7 +50,7 @@ export const useUserStore = defineStore('user', {
     shouldEmailBulletin: true,
     shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
-    shouldUseLastConnectionType: true,
+    shouldUseLastConnectionColor: true,
     shouldShowItemActions: false,
     shouldShowMultipleSelectedLineActions: false,
     shouldShowMultipleSelectedBoxActions: false,
@@ -80,8 +80,8 @@ export const useUserStore = defineStore('user', {
     cardSettingsCardWrapWidth: consts.normalCardWrapWidth,
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
-    shouldShowMinimapJumpToList: true,
     cardDetailsResizeWidth: null,
+    affiliatePromoCode: null,
 
     // billing
 
@@ -138,7 +138,7 @@ export const useUserStore = defineStore('user', {
         userFilters += 1
       }
       const tagNames = globalStore.filteredTagNames
-      const connections = globalStore.filteredConnectionTypeIds
+      const connections = globalStore.filteredConnectionColors
       const frames = globalStore.filteredFrameIds
       const boxes = globalStore.filteredBoxIds
       return userFilters + tagNames.length + connections.length + frames.length + boxes.length
@@ -368,6 +368,13 @@ export const useUserStore = defineStore('user', {
       } else {
         globalStore.notifySignUpToJoinGroup = true
       }
+    },
+    checkIfShouldApplyAffiliatePromo () {
+      const globalStore = useGlobalStore()
+      if (!globalStore.currentUserAffiliatePromoCode) { return }
+      this.updateUser({
+        affiliatePromoCode: globalStore.currentUserAffiliatePromoCode
+      })
     },
     async initializeUser () {
       const globalStore = useGlobalStore()

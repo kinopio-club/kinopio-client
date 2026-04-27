@@ -4,9 +4,10 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
-import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
@@ -15,6 +16,7 @@ import uniqBy from 'lodash-es/uniqBy'
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 let unsubscribes
 
@@ -47,38 +49,36 @@ const props = defineProps({
   collapseExpandIsVisible: Boolean
 })
 const state = reactive({
-  multipleConnectionsPickerVisible: false,
+  colorPickerIsVisible: false,
   isHover: false
 })
 
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const colorClasses = computed(() => {
   return utils.colorClasses({ backgroundColor: props.backgroundColor })
 })
-const toggleMultipleConnectionsPickerVisible = () => {
-  const isVisible = state.multipleConnectionsPickerVisible
+
+// color picker
+
+const toggleColorPickerIsVisible = () => {
+  const isVisible = state.colorPickerIsVisible
   closeDialogsAndEmit()
-  state.multipleConnectionsPickerVisible = !isVisible
+  state.colorPickerIsVisible = !isVisible
 }
-
-// connection types
-
-const canEditAllConnections = computed(() => {
-  return props.canEdit || props.canEditAll.connections
+const connectionColorSwatches = computed(() => {
+  return uniqBy(props.connections, 'color')
 })
-const connectionTypes = computed(() => {
-  const ids = globalStore.multipleConnectionsSelectedIds
-  let types = ids.map(id => {
-    return connectionStore.getConnectionTypeByConnectionId(id)
+const connectionColors = computed(() => connectionStore.getConnectionColors)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const updateColor = (color) => {
+  const updates = props.connections.map(connection => {
+    return {
+      id: connection.id,
+      color
+    }
   })
-  types = uniqBy(types, 'id')
-  types = uniqBy(types, 'color')
-  return types
-})
-const editableConnectionTypes = computed(() => {
-  return uniq(props.connections.map(connection => {
-    return connectionStore.getConnectionType(connection.connectionTypeId)
-  }))
-})
+  connectionStore.updateConnections(updates)
+}
 
 // utils
 
@@ -87,7 +87,7 @@ const closeDialogsAndEmit = () => {
   emit('closeDialogs')
 }
 const closeDialogs = () => {
-  state.multipleConnectionsPickerVisible = false
+  state.colorPickerIsVisible = false
 }
 const updateIsHover = (value) => {
   state.isHover = value
@@ -122,15 +122,24 @@ section.subsection.connection-actions(
   template(v-if="props.visible")
     p.subsection-vertical-label(v-if="props.label" :style="{ background: props.backgroundColor }")
       span.label(:class="colorClasses") {{ props.label }}
-    .row.edit-connection-types
-      //- Type Color
+    .row.edit-connection-colors
+      //- Color
       .button-wrap(v-if="!props.hideType")
-        button.change-color(:disabled="!canEditAllConnections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
-          .segmented-colors.icon
-            template(v-for="type in connectionTypes")
-              .current-color(:style="{ background: type.color }")
-          span Type
-        MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="props.connections" :selectedConnectionTypes="editableConnectionTypes")
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPickerIsVisible" :class="{active: state.colorPickerIsVisible}")
+          .segmented-colors
+            template(v-for="connection in connectionColorSwatches")
+              .current-color(:style="{ background: connection.color }")
+        //- ColorPicker
+        ColorPicker(
+          :visible="state.colorPickerIsVisible"
+          :removeIsVisible="false"
+          :recentColors="connectionColors"
+          :currentColor="connections[0].color"
+          :luminosityIsDark="isThemeDark"
+          :shouldHideOpacity="true"
+          @selectedColor="updateColor"
+        )
+    .row
       //- Label, Direction, Reverse, Curved
       ConnectionDecorators(:connections="props.connections")
   //- collapsed horizontal label
@@ -155,16 +164,13 @@ dialog section.connection-actions
     border-color var(--primary-border-on-light-background) !important
   &.is-background-dark
     border-color var(--primary-border-on-dark-background) !important
-
   .row
-    margin-top 0
-  .row.edit-connection-types
-    margin-bottom 0
+    margin 0
   .button-wrap
     margin-left 0
     margin-right 4px
-    vertical-align middle
     margin-bottom 4px
+
   .label
     &.is-background-light
       color var(--primary-on-light-background)

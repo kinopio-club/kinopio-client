@@ -251,23 +251,17 @@ const drawDrawing = async () => {
 const mapConnections = computed(() => {
   return props.space?.connections || connectionStore.getAllConnections
 })
-const mapConnectionTypes = computed(() => {
-  return props.space?.connectionTypes || connectionStore.getAllConnectionTypes
-})
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
   point.y = point.y * ratio.value
   return point
 }
 const drawConnections = () => {
-  const connectionTypes = mapConnectionTypes.value
   const connections = mapConnections.value
   for (const connection of connections) {
     context.lineWidth = 1
     context.lineCap = 'round'
-    const type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
-    if (!type) { continue }
-    context.strokeStyle = type.color
+    context.strokeStyle = connection.color
     // update path with ratio
     let path = connection.path
     if (!path) { continue }

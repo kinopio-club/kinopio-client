@@ -46,7 +46,7 @@ const state = reactive({
 
 const canEditCard = computed(() => userStore.getUserCanEditCard(props.card))
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
+const connections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
 
 // theme
 
@@ -104,8 +104,8 @@ const unlockCard = (event) => {
 .card-unlock-button.inline-button-wrap.item-unlock-button(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-item-id="card.id")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     .connected-colors
-      template(v-for="type in connectionTypes" :key="type.id")
-        .color(:style="{ background: type.color}")
+      template(v-for="connection in connections" :key="connection.id")
+        .color(:style="{ background: connection.color}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 
