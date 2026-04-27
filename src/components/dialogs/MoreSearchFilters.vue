@@ -68,7 +68,8 @@ const updateResultsSectionHeight = async () => {
 // items
 
 const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
-const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
+const connectionColors = computed(() => connectionStore.getConnectionColors)
+
 const spaceFrames = computed(() => {
   const cards = cardStore.getAllCards
   let framesIdsInUse = cards.map(card => card.frameId)
@@ -88,10 +89,12 @@ const allItems = computed(() => {
     tag.isTag = true
     return tag
   })
-  // connection types
-  const connectionTypesItems = connectionTypes.value.map(type => {
-    type.isConnectionType = true
-    return type
+  // connection color
+  const connectionColorsItems = connectionColors.value.map(color => {
+    return {
+      color,
+      isConnectionColor: true
+    }
   })
   // frames
   const framesItems = spaceFrames.value.map(frame => {
@@ -103,21 +106,21 @@ const allItems = computed(() => {
     box.isBox = true
     return box
   })
-  return tagsItems.concat(connectionTypesItems, framesItems, boxesItems)
+  return tagsItems.concat(framesItems, boxesItems, connectionColorsItems)
 })
 const items = computed(() => {
   if (state.filter) {
     const items = {
       boxes: [],
       tags: [],
-      connectionTypes: [],
+      connectionColors: [],
       frames: []
     }
     state.filteredItems.forEach(item => {
       if (item.isTag) {
         items.tags.push(item)
-      } else if (item.isConnectionType) {
-        items.connectionTypes.push(item)
+      } else if (item.isConnectionColor) {
+        items.connectionColors.push(item)
       } else if (item.isFrame) {
         items.frames.push(item)
       } else if (item.isBox) {
@@ -129,13 +132,13 @@ const items = computed(() => {
     return {
       boxes: boxes.value,
       tags: tags.value,
-      connectionTypes: connectionTypes.value,
+      connectionColors: connectionColors.value,
       frames: spaceFrames.value
     }
   }
 })
 const currentFilteredItemsIds = computed(() => {
-  return globalStore.filteredConnectionTypeIds.concat(globalStore.filteredFrameIds, globalStore.filteredTagNames, globalStore.filteredBoxIds)
+  return globalStore.filteredFrameIds.concat(globalStore.filteredTagNames, globalStore.filteredBoxIds)
 })
 const boxBadgeStyles = (box) => {
   return {
@@ -183,12 +186,12 @@ const toggleFilteredTag = (tag) => {
     globalStore.addToFilteredTagNames(tag.name)
   }
 }
-const toggleFilteredConnectionType = (type) => {
-  const filtered = globalStore.filteredConnectionTypeIds
-  if (filtered.includes(type.id)) {
-    globalStore.removeFromFilteredConnectionTypeId(type.id)
+const toggleFilteredConnectionColor = (color) => {
+  const filtered = globalStore.filteredConnectionColors
+  if (filtered.includes(color)) {
+    globalStore.removeFromFilteredConnectionColor(color)
   } else {
-    globalStore.addToFilteredConnectionTypeId(type.id)
+    globalStore.addToFilteredConnectionColor(color)
   }
 }
 const toggleFilteredCardFrame = (frame) => {
@@ -205,6 +208,9 @@ const toggleFilteredCardFrame = (frame) => {
 const isSelected = (item) => {
   return currentFilteredItemsIds.value.includes(item.id)
 }
+const isSelectedColor = (color) => {
+  return globalStore.filteredConnectionColors.includes(color)
+}
 const boxIsActive = (box) => {
   const boxes = globalStore.filteredBoxIds
   return boxes.includes(box.id)
@@ -213,9 +219,9 @@ const tagIsActive = (tag) => {
   const tags = globalStore.filteredTagNames
   return tags.includes(tag.name)
 }
-const connectionTypeIsActive = (type) => {
-  const types = globalStore.filteredConnectionTypeIds
-  return types.includes(type.id)
+const connectionColorIsActive = (color) => {
+  const colors = globalStore.filteredConnectionColors
+  return colors.includes(color)
 }
 const frameIsActive = (frame) => {
   const frames = globalStore.filteredFrameIds
@@ -229,16 +235,15 @@ dialog.more-search-filters.narrow(v-if="props.visible" :open="props.visible" ref
     //- Clear
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
-      span Clear All
+      span Clear All Filters
       span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
 
-  section.results-section.connection-types(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ResultsFilter(:items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
     ul.results-list
       //- Boxes
       template(v-for="box in items.boxes" :key="box.id")
         li(:class="{ active: boxIsActive(box) }" @click.left="toggleFilteredBox(box)" tabindex="0" v-on:keyup.enter="toggleFilteredBox(box)")
-          input(type="checkbox" :checked="isSelected(box)")
           .box-badge.badge(:style="boxBadgeStyles(box)")
             .box-info(:style="{backgroundColor: box.color}")
             .box-fill(:style="{backgroundColor: box.color}")
@@ -246,25 +251,23 @@ dialog.more-search-filters.narrow(v-if="props.visible" :open="props.visible" ref
       //- Tags
       template(v-for="tag in items.tags" :key="tag.id")
         li(:class="{ active: tagIsActive(tag) }" @click.left="toggleFilteredTag(tag)" tabindex="0" v-on:keyup.enter="toggleFilteredTag(tag)")
-          input(type="checkbox" :checked="isSelected(tag)")
           .badge(:style="{backgroundColor: tag.color}") {{tag.name}}
-      //- Connection Types
-      template(v-for="type in items.connectionTypes" :key="type.id")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click.left="toggleFilteredConnectionType(type)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionType(type)")
-          input(type="checkbox" :checked="isSelected(type)")
-          .badge(:style="{backgroundColor: type.color}")
-          .name {{type.name}}
       //- Frames
       template(v-for="(frame in items.frames" :key="frame.id")
         li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
-          input(type="checkbox" :checked="isSelected(frame)")
           .badge
             FrameBadge(:frame="frame")
           .name {{frame.name}}
+    //- Connection Colors
+    ul.results-list.results-grid(v-if="items.connectionColors.length")
+      template(v-for="color in items.connectionColors" :key="color")
+        li(:class="{ active: connectionColorIsActive(color) }" @click.left="toggleFilteredConnectionColor(color)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionColor(color)" title="Connection Color" :data-color="color")
+          .badge(:style="{backgroundColor: color}")
 </template>
 
 <style lang="stylus">
 dialog.more-search-filters
+  overflow auto
   @media(max-width 630px)
     left -100px
   @media(max-width 510px)
@@ -282,12 +285,6 @@ dialog.more-search-filters
       display inline-block
       img
         width 100%
-  .connection-types
-    padding-bottom 0
-  .results-section
-    overflow scroll
-  input[type="checkbox"]
-    margin-top 1px
   .total-filters-active
     margin 0
     margin-left 5px
@@ -295,7 +292,6 @@ dialog.more-search-filters
     transform translateY(2px)
   .box-badge
     padding 1px 4px
-    overflow hidden
     .box-fill
       top 0
       left 0
@@ -303,4 +299,14 @@ dialog.more-search-filters
       height 100%
       position absolute
       opacity 0.5
+  ul.results-grid
+    display flex
+    flex-direction row
+    flex-wrap wrap
+    li
+      width min-content
+      .badge
+        margin 0
+        width 18px
+
 </style>

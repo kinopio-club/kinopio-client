@@ -297,7 +297,7 @@ const backupLocalSpaces = async () => {
 const migrationSpacesConnections = async () => {
   const spaces = await cache.getAllSpaces()
   const newSpaces = spaces.map(space => {
-    space.connections = utils.migrationConnections(space.connections)
+    space = utils.migrateConnectionTypes(space)
     return space
   })
   newSpaces.forEach(space => {

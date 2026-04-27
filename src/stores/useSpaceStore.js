@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -21,7 +22,6 @@ import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
-import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
@@ -56,7 +56,6 @@ export const useSpaceStore = defineStore('space', {
       if (!space) { return }
       space.cards = cardStore.getAllCards
       space.connections = connectionStore.getAllConnections
-      space.connectionTypes = connectionStore.getAllConnectionTypes
       space.boxes = boxStore.getAllBoxes
       space.lines = lineStore.getAllLines
       space.lists = listStore.getAllLists
@@ -158,8 +157,6 @@ export const useSpaceStore = defineStore('space', {
       })
       connections = connections.concat(selectedConnections)
       connections = uniqBy(connections, 'id')
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = connectionTypeIds.map(id => connectionStore.getConnectionType(id))
       // line
       const lines = globalStore.multipleLinesSelectedIds.map(lineId => {
         return lineStore.getLine(lineId)
@@ -168,7 +165,7 @@ export const useSpaceStore = defineStore('space', {
       const lists = globalStore.multipleListsSelectedIds.map(listId => {
         return listStore.getList(listId)
       })
-      return { cards, connectionTypes, connections, boxes, lines, lists }
+      return { cards, connections, boxes, lines, lists }
     },
     getSpaceSelectedAndDraggingItems () {
       const globalStore = useGlobalStore()
@@ -388,7 +385,6 @@ export const useSpaceStore = defineStore('space', {
       // initialize items
       cardStore.initializeCards(space?.cards)
       boxStore.initializeBoxes(space?.boxes)
-      connectionStore.initializeConnectionTypes(space?.connectionTypes)
       connectionStore.initializeConnections(space?.connections)
       lineStore.initializeLines(space?.lines)
       listStore.initializeLists(space?.lists)
@@ -503,7 +499,6 @@ export const useSpaceStore = defineStore('space', {
       // init items
       cardStore.initializeRemoteCards(space.cards)
       boxStore.initializeRemoteBoxes(space.boxes)
-      connectionStore.initializeRemoteConnectionTypes(space.connectionTypes)
       connectionStore.initializeRemoteConnections(space.connections)
       lineStore.initializeRemoteLines(space.lines)
       listStore.initializeRemoteLists(space.lists)
@@ -513,7 +508,7 @@ export const useSpaceStore = defineStore('space', {
       this.$state = space
       historyStore.reset()
       // clean up unused keys
-      const itemKeys = ['cards', 'boxes', 'connectionTypes', 'connections', 'lines', 'lists']
+      const itemKeys = ['cards', 'boxes', 'connections', 'lines', 'lists']
       itemKeys.forEach(key => {
         delete this[key]
       })
@@ -523,7 +518,7 @@ export const useSpaceStore = defineStore('space', {
       const groupStore = useGroupStore()
       const cardStore = useCardStore()
       isLoadingRemoteSpace = false
-      space.connections = utils.migrationConnections(space.connections)
+      space = utils.migrateConnectionTypes(space)
       if (!globalStore.isEmbedMode) {
         globalStore.spaceZoomPercent = 100
       }
@@ -574,11 +569,13 @@ export const useSpaceStore = defineStore('space', {
     async restoreCurrentSpaceFromRemote () {
       const globalStore = useGlobalStore()
       try {
+        globalStore.notifySpaceOutOfSync = true
         globalStore.isLoadingSpace = true
         const remoteSpace = await this.loadRemoteSpace({ id: this.id })
         await this.restoreSpaceRemote(remoteSpace)
         this.saveSpaceToCache()
         globalStore.isLoadingSpace = false
+        globalStore.notifySpaceOutOfSync = false
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
@@ -723,6 +720,7 @@ export const useSpaceStore = defineStore('space', {
     async createNewSpace (name) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
+      const themeStore = useThemeStore()
       const user = userStore.getUserAllState
       globalStore.triggerSpaceZoomReset()
       let space = utils.clone(newSpace)
@@ -735,7 +733,6 @@ export const useSpaceStore = defineStore('space', {
       space.readOnlyKey = nanoid()
       const shouldHideTutorialCards = userStore.shouldHideTutorialCards
       if (shouldHideTutorialCards) {
-        space.connectionTypes = []
         space.connections = []
         space.cards = []
         space.boxes = []
@@ -766,14 +763,8 @@ export const useSpaceStore = defineStore('space', {
             endItemId: '2',
             path: 'm267,266 q90,40 50,77',
             id: 'gg7DEsxy0n3syEkxfKKS4',
-            connectionTypeId: '3'
-          }
-        ]
-        space.connectionTypes = [
-          {
-            id: '3',
-            name: 'Connection Type 1',
-            color: randomColor({ luminosity: 'light' })
+            name: 'Connection',
+            color: themeStore.randomColor()
           }
         ]
       }
@@ -1282,18 +1273,12 @@ export const useSpaceStore = defineStore('space', {
       const boxStore = useBoxStore()
       const lineStore = useLineStore()
       const listStore = useListStore()
-      const { cards, boxes, connections, connectionTypes, tags, lines, lists } = items
+      const { cards, boxes, connections, tags, lines, lists } = items
       lines.forEach(line => lineStore.createLine(line))
       lists.forEach(list => listStore.createList({ list }))
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
       for (const connection of connections) {
-        let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
-        const prevTypeInCurrentSpace = connectionStore.getConnectionTypeByName(type.name)
-        type = prevTypeInCurrentSpace || type
-        await connectionStore.createConnectionType(type)
-        connection.connectionTypeId = type.id
-        connection.type = type
         await connectionStore.createConnection(connection)
         await connectionStore.updateConnectionPathByItemId(connection.startItemId)
       }
