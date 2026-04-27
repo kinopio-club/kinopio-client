@@ -61,6 +61,11 @@ export const useBoxStore = defineStore('boxes', {
         yIndex
       }
     },
+    getCurrentDraggingBox () {
+      const globalStore = useGlobalStore()
+      const boxId = globalStore.currentDraggingBoxId
+      return this.getBox(boxId)
+    },
     getBoxesResizing () {
       const globalStore = useGlobalStore()
       const ids = globalStore.currentUserIsResizingBoxIds
@@ -277,15 +282,30 @@ export const useBoxStore = defineStore('boxes', {
         globalStore.pageWidth = boxX
       }
     },
+    checkIfShouldSnapAlignBoxes (boxIds) {
+      boxIds = boxIds.filter(id => Boolean(id))
+      const updates = boxIds.map(id => {
+        const box = this.getBox(id)
+        const update = {
+          id,
+          xDisplay: undefined,
+          yDisplay: undefined
+        }
+        if (box.shouldSnapAlignToXDisplay && box.xDisplay) {
+          update.x = box.xDisplay
+        }
+        if (box.shouldSnapAlignToYDisplay && box.yDisplay) {
+          update.y = box.yDisplay
+        }
+        return update
+      })
+      this.updateBoxes(updates)
+    },
     moveBoxes ({ endCursor, prevCursor, delta, endSpaceCursor, boxes }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if ((!endCursor || !prevCursor) && !delta) { return }
-      if (globalStore.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -311,6 +331,7 @@ export const useBoxStore = defineStore('boxes', {
         updates.push(update)
         this.updatePageSize(update)
       })
+      updates = globalStore.moveItemsUpdateSnapAlignDisplayPosition(updates)
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
@@ -540,7 +561,7 @@ export const useBoxStore = defineStore('boxes', {
     updateBoxSnapGuides ({ items, isChildren, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
-      if (globalStore.shouldSnapToGrid) { return }
+      if (globalStore.shouldSnapAlign) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       const outsideThreshold = 20

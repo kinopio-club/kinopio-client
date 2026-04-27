@@ -43,6 +43,11 @@ export const useListStore = defineStore('lists', {
       const lists = ids.map(id => this.byId[id])
       return lists
     },
+    getCurrentDraggingList () {
+      const globalStore = useGlobalStore()
+      const listId = globalStore.currentDraggingListId
+      return this.getList(listId)
+    },
     getListColors () {
       const lists = this.getAllLists
       const colors = lists.map(list => list.color)
@@ -172,7 +177,7 @@ export const useListStore = defineStore('lists', {
     updateShouldSnapBackToList () {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
-      const card = cardStore.getCurrentDraggingCard()
+      const card = cardStore.getCurrentDraggingCard
       if (!card) { return }
       if (!card.listId) { return }
       const list = this.getList(card.listId)
@@ -185,9 +190,9 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       if (globalStore.preventItemSnapping) { return }
       if (!globalStore.currentUserIsDraggingCard) { return }
-      if (globalStore.shouldSnapToGrid) { return }
+      if (globalStore.shouldSnapAlign) { return }
       this.updateShouldSnapBackToList()
-      const card = cardStore.getCurrentDraggingCard()
+      const card = cardStore.getCurrentDraggingCard
       const lists = this.getAllLists
       const list = lists.find(listRect => {
         // if list has cards, list height is list-info only
@@ -257,16 +262,51 @@ export const useListStore = defineStore('lists', {
       })
       this.listChildPlaceholders[list.id] = cards
     },
+    checkIfShouldSnapAlignLists (listIds) {
+      listIds = listIds.filter(id => Boolean(id))
+      const updates = listIds.map(id => {
+        const list = this.getList(id)
+        const update = {
+          id,
+          xDisplay: undefined,
+          yDisplay: undefined
+        }
+        if (list.shouldSnapAlignToXDisplay && list.xDisplay) {
+          update.x = list.xDisplay
+        }
+        if (list.shouldSnapAlignToYDisplay && list.yDisplay) {
+          update.y = list.yDisplay
+        }
+        return update
+      })
+      this.updateLists(updates)
+    },
+    updateSnapAlignListsCardsDisplay (lists) {
+      const cardStore = useCardStore()
+      const cardDisplayPositions = []
+      for (const list of lists) {
+        const listCards = cardStore.getCardsByList(list.id)
+        for (const card of listCards) {
+          let xDisplay = null
+          let yDisplay = null
+          if (list.xDisplay) {
+            xDisplay = list.xDisplay + (card.x - list.x)
+          }
+          if (list.yDisplay) {
+            yDisplay = list.yDisplay + (card.y - list.y)
+          }
+          cardDisplayPositions.push({ id: card.id, xDisplay, yDisplay })
+        }
+      }
+      if (cardDisplayPositions.length) {
+        cardStore.updateCardsState(cardDisplayPositions)
+      }
+    },
     moveLists ({ endCursor, prevCursor, delta, lists }) {
       const globalStore = useGlobalStore()
-      const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if ((!endCursor || !prevCursor) && !delta) { return }
-      if (globalStore.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -291,8 +331,9 @@ export const useListStore = defineStore('lists', {
           height: list.height
         }
       })
-      // this.updatePageSize(lists[0]) // ??might automatically be done by cards inside
+      lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists)
       this.updateLists(lists)
+      this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
         boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })

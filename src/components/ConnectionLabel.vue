@@ -90,7 +90,7 @@ watch(() => state.isDragging, (value, prevValue) => {
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
-const isDark = computed(() => utils.colorIsDark(typeColor.value))
+const isDark = computed(() => utils.colorIsDark(props.connection.color))
 const checkIsMultiTouch = (event) => {
   isMultiTouch = false
   if (utils.isMultiTouch(event)) {
@@ -128,13 +128,13 @@ const visible = computed(() => {
 // filter
 
 const filtersIsActive = computed(() => {
-  const types = globalStore.filteredConnectionTypeIds
+  const colors = globalStore.filteredConnectionColors
   const frames = globalStore.filteredFrameIds
-  return Boolean(types.length + frames.length)
+  return Boolean(colors.length + frames.length)
 })
-const isConnectionFilteredByType = computed(() => {
-  const typeIds = globalStore.filteredConnectionTypeIds
-  return typeIds.includes(connectionTypeId.value)
+const isConnectionFilteredByColor = computed(() => {
+  const colors = globalStore.filteredConnectionColors
+  return colors.includes(props.connection.color)
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
@@ -147,7 +147,7 @@ const isCardsFilteredByFrame = computed(() => {
 })
 const isFiltered = computed(() => {
   if (filtersIsActive.value) {
-    const isInFilter = isCardsFilteredByFrame.value || isConnectionFilteredByType.value
+    const isInFilter = isCardsFilteredByFrame.value || isConnectionFilteredByColor.value
     if (isInFilter) {
       return false
     } else {
@@ -165,27 +165,8 @@ const isHiddenByCommentFilter = computed(() => {
   const endItemIsComment = startItem.isComment || utils.isNameComment(endItem.name)
   return startItemIsComment || endItemIsComment
 })
-
-// parent connection type
-
-const connectionTypeId = computed(() => props.connection.connectionTypeId)
-const connectionType = computed(() => connectionStore.getConnectionType(connectionTypeId.value))
-const typeName = computed(() => {
-  if (connectionType.value) {
-    return connectionType.value.name
-  } else {
-    return ''
-  }
-})
-const typeColor = computed(() => {
-  if (connectionType.value) {
-    return connectionType.value.color
-  } else {
-    return 'transparent'
-  }
-})
-const updateTypeColorCSS = () => {
-  utils.setCssVariable('type-color', typeColor.value)
+const updateConnectionColorCSS = () => {
+  utils.setCssVariable('connection-color', props.connection.color)
 }
 
 // label wrap
@@ -234,7 +215,7 @@ const styles = computed(() => {
     y: Math.round(labelRect.height / 2)
   }
   const styles = {
-    background: typeColor.value,
+    background: props.connection.color,
     left: `calc(${labelRelativePosition.value.x * 100}% - ${labelCenter.x}px)`,
     top: `calc(${labelRelativePosition.value.y * 100}% - ${labelCenter.y}px)`
   }
@@ -271,7 +252,7 @@ const startDragging = (event) => {
   if (!canEditSpace.value) { return }
   globalStore.closeAllDialogs()
   globalStore.clearMultipleSelected()
-  updateTypeColorCSS()
+  updateConnectionColorCSS()
   state.isDragging = true
   wasDragged = false
   const updates = {
@@ -481,7 +462,7 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
     :class="{filtered: isFiltered, active: connectionDetailsIsVisible, jiggle: shouldJiggle}"
     ref="labelElement"
   )
-    span.name(:class="{ 'is-dark': isDark }") {{typeName}}
+    span.name(:class="{ 'is-dark': isDark }") {{props.connection.name}}
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
   template(v-if="boundaryIsVisible && state.isDragging")
     .connection-label-boundary.left(v-if="boundaryLeftIsVisible")
@@ -517,10 +498,10 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
   z-index -1
   pointer-events none
 
---type-color white
+--connection-color white
 .connection-label-boundary
   position absolute
-  box-shadow 0 0 10px 3px var(--type-color)
+  box-shadow 0 0 10px 3px var(--connection-color)
   &.left
     left 0
     top 0

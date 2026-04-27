@@ -359,7 +359,9 @@ const colorIsDark = computed(() => {
 // })
 const listStyles = computed(() => {
   const isSnappingToBox = globalStore.itemSnappingIsReady && currentListIsBeingDragged.value
-  const { x, y, z } = props.list
+  let { x, y, z } = props.list
+  x = props.list.xDisplay || x
+  y = props.list.yDisplay || y
   const width = props.list.resizeWidth
   let height = props.list.height || consts.listEmptyHeight
   if (props.list.isCollapsed) {
@@ -547,10 +549,12 @@ const listChildPlaceholders = computed(() => listStore.listChildPlaceholders[pro
 const placeholderStylesMap = computed(() => {
   if (!listChildPlaceholders.value) return {}
   const styles = {}
+  const snapDeltaX = (props.list.xDisplay ?? props.list.x) - props.list.x
+  const snapDeltaY = (props.list.yDisplay ?? props.list.y) - props.list.y
   for (const placeholder of listChildPlaceholders.value) {
     styles[placeholder.id] = {
-      top: placeholder.y + 'px',
-      left: placeholder.x + 'px',
+      left: (placeholder.x + snapDeltaX) + 'px',
+      top: (placeholder.y + snapDeltaY) + 'px',
       width: listItemWidth.value + 'px',
       height: placeholder.height + 'px'
     }

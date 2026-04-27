@@ -91,6 +91,11 @@ export const useCardStore = defineStore('cards', {
       const cards = ids.map(id => this.byId[id])
       return cards
     },
+    getCurrentDraggingCard () {
+      const globalStore = useGlobalStore()
+      const cardId = globalStore.currentDraggingCardId
+      return this.getCard(cardId)
+    },
     getCardIdsGroupedByList () {
       const cards = this.getAllCards
       const result = {}
@@ -201,11 +206,6 @@ export const useCardStore = defineStore('cards', {
     },
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
-    },
-    getCurrentDraggingCard () {
-      const globalStore = useGlobalStore()
-      const cardId = globalStore.currentDraggingCardId
-      return this.getCard(cardId)
     },
     getVerticallyAlignedCardsBelow (cardId, deltaHeight = 0) {
       let cards = this.getAllCardsSortedByX
@@ -442,7 +442,7 @@ export const useCardStore = defineStore('cards', {
       })
     },
     shouldUpdateSpaceEditedAt (updates) {
-      const ignoreKeys = ['id', 'z']
+      const ignoreKeys = ['id', 'z', 'xDisplay', 'yDisplay']
       let keys = []
       for (const card of updates) {
         Object.keys(card).forEach(key => keys.push(key))
@@ -584,6 +584,25 @@ export const useCardStore = defineStore('cards', {
         globalStore.pageWidth = cardX
       }
     },
+    checkIfShouldSnapAlignCards (cardIds) {
+      cardIds = cardIds.filter(id => Boolean(id))
+      const updates = cardIds.map(id => {
+        const card = this.getCard(id)
+        const update = {
+          id,
+          xDisplay: undefined,
+          yDisplay: undefined
+        }
+        if (card.shouldSnapAlignToXDisplay && card.xDisplay) {
+          update.x = card.xDisplay
+        }
+        if (card.shouldSnapAlignToYDisplay && card.yDisplay) {
+          update.y = card.yDisplay
+        }
+        return update
+      })
+      this.updateCards(updates)
+    },
     moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
       const connectionStore = useConnectionStore()
@@ -591,10 +610,6 @@ export const useCardStore = defineStore('cards', {
       const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if ((!endCursor || !prevCursor) && !delta) { return }
-      if (globalStore.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -612,9 +627,13 @@ export const useCardStore = defineStore('cards', {
         return {
           id: card.id,
           x,
-          y
+          y,
+          width: card.width,
+          height: card.height
         }
       })
+
+      cards = globalStore.moveItemsUpdateSnapAlignDisplayPosition(cards)
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true
@@ -623,6 +642,7 @@ export const useCardStore = defineStore('cards', {
         boxStore.updateBoxSnapGuides({ items: cards, isChildren: true, cursor: endCursor })
         this.updateCardSnapGuides({ items: cards, cursor: endCursor })
       }
+      globalStore.updateItemSnapAlignGuides()
       listStore.updateListSnapGuides(cards)
     },
     clearAllCardsZ () {
@@ -1235,7 +1255,7 @@ export const useCardStore = defineStore('cards', {
       const listStore = useListStore()
       if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
-      if (globalStore.shouldSnapToGrid) { return }
+      if (globalStore.shouldSnapAlign) { return }
       const snapThreshold = 10
       const spaceEdgeThreshold = 100
       const targetCards = this.getCardsSelectableInViewport()
@@ -1293,6 +1313,7 @@ export const useCardStore = defineStore('cards', {
       snapGuides = [snapGuides[0]]
       this.cardSnapGuides = snapGuides
     }
+
   }
 
 })

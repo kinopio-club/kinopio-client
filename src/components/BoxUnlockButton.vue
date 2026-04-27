@@ -23,7 +23,7 @@ const state = reactive({
 })
 
 const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
-const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
+const connections = computed(() => connectionStore.getConnectionsByItemId(props.box.id))
 
 // styles
 
@@ -87,8 +87,8 @@ const unlockBox = (event) => {
 .box-unlock-button.inline-button-wrap.item-unlock-button(:style="positionStyles" @mouseup.left="unlockBox" @touchend="unlockBox" :data-item-id="box.id")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     .connected-colors
-      template(v-for="type in connectionTypes" :key="type.id")
-        .color(:style="{ background: type.color}")
+      template(v-for="connection in connections" :key="connection.id")
+        .color(:style="{ background: connection.color}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 

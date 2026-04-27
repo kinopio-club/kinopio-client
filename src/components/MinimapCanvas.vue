@@ -294,32 +294,30 @@ const drawDrawing = () => {
 const mapConnections = computed(() => {
   return props.space?.connections || connectionStore.getAllConnections
 })
-const mapConnectionTypes = computed(() => {
-  return props.space?.connectionTypes || connectionStore.getAllConnectionTypes
-})
+const updatePointWithRatio = (point) => {
+  point.x = point.x * ratio.value
+  point.y = point.y * ratio.value
+  return point
+}
 const drawConnections = () => {
-  const connectionTypes = mapConnectionTypes.value
   const connections = mapConnections.value
   if (!connections.length) { return }
-  const r = ratio.value
-  // Build a lookup map so we don't linear-scan types per connection
-  const typeMap = new Map()
-  for (const type of connectionTypes) {
-    typeMap.set(type.id, type)
-  }
-  context.lineWidth = 1
-  context.lineCap = 'round'
   for (const connection of connections) {
     if (!connectionStore.getConnectionIsValid(connection)) { continue }
-    const type = typeMap.get(connection.connectionTypeId)
-    if (!type) { continue }
-    const pathStr = connection.path
-    if (!pathStr) { continue }
-    context.strokeStyle = type.color
-    const startCoords = utils.startCoordsFromConnectionPath(pathStr)
-    const endCoords = utils.endCoordsFromConnectionPath(pathStr)
-    const controlPoint = utils.curveControlPointFromPath(pathStr)
-    const path = new Path2D(`m${startCoords.x * r},${startCoords.y * r} q${controlPoint.x * r},${controlPoint.y * r} ${endCoords.x * r},${endCoords.y * r}`)
+    context.lineWidth = 1
+    context.lineCap = 'round'
+    context.strokeStyle = connection.color
+    // update path with ratio
+    let path = connection.path
+    if (!path) { continue }
+    let startCoords = utils.startCoordsFromConnectionPath(path)
+    let endCoords = utils.endCoordsFromConnectionPath(path)
+    let controlPoint = utils.curveControlPointFromPath(path)
+    startCoords = updatePointWithRatio(startCoords)
+    endCoords = updatePointWithRatio(endCoords)
+    controlPoint = updatePointWithRatio(controlPoint)
+    path = `m${startCoords.x},${startCoords.y} q${controlPoint.x},${controlPoint.y} ${endCoords.x},${endCoords.y}`
+    path = new Path2D(path)
     context.stroke(path)
   }
 }

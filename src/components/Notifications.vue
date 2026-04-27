@@ -85,7 +85,6 @@ watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
 const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
-  notifySpaceOutOfSync: false,
   notifiyCouldNotSave: false
 })
 
@@ -104,7 +103,6 @@ const currentUserIsPanningReady = computed(() => globalStore.currentUserIsPannin
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
-const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
 const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
 // group
@@ -142,12 +140,12 @@ const updatePageVisibilityChange = (event) => {
   checkIfShouldNotifySpaceOutOfSync()
 }
 const toggleNotifySpaceOutOfSync = (value) => {
-  state.notifySpaceOutOfSync = value
+  globalStore.notifySpaceOutOfSync = value
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (document.visibilityState !== 'visible') { return }
   if (!globalStore.isSpacePage) { return }
-  if (state.notifySpaceOutOfSync) { return }
+  if (globalStore.notifySpaceOutOfSync) { return }
   if (globalStore.isLoadingSpace) { return }
   try {
     if (!currentUserIsSignedIn.value) { return }
@@ -166,13 +164,11 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
         remoteSpaceEditedAtFromNow: remoteSpaceEditedAt.fromNow(),
         deltaMinutes
       })
-      state.notifySpaceOutOfSync = true
       await spaceStore.restoreCurrentSpaceFromRemote()
-      state.notifySpaceOutOfSync = false
     }
   } catch (error) {
     console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
-    state.notifySpaceOutOfSync = true
+    globalStore.notifySpaceOutOfSync = true
   }
 }
 
@@ -336,7 +332,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   changeSpace(spaceId)
 }
 const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
-const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
+const snapAlignIsVisible = computed(() => globalStore.shouldSnapAlign && !dragToResizeIsVisible.value)
 
 // read-only jiggle
 
@@ -392,9 +388,9 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Drag to Pan
 
-  .persistent-item.info(v-if="snapToGridIsVisible")
+  .persistent-item.info(v-if="snapAlignIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Snap to Grid
+    span Snap Align
 
   .persistent-item.info(v-if="itemSnappingIsReady")
     img.icon(src="@/assets/merge.svg")
@@ -535,7 +531,7 @@ aside.notifications(@click.left="closeAllDialogs")
           button
             span Email Support
 
-  .persistent-item.info(v-if="state.notifySpaceOutOfSync")
+  .persistent-item.info(v-if="globalStore.notifySpaceOutOfSync")
     p
       Loader(:visible="true" :isSmall="true")
       span Refreshing data…
