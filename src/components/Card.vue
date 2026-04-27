@@ -533,6 +533,7 @@ const cardClasses = computed(() => {
   return classes
 })
 const shouldJiggle = computed(() => {
+  if (globalStore.shouldSnapAlign) { return }
   const max = 500
   const cardIsTooBig = width.value > max || props.card.height > max
   if (cardIsTooBig) { return }
@@ -546,7 +547,7 @@ const updateStylesWithWidth = (styles) => {
   const cardHasUrlsOrMedia = cardHasMedia.value || Boolean(state.urls.length)
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || userStore.cardSettingsCardWrapWidth || consts.normalCardWrapWidth
   let cardWidth = resizeWidth.value
-  if (globalStore.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
+  if (globalStore.shouldSnapAlign && currentCardIsBeingResized.value && cardWidth) {
     cardMaxWidth = utils.roundToNearest(cardMaxWidth)
     cardWidth = utils.roundToNearest(cardWidth)
   }
@@ -627,7 +628,7 @@ const tiltResizeIsVisible = computed(() => {
   return true
 })
 const x = computed(() => {
-  const x = props.card.x
+  const x = props.card.xDisplay || props.card.x
   if (x === undefined || x === null) {
     return defaultCardPosition
   } else {
@@ -635,7 +636,7 @@ const x = computed(() => {
   }
 })
 const y = computed(() => {
-  const y = props.card.y
+  const y = props.card.yDisplay || props.card.y
   if (y === undefined || y === null) {
     return defaultCardPosition
   } else {
@@ -1498,7 +1499,7 @@ const showCardDetails = (event) => {
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
   if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
-  if (globalStore.shouldSnapToGrid) { return }
+  if (globalStore.shouldSnapAlign) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {
@@ -2067,6 +2068,10 @@ const toggleVideoIsPaused = () => {
   :data-sticky-stretch-resistance="state.stickyStretchResistance"
   :data-x="x"
   :data-y="y"
+  :data-card-x="props.card.x"
+  :data-card-y="props.card.y"
+  :data-card-x-display="props.card.xDisplay"
+  :data-card-y-display="props.card.yDisplay"
   :data-resize-width="resizeWidth"
   :data-width="resizeWidth || card.width"
   :data-height="card.height"

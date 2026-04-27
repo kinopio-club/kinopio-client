@@ -229,13 +229,6 @@ export default {
     }
     return position
   },
-  cursorPositionSnapToGrid (position) {
-    const gridSpacing = consts.spaceBetweenCards
-    return {
-      x: this.roundToNearest(position.x, gridSpacing),
-      y: this.roundToNearest(position.y, gridSpacing)
-    }
-  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX
@@ -794,6 +787,16 @@ export default {
       total += number
     })
     return total / numbers.length
+  },
+  nearestItems (currentItem, items) {
+    const max = 6
+    items = items.map(item => {
+      item.distance = this.distanceBetweenTwoPoints(item, currentItem)
+      return item
+    })
+    items = sortBy(items, ['distance'])
+    items = items.slice(0, max)
+    return items
   },
   distanceBetweenTwoPoints (point1, point2) {
     if (!point1 || !point2) { return }

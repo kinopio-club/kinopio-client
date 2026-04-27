@@ -155,10 +155,6 @@ export const useLineStore = defineStore('lines', {
       const globalStore = useGlobalStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
-      if (globalStore.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         y: endCursor.y - prevCursor.y
       }

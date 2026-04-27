@@ -51,6 +51,7 @@ export default {
   listInfoHeight: 34,
   listEmptyHeight: 56,
   itemSnapOpacity: 0.5,
+  itemSnapAlignThreshold: 10,
   edgeThreshold: 30,
   itemTypes: ['cards', 'connections', 'boxes', 'lists', 'lines', 'drawingStrokes'],
   isDevelopment () {

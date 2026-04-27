@@ -200,7 +200,7 @@ export const useGlobalStore = defineStore('global', {
     remoteUserResizingLists: [],
 
     // draggingItems
-    shouldSnapToGrid: false,
+    shouldSnapAlign: false,
     preventItemSnapping: false,
     shouldSnapBackToList: false,
 
@@ -328,7 +328,7 @@ export const useGlobalStore = defineStore('global', {
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    axisGuideLinesOrigin: {}
+    itemSnapAlignGuides: {} // x, y
   }),
   getters: {
     getGlobalAllState () {
@@ -368,6 +368,18 @@ export const useGlobalStore = defineStore('global', {
         return 'box'
       } else if (this.currentUserIsDraggingList) {
         return 'list'
+      }
+    },
+    getCurrentDraggingItem () {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      if (this.currentUserIsDraggingCard) {
+        return cardStore.getCurrentDraggingCard
+      } else if (this.currentUserIsDraggingBox) {
+        return boxStore.getCurrentDraggingBox
+      } else if (this.currentUserIsDraggingList) {
+        return listStore.getCurrentDraggingList
       }
     },
     getIsResizingItem () {
@@ -988,6 +1000,167 @@ export const useGlobalStore = defineStore('global', {
       }
     },
 
+    // Snap Align
+
+    getSnapAlignItems () {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      const itemType = this.getInteractingWithItemType
+      if (itemType === 'card') {
+        return cardStore.getCardsSelectableInViewport()
+      } else if (itemType === 'box') {
+        return boxStore.getBoxesSelectableInViewport()
+      } else if (itemType === 'list') {
+        return listStore.getAllLists
+      }
+    },
+    nearestSnapAlignGuide (checks) {
+      const snapThreshold = consts.itemSnapAlignThreshold
+      let nearest = null
+      checks.forEach(checkObject => {
+        const { itemEdge, targetEdge } = checkObject
+        const distance = Math.abs(itemEdge - targetEdge)
+        if (distance <= snapThreshold) {
+          if (!nearest || distance < nearest.distance) {
+            checkObject.guideAt = targetEdge
+            checkObject.snapTo = Math.round(checkObject.snapTo)
+            nearest = checkObject
+          }
+        }
+      })
+      return nearest
+    },
+    normalizeSnapAlignChecks (checks) {
+      if (this.getInteractingWithItemType === 'card') { return checks }
+      return checks.filter(check => check.targetSide !== 'center')
+    },
+    updateItemSnapAlignGuides () {
+      const spaceStore = useSpaceStore()
+      const shouldPrevent = !this.shouldSnapAlign || this.preventItemSnapping
+      if (shouldPrevent) {
+        this.itemSnapAlignGuides = {}
+        return
+      }
+      const item = this.getCurrentDraggingItem
+      if (!item) {
+        this.itemSnapAlignGuides = {}
+        return
+      }
+      let nearestX = null // { targetSide, snapTo, guideAt, distance }
+      let nearestY = null
+      // item sides
+      const itemTop = item.y
+      const itemCenterY = item.y + item.height / 2
+      const itemBottom = item.y + item.height
+      const itemLeft = item.x
+      const itemCenterX = item.x + item.width / 2
+      const itemRight = item.x + item.width
+      // only compare nearest items
+      let viewportItems = this.getSnapAlignItems()
+      viewportItems = viewportItems.filter(target => {
+        if (target.id === item.id) { return }
+        if (target.listId) { return }
+        return !this.multipleCardsSelectedIds.includes(target.id)
+      })
+      const nearestItems = utils.nearestItems(item, viewportItems)
+      // get nearest
+      nearestItems.forEach(target => {
+        if (target.id === item.id) { return }
+        const targetTop = target.y
+        const targetCenterY = target.y + target.height / 2
+        const targetBottom = target.y + target.height
+        const targetLeft = target.x
+        const targetCenterX = target.x + target.width / 2
+        const targetRight = target.x + target.width
+        // y sides
+        let yChecks = [
+          { targetSide: 'top', itemSide: 'top', itemEdge: itemTop, targetEdge: targetTop, snapTo: targetTop },
+          { targetSide: 'top', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetTop, snapTo: targetTop - item.height / 2 },
+          { targetSide: 'top', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetTop, snapTo: targetTop - item.height },
+          { targetSide: 'center', itemSide: 'top', itemEdge: itemTop, targetEdge: targetCenterY, snapTo: targetCenterY },
+          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetCenterY, snapTo: targetCenterY - item.height / 2 },
+          { targetSide: 'center', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetCenterY, snapTo: targetCenterY - item.height },
+          { targetSide: 'bottom', itemSide: 'top', itemEdge: itemTop, targetEdge: targetBottom, snapTo: targetBottom },
+          { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - item.height / 2 },
+          { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - item.height }
+        ]
+        yChecks = this.normalizeSnapAlignChecks(yChecks)
+        const nearestYCandidate = this.nearestSnapAlignGuide(yChecks)
+        if (nearestYCandidate && (!nearestY || nearestYCandidate.distance < nearestY.distance)) {
+          nearestY = nearestYCandidate
+        }
+        // x sides
+        let xChecks = [
+          { targetSide: 'left', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetLeft, snapTo: targetLeft },
+          { targetSide: 'left', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetLeft, snapTo: targetLeft - item.width / 2 },
+          { targetSide: 'left', itemSide: 'right', itemEdge: itemRight, targetEdge: targetLeft, snapTo: targetLeft - item.width },
+          { targetSide: 'center', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetCenterX, snapTo: targetCenterX },
+          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetCenterX, snapTo: targetCenterX - item.width / 2 },
+          { targetSide: 'center', itemSide: 'right', itemEdge: itemRight, targetEdge: targetCenterX, snapTo: targetCenterX - item.width },
+          { targetSide: 'right', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetRight, snapTo: targetRight },
+          { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - item.width / 2 },
+          { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - item.width }
+        ]
+        xChecks = this.normalizeSnapAlignChecks(xChecks)
+        const nearestXCandidate = this.nearestSnapAlignGuide(xChecks)
+        if (nearestXCandidate && (!nearestX || nearestXCandidate.distance < nearestX.distance)) {
+          nearestX = nearestXCandidate
+        }
+      })
+      this.itemSnapAlignGuides.y = nearestY
+      this.itemSnapAlignGuides.x = nearestX
+    },
+    moveItemsUpdateSnapAlignDisplayPosition (items) {
+      const globalStore = useGlobalStore()
+      if (!globalStore.shouldSnapAlign) { return items }
+      const { x, y } = globalStore.itemSnapAlignGuides
+      items = items.map(item => {
+        const width = item.width || item.resizeWidth
+        const height = item.height || item.resizeHeight
+        // x target snap align
+        if (x) {
+          const { targetSide, itemSide, snapTo, guideAt, distance } = x
+          let xDisplay
+          if (itemSide === 'left') {
+            xDisplay = guideAt
+          } else if (itemSide === 'center') {
+            xDisplay = guideAt - (width / 2)
+          } else if (itemSide === 'right') {
+            xDisplay = guideAt - width
+          }
+          const shouldSnap = Math.abs(xDisplay - item.x) < consts.itemSnapAlignThreshold
+          if (shouldSnap) {
+            item.xDisplay = Math.round(xDisplay)
+          } else {
+            item.xDisplay = null
+          }
+          item.shouldSnapAlignToXDisplay = shouldSnap
+        }
+        // y target snap align
+        if (y) {
+          const { targetSide, itemSide, snapTo, guideAt, distance } = y
+          let yDisplay
+          if (itemSide === 'top') {
+            yDisplay = guideAt
+          } else if (itemSide === 'center') {
+            yDisplay = guideAt - (height / 2)
+          } else if (itemSide === 'bottom') {
+            yDisplay = guideAt - height
+          }
+          const shouldSnap = Math.abs(yDisplay - item.y) < consts.itemSnapAlignThreshold
+          if (shouldSnap) {
+            item.yDisplay = Math.round(yDisplay)
+          } else {
+            item.yDisplay = null
+          }
+          item.shouldSnapAlignToYDisplay = shouldSnap
+        }
+        return item
+      })
+      return items
+    },
+
     // Tags
 
     async updateTags () {
@@ -1020,6 +1193,19 @@ export const useGlobalStore = defineStore('global', {
       }
     },
     clearDraggingItems () {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      const cardIds = [this.currentDraggingCardId].concat(this.multipleCardsSelectedIds)
+      const boxIds = [this.currentDraggingBoxId].concat(this.multipleBoxesSelectedIds)
+      const listIds = [this.currentDraggingListId].concat(this.multipleListsSelectedIds)
+      cardStore.checkIfShouldSnapAlignCards(cardIds)
+      boxStore.checkIfShouldSnapAlignBoxes(boxIds)
+      listStore.checkIfShouldSnapAlignLists(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        cardStore.updateCardPositionsInList(list)
+      })
       this.currentDraggingCardId = ''
       this.currentDraggingBoxId = ''
       this.currentDraggingLineId = ''
@@ -1628,7 +1814,7 @@ export const useGlobalStore = defineStore('global', {
       this.offlineIsVisible = false
       this.importArenaChannelIsVisible = false
       this.groupsIsVisible = false
-      this.shouldSnapToGrid = false
+      this.shouldSnapAlign = false
     },
     toggleCardSelected (cardId) {
       const previousMultipleCardsSelectedIds = this.previousMultipleCardsSelectedIds

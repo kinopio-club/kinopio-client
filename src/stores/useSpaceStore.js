@@ -99,7 +99,7 @@ export const useSpaceStore = defineStore('space', {
     getSpaceAllUsers () {
       const userStore = useUserStore()
       let users = this.getSpaceMembers
-      users = users.concat(this.spectators)
+      users = users.concat(this.spectators, this.getSpaceGroupUsers)
       return users
     },
     getSpaceMembers () {
@@ -167,6 +167,32 @@ export const useSpaceStore = defineStore('space', {
       })
       return { cards, connections, boxes, lines, lists }
     },
+    getSpaceSelectedAndDraggingItems () {
+      const globalStore = useGlobalStore()
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const listStore = useListStore()
+      const items = this.getSpaceSelectedItems
+      if (globalStore.currentDraggingCardId) {
+        const card = cardStore.getCard(globalStore.currentDraggingCardId)
+        items.cards = items.cards.concat(card)
+        items.cards = uniqBy(items.cards, 'id')
+        items.cards = items.cards.filter(item => Boolean(item))
+      }
+      if (globalStore.currentDraggingBoxId) {
+        const box = boxStore.getBox(globalStore.currentDraggingBoxId)
+        items.boxes = items.boxes.concat(box)
+        items.boxes = uniqBy(items.boxes, 'id')
+        items.boxes = items.boxes.filter(item => Boolean(item))
+      }
+      if (globalStore.currentDraggingListId) {
+        const list = listStore.getList(globalStore.currentDraggingListId)
+        items.lists = items.lists.concat(list)
+        items.lists = uniqBy(items.lists, 'id')
+        items.lists = items.lists.filter(item => Boolean(item))
+      }
+      return items
+    },
     getSpaceItemColors () {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
@@ -211,9 +237,11 @@ export const useSpaceStore = defineStore('space', {
       if (!itemId) { return }
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
+      const listStore = useListStore()
       const card = cardStore.getCard(itemId)
       const box = boxStore.getBox(itemId)
-      return card || box
+      const list = listStore.getList(itemId)
+      return card || box || list
     },
     getSpaceIsFavorite (spaceId) {
       const userStore = useUserStore()

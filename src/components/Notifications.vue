@@ -103,7 +103,6 @@ const currentUserIsPanningReady = computed(() => globalStore.currentUserIsPannin
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
-const shouldSnapToGrid = computed(() => globalStore.shouldSnapToGrid)
 const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
 // group
@@ -333,7 +332,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   changeSpace(spaceId)
 }
 const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
-const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
+const snapAlignIsVisible = computed(() => globalStore.shouldSnapAlign && !dragToResizeIsVisible.value)
 
 // read-only jiggle
 
@@ -389,9 +388,9 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Drag to Pan
 
-  .persistent-item.info(v-if="snapToGridIsVisible")
+  .persistent-item.info(v-if="snapAlignIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Snap to Grid
+    span Snap Align
 
   .persistent-item.info(v-if="itemSnappingIsReady")
     img.icon(src="@/assets/merge.svg")
