@@ -11,7 +11,6 @@ const spaceStore = useSpaceStore()
 
 const isVisible = computed(() => globalStore.shouldSnapAlign)
 const color = computed(() => userStore.color)
-// const guides = computed(() => globalStore.itemSnapAlignGuides) // { x: { targetSide, snapTo, guideAt, distance } , y: {} }
 const verticalLine = computed(() => globalStore.itemSnapAlignGuides.x?.guideAt)
 const horizontalLine = computed(() => globalStore.itemSnapAlignGuides.y?.guideAt)
 </script>
