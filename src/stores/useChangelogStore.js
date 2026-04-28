@@ -38,8 +38,6 @@ export const useChangelogStore = defineStore('changelog', {
       if (!this.updates) { return }
       const newId = this.updates[0]?.id || 0
       const prevId = await cache.prevReadChangelogId()
-
-      console.log('❤️❤️❤️', newId, prevId, this.updates)
       if (!prevId) {
         // first time visitors are updated to latest changelog
         cache.updatePrevReadChangelogId(newId)
@@ -47,6 +45,7 @@ export const useChangelogStore = defineStore('changelog', {
       } else {
         const isUpdated = prevId !== newId
         this.isUpdated = isUpdated
+        cache.updatePrevReadChangelogId(newId)
       }
     }
   }
