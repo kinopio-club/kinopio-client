@@ -35,14 +35,15 @@ export default {
     const centerY = (rect.top + rect.bottom) / 2
 
     return {
-      north: { x: centerX, y: rect.top },
-      east: { x: rect.right, y: centerY },
-      south: { x: centerX, y: rect.bottom },
-      west: { x: rect.left, y: centerY },
       northEast: { x: rect.right, y: rect.top },
       southEast: { x: rect.right, y: rect.bottom },
       southWest: { x: rect.left, y: rect.bottom },
-      northWest: { x: rect.left, y: rect.top }
+      northWest: { x: rect.left, y: rect.top },
+
+      north: { x: centerX, y: rect.top },
+      east: { x: rect.right, y: centerY },
+      south: { x: centerX, y: rect.bottom },
+      west: { x: rect.left, y: centerY }
     }
   },
 
