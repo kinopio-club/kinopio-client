@@ -6,12 +6,12 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
-
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
+import closestPoints from '@/closestPoints.js'
 
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
@@ -21,6 +21,8 @@ import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
 import sortBy from 'lodash-es/sortBy'
 import { colord } from 'colord'
+
+const cardinalDebounceTimers = new Map()
 
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
@@ -118,6 +120,17 @@ export const useConnectionStore = defineStore('connections', {
       const curve = controlPoint || consts.defaultConnectionPathCurveControlPoint
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
+    getshortestConnectionPathBetweenItems (startItem, endItem, controlPoint) {
+      let { point1, point2, point1Cardinal, point2Cardinal } = closestPoints.findClosestPoints(startItem, endItem)
+      if (startItem.itemType === 'box') {
+        point1 = utils.estimatedItemConnectorPosition(startItem)
+      }
+      if (endItem.itemType === 'box') {
+        point2 = utils.estimatedItemConnectorPosition(endItem)
+      }
+      const path = this.getConnectionPathBetweenCoords(point1, point2, controlPoint)
+      return { path, point1Cardinal, point2Cardinal }
+    },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
       const listStore = useListStore()
       const spaceStore = useSpaceStore()
@@ -129,10 +142,16 @@ export const useConnectionStore = defineStore('connections', {
         if (list.id === startItem.listId) { startItem = list }
         if (list.id === endItem.listId) { endItem = list }
       })
-      const start = utils.estimatedItemConnectorPosition(startItem)
-      const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
-      const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
-      return path
+
+      let path, point1Cardinal, point2Cardinal
+      if (controlPoint === consts.straightLineConnectionPathControlPoint) {
+        ({ path, point1Cardinal, point2Cardinal } = this.getshortestConnectionPathBetweenItems(startItem, endItem, controlPoint))
+      } else {
+        const start = utils.estimatedItemConnectorPosition(startItem)
+        const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
+        path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
+      }
+      return { path, point1Cardinal, point2Cardinal }
     },
     getConnectionIsValid (connection) {
       const spaceStore = useSpaceStore()
@@ -344,14 +363,19 @@ export const useConnectionStore = defineStore('connections', {
         await nextTick()
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
+        const spaceStore = useSpaceStore()
         if (!itemIds.length) { return }
         const connections = this.getConnectionsByItemIds(itemIds) || []
         const updates = []
         connections.forEach(connection => {
           // perf: use dom lookup bc faster than getting state item
-          const startItem = utils.itemElementDimensions({ id: connection.startItemId })
-          const endItem = utils.itemElementDimensions({ id: connection.endItemId })
-          const path = this.getConnectionPathBetweenItems({
+          let startItem = utils.itemElementDimensions({ id: connection.startItemId })
+          let endItem = utils.itemElementDimensions({ id: connection.endItemId })
+          startItem = spaceStore.updateItemWithItemType(startItem)
+          endItem = spaceStore.updateItemWithItemType(endItem)
+          if (!endItem || !startItem) { return }
+
+          const { path, point1Cardinal, point2Cardinal } = this.getConnectionPathBetweenItems({
             startItem,
             startItemId: connection.startItemId,
             endItem,
@@ -359,11 +383,70 @@ export const useConnectionStore = defineStore('connections', {
             controlPoint: connection.controlPoint
           })
           if (!path) { return }
-          const update = {
-            id: connection.id,
-            path
+          // determine if should animate snapping between points
+          const prevPoint1Cardinal = connection.point1Cardinal
+          const prevPoint2Cardinal = connection.point2Cardinal
+          const shouldInterpolatePoint1 = prevPoint1Cardinal !== point1Cardinal
+          const shouldInterpolatePoint2 = prevPoint2Cardinal !== point2Cardinal
+          const shouldAnimateInterpolation = shouldInterpolatePoint1 || shouldInterpolatePoint2
+          if (shouldAnimateInterpolation) {
+            // compute path using previous cardinals so the line stays stable during debounce
+            const paddedRect1 = closestPoints.updateRectWithPadding(closestPoints.normalizeRect(startItem), startItem.itemType)
+            const paddedRect2 = closestPoints.updateRectWithPadding(closestPoints.normalizeRect(endItem), endItem.itemType)
+            const cardinalPoints1 = closestPoints.getCardinalPoints(paddedRect1)
+            const cardinalPoints2 = closestPoints.getCardinalPoints(paddedRect2)
+            let prevPoint1 = cardinalPoints1[prevPoint1Cardinal]
+            let prevPoint2 = cardinalPoints2[prevPoint2Cardinal]
+            // mirror box override from getshortestConnectionPathBetweenItems
+            if (startItem.itemType === 'box') { prevPoint1 = utils.estimatedItemConnectorPosition(startItem) }
+            if (endItem.itemType === 'box') { prevPoint2 = utils.estimatedItemConnectorPosition(endItem) }
+            const stablePath = (prevPoint1 && prevPoint2)
+              ? this.getConnectionPathBetweenCoords(prevPoint1, prevPoint2, connection.controlPoint)
+              : path
+            // debounce the actual cardinal update and snap animation
+            if (!cardinalDebounceTimers.has(connection.id)) {
+              const connectionId = connection.id
+              const flush = () => {
+                cardinalDebounceTimers.delete(connectionId)
+                const currentConnection = this.byId[connectionId]
+                if (!currentConnection) { return }
+                // recalculate cardinals from current item positions at flush time
+                let flushStartItem = utils.itemElementDimensions({ id: currentConnection.startItemId })
+                let flushEndItem = utils.itemElementDimensions({ id: currentConnection.endItemId })
+                if (!flushStartItem || !flushEndItem) { return }
+                flushStartItem = spaceStore.updateItemWithItemType(flushStartItem)
+                flushEndItem = spaceStore.updateItemWithItemType(flushEndItem)
+                const { point1Cardinal: currentPoint1Cardinal, point2Cardinal: currentPoint2Cardinal } = this.getConnectionPathBetweenItems({
+                  startItem: flushStartItem,
+                  startItemId: currentConnection.startItemId,
+                  endItem: flushEndItem,
+                  endItemId: currentConnection.endItemId,
+                  controlPoint: currentConnection.controlPoint
+                })
+                const fromPath = this.byId[connectionId]?.path
+                const cardinalUpdate = [{ id: connectionId, point1Cardinal: currentPoint1Cardinal, point2Cardinal: currentPoint2Cardinal }]
+                if (userStore.getUserCanEditSpace) {
+                  this.updateConnections(cardinalUpdate)
+                } else {
+                  this.updateConnectionsState(cardinalUpdate)
+                }
+                if (fromPath) {
+                  globalStore.triggerConnectionSnapAnimation({ id: connectionId, fromPath })
+                }
+              }
+              const timer = setTimeout(flush, 50)
+              cardinalDebounceTimers.set(connection.id, { timer, flush })
+            }
+            // use stable path (old cardinals, new positions) during debounce window
+            updates.push({ id: connection.id, path: stablePath })
+          } else {
+            // cardinals stable or reverted – cancel any pending debounce
+            if (cardinalDebounceTimers.has(connection.id)) {
+              clearTimeout(cardinalDebounceTimers.get(connection.id).timer)
+              cardinalDebounceTimers.delete(connection.id)
+            }
+            updates.push({ id: connection.id, path, point1Cardinal, point2Cardinal })
           }
-          updates.push(update)
         })
         if (userStore.getUserCanEditSpace) {
           this.updateConnections(updates)
@@ -377,6 +460,12 @@ export const useConnectionStore = defineStore('connections', {
     },
     updateConnectionPathByItemId (itemId) {
       this.updateConnectionPathsByItemIds([itemId])
+    },
+    flushCardinalDebounceTimers () {
+      cardinalDebounceTimers.forEach(({ timer, flush }) => {
+        clearTimeout(timer)
+        flush()
+      })
     },
 
     // label

@@ -245,7 +245,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       .badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
-
     //- debug
     ItemDetailsDebug(:item="currentConnection" :keys="['startItemId', 'endItemId', 'path']")
 </template>

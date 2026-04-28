@@ -968,6 +968,7 @@ const resetGlobalStoreState = () => {
 }
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
+  connectionStore.flushCardinalDebounceTimers()
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {

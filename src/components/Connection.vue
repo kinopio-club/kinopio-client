@@ -20,7 +20,7 @@ const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
 
 let unsubscribes
-let animationTimer, isMultiTouch, startCursor, currentCursor
+let animationTimer, snapAnimationTimer, isMultiTouch, startCursor, currentCursor
 let observer
 
 const connectionElement = ref(null)
@@ -45,6 +45,10 @@ onMounted(() => {
         showConnectionDetails(event, isFromStore)
       } else if (name === 'closeAllDialogs') {
         updatePathWhileDragging(null)
+      } else if (name === 'triggerConnectionSnapAnimation') {
+        const { id, fromPath } = args[0]
+        if (id !== props.connection.id) { return }
+        startSnapAnimation(fromPath)
       }
     }
   )
@@ -378,6 +382,45 @@ const cancelAnimation = () => {
   animationTimer = undefined
   state.pathWhileSelected = undefined
   state.frameCount = 0
+}
+
+// snap animation: lerp path between old and new cardinal points during drag
+
+const snapLerp = (a, b, t) => Math.round(a + (b - a) * t)
+const parsePathNums = (path) => {
+  const start = utils.startCoordsFromConnectionPath(path)
+  const cp = utils.curveControlPointFromPath(path)
+  const end = utils.endCoordsFromConnectionPath(path)
+  return [start.x, start.y, cp.x, cp.y, end.x, end.y]
+}
+const buildPathFromNums = ([sx, sy, cx, cy, ex, ey]) => `m${sx},${sy} q${cx},${cy} ${ex},${ey}`
+
+const startSnapAnimation = (fromPath) => {
+  window.cancelAnimationFrame(snapAnimationTimer)
+  const fromNums = parsePathNums(fromPath)
+  const totalFrames = 10 // duration
+  let frame = 0
+  const step = () => {
+    frame++
+    const element = connectionPathElement.value
+    if (!element) { state.pathWhileDragging = ''; snapAnimationTimer = undefined; return }
+    // read the live target path that Vue keeps updated via :data-d during drag
+    const liveToPath = element.getAttribute('data-d')
+    if (!liveToPath) { state.pathWhileDragging = ''; snapAnimationTimer = undefined; return }
+    const toNums = parsePathNums(liveToPath)
+    const t = frame / totalFrames
+    const nums = fromNums.map((from, i) => snapLerp(from, toNums[i], t))
+    const interpolated = buildPathFromNums(nums)
+    element.setAttribute('d', interpolated)
+    state.pathWhileDragging = interpolated
+    if (frame < totalFrames) {
+      snapAnimationTimer = window.requestAnimationFrame(step)
+    } else {
+      state.pathWhileDragging = ''
+      snapAnimationTimer = undefined
+    }
+  }
+  snapAnimationTimer = window.requestAnimationFrame(step)
 }
 const shouldAnimate = computed(() => {
   if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }

@@ -855,8 +855,6 @@ const clearFocus = () => {
 .list-info-bottom
   position absolute
   bottom 0
-  border-top-left-radius 0
-  border-top-right-radius 0
   .row
     flex-direction row-reverse
 
