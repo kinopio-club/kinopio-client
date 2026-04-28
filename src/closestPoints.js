@@ -47,7 +47,25 @@ export default {
       northWest: { x: rect.left, y: rect.top }
     }
   },
+  closestPair (pairs, minDistance) {
+    let closest
+    pairs = pairs.filter(pair => pair.distance === minDistance)
+    console.log('🚛🚛', pairs)
 
+    pairs.forEach(pair => {
+      const { point1, point2, point1Cardinal, point2Cardinal } = pair
+
+      // if isleft
+      //   point1.x < point2.x
+      // point1Cardinal = 'southEast'
+      // point2Cardinal = 'southWest'
+      // if
+      // if (pair.)
+    })
+
+    const closestPair = pairs[0] // change to eval based on .. something
+    return closestPair
+  },
   findClosestPoints (item1, item2) {
     // Normalize and add padding to rectangles
     let rect1 = this.normalizeRect(item1)
@@ -59,37 +77,29 @@ export default {
     const points2 = this.getCardinalPoints(rect2)
     // Find the pair of points with minimum distance
     let minDistance = Infinity
-    let closestPair = { point1: null, point2: null }
+    const closestPairs = [] // { point1: null, point2: null }
     // Iterate through all point pairs
     Object.values(points1).forEach((point1, p1Index) => {
       Object.values(points2).forEach((point2, p2Index) => {
         const dx = point1.x - point2.x
         const dy = point1.y - point2.y
         const distance = Math.sqrt(dx * dx + dy * dy)
-
-        if (distance === minDistance) {
-          const point1Cardinal = Object.keys(points1)[p1Index]
-          const point2Cardinal = Object.keys(points2)[p2Index]
-
-          console.log('🫐🫐🫐🫐🫐', point1Cardinal, point2Cardinal)
-        }
         if (distance <= minDistance) {
           const point1Cardinal = Object.keys(points1)[p1Index]
           const point2Cardinal = Object.keys(points2)[p2Index]
-
-          console.log('🚛🚛')
-
           // only connect to the middle if both sides are the same axis middle points
           // const isBothPointsCards = item1.itemType === 'card' && item2.itemType === 'card'
-          const isOnlyOneAxisMiddlePoint = point1.isMiddlePointX !== point2.isMiddlePointX || point1.isMiddlePointY !== point2.isMiddlePointY
-          if (isOnlyOneAxisMiddlePoint) { return }
+          const isOnlyOneMiddlePointX = point1.isMiddlePointX !== point2.isMiddlePointX
+          const isOnlyOneMiddlePointY = point1.isMiddlePointY !== point2.isMiddlePointY
+          if (isOnlyOneMiddlePointX || isOnlyOneMiddlePointY) { return }
           console.log('❤️', point1Cardinal, point2Cardinal)
 
           minDistance = distance
-          closestPair = { point1: { ...point1 }, point2: { ...point2 }, point1Cardinal, point2Cardinal }
+          const closestPair = { point1: { ...point1 }, point2: { ...point2 }, point1Cardinal, point2Cardinal, distance }
+          closestPairs.push(closestPair)
         }
       })
     })
-    return closestPair
+    return this.closestPair(closestPairs, minDistance)
   }
 }
