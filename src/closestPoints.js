@@ -47,24 +47,49 @@ export default {
       northWest: { x: rect.left, y: rect.top }
     }
   },
+
+  // prefer middle points when the items are roughly aligned on that axis, otherwise use corner points.
   closestPair (pairs, minDistance) {
-    let closest
     pairs = pairs.filter(pair => pair.distance === minDistance)
-    console.log('🚛🚛', pairs)
 
-    pairs.forEach(pair => {
-      const { point1, point2, point1Cardinal, point2Cardinal } = pair
+    const middlePairs = pairs.filter(p => p.point1.isMiddlePointX || p.point1.isMiddlePointY)
+    const cornerPairs = pairs.filter(p => !p.point1.isMiddlePointX && !p.point1.isMiddlePointY)
 
-      // if isleft
-      //   point1.x < point2.x
-      // point1Cardinal = 'southEast'
-      // point2Cardinal = 'southWest'
-      // if
-      // if (pair.)
-    })
+    // Use middle points' positions as a proxy for item centers
+    const northSouth = pairs.find(p => p.point1Cardinal === 'south' && p.point2Cardinal === 'north') ||
+      pairs.find(p => p.point1Cardinal === 'north' && p.point2Cardinal === 'south')
+    const eastWest = pairs.find(p => p.point1Cardinal === 'east' && p.point2Cardinal === 'west') ||
+      pairs.find(p => p.point1Cardinal === 'west' && p.point2Cardinal === 'east')
 
-    const closestPair = pairs[0] // change to eval based on .. something
-    return closestPair
+    if (northSouth || eastWest) {
+      // Compute dx/dy from the middle point positions (these represent center axes)
+      const ref = (northSouth || eastWest)
+      const dx = Math.abs(ref.point1.x - ref.point2.x)
+      const dy = Math.abs(ref.point1.y - ref.point2.y)
+      const threshold = 20 // px
+      if (northSouth && dx < threshold) return northSouth
+      if (eastWest && dy < threshold) return eastWest
+    }
+
+    // Fall back to best corner
+    if (cornerPairs.length) {
+      const ref = pairs[0]
+      const p1IsLeft = ref.point1.x < ref.point2.x
+      const dx = Math.abs(ref.point1.x - ref.point2.x)
+      const dy = Math.abs(ref.point1.y - ref.point2.y)
+      const isPrimarilyVertical = dy > dx
+
+      if (isPrimarilyVertical) {
+        const target = p1IsLeft ? 'southWest' : 'southEast'
+        return cornerPairs.find(p => p.point1Cardinal === target) || cornerPairs[0]
+      } else {
+        const p1IsAbove = ref.point1.y < ref.point2.y
+        const target = p1IsAbove ? 'northEast' : 'southEast'
+        return cornerPairs.find(p => p.point1Cardinal === target) || cornerPairs[0]
+      }
+    }
+
+    return pairs[0]
   },
   findClosestPoints (item1, item2) {
     // Normalize and add padding to rectangles
@@ -95,8 +120,8 @@ export default {
           console.log('❤️', point1Cardinal, point2Cardinal)
 
           minDistance = distance
-          const closestPair = { point1: { ...point1 }, point2: { ...point2 }, point1Cardinal, point2Cardinal, distance }
-          closestPairs.push(closestPair)
+          const pair = { point1: { ...point1 }, point2: { ...point2 }, point1Cardinal, point2Cardinal, distance }
+          closestPairs.push(pair)
         }
       })
     })
