@@ -29,8 +29,8 @@ const updateDialogHeight = async () => {
 
 <template lang="pug">
 dialog.narrow.about-groups(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  //- section
-  //-   p About Groups
+  section.title-section
+    p About Groups
   AboutGroups
 </template>
 

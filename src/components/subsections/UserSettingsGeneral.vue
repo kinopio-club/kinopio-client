@@ -7,7 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
-import UserAPIInfo from '@/components/dialogs/UserAPIInfo.vue'
+import UserApiInfo from '@/components/dialogs/UserApiInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import DeleteAllConfirmation from '@/components/dialogs/DeleteAllConfirmation.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
@@ -50,7 +50,7 @@ const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
   deleteAllConfirmationVisible: false,
-  userAPIInfoIsVisible: false,
+  userApiInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
   notificationSettingsIsVisible: false,
   themeSettingsIsVisible: false
@@ -63,7 +63,7 @@ const closeDialogs = () => {
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
-  state.userAPIInfoIsVisible = false
+  state.userApiInfoIsVisible = false
   state.moderatorActionsSettingsIsVisible = false
   state.deleteAllConfirmationVisible = false
 }
@@ -93,10 +93,10 @@ const toggleThemeSettingsIsVisible = () => {
   closeDialogs()
   state.themeSettingsIsVisible = !isVisible
 }
-const toggleUserAPIInfoIsVisible = () => {
-  const isVisible = state.userAPIInfoIsVisible
+const toggleUserApiInfoIsVisible = () => {
+  const isVisible = state.userApiInfoIsVisible
   closeDialogs()
-  state.userAPIInfoIsVisible = !isVisible
+  state.userApiInfoIsVisible = !isVisible
 }
 const toggleModeratorActionsSettingsIsVisible = () => {
   const isVisible = state.moderatorActionsSettingsIsVisible
@@ -150,10 +150,10 @@ const toggleIsDebugMode = () => {
     .row
       //- API/Developer Info
       .button-wrap
-        button(@click.left.stop="toggleUserAPIInfoIsVisible" :class="{active: state.userAPIInfoIsVisible}")
+        button(@click.left.stop="toggleUserApiInfoIsVisible" :class="{active: state.userApiInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
           span API
-        UserAPIInfo(:visible="state.userAPIInfoIsVisible")
+        UserApiInfo(:visible="state.userApiInfoIsVisible")
       .button-wrap
         label(:class="{active: isDebugMode}" @click.left.prevent="toggleIsDebugMode" @keydown.stop.enter="toggleIsDebugMode")
           input(type="checkbox" v-model="isDebugMode")

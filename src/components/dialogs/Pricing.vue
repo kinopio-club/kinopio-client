@@ -158,7 +158,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
               span Can create Groups
               button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
                 span ?
-                AboutGroups(:visible="state.aboutGroupsIsVisible")
+    AboutGroups(:visible="state.aboutGroupsIsVisible")
     template(v-if="!props.parentIsPage")
       CardsCreatedProgress
       //- free cards from space member
@@ -189,13 +189,16 @@ dialog.pricing
     .button-wrap,
     .small-button
       margin-top 0
-  dialog.about-groups
-    top -100px
-    right 16px
-  .free-limit-row
+    .free-limit-row
     button
       margin-left 5px
     dialog.free-limit-faq
       top 18px
+  section
+    position relative
+  dialog.about-groups
+    right 16px
+    top -48px
+    width 220px
 
 </style>

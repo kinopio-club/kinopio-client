@@ -116,8 +116,8 @@ const checkIsCardScope = (event) => {
   const isFromCard = event.target.classList[0] === 'card'
   return isFromCard || isFromCardName
 }
-const checkIsJumpToDialogScope = (event) => {
-  const isFromDialog = event.target.closest('dialog.jump-to')
+const checkIsTocDialogScope = (event) => {
+  const isFromDialog = event.target.closest('dialog#toc')
   return isFromDialog
 }
 const checkIsPanScope = (event) => {
@@ -143,11 +143,11 @@ const handleShortcutsOnKeyUp = (event) => {
   const keyL = key === 'l' || keyCode === 'KeyL'
   const keyN = key === 'n' || keyCode === 'KeyN'
   const keyM = key === 'm' || keyCode === 'KeyM' // depcrecated for JumpTo Mar 2026
-  const keyJ = key === 'j' || keyCode === 'KeyJ'
+  const keyC = key === 'c' || keyCode === 'KeyC'
   const keyT = key === 't' || keyCode === 'KeyT'
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
-  const isJumpToDialogScope = checkIsJumpToDialogScope(event)
+  const isTocDialogScope = checkIsTocDialogScope(event)
   const toolbarIsDrawing = globalStore.getToolbarIsDrawing
   const canEditSpace = userStore.getUserCanEditSpace
   // ?
@@ -160,9 +160,13 @@ const handleShortcutsOnKeyUp = (event) => {
     spaceStore.createSpace()
     globalStore.addNotification({ message: 'New space created (N)', icon: 'add', type: 'success' })
     globalStore.triggerSpaceDetailsInfoIsVisible()
+  // c
+  } else if (keyC && (isSpaceScope || isTocDialogScope)) {
+    globalStore.triggerTocIsVisible()
   // m
-  } else if ((keyM || keyJ) && (isSpaceScope || isJumpToDialogScope)) {
-    globalStore.triggerJumpToIsVisible()
+  } else if (keyM && isSpaceScope) {
+    const value = !userStore.shouldShowMinimap
+    userStore.updateUser({ shouldShowMinimap: value })
   // t
   } else if (keyT && isSpaceScope) {
     globalStore.addNotification({ message: 'Theme toggled (T)', type: 'info' })

@@ -27,6 +27,8 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 let canvas, context
+let offscreenCanvas, offscreenContext
+let cachedDrawingImage, cachedDrawingDataUrl
 let startPanningPosition
 const itemRadius = 1
 const canvasElement = ref(null)
@@ -34,9 +36,9 @@ const canvasElement = ref(null)
 let unsubscribes
 
 onMounted(async () => {
-  init()
+  update()
   window.addEventListener('scroll', updateScroll)
-  window.addEventListener('resize', init)
+  window.addEventListener('resize', update)
   window.addEventListener('pointerup', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
 
@@ -78,49 +80,49 @@ onMounted(async () => {
     async ({ name, args }) => {
       if (globalStoreActions.includes(name)) {
         await nextTick()
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const cardActionUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const connectionActionUnsubscribe = connectionStore.$onAction(
     ({ name, args }) => {
       if (connectionStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const boxActionUnsubscribe = boxStore.$onAction(
     ({ name, args }) => {
       if (boxStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const lineActionUnsubscribe = lineStore.$onAction(
     ({ name, args }) => {
       if (lineStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const listActionUnsubscribe = listStore.$onAction(
     ({ name, args }) => {
       if (listStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (spaceStoreActions.includes(name)) {
-        initThrottle()
+        updateThrottle()
       }
     }
   )
@@ -136,7 +138,7 @@ onMounted(async () => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
-  window.removeEventListener('resize', init)
+  window.removeEventListener('resize', update)
   window.removeEventListener('pointerup', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
   unsubscribes()
@@ -144,7 +146,7 @@ onBeforeUnmount(() => {
 
 watch(() => globalStore.isLoadingSpace, async (value, prevValue) => {
   await nextTick()
-  init()
+  update()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -157,7 +159,8 @@ const props = defineProps({
   space: Object,
   viewportIsHidden: Boolean,
   backgroundColor: String,
-  parentIsDialog: Boolean
+  parentIsDialog: Boolean,
+  preventAnimation: Boolean
 })
 const state = reactive({
   scrollX: 0,
@@ -168,12 +171,17 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    init()
+    update()
   }
 })
 watch(() => props.space, (value, prevValue) => {
   if (value) {
-    init()
+    update()
+  }
+})
+watch(() => props.size, (value, prevValue) => {
+  if (value) {
+    update()
   }
 })
 
@@ -201,49 +209,84 @@ const styles = computed(() => {
 
 // canvas
 
-const initThrottle = throttle((color) => {
-  init()
+const updateThrottle = throttle((color) => {
+  update()
 }, 100) // 10fps
 
-const init = async () => {
+const update = async () => {
   await nextTick()
   if (!props.visible) { return }
-  await initCanvas()
+  await updateCanvas()
   if (!canvas) { return }
+  // draw everything to the offscreen canvas so all layers are composited before anything appears on screen.
+  const visibleContext = context
+  context = offscreenContext
+  if (!context) { return }
   await drawDrawing()
   drawBoxes()
   drawConnections()
   drawLists()
   drawCards()
   drawLines()
+  // Blit the fully-composited offscreen canvas to the visible canvas to prevent flickering
+  context = visibleContext
+  context.clearRect(0, 0, state.pageWidth, state.pageHeight)
+  context.drawImage(offscreenCanvas, 0, 0, state.pageWidth, state.pageHeight)
 }
-const initCanvas = async () => {
+const updateCanvas = async () => {
   await nextTick()
   state.pageWidth = Math.round(pageWidth.value * ratio.value)
   state.pageHeight = Math.round(pageHeight.value * ratio.value)
   updateScroll()
   canvas = canvasElement.value
   if (!canvas) { return }
-  context = canvas.getContext('2d')
-  canvas.width = state.pageWidth * window.devicePixelRatio
-  canvas.height = state.pageHeight * window.devicePixelRatio
-  canvas.style.width = state.pageWidth + 'px'
-  canvas.style.height = state.pageHeight + 'px'
-  context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  context.clearRect(0, 0, canvas.width, canvas.height)
+  const targetWidth = state.pageWidth * window.devicePixelRatio
+  const targetHeight = state.pageHeight * window.devicePixelRatio
+  if (!targetWidth || !targetHeight) { return }
+  // only resize when dimensions change to prevent flickering
+  if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+    canvas.style.width = state.pageWidth + 'px'
+    canvas.style.height = state.pageHeight + 'px'
+    context = canvas.getContext('2d')
+    context.scale(window.devicePixelRatio, window.devicePixelRatio)
+  }
+  // Reuse offscreen canvas when dimensions match, just clear it
+  if (!offscreenCanvas || offscreenCanvas?.width !== targetWidth || offscreenCanvas?.height !== targetHeight) {
+    offscreenCanvas = new OffscreenCanvas(targetWidth, targetHeight)
+    offscreenContext = offscreenCanvas.getContext('2d')
+    offscreenContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  } else {
+    offscreenContext.clearRect(0, 0, state.pageWidth, state.pageHeight)
+  }
 }
 
 // drawing
 
-const drawDrawing = async () => {
-  if (!globalStore.drawingDataUrl) { return }
-  const image = new Image()
-  image.onload = () => {
-    const width = image.width * ratio.value
-    const height = image.height * ratio.value
-    context.drawImage(image, 0, 0, width, height)
+const drawDrawing = () => {
+  const dataUrl = globalStore.drawingDataUrl
+  if (!dataUrl) { return Promise.resolve() }
+  // Reuse cached image if the data URL hasn't changed
+  if (cachedDrawingImage && cachedDrawingDataUrl === dataUrl) {
+    const width = cachedDrawingImage.width * ratio.value
+    const height = cachedDrawingImage.height * ratio.value
+    context.drawImage(cachedDrawingImage, 0, 0, width, height)
+    return Promise.resolve()
   }
-  image.src = globalStore.drawingDataUrl
+  return new Promise((resolve) => {
+    const image = new Image()
+    image.onload = () => {
+      cachedDrawingImage = image
+      cachedDrawingDataUrl = dataUrl
+      const width = image.width * ratio.value
+      const height = image.height * ratio.value
+      context.drawImage(image, 0, 0, width, height)
+      resolve()
+    }
+    image.onerror = resolve
+    image.src = dataUrl
+  })
 }
 
 // connections
@@ -258,7 +301,9 @@ const updatePointWithRatio = (point) => {
 }
 const drawConnections = () => {
   const connections = mapConnections.value
+  if (!connections.length) { return }
   for (const connection of connections) {
+    if (!connectionStore.getConnectionIsValid(connection)) { continue }
     context.lineWidth = 1
     context.lineCap = 'round'
     context.strokeStyle = connection.color
@@ -283,20 +328,17 @@ const mapBoxes = computed(() => {
   return props.space?.boxes || boxStore.getAllBoxes
 })
 const drawBoxes = () => {
-  let boxes = mapBoxes.value
-  boxes = utils.clone(boxes)
-  boxes = boxes.map(box => {
-    box.x = box.x * ratio.value
-    box.y = box.y * ratio.value
-    box.width = box.resizeWidth * ratio.value
-    box.height = box.resizeHeight * ratio.value
-    return box
-  })
-  boxes.forEach(box => {
+  const boxes = mapBoxes.value
+  const r = ratio.value
+  context.lineWidth = 1
+  for (const box of boxes) {
+    const x = box.x * r
+    const y = box.y * r
+    const width = box.resizeWidth * r
+    const height = box.resizeHeight * r
     const rect = new Path2D()
-    rect.roundRect(box.x, box.y, box.width, box.height, itemRadius)
+    rect.roundRect(x, y, width, height, itemRadius)
     context.strokeStyle = box.color
-    context.lineWidth = 1
     context.stroke(rect)
     if (box.fill === 'filled') {
       context.fillStyle = box.color
@@ -304,7 +346,7 @@ const drawBoxes = () => {
       context.fill(rect)
       context.globalAlpha = 1
     }
-  })
+  }
 }
 
 // lines
@@ -314,16 +356,18 @@ const mapLines = computed(() => {
 })
 const drawLines = () => {
   const lines = mapLines.value
-  lines.forEach(line => {
-    const width = Math.floor(globalStore.pageWidth * ratio.value)
-    const y = Math.floor(line.y * ratio.value)
+  if (!lines.length) { return }
+  const r = ratio.value
+  const width = Math.floor(globalStore.pageWidth * r)
+  context.lineWidth = 1
+  for (const line of lines) {
+    const y = Math.floor(line.y * r)
     context.strokeStyle = line.color
-    context.lineWidth = 1
     context.beginPath()
     context.moveTo(0, y)
     context.lineTo(width, y)
     context.stroke()
-  })
+  }
 }
 
 // lists
@@ -332,23 +376,18 @@ const mapLists = computed(() => {
   return props.space?.lists || listStore.getAllLists
 })
 const drawLists = () => {
-  let lists = mapLists.value
-  lists = utils.clone(lists)
-  lists = lists.map(list => {
-    const width = list.resizeWidth || consts.normalCardWrapWidth
-    const height = list.height || consts.listEmptyHeight
-    list.x = list.x * ratio.value
-    list.y = list.y * ratio.value
-    list.width = width * ratio.value
-    list.height = height * ratio.value
-    return list
-  })
-  lists.forEach(list => {
+  const lists = mapLists.value
+  const r = ratio.value
+  for (const list of lists) {
+    const x = list.x * r
+    const y = list.y * r
+    const width = (list.resizeWidth || consts.normalCardWrapWidth) * r
+    const height = (list.height || consts.listEmptyHeight) * r
     const rect = new Path2D()
-    rect.roundRect(list.x, list.y, list.width, list.height, itemRadius)
+    rect.roundRect(x, y, width, height, itemRadius)
     context.fillStyle = list.color
     context.fill(rect)
-  })
+  }
 }
 
 // cards
@@ -358,23 +397,18 @@ const mapCards = computed(() => {
 })
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
-  let cards = mapCards.value
-  cards = utils.clone(cards)
-  cards = cards.map(card => {
-    const width = card.width || 200
-    const height = card.height || 50
-    card.x = card.x * ratio.value
-    card.y = card.y * ratio.value
-    card.width = width * ratio.value
-    card.height = height * ratio.value
-    return card
-  })
-  cards.forEach(card => {
+  const cards = mapCards.value
+  const r = ratio.value
+  for (const card of cards) {
+    const x = card.x * r
+    const y = card.y * r
+    const width = (card.width || 200) * r
+    const height = (card.height || 50) * r
     const rect = new Path2D()
-    rect.roundRect(card.x, card.y, card.width, card.height, itemRadius)
+    rect.roundRect(x, y, width, height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
     context.fill(rect)
-  })
+  }
 }
 
 // viewport
@@ -384,13 +418,15 @@ const updateScroll = () => {
   state.scrollY = window.scrollY
 }
 const viewportStyle = computed(() => {
-  const zoom = globalStore.getSpaceCounterZoomDecimal
+  const counterZoom = globalStore.getSpaceCounterZoomDecimal
+  const origin = globalStore.zoomOrigin
   const color = userStore.color
-  // viewport box
-  let width = (globalStore.viewportWidth * zoom) * ratio.value
-  let height = (globalStore.viewportHeight * zoom) * ratio.value
-  let left = (state.scrollX * zoom) * ratio.value
-  let top = (state.scrollY * zoom) * ratio.value
+  // viewport size in space coordinates (correct regardless of origin)
+  let width = (globalStore.viewportWidth * counterZoom) * ratio.value
+  let height = (globalStore.viewportHeight * counterZoom) * ratio.value
+  // convert scroll position to space coordinates, accounting for zoom origin offset
+  let left = (state.scrollX * counterZoom - origin.x * (counterZoom - 1)) * ratio.value
+  let top = (state.scrollY * counterZoom - origin.y * (counterZoom - 1)) * ratio.value
   // constraints
   if (Math.round(left + width) > state.pageWidth) {
     left = Math.min(left, state.pageWidth)
@@ -425,9 +461,20 @@ const positionInSpace = (event) => {
   y = y / ratio.value
   return { x, y }
 }
+const spaceToScroll = (spacePos) => {
+  // convert a space coordinate to a scroll position, inverse of the viewport mapping
+  const zoom = globalStore.getSpaceZoomDecimal
+  const origin = globalStore.zoomOrigin
+  return {
+    x: origin.x * (1 - zoom) + zoom * spacePos.x,
+    y: origin.y * (1 - zoom) + zoom * spacePos.y
+  }
+}
 const positionInViewportCenter = (position) => {
-  let x = position.x - (globalStore.viewportWidth / 2)
-  let y = position.y - (globalStore.viewportHeight / 2)
+  const counterZoom = globalStore.getSpaceCounterZoomDecimal
+  // offset by half the visible area in space coordinates
+  let x = position.x - (globalStore.viewportWidth * counterZoom / 2)
+  let y = position.y - (globalStore.viewportHeight * counterZoom / 2)
   x = Math.max(0, x)
   y = Math.max(0, y)
   return { x, y }
@@ -447,9 +494,11 @@ const startPanningViewport = (event) => {
 const panToPosition = (event) => {
   const position = positionInSpace(event)
   const centerPosition = positionInViewportCenter(position)
+  // convert space coordinates back to scroll coordinates
+  const scroll = spaceToScroll(centerPosition)
   window.scrollTo({
-    top: centerPosition.y,
-    left: centerPosition.x,
+    top: scroll.y,
+    left: scroll.x,
     behavior: 'smooth'
   })
   state.prevPosition = position
@@ -464,7 +513,9 @@ const panViewport = (event) => {
     x: position.x - state.prevPosition.x,
     y: position.y - state.prevPosition.y
   }
-  window.scrollBy(delta.x, delta.y, 'instant')
+  // delta is in space coordinates, scale to scroll coordinates
+  const zoom = globalStore.getSpaceZoomDecimal
+  window.scrollBy(delta.x * zoom, delta.y * zoom, 'instant')
   state.prevPosition = position
 }
 const endPanningViewport = (event) => {
@@ -477,9 +528,9 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   canvas#minimap-canvas(ref="canvasElement")
-  .viewport.blink(v-if="viewportIsVisible" :style="viewportStyle")
+  .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
 </template>
 
 <style lang="stylus">

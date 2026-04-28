@@ -45,6 +45,7 @@ export const useChangelogStore = defineStore('changelog', {
       } else {
         const isUpdated = prevId !== newId
         this.isUpdated = isUpdated
+        cache.updatePrevReadChangelogId(newId)
       }
     }
   }

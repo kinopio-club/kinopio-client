@@ -153,6 +153,12 @@ export const useConnectionStore = defineStore('connections', {
       }
       return { path, point1Cardinal, point2Cardinal }
     },
+    getConnectionIsValid (connection) {
+      const spaceStore = useSpaceStore()
+      const startItem = spaceStore.getSpaceItemById(connection.startItemId)
+      const endItem = spaceStore.getSpaceItemById(connection.endItemId)
+      return Boolean(startItem && endItem)
+    },
 
     // init
 
