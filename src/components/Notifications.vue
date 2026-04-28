@@ -317,6 +317,7 @@ const refreshBrowser = () => {
 }
 const updateChangelogAndRefreshBrowser = () => {
   cache.updatePrevReadChangelogId(latestChangelogPost.value.id)
+  console.log('🔥🔥🔥🔥', latestChangelogPost.value, latestChangelogPost.value.id)
   refreshBrowser()
 }
 const duplicateSpace = async () => {
