@@ -10,7 +10,7 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
-import JumpTo from '@/components/dialogs/JumpTo.vue'
+import Toc from '@/components/dialogs/Toc.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -37,11 +37,11 @@ onMounted(() => {
       } else if (name === 'triggerHideTouchInterface') {
         hideOnTouch()
       } else if (name === 'closeAllDialogs') {
-        if (!globalStore.jumpToIsPinned) {
-          hideJumpTo()
+        if (!globalStore.tocIsPinned) {
+          hideToc()
         }
-      } else if (name === 'triggerJumpToIsVisible') {
-        toggleJumpTo()
+      } else if (name === 'triggerTocIsVisible') {
+        toggleTocIsVisible()
       }
     }
   )
@@ -121,7 +121,7 @@ const leftControlsIsVisible = computed(() => {
 })
 const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
-  if (globalStore.jumpToIsPinned) { return true }
+  if (globalStore.tocIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
   // const isTouchDevice = globalStore.isTouchDevice
   // if (!isTouchDevice) { return true }
@@ -143,11 +143,19 @@ const togglePresentationMode = () => {
 
 // jumpTo
 
-const hideJumpTo = () => {
+const hideToc = () => {
   state.jumpToIsVisible = false
 }
-const toggleJumpTo = () => {
+const toggleTocIsVisible = () => {
   state.jumpToIsVisible = !state.jumpToIsVisible
+}
+
+// minimap
+
+const minimapIsVisible = computed(() => userStore.shouldShowMinimap)
+const toggleMinimap = () => {
+  const value = !userStore.shouldShowMinimap
+  userStore.updateUser({ shouldShowMinimap: value })
 }
 
 // hide
@@ -240,15 +248,31 @@ const updatePositionInVisualViewport = () => {
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
     //- presentation mode
-    .button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
+    .button-wrap.footer-button-wrap(
+      @click="togglePresentationMode"
+      @touchend.stop :class="{'hidden': state.isHiddenOnTouch}"
+    )
+      button.small-button(
+        :class="{'active': isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}"
+        title="Focus/Presentation Mode (P)"
+      )
         img.icon.presentation(src="@/assets/presentation.svg")
-    //- jumpTo
-    .button-wrap.footer-button-wrap(@click.stop="toggleJumpTo" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Jump To (J)")
+    //- jumpTo minimap
+    .segmented-buttons
+      button.small-button(
+        @click.stop="toggleTocIsVisible"
+        @touchend.stop
+        :class="{'hidden': state.isHiddenOnTouch, 'active': state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
+        title="Toggle TOC (C)"
+      )
         img.icon.toc(src="@/assets/toc.svg")
-      JumpTo(:visible="state.jumpToIsVisible")
-
+      button.small-button(
+        @click.stop="toggleMinimap"
+        :class="{'hidden': state.isHiddenOnTouch, 'active': minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
+        title="Toggle Minimap (M)"
+      )
+        img.icon.minimap(src="@/assets/minimap.svg")
+    Toc(:visible="state.jumpToIsVisible")
 </template>
 
 <style lang="stylus">
@@ -324,6 +348,10 @@ const updatePositionInVisualViewport = () => {
 
   dialog
     top initial !important
+
+  .icon.minimap
+    width 13px
+    vertical-align -1px
 
 footer
   .is-mobile-icon

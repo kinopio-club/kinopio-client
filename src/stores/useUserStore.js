@@ -81,6 +81,7 @@ export const useUserStore = defineStore('user', {
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
     cardDetailsResizeWidth: null,
+    shouldShowMinimap: false,
     affiliatePromoCode: null,
 
     // billing

@@ -134,6 +134,12 @@ export const useConnectionStore = defineStore('connections', {
       const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
       return path
     },
+    getConnectionIsValid (connection) {
+      const spaceStore = useSpaceStore()
+      const startItem = spaceStore.getSpaceItemById(connection.startItemId)
+      const endItem = spaceStore.getSpaceItemById(connection.endItemId)
+      return Boolean(startItem && endItem)
+    },
 
     // init
 

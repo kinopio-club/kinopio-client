@@ -61,10 +61,10 @@ const updateSize = async () => {
 
 // pin dialog
 
-const dialogIsPinned = computed(() => globalStore.jumpToIsPinned)
+const dialogIsPinned = computed(() => globalStore.tocIsPinned)
 const toggleDialogIsPinned = () => {
   const isPinned = !dialogIsPinned.value
-  globalStore.jumpToIsPinned = isPinned
+  globalStore.tocIsPinned = isPinned
 }
 
 // items
@@ -86,7 +86,7 @@ const focusItem = (item) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.jump-to.is-pinnable(
+dialog.narrow.toc.is-pinnable#toc(
   v-if="props.visible"
   :open="props.visible"
   @click.left.stop
@@ -95,9 +95,9 @@ dialog.narrow.jump-to.is-pinnable(
   :data-is-pinned="dialogIsPinned"
   :class="{'is-pinned': dialogIsPinned}"
 )
-  section.jump-to-section.title-section
+  section.toc-section.title-section
     .row.title-row(ref="rowElement")
-      span Jump To
+      span TOC
       .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
@@ -109,18 +109,16 @@ dialog.narrow.jump-to.is-pinnable(
 </template>
 
 <style lang="stylus">
-dialog.jump-to
+dialog.toc
   overflow auto
   right 8px
-  bottom 28px
+  bottom 34px
   top initial
   left initial
   text-align left
-  &.is-pinned
-    right 0
   .right-pin
     transform rotate(180deg)
-  section.jump-to-section
+  section.toc-section
     user-select none
   section.results-section
     max-height 50dvh
