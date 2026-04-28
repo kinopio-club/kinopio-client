@@ -1061,7 +1061,6 @@ export const useGlobalStore = defineStore('global', {
       let viewportItems = this.getSnapAlignItems()
       viewportItems = viewportItems.filter(target => {
         if (target.id === item.id) { return }
-        if (target.listId) { return }
         return !this.multipleCardsSelectedIds.includes(target.id)
       })
       const nearestItems = utils.nearestItems(item, viewportItems)
