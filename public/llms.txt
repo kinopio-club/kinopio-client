@@ -1,6 +1,6 @@
 # Kinopio
 
-> Kinopio is a spatial thinking canvas for connecting thoughts, ideas, and feelings using cards, connection lines, boxes, and lists. Kinopio is free for 100 cards. No sign up required.
+> Kinopio is a spatial thinking canvas for connecting thoughts, ideas, and plans using cards, connection lines, boxes, and lists. Kinopio is free for 100 cards. No sign up required.
 
 ## Major features
 
