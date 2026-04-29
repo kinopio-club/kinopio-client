@@ -82,7 +82,7 @@ AboutJsonLd
           height="511"
         )
           source(src="https://updates.kinopio.club/page/about/hero/1.webm")
-        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and feelings. Community-funded and{{' '}}
+        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
         p Free for 100 cards. No sign up required.
