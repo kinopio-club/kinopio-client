@@ -743,7 +743,7 @@ export const useSpaceStore = defineStore('space', {
             x: 82,
             y: 251,
             z: 0,
-            name: 'Get your thoughts, ideas and feelings out',
+            name: 'Get your thoughts, ideas and plans out',
             width: 200,
             height: 51
           },

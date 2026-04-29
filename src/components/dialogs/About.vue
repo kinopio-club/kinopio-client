@@ -137,7 +137,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
 
   section
     .row
-      p Collect and connect your thoughts, ideas, and feelings
+      p Collect and connect your thoughts, ideas, and plans
     .row
       .button-wrap
         button(@click.stop="toggleHelpIsVisible" :class="{active: state.helpIsVisible}")

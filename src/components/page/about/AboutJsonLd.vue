@@ -53,7 +53,7 @@ const softwareSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
   name: 'Kinopio',
-  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.',
+  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and plans. Designed to work the way your mind works.',
   applicationCategory: 'ProductivityApplication',
   operatingSystem: 'Web browser',
   url: 'https://kinopio.club',
@@ -88,7 +88,7 @@ const websiteSchema = {
   '@type': 'WebSite',
   name: 'Kinopio',
   url: 'https://kinopio.club',
-  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings.',
+  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and plans.',
   potentialAction: {
     '@type': 'SearchAction',
     target: 'https://kinopio.club/explore?search={search_term_string}',
@@ -100,7 +100,7 @@ const aboutPageSchema = {
   '@type': 'AboutPage',
   name: 'About Kinopio',
   url: 'https://kinopio.club',
-  description: 'Learn about Kinopio, a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings.',
+  description: 'Learn about Kinopio, a spatial note-taking tool for collecting and connecting your thoughts, ideas, and plans.',
   mainEntity: {
     '@id': 'https://kinopio.club/#organization'
   }
@@ -109,7 +109,7 @@ const productSchema = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: 'Kinopio',
-  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and feelings. Designed to work the way your mind works.',
+  description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and plans. Designed to work the way your mind works.',
   url: 'https://kinopio.club',
   brand: {
     '@id': 'https://kinopio.club/#organization'
