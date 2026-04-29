@@ -135,6 +135,11 @@ const state = reactive({
     pickerPosition: {},
     pickerSearch: ''
   },
+  user: {
+    pickerIsVisible: false,
+    pickerPosition: {},
+    pickerSearch: ''
+  },
   notifiedMembers: false,
   formats: {
     image: '',
@@ -1470,6 +1475,15 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @selectTag="updateTagBracketsWithTag"
         @currentTag="updateCurrentSearchTag"
         @newTagColor="updateNewTagColor"
+      )
+      UserPicker(
+        :visible="state.user.pickerIsVisible"
+        :parentIsCardDetails="true"
+        :cursorPosition="state.cursorPosition"
+        :position="state.user.pickerPosition"
+        :search="state.user.pickerSearch"
+        @closeDialog="hideUserPicker"
+        @selectUser="updateAssignedUser"
       )
       SpacePicker(
         :visible="state.space.pickerIsVisible"
