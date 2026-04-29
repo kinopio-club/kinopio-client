@@ -69,8 +69,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-// changelog
+// spaces
 
+const currentSpaceIsChangelog = computed(() => spaceStore.id === consts.changelogSpaceId())
+const currentSpaceIsAffiliate = computed(() => spaceStore.id === consts.affiliateSpaceId())
+const currentSpaceIsRoadmap = computed(() => spaceStore.id === consts.roadmapSpaceId())
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
   const changelogId = changelogStore.updates[0]?.id
@@ -79,7 +82,14 @@ const changeSpaceToChangelog = () => {
     changelogStore.isUpdated = false
   }
   spaceStore.changeSpace(space)
-  globalStore.addNotification({ message: 'Changelog space opened', type: 'success' })
+}
+const changeSpaceToAffiliate = () => {
+  const space = { id: consts.affiliateSpaceId() }
+  spaceStore.changeSpace(space)
+}
+const changeSpaceToRoadmap = () => {
+  const space = { id: consts.roadmapSpaceId() }
+  spaceStore.changeSpace(space)
 }
 
 // donate
@@ -111,15 +121,6 @@ const toggleHelpIsVisible = () => {
   closeDialogs()
   state.helpIsVisible = !isVisible
 }
-
-// roadmap
-
-const changeSpaceToRoadmap = () => {
-  const space = { id: consts.roadmapSpaceId() }
-  spaceStore.changeSpace(space)
-  globalStore.addNotification({ message: 'Roadmap space opened', type: 'success' })
-}
-
 </script>
 
 <template lang="pug">
@@ -144,14 +145,21 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
         Help(:visible="state.helpIsVisible")
       .button-wrap
         a(href="/roadmap")
-          button(@click.left.stop.prevent="changeSpaceToRoadmap")
+          button(@click.left.stop.prevent="changeSpaceToRoadmap" :class="{ active: currentSpaceIsRoadmap }")
             span 💐 Roadmap
     .row
       .button-wrap
         a(href="/changelog")
-          button(@click.left.stop.prevent="changeSpaceToChangelog")
+          button(@click.left.stop.prevent="changeSpaceToChangelog" :class="{ active: currentSpaceIsChangelog }")
             span Changelog
             img.updated.icon(src="@/assets/updated.gif")
+    .row
+      .button-wrap
+        a(href="https://kinopio.club/friends-of-kinopio-affiliate-program-YNmS6C3fofN3R9mYgO1Bu")
+          button(@click.left.stop.prevent="changeSpaceToAffiliate" :class="{ active: currentSpaceIsAffiliate }")
+            span Affiliate Program
+            img.new.icon(src="@/assets/new.gif")
+
             //- v-if="changelogIsUpdated"
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
@@ -213,7 +221,8 @@ dialog.about
   top calc(100% - 6px) !important
   &.overflow
     overflow auto
-  .updated
+  .updated.icon,
+  .new.icon
     margin 0
     margin-left 3px
   .keyboard-shortcut

@@ -108,16 +108,23 @@ export default {
 
   roadmapSpaceId () {
     if (this.isDevelopment()) {
-      return 'FiM7akGos18Sfx4yKrwjF'
+      return 'i6l8R_lSxtsSr3roZ_IEV'
     } else {
       return '3CBHtivu7X7nTzrcaTFQV'
     }
   },
   changelogSpaceId () {
     if (this.isDevelopment()) {
-      return 'ezP9B9r2U0CUYR8g-Mn9N'
+      return 'Y21yhTMPRE2uFSSplLtHR'
     } else {
       return '6lsytK8ZfOtMl2oqG05Rj'
+    }
+  },
+  affiliateSpaceId () {
+    if (this.isDevelopment()) {
+      return '1kR5AsvvdpD7x2zxjHLh9'
+    } else {
+      return 'YNmS6C3fofN3R9mYgO1Bu'
     }
   },
 
