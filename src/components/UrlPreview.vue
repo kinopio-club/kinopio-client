@@ -173,6 +173,13 @@ const showNone = async () => {
               span Text
             button(@click="showNone" :class="{active : isShowNone}")
               span None
+        .row(v-else-if="!previewHasInfo && state.moreOptionsIsVisible")
+          .segmented-buttons
+            button(@click="showAll" :class="{active : isShowAll}")
+              span All
+            button(@click="showNone" :class="{active : isShowNone}")
+              span None
+
       //- image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
       a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)" target="_blank")
