@@ -140,6 +140,7 @@ export const useGlobalStore = defineStore('global', {
     shouldExplicitlyRenderCardIds: {},
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
+    cardDetailsCursor: {}, // startPosition, precedingString
     parentCardId: '',
     childCardId: '',
     remoteCardDetailsVisible: [],

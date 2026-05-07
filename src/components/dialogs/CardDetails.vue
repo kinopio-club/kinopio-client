@@ -452,6 +452,33 @@ const resetTextareaHeight = () => {
   if (!visible.value) { return }
   nameElement.value.style.height = 'initial'
 }
+const setCursorPosition = (element, position) => {
+  const length = name.value.length
+  const { startPosition, precedingString } = globalStore.cardDetailsCursor
+  const isStartPosition = !utils.isNullish(startPosition)
+  if (isStartPosition) {
+    // precedingString = utils.normalizeString(precedingString)
+
+    const match = utils.normalizeString(name.value).lastIndexOf(utils.normalizeString(precedingString))
+    // const match = name.value.lastIndexOf(precedingString)
+
+    const isMatch = match !== -1
+    if (isMatch) {
+      position = match + precedingString.length
+    } else {
+      position = length
+    }
+    // get pos from precedingString
+    // position = globalStore.cardDetailsCursor.startPosition
+    console.log('☎️☎️☎️', globalStore.cardDetailsCursor, isMatch, position, name.value, '🛫', precedingString)
+    element.setSelectionRange(position, position)
+    globalStore.cardDetailsCursor = {}
+  } else if (position) {
+    element.setSelectionRange(position, position)
+  } else {
+    element.setSelectionRange(length, length)
+  }
+}
 const focusName = async (position) => {
   if (globalStore.shouldPreventNextFocusOnName) {
     triggerUpdateHeaderAndFooterPosition()
@@ -460,14 +487,8 @@ const focusName = async (position) => {
   }
   await nextTick()
   const element = nameElement.value
-  const length = name.value.length
   utils.focusTextarea(element)
-  if (position) {
-    element.setSelectionRange(position, position)
-  }
-  if (length) {
-    element.setSelectionRange(length, length)
-  }
+  setCursorPosition(element, position)
   triggerUpdateHeaderAndFooterPosition()
 }
 const name = computed({
