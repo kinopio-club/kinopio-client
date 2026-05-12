@@ -10,6 +10,7 @@ import Wordmark from '@/components/page/Wordmark.vue'
 import Header from '@/components/page/Header.vue'
 import AboutSocialProof from '@/components/page/about/AboutSocialProof.vue'
 import AboutHowTo from '@/components/page/about/AboutHowTo.vue'
+import AboutTeamBenefits from '@/components/page/about/AboutTeamBenefits.vue'
 import AboutExamples from '@/components/page/about/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/page/about/AboutMoreFeatures.vue'
 import AboutCollaborate from '@/components/page/about/AboutCollaborate.vue'
@@ -92,6 +93,8 @@ AboutJsonLd
         .button-wrap
           router-link(to="/app")
             button.success Open Kinopio
+
+      AboutTeamBenefits
 
       AboutHowTo
 
