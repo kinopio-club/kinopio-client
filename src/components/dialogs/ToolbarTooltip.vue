@@ -62,9 +62,9 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
   section.title-section
     .row.title-row
       span {{ data.title }}
-        span.badge.keyboard-shortcut {{ data.keyboardShortcut }}
-      //- a href new window target _blank
-      button.small-button ?
+        span.badge.keyboard-shortcut(title="keyboard Shortcut") {{ data.keyboardShortcut }}
+      a(:href="data.helpUrl" target="_blank")
+        button.small-button ?
   section
     img(src="https://d2w9rnfcy7mm78.cloudfront.net/46095939/original_105b79e6b78982b6b1eea60b261d66bf.jpeg?1778634028?bc=0")
     p {{ data.description }}
@@ -74,7 +74,6 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
 dialog.toolbar-tooltip
   left 29px
   top 0px
-  // border 0
   width 180px
   .keyboard-shortcut
     vertical-align 0
