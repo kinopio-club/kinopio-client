@@ -10,6 +10,7 @@ import Wordmark from '@/components/page/Wordmark.vue'
 import Header from '@/components/page/Header.vue'
 import AboutSocialProof from '@/components/page/about/AboutSocialProof.vue'
 import AboutHowTo from '@/components/page/about/AboutHowTo.vue'
+import AboutTeamBenefits from '@/components/page/about/AboutTeamBenefits.vue'
 import AboutExamples from '@/components/page/about/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/page/about/AboutMoreFeatures.vue'
 import AboutCollaborate from '@/components/page/about/AboutCollaborate.vue'
@@ -83,15 +84,17 @@ AboutJsonLd
           height="511"
         )
           source(src="https://updates.kinopio.club/page/about/hero/1.webm")
-        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
+        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Started in 2018, community-funded, and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
-        p Free for 100 cards. No sign up required.
 
+        p Free for 100 cards. No sign up required.
         //- cta
         .button-wrap
           router-link(to="/app")
             button.success Open Kinopio
+
+      AboutTeamBenefits
 
       AboutHowTo
 
