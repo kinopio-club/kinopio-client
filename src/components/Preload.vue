@@ -47,6 +47,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/add.svg")
     img.icon(src="@/assets/align-left-distributed.svg")
     img.icon(src="@/assets/align-left.svg")
+    img.icon(src="@/assets/amount.svg")
     img.icon(src="@/assets/android-menu.svg")
     img.icon(src="@/assets/anon-avatar.svg")
     img.icon(src="@/assets/apple.svg")
