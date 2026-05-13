@@ -7,14 +7,22 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useLineStore } from '@/stores/useLineStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
+import ToolbarTooltip from '@/components/dialogs/ToolbarTooltip.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const lineStore = useLineStore()
 
+let tooltipTimer
+const tooltipTimerDelay = 600
+
 const props = defineProps({
   visible: Boolean
+})
+
+const state = reactive({
+  lineTooltipIsVisible: false
 })
 
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
@@ -56,6 +64,24 @@ const DrawingLabel = computed(() => {
     return 'Drawing (D)'
   }
 })
+
+// tooltips
+
+const closeAllTooltips = () => {
+  state.lineTooltipIsVisible = false
+}
+const startTooltipTimer = (toolName) => {
+  tooltipTimer = setTimeout(() => {
+    closeAllTooltips()
+    if (toolName === 'line') {
+      state.lineTooltipIsVisible = true
+    } // else if () {}
+  }, tooltipTimerDelay)
+}
+const cancelTooltip = async (event) => {
+  clearTimeout(tooltipTimer)
+  closeAllTooltips()
+}
 </script>
 
 <template lang="pug">
@@ -64,18 +90,21 @@ nav#toolbar.toolbar(v-if="visible")
   .toolbar-items
     .segmented-buttons
       //- Line
-      .button-wrap
+      .button-wrap(
+          aria-label="Add Line Divider (-)"
+          @mouseenter="startTooltipTimer('line')"
+          @mouseleave="cancelTooltip"
+        )
         button(
           @click="addLine"
-          title="Add Line Divider (-)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
           img.icon.line-icon(src="@/assets/line.svg")
-
+        ToolbarTooltip(:visible="state.lineTooltipIsVisible" toolName="line")
       //- Box
       .button-wrap
         button(
-          title="Draw Box (B)"
+          aria-label="Draw Box (B)"
           :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('box')"
         )
@@ -86,7 +115,7 @@ nav#toolbar.toolbar(v-if="visible")
       //- List
       .button-wrap
         button(
-          title="Draw List (L)"
+          aria-label="Draw List (L)"
           :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('list')"
         )
@@ -97,7 +126,7 @@ nav#toolbar.toolbar(v-if="visible")
       //- Drawing
       .button-wrap
         button.drawing-button(
-          title="Drawing (D)"
+          aria-label="Drawing (D)"
           :class="{ active: toolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('drawing')"
         )
