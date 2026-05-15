@@ -70,6 +70,16 @@ export default defineConfig(async ({ command, mode }) => {
   // update once a day (maybe not at the build stage, but in netlify functions)
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
+  // dev https certs (optional, local only)
+  const certKeyPath = './.cert/key.pem'
+  const certPath = './.cert/cert.pem'
+  let httpsConfig
+  if (command === 'serve' && fs.existsSync(certKeyPath) && fs.existsSync(certPath)) {
+    httpsConfig = {
+      key: fs.readFileSync(certKeyPath),
+      cert: fs.readFileSync(certPath)
+    }
+  }
   // config
   return {
     ssgOptions: {
@@ -161,10 +171,7 @@ export default defineConfig(async ({ command, mode }) => {
         // Allow serving files from one level up to the project root
         allow: ['..']
       },
-      https: {
-        key: fs.readFileSync('./.cert/key.pem'),
-        cert: fs.readFileSync('./.cert/cert.pem')
-      }
+      https: httpsConfig
     },
     build: {
       // generates and deploys .map files

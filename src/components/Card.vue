@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -40,7 +41,6 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
-import uniq from 'lodash-es/uniq'
 
 dayjs.extend(isToday)
 extend([namesPlugin])
@@ -49,6 +49,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -1247,37 +1248,6 @@ const checkIfShouldDragMultipleCards = (event, cardId = props.card.id) => {
     globalStore.clearMultipleSelected()
   }
 }
-const startDraggingDuplicateItems = async (event) => {
-  globalStore.currentUserIsDraggingDuplicateItem = true
-  checkIfShouldDragMultipleCards(event)
-  let cardIds = globalStore.multipleCardsSelectedIds.concat([props.card.id])
-  cardIds = uniq(cardIds)
-  const cards = cardIds.map(id => cardStore.getCard(id))
-  const index = cardIds.findIndex(id => id === props.card.id) || 0
-  const boxes = globalStore.multipleBoxesSelectedIds.map(id => boxStore.getBox(id))
-  globalStore.clearMultipleSelected()
-  // create new items
-  const newItems = await utils.uniqueSpaceItems({
-    cards: utils.clone(cards),
-    boxes: utils.clone(boxes)
-  })
-  const newCards = newItems.cards.map(card => {
-    card.z += 1
-    return card
-  })
-  const newBoxes = newItems.boxes.map(box => {
-    box.z += 1
-    return box
-  })
-  const newCurrentCard = newCards[index]
-  newCards.forEach(card => cardStore.createCard(card, true))
-  newBoxes.forEach(box => boxStore.createBox(box, true))
-  // select new items
-  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
-  globalStore.multipleBoxesSelectedIds = newBoxes.map(box => box.id)
-  globalStore.multipleCardsSelectedIds = newCards.map(card => card.id)
-  return newCurrentCard.id
-}
 const startDraggingCard = async (event) => {
   isMultiTouch = false
   let cardId = props.card.id
@@ -1296,11 +1266,11 @@ const startDraggingCard = async (event) => {
   if (globalStore.currentUserIsDrawingConnection) { return }
   globalStore.closeAllDialogs()
   globalStore.clearDraggingItems()
-  if (event.altKey) {
-    cardId = await startDraggingDuplicateItems(event)
-  }
   globalStore.currentUserIsDraggingCard = true
   globalStore.currentDraggingCardId = cardId
+  if (event.altKey) {
+    cardId = await globalStore.startDraggingDuplicateItems('card', cardId)
+  }
   postMessage.sendHaptics({ name: 'softImpact' })
   const updates = {
     cardId,

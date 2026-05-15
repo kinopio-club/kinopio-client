@@ -722,8 +722,7 @@ const writeSelectedToClipboard = async (position) => {
   }
 }
 const handleCopyCutEvent = async (event) => {
-  const isSpaceScope = checkIsSpaceScope(event)
-  if (!isSpaceScope) { return }
+  if (!globalStore.getIsMultipleItemsSelected) { return }
   globalStore.clearNotificationsWithPosition()
   const position = currentCursorPosition || prevCursorPosition
   event.preventDefault()

@@ -70,8 +70,14 @@ const checkIfShouldStartMomentum = () => {
   }
   shouldCancelPanningTimer = true
 }
-const cancelMomentum = () => {
+const cancelMomentum = (event) => {
   shouldCancelMomentumTimer = true
+  if (event?.type === 'wheel') {
+    shouldCancelPanningTimer = true
+    startPosition = null
+    panningDelta = null
+    shouldPanNextFrame = false
+  }
 }
 
 // safari fix

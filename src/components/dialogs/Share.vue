@@ -8,7 +8,6 @@ import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
-import InviteToGroup from '@/components/InviteToGroup.vue'
 import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import QRCode from '@/components/dialogs/QRCode.vue'
@@ -16,8 +15,6 @@ import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 import consts from '@/consts.js'
-import GroupLabel from '@/components/GroupLabel.vue'
-import AddToGroup from '@/components/dialogs/AddToGroup.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -55,8 +52,7 @@ const state = reactive({
   isShareInPresentationMode: false,
   childDialogIsVisible: false,
   spaceUsersIsVisible: false,
-  QRCodeIsVisible: false,
-  addToGroupIsVisible: false
+  QRCodeIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -104,8 +100,7 @@ const dialogIsVisible = computed(() => {
     state.embedIsVisible ||
     state.childDialogIsVisible ||
     state.spaceUsersIsVisible ||
-    state.QRCodeIsVisible ||
-    state.addToGroupIsVisible
+    state.QRCodeIsVisible
   )
 })
 const closeDialogs = () => {
@@ -115,12 +110,14 @@ const closeDialogs = () => {
   state.childDialogIsVisible = false
   state.spaceUsersIsVisible = false
   state.QRCodeIsVisible = false
-  state.addToGroupIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const childDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
   state.embedIsVisible = false
+}
+const selectGroup = (group) => {
+  closeDialogs()
 }
 
 // toggles
@@ -153,11 +150,6 @@ const toggleQRCodeIsVisible = () => {
   closeDialogs()
   state.QRCodeIsVisible = !isVisible
 }
-const toggleAddToGroupIsVisible = () => {
-  const isVisible = state.addToGroupIsVisible
-  closeDialogs()
-  state.addToGroupIsVisible = !isVisible
-}
 
 // users
 
@@ -166,49 +158,6 @@ const toggleSpaceUsersIsVisible = () => {
   const value = !state.spaceUsersIsVisible
   closeDialogs()
   state.spaceUsersIsVisible = value
-}
-
-// group
-
-const currentSpace = computed(() => spaceStore.getSpaceAllState)
-const userGroups = computed(() => groupStore.getCurrentUserGroups)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-const currentUserIsGroupAdmin = (group) => {
-  return groupStore.getGroupUserIsAdmin({
-    userId: userStore.id,
-    groupId: group.id
-  })
-}
-const toggleSpaceGroup = async (group) => {
-  const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
-  if (shouldRemoveSpaceGroup) {
-    await removeSpaceGroup(group)
-  } else {
-    await updateSpaceGroup(group)
-  }
-}
-const updateSpaceGroup = (group) => {
-  const isSpaceCreator = userStore.getUserIsSpaceCreator
-  if (isSpaceCreator) {
-    groupStore.addSpaceToGroup(group)
-  } else {
-    globalStore.addNotification({
-      message: 'Only space creator can assign to group',
-      type: 'danger'
-    })
-  }
-}
-const removeSpaceGroup = (group) => {
-  const isGroupAdmin = currentUserIsGroupAdmin(group)
-  const isSpaceCreator = userStore.getUserIsSpaceCreator
-  if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup()
-  } else {
-    globalStore.addNotification({
-      message: 'Only space creator, or group admin, can remove from group',
-      type: 'danger'
-    })
-  }
 }
 </script>
 
@@ -256,18 +205,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon(src="@/assets/presentation.svg")
 
   //- Invite
-  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" :group="spaceGroup" @childDialogIsVisible="childDialogIsVisible")
-
-  //- Group
-  section
-    .button-wrap
-      button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
-        img.icon.group(src="@/assets/group.svg")
-        GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
-        template(v-else)
-          span Add to Group
-      AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
-
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
   section(v-if="!spaceIsRemote")
     p
       span To share or invite collaborators,

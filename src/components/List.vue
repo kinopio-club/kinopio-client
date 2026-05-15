@@ -116,20 +116,20 @@ const updateIsHover = (value) => {
   state.isHover = value
 }
 const startListInfoInteraction = async (event) => {
+  let listId = props.list.id
   if (!currentListIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
   if (isResizing.value) { return }
   if (!canEditSpace.value) { return }
-  globalStore.currentDraggingListId = ''
   globalStore.closeAllDialogs()
   globalStore.currentUserIsDraggingList = true
-  const list = props.list.id
-  // if (event.altKey) {
-  //   list = await startDraggingDuplicateItems(event)
-  // }
-  globalStore.currentDraggingListId = list
-  listStore.incrementListZ(props.list.id)
+  globalStore.currentDraggingListId = listId
+  if (event.altKey) {
+    listId = await globalStore.startDraggingDuplicateItems('list', listId)
+    globalStore.currentDraggingListId = listId
+  }
+  listStore.incrementListZ(listId)
 }
 const endListInfoInteraction = (event) => {
   // const isMeta = event.metaKey || event.ctrlKey
@@ -304,7 +304,7 @@ const updateTouchPosition = (event) => {
 const updateCurrentTouchPosition = (event) => {
   currentTouchPosition = utils.cursorPositionInViewport(event)
   if (currentListIsBeingDragged.value || isResizing.value) {
-    event.preventDefault() // allows dragging boxes without scrolling
+    event.preventDefault() // allows dragging items without scrolling
   }
 }
 const touchIsNearTouchPosition = (event) => {

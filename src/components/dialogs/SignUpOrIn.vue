@@ -202,7 +202,7 @@ const signUp = async (event) => {
     const response = await apiStore.signUp({ email, password, currentUser, sessionToken })
     const newUser = await response.json()
     if (isSuccess(response)) {
-      globalStore.clearAllNotifications()
+      globalStore.clearNotificationsSignUpOrIn()
       // update user
       userStore.initializeUserState(newUser)
       // update and save spaces
@@ -252,7 +252,7 @@ const signIn = async (event) => {
     // add remote spaces
     const spaces = await apiStore.getUserSpaces()
     await cache.addSpaces(spaces)
-    globalStore.clearAllNotifications()
+    globalStore.clearNotificationsSignUpOrIn()
     await addCollaboratorToInvitedSpaces()
     globalStore.triggerSpaceDetailsVisible()
     globalStore.isLoadingFavorites = true

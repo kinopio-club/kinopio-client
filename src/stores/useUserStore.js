@@ -366,6 +366,7 @@ export const useUserStore = defineStore('user', {
       if (this.getUserIsSignedIn) {
         groupStore.joinGroup()
       } else {
+        globalStore.shouldNotifyIsJoiningGroup = false
         globalStore.notifySignUpToJoinGroup = true
       }
     },

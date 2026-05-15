@@ -22,3 +22,7 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# Local HTTPS certs (mkcert)
+/.cert
+

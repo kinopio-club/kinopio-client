@@ -151,17 +151,20 @@ const currentLineIsSelected = computed(() => {
   const selected = globalStore.multipleLinesSelectedIds
   return selected.find(id => props.line.id === id)
 })
-const startLineInfoInteraction = (event) => {
+const startLineInfoInteraction = async (event) => {
+  let lineId = props.line.id
   if (!currentLineIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
-  globalStore.currentDraggingLineId = ''
   globalStore.closeAllDialogs()
   globalStore.linesWereDragged = false
   globalStore.currentUserIsDraggingLine = true
-  globalStore.currentDraggingLineId = props.line.id
+  globalStore.currentDraggingLineId = lineId
+  if (event.altKey) {
+    lineId = await globalStore.startDraggingDuplicateItems('line', lineId)
+  }
   const updates = {
-    lineId: props.line.id,
+    lineId,
     userId: userStore.id
   }
   broadcastStore.update({ updates, action: 'addToRemoteLinesDragging' })

@@ -927,6 +927,103 @@ export const useGlobalStore = defineStore('global', {
       this.drawingStrokeColors.push(color)
     },
 
+    // Duplicating items
+
+    async startDraggingDuplicateItems (draggingType, draggingItemId) {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const lineStore = useLineStore()
+      const listStore = useListStore()
+      const connectionStore = useConnectionStore()
+      this.currentUserIsDraggingDuplicateItem = true
+      // get selected items
+      // items inside box
+      if (draggingType === 'box') {
+        const box = boxStore.getBox(draggingItemId)
+        boxStore.selectItemsInSelectedBoxes(box)
+      }
+      // lines
+      let lineIds = this.multipleLinesSelectedIds.concat(this.currentDraggingLineId)
+      lineIds = lineIds.filter(id => Boolean(id))
+      lineIds = uniq(lineIds)
+      const lines = lineIds.map(id => lineStore.getLine(id))
+      // lists
+      let listIds = this.multipleListsSelectedIds.concat(this.currentDraggingListId)
+      listIds = uniq(listIds)
+      listIds = listIds.filter(id => Boolean(id))
+      const lists = listIds.map(id => listStore.getList(id))
+      this.multipleListsSelectedIds = lists.map(list => list.id)
+      listStore.selectItemsInSelectedLists()
+      // cards
+      let cardIds = this.multipleCardsSelectedIds.concat(this.currentDraggingCardId)
+      cardIds = uniq(cardIds)
+      cardIds = cardIds.filter(id => Boolean(id))
+
+      const cards = cardIds.map(id => cardStore.getCard(id))
+      // boxes
+      let boxIds = this.multipleBoxesSelectedIds.concat(this.currentDraggingBoxId)
+      boxIds = uniq(boxIds)
+      boxIds = boxIds.filter(id => Boolean(id))
+      const boxes = boxIds.map(id => boxStore.getBox(id))
+      // connections
+      const connectableItemIds = cards.concat(boxes).map(item => item.id)
+      const connections = connectionStore.getConnectionsByItemIds(connectableItemIds)
+      // current dragging item index
+      let draggingItemIds
+      if (draggingType === 'line') {
+        draggingItemIds = lineIds
+      } else if (draggingType === 'list') {
+        draggingItemIds = listIds
+      } else if (draggingType === 'card') {
+        draggingItemIds = cardIds
+      } else if (draggingType === 'box') {
+        draggingItemIds = boxIds
+      }
+      const index = draggingItemIds.findIndex(id => id === draggingItemId)
+      // create new items
+      const newItems = await utils.uniqueSpaceItems({
+        cards: utils.clone(cards),
+        boxes: utils.clone(boxes),
+        lists: utils.clone(lists),
+        connections: utils.clone(connections),
+        lines: utils.clone(lines)
+      })
+      const zItemTypes = ['cards', 'boxes', 'lists']
+      zItemTypes.forEach(itemType => {
+        newItems[itemType].map(item => {
+          item.z += 1
+          return item
+        })
+      })
+      newItems.connections.forEach(connection => connectionStore.createConnection(connection))
+      newItems.lists.forEach(list => listStore.createList({ list }))
+      newItems.cards.forEach(card => cardStore.createCard(card, true))
+      newItems.boxes.forEach(box => boxStore.createBox(box))
+      newItems.lines.forEach(line => lineStore.createLine(line))
+      // unselect old items
+      this.clearMultipleSelected()
+      // select new items
+      this.multipleCardsSelectedIds = newItems.cards.map(card => card.id)
+      this.multipleBoxesSelectedIds = newItems.boxes.map(box => box.id)
+      this.multipleConnectionsSelectedIds = newItems.connections.map(connection => connection.id)
+      this.multipleListsSelectedIds = newItems.lists.map(list => list.id)
+      this.multipleLinesSelectedIds = newItems.lines.map(line => line.id)
+      newItems.lists.forEach(list => listStore.updateListDimensions(list))
+      // new current dragging item
+      let newCurrentItems
+      if (draggingType === 'line') {
+        newCurrentItems = newItems.lines
+      } else if (draggingType === 'list') {
+        newCurrentItems = newItems.lists
+      } else if (draggingType === 'card') {
+        newCurrentItems = newItems.cards
+      } else if (draggingType === 'box') {
+        newCurrentItems = newItems.boxes
+      }
+      const newCurrentItem = newCurrentItems[index]
+      return newCurrentItem.id
+    },
+
     // Dragging Cards
 
     addToRemoteCardsDragging (update) {
@@ -1515,11 +1612,14 @@ export const useGlobalStore = defineStore('global', {
       this.notifyConnectionError = false
       this.notifyServerCouldNotSave = false
       this.notifySignUpToEditSpace = false
-      this.notifySignUpToJoinGroup = false
       this.notifyCardsCreatedIsNearLimit = false
       this.notifyCardsCreatedIsOverLimit = false
       this.notifyMoveOrCopyToSpace = false
       this.notificationsWithPosition = []
+    },
+    clearNotificationsSignUpOrIn () {
+      this.notifySignUpToJoinGroup = false
+      this.clearAllNotifications()
     },
     clearAllInteractingWithAndSelected () {
       this.currentUserIsDraggingCard = false

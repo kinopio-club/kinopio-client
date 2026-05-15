@@ -13,6 +13,8 @@ import EmailInvites from '@/components/dialogs/EmailInvites.vue'
 import InvitePicker from '@/components/dialogs/InvitePicker.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import AddToGroup from '@/components/dialogs/AddToGroup.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 import randomColor from 'randomcolor'
 
@@ -44,19 +46,15 @@ onBeforeUnmount(() => {
 const emit = defineEmits(['closeDialogs', 'childDialogIsVisible'])
 
 const props = defineProps({
-  visible: Boolean,
-  group: Object
+  visible: Boolean
 })
 
 const state = reactive({
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
   invitePickerIsVisible: false,
+  addToGroupIsVisible: false,
   inviteType: 'edit' // 'group', 'edit', 'read'
-})
-
-watch(() => props.group, (value, prevValue) => {
-  updateDefaultInviteType()
 })
 
 const spaceName = computed(() => spaceStore.name)
@@ -70,6 +68,7 @@ const emitChildDialogIsVisible = (value) => {
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
   state.invitePickerIsVisible = false
+  state.addToGroupIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
@@ -83,6 +82,12 @@ const toggleInvitePickerIsVisible = () => {
   state.invitePickerIsVisible = !isVisible
   emitChildDialogIsVisible(state.invitePickerIsVisible)
 }
+const toggleAddToGroupIsVisible = () => {
+  const isVisible = state.addToGroupIsVisible
+  closeChildDialogs()
+  state.addToGroupIsVisible = !isVisible
+  emitChildDialogIsVisible(state.addToGroupIsVisible)
+}
 const randomUser = computed(() => {
   const luminosity = userStore.theme
   const color = randomColor({ luminosity })
@@ -95,7 +100,7 @@ const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsRead = computed(() => state.inviteType === 'read')
 const updateDefaultInviteType = () => {
-  if (props.group) {
+  if (spaceGroup.value) {
     state.inviteType = 'group'
   } else {
     state.inviteType = 'edit'
@@ -126,7 +131,7 @@ const inviteUrl = computed(() => {
   let url
   // group
   if (inviteTypeIsGroup.value) {
-    url = groupStore.getGroupInviteUrl(props.group)
+    url = groupStore.getGroupInviteUrl(spaceGroup.value)
     console.info('🍇 group invite url', url)
   // edit
   } else if (inviteTypeIsEdit.value) {
@@ -151,15 +156,73 @@ const copyInviteLink = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
+
+// group
+
+const userGroups = computed(() => groupStore.getCurrentUserGroups)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+watch(() => spaceGroup.value, (value, prevValue) => {
+  updateDefaultInviteType()
+})
+const currentUserIsGroupAdmin = (group) => {
+  return groupStore.getGroupUserIsAdmin({
+    userId: userStore.id,
+    groupId: group.id
+  })
+}
+const toggleSpaceGroup = async (group) => {
+  const currentSpace = spaceStore.getSpaceAllState
+  const shouldRemoveSpaceGroup = currentSpace.groupId === group.id
+  if (shouldRemoveSpaceGroup) {
+    await removeSpaceGroup(group)
+  } else {
+    await updateSpaceGroup(group)
+  }
+  emit('selectGroup', group)
+}
+const updateSpaceGroup = (group) => {
+  const isSpaceCreator = userStore.getUserIsSpaceCreator
+  if (isSpaceCreator) {
+    groupStore.addSpaceToGroup(group)
+  } else {
+    globalStore.addNotification({
+      message: 'Only space creator can assign to group',
+      type: 'danger'
+    })
+  }
+}
+const removeSpaceGroup = (group) => {
+  const isGroupAdmin = currentUserIsGroupAdmin(group)
+  const isSpaceCreator = userStore.getUserIsSpaceCreator
+  if (isGroupAdmin || isSpaceCreator) {
+    groupStore.removeSpaceFromGroup()
+  } else {
+    globalStore.addNotification({
+      message: 'Only space creator, or group admin, can remove from group',
+      type: 'danger'
+    })
+  }
+}
 </script>
 
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
+
+  //- space group
+  .row.button-wrap.group-button
+    button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+      img.icon.group(src="@/assets/group.svg")
+      GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
+      template(v-else)
+        span Add to Group
+    AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+
+  //- picker
   .button-wrap.invite-button
     button.title-row-flex(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
       span
-        InviteLabel(:inviteType="state.inviteType" :group="props.group" :randomUser="randomUser")
-        InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="props.group" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+        InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
+        InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
   section.subsection
@@ -188,4 +251,6 @@ section.invite-to-space
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
+  .group-button + .invite-button
+    margin 0
 </style>

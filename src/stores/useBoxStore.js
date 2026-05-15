@@ -472,6 +472,7 @@ export const useBoxStore = defineStore('boxes', {
     getItemsContainedInSelectedBoxes (selectedBox) {
       const cardStore = useCardStore()
       const listStore = useListStore()
+      const connectionStore = useConnectionStore()
       const cards = []
       const boxes = []
       const lists = []
@@ -494,12 +495,15 @@ export const useBoxStore = defineStore('boxes', {
           lists.push(list)
         }
       })
-      return { cards, boxes, lists }
+      // connections
+      const itemIds = cards.concat(boxes, lists).map(item => item.id)
+      const connections = connectionStore.getConnectionsByItemIds(itemIds)
+      return { cards, boxes, lists, connections }
     },
     selectItemsInSelectedBoxes (selectedBox) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
-      const { boxes, cards, lists } = this.getItemsContainedInSelectedBoxes(selectedBox)
+      const { boxes, cards, lists, connections } = this.getItemsContainedInSelectedBoxes(selectedBox)
       // boxes
       const boxIds = boxes.map(box => box.id)
       globalStore.addMultipleToMultipleBoxesSelected(boxIds)
@@ -518,6 +522,8 @@ export const useBoxStore = defineStore('boxes', {
         const listCardIds = listCards.map(card => card.id)
         globalStore.addMultipleToMultipleCardsSelected(listCardIds)
       })
+      const connectionIds = connections.map(connection => connection.id)
+      globalStore.addMultipleToMultipleConnectionsSelected(connectionIds)
     },
 
     // snap guides

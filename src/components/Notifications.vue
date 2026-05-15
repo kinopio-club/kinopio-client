@@ -107,7 +107,7 @@ const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
 
 // group
 
-const groupToJoin = computed(() => globalStore.groupToJoinOnLoad.group)
+const groupToJoin = computed(() => globalStore.groupToJoinOnLoad?.group)
 
 // space
 
@@ -354,7 +354,7 @@ aside.notifications(@click.left="closeAllDialogs")
       .row(v-if="item.badge")
         span.badge.info {{ item.badge }}
       template(v-if="item.group")
-        GroupLabel(:group="item.group")
+        GroupLabel(:group="item.group" :showName="true")
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
         img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")

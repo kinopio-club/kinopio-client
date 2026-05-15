@@ -235,7 +235,7 @@ export const useGroupStore = defineStore('groups', {
       const userStore = useUserStore()
       const userId = userStore.id
       const group = globalStore.groupToJoinOnLoad
-      if (!group) { return }
+      if (!group.groupId) { return }
       globalStore.updateNotifyIsJoiningGroup(true)
       try {
         const response = await apiStore.createGroupUser({
@@ -244,8 +244,7 @@ export const useGroupStore = defineStore('groups', {
           userId
         })
         globalStore.addNotification({
-          badge: 'Joined Group',
-          message: `${response.group.name}`,
+          message: 'Joined Group',
           type: 'success',
           isPersistentItem: true,
           group: response.group

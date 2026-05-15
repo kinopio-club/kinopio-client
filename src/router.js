@@ -193,14 +193,16 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: async (to, from, next) => {
         const globalStore = useGlobalStore()
+        const userStore = useUserStore()
         const apiStore = useApiStore()
         const groupId = to.params.groupId
         const collaboratorKey = to.query.collaboratorKey
-        globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
         globalStore.shouldNotifyIsJoiningGroup = true
-        next()
+        globalStore.groupToJoinOnLoad = { groupId, collaboratorKey }
+        await userStore.initializeUser()
         const group = await apiStore.getGroupPublicMeta(groupId)
         globalStore.groupToJoinOnLoad.group = group
+        next()
       }
     }, {
       path: '/affiliates',
