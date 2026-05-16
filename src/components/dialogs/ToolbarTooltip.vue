@@ -17,11 +17,30 @@ const dialogElement = ref(null)
 
 const props = defineProps({
   visible: Boolean,
-  toolName: String
+  tool: String
 })
+
 const state = reactive({
   dialogHeight: null
 })
+
+const data = {
+  line: {
+    title: 'Add Line Divider',
+    keyboardShortcut: '–',
+    helpUrl: '',
+    description: 'click to create, or drag to do x y z. for sections.',
+    videoUrl: ''
+  },
+  box: {
+    title: 'Draw Box',
+    keyboardShortcut: 'B',
+    helpUrl: '',
+    description: 'click to create, or drag to do x y z. for sections.',
+    videoUrl: ''
+  }
+
+}
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -36,18 +55,8 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const data = computed(() => {
-  if (props.toolName === 'line') {
-    return {
-      title: 'Add Line Divider',
-      keyboardShortcut: '–',
-      helpUrl: '',
-      description: 'click to create, or drag to do x y z. for sections.',
-      videoUrl: ''
-    }
-  } else {
-    return {}
-  }
+const tooltip = computed(() => {
+  return data[props.tool]
 })
 </script>
 
@@ -61,13 +70,13 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
 )
   section.title-section
     .row.title-row
-      span {{ data.title }}
-        span.badge.keyboard-shortcut(title="keyboard Shortcut") {{ data.keyboardShortcut }}
-      a(:href="data.helpUrl" target="_blank")
+      span {{ tooltip.title }}
+        span.badge.keyboard-shortcut(title="keyboard Shortcut") {{ tooltip.keyboardShortcut }}
+      a(:href="tooltip.helpUrl" target="_blank")
         button.small-button ?
   section
     img(src="https://d2w9rnfcy7mm78.cloudfront.net/46095939/original_105b79e6b78982b6b1eea60b261d66bf.jpeg?1778634028?bc=0")
-    p {{ data.description }}
+    p {{ tooltip.description }}
 </template>
 
 <style lang="stylus">

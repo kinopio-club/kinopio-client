@@ -22,7 +22,12 @@ const props = defineProps({
 })
 
 const state = reactive({
-  lineTooltipIsVisible: false
+  tooltipIsVisible: {
+    line: false,
+    box: false,
+    list: false,
+    drawing: false
+  }
 })
 
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
@@ -47,6 +52,7 @@ const toolbarIsDrawing = computed(() => {
   return globalStore.getToolbarIsDrawing
 })
 const toggleToolbar = (value) => {
+  cancelTooltip()
   if (value === currentUserToolbar.value) {
     globalStore.updateCurrentUserToolbar('card')
   } else {
@@ -68,17 +74,18 @@ const DrawingLabel = computed(() => {
 // tooltips
 
 const closeAllTooltips = () => {
-  state.lineTooltipIsVisible = false
+  state.tooltipIsVisible.line = false
+  state.tooltipIsVisible.box = false
+  state.tooltipIsVisible.list = false
+  state.tooltipIsVisible.drawing = false
 }
-const startTooltipTimer = (toolName) => {
+const startTooltipTimer = (tool) => {
   tooltipTimer = setTimeout(() => {
     closeAllTooltips()
-    if (toolName === 'line') {
-      state.lineTooltipIsVisible = true
-    } // else if () {}
+    state.tooltipIsVisible[tool] = true
   }, tooltipTimerDelay)
 }
-const cancelTooltip = async (event) => {
+const cancelTooltip = async () => {
   clearTimeout(tooltipTimer)
   closeAllTooltips()
 }
@@ -100,9 +107,12 @@ nav#toolbar.toolbar(v-if="visible")
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
           img.icon.line-icon(src="@/assets/line.svg")
-        ToolbarTooltip(:visible="state.lineTooltipIsVisible" toolName="line")
+        ToolbarTooltip(:visible="state.tooltipIsVisible.line" tool="line")
       //- Box
-      .button-wrap
+      .button-wrap(
+        @mouseenter="startTooltipTimer('box')"
+        @mouseleave="cancelTooltip"
+      )
         button(
           aria-label="Draw Box (B)"
           :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
@@ -111,6 +121,7 @@ nav#toolbar.toolbar(v-if="visible")
           img.icon.box-icon(src="@/assets/box.svg")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
           span Draw Box (B)
+        ToolbarTooltip(:visible="state.tooltipIsVisible.box" tool="box")
 
       //- List
       .button-wrap
