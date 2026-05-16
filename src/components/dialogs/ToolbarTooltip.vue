@@ -83,13 +83,17 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
 )
   section.title-section
     .row.title-row
-      span {{ tooltip.title }}
-        span.badge.keyboard-shortcut(title="keyboard Shortcut") {{ tooltip.keyboardShortcut }}
-      a(:href="tooltip.helpUrl" target="_blank")
-        button.small-button ?
+      div {{ tooltip.title }}
+      div
+        .badge.keyboard-shortcut(title="keyboard Shortcut") {{ tooltip.keyboardShortcut }}
   section
     img(src="https://d2w9rnfcy7mm78.cloudfront.net/46095939/original_105b79e6b78982b6b1eea60b261d66bf.jpeg?1778634028?bc=0")
     p {{ tooltip.description }}
+    p
+      a(:href="tooltip.helpUrl" target="_blank")
+        button
+          span Learn More{{' '}}
+          img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
