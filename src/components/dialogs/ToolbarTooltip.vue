@@ -92,7 +92,7 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
     p
       a(:href="tooltip.helpUrl" target="_blank")
         button
-          span Learn More{{' '}}
+          span Help{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
 </template>
 
