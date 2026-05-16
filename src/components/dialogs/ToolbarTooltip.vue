@@ -25,11 +25,13 @@ const state = reactive({
 })
 
 const data = {
+  // TODO line help doc
+  // https://x.com/KinopioClub/status/1988653434996682936
   line: {
     title: 'Add Line Divider',
     keyboardShortcut: '–',
     helpUrl: '',
-    description: 'click to create, or drag to do x y z. for sections.',
+    description: 'Click to create a draggable horizontal dividing line. Use to mark pages, sections, slides.',
     videoUrl: ''
   },
   box: {
