@@ -80,6 +80,7 @@ const closeAllTooltips = () => {
   state.tooltipIsVisible.drawing = false
 }
 const startTooltipTimer = (tool) => {
+  if (currentUserToolbar.value === tool) { return }
   tooltipTimer = setTimeout(() => {
     closeAllTooltips()
     state.tooltipIsVisible[tool] = true
@@ -124,7 +125,10 @@ nav#toolbar.toolbar(v-if="visible")
         ToolbarTooltip(:visible="state.tooltipIsVisible.box" tool="box")
 
       //- List
-      .button-wrap
+      .button-wrap(
+        @mouseenter="startTooltipTimer('list')"
+        @mouseleave="cancelTooltip"
+      )
         button(
           aria-label="Draw List (L)"
           :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
@@ -133,9 +137,13 @@ nav#toolbar.toolbar(v-if="visible")
           img.icon.list-icon(src="@/assets/list.svg")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
           span Draw List (L)
+        ToolbarTooltip(:visible="state.tooltipIsVisible.list" tool="list")
 
       //- Drawing
-      .button-wrap
+      .button-wrap(
+        @mouseenter="startTooltipTimer('drawing')"
+        @mouseleave="cancelTooltip"
+      )
         button.drawing-button(
           aria-label="Drawing (D)"
           :class="{ active: toolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
@@ -144,6 +152,7 @@ nav#toolbar.toolbar(v-if="visible")
           img.icon.pencil-icon(src="@/assets/pencil.svg")
         .label-badge.toolbar-badge-wrap.jiggle(v-if="toolbarIsDrawing")
           span {{DrawingLabel}}
+        ToolbarTooltip(:visible="state.tooltipIsVisible.drawing" tool="drawing")
 </template>
 
 <style lang="stylus">

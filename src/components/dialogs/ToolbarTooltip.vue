@@ -17,7 +17,7 @@ const dialogElement = ref(null)
 
 const props = defineProps({
   visible: Boolean,
-  tool: String
+  tool: String // line, box, list, drawing
 })
 
 const state = reactive({
@@ -38,8 +38,21 @@ const data = {
     helpUrl: '',
     description: 'click to create, or drag to do x y z. for sections.',
     videoUrl: ''
+  },
+  list: {
+    title: 'list',
+    keyboardShortcut: 'L',
+    helpUrl: '',
+    description: 'click to create, or drag to do x y z. for sections.',
+    videoUrl: ''
+  },
+  drawing: {
+    title: 'Drawing',
+    keyboardShortcut: 'D',
+    helpUrl: '',
+    description: 'click to create, or drag to do x y z. for sections.',
+    videoUrl: ''
   }
-
 }
 
 watch(() => props.visible, (value, prevValue) => {
