@@ -36,7 +36,8 @@ const state = reactive({
     },
     studentDiscount: {
       unknownServerError: false,
-      emailIsMissing: false
+      emailIsMissing: false,
+      userNotFound: false
     }
   }
 })
@@ -59,6 +60,7 @@ const clearErrors = () => {
   state.error.restartServer.unknownServerError = false
   state.error.studentDiscount.unknownServerError = false
   state.error.studentDiscount.emailIsMissing = false
+  state.error.studentDiscount.userNotFound = false
 }
 const clearState = () => {
   state.studentDiscountUser = null
@@ -83,14 +85,24 @@ const restartServer = async () => {
 const applyStudentDiscount = async (event) => {
   try {
     clearErrors()
+    state.loading.studentDiscount = true
     const email = event.target.elements[0].value
     if (!email) {
       state.error.studentDiscount.emailIsMissing = true
     }
-    // TODO API REQ
+    const data = await apiStore.applyStudentDiscount(email)
+    state.studentDiscountUser = data.user
+    console.log('🧞‍♀️🧞‍♀️🧞‍♀️🧞‍♀️', data, state.studentDiscountUser)
   } catch (error) {
-    console.error('🚒 applyStudentDiscount', error)
-    state.error.studentDiscount.unknownServerError = true
+    const body = await error.response.json()
+    console.error('🚒 applyStudentDiscount', error, body.message)
+    if (body.message === 'user not found') {
+      state.error.studentDiscount.userNotFound = true
+    } else {
+      state.error.studentDiscount.unknownServerError = true
+    }
+  } finally {
+    state.loading.studentDiscount = false
   }
 }
 const studentDiscountMessage = computed(() => {
@@ -119,6 +131,7 @@ dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @clic
       button(@click="restartServer" :disabled="moderatorIsLoadingRestartServer")
         span 🚒 Restart Server
         Loader(:visible="moderatorIsLoadingRestartServer")
+    //- error
     .row(v-if="moderatorIsLoadingRestartServer && !state.error.restartServer.unknownServerError")
       .badge.info
         span Server is Restarting. Refresh and try again in ~5 minutes.
@@ -128,12 +141,15 @@ dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @clic
   //- student discount
   section
     p Apply Student Discount
-    p
-      form(@submit.prevent="applyStudentDiscount")
-        input(placeholder="User Email" type="email")
-        button(type="submit" :class="{active : state.loading.studentDiscount}")
-          span Submit
-          Loader(:visible="state.loading.studentDiscount")
+    form(@submit.prevent="applyStudentDiscount")
+      input(placeholder="User Email" type="email")
+      button(type="submit" :class="{active : state.loading.studentDiscount}")
+        span Submit
+        Loader(:visible="state.loading.studentDiscount")
+    //- error
+    template(v-if="state.error.studentDiscount.userNotFound")
+      p
+        span.badge.danger User account not found
     //- success
     template(v-if="state.studentDiscountUser")
       p
@@ -152,4 +168,6 @@ dialog.moderator-actions
   overflow auto
   left initial
   right 8px
+  form
+    margin-top 10px
 </style>
