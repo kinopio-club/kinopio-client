@@ -92,7 +92,6 @@ const applyStudentDiscount = async (event) => {
     }
     const data = await apiStore.applyStudentDiscount(email)
     state.studentDiscountUser = data.user
-    console.log('🧞‍♀️🧞‍♀️🧞‍♀️🧞‍♀️', data, state.studentDiscountUser)
   } catch (error) {
     const body = await error.response.json()
     console.error('🚒 applyStudentDiscount', error, body.message)
@@ -106,7 +105,7 @@ const applyStudentDiscount = async (event) => {
   }
 }
 const studentDiscountMessage = computed(() => {
-  return `Hey ${state.studentDiscountUser.name},\n\nI just updated your account to use the discount. The prices you should now see (on the web or desktop app) are $4/mo, $40/yr, and $200/life. Thanks for using Kinopio!`
+  return `Hey ${state.studentDiscountUser.name},\n\nI just updated your account to use the student discount. Thanks for using Kinopio!`
 })
 const copyStudentDiscountMessage = async (event) => {
   globalStore.clearNotificationsWithPosition()
