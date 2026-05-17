@@ -42,7 +42,7 @@ const data = {
     videoUrl: ''
   },
   list: {
-    title: 'list',
+    title: 'Draw List',
     keyboardShortcut: 'L',
     helpUrl: '',
     description: 'click to create, or drag to do x y z. for sections.',
