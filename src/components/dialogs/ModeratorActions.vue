@@ -106,7 +106,7 @@ const applyStudentDiscount = async (event) => {
   }
 }
 const studentDiscountMessage = computed(() => {
-  return `Hey ${state.studentDiscountUser.name},\n\njust updated your account to use the discount. The prices you should now see (on the web or desktop app) are $4/mo, $40/yr, and $200/life. Thanks for using Kinopio!`
+  return `Hey ${state.studentDiscountUser.name},\n\nI just updated your account to use the discount. The prices you should now see (on the web or desktop app) are $4/mo, $40/yr, and $200/life. Thanks for using Kinopio!`
 })
 const copyStudentDiscountMessage = async (event) => {
   globalStore.clearNotificationsWithPosition()
@@ -154,11 +154,12 @@ dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @clic
     template(v-if="state.studentDiscountUser")
       p
         span.badge.success success
-      p {{studentDiscountMessage}}
-      p
-        button(@click.left="copyStudentDiscountMessage")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Message
+      section.subsection
+        p {{studentDiscountMessage}}
+        p
+          button(@click.left="copyStudentDiscountMessage")
+            img.icon.copy(src="@/assets/copy.svg")
+            span Copy Message
   section
     p All moderator actions are logged and will notify admins.
 </template>
@@ -170,6 +171,7 @@ dialog.moderator-actions
   right 8px
   @media(max-height 600px)
     top -200px
-  form
+  form,
+  section.subsection
     margin-top 10px
 </style>
