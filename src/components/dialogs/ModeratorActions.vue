@@ -166,8 +166,6 @@ dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @clic
 <style lang="stylus">
 dialog.moderator-actions
   overflow auto
-  left initial
-  right 8px
   @media(max-height 600px)
     top -200px
   form,
