@@ -168,6 +168,8 @@ dialog.moderator-actions
   overflow auto
   left initial
   right 8px
+  @media(max-height 600px)
+    top -200px
   form
     margin-top 10px
 </style>
