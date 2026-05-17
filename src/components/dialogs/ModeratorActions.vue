@@ -26,14 +26,26 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
+  studentDiscountUser: undefined,
+  loading: {
+    studentDiscount: false
+  },
   error: {
-    unknownServerError: false
+    restartServer: {
+      unknownServerError: false
+    },
+    studentDiscount: {
+      unknownServerError: false,
+      emailIsMissing: false
+    }
   }
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
+    clearState()
+    clearErrors()
   }
 })
 
@@ -43,6 +55,16 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
+const clearErrors = () => {
+  state.error.restartServer.unknownServerError = false
+  state.error.studentDiscount.unknownServerError = false
+  state.error.studentDiscount.emailIsMissing = false
+}
+const clearState = () => {
+  state.studentDiscountUser = null
+}
+
+// restart
 
 const moderatorIsLoadingRestartServer = computed(() => globalStore.moderatorIsLoadingRestartServer)
 const restartServer = async () => {
@@ -52,10 +74,38 @@ const restartServer = async () => {
     await apiStore.moderatorRestartServer()
   } catch (error) {
     console.error('🚒 restartServer', error)
-    state.error.unknownServerError = true
+    state.error.restartServer.unknownServerError = true
   }
+}
 
-  // http://localhost:8086/ or https://helper.kinopio.club
+// student discount
+
+const applyStudentDiscount = async (event) => {
+  try {
+    clearErrors()
+    const email = event.target.elements[0].value
+    if (!email) {
+      state.error.studentDiscount.emailIsMissing = true
+    }
+    // TODO API REQ
+  } catch (error) {
+    console.error('🚒 applyStudentDiscount', error)
+    state.error.studentDiscount.unknownServerError = true
+  }
+}
+const studentDiscountMessage = computed(() => {
+  return `Hey ${state.studentDiscountUser.name},\n\njust updated your account to use the discount. The prices you should now see (on the web or desktop app) are $4/mo, $40/yr, and $200/life. Thanks for using Kinopio!`
+})
+const copyStudentDiscountMessage = async (event) => {
+  globalStore.clearNotificationsWithPosition()
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(studentDiscountMessage.value)
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
 }
 </script>
 
@@ -63,18 +113,38 @@ const restartServer = async () => {
 dialog.narrow.moderator-actions(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p Moderator Actions
+  //- restart server
   section
-    p All moderator actions are logged and will notify admins.
     .row
       button(@click="restartServer" :disabled="moderatorIsLoadingRestartServer")
-        span Restart Server
-        Loader(:visible="moderatorIsLoadingRestartServer" :isSmall="true")
-    .row(v-if="moderatorIsLoadingRestartServer && !state.error.unknownServerError")
+        span 🚒 Restart Server
+        Loader(:visible="moderatorIsLoadingRestartServer")
+    .row(v-if="moderatorIsLoadingRestartServer && !state.error.restartServer.unknownServerError")
       .badge.info
         span Server is Restarting. Refresh and try again in ~5 minutes.
-    .row(v-if="state.error.unknownServerError")
+    .row(v-if="state.error.restartServer.unknownServerError")
       .badge.danger
         span (シ_ _)シ Something went wrong, Please try again or contact support
+  //- student discount
+  section
+    p Apply Student Discount
+    p
+      form(@submit.prevent="applyStudentDiscount")
+        input(placeholder="User Email" type="email")
+        button(type="submit" :class="{active : state.loading.studentDiscount}")
+          span Submit
+          Loader(:visible="state.loading.studentDiscount")
+    //- success
+    template(v-if="state.studentDiscountUser")
+      p
+        span.badge.success success
+      p {{studentDiscountMessage}}
+      p
+        button(@click.left="copyStudentDiscountMessage")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Message
+  section
+    p All moderator actions are logged and will notify admins.
 </template>
 
 <style lang="stylus">
