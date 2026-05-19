@@ -6,7 +6,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 // import utils from '@/utils.js'
-import Header from '@/components/page/Header.vue'
+import Header from '@/components/pages/Header.vue'
 
 const globalStore = useGlobalStore()
 const apiStore = useApiStore()
