@@ -5,17 +5,17 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 import { useUserStore } from '@/stores/useUserStore'
 
-import AboutJsonLd from '@/components/page/about/AboutJsonLd.vue'
-import Wordmark from '@/components/page/Wordmark.vue'
-import Header from '@/components/page/Header.vue'
-import AboutSocialProof from '@/components/page/about/AboutSocialProof.vue'
-import AboutHowTo from '@/components/page/about/AboutHowTo.vue'
-import AboutExamples from '@/components/page/about/AboutExamples.vue'
-import AboutMoreFeatures from '@/components/page/about/AboutMoreFeatures.vue'
-import AboutCollaborate from '@/components/page/about/AboutCollaborate.vue'
-import AboutFAQ from '@/components/page/about/AboutFAQ.vue'
-import FooterSitemap from '@/components/page/FooterSitemap.vue'
-import Footer from '@/components/page/Footer.vue'
+import AboutJsonLd from '@/components/pages/about/AboutJsonLd.vue'
+import Wordmark from '@/components/pages/Wordmark.vue'
+import Header from '@/components/pages/Header.vue'
+import AboutSocialProof from '@/components/pages/about/AboutSocialProof.vue'
+import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
+import AboutExamples from '@/components/pages/about/AboutExamples.vue'
+import AboutMoreFeatures from '@/components/pages/about/AboutMoreFeatures.vue'
+import AboutCollaborate from '@/components/pages/about/AboutCollaborate.vue'
+import AboutFAQ from '@/components/pages/about/AboutFAQ.vue'
+import FooterSitemap from '@/components/pages/FooterSitemap.vue'
+import Footer from '@/components/pages/Footer.vue'
 import Notifications from '@/components/Notifications.vue'
 import consts from '@/consts.js'
 
@@ -77,12 +77,12 @@ AboutJsonLd
           loop
           muted
           playsinline
-          poster="https://updates.kinopio.club/page/about/hero/1.webp"
+          poster="https://updates.kinopio.club/pages/about/hero/1.webp"
           aria-label="Kinopio overview: Click and type anywhere to add cards, drag cards, drag between connectors to connect, play embeds, paint over cards to bulk edit."
           width="715"
           height="511"
         )
-          source(src="https://updates.kinopio.club/page/about/hero/1.webm")
+          source(src="https://updates.kinopio.club/pages/about/hero/1.webm")
         p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
