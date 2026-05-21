@@ -170,16 +170,15 @@ const copyInviteLink = async (event) => {
 
   section.subsection
     .row
+      .button-wrap
+        button(@click.left="copyInviteLink")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Invite Link
       .button-wrap(v-if="inviteTypeIsEdit")
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
           span Email
         EmailInvites(:visible="state.emailInvitesIsVisible")
-      .button-wrap
-        button(@click.left="copyInviteLink")
-          img.icon.copy(src="@/assets/copy.svg")
-          span
-            span Copy Invite Link
 </template>
 
 <style lang="stylus">
@@ -195,4 +194,7 @@ const copyInviteLink = async (event) => {
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
+  dialog.email-invites
+    left initial
+    right 8px
 </style>
