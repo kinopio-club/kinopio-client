@@ -86,7 +86,7 @@ dialog.narrow.space-users(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
-  section
+  section.title-section
     p Users Who Can Edit This Space
     p.badge.success(v-if="spaceIsOpen")
       img.icon.open(src="@/assets/open.svg")

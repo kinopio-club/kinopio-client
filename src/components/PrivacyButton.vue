@@ -21,7 +21,8 @@ const emit = defineEmits(['togglePrivacyPickerIsVisible', 'closeDialogs', 'updat
 const props = defineProps({
   privacyPickerIsVisible: Boolean,
   showDescription: Boolean,
-  showShortName: Boolean
+  showShortName: Boolean,
+  isSmallButton: Boolean
 })
 
 const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
@@ -70,7 +71,7 @@ const updateLocalSpaces = () => {
   button.title-row-flex(
     @click.left.stop="togglePrivacyPickerIsVisible"
     :disabled="isInvitedButCannotEditSpace"
-    :class="{ active: props.privacyPickerIsVisible }"
+    :class="{ active: props.privacyPickerIsVisible, 'small-button': props.isSmallButton }"
     title="Space Privacy Options"
   )
     //- short name

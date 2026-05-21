@@ -69,12 +69,14 @@ const closeChildDialogs = () => {
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
   closeChildDialogs()
+  closeDialogs()
   state.emailInvitesIsVisible = value
   emitChildDialogIsVisible(state.emailInvitesIsVisible)
 }
 const toggleInvitePickerIsVisible = () => {
   const isVisible = state.invitePickerIsVisible
   closeChildDialogs()
+  closeDialogs()
   state.invitePickerIsVisible = !isVisible
   emitChildDialogIsVisible(state.invitePickerIsVisible)
 }
@@ -162,10 +164,9 @@ const copyInviteLink = async (event) => {
   //- picker
   .button-wrap.invite-button
     button.title-row-flex(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
-      span
-        InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
-        InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+      InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
+    InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
 
   section.subsection
     .row
@@ -194,6 +195,4 @@ const copyInviteLink = async (event) => {
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
-  .group-button + .invite-button
-    margin 0
 </style>
