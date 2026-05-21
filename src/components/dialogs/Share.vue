@@ -7,7 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import InviteToSpace from '@/components/InviteToSpace.vue'
+import ShareOptions from '@/components/ShareOptions.vue'
 import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
@@ -209,7 +209,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
 
       //- Invite
-      InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
+      ShareOptions(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
 
     //- Import, Export, Embed
     section.import-export-section

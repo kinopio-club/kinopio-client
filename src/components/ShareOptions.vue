@@ -10,7 +10,7 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import InviteLabel from '@/components/InviteLabel.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
-import InvitePicker from '@/components/dialogs/InvitePicker.vue'
+import ShareOptionsPicker from '@/components/dialogs/ShareOptionsPicker.vue'
 import QRCode from '@/components/dialogs/QRCode.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -51,7 +51,7 @@ const props = defineProps({
 const state = reactive({
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
-  invitePickerIsVisible: false,
+  shareOptionsPickerIsVisible: false,
   QRCodeIsVisible: false,
   isShareInPresentationMode: false,
   inviteType: 'edit' // 'group', 'edit', 'read'
@@ -74,7 +74,7 @@ const emitChildDialogIsVisible = (value) => {
 }
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
-  state.invitePickerIsVisible = false
+  state.shareOptionsPickerIsVisible = false
   state.QRCodeIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
@@ -84,12 +84,12 @@ const toggleEmailInvitesIsVisible = () => {
   state.emailInvitesIsVisible = value
   emitChildDialogIsVisible(state.emailInvitesIsVisible)
 }
-const toggleInvitePickerIsVisible = () => {
-  const isVisible = state.invitePickerIsVisible
+const toggleShareOptionsPickerIsVisible = () => {
+  const isVisible = state.shareOptionsPickerIsVisible
   closeChildDialogs()
   closeDialogs()
-  state.invitePickerIsVisible = !isVisible
-  emitChildDialogIsVisible(state.invitePickerIsVisible)
+  state.shareOptionsPickerIsVisible = !isVisible
+  emitChildDialogIsVisible(state.shareOptionsPickerIsVisible)
 }
 const toggleIsShareInPresentationMode = () => {
   closeChildDialogs()
@@ -203,10 +203,10 @@ const copySpaceUrl = async (event) => {
 
   //- picker
   .button-wrap.invite-button
-    button.title-row-flex(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
+    button.title-row-flex(@click.stop="toggleShareOptionsPickerIsVisible" :class="{ active: state.shareOptionsPickerIsVisible }")
       InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
-    InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+    ShareOptionsPicker(:visible="state.shareOptionsPickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
 
   //- copy url (public space)
   section.subsection(v-if="spaceIsPublic && inviteTypeIsRead")
