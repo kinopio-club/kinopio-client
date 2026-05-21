@@ -5,9 +5,11 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import UserList from '@/components/UserList.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -15,6 +17,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -45,6 +48,7 @@ const updateDialogHeight = async () => {
 
 const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spaceIsOpen = computed(() => spaceStore.getSpaceIsOpen)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
 // users
 
@@ -99,6 +103,11 @@ dialog.narrow.space-users(
       @selectUser="toggleUserDetails"
       :showCollaboratorActions="currentUserCanEditSpace"
     )
+  section(v-if="spaceGroup")
+    .row
+      p
+        GroupLabel(:group="spaceGroup")
+        span Group Members
 </template>
 
 <style lang="stylus">
