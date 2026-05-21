@@ -496,6 +496,7 @@ export const useSpaceStore = defineStore('space', {
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
+      globalStore.notifySpaceIsRemoved = space.isRemoved
       // init items
       cardStore.initializeRemoteCards(space.cards)
       boxStore.initializeRemoteBoxes(space.boxes)
