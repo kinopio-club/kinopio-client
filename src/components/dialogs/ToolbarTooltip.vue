@@ -31,28 +31,28 @@ const data = {
     title: 'Add Line Divider',
     keyboardShortcut: '–',
     helpUrl: '',
-    description: 'Click to create a draggable horizontal dividing line. Use to mark pages, sections, slides.',
+    description: 'Add a horizontal dividing line between pages, sections, or slides.',
     videoUrl: ''
   },
   box: {
     title: 'Draw Box',
     keyboardShortcut: 'B',
-    helpUrl: '',
-    description: 'click to create, or drag to do x y z. for sections.',
+    helpUrl: 'https://kinopio.club/help/posts/boxes/',
+    description: 'Drag to create a box to define regions and group everything inside.',
     videoUrl: ''
   },
   list: {
     title: 'Draw List',
     keyboardShortcut: 'L',
-    helpUrl: '',
-    description: 'click to create, or drag to do x y z. for sections.',
+    helpUrl: 'https://kinopio.club/help/posts/lists/',
+    description: 'Drag to create a list to vertically group and sort cards.',
     videoUrl: ''
   },
   drawing: {
     title: 'Drawing',
     keyboardShortcut: 'D',
-    helpUrl: '',
-    description: 'click to create, or drag to do x y z. for sections.',
+    helpUrl: 'https://kinopio.club/help/posts/drawing/',
+    description: 'Draw freehand strokes. You can change color, stroke size, and toggle eraser mode.',
     videoUrl: ''
   }
 }
