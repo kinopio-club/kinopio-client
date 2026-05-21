@@ -958,6 +958,8 @@ header
         background-color var(--secondary-background)
       &.danger
         background-color var(--danger-background)
+    .label-badge + .label-badge
+      margin-left 5px
     .group-label-badge
       background-color transparent
       padding 0

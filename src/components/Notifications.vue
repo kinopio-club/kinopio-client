@@ -104,6 +104,7 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => globalStore.isTouchDevice)
 const itemSnappingIsReady = computed(() => globalStore.itemSnappingIsReady)
+const currentUserIsSpaceCreator = computed(() => userStore.getUserIsSpaceCreator)
 
 // group
 
@@ -458,7 +459,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space is removed
-    .row
+    .row(v-if="currentUserIsSpaceCreator")
       button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
         span Restore
