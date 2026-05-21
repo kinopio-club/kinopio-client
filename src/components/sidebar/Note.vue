@@ -13,6 +13,8 @@ const spaceStore = useSpaceStore()
 
 const textareaElement = ref(null)
 
+const emit = defineEmits(['updateDialogHeight'])
+
 onMounted(() => {
   focusTextarea()
   textareaSizes()
@@ -150,6 +152,10 @@ const copyCurrentConnectionItemNamesToNote = (event) => {
   clearCurrentConnection()
   focusTextarea()
 }
+
+const updateDialogHeight = () => {
+  emit('updateDialogHeight')
+}
 </script>
 
 <template lang="pug">
@@ -182,6 +188,7 @@ section.note(v-if="visible" :style="styles")
       @mouseleave="mouseleave"
       @mouseup.left="copyCurrentConnectionItemNamesToNote"
       :style="textareaStyles"
+      @focus="updateDialogHeight"
     )
     .focusing-frame(v-if="state.backgroundColor" :style="{backgroundColor: state.backgroundColor}")
 </template>

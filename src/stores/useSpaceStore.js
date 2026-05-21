@@ -416,7 +416,7 @@ export const useSpaceStore = defineStore('space', {
         }
         return remoteSpace
       } catch (error) {
-        console.error('🚒 getRemoteSpace', space.id, error)
+        console.error('🚒 getRemoteSpace', space.id, space, error)
         throw error
       }
     },
