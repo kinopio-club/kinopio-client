@@ -105,6 +105,7 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 
     brew install mkcert
     mkcert -install
+    mkdir ./.cert
 	mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem "kinopio.local" "localhost" "127.0.0.1"
 
 ## Pre-rendered Pages (Static-Site Generation, SSG)

@@ -20,7 +20,7 @@ The API is limited to 5 requests per second. If you exceed this rate, you will r
 <h2 class="badge all">All</h2>
 <a class="anchor" name="all"></a>
 
-[https://api.kinopio.club](https://api.kinopio.club) is the base path for all routes
+<span class="badge all">[https://api.kinopio.club](https://api.kinopio.club)</span>is the base path for all routes.
 
 <div class="table-wrap all">
 
