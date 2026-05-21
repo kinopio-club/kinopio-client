@@ -13,8 +13,6 @@ import EmailInvites from '@/components/dialogs/EmailInvites.vue'
 import InvitePicker from '@/components/dialogs/InvitePicker.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-import AddToGroup from '@/components/dialogs/AddToGroup.vue'
-import GroupLabel from '@/components/GroupLabel.vue'
 
 import randomColor from 'randomcolor'
 
@@ -53,7 +51,6 @@ const state = reactive({
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
   invitePickerIsVisible: false,
-  addToGroupIsVisible: false,
   inviteType: 'edit' // 'group', 'edit', 'read'
 })
 
@@ -68,7 +65,6 @@ const emitChildDialogIsVisible = (value) => {
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
   state.invitePickerIsVisible = false
-  state.addToGroupIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
@@ -81,12 +77,6 @@ const toggleInvitePickerIsVisible = () => {
   closeChildDialogs()
   state.invitePickerIsVisible = !isVisible
   emitChildDialogIsVisible(state.invitePickerIsVisible)
-}
-const toggleAddToGroupIsVisible = () => {
-  const isVisible = state.addToGroupIsVisible
-  closeChildDialogs()
-  state.addToGroupIsVisible = !isVisible
-  emitChildDialogIsVisible(state.addToGroupIsVisible)
 }
 const randomUser = computed(() => {
   const luminosity = userStore.theme
@@ -143,6 +133,13 @@ const inviteUrl = computed(() => {
   return url
 })
 
+// group
+
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+watch(() => spaceGroup.value, (value, prevValue) => {
+  updateDefaultInviteType()
+})
+
 //  copy invite urls
 
 const copyInviteLink = async (event) => {
@@ -157,65 +154,10 @@ const copyInviteLink = async (event) => {
   }
 }
 
-// group
-
-const userGroups = computed(() => groupStore.getCurrentUserGroups)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-watch(() => spaceGroup.value, (value, prevValue) => {
-  updateDefaultInviteType()
-})
-const currentUserIsGroupAdmin = (group) => {
-  return groupStore.getGroupUserIsAdmin({
-    userId: userStore.id,
-    groupId: group.id
-  })
-}
-const toggleSpaceGroup = async (group) => {
-  const currentSpace = spaceStore.getSpaceAllState
-  const shouldRemoveSpaceGroup = currentSpace.groupId === group.id
-  if (shouldRemoveSpaceGroup) {
-    await removeSpaceGroup(group)
-  } else {
-    await updateSpaceGroup(group)
-  }
-  emit('selectGroup', group)
-}
-const updateSpaceGroup = (group) => {
-  const isSpaceCreator = userStore.getUserIsSpaceCreator
-  if (isSpaceCreator) {
-    groupStore.addSpaceToGroup(group)
-  } else {
-    globalStore.addNotification({
-      message: 'Only space creator can assign to group',
-      type: 'danger'
-    })
-  }
-}
-const removeSpaceGroup = (group) => {
-  const isGroupAdmin = currentUserIsGroupAdmin(group)
-  const isSpaceCreator = userStore.getUserIsSpaceCreator
-  if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup()
-  } else {
-    globalStore.addNotification({
-      message: 'Only space creator, or group admin, can remove from group',
-      type: 'danger'
-    })
-  }
-}
 </script>
 
 <template lang="pug">
-section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
-
-  //- space group
-  .row.button-wrap.group-button
-    button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
-      img.icon.group(src="@/assets/group.svg")
-      GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
-      template(v-else)
-        span Add to Group
-    AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
 
   //- picker
   .button-wrap.invite-button
@@ -240,7 +182,8 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
 </template>
 
 <style lang="stylus">
-section.invite-to-space
+.invite-to-space
+  margin-top 10px
   .button-wrap.invite-button
     width 100%
     > button
