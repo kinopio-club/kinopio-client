@@ -10,7 +10,6 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
 import SpaceUsers from '@/components/dialogs/SpaceUsers.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
-import QRCode from '@/components/dialogs/QRCode.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
@@ -51,10 +50,8 @@ const state = reactive({
   dialogHeight: null,
   rssFeedsIsVisible: false,
   embedIsVisible: false,
-  isShareInPresentationMode: false,
   childDialogIsVisible: false,
   spaceUsersIsVisible: false,
-  QRCodeIsVisible: false,
   addToGroupIsVisible: false
 })
 
@@ -62,30 +59,6 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceIsRemote = computed(() => spaceStore.getSpaceIsRemote)
-const spaceIsPublic = computed(() => spaceStore.privacy !== 'private')
-const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
-
-// copy url
-
-const spaceUrl = computed(() => {
-  let url = spaceStore.getSpaceUrl
-  url = new URL(url)
-  if (state.isShareInPresentationMode) {
-    url.searchParams.set('present', true)
-  }
-  return url.href
-})
-const copySpaceUrl = async (event) => {
-  globalStore.clearNotificationsWithPosition()
-  const position = utils.cursorPositionInPage(event)
-  try {
-    await navigator.clipboard.writeText(spaceUrl.value)
-    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
-}
 
 // dialog
 
@@ -103,7 +76,6 @@ const dialogIsVisible = computed(() => {
     state.embedIsVisible ||
     state.childDialogIsVisible ||
     state.spaceUsersIsVisible ||
-    state.QRCodeIsVisible ||
     state.addToGroupIsVisible
   )
 })
@@ -113,7 +85,6 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.childDialogIsVisible = false
   state.spaceUsersIsVisible = false
-  state.QRCodeIsVisible = false
   state.addToGroupIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
@@ -145,15 +116,6 @@ const toggleEmbedIsVisible = () => {
   const isVisible = state.embedIsVisible
   closeDialogs()
   state.embedIsVisible = !isVisible
-}
-const toggleIsShareInPresentationMode = () => {
-  closeDialogs()
-  state.isShareInPresentationMode = !state.isShareInPresentationMode
-}
-const toggleQRCodeIsVisible = () => {
-  const isVisible = state.QRCodeIsVisible
-  closeDialogs()
-  state.QRCodeIsVisible = !isVisible
 }
 const toggleAddToGroupIsVisible = () => {
   const isVisible = state.addToGroupIsVisible
@@ -246,26 +208,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             span Add to Group
         AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
 
-      //- TODO copy to invitetospace subsection
-
-      //- Copy URL
-      //- section.subsection(v-if="!spaceIsPrivate" :class="{'share-url-subsection-member': isSpaceMember}")
-      //-   .row.title-row
-      //-     .segmented-buttons
-      //-       button(@click.left="copySpaceUrl")
-      //-         img.icon.copy(src="@/assets/copy.svg")
-      //-         .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
-      //-           img.icon.lock(src="@/assets/lock.svg")
-      //-         span Copy Public URL
-      //-       button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
-      //-         img.icon.qr-code(src="@/assets/qr-code.svg")
-      //-     QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
-      //-     .row
-      //-       //- presentation mode
-      //-       label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.prevent.stop.left="toggleIsShareInPresentationMode" @touchend.prevent.stop="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
-      //-         input(type="checkbox" :value="state.isShareInPresentationMode")
-      //-         img.icon(src="@/assets/presentation.svg")
-
       //- Invite
       InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
 
@@ -327,10 +269,6 @@ dialog.share
     pointer-events none
   p + .subsection
     margin-top 10px
-  .share-url-subsection-member
-    margin-top 0
-    border-top-left-radius 0
-    border-top-right-radius 0
 
   .segmented-buttons
     z-index 1
