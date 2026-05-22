@@ -141,11 +141,12 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const path = window.location.pathname
         globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)
         globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
         globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
-        globalStore.updateSpaceAndCardUrlToLoad(path)
+        const url = window.location.toString()
+        console.log(url)
+        globalStore.updateSpaceAndCardUrlToLoad(url)
         next()
       }
     }, {
@@ -265,9 +266,10 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const path = window.location.pathname
         globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
-        globalStore.updateSpaceAndCardUrlToLoad(path)
+        const url = window.location.toString()
+
+        globalStore.updateSpaceAndCardUrlToLoad(url)
         next()
       }
     }

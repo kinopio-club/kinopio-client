@@ -1808,8 +1808,8 @@ export const useGlobalStore = defineStore('global', {
       const value = isOffline && isNotCached && isRemote
       this.currentSpaceIsUnavailableOffline = value
     },
-    updateSpaceAndCardUrlToLoad (path) {
-      const matches = utils.spaceAndCardIdFromPath(path)
+    updateSpaceAndCardUrlToLoad (url) {
+      const matches = utils.spaceAndCardIdFromUrl(url)
       if (!matches) { return }
       if (matches.cardId) {
         this.updateFocusOnCardId(matches.cardId)

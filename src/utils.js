@@ -2070,10 +2070,6 @@ export default {
     }
     return url
   },
-  spaceAndCardIdFromUrl (url) {
-    url = new URL(url)
-    return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
-  },
   urlFromSpaceAndItem ({ spaceId, itemId }) {
     let url = `${consts.kinopioDomain()}/${spaceId}`
     if (itemId) {
@@ -2120,7 +2116,9 @@ export default {
     group.id = group.groupId
     return group
   },
-  spaceAndCardIdFromPath (path) {
+  spaceAndCardIdFromUrl (url) {
+    url = new URL(url)
+    const path = url.pathname
     // https://regexr.com/5kr4g
     // matches (text after /) twice
     const urlPattern = new RegExp(/\/([^?\s/]+)\/{0,1}([^?\s/]+){0,1}/i)
