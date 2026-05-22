@@ -145,7 +145,6 @@ const router = {
         globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
         globalStore.isCommentMode = utils.stringToBoolean(to.query.comment)
         const url = window.location.toString()
-        console.log(url)
         globalStore.updateSpaceAndCardUrlToLoad(url)
         next()
       }
