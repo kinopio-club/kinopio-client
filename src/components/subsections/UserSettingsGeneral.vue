@@ -106,7 +106,7 @@ const toggleModeratorActionsSettingsIsVisible = () => {
 
 // debug mode
 
-const isDebugMode = computed(() => { return userStore.isDebugMode })
+const isDebugMode = computed(() => userStore.isDebugMode)
 const toggleIsDebugMode = () => {
   const value = !isDebugMode.value
   userStore.updateUser({ isDebugMode: value })
