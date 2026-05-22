@@ -5,7 +5,7 @@ export default {
       {
         name: 'open',
         friendlyName: 'Open to Comments',
-        description: 'Anyone can view and add comments. Only collaborators can edit.',
+        description: 'Anyone with the URL can view and add comments. Only collaborators can edit.',
         descriptionGroup: 'Anyone can view and add comments. Only group members and collaborators can edit.',
         color: 'success',
         icon: 'comment'
@@ -14,7 +14,7 @@ export default {
         name: 'closed',
         shortName: 'public',
         friendlyName: 'Public Read Only',
-        description: 'Anyone can view. Only collaborators can edit.',
+        description: 'Anyone with the URL can view. Only collaborators can edit.',
         descriptionGroup: 'Anyone can view. Only group members and collaborators can edit.',
         color: 'info',
         icon: 'unlock'

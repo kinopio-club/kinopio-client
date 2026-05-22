@@ -12,12 +12,14 @@ import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
 import Toc from '@/components/dialogs/Toc.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 let unsubscribes
+let updateLiveSpacesIntervalTimer, updateCommunitySpacesIntervalTimer
 
 const footerElement = ref(null)
 
@@ -26,6 +28,20 @@ const updatePositionDuration = 60
 let hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer
 
 onMounted(() => {
+  // community spaces
+  if (!consts.isStaticPrerenderingPage) {
+    window.addEventListener('online', updateLiveSpaces)
+    window.addEventListener('online', updateCommunitySpaces)
+  }
+  updateLiveSpaces()
+  updateCommunitySpaces()
+  updateLiveSpacesIntervalTimer = setInterval(() => {
+    updateLiveSpaces()
+  }, 1000 * 60 * 5) // 5 minutes
+  updateCommunitySpacesIntervalTimer = setInterval(() => {
+    updateCommunitySpaces()
+  }, 1000 * 60 * 10) // 10 minutes
+  // position
   window.addEventListener('scroll', updatePosition)
   window.addEventListener('resize', updatePosition)
   updatePosition()
@@ -50,6 +66,14 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  // community spaces
+  if (!consts.isStaticPrerenderingPage) {
+    window.removeEventListener('online', updateLiveSpaces)
+    window.removeEventListener('online', updateCommunitySpaces)
+  }
+  clearInterval(updateLiveSpacesIntervalTimer)
+  clearInterval(updateCommunitySpacesIntervalTimer)
+  // position
   window.removeEventListener('scroll', updatePosition)
   window.removeEventListener('resize', updatePosition)
   unsubscribes()
@@ -67,6 +91,17 @@ const state = reactive({
   jumpToIsVisible: false,
   isScrolled: false
 })
+
+// community spaces
+
+const updateLiveSpaces = () => {
+  globalStore.triggerUpdateLiveSpaces()
+}
+const updateCommunitySpaces = () => {
+  globalStore.triggerUpdateCommunitySpaces()
+}
+
+// position
 
 const isPinchZooming = computed(() => globalStore.isPinchZooming)
 watch(() => isPinchZooming.value, (value, prevValue) => {

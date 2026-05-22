@@ -10,11 +10,10 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import InviteLabel from '@/components/InviteLabel.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
-import InvitePicker from '@/components/dialogs/InvitePicker.vue'
+import ShareOptionsPicker from '@/components/dialogs/ShareOptionsPicker.vue'
+import QRCode from '@/components/dialogs/QRCode.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-import AddToGroup from '@/components/dialogs/AddToGroup.vue'
-import GroupLabel from '@/components/GroupLabel.vue'
 
 import randomColor from 'randomcolor'
 
@@ -52,13 +51,21 @@ const props = defineProps({
 const state = reactive({
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
-  invitePickerIsVisible: false,
-  addToGroupIsVisible: false,
+  shareOptionsPickerIsVisible: false,
+  QRCodeIsVisible: false,
+  isShareInPresentationMode: false,
   inviteType: 'edit' // 'group', 'edit', 'read'
 })
 
 const spaceName = computed(() => spaceStore.name)
+const spaceIsPublic = computed(() => spaceStore.getSpaceIsPublic)
+const spaceIsPrivate = computed(() => spaceStore.getSpaceIsPrivate)
 const collaboratorKey = computed(() => spaceStore.collaboratorKey)
+const randomUser = computed(() => {
+  const luminosity = userStore.theme
+  const color = randomColor({ luminosity })
+  return { color }
+})
 const closeDialogs = () => {
   emit('closeDialogs')
 }
@@ -67,32 +74,35 @@ const emitChildDialogIsVisible = (value) => {
 }
 const closeChildDialogs = () => {
   state.emailInvitesIsVisible = false
-  state.invitePickerIsVisible = false
-  state.addToGroupIsVisible = false
+  state.shareOptionsPickerIsVisible = false
+  state.QRCodeIsVisible = false
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
   closeChildDialogs()
+  closeDialogs()
   state.emailInvitesIsVisible = value
   emitChildDialogIsVisible(state.emailInvitesIsVisible)
 }
-const toggleInvitePickerIsVisible = () => {
-  const isVisible = state.invitePickerIsVisible
+const toggleShareOptionsPickerIsVisible = () => {
+  const isVisible = state.shareOptionsPickerIsVisible
   closeChildDialogs()
-  state.invitePickerIsVisible = !isVisible
-  emitChildDialogIsVisible(state.invitePickerIsVisible)
+  closeDialogs()
+  state.shareOptionsPickerIsVisible = !isVisible
+  emitChildDialogIsVisible(state.shareOptionsPickerIsVisible)
 }
-const toggleAddToGroupIsVisible = () => {
-  const isVisible = state.addToGroupIsVisible
+const toggleIsShareInPresentationMode = () => {
   closeChildDialogs()
-  state.addToGroupIsVisible = !isVisible
-  emitChildDialogIsVisible(state.addToGroupIsVisible)
+  closeDialogs()
+  state.isShareInPresentationMode = !state.isShareInPresentationMode
 }
-const randomUser = computed(() => {
-  const luminosity = userStore.theme
-  const color = randomColor({ luminosity })
-  return { color }
-})
+const toggleQRCodeIsVisible = () => {
+  const isVisible = state.QRCodeIsVisible
+  closeChildDialogs()
+  closeDialogs()
+  state.QRCodeIsVisible = !isVisible
+  emitChildDialogIsVisible(state.QRCodeIsVisible)
+}
 
 // invite types
 
@@ -143,6 +153,13 @@ const inviteUrl = computed(() => {
   return url
 })
 
+// group
+
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+watch(() => spaceGroup.value, (value, prevValue) => {
+  updateDefaultInviteType()
+})
+
 //  copy invite urls
 
 const copyInviteLink = async (event) => {
@@ -157,90 +174,75 @@ const copyInviteLink = async (event) => {
   }
 }
 
-// group
+// copy public space url
 
-const userGroups = computed(() => groupStore.getCurrentUserGroups)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-watch(() => spaceGroup.value, (value, prevValue) => {
-  updateDefaultInviteType()
+const spaceUrl = computed(() => {
+  let url = spaceStore.getSpaceUrl
+  url = new URL(url)
+  if (state.isShareInPresentationMode) {
+    url.searchParams.set('present', true)
+  }
+  return url.href
 })
-const currentUserIsGroupAdmin = (group) => {
-  return groupStore.getGroupUserIsAdmin({
-    userId: userStore.id,
-    groupId: group.id
-  })
-}
-const toggleSpaceGroup = async (group) => {
-  const currentSpace = spaceStore.getSpaceAllState
-  const shouldRemoveSpaceGroup = currentSpace.groupId === group.id
-  if (shouldRemoveSpaceGroup) {
-    await removeSpaceGroup(group)
-  } else {
-    await updateSpaceGroup(group)
-  }
-  emit('selectGroup', group)
-}
-const updateSpaceGroup = (group) => {
-  const isSpaceCreator = userStore.getUserIsSpaceCreator
-  if (isSpaceCreator) {
-    groupStore.addSpaceToGroup(group)
-  } else {
-    globalStore.addNotification({
-      message: 'Only space creator can assign to group',
-      type: 'danger'
-    })
+const copySpaceUrl = async (event) => {
+  globalStore.clearNotificationsWithPosition()
+  const position = utils.cursorPositionInPage(event)
+  try {
+    await navigator.clipboard.writeText(spaceUrl.value)
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const removeSpaceGroup = (group) => {
-  const isGroupAdmin = currentUserIsGroupAdmin(group)
-  const isSpaceCreator = userStore.getUserIsSpaceCreator
-  if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup()
-  } else {
-    globalStore.addNotification({
-      message: 'Only space creator, or group admin, can remove from group',
-      type: 'danger'
-    })
-  }
-}
+
 </script>
 
 <template lang="pug">
-section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
-
-  //- space group
-  .row.button-wrap.group-button
-    button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
-      img.icon.group(src="@/assets/group.svg")
-      GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
-      template(v-else)
-        span Add to Group
-    AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
 
   //- picker
   .button-wrap.invite-button
-    button.title-row-flex(@click.stop="toggleInvitePickerIsVisible" :class="{ active: state.invitePickerIsVisible }")
-      span
-        InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
-        InvitePicker(:visible="state.invitePickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+    button.title-row-flex(@click.stop="toggleShareOptionsPickerIsVisible" :class="{ active: state.shareOptionsPickerIsVisible }")
+      InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
+    ShareOptionsPicker(:visible="state.shareOptionsPickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
 
-  section.subsection
+  //- copy url (public space)
+  section.subsection(v-if="spaceIsPublic && inviteTypeIsRead")
+    .row.title-row
+      .segmented-buttons
+        button(@click.left="copySpaceUrl")
+          img.icon.copy(src="@/assets/copy.svg")
+          //- .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
+          span Copy Public URL
+        button(@click.stop="toggleQRCodeIsVisible" :class="{ active: state.QRCodeIsVisible }" title="Scan QR Code")
+          img.icon.qr-code(src="@/assets/qr-code.svg")
+      QRCode(:visible="state.QRCodeIsVisible" :value="spaceUrl")
+      .row
+        //- presentation mode
+        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.prevent.stop.left="toggleIsShareInPresentationMode" @touchend.prevent.stop="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
+          input(type="checkbox" :value="state.isShareInPresentationMode")
+          img.icon(src="@/assets/presentation.svg")
+
+  //- copy invite link (private space)
+  section.subsection(v-else)
     .row
+      .button-wrap
+        button(@click.left="copyInviteLink")
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Invite Link
       .button-wrap(v-if="inviteTypeIsEdit")
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
           span Email
         EmailInvites(:visible="state.emailInvitesIsVisible")
-      .button-wrap
-        button(@click.left="copyInviteLink")
-          img.icon.copy(src="@/assets/copy.svg")
-          span
-            span Copy Invite Link
+
 </template>
 
 <style lang="stylus">
-section.invite-to-space
+.invite-to-space
+  margin-top 10px
   .button-wrap.invite-button
     width 100%
     > button
@@ -251,6 +253,7 @@ section.invite-to-space
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
-  .group-button + .invite-button
-    margin 0
+  dialog.email-invites
+    left initial
+    right 8px
 </style>

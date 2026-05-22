@@ -590,6 +590,8 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateDrawingDataUrl () {},
     triggerUpdateDrawingStrokes () {},
     triggerIsSnappingToList () {},
+    triggerUpdateLiveSpaces () {},
+    triggerUpdateCommunitySpaces () {},
 
     resetPageSizes () {
       this.triggerDrawingReset()
@@ -1806,8 +1808,8 @@ export const useGlobalStore = defineStore('global', {
       const value = isOffline && isNotCached && isRemote
       this.currentSpaceIsUnavailableOffline = value
     },
-    updateSpaceAndCardUrlToLoad (path) {
-      const matches = utils.spaceAndCardIdFromPath(path)
+    updateSpaceAndCardUrlToLoad (url) {
+      const matches = utils.spaceAndCardIdFromUrl(url)
       if (!matches) { return }
       if (matches.cardId) {
         this.updateFocusOnCardId(matches.cardId)

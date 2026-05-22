@@ -68,6 +68,9 @@ export const useSpaceStore = defineStore('space', {
     getSpaceIsOpen () {
       return this.privacy === 'open'
     },
+    getSpaceIsPublic () {
+      return !this.getSpaceIsPrivate
+    },
     getSpaceUrl () {
       const domain = consts.kinopioDomain()
       const spaceUrl = utils.url({ name: this.name, id: this.id })
