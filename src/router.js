@@ -267,7 +267,6 @@ const router = {
         const globalStore = useGlobalStore()
         globalStore.isPresentationMode = utils.stringToBoolean(to.query.present)
         const url = window.location.toString()
-
         globalStore.updateSpaceAndCardUrlToLoad(url)
         next()
       }
