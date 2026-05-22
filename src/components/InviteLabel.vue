@@ -23,9 +23,9 @@ const spaceIsPrivate = computed(() => spaceStore.getSpaceIsPrivate)
 const spaceIsPublic = computed(() => spaceStore.getSpaceIsPublic)
 const currentUser = computed(() => userStore.getUserAllState)
 const inviteState = computed(() => {
-  let inviteStates = invite.states()
+  let inviteStates = invite.privateSpaceStates()
   if (spaceIsPublic.value) {
-    inviteStates = invite.statesPublicSpace()
+    inviteStates = invite.publicSpaceStates()
   }
   return inviteStates.find(item => item.type === props.inviteType)
 })

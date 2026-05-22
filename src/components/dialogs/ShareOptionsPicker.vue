@@ -46,9 +46,9 @@ const updateDialogHeight = async () => {
 
 const spaceIsPublic = computed(() => spaceStore.getSpaceIsPublic)
 const inviteStates = computed(() => {
-  let value = invite.states()
+  let value = invite.privateSpaceStates()
   if (spaceIsPublic.value) {
-    value = invite.statesPublicSpace()
+    value = invite.publicSpaceStates()
   }
   if (!props.group) {
     value = value.filter(item => item.type !== 'group')

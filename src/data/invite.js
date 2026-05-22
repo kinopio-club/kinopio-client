@@ -1,6 +1,6 @@
 export default {
 
-  states () {
+  privateSpaceStates () {
     return [
       {
         type: 'group',
@@ -19,7 +19,7 @@ export default {
       }
     ]
   },
-  statesPublicSpace () {
+  publicSpaceStates () {
     return [
       {
         type: 'group',
