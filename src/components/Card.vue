@@ -2190,18 +2190,6 @@ const toggleVideoIsPaused = () => {
             @shouldRenderParent="updateShouldRenderParent"
           )
     .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
-      template(v-if="cardUrlPreviewIsVisible")
-        UrlPreviewCard(
-          :visible="true"
-          :card="card"
-          :user="cardCreatedByUser"
-          :isImageCard="isImageCard"
-          :isSelected="isSelectedOrDragging"
-          :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
-          :isLoadingUrlPreview="isLoadingUrlPreview"
-          @retryUrlPreview="retryUrlPreview"
-          :backgroundColor="backgroundColor"
-        )
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
           :card="card"
@@ -2224,6 +2212,18 @@ const toggleVideoIsPaused = () => {
           :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
           :isImageCard="isImageCard"
+        )
+      template(v-if="cardUrlPreviewIsVisible")
+        UrlPreviewCard(
+          :visible="true"
+          :card="card"
+          :user="cardCreatedByUser"
+          :isImageCard="isImageCard"
+          :isSelected="isSelectedOrDragging"
+          :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
+          :isLoadingUrlPreview="isLoadingUrlPreview"
+          @retryUrlPreview="retryUrlPreview"
+          :backgroundColor="backgroundColor"
         )
     //- url preview loading
     .status-container(v-if="isLoadingUrlPreview")
