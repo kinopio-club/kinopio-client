@@ -1906,7 +1906,7 @@ const updateOtherItems = () => {
   const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
   const urlIsGroupInvite = utils.urlIsGroupInvite(url)
   if (urlIsSpaceInvite) {
-    updateOtherInviteItems(url)
+    updateOtherSpaceInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
   } else if (urlIsGroupInvite) {
@@ -1924,7 +1924,7 @@ const updateOtherSpaceOrCardItems = (url) => {
   cardStore.updateCard(update)
   spaceStore.updateOtherItems({ spaceId, cardId })
 }
-const updateOtherInviteItems = (url) => {
+const updateOtherSpaceInviteItems = (url) => {
   url = new URL(url)
   const spaceId = url.pathname.split('/').pop()
   const { collaboratorKey } = qs.decode(url.search)
