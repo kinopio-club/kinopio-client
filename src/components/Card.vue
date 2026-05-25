@@ -361,14 +361,13 @@ const otherCardIsVisible = computed(() => {
 
 // other space
 
-const otherSpaceSegment = computed(() => nameSegments.value.find(segment => segment.otherSpace))
 const otherSpace = computed(() => {
-  const nameSegment = otherSpaceSegment.value
-  return nameSegment?.otherSpace
+  const space = globalStore.getOtherSpaceById(props.card.linkToSpaceId)
+  return space
 })
+
 const otherSpaceUrl = computed(() => {
-  const nameSegment = otherSpaceSegment.value
-  return nameSegment?.name
+  return state.formats.link
 })
 const spaceOrInviteUrl = computed(() => {
   const link = state.formats.link
@@ -1144,7 +1143,8 @@ const updateUrlPreviewOnline = async () => {
     return
   }
   const shouldUpdate = shouldUpdateUrlPreview(url)
-  if (!shouldUpdate) {
+  const isAppUrl = utils.urlIsApp(url)
+  if (!shouldUpdate || isAppUrl) {
     globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
@@ -1906,7 +1906,7 @@ const updateOtherItems = () => {
   const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
   const urlIsGroupInvite = utils.urlIsGroupInvite(url)
   if (urlIsSpaceInvite) {
-    updateOtherInviteItems(url)
+    updateOtherSpaceInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
   } else if (urlIsGroupInvite) {
@@ -1924,19 +1924,17 @@ const updateOtherSpaceOrCardItems = (url) => {
   cardStore.updateCard(update)
   spaceStore.updateOtherItems({ spaceId, cardId })
 }
-const updateOtherInviteItems = (url) => {
+const updateOtherSpaceInviteItems = (url) => {
   url = new URL(url)
-  const { spaceId, collaboratorKey } = qs.decode(url.search)
-  const isCardLink = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
-  if (!isCardLink) {
-    const update = {
-      id: props.card.id,
-      linkToSpaceId: spaceId,
-      linkToCardId: null,
-      linkToSpaceCollaboratorKey: collaboratorKey
-    }
-    cardStore.updateCard(update)
+  const spaceId = url.pathname.split('/').pop()
+  const { collaboratorKey } = qs.decode(url.search)
+  const update = {
+    id: props.card.id,
+    linkToSpaceId: spaceId,
+    linkToCardId: null,
+    linkToSpaceCollaboratorKey: collaboratorKey
   }
+  cardStore.updateCard(update)
   spaceStore.updateOtherItems({ spaceId, collaboratorKey })
 }
 const updateOtherGroupItems = (url) => {
