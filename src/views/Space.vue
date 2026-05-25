@@ -1124,8 +1124,8 @@ const updateMetaRSSFeed = () => {
     #list-backgrounds
     Connections
     #box-infos
-    Cards
     #card-meta-containers
+    Cards
     Lines
     Lists
     ItemUnlockButtons
