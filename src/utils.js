@@ -2349,7 +2349,7 @@ export default {
     if (!url) { return }
     try {
       url = new URL(url)
-      return url.pathname === '/invite'
+      return url.pathname.startsWith('/space/invite')
     } catch (error) {
       console.warn('🚑 urlIsSpaceInvite', error)
     }
@@ -2358,7 +2358,7 @@ export default {
     const hostIsKinopio = this.hostIsKinopio(url)
     if (!hostIsKinopio) { return }
     url = new URL(url)
-    return url.pathname === '/group/invite'
+    return url.pathname.startsWith('/group/invite/')
   },
   urlIsSpace (url) {
     if (!url) { return }
