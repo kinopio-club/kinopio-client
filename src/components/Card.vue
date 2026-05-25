@@ -1926,7 +1926,10 @@ const updateOtherSpaceOrCardItems = (url) => {
 }
 const updateOtherInviteItems = (url) => {
   url = new URL(url)
-  const { spaceId, collaboratorKey } = qs.decode(url.search)
+  const spaceId = url.pathname.split('/').pop()
+  const { collaboratorKey } = qs.decode(url.search)
+
+  // const { spaceId, collaboratorKey } = qs.decode(url.search)
   const isCardLink = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
   if (!isCardLink) {
     const update = {
