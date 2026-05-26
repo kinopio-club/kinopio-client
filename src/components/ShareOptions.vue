@@ -173,6 +173,13 @@ const copyInviteLink = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
+const copyInviteLinkString = computed(() => {
+  if (state.inviteType === 'group') {
+    return 'Copy Group Invite Link'
+  } else {
+    return 'Copy Invite Link'
+  }
+})
 
 // copy public space url
 
@@ -231,7 +238,7 @@ const copySpaceUrl = async (event) => {
       .button-wrap
         button(@click.left="copyInviteLink")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite Link
+          span {{copyInviteLinkString}}
       .button-wrap(v-if="inviteTypeIsEdit")
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
