@@ -2,6 +2,11 @@
 
 const fonts = [
   {
+    id: -1,
+    name: 'None (Helvetica)',
+    previewImage: null
+  },
+  {
     id: 1,
     name: 'apris',
     previewImage: 'https://files.kinopio.club/font-preview/apris.webp'
