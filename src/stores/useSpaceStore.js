@@ -577,6 +577,7 @@ export const useSpaceStore = defineStore('space', {
         globalStore.isLoadingSpace = true
         const remoteSpace = await this.loadRemoteSpace({ id: this.id })
         await this.restoreSpaceRemote(remoteSpace)
+        globalStore.triggerDrawingInitialize()
         this.saveSpaceToCache()
         globalStore.isLoadingSpace = false
         globalStore.notifySpaceOutOfSync = false
