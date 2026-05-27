@@ -668,7 +668,7 @@ const dragBoxes = (event) => {
     const isMetaKey = event.metaKey || event.ctrlKey // drag only box
     const preventSelectItemsInside = isMetaKey || globalStore.currentUserIsDraggingDuplicateItem
     if (!preventSelectItemsInside) {
-      boxStore.selectItemsInSelectedBoxes()
+      boxStore.selectItemsInSelectedBox()
       globalStore.multipleBoxesSelectedIds.push(globalStore.currentDraggingBoxId)
     }
   }
