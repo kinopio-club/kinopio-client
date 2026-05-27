@@ -35,6 +35,7 @@ import Lists from '@/components/Lists.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import ItemSnapAlignGuideLines from '@/components/ItemSnapAlignGuideLines.vue'
+import CardCommentPreview from '@/components/CardCommentPreview.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
@@ -667,7 +668,7 @@ const dragBoxes = (event) => {
     const isMetaKey = event.metaKey || event.ctrlKey // drag only box
     const preventSelectItemsInside = isMetaKey || globalStore.currentUserIsDraggingDuplicateItem
     if (!preventSelectItemsInside) {
-      boxStore.selectItemsInSelectedBoxes()
+      boxStore.selectItemsInSelectedBox()
       globalStore.multipleBoxesSelectedIds.push(globalStore.currentDraggingBoxId)
     }
   }
@@ -1092,6 +1093,34 @@ const updateMetaRSSFeed = () => {
   link.href = url
   head.appendChild(link)
 }
+
+// card comment preview
+
+const currentHoveredCard = computed(() => {
+  const cardId = globalStore.currentUserIsHoveringOverCardId
+  if (!cardId) { return }
+  const card = cardStore.getCard(cardId)
+  return card
+})
+const currentHoveredCardIsComment = computed(() => {
+  const card = currentHoveredCard.value
+  if (!card) { return }
+  return cardStore.getIsCommentCard(card)
+})
+const cardCommentPreviewIsVisible = computed(() => {
+  if (shouldPrevent.value) { return }
+  const cardId = globalStore.currentUserIsHoveringOverCardId
+  const cardDetailsIsVisible = cardId === globalStore.cardDetailsIsVisibleForCardId
+  if (cardDetailsIsVisible) { return }
+  return currentHoveredCardIsComment.value
+})
+const shouldPrevent = computed(() => {
+  const isHoveringOverConnector = globalStore.currentUserIsHoveringOverConnectorItemId
+  const isHoveringOverCheckbox = globalStore.currentUserIsHoveringOverCheckboxCardId
+  const isHoveringOverLinkButton = globalStore.currentUserIsHoveringOverUrlButtonCardId
+  const isInteractingWithItem = globalStore.getIsInteractingWithItem
+  return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox || isHoveringOverLinkButton
+})
 </script>
 
 <template lang="pug">
@@ -1126,6 +1155,7 @@ const updateMetaRSSFeed = () => {
     #box-infos
     Cards
     #card-meta-containers
+    CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="currentHoveredCard")
     Lines
     Lists
     ItemUnlockButtons

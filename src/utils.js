@@ -2070,10 +2070,6 @@ export default {
     }
     return url
   },
-  spaceAndCardIdFromUrl (url) {
-    url = new URL(url)
-    return this.spaceAndCardIdFromPath(url.pathname) // /spaceId/cardId
-  },
   urlFromSpaceAndItem ({ spaceId, itemId }) {
     let url = `${consts.kinopioDomain()}/${spaceId}`
     if (itemId) {
@@ -2115,12 +2111,14 @@ export default {
   groupFromGroupInviteUrl (url) {
     if (!url) { return }
     url = new URL(url)
-    const params = url.searchParams
-    const group = this.urlSearchParamsToObject(params)
-    group.id = group.groupId
+    const segments = url.pathname.split('/').filter(Boolean)
+    const group = this.urlSearchParamsToObject(url.searchParams)
+    group.id = segments[2]
     return group
   },
-  spaceAndCardIdFromPath (path) {
+  spaceAndCardIdFromUrl (url) {
+    url = new URL(url)
+    const path = url.pathname
     // https://regexr.com/5kr4g
     // matches (text after /) twice
     const urlPattern = new RegExp(/\/([^?\s/]+)\/{0,1}([^?\s/]+){0,1}/i)
@@ -2351,7 +2349,7 @@ export default {
     if (!url) { return }
     try {
       url = new URL(url)
-      return url.pathname === '/invite'
+      return url.pathname.startsWith('/space/invite/')
     } catch (error) {
       console.warn('🚑 urlIsSpaceInvite', error)
     }
@@ -2360,12 +2358,15 @@ export default {
     const hostIsKinopio = this.hostIsKinopio(url)
     if (!hostIsKinopio) { return }
     url = new URL(url)
-    return url.pathname === '/group/invite'
+    return url.pathname.startsWith('/group/invite/')
+  },
+  urlIsApp (url) {
+    return Boolean(this.urlIsGroupInvite(url) || this.urlIsSpaceInvite(url) || this.urlIsSpace(url))
   },
   urlIsSpace (url) {
     if (!url) { return }
     if (this.urlIsGroupInvite(url)) { return }
-    if (this.urlIsSpaceInvite(url)) { return true }
+    if (this.urlIsSpaceInvite(url)) { return }
     let spaceUrlPattern
     if (consts.isDevelopment()) {
       // https://regexr.com/5hjc2

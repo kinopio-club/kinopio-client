@@ -144,8 +144,6 @@ const updateGroup = async () => {
       Loader(:visible="state.isLoading" :isSmall="true" :isStatic="true")
       template(v-if="!state.isLoading")
         GroupLabel(:group="state.group" :showName="true")
-    .row
-      .badge.danger Should not be shared publicly
 </template>
 
 <style lang="stylus">

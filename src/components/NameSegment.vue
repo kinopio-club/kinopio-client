@@ -188,7 +188,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 
 <style lang="stylus">
 .name-segment
-  --header-font var(--header-font-0)
+  &.header-font-0
+    --header-font var(--header-font-0)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2

@@ -68,6 +68,9 @@ export const useSpaceStore = defineStore('space', {
     getSpaceIsOpen () {
       return this.privacy === 'open'
     },
+    getSpaceIsPublic () {
+      return !this.getSpaceIsPrivate
+    },
     getSpaceUrl () {
       const domain = consts.kinopioDomain()
       const spaceUrl = utils.url({ name: this.name, id: this.id })
@@ -496,6 +499,7 @@ export const useSpaceStore = defineStore('space', {
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
       space.spectators = []
+      globalStore.notifySpaceIsRemoved = space.isRemoved
       // init items
       cardStore.initializeRemoteCards(space.cards)
       boxStore.initializeRemoteBoxes(space.boxes)
@@ -573,6 +577,7 @@ export const useSpaceStore = defineStore('space', {
         globalStore.isLoadingSpace = true
         const remoteSpace = await this.loadRemoteSpace({ id: this.id })
         await this.restoreSpaceRemote(remoteSpace)
+        globalStore.triggerDrawingInitialize()
         this.saveSpaceToCache()
         globalStore.isLoadingSpace = false
         globalStore.notifySpaceOutOfSync = false

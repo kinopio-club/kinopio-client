@@ -1,9 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import InviteLabel from '@/components/InviteLabel.vue'
 import utils from '@/utils.js'
 import invite from '@/data/invite.js'
+
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -40,8 +44,12 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const spaceIsPublic = computed(() => spaceStore.getSpaceIsPublic)
 const inviteStates = computed(() => {
-  let value = invite.states()
+  let value = invite.privateSpaceStates()
+  if (spaceIsPublic.value) {
+    value = invite.publicSpaceStates()
+  }
   if (!props.group) {
     value = value.filter(item => item.type !== 'group')
   }

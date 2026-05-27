@@ -209,7 +209,10 @@ dialog.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.lef
     ul.results-list(:class="{'is-dark-theme': isThemeDark}")
       template(v-for="font in fonts" :key="font.id")
         li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
-          img.preview-image(:src="font.previewImage" :title="font.name")
+          template(v-if="font.previewImage")
+            img.preview-image(:src="font.previewImage" :title="font.name")
+          template(v-else)
+            span {{font.name}}
 </template>
 
 <style lang="stylus">

@@ -23,6 +23,9 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
+const maxIterations = 30
+let currentIteration, updatePositionTimer
+
 const dialogElement = ref(null)
 const titleElement = ref(null)
 let unsubscribes
@@ -104,6 +107,26 @@ const updateDialogHeight = async () => {
   await nextTick()
   updateSubsectionHeight()
 }
+const updateHeights = () => {
+  if (!props.visible) {
+    window.cancelAnimationFrame(updatePositionTimer)
+    updatePositionTimer = undefined
+    return
+  }
+  currentIteration = 0
+  if (updatePositionTimer) { return }
+  updatePositionTimer = window.requestAnimationFrame(updateHeightsFrame)
+}
+const updateHeightsFrame = () => {
+  currentIteration++
+  updateDialogHeight()
+  if (currentIteration < maxIterations) {
+    window.requestAnimationFrame(updateHeightsFrame)
+  } else {
+    window.cancelAnimationFrame(updatePositionTimer)
+    updatePositionTimer = undefined
+  }
+}
 
 // pin dialog
 
@@ -183,7 +206,6 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Stats
           button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
             img.icon.stats(src="@/assets/stats.svg")
-
           //- Tags
           button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
@@ -192,8 +214,10 @@ dialog#sidebar.sidebar.is-pinnable(
             span Links
         //- second row
         .segmented-buttons
+          //- Todos
           button(@click.left="toggleSection('todos')" :class="{ active: state.todosIsVisible}" title="Todos")
             span Todos
+          //- Note
           button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
             img.icon.note(src="@/assets/note.svg")
           //- Favorites
@@ -217,7 +241,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
   History(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
   Todos(:visible="state.todosIsVisible" :subsectionHeight="state.subsectionHeight")
-  Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight")
+  Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight" @updateDialogHeight="updateHeights")
 
   SidebarResize
 </template>

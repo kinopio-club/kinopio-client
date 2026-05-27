@@ -210,6 +210,7 @@ const shouldShowChangelogIsUpdated = computed(() => {
 const currentSpace = computed(() => spaceStore)
 const currentSpaceUrl = computed(() => spaceStore.getSpaceUrl)
 const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
+const currentSpaceIsRemoved = computed(() => spaceStore.isRemoved)
 const currentSpaceName = computed(() => {
   const id = spaceStore.id
   const name = spaceStore.name
@@ -719,19 +720,23 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   GroupLabel(:group="spaceGroup")
 
                 //- read only badge
-                .label-badge(v-if="!userCanEditSpace")
+                .label-badge(v-if="!userCanEditSpace" title="You can only read this space")
                   span(:class="{'invisible': state.readOnlyJiggle}")
                     span Read Only
                   span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                     span Read Only
                 //- comment only badge
-                .label-badge.success(v-else-if="userCanOnlyComment")
+                .label-badge.success(v-else-if="userCanOnlyComment" title="You can only comment in this space")
                   span(:class="{'invisible': state.readOnlyJiggle}")
                     span Comment Only
                 //- in explore badge
-                .label-badge.secondary(v-if="shouldShowInExplore")
+                .label-badge.secondary(v-if="shouldShowInExplore" title="Space is in Explore")
                   span
                     img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
+                //- is removed badge
+                .label-badge.danger(v-if="currentSpaceIsRemoved" title="Space is removed")
+                  span
+                    img.icon.remove(src="@/assets/remove.svg")
 
               //- space status loader
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
@@ -951,6 +956,10 @@ header
         background-color var(--success-background)
       &.secondary
         background-color var(--secondary-background)
+      &.danger
+        background-color var(--danger-background)
+    .label-badge + .label-badge
+      margin-left 5px
     .group-label-badge
       background-color transparent
       padding 0

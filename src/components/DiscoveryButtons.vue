@@ -11,7 +11,6 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import utils from '@/utils.js'
-import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -19,24 +18,9 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
 let unsubscribes
-let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
-  // update spaces
-  if (!consts.isStaticPrerenderingPage) {
-    window.addEventListener('online', updateLiveSpaces)
-    window.addEventListener('online', updateSpaces)
-  }
-  updateLiveSpaces()
-  updateSpaces()
-  updateLiveSpacesIntervalTimer = setInterval(() => {
-    updateLiveSpaces()
-  }, 1000 * 60 * 5) // 5 minutes
-  updateSpacesIntervalTimer = setInterval(() => {
-    updateSpaces()
-  }, 1000 * 60 * 10) // 10 minutes
-
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerExploreIsVisible') {
@@ -44,7 +28,11 @@ onMounted(() => {
       } else if (name === 'closeAllDialogs') {
         closeDialogs()
       } else if (name === 'triggerUserIsLoaded') {
-        updateSpaces()
+        updateCommunitySpaces()
+      } else if (name === 'triggerUpdateCommunitySpaces') {
+        updateCommunitySpaces()
+      } else if (name === 'triggerUpdateLiveSpaces') {
+        updateLiveSpaces()
       }
     }
   )
@@ -53,12 +41,6 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  if (!consts.isStaticPrerenderingPage) {
-    window.removeEventListener('online', updateLiveSpaces)
-    window.removeEventListener('online', updateSpaces)
-  }
-  clearInterval(updateLiveSpacesIntervalTimer)
-  clearInterval(updateSpacesIntervalTimer)
   unsubscribes()
 })
 
@@ -84,6 +66,12 @@ const state = reactive({
 watch(() => state.exploreIsVisible, (value, prevValue) => {
   if (!value) {
     clearUnreadSpacesCounts()
+  }
+})
+
+watch(() => globalStore.isSpacePage, async (value, prevValue) => {
+  if (value) {
+    state.followingSpaces = await apiStore.getFollowingUsersSpaces()
   }
 })
 
@@ -143,7 +131,7 @@ const toggleExploreIsVisible = () => {
   globalStore.closeAllDialogs()
   state.exploreIsVisible = !isVisible
 }
-const updateSpaces = async () => {
+const updateCommunitySpaces = async () => {
   try {
     state.isLoadingSpaces = true
     const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
@@ -156,7 +144,7 @@ const updateSpaces = async () => {
     state.everyoneSpaces = everyoneSpaces
     updateUnreadSpacesCounts()
   } catch (error) {
-    console.error('🚑 updateSpaces', error)
+    console.error('🚑 updateCommunitySpaces', error)
     state.error.isLoading = true
   }
   state.isLoadingSpaces = false

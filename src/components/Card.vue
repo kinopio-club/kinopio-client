@@ -361,14 +361,13 @@ const otherCardIsVisible = computed(() => {
 
 // other space
 
-const otherSpaceSegment = computed(() => nameSegments.value.find(segment => segment.otherSpace))
 const otherSpace = computed(() => {
-  const nameSegment = otherSpaceSegment.value
-  return nameSegment?.otherSpace
+  const space = globalStore.getOtherSpaceById(props.card.linkToSpaceId)
+  return space
 })
+
 const otherSpaceUrl = computed(() => {
-  const nameSegment = otherSpaceSegment.value
-  return nameSegment?.name
+  return state.formats.link
 })
 const spaceOrInviteUrl = computed(() => {
   const link = state.formats.link
@@ -1144,7 +1143,8 @@ const updateUrlPreviewOnline = async () => {
     return
   }
   const shouldUpdate = shouldUpdateUrlPreview(url)
-  if (!shouldUpdate) {
+  const isAppUrl = utils.urlIsApp(url)
+  if (!shouldUpdate || isAppUrl) {
     globalStore.removeUrlPreviewLoadingForCardIds(cardId)
     return
   }
@@ -1890,7 +1890,7 @@ const lockingFrameStyle = computed(() => {
 // other items
 
 const updateOtherItems = () => {
-  let url = state.linkToPreview
+  const url = state.linkToPreview
   const shouldRemoveLink = (props.card.linkToCardId || props.card.linkToSpaceId) && !url
   if (shouldRemoveLink) {
     const update = {
@@ -1905,9 +1905,8 @@ const updateOtherItems = () => {
   const urlIsSpace = utils.urlIsSpace(url)
   const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
   const urlIsGroupInvite = utils.urlIsGroupInvite(url)
-  url = new URL(url)
   if (urlIsSpaceInvite) {
-    updateOtherInviteItems(url)
+    updateOtherSpaceInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
   } else if (urlIsGroupInvite) {
@@ -1915,7 +1914,7 @@ const updateOtherItems = () => {
   }
 }
 const updateOtherSpaceOrCardItems = (url) => {
-  const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
+  const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(url)
   const update = {
     id: props.card.id,
     linkToSpaceId: spaceId,
@@ -1925,21 +1924,21 @@ const updateOtherSpaceOrCardItems = (url) => {
   cardStore.updateCard(update)
   spaceStore.updateOtherItems({ spaceId, cardId })
 }
-const updateOtherInviteItems = (url) => {
-  const { spaceId, collaboratorKey } = qs.decode(url.search)
-  const isCardLink = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
-  if (!isCardLink) {
-    const update = {
-      id: props.card.id,
-      linkToSpaceId: spaceId,
-      linkToCardId: null,
-      linkToSpaceCollaboratorKey: collaboratorKey
-    }
-    cardStore.updateCard(update)
+const updateOtherSpaceInviteItems = (url) => {
+  url = new URL(url)
+  const spaceId = url.pathname.split('/').pop()
+  const { collaboratorKey } = qs.decode(url.search)
+  const update = {
+    id: props.card.id,
+    linkToSpaceId: spaceId,
+    linkToCardId: null,
+    linkToSpaceCollaboratorKey: collaboratorKey
   }
+  cardStore.updateCard(update)
   spaceStore.updateOtherItems({ spaceId, collaboratorKey })
 }
 const updateOtherGroupItems = (url) => {
+  url = new URL(url)
   const groupFromUrl = utils.groupFromGroupInviteUrl(url)
   groupStore.updateOtherGroups(groupFromUrl)
 }
@@ -2189,18 +2188,6 @@ const toggleVideoIsPaused = () => {
             @shouldRenderParent="updateShouldRenderParent"
           )
     .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
-      template(v-if="cardUrlPreviewIsVisible")
-        UrlPreviewCard(
-          :visible="true"
-          :card="card"
-          :user="cardCreatedByUser"
-          :isImageCard="isImageCard"
-          :isSelected="isSelectedOrDragging"
-          :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
-          :isLoadingUrlPreview="isLoadingUrlPreview"
-          @retryUrlPreview="retryUrlPreview"
-          :backgroundColor="backgroundColor"
-        )
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
           :card="card"
@@ -2223,6 +2210,18 @@ const toggleVideoIsPaused = () => {
           :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
           :isImageCard="isImageCard"
+        )
+      template(v-if="cardUrlPreviewIsVisible")
+        UrlPreviewCard(
+          :visible="true"
+          :card="card"
+          :user="cardCreatedByUser"
+          :isImageCard="isImageCard"
+          :isSelected="isSelectedOrDragging"
+          :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
+          :isLoadingUrlPreview="isLoadingUrlPreview"
+          @retryUrlPreview="retryUrlPreview"
+          :backgroundColor="backgroundColor"
         )
     //- url preview loading
     .status-container(v-if="isLoadingUrlPreview")
