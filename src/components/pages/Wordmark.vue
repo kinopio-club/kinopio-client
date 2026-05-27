@@ -13,12 +13,12 @@ h1.wordmark KINOPIO
   --wordmark-font baustrabe, var(--sans-serif-font)
 @font-face
   font-family 'baustrabe'
-  src url("@/assets/fonts/baustrabe/Baustraßev0.8-Bold.woff2") format("woff2")
+  src url("/fonts/baustrabe/Baustraßev0.8-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'baustrabe'
-  src url("@/assets/fonts/baustrabe/Baustraßev0.8-BoldOblique.woff2") format("woff2")
+  src url("/fonts/baustrabe/Baustraßev0.8-BoldOblique.woff2") format("woff2")
   font-weight bold
   font-style italic
 
