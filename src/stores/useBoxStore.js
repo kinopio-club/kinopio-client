@@ -567,7 +567,8 @@ export const useBoxStore = defineStore('boxes', {
     updateBoxSnapGuides ({ items, isChildren, cursor }) {
       const globalStore = useGlobalStore()
       if (!items.length) { return }
-      if (globalStore.shouldSnapAlign) { return }
+      const shouldPrevent = globalStore.shouldSnapAlign || globalStore.preventItemSnapping
+      if (shouldPrevent) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       const outsideThreshold = 20
