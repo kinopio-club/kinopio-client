@@ -33,6 +33,9 @@ const data = {
     helpUrl: '',
     description: 'Add a horizontal dividing line between pages, sections, or slides.',
     videoUrl: ''
+    // grid bk, 324 x 212
+
+    // two lines, drag top, select all below, drag down
   },
   box: {
     title: 'Draw Box',
@@ -40,6 +43,7 @@ const data = {
     helpUrl: 'https://kinopio.club/help/posts/boxes/',
     description: 'Drag to create a box to define regions and group everything inside.',
     videoUrl: ''
+    // draw box around cards, drag box
   },
   list: {
     title: 'Draw List',
@@ -47,6 +51,7 @@ const data = {
     helpUrl: 'https://kinopio.club/help/posts/lists/',
     description: 'Drag to create a list to vertically group and sort cards.',
     videoUrl: ''
+    // draw list, sort cards, collapse, drag
   },
   drawing: {
     title: 'Drawing',
@@ -54,6 +59,7 @@ const data = {
     helpUrl: 'https://kinopio.club/help/posts/drawing/',
     description: 'Draw freehand strokes. You can change color, stroke size, and toggle eraser mode.',
     videoUrl: ''
+    // draw circle around item, heart over card
   }
 }
 
