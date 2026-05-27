@@ -942,7 +942,7 @@ export const useGlobalStore = defineStore('global', {
       // items inside box
       if (draggingType === 'box') {
         const box = boxStore.getBox(draggingItemId)
-        boxStore.selectItemsInSelectedBoxes(box)
+        boxStore.selectItemsInSelectedBox(box)
       }
       // lines
       let lineIds = this.multipleLinesSelectedIds.concat(this.currentDraggingLineId)

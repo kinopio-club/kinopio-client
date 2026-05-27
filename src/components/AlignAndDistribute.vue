@@ -74,7 +74,7 @@ const normalizeDimensions = (items) => {
 const tagItemTypes = (items, type) => items.map(item => ({ ...item, _type: type }))
 const unselectItemsContainedInBoxes = (items, boxes) => {
   boxes.forEach(box => {
-    const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(box)
+    const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBox(box)
     const containedItems = cards.concat(boxes, lists)
     const containedItemIds = containedItems.map(containedItem => containedItem.id)
     items = items.filter(item => !containedItemIds.includes(item.id))
@@ -217,7 +217,7 @@ const isDistributedVertically = computed(() => {
 // update items
 
 const updateItemsContainedInBox = (delta, box) => {
-  const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(box)
+  const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBox(box)
   cards.forEach(card => {
     const update = {
       id: card.id,

@@ -469,7 +469,7 @@ export const useBoxStore = defineStore('boxes', {
         return isTopLeft && isTopRight && isBottomLeft && isBottomRight
       })
     },
-    getItemsContainedInSelectedBoxes (selectedBox) {
+    getItemsContainedInSelectedBox (selectedBox) {
       const cardStore = useCardStore()
       const listStore = useListStore()
       const connectionStore = useConnectionStore()
@@ -500,10 +500,10 @@ export const useBoxStore = defineStore('boxes', {
       const connections = connectionStore.getConnectionsByItemIds(itemIds)
       return { cards, boxes, lists, connections }
     },
-    selectItemsInSelectedBoxes (selectedBox) {
+    selectItemsInSelectedBox (selectedBox) {
       const globalStore = useGlobalStore()
       const cardStore = useCardStore()
-      const { boxes, cards, lists, connections } = this.getItemsContainedInSelectedBoxes(selectedBox)
+      const { boxes, cards, lists, connections } = this.getItemsContainedInSelectedBox(selectedBox)
       // boxes
       const boxIds = boxes.map(box => box.id)
       globalStore.addMultipleToMultipleBoxesSelected(boxIds)
@@ -783,7 +783,7 @@ export const useBoxStore = defineStore('boxes', {
       globalStore.boxIsSnappingTransition = true
       this.updateBox(item)
       // move contained items
-      const { cards, boxes, lists } = this.getItemsContainedInSelectedBoxes(prevItem)
+      const { cards, boxes, lists } = this.getItemsContainedInSelectedBox(prevItem)
       cardStore.moveCards({ delta, cards })
       this.moveBoxes({ delta, boxes })
       listStore.moveLists({ delta, lists })
