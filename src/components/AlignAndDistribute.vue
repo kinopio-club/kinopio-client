@@ -72,12 +72,22 @@ const normalizeDimensions = (items) => {
   })
 }
 const tagItemTypes = (items, type) => items.map(item => ({ ...item, _type: type }))
-
+const unselectItemsContainedInBoxes = (items, boxes) => {
+  boxes.forEach(box => {
+    const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(box)
+    const containedItems = cards.concat(boxes, lists)
+    const containedItemIds = containedItems.map(containedItem => containedItem.id)
+    items = items.filter(item => !containedItemIds.includes(item.id))
+  })
+  return items
+}
 const allItems = computed(() => {
   const cards = tagItemTypes(normalizeDimensions(props.editableCards), 'cards')
   const boxes = tagItemTypes(normalizeDimensions(props.editableBoxes), 'boxes')
   const lists = tagItemTypes(normalizeDimensions(props.lists), 'lists')
-  return cards.concat(boxes, lists)
+  let items = cards.concat(boxes, lists)
+  items = unselectItemsContainedInBoxes(items, boxes)
+  return items
 })
 
 // verify positioning
@@ -206,12 +216,46 @@ const isDistributedVertically = computed(() => {
 
 // update items
 
+const updateItemsContainedInBox = (delta, box) => {
+  const { cards, boxes, lists } = boxStore.getItemsContainedInSelectedBoxes(box)
+  cards.forEach(card => {
+    const update = {
+      id: card.id,
+      x: card.x + delta.x,
+      y: card.y + delta.y
+    }
+    cardStore.updateCard(update)
+  })
+  boxes.forEach(box => {
+    const update = {
+      id: box.id,
+      x: box.x + delta.x,
+      y: box.y + delta.y
+    }
+    boxStore.updateBox(update)
+  })
+  lists.forEach(list => {
+    const update = {
+      id: list.id,
+      x: list.x + delta.x,
+      y: list.y + delta.y
+    }
+    listStore.updateList(update)
+    cardStore.updateCardPositionsInList(update)
+  })
+}
 const updateItem = (item) => {
   const type = item._type
   if (type === 'cards' && !item.listId) {
     cardStore.updateCard(item)
   }
   if (type === 'boxes') {
+    const box = boxStore.getBox(item.id)
+    const delta = {
+      x: item.x - box.x,
+      y: item.y - box.y
+    }
+    updateItemsContainedInBox(delta, box)
     boxStore.updateBox(item)
   }
   if (type === 'lists') {
