@@ -25,15 +25,12 @@ const state = reactive({
 })
 
 const data = {
-  // TODO line help doc
-  // https://x.com/KinopioClub/status/1988653434996682936
   line: {
     title: 'Add Line Divider',
     keyboardShortcut: '–',
-    helpUrl: '',
+    helpUrl: 'https://kinopio.club/help/posts/lines/',
     description: 'Add a horizontal dividing line between pages, sections, or slides.',
     videoUrl: 'https://files.kinopio.club/tooltips/tooltip-line.gif'
-    // grid bk, 324 x 212
   },
   box: {
     title: 'Draw Box',
