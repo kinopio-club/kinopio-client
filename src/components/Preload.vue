@@ -23,8 +23,8 @@ watch(() => globalStore.isLoadingSpace, (value) => {
   updateImageUrls()
   if (state.spaceLoaded) { return }
   if (!value) {
-    state.spaceLoaded = true
     console.log('💐 preload assets')
+    state.spaceLoaded = true
   }
 })
 </script>
