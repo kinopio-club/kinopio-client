@@ -121,6 +121,7 @@ const clearDrawing = () => {
       :class="{ active: state.brushSizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
       @click.left="toggleBrushSizePickerIsVisible"
     )
+      img.icon.amount(src="@/assets/amount.svg")
       span {{currentBrushSizeUppercase}}
     //- eraser
     button(

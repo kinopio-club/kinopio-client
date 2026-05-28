@@ -1533,6 +1533,17 @@ export const useApiStore = defineStore('api', {
         throw new Error(error)
       }
     },
+    async applyStudentDiscount (email) {
+      try {
+        const body = { email }
+        const options = await this.requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${consts.apiHost()}/user/apply-student-discount`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 applyStudentDiscount', error)
+        throw new Error(error)
+      }
+    },
 
     // Affiliates
 

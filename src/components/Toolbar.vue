@@ -7,14 +7,27 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useLineStore } from '@/stores/useLineStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
+import ToolbarTooltip from '@/components/dialogs/ToolbarTooltip.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const lineStore = useLineStore()
 
+let tooltipTimer
+const tooltipTimerDelay = 600
+
 const props = defineProps({
   visible: Boolean
+})
+
+const state = reactive({
+  tooltipIsVisible: {
+    line: false,
+    box: false,
+    list: false,
+    drawing: false
+  }
 })
 
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
@@ -39,6 +52,7 @@ const toolbarIsDrawing = computed(() => {
   return globalStore.getToolbarIsDrawing
 })
 const toggleToolbar = (value) => {
+  cancelTooltip()
   if (value === currentUserToolbar.value) {
     globalStore.updateCurrentUserToolbar('card')
   } else {
@@ -56,6 +70,26 @@ const DrawingLabel = computed(() => {
     return 'Drawing (D)'
   }
 })
+
+// tooltips
+
+const closeAllTooltips = () => {
+  state.tooltipIsVisible.line = false
+  state.tooltipIsVisible.box = false
+  state.tooltipIsVisible.list = false
+  state.tooltipIsVisible.drawing = false
+}
+const startTooltipTimer = (tool) => {
+  if (currentUserToolbar.value === tool) { return }
+  tooltipTimer = setTimeout(() => {
+    closeAllTooltips()
+    state.tooltipIsVisible[tool] = true
+  }, tooltipTimerDelay)
+}
+const cancelTooltip = async () => {
+  clearTimeout(tooltipTimer)
+  closeAllTooltips()
+}
 </script>
 
 <template lang="pug">
@@ -64,46 +98,61 @@ nav#toolbar.toolbar(v-if="visible")
   .toolbar-items
     .segmented-buttons
       //- Line
-      .button-wrap
+      .button-wrap(
+          aria-label="Add Line Divider (-)"
+          @mouseenter="startTooltipTimer('line')"
+          @mouseleave="cancelTooltip"
+        )
         button(
           @click="addLine"
-          title="Add Line Divider (-)"
           :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
         )
           img.icon.line-icon(src="@/assets/line.svg")
-
+        ToolbarTooltip(:visible="state.tooltipIsVisible.line" tool="line")
       //- Box
-      .button-wrap
+      .button-wrap(
+        @mouseenter="startTooltipTimer('box')"
+        @mouseleave="cancelTooltip"
+      )
         button(
-          title="Draw Box (B)"
+          aria-label="Draw Box (B)"
           :class="{ active: toolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('box')"
         )
           img.icon.box-icon(src="@/assets/box.svg")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsBox")
           span Draw Box (B)
+        ToolbarTooltip(:visible="state.tooltipIsVisible.box" tool="box")
 
       //- List
-      .button-wrap
+      .button-wrap(
+        @mouseenter="startTooltipTimer('list')"
+        @mouseleave="cancelTooltip"
+      )
         button(
-          title="Draw List (L)"
+          aria-label="Draw List (L)"
           :class="{ active: toolbarIsList, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('list')"
         )
           img.icon.list-icon(src="@/assets/list.svg")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
           span Draw List (L)
+        ToolbarTooltip(:visible="state.tooltipIsVisible.list" tool="list")
 
       //- Drawing
-      .button-wrap
+      .button-wrap(
+        @mouseenter="startTooltipTimer('drawing')"
+        @mouseleave="cancelTooltip"
+      )
         button.drawing-button(
-          title="Drawing (D)"
+          aria-label="Drawing (D)"
           :class="{ active: toolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('drawing')"
         )
           img.icon.pencil-icon(src="@/assets/pencil.svg")
         .label-badge.toolbar-badge-wrap.jiggle(v-if="toolbarIsDrawing")
           span {{DrawingLabel}}
+        ToolbarTooltip(:visible="state.tooltipIsVisible.drawing" tool="drawing")
 </template>
 
 <style lang="stylus">
