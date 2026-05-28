@@ -89,11 +89,11 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
   section
     img(:src="tooltip.videoUrl" aria-label="tooltip line")
     p {{ tooltip.description }}
-    p
-      a(:href="tooltip.helpUrl" target="_blank")
-        button
-          span Help{{' '}}
-          img.icon.visit(src="@/assets/visit.svg")
+    //- p
+    //-   a(:href="tooltip.helpUrl" target="_blank")
+    //-     button
+    //-       span Help{{' '}}
+    //-       img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
