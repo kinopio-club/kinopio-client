@@ -104,7 +104,7 @@ dialog.space-status
   .loader
     width 14px
     height 14px
-    vertical-align -3px
+    vertical-align -1px
     margin-right 6px
   .loader + span
     margin-left 2px
