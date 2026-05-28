@@ -32,34 +32,29 @@ const data = {
     keyboardShortcut: '–',
     helpUrl: '',
     description: 'Add a horizontal dividing line between pages, sections, or slides.',
-    videoUrl: ''
+    videoUrl: 'https://files.kinopio.club/tooltips/tooltip-line.gif'
     // grid bk, 324 x 212
-
-    // two lines, drag top, select all below, drag down
   },
   box: {
     title: 'Draw Box',
     keyboardShortcut: 'B',
     helpUrl: 'https://kinopio.club/help/posts/boxes/',
     description: 'Drag to create a box to define regions and group everything inside.',
-    videoUrl: ''
-    // draw box around cards, drag box
+    videoUrl: 'https://files.kinopio.club/tooltips/tooltip-box.gif'
   },
   list: {
     title: 'Draw List',
     keyboardShortcut: 'L',
     helpUrl: 'https://kinopio.club/help/posts/lists/',
     description: 'Drag to create a list to vertically group and sort cards.',
-    videoUrl: ''
-    // draw list, sort cards, collapse, drag
+    videoUrl: 'https://files.kinopio.club/tooltips/tooltip-list.gif'
   },
   drawing: {
     title: 'Drawing',
     keyboardShortcut: 'D',
     helpUrl: 'https://kinopio.club/help/posts/drawing/',
     description: 'Draw freehand strokes. You can change color, stroke size, and toggle eraser mode.',
-    videoUrl: ''
-    // draw circle around item, heart over card
+    videoUrl: 'https://files.kinopio.club/tooltips/tooltip-drawing.gif'
   }
 }
 
@@ -95,7 +90,7 @@ dialog.narrow.toolbar-tooltip#toolbar-tooltip(
       div
         .badge.keyboard-shortcut(title="keyboard Shortcut") {{ tooltip.keyboardShortcut }}
   section
-    img(src="https://d2w9rnfcy7mm78.cloudfront.net/46095939/original_105b79e6b78982b6b1eea60b261d66bf.jpeg?1778634028?bc=0")
+    img(:src="tooltip.videoUrl" aria-label="tooltip line")
     p {{ tooltip.description }}
     p
       a(:href="tooltip.helpUrl" target="_blank")

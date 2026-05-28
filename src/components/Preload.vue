@@ -7,12 +7,9 @@ import { useCardStore } from '@/stores/useCardStore'
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 
-watch(() => globalStore.isLoadingSpace, (value, prevValue) => {
-  updateImageUrls()
-})
-
 const state = reactive({
-  imageUrls: []
+  imageUrls: [],
+  spaceLoaded: false
 })
 
 const updateImageUrls = () => {
@@ -21,6 +18,15 @@ const updateImageUrls = () => {
   urls = urls.filter(url => Boolean(url))
   state.imageUrls = urls
 }
+
+watch(() => globalStore.isLoadingSpace, (value) => {
+  updateImageUrls()
+  if (state.spaceLoaded) { return }
+  if (!value) {
+    state.spaceLoaded = true
+    console.log('💐 preload assets')
+  }
+})
 </script>
 
 <template lang="pug">
@@ -28,7 +34,7 @@ const updateImageUrls = () => {
   template(v-for="url in state.imageUrls")
     img.hidden(:src="url")
 
-  .icons.hidden
+  .icons.hidden(v-if="state.spaceLoaded")
     //- logo
     img.icon(src="@/assets/logos/logo-hover.png")
     img.icon(src="@/assets/logos/logo-active.png")
@@ -171,6 +177,12 @@ const updateImageUrls = () => {
     img(src="https://files.kinopio.club/font-preview/recoleta.webp")
     img(src="https://files.kinopio.club/font-preview/shinka-mono.webp")
     img(src="https://files.kinopio.club/font-preview/Baustraße.webp")
+
+    //- tooltips
+    img(src="https://files.kinopio.club/tooltips/tooltip-line.gif")
+    img(src="https://files.kinopio.club/tooltips/tooltip-box.gif")
+    img(src="https://files.kinopio.club/tooltips/tooltip-list.gif")
+    img(src="https://files.kinopio.club/tooltips/tooltip-drawing.gif")
 </template>
 
 <style lang="stylus">
