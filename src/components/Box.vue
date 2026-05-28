@@ -822,7 +822,6 @@ const clearFocus = () => {
 
 .box-info
   --ease-out-circ cubic-bezier(0, 0.55, 0.45, 1) // https://easings.net/#easeOutCirc
-  --header-font var(--header-font-0)
   z-index 1
   border-radius 4px
   border-bottom-right-radius var(--entity-radius)
@@ -839,6 +838,8 @@ const clearFocus = () => {
       height 0.2s var(--ease-out-circ),
       left 0.2s var(--ease-out-circ),
       top 0.2s var(--ease-out-circ)
+  &.header-font-0
+    --header-font var(--header-font-0)
   &.header-font-1
     --header-font var(--header-font-1)
   &.header-font-2

@@ -170,6 +170,7 @@ const updateImageUrls = () => {
     img(src="https://files.kinopio.club/font-preview/migra.webp")
     img(src="https://files.kinopio.club/font-preview/recoleta.webp")
     img(src="https://files.kinopio.club/font-preview/shinka-mono.webp")
+    img(src="https://files.kinopio.club/font-preview/Baustraße.webp")
 </template>
 
 <style lang="stylus">

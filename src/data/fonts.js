@@ -17,6 +17,11 @@ const fonts = [
     previewImage: 'https://files.kinopio.club/font-preview/eiko.webp'
   },
   {
+    id: 9,
+    name: 'baustrabe',
+    previewImage: 'https://files.kinopio.club/font-preview/Baustraße.webp'
+  },
+  {
     id: 2,
     name: 'gaya',
     previewImage: 'https://files.kinopio.club/font-preview/gaya.webp'
