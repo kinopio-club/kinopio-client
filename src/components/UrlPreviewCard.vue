@@ -154,6 +154,7 @@ const isSocialMediaUrl = computed(() => {
   return domains.some(domain => url.includes(domain))
 })
 const removeTrailingAttributionText = (description) => {
+  if (!description) { return description }
   const index = description.lastIndexOf('— ')
   if (index > 1) {
     description = description.substring(0, index)
