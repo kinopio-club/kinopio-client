@@ -6,25 +6,23 @@ You can auth requests with either your user or an app api key, both can be found
 
 Type | Header | Permissions | Description
 --- | --- | --- | ---
-User API Key | `Authorization` | Root | For personal projects only
+User API Key | `Authorization` | Root, be careful | For personal projects only
 App API Key | `App-Authorization` | Scope is either `user`, `read`, `edit`, or `delete` | For integrations, apps, and projects meant to be used by others
 
-<p class="badge danger">🙈 API Keys are secrets, so be sure to keep them safe. For safety, prefer keys with the narrowest scope possible.</p>
-
-A route that lists an **App Key** scope below can be called with an app API key that has that scope.
-
-### App API Key Scopes
-
-Scope | Description
+App API Key Scopes | Description
 --- | ---
-`user` | ..
-`read` | ..
-`edit` | ..
-`delete` | ..
+`user` | Can only read <a href="#users" class="badge button-badge users">User</a>profile data
+`read` | Can read content (spaces, cards, etc.)
+`edit` | Can read and edit content
+`delete` | Can read, edit, and delete content
+
+<p class="badge danger"><img class="icon key" src="@/assets/key.svg"/> API Keys are secrets, so be sure to keep them safe. For safety, prefer keys with the narrowest scope possible.</p>
 
 ## Rate Limits
 
 The API is limited to 5 requests per second. If you exceed this rate, you will receive a `429` response and will need to wait 30 seconds before subsequent requests will succeed.
+
+-------
 
 ## Routes and Attributes by Item Type
 
@@ -43,6 +41,7 @@ Method | Name | Description | Auth
 </div>
 </section>
 
+------
 
 <section class="section-wrap users">
 <a class="anchor" data-section="👯‍♀️" name="users"></a>
@@ -148,6 +147,8 @@ Name | Type | Description
 </div>
 </section>
 
+------
+
 <section class="section-wrap spaces">
 <a class="anchor" data-section="🍓" name="spaces"></a>
 <h2 class="badge spaces">Spaces</h2>
@@ -241,7 +242,7 @@ Name | Type | Description
 </div>
 </section>
 
-
+------
 
 <section class="section-wrap cards">
 <a class="anchor" data-section="🎑" name="cards"></a>
@@ -330,7 +331,7 @@ Name | Type | Description
 </div>
 </section>
 
-
+------
 
 <section class="section-wrap connections">
 <a class="anchor" data-section="🍆" name="connections"></a>
@@ -379,7 +380,7 @@ Name | Type | Description
 </div>
 </section>
 
-
+------
 
 <section class="section-wrap boxes">
 <a class="anchor" data-section="🍱" name="boxes"></a>
@@ -433,7 +434,7 @@ Name | Type | Description
 </div>
 </section>
 
-
+------
 
 <section class="section-wrap lists">
 <a class="anchor" data-section="🍱" name="lists"></a>
@@ -479,7 +480,7 @@ Name | Type | Description
 </div>
 </section>
 
-
+------
 
 <section class="section-wrap tags">
 <a class="anchor" data-section="🦚" name="tags"></a>
@@ -519,7 +520,7 @@ Name | Type | Description
 </div>
 </section>
 
-
+------
 
 <section class="section-wrap notifications">
 <a class="anchor" data-section="🛎" name="notifications"></a>
@@ -562,6 +563,7 @@ Name | Type | Description
 </div>
 </section>
 
+------
 
 <section class="section-wrap other">
 <a class="anchor" data-section="🛎" name="other"></a>

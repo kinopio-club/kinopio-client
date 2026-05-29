@@ -158,6 +158,9 @@ AboutJsonLd
 main.api-page-wrap
   .page-wrap
     max-width 900px
+  hr
+    margin-top 2rem
+    margin-bottom 1rem
   p
     max-width 440px // same as page.styl
   ul.api-toc
