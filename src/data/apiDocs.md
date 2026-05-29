@@ -7,13 +7,20 @@ You can auth requests with either your user or an app api key, both can be found
 Type | Header | Permissions | Description
 --- | --- | --- | ---
 User API Key | `Authorization` | Root | For personal projects only
-App API Key | `App-Authorization` | Scope is either `read`, `edit`, `delete` | For integrations, apps, and projects meant to be used by others
+App API Key | `App-Authorization` | Scope is either `user`, `read`, `edit`, or `delete` | For integrations, apps, and projects meant to be used by others
 
 <p class="badge danger">🙈 API Keys are secrets, so be sure to keep them safe. For safety, prefer keys with the narrowest scope possible.</p>
 
 A route that lists an **App Key** scope below can be called with an app API key that has that scope.
 
-<!-- (For testing, you can also use a query string (`?apiKey=`) but this is less secure and not recommended) -->
+### App API Key Scopes
+
+Scope | Description
+--- | ---
+`user` | ..
+`read` | ..
+`edit` | ..
+`delete` | ..
 
 ## Rate Limits
 
