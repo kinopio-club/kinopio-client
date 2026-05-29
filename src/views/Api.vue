@@ -292,6 +292,11 @@ main.api-page-wrap
       &:hover
         background var(--secondary-hover-background)
 
+  .table-wrap.all
+    code
+      > code
+        background transparent
+        padding 0
   // custom column widths
 
   .routes-table-wrap
