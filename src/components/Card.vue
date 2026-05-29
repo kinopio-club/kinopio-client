@@ -1460,6 +1460,18 @@ const remoteCardDetailsVisibleColor = computed(() => {
     return undefined
   }
 })
+const updateCardDetailsStartCursor = (event) => {
+  const range = document.caretPositionFromPoint(event.clientX, event.clientY)
+  const text = range.offsetNode.textContent
+  const startPosition = range.offset
+  if (text) {
+    const precedingString = text.substring(0, startPosition)
+    globalStore.cardDetailsCursor = { startPosition, precedingString }
+    console.log('❤️❤️', range)
+  } else {
+    globalStore.cardDetailsCursor = {}
+  }
+}
 const showCardDetails = (event) => {
   if (globalStore.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
@@ -1490,6 +1502,7 @@ const showCardDetails = (event) => {
     window.location = event.target.href
     return
   }
+  updateCardDetailsStartCursor(event)
   globalStore.updateCardDetailsIsVisibleForCardId(props.card.id)
   globalStore.currentDraggingCardId = props.card.id
   globalStore.parentCardId = props.card.id
