@@ -2,11 +2,14 @@ The Kinopio API is used to find, save, and update the spaces of signed up users.
 
 ## Authentication
 
-Kinopio uses token-based authentication using your user `apiKey`. You can get your apiKey in the app through `User → Settings → Account → API`.
+Kinopio has two kinds of API keys:
 
-Use your apiKey in the `Authorization` header of each request.
+- **User API key** gives full access to your account, just like being signed in. Send it in the `Authorization` header. Get it in the app through `User → Settings → Account → API`.
+- **App API key** is a key you generate with a limited set of scopes, for building integrations or sharing access without handing over your whole account. Send it in the `app-authorization` header.
 
-<p class="badge danger">🙈 Your API key carries the same privileges as your user account, so be sure to keep it secret!</p>
+<p class="badge danger">🙈 Both keys are secrets, so be sure to keep them safe. Prefer an app API key with the narrowest scopes for anything you don't fully control.</p>
+
+A route that lists an **App Key** scope below can be called with an app API key that has that scope.
 
 <!-- (For testing, you can also use a query string (`?apiKey=`) but this is less secure and not recommended) -->
 
@@ -44,25 +47,25 @@ Routes with Auth as `apiKey` mean that the Authorization header apiKey must matc
 
 <div class="table-wrap users routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`   | <code class="users">/user/public/:userId</code>         | Gets public info on a user                                                                                                                                | None
-`GET`   | <code class="users">/user/public/explore-spaces/:userId</code>   | The a list of spaces with `showInExplore: true` created by the user                                                          | None
-`GET`   | <code class="users">/user/hidden-spaces</code>          | Get hidden spaces for the authenticating user                                                         | `apiKey`
-`GET`   | <code class="users">/user/public/multiple?userIds=id1,id2</code>        | Gets public info for multiple userIds, up to 60 userIds at a time                                      | None
-`GET`   | <code class="users">/user</code>                        | Get all info on the authenticating user                                                                                                                   | `apiKey`
-`GET`   | <code class="users">/user/favorite-spaces</code>        | Get favorite spaces for the authenticating user. Favorited spaces which have unread updates will have `isEdited: true`                      | `apiKey`
-`GET`   | <code class="users">/user/favorite-users</code>         | Get favorite users for the authenticating user                                                          | `apiKey`
-`GET`   | <code class="users">/user/favorite-colors</code>        | Get favorite colors for the authenticating user                                                         | `apiKey`
-`GET`   | <code class="users">/user/spaces</code>                 | Get a list of the user's <a href="#spaces" class="badge button-badge spaces">Spaces</a>. Use `/user/group-spaces` for spaces created by other members of groups they belong to           | `apiKey`
-`GET`   | <code class="users">/user/groups</code>                 | Get a list of the user's groups. Their role in each group (`member` or `admin`) is inside the `groupUser` object                                    | `apiKey`
-`GET`   | <code class="users">/user/group-spaces</code>           | Get a list of the user's group <a href="#spaces" class="badge button-badge spaces">Spaces</a> created by other members of groups they belong to                                          | `apiKey`
-`GET`   | <code class="users">/user/template-spaces</code>        | Get a list of the user's template <a href="#spaces" class="badge button-badge spaces">Spaces</a>. These include template spaces you made or are a collaborator in                        | `apiKey`
-`GET`   | <code class="users">/user/removed-spaces</code>         | Get <a href="#spaces" class="badge button-badge spaces">Spaces</a> removed by the authenticating user                                                                  | `apiKey`
-`GET`   | <code class="users">/user/inbox-space</code>            | Get info on the user's `Inbox` space. whether a space is an inbox or not is based on name only, so it's possible to have multiple `Inbox` spaces, but only one the most recently updated Inbox will be returned | `apiKey`
-`GET`   | <code class="users">/user/tags</code>                   | Get a list of the last edited <a href="#tags" class="badge button-badge tags">Tags</a> in your spaces                                                                  | `apiKey`
-`GET`   | <code class="users">/user/todos</code>                  | Get todo cards and boxes (item names start with `[]`, `[ ]`, or `[x]`), grouped by space                                                                            | `apiKey`
-`PATCH` | <code class="users">/user</code>                        | Update the user based on an object body with updated user attributes. You can't patch `apiKey`, `password`, `emailIsVerified`, or `email`       | `apiKey`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`   | <code class="users">/user/public/:userId</code>         | Gets public info on a user                                                                                                                                | None | —
+`GET`   | <code class="users">/user/public/explore-spaces/:userId</code>   | The a list of spaces with `showInExplore: true` created by the user                                                          | None | —
+`GET`   | <code class="users">/user/hidden-spaces</code>          | Get hidden spaces for the authenticating user                                                         | `apiKey` | `read`
+`GET`   | <code class="users">/user/public/multiple?userIds=id1,id2</code>        | Gets public info for multiple userIds, up to 60 userIds at a time                                      | None | —
+`GET`   | <code class="users">/user</code>                        | Get all info on the authenticating user                                                                                                                   | `apiKey` | `user`
+`GET`   | <code class="users">/user/favorite-spaces</code>        | Get favorite spaces for the authenticating user. Favorited spaces which have unread updates will have `isEdited: true`                      | `apiKey` | `read`
+`GET`   | <code class="users">/user/favorite-users</code>         | Get favorite users for the authenticating user                                                          | `apiKey` | `read`
+`GET`   | <code class="users">/user/favorite-colors</code>        | Get favorite colors for the authenticating user                                                         | `apiKey` | `read`
+`GET`   | <code class="users">/user/spaces</code>                 | Get a list of the user's <a href="#spaces" class="badge button-badge spaces">Spaces</a>. Use `/user/group-spaces` for spaces created by other members of groups they belong to           | `apiKey` | `read`
+`GET`   | <code class="users">/user/groups</code>                 | Get a list of the user's groups. Their role in each group (`member` or `admin`) is inside the `groupUser` object                                    | `apiKey` | `read`
+`GET`   | <code class="users">/user/group-spaces</code>           | Get a list of the user's group <a href="#spaces" class="badge button-badge spaces">Spaces</a> created by other members of groups they belong to                                          | `apiKey` | `read`
+`GET`   | <code class="users">/user/template-spaces</code>        | Get a list of the user's template <a href="#spaces" class="badge button-badge spaces">Spaces</a>. These include template spaces you made or are a collaborator in                        | `apiKey` | `read`
+`GET`   | <code class="users">/user/removed-spaces</code>         | Get <a href="#spaces" class="badge button-badge spaces">Spaces</a> removed by the authenticating user                                                                  | `apiKey` | `read`
+`GET`   | <code class="users">/user/inbox-space</code>            | Get info on the user's `Inbox` space. whether a space is an inbox or not is based on name only, so it's possible to have multiple `Inbox` spaces, but only one the most recently updated Inbox will be returned | `apiKey` | `read`
+`GET`   | <code class="users">/user/tags</code>                   | Get a list of the last edited <a href="#tags" class="badge button-badge tags">Tags</a> in your spaces                                                                  | `apiKey` | `read`
+`GET`   | <code class="users">/user/todos</code>                  | Get todo cards and boxes (item names start with `[]`, `[ ]`, or `[x]`), grouped by space                                                                            | `apiKey` | `read`
+`PATCH` | <code class="users">/user</code>                        | Update the user based on an object body with updated user attributes. You can't patch `apiKey`, `password`, `emailIsVerified`, or `email`       | `apiKey` | `edit`
 
 </div>
 
@@ -150,29 +153,29 @@ The `closed` privacy state refers to `Public Read Only`.
 
 <div class="table-wrap spaces routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`    | <code class="spaces">/space/:spaceId</code>              | Get info on a space by id. Use `?textOnly=true` for card names only                               | `canViewSpace`
-`GET`    | <code class="spaces">/space/:spaceId/public-meta</code>    | Get public space info on non-private spaces                                                     | None
-`GET`    | <code class="spaces">/space/:spaceId/favorites</code>    | Get a list of users who have favorited the spaceId                                                | None
-`GET`    | <code class="spaces">/space/:spaceId/feed.json</code>    | `RSS feed` for cards recently created or updated in a space. Use `?apiKey=` for private spaces    | `canViewSpace`
-`GET`    | <code class="spaces">/space/:spaceId/<br>removedCards</code> | Get <a href="#cards" class="badge button-badge cards">Cards</a> removed in a space                         | `canEditSpace`
-`GET`    | <code class="spaces">/space/explore-spaces</code>            | Get a list of recently updated public spaces which have been added to Explore. Sorted by date `showInExploreUpdatedAt` | None
-`GET`    | <code class="spaces">/space/explore-spaces/feed.json</code>  | `RSS feed` for new spaces added to Explore                                                    | None
-`GET`    | <code class="spaces">/space/live-spaces</code>           | Get a list of currently being edited spaces which are open or closed                              | None
-`GET`    | <code class="spaces">/space/multiple?spaceIds=id1,id2</code> | Get info on multiple spaces, up to 60 spaceIds at a time                                      | `canViewSpace`
-`GET`    | <code class="spaces">/space/public/multiple?spaceIds=id1,id2</code>        | Gets public info for multiple public spaces, up to 60 spaceIds at a time.          None
-`GET`    | <code class="spaces">/space/inbox</code>         | Get the current user's inbox space                                                                        | `apiKey`
-`GET`    | <code class="spaces">/space/everyones-spaces</code>            | Get a list of recent public spaces sorted by date `createdAt`                               | None
-`GET`    | <code class="spaces">/space/everyones-spaces/feed.json</code>  | `RSS feed` for recent public spaces                                                         | None
-`GET`    | <code class="spaces">/space/date-image</code>        | Get the image url for today's date card image                                                         | None
-`POST`   | <code class="spaces">/space</code>                       | Create a new space(s) from object(s) in request body. The owner will be the apiKey user           | `apiKey`
-`POST`   | <code class="spaces">/space/search-explore-space</code>   | Get all `showInExplore` spaces based on space name. Body object must contain `query`. Searches are not case-insensitive           | None
-`PATCH`  | <code class="spaces">/space</code>                       | Update space(s) from object(s) in request body                                                    | `canEditSpace`
-`PATCH`  | <code class="spaces">/space/restore</code>               | Restore removed space(s)  from object(s) in request body                                          | `canEditSpace`
-`DELETE` | <code class="spaces">/space</code>                       | Remove space(s) specified in request body                                                         | `canEditSpace`
-`DELETE` | <code class="spaces">/space/permanent</code>             | Permanently remove space(s) specified in request body                                             | `canEditSpace`
-`DELETE` | <code class="spaces">/space/collaborator</code>          | Removes collaborator user from space. Request Body Keys: `spaceId`, `userId`                      | `canEditSpace`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`    | <code class="spaces">/space/:spaceId</code>              | Get info on a space by id. Use `?textOnly=true` for card names only                               | `canViewSpace` | `read`
+`GET`    | <code class="spaces">/space/:spaceId/public-meta</code>    | Get public space info on non-private spaces                                                     | None | —
+`GET`    | <code class="spaces">/space/:spaceId/favorites</code>    | Get a list of users who have favorited the spaceId                                                | None | `read`
+`GET`    | <code class="spaces">/space/:spaceId/feed.json</code>    | `RSS feed` for cards recently created or updated in a space. Use `?apiKey=` for private spaces    | `canViewSpace` | —
+`GET`    | <code class="spaces">/space/:spaceId/<br>removed-cards</code> | Get <a href="#cards" class="badge button-badge cards">Cards</a> removed in a space                         | `canEditSpace` | `read`
+`GET`    | <code class="spaces">/space/explore-spaces</code>            | Get a list of recently updated public spaces which have been added to Explore. Sorted by date `showInExploreUpdatedAt` | None | —
+`GET`    | <code class="spaces">/space/explore-spaces/feed.json</code>  | `RSS feed` for new spaces added to Explore                                                    | None | —
+`GET`    | <code class="spaces">/space/live-spaces</code>           | Get a list of currently being edited spaces which are open or closed                              | None | —
+`GET`    | <code class="spaces">/space/multiple?spaceIds=id1,id2</code> | Get info on multiple spaces, up to 60 spaceIds at a time                                      | `canViewSpace` | `read`
+`GET`    | <code class="spaces">/space/public/multiple?spaceIds=id1,id2</code>        | Gets public info for multiple public spaces, up to 60 spaceIds at a time. | None | —
+`GET`    | <code class="spaces">/space/inbox</code>         | Get the current user's inbox space                                                                        | `apiKey` | `read`
+`GET`    | <code class="spaces">/space/everyone-spaces</code>            | Get a list of recent public spaces sorted by date `createdAt`                               | None | —
+`GET`    | <code class="spaces">/space/everyone-spaces/feed.json</code>  | `RSS feed` for recent public spaces                                                         | None | —
+`GET`    | <code class="spaces">/space/date-image</code>        | Get the image url for today's date card image                                                         | None | —
+`POST`   | <code class="spaces">/space</code>                       | Create a new space(s) from object(s) in request body. The owner will be the apiKey user           | `apiKey` | `edit`
+`POST`   | <code class="spaces">/space/search-explore-spaces</code>   | Get all `showInExplore` spaces based on space name. Body object must contain `query`. Searches are not case-insensitive           | None | —
+`PATCH`  | <code class="spaces">/space</code>                       | Update space(s) from object(s) in request body                                                    | `canEditSpace` | `edit`
+`PATCH`  | <code class="spaces">/space/restore/:spaceId</code>               | Restore removed space(s)  from object(s) in request body                                          | `canEditSpace` | `edit`
+`DELETE` | <code class="spaces">/space</code>                       | Remove space(s) specified in request body                                                         | `canEditSpace` | `delete`
+`DELETE` | <code class="spaces">/space/permanent</code>             | Permanently remove space(s) specified in request body                                             | `canEditSpace` | `delete`
+`DELETE` | <code class="spaces">/space/collaborator</code>          | Removes collaborator user from space. Request Body Keys: `spaceId`, `userId`                      | `canEditSpace` | `edit`
 
 </div>
 
@@ -243,24 +246,24 @@ Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs 
 
 <div class="table-wrap cards routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`     | <code class="cards">/card/:cardId</code>                | Get info on a card                                                                                                                                                                  | `canViewSpace`
-`GET`     | <code class="cards">/card/multiple?cardIds=id1,id2</code> | Get info on multiple cards, up to 60 cardIds at a time                                                                                                                    | `canViewSpace`
-`GET`     | <code class="cards">/card/by-tag-name/:tagName</code>   | Get all cards with tag matching tagName in your <a href="#spaces" class="badge button-badge spaces">Spaces</a>                                                                                   | `apiKey`
-`GET`     | <code class="cards">/card/by-link-to-space/:spaceId</code>   | Get the cards and <a href="#spaces" class="badge button-badge spaces">Spaces</a> where `linkToSpaceId` is `spaceId`. Will only return spaces that the user can view                         | `apiKey and canViewSpace`
-`POST`    | <code class="cards">/card/search</code>                 | Get all cards that match a query. Body object must contain `query`. Only matches cards created by the user. Does not return removed cards, or cards from removed spaces. Searches are not case-insensitive                                       | `apiKey`
-`POST`    | <code class="cards">/card</code>                        | Create card from object in request body. Body object must contain `spaceId` and `name`. If not included, `x`, `y`, `z` will be positioned near the top left of the space, in a cascade pattern to prevent overlaps | `canEditSpace`
-`POST`    | <code class="cards">/card/to-inbox</code>               | Create card saved to the user's `Inbox` space from object in request body and . Body object must contain `name`. Will return `404` if the user does not already have an `Inbox` space. Positioning works just like `POST /card`        | `canEditSpace`
-`POST`    | <code class="cards">/card/multiple</code>               | Creates multiple cards from an array of objects in request body. Works just like `POST /card`                                                                                | `canEditSpace`
-`POST`    | <code class="cards">/card/list</code>                   | Add card to a <a href="#lists" class="badge button-badge lists">List</a> specified in request body. Body object must contain card `id`, and `listId`. If body object has `shouldPrepend: true`, the card will be added to the top of the list     | `canEditSpace`
-`PATCH`   | <code class="cards">/card</code>                        | Update card from object in request body. Body object must contain `id`. `spaceId` cannot be patched                                                                          | `canEditSpace`
-`PATCH`   | <code class="cards">/card/multiple</code>               | Updates multiple cards from an array of objects in request body. Works just like `PATCH /card`                                                                               | `canEditSpace`
-`PATCH`   | <code class="cards">/card/update-counter</code>         | Increment or decrement a card counter for voting. Body object must contain `cardId`, and either `shouldIncrement: true` or `shouldDecrement: true`              | None
-`PATCH`   | <code class="cards">/card/restore</code>                | Restore removed card specified in body                                                                                                                                              | `canEditSpace`
-`DELETE`  | <code class="cards">/card/list</code>                   | Remove card from the <a href="#lists" class="badge button-badge lists">List</a> that it's in. Body object must contain card `id`. The card's position will be shifted to the right of the list.                                       | `canEditSpace`
-`DELETE`  | <code class="cards">/card</code>                        | Remove card specified in body                                                                                                                                                       | `canEditSpace`
-`DELETE`  | <code class="cards">/card/permanent</code>              | Permanently remove card specified in body                                                                                                                                           | `canEditSpace`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`     | <code class="cards">/card/:cardId</code>                | Get info on a card                                                                                                                                                                  | `canViewSpace` | `read`
+`GET`     | <code class="cards">/card/multiple?cardIds=id1,id2</code> | Get info on multiple cards, up to 60 cardIds at a time                                                                                                                    | `canViewSpace` | `read`
+`GET`     | <code class="cards">/card/by-tag-name/:tagName</code>   | Get all cards with tag matching tagName in your <a href="#spaces" class="badge button-badge spaces">Spaces</a>                                                                                   | `apiKey` | `read`
+`GET`     | <code class="cards">/card/by-link-to-space/:spaceId</code>   | Get the cards and <a href="#spaces" class="badge button-badge spaces">Spaces</a> where `linkToSpaceId` is `spaceId`. Will only return spaces that the user can view                         | `apiKey and canViewSpace` | `read`
+`POST`    | <code class="cards">/card/search</code>                 | Get all cards that match a query. Body object must contain `query`. Only matches cards created by the user. Does not return removed cards, or cards from removed spaces. Searches are not case-insensitive                                       | `apiKey` | `read`
+`POST`    | <code class="cards">/card</code>                        | Create card from object in request body. Body object must contain `spaceId` and `name`. If not included, `x`, `y`, `z` will be positioned near the top left of the space, in a cascade pattern to prevent overlaps | `canEditSpace` | `edit`
+`POST`    | <code class="cards">/card/to-inbox</code>               | Create card saved to the user's `Inbox` space from object in request body and . Body object must contain `name`. Will return `404` if the user does not already have an `Inbox` space. Positioning works just like `POST /card`        | `canEditSpace` | `edit`
+`POST`    | <code class="cards">/card/multiple</code>               | Creates multiple cards from an array of objects in request body. Works just like `POST /card`                                                                                | `canEditSpace` | `edit`
+`PATCH`    | <code class="cards">/card/list</code>                   | Add card to a <a href="#lists" class="badge button-badge lists">List</a> specified in request body. Body object must contain card `id`, and `listId`. If body object has `shouldPrepend: true`, the card will be added to the top of the list     | `canEditSpace` | `edit`
+`PATCH`   | <code class="cards">/card</code>                        | Update card from object in request body. Body object must contain `id`. `spaceId` cannot be patched                                                                          | `canEditSpace` | `edit`
+`PATCH`   | <code class="cards">/card/multiple</code>               | Updates multiple cards from an array of objects in request body. Works just like `PATCH /card`                                                                               | `canEditSpace` | `edit`
+`PATCH`   | <code class="cards">/card/update-counter</code>         | Increment or decrement a card counter for voting. Body object must contain `cardId`, and either `shouldIncrement: true` or `shouldDecrement: true`              | None | `edit`
+`PATCH`   | <code class="cards">/card/restore</code>                | Restore removed card specified in body                                                                                                                                              | `canEditSpace` | `edit`
+`DELETE`  | <code class="cards">/card/list</code>                   | Remove card from the <a href="#lists" class="badge button-badge lists">List</a> that it's in. Body object must contain card `id`. The card's position will be shifted to the right of the list.                                       | `canEditSpace` | `edit`
+`DELETE`  | <code class="cards">/card</code>                        | Remove card specified in body                                                                                                                                                       | `canEditSpace` | `delete`
+`DELETE`  | <code class="cards">/card/permanent</code>              | Permanently remove card specified in body                                                                                                                                           | `canEditSpace` | `delete`
 
 </div>
 
@@ -332,12 +335,12 @@ Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs 
 
 <div class="table-wrap connections routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`     | <code class="connections">/connection/<br/>:connectionId</code> | Get info on a connection                                                                                    | None
-`POST`    | <code class="connections">/connection</code>                    | Create connection(s) from object in request body. Object must contain `spaceId` and `color`                 | `canEditSpace`
-`PATCH`   | <code class="connections">/connection</code>                    | Update connection(s) from object in request body. `spaceId` cannot be patched.                              | `canEditSpace`
-`DELETE`  | <code class="connections">/connection</code>                    | Permenently remove connection(s) speced in req body                                                         | `canEditSpace`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`     | <code class="connections">/connection/<br/>:connectionId</code> | Get info on a connection                                                                                    | `canViewSpace` | `read`
+`POST`    | <code class="connections">/connection</code>                    | Create connection(s) from object in request body. Object must contain `spaceId` and `color`                 | `canEditSpace` | `edit`
+`PATCH`   | <code class="connections">/connection</code>                    | Update connection(s) from object in request body. `spaceId` cannot be patched.                              | `canEditSpace` | `edit`
+`DELETE`  | <code class="connections">/connection</code>                    | Permenently remove connection(s) speced in req body                                                         | `canEditSpace` | `delete`
 
 </div>
 
@@ -381,12 +384,12 @@ Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs 
 
 <div class="table-wrap boxes routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`     | <code class="boxes">/box/:boxId</code>  | Get info on a box                                                         | `canViewSpace`
-`POST`    | <code class="boxes">/box</code>         | Create a box from object in request body. Object must contain `spaceId`   | `canEditSpace`
-`PATCH`   | <code class="boxes">/box</code>         | Update box from object in request body                                    | `canEditSpace`
-`DELETE`  | <code class="boxes">/box</code>         | Permenently remove box, from object in request body                       | `canEditSpace`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`     | <code class="boxes">/box/:boxId</code>  | Get info on a box                                                         | `canViewSpace` | `read`
+`POST`    | <code class="boxes">/box</code>         | Create a box from object in request body. Object must contain `spaceId`   | `canEditSpace` | `edit`
+`PATCH`   | <code class="boxes">/box</code>         | Update box from object in request body                                    | `canEditSpace` | `edit`
+`DELETE`  | <code class="boxes">/box</code>         | Permenently remove box, from object in request body                       | `canEditSpace` | `delete`
 
 </div>
 
@@ -435,12 +438,11 @@ Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs 
 
 <div class="table-wrap lists routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`     | <code class="lists">/list/:listId</code>    | Get info on a list, including cards                                                             | `canViewSpace`
-`POST`    | <code class="lists">/list</code>            | Create a list from object in request body. Body object must contain `spaceId`                   | `canEditSpace`
-`PATCH`   | <code class="lists">/list</code>            | Update list from object in request body. Body object must contain `id` and `spaceId`            | `canEditSpace`
-`DELETE`  | <code class="lists">/list/</code>           | Permenently remove list in request body. Body object must contain `id` and `spaceId`            | `canEditSpace`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`     | <code class="lists">/list/:listId</code>    | Get info on a list, including cards                                                             | `canViewSpace` | `read`
+`POST`    | <code class="lists">/list</code>            | Create a list from object in request body. Body object must contain `spaceId`                   | `canEditSpace` | `edit`
+`PATCH`   | <code class="lists">/list</code>            | Update list from object in request body. Body object must contain `id` and `spaceId`            | `canEditSpace` | `edit`
 
 </div>
 
@@ -482,11 +484,11 @@ Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs 
 
 <div class="table-wrap tags routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`     | <code class="tags">/tags/:tagName</code>          | Get all tags with tagName in your <a href="#spaces" class="badge button-badge spaces">Spaces</a>                                                                      | `apiKey`
-`GET`     | <code class="tags">/tags/by-card/:cardId</code>   | Get all tags in a <a href="#cards" class="badge button-badge cards">Cards</a>                                                                                        | `apiKey`
-`PATCH`   | <code class="tags">/tags/color</code>             | Change the color of all tags with the name specified in request body. Object must contain `name`, `color`     | `apiKey`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`     | <code class="tags">/tag/:tagName</code>          | Get all tags with tagName in your <a href="#spaces" class="badge button-badge spaces">Spaces</a>                                                                      | `apiKey` | `read`
+`GET`     | <code class="tags">/tag/by-card/:cardId</code>   | Get all tags in a <a href="#cards" class="badge button-badge cards">Cards</a>                                                                                        | `apiKey` | `read`
+`PATCH`   | <code class="tags">/tag/color</code>             | Change the color of all tags with the name specified in request body. Object must contain `name`, `color`     | `apiKey` | `edit`
 
 </div>
 
@@ -522,9 +524,9 @@ Routes with Auth as `apiKey` mean that the Authorization header apiKey must matc
 
 <div class="table-wrap notifications routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`   | <code class="notifications">/notifications</code>  | Get the last 50 notifications for the current user | `apiKey`
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`   | <code class="notifications">/notification</code>  | Get the last 50 notifications for the current user | `apiKey` | `read`
 
 </div>
 
@@ -562,14 +564,14 @@ Other routes used by the kinopio-client app, which you can also use in your inte
 
 <div class="table-wrap other routes-table-wrap">
 
-Method | Path | Description | Auth
---- | --- | --- | ---
-`GET`   | <code class="other">/affiliate</code>  | returns affiliate info, promo url, commissions earned, and pending payout | `AffiliateUser`
-`GET`   | <code class="other">/services/community-backgrounds</code>  | Lists the space background images aded to the <a href="https://www.are.na/kinopio/community-backgrounds">are.na channel</a> | None
-`GET`   | <code class="other">/meta/date</code>  | Current time/timezone of kinopio-server | None
-`GET`   | <code class="other">/meta/changelog</code>  | Lists recent Kinopio new feature updates | None
-`GET`   | <code class="other">/meta/emojis</code>  | List of [unicode emojis](https://github.com/muan/unicode-emoji-json/blob/main/data-by-group.json) for the emoji picker | None
-`GET`   | <code class="other">/meta/random-name</code>  | returns a random word space name – based on the logic formerly used to generate space names | None
+Method | Path | Description | Auth | App Key
+--- | --- | --- | --- | ---
+`GET`   | <code class="other">/affiliate</code>  | returns affiliate info, promo url, commissions earned, and pending payout | `AffiliateUser` | `read`
+`GET`   | <code class="other">/services/community-backgrounds</code>  | Lists the space background images aded to the <a href="https://www.are.na/kinopio/community-backgrounds">are.na channel</a> | None | —
+`GET`   | <code class="other">/meta/date</code>  | Current time/timezone of kinopio-server | None | —
+`GET`   | <code class="other">/meta/changelog</code>  | Lists recent Kinopio new feature updates | None | —
+`GET`   | <code class="other">/meta/emojis</code>  | List of [unicode emojis](https://github.com/muan/unicode-emoji-json/blob/main/data-by-group.json) for the emoji picker | None | —
+`GET`   | <code class="other">/meta/random-name</code>  | returns a random word space name – based on the logic formerly used to generate space names | None | —
 
 </div>
 </section>
