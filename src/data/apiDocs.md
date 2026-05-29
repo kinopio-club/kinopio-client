@@ -1,5 +1,15 @@
 The Kinopio API is used to find, save, and update the spaces of signed up users. You can use it to make your own integrations and tools.
 
+<div class="table-wrap all">
+
+Base Path for All Routes | Description
+--- | --- 
+<code class="all">`https://api.kinopio.club`</code> | Confirm that the API server is online
+
+</div>
+
+-----
+
 ## Authentication
 
 You can auth requests with either your user or an app api key, both can be found in `User → Settings → Account → API`.
@@ -12,34 +22,19 @@ App API Key | `App-Authorization` | Scope is either `user`, `read`, `edit`, or `
 App API Key Scopes | Description
 --- | ---
 `user` | Can only read <a href="#users" class="badge button-badge users">User</a>profile data
-`read` | Can read content (user, spaces, cards, etc.)
+`read` | Can read content (<a href="#users" class="badge button-badge users">User</a>, <a href="#spaces" class="badge button-badge spaces">Spaces</a>, <a href="#cards" class="badge button-badge cards">Cards</a>, etc.)
 `edit` | Can read and edit content
 `delete` | Can read, edit, and delete content
 
 <p class="badge danger"><img class="icon key" src="@/assets/key.svg"/> API Keys are secrets, so be sure to keep them safe. For safety, prefer keys with the narrowest scope possible.</p>
 
+-----
+
 ## Rate Limits
 
 The API is limited to 5 requests per second. If you exceed this rate, you will receive a `429` response and will need to wait 30 seconds before subsequent requests will succeed.
 
--------
-
-## Routes and Attributes by Item Type
-
-<section class="section-wrap all">
-<h2 class="badge all">All</h2>
-<a class="anchor" name="all"></a>
-
-<div class="table-wrap all">
-
-Base Path for All Routes | Description | Scope
---- | --- | ---
-<code class="all">`https://api.kinopio.club`</code> | Confirm that the API server is online | —
-
-</div>
-</section>
-
-------
+-----
 
 <section class="section-wrap users">
 <a class="anchor" data-section="👯‍♀️" name="users"></a>
