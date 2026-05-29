@@ -54,6 +54,7 @@ const censoredApiKey = computed(() => censor(userStore.apiKey))
 const copy = async (event, type) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
+  position.x += -60
   const apiKey = userStore.apiKey
   let text = userId.value
   if (type === 'apiKey') {
