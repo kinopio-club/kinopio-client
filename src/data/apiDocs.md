@@ -2,12 +2,14 @@ The Kinopio API is used to find, save, and update the spaces of signed up users.
 
 ## Authentication
 
-Kinopio has two kinds of API keys:
+You can auth requests with either your user or an app api key, both can be found in `User → Settings → Account → API`.
 
-- **User API key** gives full access to your account, just like being signed in. Send it in the `Authorization` header. Get it in the app through `User → Settings → Account → API`.
-- **App API key** is a key you generate with a limited set of scopes, for building integrations or sharing access without handing over your whole account. Send it in the `app-authorization` header.
+Type | Header | Permissions | Description
+--- | --- | --- | ---
+User API Key | `Authorization` | Root | For personal projects only
+App API Key | `App-Authorization` | Scope is either `read`, `edit`, `delete` | For integrations, apps, and projects meant to be used by others
 
-<p class="badge danger">🙈 Both keys are secrets, so be sure to keep them safe. Prefer an app API key with the narrowest scopes for anything you don't fully control.</p>
+<p class="badge danger">🙈 API Keys are secrets, so be sure to keep them safe. For safety, prefer keys with the narrowest scope possible.</p>
 
 A route that lists an **App Key** scope below can be called with an app API key that has that scope.
 
