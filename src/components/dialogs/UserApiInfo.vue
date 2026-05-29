@@ -86,26 +86,29 @@ dialog.narrow.user-api-info(v-if="props.visible" :open="props.visible" @click.le
     p User Id
     .row
       code.badge.secondary {{ userId }}
-    .row
       .button-wrap
-        button(@click.left="copy($event, 'userId')")
+        button.small-button(@click.left="copy($event, 'userId')" title="Copy UserId")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy UserId
   //- api key
+  section.title-section
+    p
+      span API Keys
+
   section
     .row
       p
-        img.icon.key(src="@/assets/key.svg")
-        span API Key
+        span User API Key
     .row
       code.badge.secondary {{ censoredApiKey }}
+      .button-wrap
+        button.small-button(@click.left="copy($event, 'apiKey')" title="Copy User API Key")
+          img.icon.copy(src="@/assets/copy.svg")
+
     .row
       .badge.danger.copy-api-keys
-        .button-wrap
-          button(@click.left="copy($event, 'apiKey')")
-            img.icon.copy(src="@/assets/copy.svg")
-            span Copy API Key
-        p Anyone with your key can read, edit, and remove your cards and spaces. So keep it private.
+        p
+          img.icon.key(src="@/assets/key.svg")
+          span Your user API key has root permissions to your account, so keep it private.
 </template>
 
 <style lang="stylus">
