@@ -21,7 +21,7 @@ App API Key | `App-Authorization` | Scope is either `user`, `read`, `edit`, or `
 
 App API Key Scopes | Description
 --- | ---
-`user` | Can only read <a href="#users" class="badge button-badge users">User</a>profile data
+`user` | Can only read <a href="#users" class="badge button-badge users">User</a> data
 `read` | Can read content (<a href="#users" class="badge button-badge users">User</a>, <a href="#spaces" class="badge button-badge spaces">Spaces</a>, <a href="#cards" class="badge button-badge cards">Cards</a>, etc.)
 `edit` | Can read and edit content
 `delete` | Can read, edit, and delete content
