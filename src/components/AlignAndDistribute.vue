@@ -81,12 +81,21 @@ const unselectItemsContainedInBoxes = (items, boxes) => {
   })
   return items
 }
+const unselectCardsInLists = (items, lists) => {
+  lists.forEach(list => {
+    const cardsInList = items.filter(item => item.listId === list.id)
+    const cardIdsInList = cardsInList.map(listCard => listCard.id)
+    items = items.filter(item => !cardIdsInList.includes(item.id))
+  })
+  return items
+}
 const allItems = computed(() => {
   const cards = tagItemTypes(normalizeDimensions(props.editableCards), 'cards')
   const boxes = tagItemTypes(normalizeDimensions(props.editableBoxes), 'boxes')
   const lists = tagItemTypes(normalizeDimensions(props.lists), 'lists')
   let items = cards.concat(boxes, lists)
   items = unselectItemsContainedInBoxes(items, boxes)
+  items = unselectCardsInLists(items, lists)
   return items
 })
 
