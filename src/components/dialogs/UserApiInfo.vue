@@ -6,6 +6,9 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import apiKeyScopes from '@/data/apiKeyScopes.js'
+import OfflineBadge from '@/components/OfflineBadge.vue'
+import Loader from '@/components/Loader.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -25,7 +28,10 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  isLoading: false,
+  isError: false,
+  appApiKeys: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -70,6 +76,21 @@ const truncatedCensoredApiKey = (string, size) => {
 
 // app api keys
 
+const updateAppApiKeys = async () => {
+  if (!globalStore.isOnline) { return }
+  try {
+    state.isLoading = true
+    state.isError = false
+    // TODO should load from api onmount, state.error
+
+    // state.appApiKeys =
+  } catch (error) {
+    state.isError = true
+  }
+  state.isLoading = false
+}
+
+// STUB : replace w state.appApiKeys
 const appApiKeys = computed(() => {
   return [
     {
@@ -84,11 +105,9 @@ const appApiKeys = computed(() => {
     }
   ]
 })
-
-// delete = can edit and delete
-// edit
-// read
-// user
+const scope = (appApiKey) => {
+  return apiKeyScopes.find(scope => scope.name === appApiKey.name)
+}
 
 </script>
 
@@ -116,6 +135,7 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
   section.title-section
     .row.title-row
       span
+        Loader(:visible="state.isLoading" :isSmall="true")
         span API Keys
       .button-wrap
         button.small-button
@@ -123,16 +143,23 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
           span App Key
         //- AddAppApiKey
           //- name scope-picker
+    OfflineBadge
 
-  //- results list ???
-  //- list app api keys
-  //- name, scope
-  //- key [copy]
-    [rotate] [remove] in AppApiKeyDetails
-    //- ^ confirm for both
-
-  //- show user api key
+  //- app api keys
   section
+    //- (v-if="!state.loading && state.appApiKeys.length")
+
+    //- results list ???
+    //- list app api keys
+    //- name, scope
+    //- key [copy]
+      [rotate] [remove] in AppApiKeyDetails
+      //- ^ confirm for both
+
+    .badge.danger(v-if="state.error")
+      span (シ_ _)シ Something went wrong, Please try again or contact support
+
+    //- user api key
     details
       summary User API Key
       section.subsection
@@ -143,7 +170,7 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
             button.small-button(@click.left="copy($event, userApiKey)" title="Copy User API Key")
               img.icon.copy(src="@/assets/copy.svg")
         .row
-          .badge.danger.copy-api-keys
+          .badge.danger
             p
               span Your user API key has full root permissions to your account, so keep it private.
 </template>
@@ -152,7 +179,7 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
 dialog.user-api-info
   left -18px
   overflow auto
-  .copy-api-keys
-    padding-top 4px
-    padding-bottom 4px
+  .loader
+    vertical-align -1px
+    margin-right 5px
 </style>
