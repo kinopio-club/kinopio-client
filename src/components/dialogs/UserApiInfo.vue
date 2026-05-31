@@ -41,7 +41,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+// data
+
 const userId = computed(() => userStore.id)
+const userApiKey = computed(() => userStore.apiKey)
+
+// output keys
+
 const copy = async (event, text) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
@@ -55,16 +61,12 @@ const copy = async (event, text) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-
-// output keys
-
-const apiKey = computed(() => userStore.apiKey)
-const truncatedCensoredApiKey = computed(() => {
-  const size = 10
-  const string = userStore.apiKey
+const truncatedCensoredApiKey = (string, size) => {
+  size = size || 10
+  // const string = userStore.apiKey
   const censored = string.replace(/[^-]/g, 'x') // replace every character that isn't `-`
   return `${censored.substring(0, size)}…${string.substring(string.length - size, string.length)}`
-})
+}
 
 // app api keys
 
@@ -114,7 +116,6 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
   section.title-section
     .row.title-row
       span
-        img.icon.key(src="@/assets/key.svg")
         span API Keys
       .button-wrap
         button.small-button
@@ -136,9 +137,10 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
       summary User API Key
       section.subsection
         .row
-          code.badge.secondary.api-key-string(:data-original="apiKey") {{ truncatedCensoredApiKey }}
+          img.icon.key(src="@/assets/key.svg")
+          code.badge.secondary.api-key-string(:data-apikey="userApiKey") {{ truncatedCensoredApiKey(userApiKey, 9) }}
           .button-wrap
-            button.small-button(@click.left="copy($event, apiKey)" title="Copy User API Key")
+            button.small-button(@click.left="copy($event, userApiKey)" title="Copy User API Key")
               img.icon.copy(src="@/assets/copy.svg")
         .row
           .badge.danger.copy-api-keys
