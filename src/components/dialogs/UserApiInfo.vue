@@ -26,7 +26,6 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null
-  // : false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -43,6 +42,27 @@ const updateDialogHeight = async () => {
 }
 
 const userId = computed(() => userStore.id)
+const copy = async (event, text) => {
+  globalStore.clearNotificationsWithPosition()
+  const position = utils.cursorPositionInPage(event)
+  position.x += -60
+  try {
+    await navigator.clipboard.writeText(text)
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    console.info('🍇 copied', text)
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+
+// delete = can edit and delete
+// edit
+// read
+// user
+
+// output keys
+
 const censor = (value) => {
   const uncensoredCharacters = 5
   const uncensored = value.slice(-uncensoredCharacters)
@@ -51,24 +71,12 @@ const censor = (value) => {
   return censored + uncensored
 }
 const censoredApiKey = computed(() => censor(userStore.apiKey))
-const copy = async (event, type) => {
-  globalStore.clearNotificationsWithPosition()
-  const position = utils.cursorPositionInPage(event)
-  position.x += -60
-  const apiKey = userStore.apiKey
-  let text = userId.value
-  if (type === 'apiKey') {
-    text = apiKey
-  }
-  try {
-    await navigator.clipboard.writeText(text)
-    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-    console.info(`🍇 copied ${type}`)
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
-}
+const apiKey = computed(() => userStore.apiKey)
+const truncatedCensoredApiKey = computed(() => {
+  const string = userStore.apiKey
+  const censored = string.replace(/[^-]/g, 'x') // replace every character that isn't `-`
+  return `${censored.substring(0, 10)}…${string.substring(string.length - 10, string.length)}`
+})
 </script>
 
 <template lang="pug">
@@ -88,7 +96,7 @@ dialog.narrow.user-api-info(v-if="props.visible" :open="props.visible" @click.le
     .row
       code.badge.secondary {{ userId }}
       .button-wrap
-        button.small-button(@click.left="copy($event, 'userId')" title="Copy UserId")
+        button.small-button(@click.left="copy($event, userId)" title="Copy UserId")
           img.icon.copy(src="@/assets/copy.svg")
   //- api key
   section.title-section
@@ -100,9 +108,9 @@ dialog.narrow.user-api-info(v-if="props.visible" :open="props.visible" @click.le
       p
         span User API Key
     .row
-      code.badge.secondary {{ censoredApiKey }}
+      code.badge.secondary.api-key-string(:data-original="apiKey") {{ truncatedCensoredApiKey }}
       .button-wrap
-        button.small-button(@click.left="copy($event, 'apiKey')" title="Copy User API Key")
+        button.small-button(@click.left="copy($event, apiKey)" title="Copy User API Key")
           img.icon.copy(src="@/assets/copy.svg")
 
     .row
