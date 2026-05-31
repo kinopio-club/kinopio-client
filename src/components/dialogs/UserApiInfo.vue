@@ -57,7 +57,7 @@ const userApiKey = computed(() => userStore.apiKey)
 const copy = async (event, text) => {
   globalStore.clearNotificationsWithPosition()
   const position = utils.cursorPositionInPage(event)
-  position.x += -60
+  position.x += -40
   try {
     await navigator.clipboard.writeText(text)
     globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
@@ -140,7 +140,7 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
       .button-wrap
         button.small-button
           img.icon.add-icon(src="@/assets/add.svg")
-          span App Key
+          span App API Key
         //- AddAppApiKey
           //- name scope-picker
     OfflineBadge
