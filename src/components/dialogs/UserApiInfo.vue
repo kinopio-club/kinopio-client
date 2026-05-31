@@ -18,6 +18,7 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+  updateAppApiKeys()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
@@ -73,6 +74,10 @@ const truncatedCensoredApiKey = (string, size) => {
   const censored = string.replace(/[^-]/g, 'x') // replace every character that isn't `-`
   return `${censored.substring(0, size)}…${string.substring(string.length - size, string.length)}`
 }
+const scopeDescription = (appApiKey) => {
+  const description = scope(appApiKey).description
+  return `Scope: ${description}`
+}
 
 // app api keys
 
@@ -81,32 +86,32 @@ const updateAppApiKeys = async () => {
   try {
     state.isLoading = true
     state.isError = false
-    // TODO should load from api onmount, state.error
-
-    // state.appApiKeys =
+    // TODO fetch from api
+    console.log('💐💐💐💐')
+    state.appApiKeys = [
+      {
+        name: 'Cool app this is a somethign lalala',
+        scope: 'read',
+        apiKey: '1209-3102938asl-dkfjlsa-kdjf',
+        color: 'red'
+      },
+      {
+        name: 'Whoa test',
+        scope: 'edit',
+        apiKey: 'ab2C-alsdkjfa23-dkfjlsa-123z',
+        color: 'blue'
+      }
+    ]
   } catch (error) {
     state.isError = true
   }
   state.isLoading = false
 }
-
-// STUB : replace w state.appApiKeys
-const appApiKeys = computed(() => {
-  return [
-    {
-      name: 'cool app',
-      scope: 'read',
-      apiKey: '1209-3102938asl-dkfjlsa-kdjf'
-    },
-    {
-      name: 'whoa test',
-      scope: 'edit',
-      apiKey: 'ab2C-alsdkjfa23-dkfjlsa-123z'
-    }
-  ]
-})
 const scope = (appApiKey) => {
-  return apiKeyScopes.find(scope => scope.name === appApiKey.name)
+  return apiKeyScopes.find(scope => scope.name === appApiKey.scope)
+}
+const truncate = (string) => {
+  return utils.truncated(string, 18)
 }
 
 </script>
@@ -146,14 +151,35 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
     OfflineBadge
 
   //- app api keys
-  section
+  section.app-api-keys
     //- (v-if="!state.loading && state.appApiKeys.length")
 
-    //- results list ???
-    //- list app api keys
-    //- name, scope
-    //- key [copy]
-      [rotate] [remove] in AppApiKeyDetails
+    template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
+      //- AppApiKeyListItem , can have indep state for confirmations
+      .row.title-row
+        div
+          .badge.circle-badge(:style="{ backgroundColor: appApiKey.color }")
+          span {{ truncate(appApiKey.name) }}
+          span.badge.secondary.scope-badge(:title="scopeDescription(appApiKey)")
+            img.icon.amount(src="@/assets/amount.svg")
+            span {{ scope(appApiKey).friendlyName }}
+      .row
+        span.badge.secondary.api-key-string(:data-apikey="appApiKey.apiKey")
+          img.icon.key(src="@/assets/key.svg")
+          code {{ truncatedCensoredApiKey(appApiKey.apiKey, 6) }}
+        .button-wrap
+          button.small-button(@click.left="copy($event, appApiKey.apiKey)" title="Copy App API Key")
+            img.icon.copy(src="@/assets/copy.svg")
+          button.small-button.danger(title="Rotate Key")
+            img.refresh.icon(src="@/assets/refresh.svg")
+          button.small-button.danger(title="Remove Key")
+            img.icon.remove(src="@/assets/remove.svg")
+      hr
+
+      //- list app api keys
+      //- color?? (opt-circle), name, scope
+      //- icon key [copy]
+      //- [rotate] [remove] in AppApiKeyDetails(:appApiKey="appApiKey")
       //- ^ confirm for both
 
     .badge.danger(v-if="state.error")
@@ -182,4 +208,16 @@ dialog.user-api-info
   .loader
     vertical-align -1px
     margin-right 5px
+  .app-api-keys
+    code
+      margin-right 0
+  .scope-badge
+    margin-left 6px
+  .circle-badge
+    border-radius 100px
+    min-width initial
+    min-height initial
+    display inline-block
+    width 12px
+    height 12px
 </style>
