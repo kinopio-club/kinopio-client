@@ -60,7 +60,7 @@ const currentUser = computed(() => userStore.getUserAllState)
 const isModerator = computed(() => userStore.isModerator)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const updateViewportHeightIsShort = () => {
-  state.viewportHeightIsShort = globalStore.viewportHeight <= 650
+  state.viewportHeightIsShort = globalStore.viewportHeight <= 700
 }
 
 // dialog
@@ -78,7 +78,9 @@ const closeDialogs = () => {
 // child dialog state
 
 const toggleDeleteAccountConfirmationVisible = () => {
-  state.deleteAccountConfirmationVisible = !state.deleteAccountConfirmationVisible
+  const isVisible = state.deleteAccountConfirmationVisible
+  closeDialogs()
+  state.deleteAccountConfirmationVisible = !isVisible
 }
 const toggleUserBillingSettingsIsVisible = () => {
   const isVisible = state.userBillingSettingsIsVisible
@@ -230,5 +232,7 @@ const toggleIsDebugMode = () => {
       top 30px
       left 8px
       right initial
-
+    dialog.user-api-info
+      left initial
+      right 8px
 </style>

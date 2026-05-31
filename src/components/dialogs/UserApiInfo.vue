@@ -56,31 +56,42 @@ const copy = async (event, text) => {
   }
 }
 
+// output keys
+
+const apiKey = computed(() => userStore.apiKey)
+const truncatedCensoredApiKey = computed(() => {
+  const size = 10
+  const string = userStore.apiKey
+  const censored = string.replace(/[^-]/g, 'x') // replace every character that isn't `-`
+  return `${censored.substring(0, size)}…${string.substring(string.length - size, string.length)}`
+})
+
+// app api keys
+
+const appApiKeys = computed(() => {
+  return [
+    {
+      name: 'cool app',
+      scope: 'read',
+      apiKey: '1209-3102938asl-dkfjlsa-kdjf'
+    },
+    {
+      name: 'whoa test',
+      scope: 'edit',
+      apiKey: 'ab2C-alsdkjfa23-dkfjlsa-123z'
+    }
+  ]
+})
+
 // delete = can edit and delete
 // edit
 // read
 // user
 
-// output keys
-
-const censor = (value) => {
-  const uncensoredCharacters = 5
-  const uncensored = value.slice(-uncensoredCharacters)
-  const toСensor = value.slice(0, -uncensoredCharacters)
-  const censored = toСensor.replace(/[^-]/g, 'x') // replace every character that isn't `-`
-  return censored + uncensored
-}
-const censoredApiKey = computed(() => censor(userStore.apiKey))
-const apiKey = computed(() => userStore.apiKey)
-const truncatedCensoredApiKey = computed(() => {
-  const string = userStore.apiKey
-  const censored = string.replace(/[^-]/g, 'x') // replace every character that isn't `-`
-  return `${censored.substring(0, 10)}…${string.substring(string.length - 10, string.length)}`
-})
 </script>
 
 <template lang="pug">
-dialog.narrow.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
       span API
@@ -98,30 +109,46 @@ dialog.narrow.user-api-info(v-if="props.visible" :open="props.visible" @click.le
       .button-wrap
         button.small-button(@click.left="copy($event, userId)" title="Copy UserId")
           img.icon.copy(src="@/assets/copy.svg")
-  //- api key
+
+  //- api keys
   section.title-section
-    p
-      span API Keys
-
-  section
-    .row
-      p
-        span User API Key
-    .row
-      code.badge.secondary.api-key-string(:data-original="apiKey") {{ truncatedCensoredApiKey }}
+    .row.title-row
+      span
+        img.icon.key(src="@/assets/key.svg")
+        span API Keys
       .button-wrap
-        button.small-button(@click.left="copy($event, apiKey)" title="Copy User API Key")
-          img.icon.copy(src="@/assets/copy.svg")
+        button.small-button
+          img.icon.add-icon(src="@/assets/add.svg")
+          span App Key
+        //- AddAppApiKey
+          //- name scope-picker
 
-    .row
-      .badge.danger.copy-api-keys
-        p
-          img.icon.key(src="@/assets/key.svg")
-          span Your user API key has root permissions to your account, so keep it private.
+  //- results list ???
+  //- list app api keys
+  //- name, scope
+  //- key [copy]
+    [rotate] [remove] in AppApiKeyDetails
+    //- ^ confirm for both
+
+  //- show user api key
+  section
+    details
+      summary User API Key
+      section.subsection
+        .row
+          code.badge.secondary.api-key-string(:data-original="apiKey") {{ truncatedCensoredApiKey }}
+          .button-wrap
+            button.small-button(@click.left="copy($event, apiKey)" title="Copy User API Key")
+              img.icon.copy(src="@/assets/copy.svg")
+        .row
+          .badge.danger.copy-api-keys
+            p
+              span Your user API key has full root permissions to your account, so keep it private.
 </template>
 
 <style lang="stylus">
 dialog.user-api-info
+  left -18px
   overflow auto
   .copy-api-keys
     padding-top 4px
