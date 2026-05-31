@@ -9,7 +9,7 @@ import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import UserApiInfo from '@/components/dialogs/UserApiInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
-import DeleteAllConfirmation from '@/components/dialogs/DeleteAllConfirmation.vue'
+import DeleteAccountConfirmation from '@/components/dialogs/DeleteAccountConfirmation.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
@@ -23,6 +23,8 @@ const spaceStore = useSpaceStore()
 let unsubscribes
 
 onMounted(() => {
+  window.addEventListener('resize', updateViewportHeightIsShort)
+  updateViewportHeightIsShort()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
@@ -35,6 +37,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateViewportHeightIsShort)
   unsubscribes()
 })
 
@@ -42,19 +45,23 @@ const props = defineProps({
   visible: Boolean
 })
 
-const currentUser = computed(() => userStore.getUserAllState)
-const isModerator = computed(() => userStore.isModerator)
-const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-
 const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
-  deleteAllConfirmationVisible: false,
+  deleteAccountConfirmationVisible: false,
   userApiInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
   notificationSettingsIsVisible: false,
-  themeSettingsIsVisible: false
+  themeSettingsIsVisible: false,
+  viewportHeightIsShort: false
 })
+
+const currentUser = computed(() => userStore.getUserAllState)
+const isModerator = computed(() => userStore.isModerator)
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const updateViewportHeightIsShort = () => {
+  state.viewportHeightIsShort = globalStore.viewportHeight <= 650
+}
 
 // dialog
 
@@ -65,13 +72,13 @@ const closeDialogs = () => {
   state.themeSettingsIsVisible = false
   state.userApiInfoIsVisible = false
   state.moderatorActionsSettingsIsVisible = false
-  state.deleteAllConfirmationVisible = false
+  state.deleteAccountConfirmationVisible = false
 }
 
 // child dialog state
 
-const toggleDeleteAllConfirmationVisible = () => {
-  state.deleteAllConfirmationVisible = !state.deleteAllConfirmationVisible
+const toggleDeleteAccountConfirmationVisible = () => {
+  state.deleteAccountConfirmationVisible = !state.deleteAccountConfirmationVisible
 }
 const toggleUserBillingSettingsIsVisible = () => {
   const isVisible = state.userBillingSettingsIsVisible
@@ -115,6 +122,8 @@ const toggleIsDebugMode = () => {
 
 <template lang="pug">
 .user-settings-general(v-if="visible" @click="closeDialogs")
+  .child-dialogs#child-dialogs
+  //- controls
   section
     //- Notifications
     .row
@@ -122,7 +131,12 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: state.notificationSettingsIsVisible}")
           img.icon.mail(src="@/assets/mail.svg")
           span Notifications
-        NotificationSettings(:visible="state.notificationSettingsIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            NotificationSettings(:visible="state.notificationSettingsIsVisible")
+        template(v-else)
+          NotificationSettings(:visible="state.notificationSettingsIsVisible")
+
     //- Theme and Colors
     .row
       .button-wrap
@@ -130,7 +144,12 @@ const toggleIsDebugMode = () => {
           ThemeToggle
           button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: state.themeSettingsIsVisible}")
             span Theme Settings
-        ThemeSettings(:visible="state.themeSettingsIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            ThemeSettings(:visible="state.themeSettingsIsVisible")
+        template(v-else)
+          ThemeSettings(:visible="state.themeSettingsIsVisible")
+
   //- Account Settings
   section
     .row
@@ -139,44 +158,77 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: state.userAccountSettingsIsVisible}")
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
           span Account
-        UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
+        template(v-else)
+          UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
+
       //- Billing
       .button-wrap
         button(@click.left.stop="toggleUserBillingSettingsIsVisible" :class="{active: state.userBillingSettingsIsVisible}")
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
-        UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+        template(v-else)
+          UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+
+  //- Developer Info
   section
     .row
-      //- API/Developer Info
+      //- API
       .button-wrap
         button(@click.left.stop="toggleUserApiInfoIsVisible" :class="{active: state.userApiInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
           span API
-        UserApiInfo(:visible="state.userApiInfoIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            UserApiInfo(:visible="state.userApiInfoIsVisible")
+        template(v-else)
+          UserApiInfo(:visible="state.userApiInfoIsVisible")
+
+      //- debug
       .button-wrap
         label(:class="{active: isDebugMode}" @click.left.prevent="toggleIsDebugMode" @keydown.stop.enter="toggleIsDebugMode")
           input(type="checkbox" v-model="isDebugMode")
           span Debug Mode
+
     //- Moderator Actions
     .row(v-if="isModerator")
       .button-wrap
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
-        ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
+        template(v-else)
+          ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
+
   //- Delete Account
   section.delete-account
     .row
       .button-wrap
-        button.danger(@click.left.stop="toggleDeleteAllConfirmationVisible" :class="{ active: state.deleteAllConfirmationVisible }")
+        button.danger(@click.left.stop="toggleDeleteAccountConfirmationVisible" :class="{ active: state.deleteAccountConfirmationVisible }")
           img.icon(src="@/assets/remove.svg")
           span Delete Account
-        DeleteAllConfirmation(:visible="state.deleteAllConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
+        template(v-if="state.viewportHeightIsShort")
+          teleport(to="#child-dialogs")
+            DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
+        template(v-else)
+          DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
 </template>
 
 <style lang="stylus">
 .user-settings-general
-  section:not(.subsection)
+  > section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
+  .child-dialogs
+    dialog
+      top 30px
+      left 8px
+      right initial
+
 </style>

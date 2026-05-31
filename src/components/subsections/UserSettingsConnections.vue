@@ -34,7 +34,7 @@ const toggleShouldUseLastConnectionColor = () => {
     .row
       label(:class="{active: shouldUseLastConnectionColor}" @click.left.prevent="toggleShouldUseLastConnectionColor" @keydown.stop.enter="toggleShouldUseLastConnectionColor")
         input(type="checkbox" v-model="shouldUseLastConnectionColor")
-        .badge.badge-in-button(:style="{backgroundColor: lastColor}")
+        .badge.badge-in-button(v-if="lastColor" :style="{backgroundColor: lastColor}")
         span Use Last Color
     section.subsection
       p(v-if="shouldUseLastConnectionColor")

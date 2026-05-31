@@ -3,10 +3,12 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
+const globalStore = useGlobalStore()
 const apiStore = useApiStore()
 const userStore = useUserStore()
 
@@ -70,6 +72,9 @@ const deleteUserPermanent = async () => {
     state.loading.deleteUserPermanent = false
   }
 }
+const cancel = () => {
+  globalStore.triggerCloseChildDialogs()
+}
 </script>
 
 <template lang="pug">
@@ -91,7 +96,7 @@ dialog.delete-all-confirmation.narrow(v-if="props.visible" :open="props.visible"
         input(type="text" v-model="state.deleteUserConfirmation" placeholder="Confirmation Input")
     .row
       .segmented-buttons
-        button(@click.left="toggleDeleteAllConfirmationVisible")
+        button(@click.left="cancel")
           img.icon.cancel(src="@/assets/add.svg")
           span Cancel
         button.danger(@click.left="deleteUserPermanent" :disabled="!deleteUserPermanentIsConfirmed" class="{disabled: !deleteUserPermanentIsConfirmed}")
@@ -108,9 +113,4 @@ dialog.delete-all-confirmation
     padding-bottom 2px
   .subsection.danger
     background-color var(--danger-background)
-  @media(max-height 700px)
-    top -100px
-  @media(max-height 500px)
-    top -200px
-
 </style>
