@@ -147,13 +147,15 @@ dialog.narrow.add-app-api-key(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
+  section.title-section
+    p New App API Key
   section
     .row
       .button-wrap
         .segmented-buttons
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Color")
             .current-color(:style="{ background: color }")
-        ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateColor")
+        ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateColor" :luminosityIsDark="true")
       //- name
       input.name(
         placeholder="App API Key Name"

@@ -1,48 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
-import { useUserStore } from '@/stores/useUserStore'
-import { useSpaceStore } from '@/stores/useSpaceStore'
-
 import utils from '@/utils.js'
-
-const globalStore = useGlobalStore()
-const cardStore = useCardStore()
-const userStore = useUserStore()
-const spaceStore = useSpaceStore()
-
-let unsubscribes
 
 const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'clearDraggingItems') {
-        console.log('clearDraggingItems')
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
-  unsubscribes()
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['updateCurrentScope'])
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  currentScope: Object
 })
 const state = reactive({
-  count: 0,
   dialogHeight: null
 })
 
@@ -51,7 +27,6 @@ watch(() => props.visible, (value, prevValue) => {
     updateDialogHeight()
   }
 })
-// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -60,24 +35,14 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const themeName = computed(() => userStore.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // themeStore.updateThemeIsSystem(false)
-}
 </script>
 
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.api-key-scope-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p blank dialog, please duplicate
-  section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
 </template>
 
 <style lang="stylus">
-// dialog.dialog-name
+// dialog.api-key-scope-picker
 </style>
