@@ -4,15 +4,17 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
-import apiKeyScopes from '@/data/apiKeyScopes.js'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import Loader from '@/components/Loader.vue'
+import AppApiKeyListItem from '@/components/AppApiKeyListItem.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -22,7 +24,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-//   unsubscribe()
 })
 
 const props = defineProps({
@@ -68,15 +69,9 @@ const copy = async (event, text) => {
     globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const truncatedCensoredApiKey = (string, size) => {
+const truncatedApiKey = (string, size) => {
   size = size || 10
-  // const string = userStore.apiKey
-  const censored = string.replace(/[^-]/g, 'x') // replace every character that isn't `-`
-  return `${censored.substring(0, size)}…${string.substring(string.length - size, string.length)}`
-}
-const scopeDescription = (appApiKey) => {
-  const description = scope(appApiKey).description
-  return `Scope: ${description}`
+  return `${string.substring(0, size)}…${string.substring(string.length - size, string.length)}`
 }
 
 // app api keys
@@ -107,13 +102,12 @@ const updateAppApiKeys = async () => {
   }
   state.isLoading = false
 }
-const scope = (appApiKey) => {
-  return apiKeyScopes.find(scope => scope.name === appApiKey.scope)
+const updateAppApiKey = async () => {
+  // apiStore.
 }
-const truncate = (string) => {
-  return utils.truncated(string, 18)
+const rotateAppApiKey = (appApiKey) => {
+  // const apiKey = self.crypto.randomUUID()
 }
-
 </script>
 
 <template lang="pug">
@@ -147,43 +141,15 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
           img.icon.add-icon(src="@/assets/add.svg")
           span App API Key
         //- AddAppApiKey
-          //- name scope-picker
+          //- addGroup: color, name, scope-picker/list
     OfflineBadge
 
   //- app api keys
-  section.app-api-keys
-    //- (v-if="!state.loading && state.appApiKeys.length")
-
-    template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
-      //- AppApiKeyListItem , can have indep state for confirmations
-      .row.title-row
-        div
-          .badge.circle-badge(:style="{ backgroundColor: appApiKey.color }")
-          span {{ truncate(appApiKey.name) }}
-          span.badge.secondary.scope-badge(:title="scopeDescription(appApiKey)")
-            img.icon.amount(src="@/assets/amount.svg")
-            span {{ scope(appApiKey).friendlyName }}
-      .row
-        span.badge.secondary.api-key-string(:data-apikey="appApiKey.apiKey")
-          img.icon.key(src="@/assets/key.svg")
-          code {{ truncatedCensoredApiKey(appApiKey.apiKey, 6) }}
-        .button-wrap
-          button.small-button(@click.left="copy($event, appApiKey.apiKey)" title="Copy App API Key")
-            img.icon.copy(src="@/assets/copy.svg")
-          button.small-button.danger(title="Rotate Key")
-            img.refresh.icon(src="@/assets/refresh.svg")
-          button.small-button.danger(title="Remove Key")
-            img.icon.remove(src="@/assets/remove.svg")
-      hr
-
-      //- list app api keys
-      //- color?? (opt-circle), name, scope
-      //- icon key [copy]
-      //- [rotate] [remove] in AppApiKeyDetails(:appApiKey="appApiKey")
-      //- ^ confirm for both
-
+  section.app-api-keys(v-if="!state.loading && state.appApiKeys.length")
     .badge.danger(v-if="state.error")
       span (シ_ _)シ Something went wrong, Please try again or contact support
+    template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
+      AppApiKeyListItem(:appApiKey="appApiKey" @removeAppApiKey="removeAppApiKey" @rotateAppApiKey="rotateAppApiKey")
 
     //- user api key
     details
@@ -191,7 +157,7 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
       section.subsection
         .row
           img.icon.key(src="@/assets/key.svg")
-          code.badge.secondary.api-key-string(:data-apikey="userApiKey") {{ truncatedCensoredApiKey(userApiKey, 9) }}
+          code.badge.secondary.api-key-string(:data-apikey="userApiKey") {{ truncatedApiKey(userApiKey, 9) }}
           .button-wrap
             button.small-button(@click.left="copy($event, userApiKey)" title="Copy User API Key")
               img.icon.copy(src="@/assets/copy.svg")
