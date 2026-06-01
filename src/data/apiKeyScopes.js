@@ -3,7 +3,7 @@
 const scopes = [
   {
     name: 'user',
-    friendlyName: 'Read User',
+    friendlyName: 'User',
     description: 'Can only read your user profile.'
   },
   {

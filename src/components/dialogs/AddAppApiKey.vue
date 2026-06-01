@@ -121,8 +121,8 @@ const toggleApiKeyScopePickerIsVisible = () => {
   state.apiKeyScopePickerIsVisible = value
 }
 const updateCurrentScope = (scope) => {
-  console.log('❤️❤️❤️', scope)
-  // state.scope = scope.name
+  state.scope = scope
+  closeDialogs()
 }
 
 // submit
@@ -175,7 +175,7 @@ dialog.narrow.add-app-api-key(
         button(@click.stop="toggleApiKeyScopePickerIsVisible" :class="{active: state.apiKeyScopePickerIsVisible}")
           span Scope
           span.badge.secondary.scope-badge {{currentScope.friendlyName}}
-        ApiKeyScopePicker(:visible="state.apiKeyScopePickerIsVisible" :currentScope="state.scope" @updateCurrentScope="updateCurrentScope")
+        ApiKeyScopePicker(:visible="state.apiKeyScopePickerIsVisible" :currentScopeName="state.scope" @updateCurrentScope="updateCurrentScope")
     //- create
     .row
       button(@click.stop="createAppApiKey")
@@ -201,5 +201,6 @@ dialog.add-app-api-key
     margin-right 5px
   .scope-badge
     margin-left 5px
+    margin-right 0
 
 </style>
