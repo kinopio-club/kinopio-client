@@ -10,6 +10,7 @@ import utils from '@/utils.js'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import Loader from '@/components/Loader.vue'
 import AppApiKeyListItem from '@/components/AppApiKeyListItem.vue'
+import AddAppApiKey from '@/components/dialogs/AddAppApiKey.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -33,7 +34,8 @@ const state = reactive({
   dialogHeight: null,
   isLoading: false,
   isError: false,
-  appApiKeys: []
+  appApiKeys: [],
+  addAppApiKeyIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -47,6 +49,15 @@ const updateDialogHeight = async () => {
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+}
+const closeDialogs = () => {
+  state.addAppApiKeyIsVisible = false
+}
+
+const toggleAddAppApiKeyIsVisible = () => {
+  const value = !state.addAppApiKeyIsVisible
+  closeDialogs()
+  state.addAppApiKeyIsVisible = value
 }
 
 // data
@@ -145,10 +156,13 @@ const deleteAppApiKey = async (update) => {
   }
   state.isLoading = false
 }
+const createAppApiKey = (apiKey) => {
+  // - color, name, scope-picker/list, id
+}
 </script>
 
 <template lang="pug">
-dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
       span API
@@ -172,11 +186,10 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
         Loader(:visible="state.isLoading" :isSmall="true")
         span API Keys
       .button-wrap
-        button.small-button
+        button.small-button(@click.stop="toggleAddAppApiKeyIsVisible" :class="{active: state.addAppApiKeyIsVisible}")
           img.icon.add-icon(src="@/assets/add.svg")
-          span App API Key
-        //- TODO AddAppApiKey
-          //- addGroup: color, name, scope-picker/list
+          span New
+        AddAppApiKey(:visible="state.addAppApiKeyIsVisible" @createAppApiKey="createAppApiKey")
     OfflineBadge
   //- app api keys
   section.app-api-keys(v-if="!state.loading && state.appApiKeys.length")

@@ -137,11 +137,11 @@ dialog.user-settings
         border-top-left-radius 0
         border-top-right-radius 0
   .child-dialogs
-    dialog
+    > dialog
       top 30px
       left 8px
       right initial
-    dialog.user-api-info
+    > dialog.user-api-info
       left initial
       right 8px
 
