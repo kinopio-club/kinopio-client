@@ -129,6 +129,7 @@ const updateCurrentScope = (scope) => {
 
 const createAppApiKey = () => {
   const appApiKey = {
+    id: self.crypto.randomUUID(),
     name: state.name,
     color: state.color,
     apiKey: self.crypto.randomUUID(),
