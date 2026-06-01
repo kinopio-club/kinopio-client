@@ -47,7 +47,8 @@ const state = reactive({
   apiKeyScopePickerIsVisible: false,
   name: 'App Name',
   color: 'red',
-  scope: 'read'
+  scope: 'read',
+  errorNameIsRequired: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -130,6 +131,11 @@ const updateCurrentScope = (scope) => {
 // submit
 
 const createAppApiKey = () => {
+  state.errorNameIsRequired = false
+  if (!state.name) {
+    state.errorNameIsRequired = true
+    return
+  }
   const appApiKey = {
     id: nanoid(),
     name: state.name,
@@ -161,7 +167,7 @@ dialog.narrow.add-app-api-key(
         ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateColor" :luminosityIsDark="true")
       //- name
       input.name(
-        placeholder="App API Key Name"
+        placeholder="App Name"
         v-model="name"
         name="apiKeyName"
         maxlength=100
@@ -184,6 +190,9 @@ dialog.narrow.add-app-api-key(
       button(@click.stop="createAppApiKey")
         img.icon.add-icon(src="@/assets/add.svg")
         span Create API Key
+    //- error
+    .row(v-if="state.errorNameIsRequired")
+      .badge.danger App Name is required
 </template>
 
 <style lang="stylus">

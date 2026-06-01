@@ -21,7 +21,7 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  updateAppApiKeys()
+  getAppApiKeys()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
@@ -90,6 +90,17 @@ const truncatedApiKey = (string, size) => {
 
 // app api keys
 
+const getAppApiKeys = async () => {
+  try {
+    state.isLoading = true
+    state.isError = false
+    state.appApiKeys = await apiStore.getAppApiKeys()
+  } catch (error) {
+    console.error('🚒 getAppApiKeys', error)
+    state.isError = true
+  }
+  state.isLoading = false
+}
 const createAppApiKey = async (body) => {
   closeDialogs()
   try {
@@ -103,22 +114,16 @@ const createAppApiKey = async (body) => {
   }
   state.isLoading = false
 }
-const updateAppApiKeys = async () => {
+const rotateAppApiKey = async (appApiKey) => {
   try {
     state.isLoading = true
     state.isError = false
-    state.appApiKeys = await apiStore.getAppApiKeys()
-    console.log('💐💐💐💐', state.appApiKeys)
-  } catch (error) {
-    console.error('🚒 updateAppApiKeys', error)
-    state.isError = true
-  }
-  state.isLoading = false
-}
-const updateAppApiKey = async (update) => {
-  try {
-    state.isLoading = true
-    state.isError = false
+    const apiKey = self.crypto.randomUUID()
+    const update = {
+      id: appApiKey.id,
+      userId: userId.value,
+      apiKey
+    }
     state.appApiKeys = state.appApiKeys.map(appApiKey => {
       if (appApiKey.id === update.id) {
         const keys = Object.keys(update)
@@ -128,20 +133,12 @@ const updateAppApiKey = async (update) => {
       }
       return appApiKey
     })
-    await apiStore.updateAppApiKey(update)
+    await apiStore.rotateAppApiKey(update)
   } catch (error) {
-    console.error('🚒 updateAppApiKey', error)
+    console.error('🚒 rotateAppApiKey', error)
     state.isError = true
   }
   state.isLoading = false
-}
-const rotateAppApiKey = (appApiKey) => {
-  const apiKey = self.crypto.randomUUID()
-  const update = {
-    id: appApiKey.id,
-    apiKey
-  }
-  updateAppApiKey(update)
 }
 const deleteAppApiKey = async (update) => {
   try {
@@ -150,7 +147,7 @@ const deleteAppApiKey = async (update) => {
     state.appApiKeys = state.appApiKeys.filter(appApiKey => appApiKey.id !== update.id)
     await apiStore.deleteAppApiKey(update)
   } catch (error) {
-    console.error('🚒 updateAppApiKey', error)
+    console.error('🚒 deleteAppApiKey', error)
     state.isError = true
   }
   state.isLoading = false
@@ -197,7 +194,7 @@ dialog.user-api-info(
     OfflineBadge
   //- app api keys
   section.app-api-keys
-    .badge.danger(v-if="state.error")
+    .row.badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
       AppApiKeyListItem(:appApiKey="appApiKey" @deleteAppApiKey="deleteAppApiKey" @rotateAppApiKey="rotateAppApiKey")
