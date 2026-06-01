@@ -106,7 +106,7 @@ dialog.narrow.notification-settings(v-if="props.visible" :open="props.visible" @
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
   template(v-else)
     section
-      .row A quarterly-ish newsletter about new features and product strategy
+      .row A quarterly-ish newsletter about new features and growing Kinopio
       .row
         label(:class="{active: shouldEmailBulletin}" @click.left.prevent="toggleShouldEmailBulletin" @keydown.stop.enter="toggleShouldEmailBulletin")
           input(type="checkbox" v-model="shouldEmailBulletin")
