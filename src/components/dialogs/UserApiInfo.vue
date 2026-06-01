@@ -107,10 +107,18 @@ const updateAppApiKeys = async () => {
 }
 const updateAppApiKey = async (update) => {
   try {
-    // TODO update state by id
     state.isLoading = true
     state.isError = false
-    // TODO await apiStore.
+    state.appApiKeys = state.appApiKeys.map(appApiKey => {
+      if (appApiKey.id === update.id) {
+        const keys = Object.keys(update)
+        keys.forEach(key => {
+          appApiKey[key] = update[key]
+        })
+      }
+      return appApiKey
+    })
+    await apiStore.updateAppApiKey(update)
   } catch (error) {
     console.error('🚒 updateAppApiKey', error)
     state.isError = true
@@ -125,13 +133,12 @@ const rotateAppApiKey = (appApiKey) => {
   }
   updateAppApiKey(update)
 }
-const removeAppApiKey = async (appApiKey) => {
-  console.log('🍒')
+const deleteAppApiKey = async (update) => {
   try {
     state.isLoading = true
     state.isError = false
-    // TODO remove from state
-    // TODO await apiStore.removeAppApiKey
+    state.appApiKeys = state.appApiKeys.filter(appApiKey => appApiKey.id !== update.id)
+    await apiStore.deleteAppApiKey(update)
   } catch (error) {
     console.error('🚒 updateAppApiKey', error)
     state.isError = true
@@ -176,7 +183,7 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
     .badge.danger(v-if="state.error")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
-      AppApiKeyListItem(:appApiKey="appApiKey" @removeAppApiKey="removeAppApiKey" @rotateAppApiKey="rotateAppApiKey")
+      AppApiKeyListItem(:appApiKey="appApiKey" @deleteAppApiKey="deleteAppApiKey" @rotateAppApiKey="rotateAppApiKey")
     //- user api key
     details
       summary User API Key

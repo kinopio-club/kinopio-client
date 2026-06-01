@@ -1506,6 +1506,9 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'deleteGroupPermanent', error })
       }
     },
+
+    // Analytics
+
     async sendAnalyticsEvent (body) {
       try {
         const headers = new Headers({
@@ -1561,6 +1564,74 @@ export const useApiStore = defineStore('api', {
       } catch (error) {
         this.handleServerError({ name: 'getAffiliate', error })
       }
+    },
+
+    // App API Keys
+
+    // async getUserGroups () {
+    //   const globalStore = useGlobalStore()
+    //   const userStore = useUserStore()
+    //   const apiKey = userStore.apiKey
+    //   const isOnline = globalStore.isOnline
+    //   if (!shouldRequest({ apiKey, isOnline })) { return }
+    //   try {
+    //     globalStore.isLoadingGroups = true
+    //     const options = await this.requestOptions({ method: 'GET' })
+    //     const response = await fetch(`${consts.apiHost()}/user/groups`, options)
+    //     globalStore.isLoadingGroups = false
+    //     return normalizeResponse(response)
+    //   } catch (error) {
+    //     this.handleServerError({ name: 'getUserGroups', error })
+    //   }
+    //   globalStore.isLoadingGroups = false
+    // },
+
+    // async createGroup (body) {
+    //   const globalStore = useGlobalStore()
+    //   const userStore = useUserStore()
+    //   const apiKey = userStore.apiKey
+    //   const isOnline = globalStore.isOnline
+    //   if (!shouldRequest({ apiKey, isOnline })) { return }
+    //   try {
+    //     const options = await this.requestOptions({ body, method: 'POST' })
+    //     const response = await fetch(`${consts.apiHost()}/group/`, options)
+    //     return normalizeResponse(response)
+    //   } catch (error) {
+    //     this.handleServerError({ name: 'createGroup', error })
+    //   }
+    // },
+    async updateAppApiKey (body) {
+      console.log('🍒deleteAppApiKey', body)
+
+      // const globalStore = useGlobalStore()
+      // const userStore = useUserStore()
+      // const apiKey = userStore.apiKey
+      // const isOnline = globalStore.isOnline
+      // if (!shouldRequest({ apiKey, isOnline })) { return }
+      // try {
+      //   const options = await this.requestOptions({ body, method: 'PATCH' })
+      //   const response = await fetch(`${consts.apiHost()}/connection/multiple`, options)
+      //   return normalizeResponse(response)
+      // } catch (error) {
+      //   this.handleServerError({ name: 'updateConnections', error })
+      // }
+    },
+
+    async deleteAppApiKey (body) {
+      console.log('🍒deleteAppApiKey', body)
+
+      // const globalStore = useGlobalStore()
+      // const userStore = useUserStore()
+      // const apiKey = userStore.apiKey
+      // const isOnline = globalStore.isOnline
+      // if (!shouldRequest({ apiKey, isOnline })) { return }
+      // try {
+      //   const options = await this.requestOptions({ body, method: 'DELETE' })
+      //   const response = await fetch(`${consts.apiHost()}/group/`, options)
+      //   return normalizeResponse(response)
+      // } catch (error) {
+      //   this.handleServerError({ name: 'deleteGroupPermanent', error })
+      // }
     }
 
   }

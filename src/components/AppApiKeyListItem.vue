@@ -33,14 +33,14 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['rotateAppApiKey', 'removeAppApiKey'])
+const emit = defineEmits(['rotateAppApiKey', 'deleteAppApiKey'])
 
 const props = defineProps({
   appApiKey: Object
 })
 const state = reactive({
   confirmRotateKeyIsVisible: false,
-  confirmRemoveKeyIsVisible: false,
+  confirmDeleteKeyIsVisible: false,
   isError: false,
   isLoading: false
 })
@@ -77,23 +77,23 @@ const truncate = (string) => {
 
 const clearConfirmations = () => {
   state.confirmRotateKeyIsVisible = false
-  state.confirmRemoveKeyIsVisible = false
+  state.confirmDeleteKeyIsVisible = false
 }
 const toggleConfirmRotateKeyIsVisible = () => {
   const value = !state.confirmRotateKeyIsVisible
   clearConfirmations()
   state.confirmRotateKeyIsVisible = value
 }
-const toggleConfirmRemoveKeyIsVisible = () => {
-  const value = !state.confirmRemoveKeyIsVisible
+const toggleConfirmDeleteKeyIsVisible = () => {
+  const value = !state.confirmDeleteKeyIsVisible
   clearConfirmations()
-  state.confirmRemoveKeyIsVisible = value
+  state.confirmDeleteKeyIsVisible = value
 }
 const rotateApiKey = () => {
   emit('rotateAppApiKey', props.appApiKey)
 }
-const removeApiKey = () => {
-  emit('removeAppApiKey', props.appApiKey)
+const deleteApiKey = () => {
+  emit('deleteAppApiKey', props.appApiKey)
 }
 </script>
 
@@ -114,7 +114,7 @@ const removeApiKey = () => {
         img.icon.copy(src="@/assets/copy.svg")
       button.small-button.danger(title="Rotate Key" @click.stop="toggleConfirmRotateKeyIsVisible" :class="{ active: state.confirmRotateKeyIsVisible }")
         img.refresh.icon(src="@/assets/refresh.svg")
-      button.small-button.danger(title="Remove Key" @click.stop="toggleConfirmRemoveKeyIsVisible" :class="{ active: state.confirmRemoveKeyIsVisible }")
+      button.small-button.danger(title="Delete Key" @click.stop="toggleConfirmDeleteKeyIsVisible" :class="{ active: state.confirmDeleteKeyIsVisible }")
         img.icon.remove(src="@/assets/remove.svg")
   //- rotate
   section.subsection(v-if="state.confirmRotateKeyIsVisible" @click.stop)
@@ -124,15 +124,14 @@ const removeApiKey = () => {
       button.small-button.danger(@click="rotateApiKey")
         img.refresh.icon(src="@/assets/refresh.svg")
         span Rotate API Key
-  //- remove
-  section.subsection(v-if="state.confirmRemoveKeyIsVisible" @click.stop)
+  //- delete
+  section.subsection(v-if="state.confirmDeleteKeyIsVisible" @click.stop)
     .row
       button.small-button(@click="clearConfirmations")
         img.icon.cancel(src="@/assets/add.svg")
-      button.small-button.danger(@click="removeApiKey" )
+      button.small-button.danger(@click="deleteApiKey" )
         img.icon.remove(src="@/assets/remove.svg")
-        span Remove API Key
-
+        span Delete API Key
 </template>
 
 <style lang="stylus">
