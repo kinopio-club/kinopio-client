@@ -101,6 +101,7 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
     .segmented-buttons.settings-type-buttons
       button(@click="updateCurrentSettings('connections')" :class="{ active: currentSettingsIsConnections }")
         span Connections
+  .child-dialogs#settings-child-dialogs
 
   UserSettingsGeneral(:visible="currentSettingsIsGeneral")
   UserSettingsControls(:visible="currentSettingsIsControls")
@@ -135,4 +136,13 @@ dialog.user-settings
       button
         border-top-left-radius 0
         border-top-right-radius 0
+  .child-dialogs
+    dialog
+      top 30px
+      left 8px
+      right initial
+    dialog.user-api-info
+      left initial
+      right 8px
+
 </style>

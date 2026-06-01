@@ -85,12 +85,14 @@ const updateAppApiKeys = async () => {
     console.log('💐💐💐💐')
     state.appApiKeys = [
       {
+        id: '1a1',
         name: 'Cool app this is a somethign lalala',
         scope: 'read',
         apiKey: '1209-3102938asl-dkfjlsa-kdjf',
         color: 'red'
       },
       {
+        id: '2b',
         name: 'Whoa test',
         scope: 'edit',
         apiKey: 'ab2C-alsdkjfa23-dkfjlsa-123z',
@@ -98,15 +100,43 @@ const updateAppApiKeys = async () => {
       }
     ]
   } catch (error) {
+    console.error('🚒 updateAppApiKeys', error)
     state.isError = true
   }
   state.isLoading = false
 }
-const updateAppApiKey = async () => {
-  // apiStore.
+const updateAppApiKey = async (update) => {
+  try {
+    // TODO update state by id
+    state.isLoading = true
+    state.isError = false
+    // TODO await apiStore.
+  } catch (error) {
+    console.error('🚒 updateAppApiKey', error)
+    state.isError = true
+  }
+  state.isLoading = false
 }
 const rotateAppApiKey = (appApiKey) => {
-  // const apiKey = self.crypto.randomUUID()
+  const apiKey = self.crypto.randomUUID()
+  const update = {
+    id: appApiKey.id,
+    apiKey
+  }
+  updateAppApiKey(update)
+}
+const removeAppApiKey = async (appApiKey) => {
+  console.log('🍒')
+  try {
+    state.isLoading = true
+    state.isError = false
+    // TODO remove from state
+    // TODO await apiStore.removeAppApiKey
+  } catch (error) {
+    console.error('🚒 updateAppApiKey', error)
+    state.isError = true
+  }
+  state.isLoading = false
 }
 </script>
 
@@ -120,7 +150,6 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
           button.small-button
             span API Docs{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
-
   //- user id
   section
     p User Id
@@ -129,7 +158,6 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
       .button-wrap
         button.small-button(@click.left="copy($event, userId)" title="Copy UserId")
           img.icon.copy(src="@/assets/copy.svg")
-
   //- api keys
   section.title-section
     .row.title-row
@@ -140,17 +168,15 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
         button.small-button
           img.icon.add-icon(src="@/assets/add.svg")
           span App API Key
-        //- AddAppApiKey
+        //- TODO AddAppApiKey
           //- addGroup: color, name, scope-picker/list
     OfflineBadge
-
   //- app api keys
   section.app-api-keys(v-if="!state.loading && state.appApiKeys.length")
     .badge.danger(v-if="state.error")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
       AppApiKeyListItem(:appApiKey="appApiKey" @removeAppApiKey="removeAppApiKey" @rotateAppApiKey="rotateAppApiKey")
-
     //- user api key
     details
       summary User API Key
@@ -177,13 +203,4 @@ dialog.user-api-info
   .app-api-keys
     code
       margin-right 0
-  .scope-badge
-    margin-left 6px
-  .circle-badge
-    border-radius 100px
-    min-width initial
-    min-height initial
-    display inline-block
-    width 12px
-    height 12px
 </style>

@@ -56,6 +56,12 @@ const state = reactive({
   viewportHeightIsShort: false
 })
 
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateViewportHeightIsShort()
+  }
+})
+
 const currentUser = computed(() => userStore.getUserAllState)
 const isModerator = computed(() => userStore.isModerator)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -124,7 +130,6 @@ const toggleIsDebugMode = () => {
 
 <template lang="pug">
 .user-settings-general(v-if="visible" @click="closeDialogs")
-  .child-dialogs#child-dialogs
   //- controls
   section
     //- Notifications
@@ -134,7 +139,7 @@ const toggleIsDebugMode = () => {
           img.icon.mail(src="@/assets/mail.svg")
           span Notifications
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             NotificationSettings(:visible="state.notificationSettingsIsVisible")
         template(v-else)
           NotificationSettings(:visible="state.notificationSettingsIsVisible")
@@ -147,7 +152,7 @@ const toggleIsDebugMode = () => {
           button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: state.themeSettingsIsVisible}")
             span Theme Settings
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             ThemeSettings(:visible="state.themeSettingsIsVisible")
         template(v-else)
           ThemeSettings(:visible="state.themeSettingsIsVisible")
@@ -161,7 +166,7 @@ const toggleIsDebugMode = () => {
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
           span Account
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
         template(v-else)
           UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
@@ -172,7 +177,7 @@ const toggleIsDebugMode = () => {
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
         template(v-else)
           UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
@@ -186,7 +191,7 @@ const toggleIsDebugMode = () => {
           img.icon.key(src="@/assets/key.svg")
           span API
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             UserApiInfo(:visible="state.userApiInfoIsVisible")
         template(v-else)
           UserApiInfo(:visible="state.userApiInfoIsVisible")
@@ -203,7 +208,7 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
         template(v-else)
           ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
@@ -216,7 +221,7 @@ const toggleIsDebugMode = () => {
           img.icon(src="@/assets/remove.svg")
           span Delete Account
         template(v-if="state.viewportHeightIsShort")
-          teleport(to="#child-dialogs")
+          teleport(to="#settings-child-dialogs")
             DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
         template(v-else)
           DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
@@ -227,12 +232,4 @@ const toggleIsDebugMode = () => {
   > section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
-  .child-dialogs
-    dialog
-      top 30px
-      left 8px
-      right initial
-    dialog.user-api-info
-      left initial
-      right 8px
 </style>

@@ -89,15 +89,21 @@ const toggleConfirmRemoveKeyIsVisible = () => {
   clearConfirmations()
   state.confirmRemoveKeyIsVisible = value
 }
+const rotateApiKey = () => {
+  emit('rotateAppApiKey', props.appApiKey)
+}
+const removeApiKey = () => {
+  emit('removeAppApiKey', props.appApiKey)
+}
 </script>
 
 <template lang="pug">
-.app-api-key-list-item
+.app-api-key-list-item(@click="clearConfirmations")
   .row.title-row
     div
       .badge.circle-badge(:style="{ backgroundColor: appApiKey.color }")
       span(:title="appApiKey.name") {{ truncate(appApiKey.name) }}
-      button.small-button.scope-button(:title="scopeDescription(appApiKey)")
+      span.badge.secondary.scope-badge(:title="scopeDescription(appApiKey)")
         span {{ scope(appApiKey).friendlyName }}
   .row
     span.badge.secondary.api-key-string(:data-apikey="appApiKey.apiKey")
@@ -106,10 +112,27 @@ const toggleConfirmRemoveKeyIsVisible = () => {
     .button-wrap
       button.small-button(@click.left="copy($event, appApiKey.apiKey)" title="Copy App API Key")
         img.icon.copy(src="@/assets/copy.svg")
-      button.small-button.danger(title="Rotate Key" @click="toggleConfirmRotateKeyIsVisible")
+      button.small-button.danger(title="Rotate Key" @click.stop="toggleConfirmRotateKeyIsVisible" :class="{ active: state.confirmRotateKeyIsVisible }")
         img.refresh.icon(src="@/assets/refresh.svg")
-      button.small-button.danger(title="Remove Key" @click="toggleConfirmRemoveKeyIsVisible")
+      button.small-button.danger(title="Remove Key" @click.stop="toggleConfirmRemoveKeyIsVisible" :class="{ active: state.confirmRemoveKeyIsVisible }")
         img.icon.remove(src="@/assets/remove.svg")
+  //- rotate
+  section.subsection(v-if="state.confirmRotateKeyIsVisible" @click.stop)
+    .row
+      button.small-button(@click="clearConfirmations")
+        img.icon.cancel(src="@/assets/add.svg")
+      button.small-button.danger(@click="rotateApiKey")
+        img.refresh.icon(src="@/assets/refresh.svg")
+        span Rotate API Key
+  //- remove
+  section.subsection(v-if="state.confirmRemoveKeyIsVisible" @click.stop)
+    .row
+      button.small-button(@click="clearConfirmations")
+        img.icon.cancel(src="@/assets/add.svg")
+      button.small-button.danger(@click="removeApiKey" )
+        img.icon.remove(src="@/assets/remove.svg")
+        span Remove API Key
+
 </template>
 
 <style lang="stylus">
@@ -117,6 +140,16 @@ const toggleConfirmRemoveKeyIsVisible = () => {
   padding-bottom 10px
   margin-bottom 10px
   border-bottom 1px solid var(--primary-border)
-  .scope-button
+  .scope-badge
     margin-left 5px
+  .circle-badge
+    border-radius 100px
+    min-width initial
+    min-height initial
+    display inline-block
+    width 12px
+    height 12px
+  section.subsection
+    .row
+      justify-content flex-end
 </style>
