@@ -1597,8 +1597,6 @@ export const useApiStore = defineStore('api', {
       }
     },
     async rotateAppApiKey (body) {
-      console.log('🍒🍒🍒 rotateAppApiKey', body)
-
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
@@ -1613,20 +1611,18 @@ export const useApiStore = defineStore('api', {
       }
     },
     async deleteAppApiKey (body) {
-      console.log('🍒deleteAppApiKey', body)
-
-      // const globalStore = useGlobalStore()
-      // const userStore = useUserStore()
-      // const apiKey = userStore.apiKey
-      // const isOnline = globalStore.isOnline
-      // if (!shouldRequest({ apiKey, isOnline })) { return }
-      // try {
-      //   const options = await this.requestOptions({ body, method: 'DELETE' })
-      //   const response = await fetch(`${consts.apiHost()}/group/`, options)
-      //   return normalizeResponse(response)
-      // } catch (error) {
-      //   this.handleServerError({ name: 'deleteGroupPermanent', error })
-      // }
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ body, method: 'DELETE' })
+        const response = await fetch(`${consts.apiHost()}/app-api-key`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'deleteGroupPermanent', error })
+      }
     }
 
   }

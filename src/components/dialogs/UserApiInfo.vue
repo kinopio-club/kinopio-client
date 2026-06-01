@@ -181,6 +181,7 @@ dialog.user-api-info(
       .button-wrap
         button.small-button(@click.left="copy($event, userId)" title="Copy UserId")
           img.icon.copy(src="@/assets/copy.svg")
+
   //- api keys
   section.title-section
     .row.title-row
@@ -192,12 +193,14 @@ dialog.user-api-info(
           img.icon.add-icon(src="@/assets/add.svg")
           span New
     OfflineBadge
+
   //- app api keys
   section.app-api-keys
     .row.badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
       AppApiKeyListItem(:appApiKey="appApiKey" @deleteAppApiKey="deleteAppApiKey" @rotateAppApiKey="rotateAppApiKey")
+
     //- user api key
     details
       summary User API Key
