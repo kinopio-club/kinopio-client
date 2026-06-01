@@ -67,7 +67,6 @@ const toggleColorPicker = () => {
 }
 const inputColorClasses = computed(() => {
   if (!props.isBackgroundColor) { return }
-  console.log(utils.colorClasses({ backgroundColor: props.group.color }), props.group.color)
   return utils.colorClasses({ backgroundColor: props.group.color })
 })
 
@@ -129,7 +128,6 @@ const groupName = computed({
     name="groupName"
     maxlength=100
     ref="nameInputElement"
-    @keydown.enter.exact.prevent="createGroup"
     @keyup.stop.backspace
     @keyup.stop.enter
     @mouseup.stop

@@ -59,6 +59,9 @@ const toggleAddAppApiKeyIsVisible = () => {
   closeDialogs()
   state.addAppApiKeyIsVisible = value
 }
+const childDialogIsVisible = computed(() => {
+  return state.addAppApiKeyIsVisible
+})
 
 // data
 
@@ -157,12 +160,31 @@ const deleteAppApiKey = async (update) => {
   state.isLoading = false
 }
 const createAppApiKey = (apiKey) => {
+  closeDialogs()
+  console.log('🍒🍒', apiKey)
   // - color, name, scope-picker/list, id
+  try {
+    state.isLoading = true
+    state.isError = false
+    state.appApiKeys.push(apiKey)
+    // await apiStore.deleteAppApiKey(update)
+  } catch (error) {
+    console.error('🚒 updateAppApiKey', error)
+    state.isError = true
+  }
+  state.isLoading = false
 }
 </script>
 
 <template lang="pug">
-dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.user-api-info(
+  v-if="props.visible"
+  :open="props.visible"
+  @click.left.stop="closeDialogs"
+  ref="dialogElement"
+  :style="{'max-height': state.dialogHeight + 'px'}"
+  :class="{ overflow: !childDialogIsVisible }"
+)
   section.title-section
     .row.title-row
       span API
@@ -171,6 +193,8 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
           button.small-button
             span API Docs{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
+      AddAppApiKey(:visible="state.addAppApiKeyIsVisible" @createAppApiKey="createAppApiKey")
+
   //- user id
   section
     p User Id
@@ -189,7 +213,6 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
         button.small-button(@click.stop="toggleAddAppApiKeyIsVisible" :class="{active: state.addAppApiKeyIsVisible}")
           img.icon.add-icon(src="@/assets/add.svg")
           span New
-        AddAppApiKey(:visible="state.addAppApiKeyIsVisible" @createAppApiKey="createAppApiKey")
     OfflineBadge
   //- app api keys
   section.app-api-keys(v-if="!state.loading && state.appApiKeys.length")
@@ -216,7 +239,8 @@ dialog.user-api-info(v-if="props.visible" :open="props.visible" @click.left.stop
 <style lang="stylus">
 dialog.user-api-info
   left -18px
-  overflow auto
+  &.overflow
+    overflow auto
   .loader
     vertical-align -1px
     margin-right 5px
