@@ -6,6 +6,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import utils from '@/utils.js'
 import randomColor from 'randomcolor'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import ApiKeyScopePicker from '@/components/dialogs/ApiKeyScopePicker.vue'
 import apiKeyScopes from '@/data/apiKeyScopes.js'
 
 const globalStore = useGlobalStore()
@@ -41,6 +42,7 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
+  apiKeyScopePickerIsVisible: false,
   name: 'App Name',
   color: 'red',
   scope: 'read'
@@ -51,6 +53,7 @@ watch(() => props.visible, (value, prevValue) => {
     state.color = randomColor({ luminosity: 'dark' })
     updateDialogHeight()
     focusNameInput()
+    closeDialogs()
   }
 })
 
@@ -62,6 +65,7 @@ const updateDialogHeight = async () => {
 }
 const closeDialogs = (shouldEmit) => {
   state.colorPickerIsVisible = false
+  state.apiKeyScopePickerIsVisible = false
   if (shouldEmit) {
     emit('childDialogIsVisible', false)
   }
@@ -106,6 +110,21 @@ const name = computed({
   }
 })
 
+// scope
+
+const currentScope = computed(() => {
+  return apiKeyScopes.find(scope => scope.name === state.scope)
+})
+const toggleApiKeyScopePickerIsVisible = () => {
+  const value = !state.apiKeyScopePickerIsVisible
+  closeDialogs()
+  state.apiKeyScopePickerIsVisible = value
+}
+const updateCurrentScope = (scope) => {
+  console.log('❤️❤️❤️', scope)
+  // state.scope = scope.name
+}
+
 // submit
 
 const createAppApiKey = () => {
@@ -148,9 +167,14 @@ dialog.narrow.add-app-api-key(
         @touchend.stop
         :class="inputColorClasses"
       )
+    //- scope picker
     .row
-      button
-        span User Scope
+      .button-wrap
+        button(@click.stop="toggleApiKeyScopePickerIsVisible" :class="{active: state.apiKeyScopePickerIsVisible}")
+          span Scope
+          span.badge.secondary.scope-badge {{currentScope.friendlyName}}
+        ApiKeyScopePicker(:visible="state.apiKeyScopePickerIsVisible" :currentScope="state.scope" @updateCurrentScope="updateCurrentScope")
+    //- create
     .row
       button(@click.stop="createAppApiKey")
         img.icon.add-icon(src="@/assets/add.svg")
@@ -173,4 +197,7 @@ dialog.add-app-api-key
     margin-bottom 0
   .button-label
     margin-right 5px
+  .scope-badge
+    margin-left 5px
+
 </style>
