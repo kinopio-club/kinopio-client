@@ -9,6 +9,8 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import ApiKeyScopePicker from '@/components/dialogs/ApiKeyScopePicker.vue'
 import apiKeyScopes from '@/data/apiKeyScopes.js'
 
+import { nanoid } from 'nanoid'
+
 const globalStore = useGlobalStore()
 
 let unsubscribes
@@ -129,7 +131,7 @@ const updateCurrentScope = (scope) => {
 
 const createAppApiKey = () => {
   const appApiKey = {
-    id: self.crypto.randomUUID(),
+    id: nanoid(),
     name: state.name,
     color: state.color,
     apiKey: self.crypto.randomUUID(),

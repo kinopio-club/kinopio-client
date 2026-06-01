@@ -1568,40 +1568,36 @@ export const useApiStore = defineStore('api', {
 
     // App API Keys
 
-    // async getUserGroups () {
-    //   const globalStore = useGlobalStore()
-    //   const userStore = useUserStore()
-    //   const apiKey = userStore.apiKey
-    //   const isOnline = globalStore.isOnline
-    //   if (!shouldRequest({ apiKey, isOnline })) { return }
-    //   try {
-    //     globalStore.isLoadingGroups = true
-    //     const options = await this.requestOptions({ method: 'GET' })
-    //     const response = await fetch(`${consts.apiHost()}/user/groups`, options)
-    //     globalStore.isLoadingGroups = false
-    //     return normalizeResponse(response)
-    //   } catch (error) {
-    //     this.handleServerError({ name: 'getUserGroups', error })
-    //   }
-    //   globalStore.isLoadingGroups = false
-    // },
-
-    // async createGroup (body) {
-    //   const globalStore = useGlobalStore()
-    //   const userStore = useUserStore()
-    //   const apiKey = userStore.apiKey
-    //   const isOnline = globalStore.isOnline
-    //   if (!shouldRequest({ apiKey, isOnline })) { return }
-    //   try {
-    //     const options = await this.requestOptions({ body, method: 'POST' })
-    //     const response = await fetch(`${consts.apiHost()}/group/`, options)
-    //     return normalizeResponse(response)
-    //   } catch (error) {
-    //     this.handleServerError({ name: 'createGroup', error })
-    //   }
-    // },
+    async getAppApiKeys () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetch(`${consts.apiHost()}/app-api-key`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getAppApiKeys', error })
+      }
+    },
+    async createAppApiKey (body) {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ body, method: 'POST' })
+        const response = await fetch(`${consts.apiHost()}/app-api-key`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'createAppApiKey', error })
+      }
+    },
     async updateAppApiKey (body) {
-      console.log('🍒deleteAppApiKey', body)
+      console.log('🍒 updateAppApiKey', body)
 
       // const globalStore = useGlobalStore()
       // const userStore = useUserStore()
@@ -1616,7 +1612,6 @@ export const useApiStore = defineStore('api', {
       //   this.handleServerError({ name: 'updateConnections', error })
       // }
     },
-
     async deleteAppApiKey (body) {
       console.log('🍒deleteAppApiKey', body)
 

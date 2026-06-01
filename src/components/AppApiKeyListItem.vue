@@ -59,6 +59,7 @@ const copy = async (event, text) => {
   }
 }
 const truncatedApiKey = (string, size) => {
+  if (!string) { return }
   size = size || 10
   return `${string.substring(0, size)}…${string.substring(string.length - size, string.length)}`
 }

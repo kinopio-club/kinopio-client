@@ -90,29 +90,25 @@ const truncatedApiKey = (string, size) => {
 
 // app api keys
 
-const updateAppApiKeys = async () => {
-  if (!globalStore.isOnline) { return }
+const createAppApiKey = async (body) => {
+  closeDialogs()
   try {
     state.isLoading = true
     state.isError = false
-    // TODO fetch from api
-    console.log('💐💐💐💐')
-    state.appApiKeys = [
-      {
-        id: '1a1',
-        name: 'Cool app this is a somethign lalala',
-        scope: 'read',
-        apiKey: '1209-3102938asl-dkfjlsa-kdjf',
-        color: 'red'
-      },
-      {
-        id: '2b',
-        name: 'Whoa test',
-        scope: 'edit',
-        apiKey: 'ab2C-alsdkjfa23-dkfjlsa-123z',
-        color: 'blue'
-      }
-    ]
+    state.appApiKeys.push(body)
+    await apiStore.createAppApiKey(body)
+  } catch (error) {
+    console.error('🚒 updateAppApiKey', error)
+    state.isError = true
+  }
+  state.isLoading = false
+}
+const updateAppApiKeys = async () => {
+  try {
+    state.isLoading = true
+    state.isError = false
+    state.appApiKeys = await apiStore.getAppApiKeys()
+    console.log('💐💐💐💐', state.appApiKeys)
   } catch (error) {
     console.error('🚒 updateAppApiKeys', error)
     state.isError = true
@@ -153,21 +149,6 @@ const deleteAppApiKey = async (update) => {
     state.isError = false
     state.appApiKeys = state.appApiKeys.filter(appApiKey => appApiKey.id !== update.id)
     await apiStore.deleteAppApiKey(update)
-  } catch (error) {
-    console.error('🚒 updateAppApiKey', error)
-    state.isError = true
-  }
-  state.isLoading = false
-}
-const createAppApiKey = (apiKey) => {
-  closeDialogs()
-  console.log('🍒🍒', apiKey)
-  // - color, name, scope-picker/list, id
-  try {
-    state.isLoading = true
-    state.isError = false
-    state.appApiKeys.push(apiKey)
-    // await apiStore.deleteAppApiKey(update)
   } catch (error) {
     console.error('🚒 updateAppApiKey', error)
     state.isError = true
@@ -215,7 +196,7 @@ dialog.user-api-info(
           span New
     OfflineBadge
   //- app api keys
-  section.app-api-keys(v-if="!state.loading && state.appApiKeys.length")
+  section.app-api-keys
     .badge.danger(v-if="state.error")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     template(v-for="appApiKey in state.appApiKeys" :key="appApiKey.apiKey")
