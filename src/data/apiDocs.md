@@ -162,7 +162,7 @@ Method | Path | Description | Scope
 `GET`    | <code class="spaces">/space/:spaceId/public-meta</code>    | Get public space info on non-private spaces                                                     | —
 `GET`    | <code class="spaces">/space/:spaceId/favorites</code>    | Get a list of users who have favorited the spaceId                                                | `read`
 `GET`    | <code class="spaces">/space/:spaceId/feed.json</code>    | `RSS feed` for cards recently created or updated in a space. Use `?apiKey=` for private spaces    | —
-`GET`    | <code class="spaces">/space/:spaceId/<br>removed-cards</code> | Get <a href="#cards" class="badge button-badge cards">Cards</a> removed in a space                         | `read`
+`GET`    | <code class="spaces">/space/:spaceId/removed-cards</code> | Get <a href="#cards" class="badge button-badge cards">Cards</a> removed in a space                         | `read`
 `GET`    | <code class="spaces">/space/explore-spaces</code>            | Get a list of recently updated public spaces which have been added to Explore. Sorted by date `showInExploreUpdatedAt` | —
 `GET`    | <code class="spaces">/space/explore-spaces/feed.json</code>  | `RSS feed` for new spaces added to Explore                                                    | —
 `GET`    | <code class="spaces">/space/live-spaces</code>           | Get a list of currently being edited spaces which are open or closed                              | —

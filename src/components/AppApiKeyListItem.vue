@@ -17,7 +17,6 @@ const spaceStore = useSpaceStore()
 let unsubscribes
 
 onMounted(() => {
-  console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
