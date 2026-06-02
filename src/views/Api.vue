@@ -91,9 +91,6 @@ const updateSystemTheme = () => {
 const items = computed(() => {
   let items = [
     {
-      name: 'All',
-      color: 'khaki'
-    }, {
       name: 'Users',
       color: '#b9a8ff'
     }, {
@@ -155,9 +152,14 @@ AboutJsonLd
 </template>
 
 <style lang="stylus">
+:root
+  --api-badge-all khaki
 main.api-page-wrap
   .page-wrap
     max-width 900px
+  hr
+    margin-top 2rem
+    margin-bottom 1rem
   p
     max-width 440px // same as page.styl
   ul.api-toc
@@ -278,6 +280,8 @@ main.api-page-wrap
     border-style solid
     table-layout fixed
     width 100%
+    // th + th
+    //   border-left 1px solid var(--primary-border)
     th,
     td
       padding 8px
@@ -289,6 +293,11 @@ main.api-page-wrap
       &:hover
         background var(--secondary-hover-background)
 
+  .table-wrap.all
+    code
+      > code
+        background transparent
+        padding 0
   // custom column widths
 
   .routes-table-wrap

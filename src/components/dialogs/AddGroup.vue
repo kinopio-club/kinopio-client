@@ -100,6 +100,8 @@ const createGroup = async () => {
 
 <template lang="pug">
 dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+  section.title-section
+    p New Group
   UpgradedUserRequired(:message="upgradeMessage")
   section(v-if="currentUserIsUpgraded")
     GroupDetailsInfo(:group="state.group" @updateGroup="updateGroup")

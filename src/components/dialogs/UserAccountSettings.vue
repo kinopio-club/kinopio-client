@@ -126,6 +126,4 @@ dialog.narrow.update-email(v-if="props.visible" :open="props.visible" @click.lef
 <style lang="stylus">
 .update-email
   overflow auto
-  @media(max-height 650px)
-    top -100px !important
 </style>

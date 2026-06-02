@@ -91,16 +91,17 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
       button.pin-button.small-button(:class="{active: userSettingsIsPinned}" @click.left="toggleUserSettingsIsPinned" title="Pin dialog")
         img.icon.pin(src="@/assets/pin.svg")
 
-    .segmented-buttons
+    .segmented-buttons.settings-type-buttons
       button(@click="updateCurrentSettings('general')" :class="{ active: currentSettingsIsGeneral }")
         span General
       button(@click="updateCurrentSettings('controls')" :class="{ active: currentSettingsIsControls }")
         span Controls
       button(@click="updateCurrentSettings('cards')" :class="{ active: currentSettingsIsCards }")
         span Cards
-    .segmented-buttons
+    .segmented-buttons.settings-type-buttons
       button(@click="updateCurrentSettings('connections')" :class="{ active: currentSettingsIsConnections }")
         span Connections
+  .child-dialogs#settings-child-dialogs
 
   UserSettingsGeneral(:visible="currentSettingsIsGeneral")
   UserSettingsControls(:visible="currentSettingsIsControls")
@@ -125,7 +126,7 @@ dialog.user-settings
       border-top 1px solid var(--primary-border)
       border-radius 0 !important
 
-  .segmented-buttons
+  .segmented-buttons.settings-type-buttons
     &:nth-child(even)
       button
         border-bottom-left-radius 0
@@ -135,4 +136,13 @@ dialog.user-settings
       button
         border-top-left-radius 0
         border-top-right-radius 0
+  .child-dialogs
+    > dialog
+      top 30px
+      left 8px
+      right initial
+    > dialog.user-api-info
+      left initial
+      right 8px
+
 </style>
