@@ -85,11 +85,11 @@ const pageBodyContent = (space) => {
   if (spaceIsPrivate) { return }
   let items = space.cards.concat(space.boxes, space.lists)
   items = sortByDistanceFromOrigin(items)
-  items.slice(0, 1000)
+  items = items.slice(0, 1000)
   const listItems = items
     .map(item => `<li>${escapeHtml(item.name)}</li>`)
     .join('')
-  return `<main id="static-space" hidden><h1>${escapeHtml(space.name)}</h1><p>${escapeHtml(space.description)}</p><ul>${listItems}</ul></main>`
+  return `<main id="static-space" hidden><h1>${escapeHtml(space.name)}</h1><ul>${listItems}</ul></main>`
 }
 
 // json-ld for crawlers
