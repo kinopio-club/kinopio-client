@@ -103,6 +103,7 @@ const deleteApiKey = () => {
     div
       .badge.circle-badge(:style="{ backgroundColor: appApiKey.color }")
       span(:title="appApiKey.name") {{ truncate(appApiKey.name) }}
+    div
       span.badge.secondary.scope-badge(:title="scopeDescription(appApiKey)")
         span {{ scope(appApiKey).friendlyName }}
   .row
