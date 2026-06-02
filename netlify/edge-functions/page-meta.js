@@ -85,7 +85,6 @@ const pageBodyContent = (space) => {
   if (spaceIsPrivate) { return }
   let items = space.cards.concat(space.boxes, space.lists)
   items = sortByDistanceFromOrigin(items)
-  items.slice(0, 1000)
   const listItems = items
     .map(item => `<li>${escapeHtml(item.name)}</li>`)
     .join('')
