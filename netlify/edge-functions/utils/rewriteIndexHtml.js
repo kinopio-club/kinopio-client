@@ -9,7 +9,7 @@ const imageType = (previewImage) => {
 }
 
 export default async ({ context, title, description, previewImage, jsonLD, bodyContent, canonicalUrl }) => {
-  console.log('🔮 rewriteIndexHtml', { title, description, previewImage, canonicalUrl, bodyContent })
+  console.log('🔮 rewriteIndexHtml', canonicalUrl)
   try {
     const response = await context.next()
     // check if response is valid HTML
