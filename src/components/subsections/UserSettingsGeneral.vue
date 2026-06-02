@@ -63,6 +63,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isModerator = computed(() => userStore.isModerator)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const updateViewportHeightIsShort = () => {
@@ -186,7 +187,7 @@ const toggleIsDebugMode = () => {
   section
     .row
       //- API
-      .button-wrap
+      .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="toggleUserApiInfoIsVisible" :class="{active: state.userApiInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
           span API
