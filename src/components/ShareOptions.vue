@@ -107,7 +107,6 @@ const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsRead = computed(() => state.inviteType === 'read')
 const updateDefaultInviteType = () => {
-  const userIsReadOnly = !userStore.getUserIsSpaceMember
   if (spaceGroup.value) {
     state.inviteType = 'group'
   } else if (spaceIsReadOnly.value) {
