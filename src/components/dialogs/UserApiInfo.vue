@@ -175,12 +175,14 @@ dialog.user-api-info(
 
   //- user id
   section
-    p User Id
-    .row
-      code.badge.secondary {{ userId }}
-      .button-wrap
-        button.small-button(@click.left="copy($event, userId)" title="Copy UserId")
-          img.icon.copy(src="@/assets/copy.svg")
+    details
+      summary User Id
+      section.subsection
+        .row
+          code.badge.secondary {{ userId }}
+          .button-wrap
+            button.small-button(@click.left="copy($event, userId)" title="Copy UserId")
+              img.icon.copy(src="@/assets/copy.svg")
 
   //- api keys
   section.title-section
