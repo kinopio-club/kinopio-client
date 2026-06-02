@@ -58,6 +58,32 @@ const pageTitle = (space) => {
   return title
 }
 
+// escape user-supplied strings before injecting into HTML
+const escapeHtml = (string) => {
+  if (!string) { return '' }
+  return String(string)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+// simplified body content for crawlers
+// rendered inside <body> so search engines see card text without executing js
+
+const pageBodyContent = (space) => {
+  const spaceIsPrivate = !space.cards
+  if (spaceIsPrivate) { return }
+  const items = space.cards.concat(space.boxes, space.lists)
+  items.sort((a, b) => a.y - b.y || a.x - b.x) // from top-left
+  items.slice(0, 1000)
+  const listItems = items
+    .map(item => `<li>${escapeHtml(item.name)}</li>`)
+    .join('')
+  return `<main id="page-meta-body-content" hidden><h1>${escapeHtml(space.name)}</h1><p>${escapeHtml(space.description)}</p><ul>${listItems}</ul></main>`
+}
+
 // json-ld for crawlers
 // https://json-ld.org/
 
@@ -151,6 +177,7 @@ export default async (request, context) => {
       description,
       previewImage,
       jsonLD: pageJsonLD(space),
+      bodyContent: pageBodyContent(space),
       canonicalUrl: siteHost + url.pathname
     })
   } catch (error) {

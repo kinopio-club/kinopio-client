@@ -4,4 +4,9 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  document.getElementById('page-meta-body-content')?.remove()
+})
 </script>
