@@ -72,11 +72,19 @@ const escapeHtml = (string) => {
 // simplified body content for crawlers
 // rendered inside <body> so search engines see card text without executing js
 
+const sortByDistanceFromOrigin = (items) => {
+  items.map(item => {
+    item.distance = Math.sqrt(item.x ** 2 + item.y ** 2)
+    return item
+  })
+  items = items.sort((a, b) => a.distance - b.distance)
+  return items
+}
 const pageBodyContent = (space) => {
   const spaceIsPrivate = !space.cards
   if (spaceIsPrivate) { return }
-  const items = space.cards.concat(space.boxes, space.lists)
-  items.sort((a, b) => a.y - b.y || a.x - b.x) // from top-left
+  let items = space.cards.concat(space.boxes, space.lists)
+  items = sortByDistanceFromOrigin(items)
   items.slice(0, 1000)
   const listItems = items
     .map(item => `<li>${escapeHtml(item.name)}</li>`)
