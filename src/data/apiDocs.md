@@ -16,8 +16,8 @@ You can auth requests with either your user or an app api key, both can be found
 
 API Key Type | Header | Permissions | Description
 --- | --- | --- | ---
-User API Key | `Authorization` | Root, be careful | For personal projects only
-App API Key | `App-Authorization` | Scope is either `user`, `read`, `edit`, or `delete` | For integrations, apps, and projects meant to be used by others
+App API Key | `App-Authorization` | Scope is either `user`, `read`, `edit`, or `delete` | For projects, apps, and integrations
+User API Key | `Authorization` | Root, be careful | For legacy projects
 
 App API Key Scopes | Description
 --- | ---
@@ -43,8 +43,6 @@ The API is limited to 5 requests per second. If you exceed this rate, you will r
 Users are representations of any account on Kinopio. Users are created by the server when they sign up.
 
 <h3 class="badge users">User Routes</h3>
-
-Routes with Auth as `apiKey` mean that the Authorization header apiKey must match the requested user.
 
 <div class="table-wrap users routes-table-wrap">
 
@@ -150,10 +148,6 @@ Spaces are where your <a href="#cards" class="badge button-badge cards">Cards</a
 
 <h3 class="badge spaces">Space Routes</h3>
 
-Routes with Auth `canViewSpace` or `canEditSpace` requires that your Authorization apiKey belongs to a user with the permission to view or edit the space.
-
-The `closed` privacy state refers to `Public Read Only`.
-
 <div class="table-wrap spaces routes-table-wrap">
 
 Method | Path | Description | Scope
@@ -165,7 +159,7 @@ Method | Path | Description | Scope
 `GET`    | <code class="spaces">/space/:spaceId/removed-cards</code> | Get <a href="#cards" class="badge button-badge cards">Cards</a> removed in a space                         | `read`
 `GET`    | <code class="spaces">/space/explore-spaces</code>            | Get a list of recently updated public spaces which have been added to Explore. Sorted by date `showInExploreUpdatedAt` | —
 `GET`    | <code class="spaces">/space/explore-spaces/feed.json</code>  | `RSS feed` for new spaces added to Explore                                                    | —
-`GET`    | <code class="spaces">/space/live-spaces</code>           | Get a list of currently being edited spaces which are open or closed                              | —
+`GET`    | <code class="spaces">/space/live-spaces</code>           | Get a list of currently being edited spaces which are `open` or `closed` (Public Read Only)       | —
 `GET`    | <code class="spaces">/space/multiple?spaceIds=id1,id2</code> | Get info on multiple spaces, up to 60 spaceIds at a time                                      | `read`
 `GET`    | <code class="spaces">/space/public/multiple?spaceIds=id1,id2</code>        | Gets public info for multiple public spaces, up to 60 spaceIds at a time. | —
 `GET`    | <code class="spaces">/space/inbox</code>         | Get the current user's inbox space                                                                        | `read`
@@ -241,11 +235,9 @@ Name | Type | Description
 <a class="anchor" data-section="🎑" name="cards"></a>
 <h2 class="badge cards">Cards</h2>
 
-Cards are the building blocks of <a href="#spaces" class="badge spaces">Spaces</a>. They have `x`, `y`, and `z` positions and a `name`.
+Cards are the building blocks of <a href="#spaces" class="badge spaces">Spaces</a>. They have `x`, `y`, and `z` positions, `height`, `width`, and a `name`.
 
 <h3 class="badge cards">Cards Routes</h3>
-
-Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs to a user with the permission to edit the space that the card belongs to.
 
 <div class="table-wrap cards routes-table-wrap">
 
@@ -330,11 +322,9 @@ Name | Type | Description
 <a class="anchor" data-section="🍆" name="connections"></a>
 <h2 class="badge connections">Connections</h2>
 
-Connections are the lines that connect cards together.
+Connections are lines that visually connect a `startItemId` to an `endItemId`.
 
 <h3 class="badge connections">Connection Routes</h3>
-
-Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs to a user with the permission to edit the space that the connection belongs to.
 
 <div class="table-wrap connections routes-table-wrap">
 
@@ -382,8 +372,6 @@ Name | Type | Description
 Boxes are items used by users to contain or organize cards in a space. They can be named, colored, and positioned
 
 <h3 class="badge boxes">Box Routes</h3>
-
-Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs to a user with the permission to edit the space that the box belongs to.
 
 <div class="table-wrap boxes routes-table-wrap">
 
@@ -433,11 +421,9 @@ Name | Type | Description
 <a class="anchor" data-section="🍱" name="lists"></a>
 <h2 class="badge lists">Lists</h2>
 
-Lists are items used by users to vertically contain and organize cards in a space. They can be named, colored, and positioned. <a href="#cards" class="badge button-badge cards">Cards</a> that belong to lists have a `listId`, and `listPositionIndex`.
+Lists are items used by users to vertically contain and organize <a href="#cards" class="badge button-badge cards">Cards</a>in a space. They can be named, colored, and positioned. Cards that belong to lists have a `listId`, and `listPositionIndex`.
 
 <h3 class="badge lists">List Routes</h3>
-
-Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs to a user with the permission to edit the space that the list belongs to.
 
 <div class="table-wrap lists routes-table-wrap">
 
@@ -479,11 +465,9 @@ Name | Type | Description
 <a class="anchor" data-section="🦚" name="tags"></a>
 <h2 class="badge tags">Tags</h2>
 
-Each tag you add to a card is considered a seperate entity. So if you have two cards which both have the tag [[balloon]], this is two tag entities both named 'balloon', with different cardIds.
+Each tag you add to a card is considered a seperate entity. So if you have multiple <a href="#cards" class="badge button-badge cards">Cards</a>which both have the tag `[[balloon]]` in their `name`, you'll have multiple tag objects named `'balloon'` with different cardIds.
 
 <h3 class="badge tags">Tags Routes</h3>
-
-Routes with Auth `canEditSpace` requires that your Authorization apiKey belongs to a user with the permission to edit the space that the tag belongs to.
 
 <div class="table-wrap tags routes-table-wrap">
 
@@ -523,8 +507,6 @@ Notifications are created when another user adds a card in a space that you're a
 
 <h3 class="badge notifications">Notifications Routes</h3>
 
-Routes with Auth as `apiKey` mean that the Authorization header apiKey must match the requested user.
-
 <div class="table-wrap notifications routes-table-wrap">
 
 Method | Path | Description | Scope
@@ -562,7 +544,7 @@ Name | Type | Description
 <a class="anchor" data-section="🛎" name="other"></a>
 <h2 class="badge other">Other</h2>
 
-Other routes used by the kinopio-client app, which you can also use in your integrations
+Other routes used by the `kinopio-client` app, which you can also use in your integrations
 
 <h3 class="badge other">other Routes</h3>
 
