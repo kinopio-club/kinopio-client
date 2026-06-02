@@ -44,10 +44,6 @@ onBeforeUnmount(() => {
 
 const emit = defineEmits(['closeDialogs', 'childDialogIsVisible'])
 
-const props = defineProps({
-  visible: Boolean
-})
-
 const state = reactive({
   emailInvitesIsVisible: false,
   isShareInCommentMode: false,
@@ -60,6 +56,7 @@ const state = reactive({
 const spaceName = computed(() => spaceStore.name)
 const spaceIsPublic = computed(() => spaceStore.getSpaceIsPublic)
 const spaceIsPrivate = computed(() => spaceStore.getSpaceIsPrivate)
+const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace)
 const collaboratorKey = computed(() => spaceStore.collaboratorKey)
 const randomUser = computed(() => {
   const luminosity = userStore.theme
@@ -110,8 +107,11 @@ const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsRead = computed(() => state.inviteType === 'read')
 const updateDefaultInviteType = () => {
+  const userIsReadOnly = !userStore.getUserIsSpaceMember
   if (spaceGroup.value) {
     state.inviteType = 'group'
+  } else if (spaceIsReadOnly.value) {
+    state.inviteType = 'read'
   } else {
     state.inviteType = 'edit'
   }
@@ -206,10 +206,10 @@ const copySpaceUrl = async (event) => {
 </script>
 
 <template lang="pug">
-.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
+.invite-to-space(@click.stop="closeDialogs")
 
-  //- picker
-  .button-wrap.invite-button
+  //- invite picker
+  .button-wrap.invite-button(v-if="!spaceIsReadOnly")
     button.title-row-flex(@click.stop="toggleShareOptionsPickerIsVisible" :class="{ active: state.shareOptionsPickerIsVisible }")
       InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
@@ -256,7 +256,7 @@ const copySpaceUrl = async (event) => {
       width 100%
       border-bottom-left-radius 0
       border-bottom-right-radius 0
-  section.subsection
+  .invite-button + section.subsection
     margin-top 0
     border-top-left-radius 0
     border-top-right-radius 0
