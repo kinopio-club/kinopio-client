@@ -7,6 +7,6 @@
 import { onMounted } from 'vue'
 
 onMounted(() => {
-  document.getElementById('page-meta-body-content')?.remove()
+  document.getElementById('static-space')?.remove()
 })
 </script>

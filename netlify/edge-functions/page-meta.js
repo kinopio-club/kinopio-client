@@ -88,7 +88,7 @@ const pageBodyContent = (space) => {
   const listItems = items
     .map(item => `<li>${escapeHtml(item.name)}</li>`)
     .join('')
-  return `<main id="page-meta-body-content" hidden><h1>${escapeHtml(space.name)}</h1><p>${escapeHtml(space.description)}</p><ul>${listItems}</ul></main>`
+  return `<main id="static-space" hidden><h1>${escapeHtml(space.name)}</h1><p>${escapeHtml(space.description)}</p><ul>${listItems}</ul></main>`
 }
 
 // json-ld for crawlers
