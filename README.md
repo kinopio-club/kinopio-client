@@ -116,17 +116,11 @@ For unfurling, specify static pages in `page-meta.js`.
 
 To test pre-rendered page routes use `npm run build-dev`.
 
-## Testing Netlify Edge-Functions (page-meta)
+## Testing page-meta
 
 `/edge-functions/page-meta.js` is an [edge function](https://www.netlify.com/platform/core/functions/) that runs in an isolated server-side container before page requests. It writes `index.html` metatags for title, description etc. for crawlers.
 
-To test locally, 
-
-    npm run build-dev
-    npx netlify dev
-    curl -s https://localhost:8888
-
-You can also test in staging using PR deploy URLs.
+I couldn't figure out how to run the netlify-cli locally, so instead I test this in staging using PR deploy URLs.
 
 To view the logs:
 
