@@ -209,7 +209,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
 
       //- Invite
-      ShareOptions(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
+      ShareOptions(@closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
 
     //- Import, Export, Embed
     section.import-export-section

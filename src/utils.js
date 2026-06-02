@@ -986,7 +986,7 @@ export default {
   },
   sortByDistanceFromOrigin (items) {
     items = this.clone(items)
-    items.map(item => {
+    items = items.map(item => {
       item.distance = Math.sqrt(Math.pow(item.x, 2) + Math.pow(item.y, 2))
       return item
     })

@@ -4,4 +4,10 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  // remove page body content created by page-meta
+  document.getElementById('static-space')?.remove()
+})
 </script>
