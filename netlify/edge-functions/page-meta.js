@@ -73,7 +73,7 @@ const escapeHtml = (string) => {
 // rendered inside <body> so search engines see card text without executing js
 
 const sortByDistanceFromOrigin = (items) => {
-  items.map(item => {
+  items = items.map(item => {
     item.distance = Math.sqrt(item.x ** 2 + item.y ** 2)
     return item
   })
