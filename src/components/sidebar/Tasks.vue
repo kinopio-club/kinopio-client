@@ -22,10 +22,26 @@ const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 
+let unsubscribes
+
 const resultsElement = ref(null)
 
 onMounted(() => {
   clearPreviousResultItem()
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerCloseChildDialogs') {
+        closeDialogs()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -175,12 +191,12 @@ const clearAllFilters = () => {
       .button-wrap
         // no filters
         template(v-if="!taskFiltersIsActive")
-          .button-wrap.title-row-small-button-wrap.section-top(@click.left.stop="toggleTaskFiltersIsVisible")
+          .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
             button.small-button(:class="{ active: state.taskFiltersIsVisible }")
               img.icon(src="@/assets/filter.svg")
         // filters active
         template(v-if="taskFiltersIsActive")
-          .segmented-buttons.title-row-small-button-wrap.section-top
+          .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
             button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active
@@ -259,4 +275,7 @@ const clearAllFilters = () => {
   .offline-badge
     display inline-block
     margin-left 5px
+  .filter-button
+    margin-top -5px
+    margin-bottom -5px
 </style>
