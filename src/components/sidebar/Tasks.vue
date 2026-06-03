@@ -229,16 +229,6 @@ const clearAllFilters = () => {
 
   section.results-section(v-if="isItems")
     ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
-    //- BoxList(
-    //-   :boxes="boxesFiltered"
-    //-   @selectBox="selectBox"
-    //- )
-    //- CardList(
-    //-   :cards="cardsFiltered"
-    //-   :shouldHideDate="true"
-    //-   @selectCard="selectCard"
-    //- )
-
 </template>
 
 <style lang="stylus">

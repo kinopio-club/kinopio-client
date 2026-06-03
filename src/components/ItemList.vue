@@ -8,6 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import CardListITem from '@/components/CardListITem.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -34,6 +35,8 @@ const props = defineProps({
     default: () => []
   }
 })
+
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 
 // adopted from CardList.vue
 const normalizedCards = computed(() => {
@@ -75,11 +78,22 @@ const allItems = computed(() => {
     }
     return card
   })
-
   let items = lines.concat(lists, boxes, cards)
   items = utils.sortByY(items)
   return items
 })
+
+const boxIsTodo = (box) => {
+  return Boolean(utils.checkboxFromString(box.name))
+}
+const boxName = (box) => {
+  const checkbox = utils.checkboxFromString(box.name)
+  if (checkbox) {
+    return box.name.replace(checkbox, '')
+  } else {
+    return box.name
+  }
+}
 
 const selectItem = (item) => {
   emit('selectItem', item)
@@ -104,10 +118,11 @@ ul.results-list.item-list(v-if="allItems.length")
     //- box
     template(v-if="item.itemType === 'box'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+        ItemCheckboxButton(:visible="boxIsTodo(item)" :box="item" :canEditItem="canEditSpace" :parentIsList="true")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
           .box-fill(:style="{backgroundColor: item.color}")
-        span {{item.name}}
+        span {{ boxName(item) }}
     //- line
     template(v-if="item.itemType === 'line'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
@@ -132,6 +147,7 @@ ul.results-list.item-list(v-if="allItems.length")
   .box-badge
     padding 1px 4px
     overflow hidden
+    margin-top -1px
     .box-fill
       top 0
       left 0
