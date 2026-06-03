@@ -10,8 +10,7 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import TaskFilters from '@/components/dialogs/TaskFilters.vue'
-import CardList from '@/components/CardList.vue'
-import BoxList from '@/components/BoxList.vue'
+import ItemList from '@/components/ItemList.vue'
 import ProgressCircle from '@/components/ProgressCircle.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -104,6 +103,14 @@ const updateItemsBySpace = async () => {
 const allItems = computed(() => cards.value.concat(boxes.value))
 const items = computed(() => cardsFiltered.value.concat(boxesFiltered.value))
 const isItems = computed(() => items.value.length)
+
+const selectItem = (item) => {
+  if (item.itemType === 'box') {
+    selectBox(item)
+  } else if (item.itemType === 'card') {
+    selectCard(item)
+  }
+}
 
 // cards
 
@@ -221,15 +228,17 @@ const clearAllFilters = () => {
         span to create todo tasks that you can track here.
 
   section.results-section(v-if="isItems")
-    BoxList(
-      :boxes="boxesFiltered"
-      @selectBox="selectBox"
-    )
-    CardList(
-      :cards="cardsFiltered"
-      :shouldHideDate="true"
-      @selectCard="selectCard"
-    )
+    ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
+    //- BoxList(
+    //-   :boxes="boxesFiltered"
+    //-   @selectBox="selectBox"
+    //- )
+    //- CardList(
+    //-   :cards="cardsFiltered"
+    //-   :shouldHideDate="true"
+    //-   @selectCard="selectCard"
+    //- )
+
 </template>
 
 <style lang="stylus">

@@ -115,7 +115,7 @@ const canEditCard = (card) => {
 </script>
 
 <template lang="pug">
-li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
+li.card-list-item(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
   //- date
   span.badge.status.inline-badge(v-if="!props.shouldHideDate" :class="{'date-is-today': dateIsToday(card)}")
     img.icon.time(src="@/assets/time.svg")
@@ -142,22 +142,21 @@ li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardI
 </template>
 
 <style lang="stylus">
-.card-list
-  li
-    position relative
-    display block !important
-    .button-badge
+li.card-list-item
+  position relative
+  display block !important
+  .button-badge
+    box-shadow none
+    display inline-block
+    margin-right 0
+    pointer-events none
+    &:hover,
+    &:active
       box-shadow none
-      display inline-block
-      margin-right 0
-      pointer-events none
-      &:hover,
-      &:active
-        box-shadow none
-    img
-      max-width 48px
-      border-radius var(--small-entity-radius)
-      vertical-align middle
+  img
+    max-width 48px
+    border-radius var(--small-entity-radius)
+    vertical-align middle
   .badge.date-is-today
     background-color var(--info-background)
   .time

@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import CardListITem from '@/components/CardListITem.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -27,9 +28,30 @@ const props = defineProps({
   boxes: {
     type: Array,
     default: () => []
+  },
+  cards: {
+    type: Array,
+    default: () => []
   }
 })
 
+// adopted from CardList.vue
+const normalizedCards = computed(() => {
+  const items = utils.clone(props.cards)
+  return items.map(card => {
+    card = cardStore.cardWithNameSegments(card, true)
+    card.user = spaceStore.getSpaceUserById(card.userId)
+    globalStore.updateOtherUsers(card.user)
+    if (!card.user) {
+      card.user = {
+        id: '',
+        name: '',
+        color: undefined
+      }
+    }
+    return card
+  })
+})
 const allItems = computed(() => {
   let lines = utils.clone(props.lines)
   let boxes = utils.clone(props.boxes)
@@ -46,8 +68,15 @@ const allItems = computed(() => {
     box.itemType = 'box'
     return box
   })
+  const cards = normalizedCards.value.map(card => {
+    card.itemType = 'card'
+    card.user = {
+      id: card.userId
+    }
+    return card
+  })
 
-  let items = lines.concat(lists, boxes)
+  let items = lines.concat(lists, boxes, cards)
   items = utils.sortByY(items)
   return items
 })
@@ -64,35 +93,38 @@ const boxBadgeStyles = (box) => {
     borderTop: `8px solid ${box.color}`
   }
 }
-const badgeColorClasses = (line) => {
-  return utils.colorClasses({ backgroundColor: line.color })
+const badgeColorClasses = (item) => {
+  return utils.colorClasses({ backgroundColor: item.color || item.backgroundColor })
 }
 </script>
 
 <template lang="pug">
 ul.results-list.item-list(v-if="allItems.length")
   template(v-for="item in allItems" :key="item.id")
-    //- box item
+    //- box
     template(v-if="item.itemType === 'box'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
           .box-fill(:style="{backgroundColor: item.color}")
         span {{item.name}}
-    //- line item
+    //- line
     template(v-if="item.itemType === 'line'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
         .badge-horizontal-line(:style="{ background: item.color }")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
-    //- list item
+    //- list
     template(v-if="item.itemType === 'list'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
+    //- card
+    template(v-if="item.itemType === 'card'")
+      CardListITem(:card="item" @selectCard="selectItem" tabindex="0" v-on:keyup.enter="selectItem(item)" :shouldHideDate="true")
 
 .badge.secondary(v-if="!allItems.length")
-  span No lines, lists, or boxes in this space yet
+  span No items in this space yet
 </template>
 
 <style lang="stylus">

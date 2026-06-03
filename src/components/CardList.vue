@@ -8,10 +8,6 @@ import { useThemeStore } from '@/stores/useThemeStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import CardListItem from '@/components/CardListItem.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
-import NameSegment from '@/components/NameSegment.vue'
-import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -163,44 +159,5 @@ span
 </template>
 
 <style lang="stylus">
-.card-list
-  li
-    position relative
-    display block !important
-    .button-badge
-      box-shadow none
-      display inline-block
-      margin-right 0
-      pointer-events none
-      &:hover,
-      &:active
-        box-shadow none
-    img
-      max-width 48px
-      border-radius var(--small-entity-radius)
-      vertical-align middle
-  .badge.date-is-today
-    background-color var(--info-background)
-  .time
-    vertical-align 0
-    height 11px
-  .inline-badge
-    display inline-block
-  .remove-button
-    position absolute
-    top 7px
-    right 4px
-    .icon
-      vertical-align 0
-  .loader
-    position absolute
-    top 8px
-    left 2px
-  .card-info
-    &.badge
-      position initial
-      &.is-dark
-        color var(--primary-on-dark-background)
-  .strikethrough
-    opacity 0.5
+// .card-list
 </style>
