@@ -107,10 +107,10 @@ const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsRead = computed(() => state.inviteType === 'read')
 const updateDefaultInviteType = () => {
-  if (spaceGroup.value) {
-    state.inviteType = 'group'
-  } else if (spaceIsReadOnly.value) {
+  if (spaceIsReadOnly.value) {
     state.inviteType = 'read'
+  } else if (spaceGroup.value) {
+    state.inviteType = 'group'
   } else {
     state.inviteType = 'edit'
   }
@@ -205,7 +205,7 @@ const copySpaceUrl = async (event) => {
 </script>
 
 <template lang="pug">
-.invite-to-space(@click.stop="closeDialogs")
+.share-options(@click.stop="closeDialogs")
 
   //- invite picker
   .button-wrap.invite-button(v-if="!spaceIsReadOnly")
@@ -247,8 +247,10 @@ const copySpaceUrl = async (event) => {
 </template>
 
 <style lang="stylus">
-.invite-to-space
+.group-button + .share-options
   margin-top 10px
+
+.share-options
   .button-wrap.invite-button
     width 100%
     > button

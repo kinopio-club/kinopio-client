@@ -200,7 +200,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   template(v-if="spaceIsRemote")
     section
       //- Group Picker
-      .row.button-wrap.group-button
+      .row.button-wrap.group-button(v-if="isSpaceMember")
         button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
           img.icon.group(src="@/assets/group.svg")
           GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
