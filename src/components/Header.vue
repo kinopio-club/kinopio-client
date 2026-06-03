@@ -967,6 +967,7 @@ header
         padding 0 5px
         font-size 12px
         vertical-align 0
+        margin 0
       .icon.group
         height 9px
       .emoji
