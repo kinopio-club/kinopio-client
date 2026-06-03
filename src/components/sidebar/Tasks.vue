@@ -163,6 +163,13 @@ const toggleTaskFiltersIsVisible = () => {
       //-     input(type="checkbox" v-model="state.shouldShowCompleted")
       //-     span Show Completed
 
+    .row
+      .segmented-buttons
+        button.active
+          span Current Space
+        button
+          span All Spaces
+
     section.subsection(v-if="!isItems")
       span Prepend cards or boxes with
         span.badge.info [ ]
