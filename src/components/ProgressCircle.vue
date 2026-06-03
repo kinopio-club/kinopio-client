@@ -42,7 +42,6 @@ const dashOffset = computed(() => {
 })
 const colorClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: props.backgroundColor })
-  console.log(props.backgroundColor, classes)
   return classes
 })
 

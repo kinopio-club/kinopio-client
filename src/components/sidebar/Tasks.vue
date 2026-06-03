@@ -29,9 +29,11 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  shouldShowCompleted: false,
-  taskFiltersIsVisible: false
+  taskFiltersIsVisible: false,
   // isLoadingRemoteSpaces: false
+  filters: {
+    shouldShowCompleted: false
+  }
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -50,6 +52,10 @@ const styles = computed(() => {
     maxHeight: props.subsectionHeight + 'px'
   }
 })
+const closeDialogs = () => {
+  state.taskFiltersIsVisible = false
+}
+const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
 
 // items
 
@@ -92,18 +98,6 @@ const boxes = computed(() => {
 })
 const boxesFiltered = computed(() => filterCompleted(boxes.value))
 
-// completed
-
-const toggleShouldShowCompleted = () => {
-  state.shouldShowCompleted = !state.shouldShowCompleted
-}
-const filterCompleted = (results) => {
-  if (!state.shouldShowCompleted) {
-    results = results.filter(item => utils.nameIsUnchecked(item.name))
-  }
-  return results
-}
-
 // progress
 
 const itemsCompleted = computed(() => {
@@ -121,15 +115,23 @@ const itemsRemaningCount = computed(() => {
 
 // filters
 
-const closeDialogs = () => {
-  state.taskFiltersIsVisible = false
+const filterCompleted = (results) => {
+  if (!state.filters.shouldShowCompleted) {
+    results = results.filter(item => utils.nameIsUnchecked(item.name))
+  }
+  return results
 }
-const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
-const taskFiltersIsActive = computed(() => true)
+const taskFiltersIsActive = computed(() => Boolean(state.filters.shouldShowCompleted))
 const toggleTaskFiltersIsVisible = () => {
   const value = !state.taskFiltersIsVisible
   closeDialogs()
   state.taskFiltersIsVisible = value
+}
+const updateShouldShowCompleted = (value) => {
+  state.filters.shouldShowCompleted = value
+}
+const clearAllFilters = () => {
+  globalStore.triggerClearTaskFilters()
 }
 </script>
 
@@ -154,14 +156,10 @@ const toggleTaskFiltersIsVisible = () => {
             button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active
+
             button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
-        TaskFilters(:visible="state.taskFiltersIsVisible" :isLoading="state.isLoadingRemoteSpaces")
-
-      //- .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
-      //-   label.small-button(:class="{ active: state.shouldShowCompleted }")
-      //-     input(type="checkbox" v-model="state.shouldShowCompleted")
-      //-     span Show Completed
+        TaskFilters(:visible="state.taskFiltersIsVisible" :isLoading="state.isLoadingRemoteSpaces" @updateShouldShowCompleted="updateShouldShowCompleted")
 
     .row
       .segmented-buttons
