@@ -281,8 +281,6 @@ const isFiltered = computed(() => {
 
 // direction
 
-const gradientId = computed(() => `gradient-${props.connection.id}`)
-const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
 const directionIsVisible = computed(() => {
   if (!visible.value) { return }
   return props.connection.directionIsVisible
@@ -388,24 +386,6 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
     animationTimer = window.requestAnimationFrame(animationFrame)
   }
 })
-const relativePath = computed(() => {
-  if (!directionIsVisible.value) { return }
-  if (!props.connection.path) { return }
-  const path = state.pathWhileDragging || state.pathWhileSelected || props.connection.path // jiggling
-  const pathStart = utils.startCoordsFromConnectionPath(path)
-  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
-  const controlPoint = utils.curveControlPointFromPath(path)
-  const origin = { x: 0, y: 0 }
-  if (pathEndRelative.x < 0) {
-    origin.x = Math.abs(pathEndRelative.x)
-  }
-  if (pathEndRelative.y < 0) {
-    origin.y = Math.abs(pathEndRelative.y)
-  }
-  const relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
-  return relativePath
-})
-
 // utils
 
 const removeConnection = () => {
@@ -522,7 +502,7 @@ svg.connection(
     :key="connection.id"
     :d="connection.path"
 
-    :class="connectionPathClasses"
+    :class="[connectionPathClasses, { 'direction-is-visible': directionIsVisible }]"
     :style="connectionPathStyles"
 
     :data-start-card="connection.startItemId"
@@ -546,20 +526,23 @@ svg.connection(
   )
     title {{props.connection.name}}
 
-  defs(v-if="state.isVisibleInViewport")
-    linearGradient(:id="gradientId")
-      stop(offset="0%" :stop-color="props.connection.color" stop-opacity="0" fill-opacity="0")
-      stop(offset="90%" :stop-color="props.connection.color")
-
-  circle(
-    v-if="directionIsVisible"
-    r="7"
-    :fill="gradientIdReference"
-    :class="{filtered: isFiltered}"
-    :data-id="connection.id"
-    :data-relative-path="relativePath"
+  path.connection-path-hit(
+    v-if="visible && directionIsVisible"
+    fill="none"
+    stroke="transparent"
+    stroke-width="5"
+    :d="connection.path"
+    :style="connectionPathStyles"
+    @mousedown.left="startDraggingConnection"
+    @touchstart="startDraggingConnection"
+    @mouseup.left="showConnectionDetails"
+    @touchend.stop="showConnectionDetails"
+    @dragover.prevent
+    @drop.prevent.stop="addCardsAndUploadFiles"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
   )
-    animateMotion(dur="3s" repeatCount="indefinite" :path="relativePath" rotate="auto")
+
 </template>
 
 <style lang="stylus">
@@ -589,4 +572,15 @@ svg.connection
     &.is-connected-to-comment,
     &.is-connected-to-checked-item
       opacity 0.5
+  path.connection-path-hit
+    pointer-events stroke
+    cursor pointer
+    touch-action manipulation
+  path.connection-path
+    &.direction-is-visible
+      stroke-dasharray 16 10
+      animation march 2s linear infinite
+@keyframes march
+  to
+    stroke-dashoffset -52
 </style>
