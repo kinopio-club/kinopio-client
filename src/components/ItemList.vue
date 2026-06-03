@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
-import CardListITem from '@/components/CardListITem.vue'
+import CardListItem from '@/components/CardListItem.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 
 const globalStore = useGlobalStore()
@@ -136,7 +136,7 @@ ul.results-list.item-list(v-if="allItems.length")
           span {{ item.name }}
     //- card
     template(v-if="item.itemType === 'card'")
-      CardListITem(:card="item" @selectCard="selectItem" tabindex="0" v-on:keyup.enter="selectItem(item)" :shouldHideDate="true")
+      CardListItem(:card="item" @selectCard="selectItem" tabindex="0" v-on:keyup.enter="selectItem(item)" :shouldHideDate="true")
 
 .badge.secondary(v-if="!allItems.length")
   span No items in this space yet
