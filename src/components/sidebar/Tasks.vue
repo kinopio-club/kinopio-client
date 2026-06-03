@@ -121,7 +121,7 @@ const itemsRemaningCount = computed(() => {
     .row.title-row
       div
         ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
-        span Todos
+        span Tasks
       .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
         label.small-button(:class="{ active: state.shouldShowCompleted }")
           input(type="checkbox" v-model="state.shouldShowCompleted")
