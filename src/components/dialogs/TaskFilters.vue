@@ -4,7 +4,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 
 const globalStore = useGlobalStore()
 
@@ -75,7 +74,6 @@ dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.lef
     .row.title-row
       div
         span Task Filters
-        Loader(:visible="props.isLoading" :isSmall="true")
       button.small-button(@click.left="clearAllFilters" title="Clear all task filters")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear

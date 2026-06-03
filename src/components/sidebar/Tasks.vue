@@ -6,17 +6,21 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
+import OfflineBadge from '@/components/OfflineBadge.vue'
 import TaskFilters from '@/components/dialogs/TaskFilters.vue'
 import CardList from '@/components/CardList.vue'
 import BoxList from '@/components/BoxList.vue'
 import ProgressCircle from '@/components/ProgressCircle.vue'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const resultsElement = ref(null)
 
@@ -29,11 +33,14 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
+  cardsBySpace: [],
   taskFiltersIsVisible: false,
-  // isLoadingRemoteSpaces: false
+  isLoading: false,
+  isError: false,
   filters: {
     shouldShowCompleted: false
-  }
+  },
+  scopeIsCurrentSpace: true
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -56,8 +63,27 @@ const closeDialogs = () => {
   state.taskFiltersIsVisible = false
 }
 const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
+const updateScopeIsCurrentSpace = (value) => {
+  state.scopeIsCurrentSpace = value
+  if (!value) {
+    updateItemsBySpace()
+  }
+}
 
 // items
+
+const updateItemsBySpace = async () => {
+  try {
+    state.isLoading = true
+    state.isError = false
+    const data = await apiStore.getUserTodos()
+    console.log('🍒🍒🍒🍒', data)
+  } catch (error) {
+    console.error('🚒 updateItemsBySpace', error)
+    state.isError = true
+  }
+  state.isLoading = false
+}
 
 const allItems = computed(() => cards.value.concat(boxes.value))
 const items = computed(() => cardsFiltered.value.concat(boxesFiltered.value))
@@ -140,8 +166,10 @@ const clearAllFilters = () => {
   section
     .row.title-row
       div
+        Loader(:visible="state.isLoading" :isSmall="true")
         ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
         span Tasks
+        OfflineBadge
 
       //- Filters
       .button-wrap
@@ -159,14 +187,17 @@ const clearAllFilters = () => {
 
             button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
-        TaskFilters(:visible="state.taskFiltersIsVisible" :isLoading="state.isLoadingRemoteSpaces" @updateShouldShowCompleted="updateShouldShowCompleted")
+        TaskFilters(:visible="state.taskFiltersIsVisible" @updateShouldShowCompleted="updateShouldShowCompleted")
 
     .row
       .segmented-buttons
-        button.active
+        button(:class="{ active: state.scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(true)")
           span Current Space
-        button
+        button(:class="{ active: !state.scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
           span All Spaces
+
+    .badge.error-badge.danger(v-if="state.isError")
+      span (シ_ _)シ Something went wrong, Please try again or contact support
 
     section.subsection(v-if="!isItems")
       span Prepend cards or boxes with
@@ -222,5 +253,10 @@ const clearAllFilters = () => {
     padding 0
     border-radius 100px
     margin-left 3px
-
+  .loader
+    vertical-align -1px
+    margin-right 6px
+  .offline-badge
+    display inline-block
+    margin-left 5px
 </style>
