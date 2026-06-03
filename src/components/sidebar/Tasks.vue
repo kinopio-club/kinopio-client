@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import TaskFilters from '@/components/dialogs/TaskFilters.vue'
 import CardList from '@/components/CardList.vue'
 import BoxList from '@/components/BoxList.vue'
 import ProgressCircle from '@/components/ProgressCircle.vue'
@@ -28,7 +29,9 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  shouldShowCompleted: false
+  shouldShowCompleted: false,
+  taskFiltersIsVisible: false
+  // isLoadingRemoteSpaces: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -63,6 +66,7 @@ const cards = computed(() => {
 })
 const cardsFiltered = computed(() => filterCompleted(cards.value))
 const selectCard = (card) => {
+  closeDialogs()
   const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
     globalStore.updateFocusOnCardId(card.id)
@@ -76,6 +80,7 @@ const selectCard = (card) => {
 // boxes
 
 const selectBox = (box) => {
+  closeDialogs()
   globalStore.updateFocusOnBoxId(box.id)
 }
 const boxes = computed(() => {
@@ -113,19 +118,50 @@ const itemsRemaningCount = computed(() => {
   const value = allItems.value.filter(card => !utils.nameIsChecked(card.name))
   return value.length.toString()
 })
+
+// filters
+
+const closeDialogs = () => {
+  state.taskFiltersIsVisible = false
+}
+const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
+const taskFiltersIsActive = computed(() => true)
+const toggleTaskFiltersIsVisible = () => {
+  const value = !state.taskFiltersIsVisible
+  closeDialogs()
+  state.taskFiltersIsVisible = value
+}
 </script>
 
 <template lang="pug">
-.todos(v-if="props.visible" :style="styles")
+.todos(v-if="props.visible" :style="styles" :class="{ overflow: !childDialogIsVisible }" @click.stop="closeDialogs")
   section
     .row.title-row
       div
         ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
         span Tasks
-      .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
-        label.small-button(:class="{ active: state.shouldShowCompleted }")
-          input(type="checkbox" v-model="state.shouldShowCompleted")
-          span Show Completed
+
+      //- Filters
+      .button-wrap
+        // no filters
+        template(v-if="!taskFiltersIsActive")
+          .button-wrap.title-row-small-button-wrap.section-top(@click.left.stop="toggleTaskFiltersIsVisible")
+            button.small-button(:class="{ active: state.taskFiltersIsVisible }")
+              img.icon(src="@/assets/filter.svg")
+        // filters active
+        template(v-if="taskFiltersIsActive")
+          .segmented-buttons.title-row-small-button-wrap.section-top
+            button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
+              img.icon(src="@/assets/filter.svg")
+              .badge.info.filter-is-active
+            button.small-button(@click.left.stop="clearAllFilters")
+              img.icon.cancel(src="@/assets/add.svg")
+        TaskFilters(:visible="state.taskFiltersIsVisible" :isLoading="state.isLoadingRemoteSpaces")
+
+      //- .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
+      //-   label.small-button(:class="{ active: state.shouldShowCompleted }")
+      //-     input(type="checkbox" v-model="state.shouldShowCompleted")
+      //-     span Show Completed
 
     section.subsection(v-if="!isItems")
       span Prepend cards or boxes with
@@ -147,7 +183,6 @@ const itemsRemaningCount = computed(() => {
 <style lang="stylus">
 .todos
   border-top 1px solid var(--primary-border)
-  overflow auto
   .button-wrap
     margin 0
   .tips-section
@@ -172,4 +207,15 @@ const itemsRemaningCount = computed(() => {
     padding-bottom 2px
   .progress-circle
     vertical-align -2px
+  .filter-is-active
+    margin 0
+    min-height initial
+    min-width initial
+    display inline-block
+    width 10px
+    height 10px
+    padding 0
+    border-radius 100px
+    margin-left 3px
+
 </style>

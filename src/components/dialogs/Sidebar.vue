@@ -252,7 +252,6 @@ dialog#sidebar.sidebar.is-pinnable(
   left initial
   right 8px
   max-height calc(100vh - 25px)
-  overflow hidden
   &.is-pinned
     top -36px
     right 0
