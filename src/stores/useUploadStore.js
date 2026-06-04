@@ -73,6 +73,14 @@ export const useUploadStore = defineStore('upload', {
         }
       }
     },
+    checkIfFileTypeBlocked (file) {
+      if (file.name.toLowerCase().endsWith('.exe')) {
+        throw {
+          type: 'blockedFileType',
+          message: 'for security reasons, .exe files cannot be uploaded'
+        }
+      }
+    },
     addImageDataUrl ({ file, cardId, spaceId }) {
       const fileType = file.type || utils.imageFileTypeFromName(file)
       const isImage = fileType.includes('image')
@@ -94,6 +102,7 @@ export const useUploadStore = defineStore('upload', {
       const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
       this.checkIfFileTooBig(file)
+      this.checkIfFileTypeBlocked(file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
@@ -170,6 +179,13 @@ export const useUploadStore = defineStore('upload', {
       if (isOutsideSpace) {
         position = utils.cursorPositionInPage(event)
         globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+        return
+      }
+      // check blocked file types
+      const hasBlockedFile = files.find(file => file.name.toLowerCase().endsWith('.exe'))
+      if (hasBlockedFile) {
+        globalStore.addNotificationWithPosition({ message: 'File Type Blocked', position, type: 'danger', layer: 'space', icon: 'cancel' })
+        globalStore.addNotification({ message: '.exe files cannot be uploaded', type: 'danger' })
         return
       }
       // check sizeLimit
