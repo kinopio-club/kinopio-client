@@ -77,7 +77,7 @@ const focusItem = (item) => {
     globalStore.updateFocusOnItemId(item.id)
   }
   if (item.itemType === 'line') {
-    globalStore.updateFocusOnLineId(item.id)
+    globalStore.updateFocusOnItemId(item.id)
   }
   if (item.itemType === 'list') {
     globalStore.updateFocusOnListId(item.id)

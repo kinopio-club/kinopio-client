@@ -131,9 +131,9 @@ const selectAllBelow = () => {
 
 // focus
 
-const isFocusing = computed(() => props.line.id === globalStore.focusOnLineId)
+const isFocusing = computed(() => props.line.id === globalStore.focusOnItemId)
 const clearFocus = () => {
-  globalStore.focusOnLineId = ''
+  globalStore.focusOnItemId = ''
 }
 
 // line dragging
@@ -300,7 +300,7 @@ const lockingAnimationFrame = (timestamp) => {
 const nextLine = computed(() => lineStore.getNextLine(props.line.y))
 const prevLine = computed(() => lineStore.getPrevLine(props.line.y))
 const focusLine = (line) => {
-  globalStore.updateFocusOnLineId(line.id)
+  globalStore.updateFocusOnItemId(line.id)
   globalStore.clearAllSelected()
 }
 </script>

@@ -167,7 +167,6 @@ export const useGlobalStore = defineStore('global', {
     userDetailsUser: {},
 
     // lines
-    focusOnLineId: '',
     lineDetailsIsVisibleForLineId: '',
     multipleLinesSelectedIds: [],
     remoteLineDetailsVisible: [],
@@ -1820,17 +1819,14 @@ export const useGlobalStore = defineStore('global', {
       this.focusOnItemId = itemId
       if (!itemId) { return }
       const boxElement = utils.boxElementFromId(itemId)
+      const lineElement = utils.lineElementFromId(itemId)
       if (boxElement) {
         this.scrollElementIntoView({ element: boxElement, positionIsCenter: true })
+      } else if (lineElement) {
+        this.scrollElementIntoView({ element: lineElement, positionIsTop: true })
       } else {
         this.triggerScrollItemIntoView(itemId)
       }
-    },
-    updateFocusOnLineId (lineId) {
-      this.focusOnLineId = lineId
-      if (!lineId) { return }
-      const element = utils.lineElementFromId(lineId)
-      this.scrollElementIntoView({ element, positionIsTop: true })
     },
     updateFocusOnListId (listId) {
       this.focusOnListId = listId

@@ -131,8 +131,6 @@ const updateItemsBySpace = async () => {
       state.cards = state.cards.concat(space.cards)
       state.boxes = state.boxes.concat(space.boxes)
     })
-
-    console.log('🍒🍒🍒🍒', state.itemsBySpace, '☎️', state.cards, '🥇', state.boxes)
   } catch (error) {
     console.error('🚒 updateItemsBySpace', error)
     state.isError = true
