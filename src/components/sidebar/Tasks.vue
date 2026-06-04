@@ -48,7 +48,7 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  cardsBySpace: [],
+  itemsBySpace: [],
   taskFiltersIsVisible: false,
   isLoading: false,
   isError: false,
@@ -79,6 +79,7 @@ const closeDialogs = () => {
 }
 const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
 const updateScopeIsCurrentSpace = (value) => {
+  if (state.scopeIsCurrentSpace === value) { return }
   state.scopeIsCurrentSpace = value
   if (!value) {
     updateItemsBySpace()
@@ -91,8 +92,8 @@ const updateItemsBySpace = async () => {
   try {
     state.isLoading = true
     state.isError = false
-    const data = await apiStore.getUserTodos()
-    console.log('🍒🍒🍒🍒', data)
+    state.itemsBySpace = await apiStore.getUserTodos()
+    console.log('🍒🍒🍒🍒', state.itemsBySpace)
   } catch (error) {
     console.error('🚒 updateItemsBySpace', error)
     state.isError = true
@@ -100,7 +101,20 @@ const updateItemsBySpace = async () => {
   state.isLoading = false
 }
 
-const allItems = computed(() => cards.value.concat(boxes.value))
+const allItems = computed(() => {
+  if (state.scopeIsCurrentSpace) {
+    return cards.value.concat(boxes.value)
+  } else {
+    let cards = []
+    let boxes = []
+    state.itemsBySpace.forEach(space => {
+      cards = cards.concat(space.cards)
+      boxes = boxes.concat(space.boxes)
+    })
+    console.log(cards, boxes, state.itemsBySpace)
+    return cards.concat(boxes)
+  }
+})
 const items = computed(() => cardsFiltered.value.concat(boxesFiltered.value))
 const isItems = computed(() => items.value.length)
 
@@ -189,7 +203,6 @@ const clearAllFilters = () => {
   section
     .row.title-row
       div
-        Loader(:visible="state.isLoading" :isSmall="true")
         ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
         span Tasks
         OfflineBadge
@@ -219,16 +232,25 @@ const clearAllFilters = () => {
         button(:class="{ active: !state.scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
           span All Spaces
 
+    Loader(:visible="state.isLoading")
+    //- error
     .badge.error-badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
-
+    //- no items
     section.subsection(v-if="!isItems")
       span Prepend cards or boxes with
         span.badge.info [ ]
         span to create todo tasks that you can track here.
 
-  section.results-section(v-if="isItems")
-    ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
+  //- items
+  template(v-if="isItems")
+    //- current space
+    section.results-section(v-if="state.scopeIsCurrentSpace")
+      ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
+    //- all spaces
+    section.results-section(v-else)
+      ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
+
 </template>
 
 <style lang="stylus">
