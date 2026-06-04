@@ -15,7 +15,7 @@ import Stats from '@/components/sidebar/Stats.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
-import Todos from '@/components/sidebar/Todos.vue'
+import Tasks from '@/components/sidebar/Tasks.vue'
 import Note from '@/components/sidebar/Note.vue'
 import SidebarResize from '@/components/SidebarResize.vue'
 
@@ -64,7 +64,7 @@ const state = reactive({
   statsIsVisible: false,
   favoritesIsVisible: false,
   historyIsVisible: false,
-  todosIsVisible: false,
+  tasksIsVisible: false,
   noteIsVisible: false
 })
 
@@ -90,7 +90,7 @@ const clearVisible = () => {
   state.statsIsVisible = false
   state.favoritesIsVisible = false
   state.historyIsVisible = false
-  state.todosIsVisible = false
+  state.tasksIsVisible = false
   state.noteIsVisible = false
 }
 const updateSubsectionHeight = () => {
@@ -156,7 +156,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = userStore.lastSidebarSection
-  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'todos', 'note'] // listed in api docs
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'tasks', 'note'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -214,9 +214,9 @@ dialog#sidebar.sidebar.is-pinnable(
             span Links
         //- second row
         .segmented-buttons
-          //- Todos
-          button(@click.left="toggleSection('todos')" :class="{ active: state.todosIsVisible}" title="Todos")
-            span Todos
+          //- Tasks
+          button(@click.left="toggleSection('tasks')" :class="{ active: state.tasksIsVisible}" title="Tasks")
+            span Tasks
           //- Note
           button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
             img.icon.note(src="@/assets/note.svg")
@@ -240,7 +240,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Inbox(:visible="state.inboxIsVisible" :subsectionHeight="state.subsectionHeight")
   Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
   History(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
-  Todos(:visible="state.todosIsVisible" :subsectionHeight="state.subsectionHeight")
+  Tasks(:visible="state.tasksIsVisible" :subsectionHeight="state.subsectionHeight")
   Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight" @updateDialogHeight="updateHeights")
 
   SidebarResize
@@ -252,7 +252,6 @@ dialog#sidebar.sidebar.is-pinnable(
   left initial
   right 8px
   max-height calc(100vh - 25px)
-  overflow hidden
   &.is-pinned
     top -36px
     right 0

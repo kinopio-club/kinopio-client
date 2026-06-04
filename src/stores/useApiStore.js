@@ -363,6 +363,20 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getUser', error })
       }
     },
+    async getUserTodos () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetchWithTimeout(`${consts.apiHost()}/user/todos`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getUser', error })
+      }
+    },
     async getUserFavoriteSpaces () {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()

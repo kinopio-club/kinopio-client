@@ -113,7 +113,7 @@ export const useLineStore = defineStore('lines', {
       if (!userStore.getUserIsSpaceMember) { return }
       line = this.normalizeNewLine(line)
       this.addLineToState(line)
-      globalStore.focusOnLineId = line.id
+      globalStore.focusOnItemId = line.id
       window.scrollTo({
         left: 0,
         behavior: 'smooth'

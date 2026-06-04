@@ -118,7 +118,6 @@ export const useGlobalStore = defineStore('global', {
     remotePreviousUserBoxSelectStyles: [],
 
     // boxes
-    focusOnBoxId: '',
     boxDetailsIsVisibleForBoxId: '',
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
@@ -146,7 +145,7 @@ export const useGlobalStore = defineStore('global', {
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
     iframeIsVisibleForCardId: '',
-    focusOnCardId: '',
+    focusOnItemId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -168,7 +167,6 @@ export const useGlobalStore = defineStore('global', {
     userDetailsUser: {},
 
     // lines
-    focusOnLineId: '',
     lineDetailsIsVisibleForLineId: '',
     multipleLinesSelectedIds: [],
     remoteLineDetailsVisible: [],
@@ -181,7 +179,6 @@ export const useGlobalStore = defineStore('global', {
     preventDraggedLineFromShowingDetails: false,
 
     // lists
-    focusOnListId: '',
     listDetailsIsVisibleForListId: '',
     multipleListsSelectedIds: [],
     remoteListDetailsVisible: [],
@@ -267,7 +264,7 @@ export const useGlobalStore = defineStore('global', {
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
-    loadSpaceFocusOnCardId: '',
+    loadSpaceFocusOnItemId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
@@ -518,7 +515,7 @@ export const useGlobalStore = defineStore('global', {
     triggerDonateIsVisible () {},
     triggerUploadComplete (updates) {},
     triggerPauseAllAudio () {},
-    triggerScrollCardIntoView (cardId) {},
+    triggerScrollItemIntoView (cardId) {},
     triggerPickerNavigationKey (key) {},
     triggerPickerSelect () {},
     triggerUpdateNotifications () {},
@@ -568,6 +565,7 @@ export const useGlobalStore = defineStore('global', {
     triggerClearUserNotifications () {},
     triggerAddBox (event) {},
     triggerAddList (event) {},
+    triggerClearTaskFilters () {},
     // select all below
     triggerSelectAllItemsBelowCursor (position) {},
     triggerSelectAllItemsAboveCursor (position) {},
@@ -720,7 +718,7 @@ export const useGlobalStore = defineStore('global', {
       this.previousResultItem = {}
     },
     clearPreviousResultItem () {
-      if (!this.focusOnCardId && !this.focusOnBoxId) {
+      if (!this.focusOnItemId) {
         this.previousResultItem = {}
       }
     },
@@ -1812,32 +1810,25 @@ export const useGlobalStore = defineStore('global', {
       const matches = utils.spaceAndCardIdFromUrl(url)
       if (!matches) { return }
       if (matches.cardId) {
-        this.updateFocusOnCardId(matches.cardId)
+        this.updateFocusOnItemId(matches.cardId)
       }
       this.spaceUrlToLoad = `${consts.kinopioDomain()}/${matches.spaceUrl}`
     },
-    updateFocusOnCardId (cardId) {
-      this.focusOnCardId = cardId
-      if (!cardId) { return }
-      this.triggerScrollCardIntoView(cardId)
-    },
-    updateFocusOnBoxId (boxId) {
-      this.focusOnBoxId = boxId
-      if (!boxId) { return }
-      const element = utils.boxElementFromId(boxId)
-      this.scrollElementIntoView({ element, positionIsCenter: true })
-    },
-    updateFocusOnLineId (lineId) {
-      this.focusOnLineId = lineId
-      if (!lineId) { return }
-      const element = utils.lineElementFromId(lineId)
-      this.scrollElementIntoView({ element, positionIsTop: true })
-    },
-    updateFocusOnListId (listId) {
-      this.focusOnListId = listId
-      if (!listId) { return }
-      const element = utils.listElementFromId(listId)
-      this.scrollElementIntoView({ element, positionIsCenter: true })
+    updateFocusOnItemId (itemId) {
+      this.focusOnItemId = itemId
+      if (!itemId) { return }
+      const boxElement = utils.boxElementFromId(itemId)
+      const lineElement = utils.lineElementFromId(itemId)
+      const listElement = utils.listElementFromId(itemId)
+      if (boxElement) {
+        this.scrollElementIntoView({ element: boxElement, positionIsCenter: true })
+      } else if (lineElement) {
+        this.scrollElementIntoView({ element: lineElement, positionIsTop: true })
+      } else if (listElement) {
+        this.scrollElementIntoView({ element: listElement, positionIsCenter: true })
+      } else {
+        this.triggerScrollItemIntoView(itemId)
+      }
     },
     checkIfItemShouldIncreasePageSize (item) {
       if (!item) { return }
@@ -1881,8 +1872,7 @@ export const useGlobalStore = defineStore('global', {
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteListDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteLineDetailsVisible' })
       this.passwordResetIsVisible = false
-      this.updateFocusOnCardId('')
-      this.updateFocusOnBoxId('')
+      this.updateFocusOnItemId('')
       const dialogs = document.querySelectorAll('dialog')
       const dialogIsVisible = Boolean(dialogs.length)
       if (!dialogIsVisible) { return }

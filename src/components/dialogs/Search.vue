@@ -167,7 +167,7 @@ const recentlyUpdatedCards = computed(() => {
 const selectCard = (card) => {
   const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
-    globalStore.updateFocusOnCardId(card.id)
+    globalStore.updateFocusOnItemId(card.id)
     focusItem(card)
   } else {
     selectSpaceCard(card)
@@ -181,7 +181,7 @@ const changeSpace = (spaceId) => {
 }
 const selectSpaceCard = (card) => {
   changeSpace(card.spaceId)
-  globalStore.loadSpaceFocusOnCardId = card.id
+  globalStore.loadSpaceFocusOnItemId = card.id
 }
 
 // keyboard nav

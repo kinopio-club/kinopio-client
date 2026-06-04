@@ -185,7 +185,7 @@ const removeLine = () => {
 const nextLine = computed(() => lineStore.getNextLine(currentLine.value.y))
 const prevLine = computed(() => lineStore.getPrevLine(currentLine.value.y))
 const focusLine = (line) => {
-  globalStore.updateFocusOnLineId(line.id)
+  globalStore.updateFocusOnItemId(line.id)
   globalStore.updateLineDetailsIsVisibleForLineId(line.id)
 }
 </script>

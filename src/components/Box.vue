@@ -675,9 +675,9 @@ const hasCheckbox = computed(() => {
 
 // box focus
 
-const isFocusing = computed(() => props.box.id === globalStore.focusOnBoxId)
+const isFocusing = computed(() => props.box.id === globalStore.focusOnItemId)
 const clearFocus = () => {
-  globalStore.focusOnBoxId = ''
+  globalStore.focusOnItemId = ''
 }
 </script>
 

@@ -138,7 +138,7 @@ const selectCard = async (card) => {
   const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
   cardStore.createCard(newCard, true) // skipCardDetailsIsVisible
-  globalStore.updateFocusOnCardId(newCard.id)
+  globalStore.updateFocusOnItemId(newCard.id)
   removeCard(card)
 }
 const addCard = (card) => {

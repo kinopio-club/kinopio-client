@@ -85,9 +85,9 @@ let unsubscribes
 
 onMounted(async () => {
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-  const shouldFocus = globalStore.loadSpaceFocusOnCardId === props.card.id
+  const shouldFocus = globalStore.loadSpaceFocusOnItemId === props.card.id
   if (shouldFocus) {
-    globalStore.updateFocusOnCardId(props.card.id)
+    globalStore.updateFocusOnItemId(props.card.id)
   }
   await updateUrlPreviewOnload()
   updateUrls()
@@ -98,7 +98,7 @@ onMounted(async () => {
     ({ name, args }) => {
       if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
         updateRemoteConnections()
-      } else if (name === 'triggerScrollCardIntoView') {
+      } else if (name === 'triggerScrollItemIntoView') {
         if (args[0] === props.card.id) {
           const element = cardElement.value
           globalStore.scrollElementIntoView({ element, positionIsCenter: true })
@@ -218,7 +218,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   const currentSpaceId = spaceStore.id
   // space and card
   if (currentSpaceId !== spaceId) {
-    globalStore.loadSpaceFocusOnCardId = cardId
+    globalStore.loadSpaceFocusOnItemId = cardId
     const space = { id: spaceId }
     spaceStore.changeSpace(space)
   // card in current space
@@ -1995,7 +1995,7 @@ const isInCheckedBox = computed(() => {
 
 // card focus
 
-const isFocusing = computed(() => props.card.id === globalStore.focusOnCardId)
+const isFocusing = computed(() => props.card.id === globalStore.focusOnItemId)
 const focusColor = computed(() => {
   if (isFocusing.value) {
     return currentUserColor.value
@@ -2004,7 +2004,7 @@ const focusColor = computed(() => {
   }
 })
 const clearFocus = () => {
-  globalStore.focusOnCardId = ''
+  globalStore.focusOnItemId = ''
 }
 
 // meta

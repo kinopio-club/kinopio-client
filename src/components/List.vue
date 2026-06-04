@@ -564,9 +564,9 @@ const placeholderStylesMap = computed(() => {
 
 // focus
 
-const isFocusing = computed(() => props.list.id === globalStore.focusOnListId)
+const isFocusing = computed(() => props.list.id === globalStore.focusOnItemId)
 const clearFocus = () => {
-  globalStore.focusOnListId = ''
+  globalStore.focusOnItemId = ''
 }
 
 </script>

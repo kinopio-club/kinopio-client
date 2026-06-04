@@ -177,9 +177,9 @@ const changeSpace = (notification) => {
 const focusCard = (notification) => {
   if (currentSpaceId.value !== notification.space.id) {
     changeSpace(notification)
-    globalStore.updateFocusOnCardId(notification.card.id)
+    globalStore.updateFocusOnItemId(notification.card.id)
   } else {
-    globalStore.updateFocusOnCardId(notification.card.id)
+    globalStore.updateFocusOnItemId(notification.card.id)
   }
   emit('markAsRead', notification.id)
 }

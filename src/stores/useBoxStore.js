@@ -48,6 +48,12 @@ export const useBoxStore = defineStore('boxes', {
       const boxes = ids.map(id => this.byId[id])
       return boxes
     },
+    getBoxesIsTodoSortedByY () {
+      let boxes = this.getAllBoxes
+      boxes = boxes.filter(box => !box.isRemoved)
+      boxes = sortBy(boxes, 'y')
+      return boxes.filter(box => utils.checkboxFromString(box.name))
+    },
     getBoxesSelectableByY () {
       let boxes = this.allIds.map(id => this.byId[id])
       // filter

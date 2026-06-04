@@ -268,7 +268,7 @@ const searchResultsOrFilters = computed(() => {
   }
 })
 const focusOnCard = (card) => {
-  globalStore.updateFocusOnCardId(card.id)
+  globalStore.updateFocusOnItemId(card.id)
   globalStore.previousResultItem = card
 }
 const showNextSearchCard = () => {
