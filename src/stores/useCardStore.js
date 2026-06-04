@@ -862,6 +862,16 @@ export const useCardStore = defineStore('cards', {
       await apiStore.updateCards([update])
       this.toggleCardChecked(card.id, value)
     },
+    // console utility method
+    markAllCheckboxCardsChecked () {
+      const cards = this.getAllCards
+      cards.forEach(card => {
+        const isUnchecked = card.name.startsWith('[] ')
+        if (isUnchecked) {
+          this.toggleCardChecked(card.id, true)
+        }
+      })
+    },
 
     // tilt
 
