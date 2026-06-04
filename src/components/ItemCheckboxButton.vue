@@ -37,6 +37,24 @@ const checkboxState = computed({
 
 // toggle item checkbox
 
+const updateItemChecked = (value) => {
+  const isInCurrentSpace = item.value.spaceId === spaceStore.id
+  // update item in current space
+  if (isInCurrentSpace) {
+    if (props.card) {
+      cardStore.toggleCardChecked(props.card.id, value)
+    } else if (props.box) {
+      boxStore.toggleBoxChecked(props.box.id, value)
+    }
+  // update item in other space
+  } else {
+    if (props.card) {
+      cardStore.toggleOtherSpaceCardChecked(props.card, value)
+    } else if (props.box) {
+      boxStore.toggleOtherSpaceBoxChecked(props.box, value)
+    }
+  }
+}
 const toggleItemChecked = (event) => {
   if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (globalStore.preventDraggedCardFromShowingDetails) { return }
@@ -46,11 +64,7 @@ const toggleItemChecked = (event) => {
   if (!props.parentIsList) {
     globalStore.closeAllDialogs()
   }
-  if (props.card) {
-    cardStore.toggleCardChecked(props.card.id, value)
-  } else if (props.box) {
-    boxStore.toggleBoxChecked(props.box.id, value)
-  }
+  updateItemChecked(value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   emit('toggleItemChecked')
   globalStore.currentUserIsDraggingCard = false

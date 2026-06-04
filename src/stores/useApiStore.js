@@ -1170,6 +1170,20 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'createBoxes', error })
       }
     },
+    async updateBox (body) {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${consts.apiHost()}/box`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'updateBoxes', error })
+      }
+    },
 
     // Tag
 

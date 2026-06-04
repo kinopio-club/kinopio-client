@@ -843,6 +843,25 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
     },
+    async toggleOtherSpaceCardChecked (card, value) {
+      const apiStore = useApiStore()
+      let { id, name, spaceId } = card
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date(),
+        spaceId
+      }
+      await apiStore.updateCards([update])
+      this.toggleCardChecked(card.id, value)
+    },
 
     // tilt
 

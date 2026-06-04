@@ -440,6 +440,25 @@ export const useBoxStore = defineStore('boxes', {
       this.updateBox(update)
       this.updateBoxInfoDimensions(update)
     },
+    async toggleOtherSpaceBoxChecked (box, value) {
+      const apiStore = useApiStore()
+      let { id, name, spaceId } = box
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date(),
+        spaceId
+      }
+      await apiStore.updateBox(update)
+      this.toggleBoxChecked(box.id, value)
+    },
 
     // contained items
 
