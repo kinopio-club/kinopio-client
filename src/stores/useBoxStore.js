@@ -54,7 +54,6 @@ export const useBoxStore = defineStore('boxes', {
       boxes = sortBy(boxes, 'y')
       return boxes.filter(box => utils.checkboxFromString(box.name))
     },
-
     getBoxesSelectableByY () {
       let boxes = this.allIds.map(id => this.byId[id])
       // filter
