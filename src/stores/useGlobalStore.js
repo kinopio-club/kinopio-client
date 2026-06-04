@@ -179,7 +179,6 @@ export const useGlobalStore = defineStore('global', {
     preventDraggedLineFromShowingDetails: false,
 
     // lists
-    focusOnListId: '',
     listDetailsIsVisibleForListId: '',
     multipleListsSelectedIds: [],
     remoteListDetailsVisible: [],
@@ -1820,19 +1819,16 @@ export const useGlobalStore = defineStore('global', {
       if (!itemId) { return }
       const boxElement = utils.boxElementFromId(itemId)
       const lineElement = utils.lineElementFromId(itemId)
+      const listElement = utils.listElementFromId(itemId)
       if (boxElement) {
         this.scrollElementIntoView({ element: boxElement, positionIsCenter: true })
       } else if (lineElement) {
         this.scrollElementIntoView({ element: lineElement, positionIsTop: true })
+      } else if (listElement) {
+        this.scrollElementIntoView({ element: listElement, positionIsCenter: true })
       } else {
         this.triggerScrollItemIntoView(itemId)
       }
-    },
-    updateFocusOnListId (listId) {
-      this.focusOnListId = listId
-      if (!listId) { return }
-      const element = utils.listElementFromId(listId)
-      this.scrollElementIntoView({ element, positionIsCenter: true })
     },
     checkIfItemShouldIncreasePageSize (item) {
       if (!item) { return }
