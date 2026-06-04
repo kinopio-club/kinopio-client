@@ -165,21 +165,22 @@ const selectCard = (card) => {
   closeDialogs()
   const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
-    globalStore.updateFocusOnCardId(card.id)
+    globalStore.updateFocusOnItemId(card.id)
     globalStore.previousResultItem = card
+  } else {
+    globalStore.loadSpaceFocusOnItemId = card.id
+    selectSpace({ id: card.spaceId })
   }
-  // } else {
-  // selectSpaceCard(card) Search.vue
-  // TODO change space then focuse
-  // }
 }
 const selectBox = (box) => {
-  // if (isCardInCurrentSpace) {
   closeDialogs()
-  globalStore.updateFocusOnBoxId(box.id)
-  // } else {
-  // TODO change space then focuse
-  // }
+  const isBoxInCurrentSpace = box.spaceId === spaceStore.id
+  if (isBoxInCurrentSpace) {
+    globalStore.updateFocusOnItemId(box.id)
+  } else {
+    globalStore.loadSpaceFocusOnItemId = box.id
+    selectSpace({ id: box.spaceId })
+  }
 }
 
 // progress

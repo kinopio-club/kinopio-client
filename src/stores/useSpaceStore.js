@@ -563,10 +563,10 @@ export const useSpaceStore = defineStore('space', {
       }
       globalStore.updateCurrentSpaceIsUnavailableOffline(space.id)
       globalStore.updateCurrentUserIsInvitedButCannotEditCurrentSpace(space)
-      // focus card
-      const cardId = globalStore.focusOnCardId
-      if (cardId) {
-        globalStore.triggerScrollCardIntoView(cardId)
+      // focus item
+      const itemId = globalStore.focusOnItemId
+      if (itemId) {
+        globalStore.triggerScrollItemIntoView(itemId)
       }
       cardStore.alignLeftAddedCardsInInbox()
     },
@@ -652,9 +652,9 @@ export const useSpaceStore = defineStore('space', {
         if (!userIsMember) { return }
         globalStore.parentCardId = ''
         this.updateUserLastSpaceId()
-        const cardId = globalStore.loadSpaceFocusOnCardId
-        if (cardId) {
-          globalStore.updateFocusOnCardId(cardId)
+        const itemId = globalStore.loadSpaceFocusOnItemId
+        if (itemId) {
+          globalStore.updateFocusOnItemId(itemId)
         }
         globalStore.restoreMultipleSelectedItemsToLoad()
         const body = { id: space.id, updatedAt: new Date() }

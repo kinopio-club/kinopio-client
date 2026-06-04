@@ -139,7 +139,7 @@ const updateErrorMaxCharacterLimit = (newName) => {
 
 const selectCard = (card) => {
   globalStore.closeAllDialogs()
-  globalStore.updateFocusOnCardId(card.id)
+  globalStore.updateFocusOnItemId(card.id)
 }
 const changeSpace = (spaceId) => {
   if (spaceStore.id === spaceId) { return }
@@ -152,7 +152,7 @@ const selectSpaceCard = () => {
   if (isCardInCurrentSpace) {
     selectCard(otherCard.value)
   } else {
-    globalStore.loadSpaceFocusOnCardId = otherCard.value.id
+    globalStore.loadSpaceFocusOnItemId = otherCard.value.id
     changeSpace(otherCard.value.spaceId)
   }
 }

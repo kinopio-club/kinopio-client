@@ -810,7 +810,7 @@ export const useCardStore = defineStore('cards', {
       this.incrementCardZ(id)
       globalStore.updateCardDetailsIsVisibleForCardId(id)
       globalStore.parentCardId = id
-      globalStore.loadSpaceFocusOnCardId = ''
+      globalStore.loadSpaceFocusOnItemId = ''
     },
 
     // checked

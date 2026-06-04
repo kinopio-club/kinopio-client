@@ -118,7 +118,6 @@ export const useGlobalStore = defineStore('global', {
     remotePreviousUserBoxSelectStyles: [],
 
     // boxes
-    focusOnBoxId: '',
     boxDetailsIsVisibleForBoxId: '',
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
@@ -146,7 +145,7 @@ export const useGlobalStore = defineStore('global', {
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
     iframeIsVisibleForCardId: '',
-    focusOnCardId: '',
+    focusOnItemId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -267,7 +266,7 @@ export const useGlobalStore = defineStore('global', {
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
-    loadSpaceFocusOnCardId: '',
+    loadSpaceFocusOnItemId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
@@ -518,7 +517,7 @@ export const useGlobalStore = defineStore('global', {
     triggerDonateIsVisible () {},
     triggerUploadComplete (updates) {},
     triggerPauseAllAudio () {},
-    triggerScrollCardIntoView (cardId) {},
+    triggerScrollItemIntoView (cardId) {},
     triggerPickerNavigationKey (key) {},
     triggerPickerSelect () {},
     triggerUpdateNotifications () {},
@@ -721,7 +720,7 @@ export const useGlobalStore = defineStore('global', {
       this.previousResultItem = {}
     },
     clearPreviousResultItem () {
-      if (!this.focusOnCardId && !this.focusOnBoxId) {
+      if (!this.focusOnItemId) {
         this.previousResultItem = {}
       }
     },
@@ -1813,20 +1812,19 @@ export const useGlobalStore = defineStore('global', {
       const matches = utils.spaceAndCardIdFromUrl(url)
       if (!matches) { return }
       if (matches.cardId) {
-        this.updateFocusOnCardId(matches.cardId)
+        this.updateFocusOnItemId(matches.cardId)
       }
       this.spaceUrlToLoad = `${consts.kinopioDomain()}/${matches.spaceUrl}`
     },
-    updateFocusOnCardId (cardId) {
-      this.focusOnCardId = cardId
-      if (!cardId) { return }
-      this.triggerScrollCardIntoView(cardId)
-    },
-    updateFocusOnBoxId (boxId) {
-      this.focusOnBoxId = boxId
-      if (!boxId) { return }
-      const element = utils.boxElementFromId(boxId)
-      this.scrollElementIntoView({ element, positionIsCenter: true })
+    updateFocusOnItemId (itemId) {
+      this.focusOnItemId = itemId
+      if (!itemId) { return }
+      const boxElement = utils.boxElementFromId(itemId)
+      if (boxElement) {
+        this.scrollElementIntoView({ element: boxElement, positionIsCenter: true })
+      } else {
+        this.triggerScrollItemIntoView(itemId)
+      }
     },
     updateFocusOnLineId (lineId) {
       this.focusOnLineId = lineId
@@ -1882,8 +1880,7 @@ export const useGlobalStore = defineStore('global', {
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteListDetailsVisible' })
       broadcastStore.update({ updates: { userId: user.id }, action: 'clearRemoteLineDetailsVisible' })
       this.passwordResetIsVisible = false
-      this.updateFocusOnCardId('')
-      this.updateFocusOnBoxId('')
+      this.updateFocusOnItemId('')
       const dialogs = document.querySelectorAll('dialog')
       const dialogIsVisible = Boolean(dialogs.length)
       if (!dialogIsVisible) { return }

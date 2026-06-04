@@ -74,7 +74,7 @@ const boxes = computed(() => boxStore.getAllBoxes)
 const lists = computed(() => listStore.getAllLists)
 const focusItem = (item) => {
   if (item.itemType === 'box') {
-    globalStore.updateFocusOnBoxId(item.id)
+    globalStore.updateFocusOnItemId(item.id)
   }
   if (item.itemType === 'line') {
     globalStore.updateFocusOnLineId(item.id)

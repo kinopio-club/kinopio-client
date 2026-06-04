@@ -185,7 +185,7 @@ const focusOnCard = async (card) => {
   globalStore.closeAllDialogs()
   const isCurrentSpace = currentSpaceId.value !== card.spaceId
   if (isCurrentSpace) {
-    globalStore.loadSpaceFocusOnCardId = card.id
+    globalStore.loadSpaceFocusOnItemId = card.id
     let space
     if (card.spaceId) {
       space = { id: card.spaceId }
@@ -195,7 +195,7 @@ const focusOnCard = async (card) => {
     spaceStore.changeSpace(space)
   } else {
     const cardId = card.id || currentTag.value.cardId
-    globalStore.updateFocusOnCardId(cardId)
+    globalStore.updateFocusOnItemId(cardId)
   }
 }
 const showCardDetails = () => {

@@ -167,7 +167,7 @@ const restoreCard = async (card) => {
   cardStore.restoreRemovedCard(card)
   await nextTick()
   scrollIntoView(card)
-  globalStore.updateFocusOnCardId(card.id)
+  globalStore.updateFocusOnItemId(card.id)
   removeRemovedCard(card)
 }
 const deleteCard = (card) => {
