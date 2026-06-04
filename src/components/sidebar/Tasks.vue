@@ -205,16 +205,17 @@ const clearAllFilters = () => {
       div
         ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
         span Tasks
+        Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
 
       //- Filters
       .button-wrap
-        // no filters
+        //- no filters
         template(v-if="!taskFiltersIsActive")
           .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
             button.small-button(:class="{ active: state.taskFiltersIsVisible }")
               img.icon(src="@/assets/filter.svg")
-        // filters active
+        //- filters active
         template(v-if="taskFiltersIsActive")
           .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
             button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
@@ -232,7 +233,6 @@ const clearAllFilters = () => {
         button(:class="{ active: !state.scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
           span All Spaces
 
-    Loader(:visible="state.isLoading")
     //- error
     .badge.error-badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
@@ -292,7 +292,7 @@ const clearAllFilters = () => {
     margin-left 3px
   .loader
     vertical-align -1px
-    margin-right 6px
+    margin-left 6px
   .offline-badge
     display inline-block
     margin-left 5px
