@@ -35,8 +35,7 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null,
-  shouldShowCompleted: false
+  dialogHeight: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -52,19 +51,19 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-watch(() => state.shouldShowCompleted, (value, prevValue) => {
+watch(() => globalStore.sidebarTasksFilters.shouldShowCompleted, (value, prevValue) => {
   emit('updateShouldShowCompleted', value)
 })
 
 const clearAllFilters = () => {
-  state.shouldShowCompleted = false
+  globalStore.sidebarTasksFilters.shouldShowCompleted = false
 }
-
+const shouldShowCompleted = computed(() => globalStore.sidebarTasksFilters.shouldShowCompleted)
 const toggleShouldShowCompleted = () => {
-  state.shouldShowCompleted = !state.shouldShowCompleted
+  globalStore.sidebarTasksFilters.shouldShowCompleted = !globalStore.sidebarTasksFilters.shouldShowCompleted
 }
 const totalFiltersIsActive = computed(() => {
-  return state.shouldShowCompleted // ||
+  return globalStore.sidebarTasksFilters.shouldShowCompleted // ||
 })
 </script>
 
@@ -80,8 +79,8 @@ dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.lef
         span.badge.info.filter-is-active(v-if="totalFiltersIsActive")
   section
     .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
-      label(:class="{ active: state.shouldShowCompleted }")
-        input(type="checkbox" v-model="state.shouldShowCompleted")
+      label(:class="{ active: shouldShowCompleted }")
+        input(type="checkbox" v-model="shouldShowCompleted")
         span Show Completed
 
 </template>

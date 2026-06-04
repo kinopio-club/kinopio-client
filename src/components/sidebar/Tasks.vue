@@ -121,19 +121,19 @@ const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 // filters
 
 const filterResults = (results) => {
-  if (!state.filters.shouldShowCompleted) {
+  if (!globalStore.sidebarTasksFilters.shouldShowCompleted) {
     results = results.filter(item => utils.nameIsUnchecked(item.name))
   }
   return results
 }
-const taskFiltersIsActive = computed(() => Boolean(state.filters.shouldShowCompleted))
+const taskFiltersIsActive = computed(() => Boolean(globalStore.sidebarTasksFilters.shouldShowCompleted))
 const toggleTaskFiltersIsVisible = () => {
   const value = !state.taskFiltersIsVisible
   closeDialogs()
   state.taskFiltersIsVisible = value
 }
 const updateShouldShowCompleted = (value) => {
-  state.filters.shouldShowCompleted = value
+  globalStore.sidebarTasksFilters.shouldShowCompleted = value
 }
 const clearAllFilters = () => {
   globalStore.triggerClearTaskFilters()
