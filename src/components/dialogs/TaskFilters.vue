@@ -90,4 +90,5 @@ dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.lef
 dialog.task-filters
   left initial
   right 0
+  width 200px
 </style>
