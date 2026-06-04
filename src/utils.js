@@ -50,10 +50,16 @@ export default {
     return urlPattern.test(url)
   },
   imgproxyUrl (url, maxDimensions) {
-  // temporary keycdn bypass
-    const keyCdnHost = 'https://cdn.kinopio.club'
-    const bucketHost = 'https://kinopio-uploads.us-east-1.linodeobjects.com'
-    return url.replace(keyCdnHost, bucketHost)
+    if (!this.isKinopioUploadUrl(url)) {
+      return url
+    }
+    const isGif = url.includes('.gif')
+    if (isGif) { return url }
+    if (maxDimensions) {
+      return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${encodeURIComponent(url)}`
+    } else {
+      return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
+    }
   },
   mobileTouchPosition (event, type) {
     let touch
