@@ -11,6 +11,8 @@ let unsubscribes
 
 const dialogElement = ref(null)
 
+// TODO: sortitemsby (updatedAt default) , show assigned to me only, byTags[], byGroupSpaces[]
+
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   const globalActionUnsubscribe = globalStore.$onAction(
@@ -82,7 +84,6 @@ dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.lef
       label(:class="{ active: shouldShowCompleted }")
         input(type="checkbox" v-model="shouldShowCompleted")
         span Show Completed
-
 </template>
 
 <style lang="stylus">
