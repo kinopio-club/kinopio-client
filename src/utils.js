@@ -1447,6 +1447,7 @@ export default {
   },
   migrateConnectionTypes (space) { // temp migration added april 2026
     if (!space.connectionTypes) { return space }
+    space.connections = space.connections.filter(connection => Boolean(connection))
     space.connections = space.connections.map(connection => {
       const type = space.connectionTypes.find(type => type.id === connection?.connectionTypeId)
       const typeDataIsMissing = !connection.name && !connection.color

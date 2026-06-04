@@ -104,6 +104,8 @@ export const useGlobalStore = defineStore('global', {
     userNotifications: [],
     currentUserAffiliatePromoCode: '',
     lastInteractedConnectionColor: '',
+    sidebarTasksItemsBySpace: undefined,
+    sidebarTasksItemsScopeIsCurrentSpace: false,
 
     // drawing
     drawingEraserIsActive: false,

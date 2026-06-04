@@ -49,14 +49,12 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  itemsBySpace: [],
   taskFiltersIsVisible: false,
   isLoading: false,
   isError: false,
   filters: {
     shouldShowCompleted: false
   },
-  scopeIsCurrentSpace: true,
   cards: [],
   boxes: []
 })
@@ -83,10 +81,12 @@ const closeDialogs = () => {
 }
 const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
 const updateScopeIsCurrentSpace = async (value) => {
-  if (state.scopeIsCurrentSpace === value) { return }
-  state.scopeIsCurrentSpace = value
+  if (globalStore.sidebarTasksItemsScopeIsCurrentSpace === value) { return }
+  globalStore.sidebarTasksItemsScopeIsCurrentSpace = value
   updateItems()
 }
+const scopeIsCurrentSpace = computed(() => globalStore.sidebarTasksItemsScopeIsCurrentSpace)
+const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 
 // filters
 
@@ -112,7 +112,7 @@ const clearAllFilters = () => {
 // items
 
 const updateItems = () => {
-  if (state.scopeIsCurrentSpace) {
+  if (scopeIsCurrentSpace.value) {
     state.cards = cardStore.getCardsIsTodoSortedByY
     state.boxes = boxStore.getBoxesIsTodoSortedByY
   } else {
@@ -125,9 +125,11 @@ const updateItemsBySpace = async () => {
   try {
     state.isLoading = true
     state.isError = false
-    state.itemsBySpace = await apiStore.getUserTodos()
+    if (!itemsBySpace.value) {
+      globalStore.sidebarTasksItemsBySpace = await apiStore.getUserTodos()
+    }
     // update items
-    state.itemsBySpace.forEach(space => {
+    globalStore.sidebarTasksItemsBySpace.forEach(space => {
       state.cards = state.cards.concat(space.cards)
       state.boxes = state.boxes.concat(space.boxes)
     })
@@ -228,9 +230,9 @@ const itemsRemainingCount = computed(() => {
 
     .row
       .segmented-buttons
-        button(:class="{ active: state.scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(true)")
+        button(:class="{ active: scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(true)")
           span Current Space
-        button(:class="{ active: !state.scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
+        button(:class="{ active: !scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
           span All Spaces
 
     //- error
@@ -245,11 +247,11 @@ const itemsRemainingCount = computed(() => {
   //- items
   template(v-if="isTodoItems")
     //- current space
-    section.results-section(v-if="state.scopeIsCurrentSpace")
+    section.results-section(v-if="scopeIsCurrentSpace")
       ItemList(:cards="itemsFiltered(state.cards)" :boxes="itemsFiltered(state.boxes)" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
-      template(v-for="space in state.itemsBySpace" :key="space.id")
+      template(v-for="space in itemsBySpace" :key="space.id")
         ItemList(:space="space" :cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem" @selectSpace="selectSpace")
 
 </template>
