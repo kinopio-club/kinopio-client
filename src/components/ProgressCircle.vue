@@ -25,15 +25,13 @@ const state = reactive({
   strokeWidth: 1
 })
 
-const countLength = computed(() => (props.count || '').length)
-const dynamicWidth = computed(() => {
-  if (countLength.value >= 3) return props.width + 8
-  if (countLength.value >= 2) return props.width + 4
-  return props.width
-})
 const center = computed(() => props.width / 2)
-const radius = computed(() => (props.width - state.strokeWidth) / 2)
-const circumference = computed(() => 2 * Math.PI * radius.value)
+const radius = computed(() => {
+  return (props.width - state.strokeWidth) / 2
+})
+const circumference = computed(() => {
+  return 2 * Math.PI * radius.value
+})
 const percentage = computed(() => {
   const percent = Math.min(100, Math.max(0, (props.value / props.max) * 100))
   return Math.round(percent)
@@ -51,7 +49,7 @@ const colorClasses = computed(() => {
 
 <template lang="pug">
 .progress-circle(:class="colorClasses")
-  svg.circle-svg(:viewBox="`0 0 ${width} ${width}`" :width="dynamicWidth" :height="width" preserveAspectRatio="none")
+  svg.circle-svg(:viewBox="`0 0 ${width} ${width}`" :width="width" :height="width")
     circle.circle-background(
       :cx="center"
       :cy="center"
