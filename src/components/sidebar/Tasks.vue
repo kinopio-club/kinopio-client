@@ -150,6 +150,10 @@ const itemsFiltered = (value) => {
 
 // select
 
+const selectSpace = (space) => {
+  if (space.id === spaceStore.id) { return }
+  spaceStore.changeSpace(space)
+}
 const selectItem = (item) => {
   if (item.itemType === 'box') {
     selectBox(item)
@@ -196,7 +200,7 @@ const itemsRemainingCount = computed(() => {
 </script>
 
 <template lang="pug">
-.todos(v-if="props.visible" :style="styles" :class="{ overflow: !childDialogIsVisible }" @click.stop="closeDialogs")
+.tasks(v-if="props.visible" :style="styles" :class="{ overflow: !childDialogIsVisible }" @click.stop="closeDialogs")
   section
     .row.title-row
       div
@@ -233,8 +237,8 @@ const itemsRemainingCount = computed(() => {
     //- error
     .badge.error-badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
-    //- no items
-    section.subsection(v-if="!isTodoItems")
+    //- empty
+    section.subsection(v-if="!isTodoItems && !state.isLoading")
       span Prepend cards or boxes with
         span.badge.info [ ]
         span to create todo tasks that you can track here.
@@ -246,13 +250,14 @@ const itemsRemainingCount = computed(() => {
       ItemList(:cards="itemsFiltered(state.cards)" :boxes="itemsFiltered(state.boxes)" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
-      //- template v-for space
-      //- ItemList(:cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem")
+      template(v-for="space in state.itemsBySpace" :key="space.id")
+        ItemList(:space="space" :cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem" @selectSpace="selectSpace")
 
 </template>
 
 <style lang="stylus">
-.todos
+.tasks
+  overflow auto
   border-top 1px solid var(--primary-border)
   .button-wrap
     margin 0

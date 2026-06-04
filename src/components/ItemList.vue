@@ -5,17 +5,20 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import CardListItem from '@/components/CardListItem.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
-const emit = defineEmits(['selectItem'])
+const emit = defineEmits(['selectItem', 'selectSpace'])
 
 const props = defineProps({
   lines: {
@@ -33,7 +36,8 @@ const props = defineProps({
   cards: {
     type: Array,
     default: () => []
-  }
+  },
+  space: Object
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
@@ -98,6 +102,21 @@ const boxName = (box) => {
 const selectItem = (item) => {
   emit('selectItem', item)
 }
+const selectSpace = () => {
+  emit('selectSpace', props.space)
+}
+
+// space
+
+const isCurrentSpace = computed(() => props.space.id === spaceStore.id)
+const group = (groupId) => {
+  if (!groupId) { return }
+  return groupStore.getGroup(groupId)
+}
+const previewImage = (space) => {
+  if (!space.previewThumbnailImage) { return }
+  return space.previewThumbnailImage + `?date=${globalStore.sessionDate}`
+}
 
 // styles
 
@@ -113,7 +132,21 @@ const badgeColorClasses = (item) => {
 </script>
 
 <template lang="pug">
-ul.results-list.item-list(v-if="allItems.length")
+ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': props.space }")
+  //- space
+  li.space-list-item(v-if="props.space" @click.left="selectSpace" :class="{ active: isCurrentSpace }")
+    //- inbox
+    template(v-if="space.name === 'Inbox'")
+      img.icon.inbox-icon(src="@/assets/inbox.svg")
+    //- preview image
+    .preview-thumbnail-image-wrap(v-if="previewImage(props.space)")
+      img.preview-thumbnail-image(:src="previewImage(props.space)" loading="lazy")
+    //- group
+    template(v-if="group(space.groupId)")
+      GroupLabel(:group="group(space.groupId)")
+    .badge.secondary {{ space.name }}
+
+  //- items
   template(v-for="item in allItems" :key="item.id")
     //- box
     template(v-if="item.itemType === 'box'")
@@ -162,4 +195,16 @@ ul.results-list.item-list(v-if="allItems.length")
     width 100%
     height 1px
 
+  &.item-list-border:not(:first-child)
+    border-top 1px solid var(--primary-border)
+    padding-top 5px
+    margin-top 5px
+  .space-list-item
+    display flex
+    align-items center
+    .preview-thumbnail-image-wrap
+      margin-right 6px
+      margin-bottom -2px
+    .inbox-icon
+      margin-right 6px
 </style>
