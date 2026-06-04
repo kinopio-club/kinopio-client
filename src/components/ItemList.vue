@@ -171,7 +171,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     template(v-if="item.itemType === 'card'")
       CardListItem(:card="item" @selectCard="selectItem" tabindex="0" v-on:keyup.enter="selectItem(item)" :shouldHideDate="true")
 
-.badge.secondary(v-if="!allItems.length")
+.badge.secondary(v-if="!allItems.length && !props.space")
   span No items in this space yet
 </template>
 
