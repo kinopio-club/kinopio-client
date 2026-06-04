@@ -35,8 +35,38 @@ onMounted(() => {
       }
     }
   )
+  const cardActionUnsubscribe = cardStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'toggleCardChecked') {
+        await nextTick()
+        const cardId = args[0]
+        const updatedCard = cardStore.getCard(cardId)
+        state.cards = state.cards.map(card => {
+          if (card.id !== cardId) { return card }
+          card.name = updatedCard.name
+          return card
+        })
+      }
+    }
+  )
+  const boxActionUnsubscribe = boxStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'toggleBoxChecked') {
+        await nextTick()
+        const boxId = args[0]
+        const updatedBox = boxStore.getBox(boxId)
+        state.boxes = state.boxes.map(box => {
+          if (box.id !== boxId) { return box }
+          box.name = updatedBox.name
+          return box
+        })
+      }
+    }
+  )
   unsubscribes = () => {
     globalActionUnsubscribe()
+    cardActionUnsubscribe()
+    boxActionUnsubscribe()
   }
 })
 
