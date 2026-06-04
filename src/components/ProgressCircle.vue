@@ -44,6 +44,16 @@ const colorClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: props.backgroundColor })
   return classes
 })
+const countStyle = computed(() => {
+  const characters = props.count.length
+  if (characters >= 3) {
+    return {
+      fontSize: '7px',
+      verticalAlign: '1px'
+    }
+  }
+  return {}
+})
 
 </script>
 
@@ -68,7 +78,7 @@ const colorClasses = computed(() => {
       :style="{ transform: `rotate(-90deg)`, transformOrigin: 'center' }"
     )
   .count(v-if="props.count")
-    span {{ props.count }}
+    span(:style="countStyle") {{ props.count }}
 </template>
 
 <style lang="stylus" scoped>

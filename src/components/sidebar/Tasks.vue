@@ -26,6 +26,7 @@ let unsubscribes
 const resultsElement = ref(null)
 
 onMounted(() => {
+  updateItems()
   clearPreviousResultItem()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
@@ -55,11 +56,14 @@ const state = reactive({
   filters: {
     shouldShowCompleted: false
   },
-  scopeIsCurrentSpace: true
+  scopeIsCurrentSpace: true,
+  cards: [],
+  boxes: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    updateItems()
     clearPreviousResultItem()
   }
 })
@@ -78,107 +82,15 @@ const closeDialogs = () => {
   state.taskFiltersIsVisible = false
 }
 const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
-const updateScopeIsCurrentSpace = (value) => {
+const updateScopeIsCurrentSpace = async (value) => {
   if (state.scopeIsCurrentSpace === value) { return }
   state.scopeIsCurrentSpace = value
-  if (!value) {
-    updateItemsBySpace()
-  }
+  updateItems()
 }
-
-// items
-
-const updateItemsBySpace = async () => {
-  try {
-    state.isLoading = true
-    state.isError = false
-    state.itemsBySpace = await apiStore.getUserTodos()
-    console.log('🍒🍒🍒🍒', state.itemsBySpace)
-  } catch (error) {
-    console.error('🚒 updateItemsBySpace', error)
-    state.isError = true
-  }
-  state.isLoading = false
-}
-
-const allItems = computed(() => {
-  if (state.scopeIsCurrentSpace) {
-    return cards.value.concat(boxes.value)
-  } else {
-    let cards = []
-    let boxes = []
-    state.itemsBySpace.forEach(space => {
-      cards = cards.concat(space.cards)
-      boxes = boxes.concat(space.boxes)
-    })
-    console.log(cards, boxes, state.itemsBySpace)
-    return cards.concat(boxes)
-  }
-})
-const items = computed(() => cardsFiltered.value.concat(boxesFiltered.value))
-const isItems = computed(() => items.value.length)
-
-const selectItem = (item) => {
-  if (item.itemType === 'box') {
-    selectBox(item)
-  } else if (item.itemType === 'card') {
-    selectCard(item)
-  }
-}
-
-// cards
-
-const cards = computed(() => {
-  let results = cardStore.getCardsIsTodoSortedByY
-  results = utils.sortByDistanceFromOrigin(results)
-  return results
-})
-const cardsFiltered = computed(() => filterCompleted(cards.value))
-const selectCard = (card) => {
-  closeDialogs()
-  const isCardInCurrentSpace = card.spaceId === spaceStore.id
-  if (isCardInCurrentSpace) {
-    globalStore.updateFocusOnCardId(card.id)
-    globalStore.previousResultItem = card
-  }
-  // } else {
-  // selectSpaceCard(card) Search.vue
-  // }
-}
-
-// boxes
-
-const selectBox = (box) => {
-  closeDialogs()
-  globalStore.updateFocusOnBoxId(box.id)
-}
-const boxes = computed(() => {
-  let results = boxStore.getAllBoxes
-  results = utils.sortByDistanceFromOrigin(results)
-  results = results.filter(item => utils.checkboxFromString(item.name))
-  results = filterCompleted(results)
-  return results
-})
-const boxesFiltered = computed(() => filterCompleted(boxes.value))
-
-// progress
-
-const itemsCompleted = computed(() => {
-  return allItems.value.filter(item => utils.nameIsChecked(item.name))
-})
-const itemsCompletedPercent = computed(() => {
-  let value = allItems.value.length / items.value.length
-  value = Math.round(value * 100)
-  return `${items.value.length}/${items.value.length}, ${value}% Completed`
-})
-const itemsRemaningCount = computed(() => {
-  const value = allItems.value.filter(card => !utils.nameIsChecked(card.name))
-  return value.length.toString()
-})
 
 // filters
 
-const filterCompleted = (results) => {
+const filterResults = (results) => {
   if (!state.filters.shouldShowCompleted) {
     results = results.filter(item => utils.nameIsUnchecked(item.name))
   }
@@ -196,6 +108,91 @@ const updateShouldShowCompleted = (value) => {
 const clearAllFilters = () => {
   globalStore.triggerClearTaskFilters()
 }
+
+// items
+
+const updateItems = () => {
+  if (state.scopeIsCurrentSpace) {
+    state.cards = cardStore.getCardsIsTodoSortedByY
+    state.boxes = boxStore.getBoxesIsTodoSortedByY
+  } else {
+    updateItemsBySpace()
+  }
+}
+const updateItemsBySpace = async () => {
+  state.cards = []
+  state.boxes = []
+  try {
+    state.isLoading = true
+    state.isError = false
+    state.itemsBySpace = await apiStore.getUserTodos()
+    // update items
+    state.itemsBySpace.forEach(space => {
+      state.cards = state.cards.concat(space.cards)
+      state.boxes = state.boxes.concat(space.boxes)
+    })
+
+    console.log('🍒🍒🍒🍒', state.itemsBySpace, '☎️', state.cards, '🥇', state.boxes)
+  } catch (error) {
+    console.error('🚒 updateItemsBySpace', error)
+    state.isError = true
+  }
+  state.isLoading = false
+}
+const allItems = computed(() => {
+  return state.cards.concat(state.boxes)
+})
+const todoItems = computed(() => itemsFiltered(allItems.value))
+const isTodoItems = computed(() => todoItems.value.length)
+const itemsFiltered = (value) => {
+  return filterResults(value)
+}
+
+// select
+
+const selectItem = (item) => {
+  if (item.itemType === 'box') {
+    selectBox(item)
+  } else if (item.itemType === 'card') {
+    selectCard(item)
+  }
+}
+const selectCard = (card) => {
+  closeDialogs()
+  const isCardInCurrentSpace = card.spaceId === spaceStore.id
+  if (isCardInCurrentSpace) {
+    globalStore.updateFocusOnCardId(card.id)
+    globalStore.previousResultItem = card
+  }
+  // } else {
+  // selectSpaceCard(card) Search.vue
+  // TODO change space then focuse
+  // }
+}
+const selectBox = (box) => {
+  // if (isCardInCurrentSpace) {
+  closeDialogs()
+  globalStore.updateFocusOnBoxId(box.id)
+  // } else {
+  // TODO change space then focuse
+  // }
+}
+
+// progress
+
+const itemsCompleted = computed(() => {
+  return allItems.value.filter(item => utils.nameIsChecked(item.name))
+})
+const progressCircleTitle = computed(() => {
+  let value = todoItems.value.length / allItems.value.length
+  value = Math.round(value * 100)
+  return `${todoItems.value.length}/${allItems.value.length}, ${value}% Completed`
+})
+const itemsRemainingCount = computed(() => {
+  const value = allItems.value.filter(card => !utils.nameIsChecked(card.name))
+  return value.length.toString()
+})
+
 </script>
 
 <template lang="pug">
@@ -203,7 +200,7 @@ const clearAllFilters = () => {
   section
     .row.title-row
       div
-        ProgressCircle(v-if="isItems" :value="itemsCompleted.length" :max="allItems.length" :title="itemsCompletedPercent" :count="itemsRemaningCount")
+        ProgressCircle(v-if="isTodoItems" :value="itemsCompleted.length" :max="allItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
         span Tasks
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
@@ -237,19 +234,20 @@ const clearAllFilters = () => {
     .badge.error-badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     //- no items
-    section.subsection(v-if="!isItems")
+    section.subsection(v-if="!isTodoItems")
       span Prepend cards or boxes with
         span.badge.info [ ]
         span to create todo tasks that you can track here.
 
   //- items
-  template(v-if="isItems")
+  template(v-if="isTodoItems")
     //- current space
     section.results-section(v-if="state.scopeIsCurrentSpace")
-      ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
+      ItemList(:cards="itemsFiltered(state.cards)" :boxes="itemsFiltered(state.boxes)" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
-      ItemList(:cards="cardsFiltered" :boxes="boxesFiltered" @selectItem="selectItem")
+      //- template v-for space
+      //- ItemList(:cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem")
 
 </template>
 
