@@ -968,7 +968,7 @@ const validUrls = computed(() => {
 const validWebUrls = computed(() => {
   const urls = validUrls.value.filter(url => {
     const urlHasProtocol = utils.urlHasProtocol(url)
-    const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes('cdn.kinopio.club')
+    const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes(consts.cdnHost)
     const isSpace = utils.urlIsSpace(url)
     return urlHasProtocol && !isUpload && !isSpace
   })
