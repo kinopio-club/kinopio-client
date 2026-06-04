@@ -14,6 +14,8 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
+const blockedExtensions = ['.exe', '.msi', '.bat', '.ps1', '.sh', '.dmg', '.pkg']
+
 export const useUploadStore = defineStore('upload', {
   state: () => ({
     pendingUploads: [],
@@ -73,6 +75,16 @@ export const useUploadStore = defineStore('upload', {
         }
       }
     },
+    checkIfFileTypeBlocked (file) {
+      const name = file.name.toLowerCase()
+      const isBlocked = blockedExtensions.some(ext => name.endsWith(ext))
+      if (isBlocked) {
+        throw {
+          type: 'blockedFileType',
+          message: 'for security reasons, executable files cannot be uploaded'
+        }
+      }
+    },
     addImageDataUrl ({ file, cardId, spaceId }) {
       const fileType = file.type || utils.imageFileTypeFromName(file)
       const isImage = fileType.includes('image')
@@ -94,6 +106,7 @@ export const useUploadStore = defineStore('upload', {
       const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
       this.checkIfFileTooBig(file)
+      this.checkIfFileTypeBlocked(file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
@@ -170,6 +183,13 @@ export const useUploadStore = defineStore('upload', {
       if (isOutsideSpace) {
         position = utils.cursorPositionInPage(event)
         globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+        return
+      }
+      // check blocked file types
+      const hasBlockedFile = files.find(file => blockedExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
+      if (hasBlockedFile) {
+        globalStore.addNotificationWithPosition({ message: 'File Type Blocked', position, type: 'danger', layer: 'space', icon: 'cancel' })
+        globalStore.addNotification({ message: 'Executable files cannot be uploaded', type: 'danger' })
         return
       }
       // check sizeLimit
