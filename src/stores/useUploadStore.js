@@ -14,6 +14,8 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 
+const blockedExtensions = ['.exe', '.msi', '.bat', '.ps1', '.sh', '.dmg', '.pkg']
+
 export const useUploadStore = defineStore('upload', {
   state: () => ({
     pendingUploads: [],
@@ -74,10 +76,12 @@ export const useUploadStore = defineStore('upload', {
       }
     },
     checkIfFileTypeBlocked (file) {
-      if (file.name.toLowerCase().endsWith('.exe')) {
+      const name = file.name.toLowerCase()
+      const isBlocked = blockedExtensions.some(ext => name.endsWith(ext))
+      if (isBlocked) {
         throw {
           type: 'blockedFileType',
-          message: 'for security reasons, .exe files cannot be uploaded'
+          message: 'for security reasons, executable files cannot be uploaded'
         }
       }
     },
@@ -182,10 +186,10 @@ export const useUploadStore = defineStore('upload', {
         return
       }
       // check blocked file types
-      const hasBlockedFile = files.find(file => file.name.toLowerCase().endsWith('.exe'))
+      const hasBlockedFile = files.find(file => blockedExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
       if (hasBlockedFile) {
         globalStore.addNotificationWithPosition({ message: 'File Type Blocked', position, type: 'danger', layer: 'space', icon: 'cancel' })
-        globalStore.addNotification({ message: '.exe files cannot be uploaded', type: 'danger' })
+        globalStore.addNotification({ message: 'Executable files cannot be uploaded', type: 'danger' })
         return
       }
       // check sizeLimit
