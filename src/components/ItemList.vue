@@ -224,6 +224,6 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
   .mark-all-checked-button-wrap
     position absolute
     left initial
-    right 4px
+    right 7px
     z-index 1
 </style>
