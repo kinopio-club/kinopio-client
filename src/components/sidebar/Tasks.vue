@@ -283,7 +283,7 @@ const itemsRemainingCount = computed(() => {
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem" @selectSpace="selectSpace")
+        ItemList(:space="space" :cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
 
 </template>
 

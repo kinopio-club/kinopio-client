@@ -39,7 +39,8 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  space: Object
+  space: Object,
+  shouldShowMarkAllComplete: Boolean
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
@@ -142,7 +143,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
   //- space
   li.space-list-item(v-if="props.space" @click.left="selectSpace" :class="{ active: isCurrentSpace }")
     //- complete all
-    .mark-all-checked-button-wrap(v-if="isCurrentSpace")
+    .mark-all-checked-button-wrap(v-if="isCurrentSpace && props.shouldShowMarkAllComplete")
       button.small-button(title="Mark All Complete" @click.stop="markAllSpaceItemsChecked")
         img.icon.checkmark(src="@/assets/checkmark.svg")
         span All
