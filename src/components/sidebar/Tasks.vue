@@ -20,6 +20,7 @@ const boxStore = useBoxStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const userStore = useUserStore()
 
 let unsubscribes
 
@@ -97,6 +98,11 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const spaceIsLoaded = computed(() => !globalStore.isLoadingSpace)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const triggerSignUpOrInIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
+}
 
 const clearPreviousResultItem = () => {
   globalStore.clearPreviousResultItem()
@@ -151,6 +157,7 @@ const updateItems = () => {
   }
 }
 const updateItemsBySpace = async () => {
+  if (!currentUserIsSignedIn.value) { return }
   state.cards = []
   state.boxes = []
   try {
@@ -266,13 +273,18 @@ const itemsRemainingCount = computed(() => {
         button(:class="{ active: !scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
           span All Spaces
 
+    section.subsection(v-if="!currentUserIsSignedIn && !scopeIsCurrentSpace")
+      .row.badge.info
+        span Sign Up or In to search your spaces
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
     //- error
     .badge.error-badge.danger(v-if="state.isError")
       span (シ_ _)シ Something went wrong, Please try again or contact support
     //- empty
-    section.subsection(v-if="!isTodoItems && !state.isLoading")
+    section.subsection.tips(v-if="!isTodoItems && !state.isLoading")
       span Prepend cards or boxes with
-        span.badge.info [ ]
+        span.badge.info.brackers [ ]
         span to create todo tasks that you can track here.
 
   //- items
@@ -299,8 +311,9 @@ const itemsRemainingCount = computed(() => {
   .subsection
     padding 4px
     border-radius var(--entity-radius)
-    .badge
-      white-space nowrap
+    &.tips
+      .badge
+        white-space nowrap
   label
     .user
       vertical-align -3px

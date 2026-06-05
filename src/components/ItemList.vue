@@ -249,4 +249,6 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     z-index 1
   .confirmation-row
     justify-content flex-end
+  .card-image
+    margin-right 5px
 </style>

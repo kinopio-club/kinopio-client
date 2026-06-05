@@ -267,7 +267,7 @@ const removeSpaceGroup = (group) => {
         placeholder="name"
         v-model="spaceName"
         @keydown.enter.stop.prevent="closeAllDialogs"
-        @click.stop
+        @click.stop="closeDialogsAndEmit"
       )
       .textarea-loader(v-if="isLoadingSpace")
         Loader(:visible="true")
