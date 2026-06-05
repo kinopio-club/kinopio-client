@@ -43,6 +43,10 @@ const props = defineProps({
   shouldShowMarkAllComplete: Boolean
 })
 
+const state = reactive({
+  confirmMarkAllCompleteIsVisible: false
+})
+
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 
 // adopted from CardList.vue
@@ -107,6 +111,7 @@ const selectItem = (item) => {
 }
 const selectSpace = () => {
   emit('selectSpace', props.space)
+  updateConfirmMarkAllCompleteIsVisible(false)
 }
 
 // space
@@ -123,6 +128,13 @@ const previewImage = (space) => {
 const markAllSpaceItemsChecked = () => {
   cardStore.markAllCheckboxCardsChecked()
   boxStore.markAllCheckboxBoxesChecked()
+  updateConfirmMarkAllCompleteIsVisible(false)
+}
+const toggleConfirmMarkAllCompleteIsVisible = () => {
+  state.confirmMarkAllCompleteIsVisible = !state.confirmMarkAllCompleteIsVisible
+}
+const updateConfirmMarkAllCompleteIsVisible = (value) => {
+  state.confirmMarkAllCompleteIsVisible = value
 }
 
 // styles
@@ -142,11 +154,6 @@ const badgeColorClasses = (item) => {
 ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': props.space }")
   //- space
   li.space-list-item(v-if="props.space" @click.left="selectSpace" :class="{ active: isCurrentSpace }")
-    //- complete all
-    .mark-all-checked-button-wrap(v-if="isCurrentSpace && props.shouldShowMarkAllComplete")
-      button.small-button(title="Mark All Complete" @click.stop="markAllSpaceItemsChecked")
-        img.icon.checkmark(src="@/assets/checkmark.svg")
-        span All
     //- inbox
     template(v-if="space.name === 'Inbox'")
       img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -157,6 +164,20 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     template(v-if="group(space.groupId)")
       GroupLabel(:group="group(space.groupId)")
     .badge.secondary {{ space.name }}
+
+    //- complete all
+    .mark-all-checked-button-wrap(v-if="isCurrentSpace && props.shouldShowMarkAllComplete")
+      button.small-button(title="Mark All Complete" @click.stop="toggleConfirmMarkAllCompleteIsVisible" :class="{ active: state.confirmMarkAllCompleteIsVisible }")
+        img.icon.checkmark(src="@/assets/checkmark.svg")
+        span All
+
+  section.subsection(v-if="state.confirmMarkAllCompleteIsVisible" @click.stop)
+    .row.confirmation-row
+      button.small-button(@click="updateConfirmMarkAllCompleteIsVisible(false)")
+        img.icon.cancel(src="@/assets/add.svg")
+      button.small-button.danger(@click.stop="markAllSpaceItemsChecked")
+        img.icon.checkmark(src="@/assets/checkmark.svg")
+        span Mark All Complete
 
   //- items
   template(v-for="item in allItems" :key="item.id")
@@ -226,4 +247,6 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     left initial
     right 7px
     z-index 1
+  .confirmation-row
+    justify-content flex-end
 </style>
