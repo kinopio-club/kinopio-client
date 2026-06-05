@@ -226,4 +226,6 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     left initial
     right 7px
     z-index 1
+  .card-image
+    margin-right 5px
 </style>

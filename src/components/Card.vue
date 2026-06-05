@@ -1461,6 +1461,7 @@ const remoteCardDetailsVisibleColor = computed(() => {
   }
 })
 const showCardDetails = (event) => {
+  if (globalStore.currentUserIsResizingSidebar || globalStore.currentUserIsResizingCardDetails) { return }
   if (globalStore.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPaintSelecting) { return }
