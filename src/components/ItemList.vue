@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
@@ -14,6 +15,7 @@ import GroupLabel from '@/components/GroupLabel.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
+const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
@@ -117,6 +119,10 @@ const previewImage = (space) => {
   if (!space.previewThumbnailImage) { return }
   return space.previewThumbnailImage + `?date=${globalStore.sessionDate}`
 }
+const markAllSpaceItemsChecked = () => {
+  cardStore.markAllCheckboxCardsChecked()
+  boxStore.markAllCheckboxBoxesChecked()
+}
 
 // styles
 
@@ -135,6 +141,11 @@ const badgeColorClasses = (item) => {
 ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': props.space }")
   //- space
   li.space-list-item(v-if="props.space" @click.left="selectSpace" :class="{ active: isCurrentSpace }")
+    //- complete all
+    .mark-all-checked-button-wrap(v-if="isCurrentSpace")
+      button.small-button(title="Mark All Complete" @click.stop="markAllSpaceItemsChecked")
+        img.icon.checkmark(src="@/assets/checkmark.svg")
+        span All
     //- inbox
     template(v-if="space.name === 'Inbox'")
       img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -207,4 +218,11 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
       margin-bottom -2px
     .inbox-icon
       margin-right 6px
+  .icon.checkmark
+    vertical-align 2px
+  .mark-all-checked-button-wrap
+    position absolute
+    left initial
+    right 4px
+    z-index 1
 </style>

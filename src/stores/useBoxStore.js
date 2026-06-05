@@ -459,6 +459,15 @@ export const useBoxStore = defineStore('boxes', {
       await apiStore.updateBox(update)
       this.toggleBoxChecked(box.id, value)
     },
+    markAllCheckboxBoxesChecked () {
+      const boxes = this.getAllBoxes
+      boxes.forEach(box => {
+        const isUnchecked = box.name.startsWith('[] ')
+        if (isUnchecked) {
+          this.toggleBoxChecked(box.id, true)
+        }
+      })
+    },
 
     // contained items
 

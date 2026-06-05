@@ -113,6 +113,7 @@ const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
 const updateScopeIsCurrentSpace = async (value) => {
   if (globalStore.sidebarTasksItemsScopeIsCurrentSpace === value) { return }
   globalStore.sidebarTasksItemsScopeIsCurrentSpace = value
+  globalStore.sidebarTasksItemsBySpace = null
   updateItems()
 }
 const scopeIsCurrentSpace = computed(() => globalStore.sidebarTasksItemsScopeIsCurrentSpace)
