@@ -457,7 +457,6 @@ export const useBoxStore = defineStore('boxes', {
         spaceId
       }
       await apiStore.updateBox(update)
-      this.toggleBoxChecked(box.id, value)
     },
     markAllCheckboxBoxesChecked () {
       const boxes = this.getAllBoxes

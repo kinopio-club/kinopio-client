@@ -497,6 +497,22 @@ export const useGlobalStore = defineStore('global', {
     updateSessionDate () {
       this.sessionDate = new Date().toISOString()
     },
+    updateSidebarTasksItem  ({ spaceId, itemId, value }) {
+      this.sidebarTasksItemsBySpace = this.sidebarTasksItemsBySpace.map(space => {
+        if (space.id !== spaceId) { return space }
+        // update card
+        space.cards = space.cards.map(card => {
+          if (card.id !== itemId) { return card }
+          return utils.updateCheckboxItemName(card, value)
+        })
+        // update box
+        space.boxes = space.boxes.map(box => {
+          if (box.id !== itemId) { return box }
+          return utils.updateCheckboxItemName(box, value)
+        })
+        return space
+      })
+    },
 
     // subscribe triggers
 

@@ -860,7 +860,6 @@ export const useCardStore = defineStore('cards', {
         spaceId
       }
       await apiStore.updateCards([update])
-      this.toggleCardChecked(card.id, value)
     },
     markAllCheckboxCardsChecked () {
       const cards = this.getAllCards

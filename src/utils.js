@@ -2515,6 +2515,18 @@ export default {
     match = name.match(done)
     if (match) { return match[0] }
   },
+  updateCheckboxItemName (item, value) {
+    let name = item.name
+    const checkbox = this.checkboxFromString(name)
+    name = name.replace(checkbox, '')
+    if (value) {
+      name = `[x] ${name}`
+    } else {
+      name = `[] ${name}`
+    }
+    item.name = name
+    return item
+  },
 
   // Paste Card ✂️
 

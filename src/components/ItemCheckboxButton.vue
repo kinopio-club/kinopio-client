@@ -48,6 +48,11 @@ const updateItemChecked = (value) => {
     }
   // update item in other space
   } else {
+    globalStore.updateSidebarTasksItem({
+      spaceId: item.value.spaceId,
+      itemId: item.value.id,
+      value
+    })
     if (props.card) {
       cardStore.toggleOtherSpaceCardChecked(props.card, value)
     } else if (props.box) {
