@@ -18,6 +18,7 @@ import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Tag from '@/components/Tag.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import AtPicker from '@/components/dialogs/AtPicker.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
@@ -1558,7 +1559,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      dialog.at-picker(v-if="state.at.pickerIsVisible" :open="state.at.pickerIsVisible" :style="state.at.pickerPosition" :cursorPosition="state.cursorPosition" :search="state.at.pickerSearch")
+      AtPicker(
+        :visible="state.at.pickerIsVisible"
+        :position="state.at.pickerPosition"
+        :cursorPosition="state.cursorPosition"
+        :search="state.at.pickerSearch"
+        @closeDialog="hideAtPicker"
+      )
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")
           span ?
