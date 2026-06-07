@@ -161,7 +161,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
 
   UserList(
     :users="groupUsers"
-    :selectedUser="selectedUser"
+    :selectedUsers="[selectedUser]"
     @selectUser="toggleUserDetails"
     :isClickable="true"
     :showGroupUserActions="true"

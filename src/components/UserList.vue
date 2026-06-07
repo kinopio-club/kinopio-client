@@ -42,7 +42,7 @@ const emit = defineEmits(['selectUser', 'childDialogIsVisible'])
 
 const props = defineProps({
   users: Array,
-  selectedUser: Object,
+  selectedUsers: Array,
   showCollaboratorActions: Boolean,
   showGroupUserActions: Boolean,
   group: Object,
@@ -124,9 +124,12 @@ const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
 const userIsSelected = (user) => {
-  if (!utils.objectHasKeys(props.selectedUser)) { return }
-  const userId = props.selectedUser.id || globalStore.userDetailsUser.id
-  return userId === user.id
+  if (!props.selectedUsers?.length) { return }
+  return props.selectedUsers.some(selectedUser => {
+    if (!utils.objectHasKeys(selectedUser)) { return false }
+    const userId = selectedUser.id || globalStore.userDetailsUser.id
+    return userId === user.id
+  })
 }
 
 // space

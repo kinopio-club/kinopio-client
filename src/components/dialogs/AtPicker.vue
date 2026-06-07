@@ -63,9 +63,9 @@ const selectUser = (user) => {
   console.log('🍒🍒', user)
 }
 
-const selectedUser = computed(() => {
-  return { id: 'x' }
-}) // if parentCard @user is user
+const selectedUsers = computed(() => {
+  return [{ id: 'x' }] // return card @users
+})
 
 watch(() => props.search, async (value) => {
   console.log(props.search, users.value)
@@ -82,7 +82,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
 
   UserList(
     :users="users"
-    :selectedUser="selectedUser"
+    :selectedUsers="selectedUsers"
     @selectUser="selectUser"
     :isClickable="true"
     :shouldHideOptionsButton="true"
