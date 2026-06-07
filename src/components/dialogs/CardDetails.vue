@@ -130,6 +130,11 @@ const state = reactive({
     pickerPosition: {},
     pickerSearch: ''
   },
+  at: {
+    pickerIsVisible: false,
+    pickerPosition: {},
+    pickerSearch: ''
+  },
   notifiedMembers: false,
   formats: {
     image: '',
@@ -167,7 +172,7 @@ watch(() => userStore.cardDetailsResizeWidth, (value, prevValue) => {
 
 const parentElement = computed(() => dialogElement.value)
 const closeCardAndFocus = (event) => {
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
   if (pickersIsVisible) {
     hidePickers()
     return
@@ -532,6 +537,10 @@ const clickName = (event) => {
     showSpacePicker()
     updateSpacePickerSearch()
     event.stopPropagation()
+  } else if (isCursorInsideAtCommand()) {
+    showAtPicker()
+    updateAtPickerSearch()
+    event.stopPropagation()
   }
 }
 
@@ -793,6 +802,7 @@ const setSelectionRange = (start, end) => {
 const hidePickers = () => {
   hideTagPicker()
   hideSpacePicker()
+  hideAtPicker()
 }
 const hideTagPicker = () => {
   state.tag.pickerIsVisible = false
@@ -805,14 +815,16 @@ const hideSpacePicker = () => {
 const checkIfShouldShowPicker = () => {
   checkIfShouldShowTagPicker()
   checkIfShouldShowSpacePicker()
+  checkIfShouldShowAtPicker()
 }
 const checkIfShouldHidePicker = () => {
   checkIfShouldHideTagPicker()
   checkIfShouldHideSpacePicker()
+  checkIfShouldHideAtPicker()
 }
 const triggerPickerNavigation = (event) => {
   const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
   const shouldTrigger = pickerIsVisible && !modifierKey
   if (shouldTrigger) {
     globalStore.triggerPickerNavigationKey(event.key)
@@ -821,7 +833,7 @@ const triggerPickerNavigation = (event) => {
 }
 const triggerPickerSelectItem = (event) => {
   const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
   const shouldTrigger = pickerIsVisible && !modifierKey
   if (shouldTrigger) {
     globalStore.triggerPickerSelect()
@@ -847,6 +859,8 @@ const updatePickerSearch = () => {
     updateTagPickerSearch()
   } else if (state.space.pickerIsVisible) {
     updateSpacePickerSearch()
+  } else if (state.at.pickerIsVisible) {
+    updateAtPickerSearch()
   }
 }
 
@@ -1210,7 +1224,7 @@ const addListCard = () => {
 // 🎹 enter
 const handleEnterKey = (event) => {
   const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
   console.info('🎹 enter', {
     shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
     pickersIsVisible
@@ -1296,12 +1310,17 @@ const updatePicker = (event) => {
   }
   if (utils.hasBlankCharacters(key)) {
     hideSpacePicker()
+    hideAtPicker()
   } else if (key === '/' && previousCharacterIsBlank) {
     showSpacePicker()
+  } else if (key === '@' && previousCharacterIsBlank) {
+    showAtPicker()
   } else if (cursorStart === 0) {
     return
   } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
     showSpacePicker()
+  } else if (keyIsLettterOrNumber && isCursorInsideAtCommand()) {
+    showAtPicker()
   } else if (key === '[' && previousCharacter === '[') {
     showTagPicker()
     addTagClosingBrackets()
@@ -1386,6 +1405,68 @@ const checkIfShouldShowSpacePicker = () => {
     showSpacePicker()
   } else {
     hideSpacePicker()
+  }
+}
+
+// at picker
+
+const showAtPicker = () => {
+  closeDialogs()
+  const nameRect = nameElement.value.getBoundingClientRect()
+  state.at.pickerPosition = {
+    top: nameRect.height - 2
+  }
+  state.at.pickerIsVisible = true
+}
+const hideAtPicker = () => {
+  state.at.pickerSearch = ''
+  state.at.pickerIsVisible = false
+}
+const atText = () => {
+  const cursorStart = selectionStartPosition()
+  const start = atTextToCursor()
+  let end = name.value.substring(cursorStart, name.value.length)
+  end = utils.splitByBlankCharacters(end)[0]
+  return start + end
+}
+const atTextToCursor = () => {
+  const cursorStart = selectionStartPosition()
+  const textPosition = atTextPosition()
+  const text = name.value.substring(textPosition, cursorStart)
+  return text
+}
+const atTextPosition = () => {
+  const cursorStart = selectionStartPosition()
+  const text = name.value.substring(0, cursorStart)
+  const textPosition = text.lastIndexOf('@')
+  if (textPosition === -1) { return }
+  return textPosition
+}
+const isCursorInsideAtCommand = () => {
+  const text = atTextToCursor()
+  if (utils.hasBlankCharacters(text)) { return }
+  const characterBeforeAt = name.value.charAt(atTextPosition() - 1)
+  if (text && !characterBeforeAt) { return true }
+  const characterBeforeAtIsBlank = utils.hasBlankCharacters(characterBeforeAt)
+  const textIsValid = !utils.hasBlankCharacters(text)
+  return textIsValid && characterBeforeAtIsBlank
+}
+const updateAtPickerSearch = () => {
+  if (!state.at.pickerIsVisible) { return }
+  const text = atText()
+  state.at.pickerSearch = text.substring(1, text.length)
+}
+const checkIfShouldHideAtPicker = () => {
+  if (!state.at.pickerIsVisible) { return }
+  if (!isCursorInsideAtCommand()) {
+    hideAtPicker()
+  }
+}
+const checkIfShouldShowAtPicker = () => {
+  if (isCursorInsideAtCommand()) {
+    showAtPicker()
+  } else {
+    hideAtPicker()
   }
 }
 
@@ -1477,6 +1558,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
+      dialog.at-picker(v-if="state.at.pickerIsVisible" :open="state.at.pickerIsVisible" :style="state.at.pickerPosition" :cursorPosition="state.cursorPosition" :search="state.at.pickerSearch")
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")
           span ?
