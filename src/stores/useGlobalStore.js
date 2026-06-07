@@ -1015,6 +1015,7 @@ export const useGlobalStore = defineStore('global', {
       zItemTypes.forEach(itemType => {
         newItems[itemType].map(item => {
           item.z += 1
+          item.listId = null // prevent new cards from returning to list
           return item
         })
       })
