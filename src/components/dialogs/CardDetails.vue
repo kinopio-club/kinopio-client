@@ -1412,7 +1412,9 @@ const checkIfShouldShowSpacePicker = () => {
 // at picker
 
 const showAtPicker = () => {
-  closeDialogs()
+  if (!state.at.pickerIsVisible) {
+    closeDialogs()
+  }
   const nameRect = nameElement.value.getBoundingClientRect()
   state.at.pickerPosition = {
     top: nameRect.height - 2

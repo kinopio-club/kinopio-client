@@ -63,7 +63,9 @@ const selectUser = (user) => {
   console.log('🍒🍒', user)
 }
 
-const selectedUser = computed(() => false) // if parentCard @user is user
+const selectedUser = computed(() => {
+  return { id: 'x' }
+}) // if parentCard @user is user
 
 watch(() => props.search, async (value) => {
   console.log(props.search, users.value)
