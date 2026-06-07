@@ -46,7 +46,8 @@ const props = defineProps({
   showCollaboratorActions: Boolean,
   showGroupUserActions: Boolean,
   group: Object,
-  filterPlaceholder: String
+  filterPlaceholder: String,
+  shouldHideOptionsButton: Boolean
 })
 const state = reactive({
   filter: '',
@@ -239,7 +240,7 @@ const removeGroupUser = async (event, user) => {
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
         //- options button
-        .button-wrap.options-button-wrap
+        .button-wrap.options-button-wrap(v-if="!props.shouldHideOptionsButton")
           button.small-button(@click.stop="toggleOptionsIsVisibleForUser(user)" :class="{active: isOptionsIsVisibleForUser(user)}")
             span.options-button-text …
 

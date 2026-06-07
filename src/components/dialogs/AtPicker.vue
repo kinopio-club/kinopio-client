@@ -3,11 +3,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -51,12 +54,37 @@ const styles = computed(() => {
     maxHeight: state.dialogHeight + 'px'
   }
 })
+
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const users = computed(() => spaceStore.getSpaceAndGroupMembers)
+const filteredUsers = computed(() => []) // user names filtered by search
+
+const selectUser = (user) => {
+  console.log('🍒🍒', user)
+}
+
+const selectedUser = computed(() => false) // if parentCard @user is user
+
+watch(() => props.search, async (value) => {
+  console.log(props.search, users.value)
+})
+
 </script>
 
 <template lang="pug">
-dialog.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="styles")
-  section.title-section
-    p At Picker
+dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="styles")
+  section.info-section(v-if="!props.search && currentUserIsSignedIn")
+    p
+      img.icon.search(src="@/assets/search.svg")
+      span Type to search users
+
+  UserList(
+    :users="users"
+    :selectedUser="selectedUser"
+    @selectUser="selectUser"
+    :isClickable="true"
+    :shouldHideOptionsButton="true"
+  )
 </template>
 
 <style lang="stylus">
