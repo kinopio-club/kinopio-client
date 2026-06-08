@@ -1795,6 +1795,12 @@ export default {
       })
       card.id = newId
       card.userId = userId
+      // update @mentions
+      card.atMentionUsers = card.atMentionUsers.map(value => {
+        value.id = nanoid()
+        value.cardId = newId
+        return value
+      })
       return card
     })
     boxes = boxes.map(box => {
