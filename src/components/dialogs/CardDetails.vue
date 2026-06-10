@@ -1294,72 +1294,6 @@ const addCommentClosingBrackets = async () => {
   }
 }
 
-// Pickers
-
-const updatePicker = (event) => {
-  const cursorStart = selectionStartPosition()
-  const previousCharacter = name.value[cursorStart - 1]
-  const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
-  const key = event.key
-  const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
-  const keyIsLettterOrNumber = key.length === 1
-  const isInsideTagBrackets = isCursorInsideTagBrackets()
-  const isInsideSlashCommand = isCursorInsideSlashCommand()
-  if (keyIsArrowUpOrDown) { return }
-  if (key === '(') {
-    addCommentClosingBrackets()
-  }
-  if (utils.hasBlankCharacters(key)) {
-    hideSpacePicker()
-    hideAtPicker()
-  } else if (key === '/' && previousCharacterIsBlank) {
-    showSpacePicker()
-  } else if (key === '@' && previousCharacterIsBlank) {
-    showAtPicker()
-  } else if (cursorStart === 0) {
-    return
-  } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
-    showSpacePicker()
-  } else if (keyIsLettterOrNumber && isCursorInsideAtCommand()) {
-    showAtPicker()
-  } else if (key === '[' && previousCharacter === '[') {
-    showTagPicker()
-    addTagClosingBrackets()
-  } else if (keyIsLettterOrNumber && isInsideTagBrackets) {
-    showTagPicker()
-  }
-  checkIfIsInsertLineBreak(event)
-}
-const isCursorInsideSlashCommand = () => {
-  const text = slashTextToCursor()
-  if (utils.hasBlankCharacters(text)) { return }
-  const characterBeforeSlash = name.value.charAt(slashTextPosition() - 1)
-  if (text && !characterBeforeSlash) { return true }
-  const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
-  const textIsValid = !utils.hasBlankCharacters(text)
-  return textIsValid && characterBeforeSlashIsBlank
-}
-const replaceSlashCommandWithSpaceUrl = async (space) => {
-  let newName = card.value.name
-  let position = slashTextPosition()
-  const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
-  const start = newName.substring(0, position)
-  const end = newName.substring(position + slashText().length, newName.length)
-  newName = start + spaceUrl + end
-  updateCardName(newName)
-  position = position + spaceUrl.length + 1
-  hideSpacePicker()
-  await nextTick()
-  focusName(position)
-  globalStore.shouldPreventNextEnterKey = false
-  const update = {
-    id: card.value.id,
-    shouldShowOtherSpacePreviewImage: true
-  }
-  cardStore.updateCard(update)
-  textareaSizes()
-}
-
 // space picker
 
 const showSpacePicker = () => {
@@ -1395,6 +1329,15 @@ const updateSpacePickerSearch = () => {
   const text = slashText()
   state.space.pickerSearch = text.substring(1, text.length)
 }
+const isCursorInsideSlashCommand = () => {
+  const text = slashTextToCursor()
+  if (utils.hasBlankCharacters(text)) { return }
+  const characterBeforeSlash = name.value.charAt(slashTextPosition() - 1)
+  if (text && !characterBeforeSlash) { return true }
+  const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
+  const textIsValid = !utils.hasBlankCharacters(text)
+  return textIsValid && characterBeforeSlashIsBlank
+}
 const checkIfShouldHideSpacePicker = () => {
   if (!state.space.pickerIsVisible) { return }
   if (!isCursorInsideSlashCommand()) {
@@ -1408,8 +1351,28 @@ const checkIfShouldShowSpacePicker = () => {
     hideSpacePicker()
   }
 }
+const replaceSlashCommandWithSpaceUrl = async (space) => {
+  let newName = card.value.name
+  let position = slashTextPosition()
+  const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
+  const start = newName.substring(0, position)
+  const end = newName.substring(position + slashText().length, newName.length)
+  newName = start + spaceUrl + end
+  updateCardName(newName)
+  position = position + spaceUrl.length + 1
+  hideSpacePicker()
+  await nextTick()
+  focusName(position)
+  globalStore.shouldPreventNextEnterKey = false
+  const update = {
+    id: card.value.id,
+    shouldShowOtherSpacePreviewImage: true
+  }
+  cardStore.updateCard(update)
+  textareaSizes()
+}
 
-// at picker
+// @mention picker
 
 const showAtPicker = () => {
   if (!state.at.pickerIsVisible) {
@@ -1471,6 +1434,76 @@ const checkIfShouldShowAtPicker = () => {
   } else {
     hideAtPicker()
   }
+}
+const updateAtUserMentions = (user, userString) => {
+  const update = {
+    id: card.value.id,
+    atUserMentions: [{
+      id: nanoid(),
+      cardId: card.value.id,
+      userId: user.id,
+      stringMatch: userString
+    }]
+  }
+  cardStore.updateCard(update)
+}
+const replaceAtTextWithUserMention = async (event, user) => {
+  hideAtPicker()
+  let newName = card.value.name
+  let position = atTextPosition()
+  let userString = '@' + utils.normalizeString(user.name)
+  if (!user.name) {
+    userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
+  }
+  const start = newName.substring(0, position)
+  const end = newName.substring(position + slashText().length, newName.length)
+  newName = start + userString + end
+  updateCardName(newName)
+  position = position + userString.length + 1
+  hideSpacePicker()
+  await nextTick()
+  focusName(position)
+  globalStore.shouldPreventNextEnterKey = false
+  updateAtUserMentions(user, userString)
+  textareaSizes()
+}
+
+// All Pickers
+
+const updatePicker = (event) => {
+  const cursorStart = selectionStartPosition()
+  const previousCharacter = name.value[cursorStart - 1]
+  const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
+  const key = event.key
+  const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
+  const keyIsLettterOrNumber = key.length === 1
+  const isInsideTagBrackets = isCursorInsideTagBrackets()
+  const isInsideSlashCommand = isCursorInsideSlashCommand()
+  const isInsideAtMention = isCursorInsideAtCommand()
+  if (keyIsArrowUpOrDown) { return }
+  if (key === '(') {
+    addCommentClosingBrackets()
+  }
+  if (utils.hasBlankCharacters(key)) {
+    hideSpacePicker()
+    hideAtPicker()
+  } else if (key === '/' && previousCharacterIsBlank) {
+    showSpacePicker()
+  } else if (key === '@' && previousCharacterIsBlank) {
+    showAtPicker()
+  } else if (cursorStart === 0) {
+    return
+  } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
+    showSpacePicker()
+  } else if (keyIsLettterOrNumber && isCursorInsideAtCommand()) {
+    showAtPicker()
+  } else if (key === '[' && previousCharacter === '[') {
+    showTagPicker()
+    addTagClosingBrackets()
+  } else if (keyIsLettterOrNumber && isInsideTagBrackets) {
+    showTagPicker()
+  }
+  checkIfIsInsertLineBreak(event)
 }
 
 // touch mobile
@@ -1567,7 +1600,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :cursorPosition="state.cursorPosition"
         :search="state.at.pickerSearch"
         @closeDialog="hideAtPicker"
+        @selectUser="replaceAtTextWithUserMention"
       )
+        //- TODO ^ @selectTimer
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")
           span ?
@@ -1696,7 +1731,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
       template(v-if="state.error.unknownUploadError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ItemDetailsDebug(:item="card" :keys="['y', 'yDisplay']")
+      ItemDetailsDebug(:item="card" :keys="['atUserMentions']")
     CardDetailsResize
 </template>
 

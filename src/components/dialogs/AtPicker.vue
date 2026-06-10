@@ -21,7 +21,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['closeDialog'])
+const emit = defineEmits(['closeDialog', 'selectUser']) // TODO selectTimer
 
 const props = defineProps({
   visible: Boolean,
@@ -59,8 +59,8 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const users = computed(() => spaceStore.getSpaceAndGroupMembers)
 const filteredUsers = computed(() => []) // user names filtered by search
 
-const selectUser = (user) => {
-  console.log('🍒🍒', user)
+const selectUser = (event, user) => {
+  emit('selectUser', event, user)
 }
 
 const selectedUsers = computed(() => {
