@@ -96,18 +96,20 @@ export const useStickyCard = ({ card, cardElement, x, y, shouldNotStick }) => {
     // larger sizes have stick less
     let stretchResistance // higher resistance moves less
     const area = width * height
-    switch (true) {
-      case area > 1000000:
-        stretchResistance = 24
-        break
-      case area > 60000:
-        stretchResistance = 16
-        break
-      case area > 20000:
-        stretchResistance = 10
-        break
-      default:
-        stretchResistance = 6
+    if (area > 1000000) {
+      stretchResistance = 24
+    } else if (area > 60000) {
+      stretchResistance = 16
+    } else if (area > 20000) {
+      stretchResistance = 10
+    } else {
+      stretchResistance = 6
+    }
+    // too tall or wide cards stick less
+    const heightRatio = height / width
+    const widthRatio = width / height
+    if (heightRatio > 10 || widthRatio > 10) {
+      stretchResistance = 50
     }
     state.stickyStretchResistance = stretchResistance
   }
