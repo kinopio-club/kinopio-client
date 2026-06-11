@@ -703,13 +703,6 @@ const addTagClosingBrackets = async () => {
   await nextTick()
   setSelectionRange(cursorStart, cursorStart)
 }
-const moveCursorPastTagEnd = async () => {
-  const cursorStart = selectionStartPosition()
-  const endText = name.value.substring(cursorStart)
-  let newCursorPosition = endText.indexOf(']]')
-  newCursorPosition = cursorStart + newCursorPosition + 2
-  setSelectionRange(newCursorPosition, newCursorPosition)
-}
 const updatePreviousTags = async () => {
   if (!card.value.name) {
     previousTags = []
@@ -770,16 +763,19 @@ const updateTagBracketsWithTag = async (tag) => {
   await updatePreviousTags()
   const cursorStart = selectionStartPosition()
   const text = tagStartText() + tagEndText()
-  let newName
+  let newName, newCursorPosition
   if (text.length) {
     newName = name.value.replace(`[[${text}]]`, `[[${tag.name}]]`)
+    newCursorPosition = name.value.indexOf(`[[${text}]]`) + `[[${tag.name}]]`.length
   } else {
     const startText = name.value.substring(0, cursorStart)
     const endText = name.value.substring(cursorStart)
     newName = startText + tag.name + endText
+    newCursorPosition = cursorStart + tag.name.length + 2 // 2 = ]]
   }
   updateCardName(newName)
-  moveCursorPastTagEnd()
+  await nextTick()
+  setSelectionRange(newCursorPosition, newCursorPosition)
   globalStore.shouldPreventNextEnterKey = false
 }
 
