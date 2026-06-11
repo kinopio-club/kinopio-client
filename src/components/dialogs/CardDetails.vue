@@ -1374,6 +1374,8 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
 
 // @mention picker
 
+const cardAtUserMentions = computed(() => card.value.atUserMentions || [])
+const isAtUserMentions = computed(() => utils.arrayHasItems(cardAtUserMentions.value))
 const showAtPicker = () => {
   if (!state.at.pickerIsVisible) {
     closeDialogs()
@@ -1436,19 +1438,43 @@ const checkIfShouldShowAtPicker = () => {
   }
 }
 const updateAtUserMentions = (user, userString) => {
+  const mention = {
+    id: nanoid(),
+    cardId: card.value.id,
+    userId: user.id,
+    stringMatch: userString
+  }
+  const atUserMentions = cardAtUserMentions.value.concat(mention)
   const update = {
     id: card.value.id,
-    atUserMentions: [{
-      id: nanoid(),
-      cardId: card.value.id,
-      userId: user.id,
-      stringMatch: userString
-    }]
+    atUserMentions
   }
   cardStore.updateCard(update)
 }
-const replaceAtTextWithUserMention = async (event, user) => {
-  hideAtPicker()
+const removeAtUserMention = async (mentionToRemove) => {
+  const atUserMentions = cardAtUserMentions.value.filter(mention => mention.userId !== mentionToRemove.userId)
+  let newName = card.value.name
+  const position = atTextPosition() - 1
+  // await nextTick()
+  focusName(position)
+
+  // const start = newName.substring(0, position)
+  // const end = newName.substring(position + slashText().length, newName.length)
+  // newName = start + userString + end
+
+  newName = newName.replaceAll(mentionToRemove.stringMatch, '')
+
+  const update = {
+    id: card.value.id,
+    name: newName,
+    atUserMentions
+  }
+  console.log('🍒🍒🍒', mentionToRemove, update)
+
+  cardStore.updateCard(update)
+  textareaSizes()
+}
+const addAtUserMention = async (user) => {
   let newName = card.value.name
   let position = atTextPosition()
   let userString = '@' + utils.normalizeString(user.name)
@@ -1460,14 +1486,22 @@ const replaceAtTextWithUserMention = async (event, user) => {
   newName = start + userString + end
   updateCardName(newName)
   position = position + userString.length + 1
-  hideSpacePicker()
   await nextTick()
   focusName(position)
   globalStore.shouldPreventNextEnterKey = false
   updateAtUserMentions(user, userString)
   textareaSizes()
 }
-const isAtUserMentions = computed(() => utils.arrayHasItems(card.value.atUserMentions))
+const replaceAtTextWithUserMention = async (event, user) => {
+  hideAtPicker()
+  if (!user) { return }
+  const mentionToRemove = cardAtUserMentions.value.find(mention => mention.userId === user.id)
+  if (mentionToRemove) {
+    removeAtUserMention(mentionToRemove)
+  } else {
+    addAtUserMention(user)
+  }
+}
 
 // All Pickers
 
