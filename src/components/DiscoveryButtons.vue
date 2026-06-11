@@ -21,6 +21,11 @@ let unsubscribes
 const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
+  const hasCommunitySpaces = exploreSpaces.value.length || followingSpaces.value.length || everyoneSpaces.value.length
+  if (hasCommunitySpaces) {
+    state.isLoadingSpaces = false
+    updateUnreadSpacesCounts()
+  }
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerExploreIsVisible') {
@@ -51,9 +56,6 @@ const state = reactive({
   favoritesIsVisible: false,
   liveIsVisible: false,
   liveSpaces: [],
-  exploreSpaces: [],
-  followingSpaces: [],
-  everyoneSpaces: [],
   unreadExploreSpacesCount: 0,
   unreadFollowingSpacesCount: 0,
   unreadEveryoneSpacesCount: 0,
@@ -71,9 +73,13 @@ watch(() => state.exploreIsVisible, (value, prevValue) => {
 
 watch(() => globalStore.isSpacePage, async (value, prevValue) => {
   if (value) {
-    state.followingSpaces = await apiStore.getFollowingUsersSpaces()
+    globalStore.followingSpaces = await apiStore.getFollowingUsersSpaces()
   }
 })
+
+const exploreSpaces = computed(() => globalStore.exploreSpaces)
+const followingSpaces = computed(() => globalStore.followingSpaces)
+const everyoneSpaces = computed(() => globalStore.everyoneSpaces)
 
 const closeDialogs = () => {
   state.exploreIsVisible = false
@@ -111,9 +117,9 @@ const unreadSpaces = (spaces, type) => {
 const updateUnreadSpacesCounts = () => {
   const readDate = userStore.showInExploreUpdatedAt
   if (!readDate) { return maxUnreadCountCharacter }
-  state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
-  state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
-  state.unreadEveryoneSpacesCount = unreadSpaces(state.everyoneSpaces, 'everyone').length
+  state.unreadExploreSpacesCount = unreadSpaces(exploreSpaces.value, 'explore').length
+  state.unreadFollowingSpacesCount = unreadSpaces(followingSpaces.value, 'following').length
+  state.unreadEveryoneSpacesCount = unreadSpaces(everyoneSpaces.value, 'everyone').length
   const count = state.unreadExploreSpacesCount + state.unreadFollowingSpacesCount
   state.unreadSpacesCount = normalizeCount(count)
 }
@@ -134,14 +140,14 @@ const toggleExploreIsVisible = () => {
 const updateCommunitySpaces = async () => {
   try {
     state.isLoadingSpaces = true
-    const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
+    const [explore, following, everyone] = await Promise.all([
       apiStore.getExploreSpaces(),
       apiStore.getFollowingUsersSpaces(),
       apiStore.getEveryoneSpaces()
     ])
-    state.exploreSpaces = exploreSpaces
-    state.followingSpaces = followingSpaces
-    state.everyoneSpaces = everyoneSpaces
+    globalStore.exploreSpaces = explore
+    globalStore.followingSpaces = following
+    globalStore.everyoneSpaces = everyone
     updateUnreadSpacesCounts()
   } catch (error) {
     console.error('🚑 updateCommunitySpaces', error)
@@ -211,9 +217,6 @@ const liveSpacesCount = computed(() => {
         span(v-if="state.unreadSpacesCount") {{state.unreadSpacesCount}}
       Explore(
         :visible="state.exploreIsVisible"
-        :exploreSpaces="state.exploreSpaces"
-        :followingSpaces="state.followingSpaces"
-        :everyoneSpaces="state.everyoneSpaces"
         :loading="state.isLoadingSpaces"
         :unreadExploreSpacesCount="state.unreadExploreSpacesCount"
         :unreadFollowingSpacesCount="state.unreadFollowingSpacesCount"
