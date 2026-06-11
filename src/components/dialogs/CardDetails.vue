@@ -1437,7 +1437,7 @@ const checkIfShouldShowAtPicker = () => {
     hideAtPicker()
   }
 }
-const updateAtUserMentions = (user, userString) => {
+const createAtUserMention = (user, userString) => {
   const mention = {
     id: nanoid(),
     cardId: card.value.id,
@@ -1451,30 +1451,9 @@ const updateAtUserMentions = (user, userString) => {
   }
   cardStore.updateCard(update)
 }
-const removeAtUserMention = async (mentionToRemove) => {
-  const atUserMentions = cardAtUserMentions.value.filter(mention => mention.userId !== mentionToRemove.userId)
-  let newName = card.value.name
-  const position = atTextPosition() - 1
-  // await nextTick()
-  focusName(position)
-
-  // const start = newName.substring(0, position)
-  // const end = newName.substring(position + slashText().length, newName.length)
-  // newName = start + userString + end
-
-  newName = newName.replaceAll(mentionToRemove.stringMatch, '')
-
-  const update = {
-    id: card.value.id,
-    name: newName,
-    atUserMentions
-  }
-  console.log('🍒🍒🍒', mentionToRemove, update)
-
-  cardStore.updateCard(update)
-  textareaSizes()
-}
-const addAtUserMention = async (user) => {
+const replaceAtTextWithUserMention = async (event, user) => {
+  hideAtPicker()
+  if (!user) { return }
   let newName = card.value.name
   let position = atTextPosition()
   let userString = '@' + utils.normalizeString(user.name)
@@ -1489,18 +1468,8 @@ const addAtUserMention = async (user) => {
   await nextTick()
   focusName(position)
   globalStore.shouldPreventNextEnterKey = false
-  updateAtUserMentions(user, userString)
+  createAtUserMention(user, userString)
   textareaSizes()
-}
-const replaceAtTextWithUserMention = async (event, user) => {
-  hideAtPicker()
-  if (!user) { return }
-  const mentionToRemove = cardAtUserMentions.value.find(mention => mention.userId === user.id)
-  if (mentionToRemove) {
-    removeAtUserMention(mentionToRemove)
-  } else {
-    addAtUserMention(user)
-  }
 }
 
 // All Pickers
