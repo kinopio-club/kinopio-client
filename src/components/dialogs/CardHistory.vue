@@ -24,7 +24,7 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  updateCardHistory()
+  // updateCardHistory()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
@@ -52,7 +52,8 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   isLoading: false,
-  unknownServerError: false
+  unknownServerError: false,
+  operations: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -101,9 +102,8 @@ const updateCardHistory = async () => {
   if (!currentUserIsSignedIn.value) { return }
   try {
     state.isLoading = true
-    const data = await apiStore.getCardHistory(props.card)
-    console.log(data)
-    // state.history = []
+    state.operations = await apiStore.getCardHistory(props.card)
+    console.log(state.operations)
   } catch (error) {
     console.error('🚒 updateCardHistory', error, props.card.id)
     state.unknownServerError = true
@@ -139,14 +139,14 @@ dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.lef
         template(v-if="isUpdatedByDifferentUser")
           UserLabelInline(:user="updatedByUser" :title="'Updated by'" :truncateNameToLength="15")
 
-  section.history
-    .row
-      .badge.info While card history is in Beta, it is mainly for debug purposes
-    .row(v-if="!currentUserIsSignedIn")
-      .badge.info Sign in to access card history
-    .row(v-if="state.unknownServerError")
-      .badge.error-badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    OfflineBadge
+  //- section.history
+  //-   .row
+  //-     .badge.info While card history is in Beta, it is mainly for debug purposes
+  //-   .row(v-if="!currentUserIsSignedIn")
+  //-     .badge.info Sign in to access card history
+  //-   .row(v-if="state.unknownServerError")
+  //-     .badge.error-badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+  //-   OfflineBadge
 
 </template>
 

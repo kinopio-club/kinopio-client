@@ -81,7 +81,6 @@ const updateOperations = async () => {
   try {
     state.isLoading = true
     state.operations = await apiStore.getSpaceHistory()
-    // api/
   } catch (error) {
     console.error('🚒 updateOperations', error)
     state.unknownServerError = true
