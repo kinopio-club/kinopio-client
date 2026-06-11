@@ -470,8 +470,7 @@ const focusName = async (position) => {
   utils.focusTextarea(element)
   if (position) {
     element.setSelectionRange(position, position)
-  }
-  if (length) {
+  } else if (length) {
     element.setSelectionRange(length, length)
   }
   triggerUpdateHeaderAndFooterPosition()
@@ -1461,7 +1460,7 @@ const replaceAtTextWithUserMention = async (event, user) => {
     userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
   }
   const start = newName.substring(0, position)
-  const end = newName.substring(position + slashText().length, newName.length)
+  const end = newName.substring(position + atText().length, newName.length)
   newName = start + userString + end
   updateCardName(newName)
   position = position + userString.length + 1
