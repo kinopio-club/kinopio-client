@@ -65,7 +65,7 @@ const scrollUserDetailsIntoView = async () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialogElement")
+dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop @keydown.stop :style="styles" ref="dialogElement")
   UserDetailsInfo(:user="user" :showUserBadges="true")
   UserDetailsActions(:user="user")
 </template>

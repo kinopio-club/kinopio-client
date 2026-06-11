@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import UserSettingsCards from '@/components/dialogs/UserSettingsCards.vue'
+import CardHistory from '@/components/dialogs/CardHistory.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -48,7 +49,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  cardsSettingsIsVisible: false
+  cardsSettingsIsVisible: false,
+  cardHistoryIsVisible: false
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -58,51 +60,21 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
-const shouldShowItemActions = computed(() => userStore.shouldShowItemActions)
 const closeDialogsFromParent = () => {
   globalStore.userDetailsIsVisible = false
   state.cardsSettingsIsVisible = false
+  state.cardHistoryIsVisible = false
 }
 const closeDialogs = () => {
   globalStore.userDetailsIsVisible = false
   state.cardsSettingsIsVisible = false
+  state.cardHistoryIsVisible = false
   emit('closeDialogs')
 }
 const scrollParentIntoView = () => {
   const element = props.parentElement
   if (!element) { return }
   globalStore.scrollElementIntoView({ element })
-}
-
-// date
-
-const dateUpdatedAt = computed(() => {
-  const date = props.card.nameUpdatedAt || props.card.createdAt
-  const showAbsoluteDate = userStore.filterShowAbsoluteDates
-  if (date) {
-    if (showAbsoluteDate) {
-      return new Date(date).toLocaleString()
-    } else {
-      return utils.shortRelativeTime(date)
-    }
-  } else {
-    return 'now'
-  }
-})
-const toggleFilterShowAbsoluteDates = () => {
-  closeDialogs()
-  const value = !userStore.filterShowAbsoluteDates
-  userStore.updateUser({ filterShowAbsoluteDates: value })
-}
-
-// user
-
-const createdByUserIsNotEmpty = computed(() => utils.objectHasKeys(props.createdByUser))
-const isUpdatedByDifferentUser = computed(() => props.createdByUser.id !== props.updatedByUser.id)
-const userDetailsIsUser = (user) => {
-  if (!globalStore.userDetailsIsVisible) { return }
-  const userDetailsUser = globalStore.userDetailsUser
-  return user.id === userDetailsUser.id
 }
 
 // card settings
@@ -117,57 +89,67 @@ const cardSettingsTitle = computed(() => {
   return title
 })
 const toggleCardsSettingsIsVisible = () => {
-  state.cardsSettingsIsVisible = !state.cardsSettingsIsVisible
+  const value = !state.cardsSettingsIsVisible
+  closeDialogs()
+  state.cardsSettingsIsVisible = value
+}
+
+// card history
+
+const toggleCardHistoryIsVisible = () => {
+  const value = !state.cardHistoryIsVisible
+  closeDialogs()
+  state.cardHistoryIsVisible = value
 }
 </script>
 
 <template lang="pug">
+//- assigned to @user
+.row.card-collaboration-info(v-if="props.card.atUserMentions?.length")
+  template(v-for="userMention in props.card.atUserMentions" :key="userMention.id")
+    p {{userMention.userId}}
+  //- UserLabelInline
+  //- props.card.atUserMentions
+
+  //- or replace createdby/updatedby users
+  //- and move those to a stub history btn
+
 .row.card-collaboration-info.title-row(v-if="visible" @click.left.stop="closeDialogs")
   .row
     //- comment
     .badge.info.is-comment-badge(v-if="isComment")
       img.icon.comment(src="@/assets/comment.svg")
-    //- date
-    .badge.status.button-badge.time-badge(v-if="shouldShowItemActions" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
-      img.icon.time(src="@/assets/time.svg")
-      span.name {{dateUpdatedAt}}
-    .users(v-if="shouldShowItemActions")
-      //- created by
-      template(v-if="createdByUserIsNotEmpty")
-        UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true" :truncateNameToLength="15")
-      //- updated by
-      template(v-if="isUpdatedByDifferentUser")
-        UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true" :truncateNameToLength="15")
-      //- created through api
-      .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
-        img.icon.system(src="@/assets/system.svg")
+
     .badge.info(v-if="card.counterIsVisible")
       span {{card.counterValue || 0}}
 
-  //- settings
-  .button-wrap
-    button.small-button.settings-button.inline-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
-      img.settings.icon(src="@/assets/settings.svg")
-    UserSettingsCards(:visible="state.cardsSettingsIsVisible")
+  div
+    //- card history
+    .button-wrap
+      button.small-button.history-button.inline-button(@click.stop="toggleCardHistoryIsVisible" title="Card History" :class="{active: state.cardHistoryIsVisible}")
+        img.icon.time(src="@/assets/time.svg")
+      CardHistory(:visible="state.cardHistoryIsVisible" :card="props.card" :createdByUser="props.createdByUser" :updatedByUser="props.updatedByUser")
+    //- settings
+    .button-wrap
+      button.small-button.settings-button.inline-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
+        img.settings.icon(src="@/assets/settings.svg")
+      UserSettingsCards(:visible="state.cardsSettingsIsVisible")
 
 </template>
 
 <style lang="stylus">
 .card-collaboration-info
-  > .row
-    margin 0
-  .users
-    display flex
-    flex-wrap wrap
-  .system-badge
-    margin-top 1px
-  .name
-    color var(--primary)
+  margin 0 !important
   .is-comment-badge
     flex-shrink 0
-  .settings-button
-    margin-right 5px
+  .button-wrap
+    margin-left 0
+    padding 5px
+  .button-wrap + .button-wrap
+    padding-left 0
+  .settings-button,
+  .history-button
     cursor pointer
-  .time-badge
-    width fit-content
+  .icon.time
+    vertical-align -1.5px
 </style>
