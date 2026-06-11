@@ -27,7 +27,8 @@ const props = defineProps({
   visible: Boolean,
   position: Object,
   search: String,
-  cursorPosition: Number
+  cursorPosition: Number,
+  card: Object
 })
 
 const state = reactive({
@@ -64,7 +65,7 @@ const selectUser = (event, user) => {
 }
 
 const selectedUsers = computed(() => {
-  return [{ id: 'x' }] // return card @users
+  return userStore.getUsersByCardAtUserMentions(props.card)
 })
 
 watch(() => props.search, async (value) => {
@@ -86,6 +87,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     @selectUser="selectUser"
     :isClickable="true"
     :shouldHideOptionsButton="true"
+    :shouldHideResultsFilter="true"
   )
 </template>
 

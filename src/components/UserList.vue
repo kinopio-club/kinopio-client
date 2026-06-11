@@ -65,7 +65,8 @@ const props = defineProps({
   showGroupUserActions: Boolean,
   group: Object,
   filterPlaceholder: String,
-  shouldHideOptionsButton: Boolean
+  shouldHideOptionsButton: Boolean,
+  shouldHideResultsFilter: Boolean
 })
 const state = reactive({
   filter: '',
@@ -282,6 +283,7 @@ const removeGroupUser = async (event, user) => {
 <template lang="pug">
 .user-list(@click.stop="closeDialogs")
   ResultsFilter(
+    v-if="!props.shouldHideResultsFilter"
     :items="props.users"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateUsers"
