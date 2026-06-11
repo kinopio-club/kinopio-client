@@ -427,6 +427,9 @@ const cardWrapStyle = computed(() => {
   }
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${stickyState.stickyTranslateX}, ${stickyState.stickyTranslateY})`
+    if (stickyState.isAnimationStickingStart || stickyState.isAnimationStickingEnd) {
+      styles.transition = 'transform 0.1s ease-out' // matches stickyTransitionDuration
+    }
   }
   if (isSnappingToItem.value) {
     styles.opacity = consts.itemSnapOpacity

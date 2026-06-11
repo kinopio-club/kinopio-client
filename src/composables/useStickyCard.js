@@ -9,6 +9,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const stickyTimerDuration = 250
+const stickyTransitionDuration = 100 // ms
 
 // card is a ref to the card object
 // cardElement is a ref to the .card-wrap element
@@ -21,11 +22,15 @@ export const useStickyCard = ({ card, cardElement, x, y, shouldNotStick }) => {
   let stickyTimerComplete = false
   let stickyTimer
   let stickyMap
+  let stickyStartTransitionTimer
+  let stickyEndTransitionTimer
 
   const state = reactive({
     stickyTranslateX: 0,
     stickyTranslateY: 0,
     isAnimationUnsticking: false,
+    isAnimationStickingStart: false,
+    isAnimationStickingEnd: false,
     stickyStretchResistance: 6
   })
 
@@ -71,6 +76,15 @@ export const useStickyCard = ({ card, cardElement, x, y, shouldNotStick }) => {
     stickyTimerComplete = false
   }
   const stopSticking = () => {
+    // ease back to the resting position to prevent jarring movement
+    const isStuck = state.stickyTranslateX || state.stickyTranslateY
+    if (isStuck) {
+      state.isAnimationStickingEnd = true
+      clearTimeout(stickyEndTransitionTimer)
+      stickyEndTransitionTimer = setTimeout(() => {
+        state.isAnimationStickingEnd = false
+      }, stickyTransitionDuration)
+    }
     clearStickyPositionOffsets()
     preventSticking = true
   }
@@ -140,6 +154,15 @@ export const useStickyCard = ({ card, cardElement, x, y, shouldNotStick }) => {
     xOffset = Math.round(xOffset)
     let yOffset = (yPercent * halfHeight) / stretchResistance
     yOffset = Math.round(yOffset)
+    // ease in the first frame of sticking to prevent jarring movement
+    const isFirstFrame = !state.stickyTranslateX && !state.stickyTranslateY
+    if (isFirstFrame) {
+      state.isAnimationStickingStart = true
+      clearTimeout(stickyStartTransitionTimer)
+      stickyStartTransitionTimer = setTimeout(() => {
+        state.isAnimationStickingStart = false
+      }, stickyTransitionDuration)
+    }
     state.stickyTranslateX = xOffset + 'px'
     state.stickyTranslateY = yOffset + 'px'
   }
