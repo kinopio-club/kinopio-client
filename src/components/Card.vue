@@ -985,7 +985,7 @@ const isNormalizedNameOrHiddenUrl = computed(() => {
   return normalizedName.value
 })
 const nameSegments = computed(() => {
-  let segments = utils.cardNameSegments(normalizedName.value)
+  let segments = utils.cardNameSegments(normalizedName.value, props.card.atUserMentions)
   segments = segments.map(segment => {
     segment.isDark = backgroundColorIsDark.value
     // tags
@@ -1013,6 +1013,9 @@ const nameSegments = computed(() => {
       const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
       segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
       segment.otherCard = globalStore.getOtherCardById(cardId)
+    // @user mention
+    } else if (segment.isAtUserMention) {
+      segment.user = spaceStore.getSpaceUserById(segment.userId) || globalStore.getOtherUserById(segment.userId)
     // text
     } else if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)

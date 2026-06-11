@@ -39,9 +39,12 @@ const userDetailsIsUser = computed(() => {
   return props.user?.id === userDetailsUser.id
 })
 const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value && userDetailsIsUser.value)
-const toggleUserDetailsIsVisible = () => {
+const toggleUserDetailsIsVisible = (event) => {
   if (!props.isClickable) { return }
+  if (globalStore.preventDraggedCardFromShowingDetails) { return }
   event.stopPropagation()
+  globalStore.triggerCancelLocking()
+  globalStore.currentUserIsDraggingCard = false
   const isVisible = userDetailsIsVisibleForUser.value
   if (isVisible) {
     globalStore.userDetailsIsVisible = false

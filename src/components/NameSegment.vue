@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
@@ -176,6 +177,11 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- Tags
   template(v-if="props.segment.isTag")
     Tag(:tag="props.segment" :isClickable="true" :isActive="currentSelectedTag.name === props.segment.name" @clickTag="showTagDetailsIsVisible")
+  //- @User Mentions
+  template(v-if="props.segment.isAtUserMention")
+    UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :isClickable="true" :isAtMention="true")
+    span.markdown(v-else :class="textClasses")
+      span {{props.segment.name}}
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")
