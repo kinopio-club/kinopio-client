@@ -111,16 +111,17 @@ const toggleCardHistoryIsVisible = () => {
 
 <template lang="pug">
 .row.card-collaboration-info.title-row(v-if="visible" @click.left.stop="closeDialogs")
-  //- comment
-  .badge.info.is-comment-badge(v-if="isComment")
-    img.icon.comment(src="@/assets/comment.svg")
-  //- @users
-  .at-user-mentions
-    template(v-for="user in atUsers" :key="user.id")
-      UserLabelInline(:user="user" :isClickable="true" :truncateNameToLength="15" :isAtMention="true")
-  //- votes
-  .badge.info(v-if="card.counterIsVisible")
-    span {{card.counterValue || 0}}
+  .info-wrap
+    //- comment
+    .badge.info.is-comment-badge(v-if="isComment")
+      img.icon.comment(src="@/assets/comment.svg")
+    //- @users
+    .at-user-mentions
+      template(v-for="user in atUsers" :key="user.id")
+        UserLabelInline(:user="user" :isClickable="true" :truncateNameToLength="15" :isAtMention="true")
+    //- votes
+    .badge.info(v-if="card.counterIsVisible")
+      span {{card.counterValue || 0}}
   //- buttons
   .buttons-wrap
     //- card history
@@ -137,16 +138,19 @@ const toggleCardHistoryIsVisible = () => {
 
 <style lang="stylus">
 .card-collaboration-info
-  margin 0 !important
   .is-comment-badge
     flex-shrink 0
+    height fit-content
+  .info-wrap
+    width max-content
+    display flex
   .buttons-wrap
-    margin-right -6px
+    flex-wrap nowrap
+    display flex
     > .button-wrap
       margin-left 0
-      padding 6px
     > .button-wrap + .button-wrap
-      padding-left 0
+      padding-left 6px
     .settings-button,
     .history-button
       cursor pointer
