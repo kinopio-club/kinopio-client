@@ -10,6 +10,8 @@ import UserSettingsCards from '@/components/dialogs/UserSettingsCards.vue'
 import CardHistory from '@/components/dialogs/CardHistory.vue'
 import utils from '@/utils.js'
 
+import uniqBy from 'lodash-es/uniqBy'
+
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -77,6 +79,10 @@ const scrollParentIntoView = () => {
   globalStore.scrollElementIntoView({ element })
 }
 
+// @user mentions
+
+const atUsers = computed(() => userStore.getUsersByCardAtUserMentions(props.card))
+
 // card settings
 
 const cardSettingsTitle = computed(() => {
@@ -104,26 +110,19 @@ const toggleCardHistoryIsVisible = () => {
 </script>
 
 <template lang="pug">
-//- assigned to @user
-.row.card-collaboration-info(v-if="props.card.atUserMentions?.length")
-  template(v-for="userMention in props.card.atUserMentions" :key="userMention.id")
-    p {{userMention.userId}}
-  //- UserLabelInline
-  //- props.card.atUserMentions
-
-  //- or replace createdby/updatedby users
-  //- and move those to a stub history btn
-
 .row.card-collaboration-info.title-row(v-if="visible" @click.left.stop="closeDialogs")
-  .row
-    //- comment
-    .badge.info.is-comment-badge(v-if="isComment")
-      img.icon.comment(src="@/assets/comment.svg")
-
-    .badge.info(v-if="card.counterIsVisible")
-      span {{card.counterValue || 0}}
-
-  div
+  //- comment
+  .badge.info.is-comment-badge(v-if="isComment")
+    img.icon.comment(src="@/assets/comment.svg")
+  //- @users
+  .at-user-mentions
+    template(v-for="user in atUsers" :key="user.id")
+      UserLabelInline(:user="user" :isClickable="true" :truncateNameToLength="15" :isAtMention="true")
+  //- votes
+  .badge.info(v-if="card.counterIsVisible")
+    span {{card.counterValue || 0}}
+  //- buttons
+  .buttons-wrap
     //- card history
     .button-wrap
       button.small-button.history-button.inline-button(@click.stop="toggleCardHistoryIsVisible" title="Card History" :class="{active: state.cardHistoryIsVisible}")
@@ -134,7 +133,6 @@ const toggleCardHistoryIsVisible = () => {
       button.small-button.settings-button.inline-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
         img.settings.icon(src="@/assets/settings.svg")
       UserSettingsCards(:visible="state.cardsSettingsIsVisible")
-
 </template>
 
 <style lang="stylus">
@@ -142,14 +140,16 @@ const toggleCardHistoryIsVisible = () => {
   margin 0 !important
   .is-comment-badge
     flex-shrink 0
-  .button-wrap
-    margin-left 0
-    padding 5px
-  .button-wrap + .button-wrap
-    padding-left 0
-  .settings-button,
-  .history-button
-    cursor pointer
-  .icon.time
-    vertical-align -1.5px
+  .buttons-wrap
+    margin-right -6px
+    > .button-wrap
+      margin-left 0
+      padding 6px
+    > .button-wrap + .button-wrap
+      padding-left 0
+    .settings-button,
+    .history-button
+      cursor pointer
+    .icon.time
+      vertical-align -1.5px
 </style>

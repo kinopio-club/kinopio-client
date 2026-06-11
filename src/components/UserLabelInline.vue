@@ -16,7 +16,7 @@ const props = defineProps({
   shouldHideName: Boolean,
   truncateNameToLength: Number,
   title: String,
-  isOnDarkBackground: Boolean
+  isAtMention: Boolean
 })
 
 // user
@@ -80,6 +80,7 @@ span.user-label-inline-wrap(:title="title")
     :title="title"
     @click.stop
   )
+    span(v-if="props.isAtMention") @{{' '}}
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
     img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
     span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ userName }}

@@ -61,9 +61,6 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-const closeDialogs = () => {
-  globalStore.triggerCloseChildDialogs()
-}
 
 // date
 
@@ -93,7 +90,7 @@ const isUpdatedByDifferentUser = computed(() => props.createdByUser.id !== props
 </script>
 
 <template lang="pug">
-dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.left.stop= ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p Card History
   section.summary
@@ -109,14 +106,17 @@ dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.lef
           img.icon.system(src="@/assets/system.svg")
         //- created by
         template(v-if="createdByUserIsNotEmpty")
-          UserLabelInline(:user="createdByUser" :title="'Created by'" :isOnDarkBackground="true" :truncateNameToLength="15")
+          UserLabelInline(:user="createdByUser" :title="'Created by'" :truncateNameToLength="15")
         //- updated by
         template(v-if="isUpdatedByDifferentUser")
-          UserLabelInline(:user="updatedByUser" :title="'Updated by'" :isOnDarkBackground="true" :truncateNameToLength="15")
+          UserLabelInline(:user="updatedByUser" :title="'Updated by'" :truncateNameToLength="15")
 </template>
 
 <style lang="stylus">
 dialog.card-history
+  left initial
+  right 8px
+  top 20px
   .row
     flex-wrap wrap
     row-gap 10px

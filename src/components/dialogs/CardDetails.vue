@@ -1467,6 +1467,7 @@ const replaceAtTextWithUserMention = async (event, user) => {
   updateAtUserMentions(user, userString)
   textareaSizes()
 }
+const isAtUserMentions = computed(() => utils.arrayHasItems(card.value.atUserMentions))
 
 // All Pickers
 
@@ -1639,7 +1640,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
       CardActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
-      CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+      CardCollaborationInfo(:visible="shouldShowItemActions || isComment || isAtUserMentions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
       .row(v-if="nameMetaRowIsVisible && canEditCard")
         //- Split by Line Breaks
