@@ -1034,6 +1034,19 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getCardsWithLinkToSpaceId', error })
       }
     },
+    async getCardHistory (card) {
+      const globalStore = useGlobalStore()
+      try {
+        const isOnline = globalStore.isOnline
+        if (!isOnline) { return }
+        console.info('🛬 getting remote card history', card.id)
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetchWithTimeout(`${consts.apiHost()}/card/${card.id}/history`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getCardHistory', error })
+      }
+    },
     async updateCards (body) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()

@@ -5,14 +5,18 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribes
 
@@ -20,7 +24,7 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-
+  updateCardHistory()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
@@ -46,7 +50,9 @@ const props = defineProps({
   updatedByUser: Object
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  isLoading: false,
+  unknownServerError: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -87,12 +93,34 @@ const toggleFilterShowAbsoluteDates = () => {
 const createdByUserIsNotEmpty = computed(() => utils.objectHasKeys(props.createdByUser))
 const isUpdatedByDifferentUser = computed(() => props.createdByUser.id !== props.updatedByUser.id)
 
+// history
+
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const updateCardHistory = async () => {
+  state.unknownServerError = false
+  if (!currentUserIsSignedIn.value) { return }
+  try {
+    state.isLoading = true
+    const data = await apiStore.getCardHistory(props.card)
+    console.log(data)
+    // state.history = []
+  } catch (error) {
+    console.error('🚒 updateCardHistory', error, props.card.id)
+    state.unknownServerError = true
+  }
+  state.isLoading = false
+}
+
 </script>
 
 <template lang="pug">
 dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.left.stop= ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
-    p Card History
+    .row.title-row
+      div
+        span Card History
+        Loader(:visible="state.isLoading" :isSmall="true")
+
   section.summary
     //- date
     .row
@@ -110,6 +138,16 @@ dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.lef
         //- updated by
         template(v-if="isUpdatedByDifferentUser")
           UserLabelInline(:user="updatedByUser" :title="'Updated by'" :truncateNameToLength="15")
+
+  section.history
+    .row
+      .badge.info While card history is in Beta, it is mainly for debug purposes
+    .row(v-if="!currentUserIsSignedIn")
+      .badge.info Sign in to access card history
+    .row(v-if="state.unknownServerError")
+      .badge.error-badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    OfflineBadge
+
 </template>
 
 <style lang="stylus">
@@ -129,4 +167,8 @@ dialog.card-history
     flex-wrap wrap
   .name
     color var(--primary)
+  section.history
+    .row
+      > .badge
+        margin-right 0
 </style>

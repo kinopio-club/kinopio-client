@@ -148,7 +148,7 @@ const copyOperation = async (event, operation) => {
 </script>
 
 <template lang="pug">
-section.history(v-if="props.visible" :style="styles")
+section.space-history(v-if="props.visible" :style="styles")
   section
     .row.title-row
       div
@@ -165,7 +165,9 @@ section.history(v-if="props.visible" :style="styles")
     .row
       .badge.info While History is in Beta, it is mainly for debug purposes
     .row(v-if="!currentUserIsSignedIn")
-      .badge.info Sign in to record space history
+      .badge.info Sign in to access space history
+    .row.badge.error-badge.danger(v-if="state.unknownServerError")
+      span (シ_ _)シ Something went wrong, Please try again or contact support
     OfflineBadge
 
   section.results-section
@@ -190,7 +192,7 @@ section.history(v-if="props.visible" :style="styles")
 </template>
 
 <style lang="stylus">
-section.history
+section.space-history
   overflow auto
   padding 0
   .loader
