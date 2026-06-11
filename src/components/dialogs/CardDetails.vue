@@ -1450,18 +1450,22 @@ const replaceAtTextWithUserMention = async (event, user) => {
   hideAtPicker()
   if (!user) { return }
   let newName = card.value.name
-  let position = atTextPosition()
+  const position = atTextPosition()
   let userString = '@' + utils.normalizeString(user.name)
   if (!user.name) {
     userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
   }
   const start = newName.substring(0, position)
-  const end = newName.substring(position + atText().length, newName.length)
-  newName = start + userString + end
+  const end = newName.substring(position + atTextToCursor().length, newName.length)
+  let mention = userString
+  if (!utils.hasBlankCharacters(end.charAt(0))) {
+    mention = mention + ' ' // separate mention from following text
+  }
+  newName = start + mention + end
   updateCardName(newName)
-  position = position + userString.length + 1
+  const newCursorPosition = position + mention.length
   await nextTick()
-  focusName(position)
+  focusName(newCursorPosition)
   globalStore.shouldPreventNextEnterKey = false
   createAtUserMention(user, userString)
   textareaSizes()
