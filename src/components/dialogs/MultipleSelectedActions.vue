@@ -309,7 +309,7 @@ const disconnectItems = () => {
 
 const containItemsInNewBox = async () => {
   const items = cards.value.concat(boxes.value, lists.value)
-  const rect = utils.boundaryRectFromItems(cards.value)
+  const rect = utils.boundaryRectFromItems(items)
   const padding = consts.spaceBetweenCards
   const paddingTop = 30 + padding
   const box = {

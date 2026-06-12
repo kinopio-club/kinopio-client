@@ -208,16 +208,9 @@ const handleShortcutsOnKeyUp = (event) => {
   // b
   } else if (keyB && isSpaceScope) {
     if (!canEditSpace) { return }
-    let cards
-    const multipleCardIds = globalStore.multipleCardsSelectedIds
-    const cardId = globalStore.cardDetailsIsVisibleForCardId
     // Surround Selected Cards with Box
-    if (cardId) {
-      cards = [cardStore.getCard(cardId)]
-      containItemsInNewBox(cards)
-    } else if (multipleCardIds.length) {
-      cards = multipleCardIds.map(id => cardStore.getCard(id))
-      containItemsInNewBox(cards)
+    if (globalStore.multipleCardsSelectedIds.length) {
+      globalStore.triggerSelectedCardsContainInBox()
     // Toolbar Box Mode
     } else {
       globalStore.toggleCurrentUserToolbar('box')
