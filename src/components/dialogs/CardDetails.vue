@@ -1446,7 +1446,7 @@ const checkIfShouldShowAtPicker = () => {
     hideAtPicker()
   }
 }
-const createAtUserMention = (user, userString) => {
+const createAtUserMention = async (user, userString) => {
   const mention = {
     id: nanoid(),
     cardId: card.value.id,
@@ -1458,7 +1458,8 @@ const createAtUserMention = (user, userString) => {
     id: card.value.id,
     atUserMentions
   }
-  cardStore.updateCard(update)
+  await cardStore.updateCard(update)
+  await userNotificationStore.addCardUserMention(mention)
 }
 const replaceAtTextWithUserMention = async (event, user) => {
   hideAtPicker()
