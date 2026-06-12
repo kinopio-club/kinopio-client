@@ -8,7 +8,6 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -28,7 +27,6 @@ const boxStore = useBoxStore()
 const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const analyticsStore = useAnalyticsStore()
 const themeStore = useThemeStore()
 
 let unsubscribes
@@ -41,8 +39,6 @@ onMounted(() => {
       if (name === 'triggerCloseChildDialogs' && props.visible) {
         const shouldPreventEmit = true
         closeDialogs(shouldPreventEmit)
-      } else if (name === 'triggerSelectedCardsContainInBox') {
-        containItemsInNewBox()
       } else if (name === 'triggerUpdateTheme') {
         updateDefaultColor(utils.cssVariable('secondary-background'))
       }
@@ -172,28 +168,6 @@ const toggleTagPickerIsVisible = () => {
   const isVisible = state.tagPickerIsVisible
   closeDialogs()
   state.tagPickerIsVisible = !isVisible
-}
-
-// contain items in box
-
-const containItemsInNewBox = async () => {
-  if (isNotCollaborator.value) { return }
-  const rect = utils.boundaryRectFromItems(items.value)
-  const padding = consts.spaceBetweenCards
-  const paddingTop = 30 + padding
-  const box = {
-    id: nanoid(),
-    x: rect.x - padding,
-    y: rect.y - paddingTop,
-    resizeWidth: rect.width + (padding * 2),
-    resizeHeight: rect.height + (padding + paddingTop)
-  }
-  boxStore.createBox(box)
-  globalStore.closeAllDialogs()
-  await nextTick()
-  await nextTick()
-  globalStore.updateBoxDetailsIsVisibleForBoxId(box.id)
-  analyticsStore.event('containItemsInNewBox')
 }
 
 // color
