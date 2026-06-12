@@ -346,7 +346,7 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
+      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -371,6 +371,7 @@ export const useCardStore = defineStore('cards', {
       card.spaceId = spaceStore.id // currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
+      card.atUserMentions = atUserMentions || []
       return card
     },
     addCardToState (card) {
