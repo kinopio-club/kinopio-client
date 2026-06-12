@@ -130,15 +130,21 @@ export const useUserNotificationStore = defineStore('userNotifications', {
 
     // Card
 
+    shouldPreventCardNotification (cardId) {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      if (!cardId) { return true }
+      if (spaceStore.name === 'Hello Kinopio') { return true }
+      const userCanEdit = userStore.getUserCanEditSpace
+      if (!userCanEdit) { return true }
+    },
+
     async addCardUpdated ({ cardId, type }) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      if (!cardId) { return }
-      if (spaceStore.name === 'Hello Kinopio') { return }
+      if (this.shouldPreventCardNotification(cardId)) { return }
       if (notifiedCardIds.includes(cardId)) { return }
-      const userCanEdit = userStore.getUserCanEditSpace
-      if (!userCanEdit) { return }
       const userId = userStore.id
       const recipientUserIds = this.recipientUserIds
       if (!recipientUserIds.length) { return }
@@ -150,6 +156,24 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         spaceId: spaceStore.id
       }
       notifiedCardIds.push(cardId)
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
+    },
+    async addCardUserMention ({ id, cardId, userId }) { // to user mention
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      if (this.shouldPreventCardNotification(cardId)) { return }
+      if (!userId) { return }
+      if (userId === userStore.id) { return }
+      const recipientUserIds = [userId]
+      const notification = {
+        type: 'cardUserMention',
+        cardId,
+        userId: userStore.id,
+        recipientUserIds,
+        cardAtUserMentionId: id,
+        spaceId: spaceStore.id
+      }
       await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
 

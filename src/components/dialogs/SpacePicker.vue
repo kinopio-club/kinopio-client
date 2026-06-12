@@ -248,10 +248,10 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
           Loader(:visible="state.isLoadingNewSpace")
 
   //- Type to Search
-  section.info-section(v-if="parentIsCardDetails && !search && currentUserIsSignedIn")
+  section.info-section(v-if="parentIsCardDetails && !props.search && currentUserIsSignedIn")
     p
       img.icon.search(src="@/assets/search.svg")
-      span Type to search spaces {{search}}
+      span Type to search spaces
   //- Space List
   section.results-section(v-if="spaceListIsVisible")
     Loader(:visible="loading")

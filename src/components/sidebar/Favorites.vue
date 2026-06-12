@@ -179,7 +179,7 @@ section.favorites(v-if="visible" :style="styles")
 
     //- People
     template(v-if="!state.spacesIsVisible")
-      UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails")
+      UserList(:users="favoriteUsers" :selectedUsers="[userDetailsSelectedUser]" @selectUser="toggleUserDetails")
 
   //- blank state
   section.tips-section(v-if="isEmpty && !loading")

@@ -17,6 +17,9 @@ onMounted(() => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
+  window.addEventListener('focus', updateIsPlaying)
+  window.addEventListener('blur', updateIsPlaying)
+  document.addEventListener('visibilitychange', updateIsPlaying)
 
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
@@ -36,6 +39,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('mousemove', updateCanvasSelectedClass)
   window.removeEventListener('touchmove', updateCanvasSelectedClass)
+  window.removeEventListener('focus', updateIsPlaying)
+  window.removeEventListener('blur', updateIsPlaying)
+  document.removeEventListener('visibilitychange', updateIsPlaying)
   unsubscribes()
 })
 
@@ -124,6 +130,7 @@ const pauseVideo = () => {
 }
 const playVideo = () => {
   if (!props.video) { return }
+  if (props.videoIsPaused) { return }
   const element = videoElement.value
   element.play()
 }
@@ -142,11 +149,21 @@ const imageIsGif = computed(() => {
   if (!url) { return }
   return url.includes('.gif')
 })
+const updateIsPlaying = () => {
+  // pause gifs and videos while the window or tab is inactive to reduce idle cpu and gpu use
+  const windowIsActive = !document.hidden && document.hasFocus()
+  if (windowIsActive) {
+    play()
+  } else {
+    pause()
+  }
+}
 const pauseGif = () => {
   // adapted from https://stackoverflow.com/a/24707088
   // create canvas element from first frame of video
   if (globalStore.disableViewportOptimizations) { return }
   if (!imageIsGif.value) { return }
+  if (canvasElement()) { return } // already paused
   const image = imageElement.value
   const width = image.width
   const height = image.height

@@ -238,7 +238,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
     GroupList(:groups="groups" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
-    UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser" :filterPlaceholder="userListPlaceholder")
+    UserList(:users="spaceUsers" :selectedUsers="[dialogSpaceFilterByUser]" @selectUser="filterByUser" :filterPlaceholder="userListPlaceholder")
 
 </template>
 

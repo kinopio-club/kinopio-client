@@ -346,7 +346,7 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
+      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -371,6 +371,7 @@ export const useCardStore = defineStore('cards', {
       card.spaceId = spaceStore.id // currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
+      card.atUserMentions = atUserMentions || []
       return card
     },
     addCardToState (card) {
@@ -990,6 +991,7 @@ export const useCardStore = defineStore('cards', {
     // name
 
     cardWithNameSegments (card, excludeCheckboxString) {
+      const spaceStore = useSpaceStore()
       let name = card.name
       if (!name) {
         card.nameSegments = []
@@ -1005,7 +1007,7 @@ export const useCardStore = defineStore('cards', {
         imageUrl = url
         name = name.replace(url, '')
       }
-      const segments = utils.cardNameSegments(name)
+      const segments = utils.cardNameSegments(name, card.atUserMentions)
       if (imageUrl) {
         segments.unshift({
           isImage: true,
@@ -1013,8 +1015,11 @@ export const useCardStore = defineStore('cards', {
         })
       }
       card.nameSegments = segments.map(segment => {
-        if (!segment.isTag) { return segment }
-        segment.color = this.cardSegmentTagColor(segment)
+        if (segment.isTag) {
+          segment.color = this.cardSegmentTagColor(segment)
+        } else if (segment.isAtUserMention) {
+          segment.user = spaceStore.getSpaceUserById(segment.userId)
+        }
         return segment
       })
       return card

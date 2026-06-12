@@ -99,7 +99,7 @@ dialog.narrow.space-users(
   section.results-section(v-if="users.length")
     UserList(
       :users="users"
-      :selectedUser="selectedUser"
+      :selectedUsers="[selectedUser]"
       @selectUser="toggleUserDetails"
       :showCollaboratorActions="currentUserCanEditSpace"
     )

@@ -36,6 +36,24 @@ const dialogElement = ref(null)
 
 let prevCards, prevBoxes
 
+let unsubscribes
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerSelectedCardsContainInBox') {
+        containItemsInNewBox()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
+
 const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
@@ -285,6 +303,27 @@ const disconnectItems = () => {
   })
   const connectionIds = connections.map(connection => connection.id)
   connectionStore.removeConnections(connectionIds)
+}
+
+// surround with box
+
+const containItemsInNewBox = async () => {
+  const items = cards.value.concat(boxes.value, lists.value)
+  const rect = utils.boundaryRectFromItems(cards.value)
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  const box = {
+    id: nanoid(),
+    x: rect.x - padding,
+    y: rect.y - paddingTop,
+    resizeWidth: rect.width + (padding * 2),
+    resizeHeight: rect.height + (padding + paddingTop)
+  }
+  boxStore.createBox(box)
+  globalStore.closeAllDialogs()
+  await nextTick()
+  await nextTick()
+  globalStore.updateBoxDetailsIsVisibleForBoxId(box.id)
 }
 
 // connections
@@ -539,8 +578,12 @@ dialog.narrow.multiple-selected-actions(
         //- Connect
         button(v-if="multipleItemsIsSelected" title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
           img.connect.icon(src="@/assets/connect.svg")
+        //- Surround with Box
+        button(v-if="cardsIsSelected" title="Surround with Box (B)" @click.left.prevent="containItemsInNewBox" @keydown.stop.enter="containItemsInNewBox" :disabled="!canEditAll.all")
+          //- itemsisselected
+          img.icon.box-icon(src="@/assets/box.svg")
         //- List
-        button(title="Merge/Split Cards into List" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
+        button(v-if="cardsIsSelected" title="Merge/Split Cards into List (L)" :class="{active: cardsIsInListTogether}" @click.left.prevent="toggleListCards" @keydown.stop.enter="toggleListCards" :disabled="!canEditAll.all")
           img.icon.list-icon(src="@/assets/list.svg")
     //- card options
     CardActions(
@@ -676,8 +719,9 @@ dialog.narrow.multiple-selected-actions(
     margin-left 0
 
   .icon.list-icon,
-  .icon.connect
-    vertical-align -1px
+  .icon.connect,
+  .icon.box-icon
+    vertical-align -0.5px
 
   &.is-background-light
     section

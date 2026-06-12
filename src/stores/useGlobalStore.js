@@ -66,6 +66,11 @@ export const useGlobalStore = defineStore('global', {
     isPinchZooming: false,
     isTouchScrolling: false,
 
+    // community spaces
+    exploreSpaces: [],
+    followingSpaces: [],
+    everyoneSpaces: [],
+
     // search
     searchIsVisible: false,
     search: '',

@@ -281,6 +281,16 @@ export const useUserStore = defineStore('user', {
       const isUser = spaceStore.users.find(spaceUser => spaceUser.id === user.id)
       return isUser
     },
+    getUsersByCardAtUserMentions (card) {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      const isAtUserMentions = utils.arrayHasItems(card.atUserMentions)
+      if (!isAtUserMentions) { return [] }
+      let users = card.atUserMentions.map(mention => spaceStore.getSpaceUserById(mention.userId) || globalStore.getOtherUserById(mention.userId))
+      users = users.filter(user => Boolean(user))
+      users = uniqBy(users, 'id')
+      return users
+    },
 
     // init
 
