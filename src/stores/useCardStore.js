@@ -452,6 +452,14 @@ export const useCardStore = defineStore('cards', {
       keys = keys.filter(key => !ignoreKeys.includes(key))
       return Boolean(keys.length)
     },
+    updateCardNameUpdatedAt (updates) {
+      return updates.map(update => {
+        if (update.name) {
+          update.nameUpdatedAt = new Date()
+        }
+        return update
+      })
+    },
     async updateCards (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -459,6 +467,7 @@ export const useCardStore = defineStore('cards', {
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
       try {
+        updates = this.updateCardNameUpdatedAt(updates)
         this.updateCardsState(updates)
         if (!userStore.getUserCanEditSpace) { return }
         const ids = updates.map(update => update.id)
@@ -828,8 +837,7 @@ export const useCardStore = defineStore('cards', {
       }
       const update = {
         id,
-        name,
-        nameUpdatedAt: new Date()
+        name
       }
       this.updateCard(update)
     },
@@ -839,8 +847,7 @@ export const useCardStore = defineStore('cards', {
       name = name.replace('[x]', '').trim()
       const update = {
         id,
-        name,
-        nameUpdatedAt: new Date()
+        name
       }
       this.updateCard(update)
     },
@@ -857,7 +864,6 @@ export const useCardStore = defineStore('cards', {
       const update = {
         id,
         name,
-        nameUpdatedAt: new Date(),
         spaceId
       }
       await apiStore.updateCards([update])

@@ -517,7 +517,6 @@ const updateCardName = async (newName) => {
   const update = {
     id: cardId,
     name: newName,
-    nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
   cardStore.updateCard(update)
