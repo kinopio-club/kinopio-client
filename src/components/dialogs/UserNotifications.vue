@@ -242,6 +242,8 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
                 //- icon
                 img.icon.heart(v-if="notification.iconClass === 'heart'" src="@/assets/heart.svg")
                 img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
+                .badge(v-if="notification.iconClass === 'at'" :style="{ backgroundColor: currentUser.color }")
+                  img.icon.at(src="@/assets/at.svg")
                 //- user
                 span.user-wrap
                   UserLabelInline(:user="notification.user")
