@@ -1450,23 +1450,32 @@ const replaceAtTextWithUserMention = async (event, user) => {
   if (!user) { return }
   let newName = card.value.name
   const position = atTextPosition()
-  let userString = '@' + utils.normalizeString(user.name)
-  if (!user.name) {
-    userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
+  const userString = utils.cardUserAtMentionString(user)
+  // remove
+  const shouldRemove = newName.includes(userString)
+  if (shouldRemove) {
+    newName = newName.replaceAll(`${userString}`, '')
+    cardStore.updateCard({
+      id: card.value.id,
+      name: newName
+    })
+    cardStore.removeAtUserMentions(card.value, userString)
+  // add
+  } else {
+    const start = newName.substring(0, position)
+    const end = newName.substring(position + atTextToCursor().length, newName.length)
+    let mention = userString
+    if (!utils.hasBlankCharacters(end.charAt(0))) {
+      mention = mention + ' ' // separate mention from following text
+    }
+    newName = start + mention + end
+    updateCardName(newName)
+    const newCursorPosition = position + mention.length
+    await nextTick()
+    focusName(newCursorPosition)
+    globalStore.shouldPreventNextEnterKey = false
+    cardStore.addAtUserMention(card.value, user, userString)
   }
-  const start = newName.substring(0, position)
-  const end = newName.substring(position + atTextToCursor().length, newName.length)
-  let mention = userString
-  if (!utils.hasBlankCharacters(end.charAt(0))) {
-    mention = mention + ' ' // separate mention from following text
-  }
-  newName = start + mention + end
-  updateCardName(newName)
-  const newCursorPosition = position + mention.length
-  await nextTick()
-  focusName(newCursorPosition)
-  globalStore.shouldPreventNextEnterKey = false
-  cardStore.updateAtUserMentions([card.value], user, userString)
   textareaSizes()
 }
 

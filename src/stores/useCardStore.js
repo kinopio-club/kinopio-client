@@ -489,24 +489,33 @@ export const useCardStore = defineStore('cards', {
     updateCard (update) {
       this.updateCards([update])
     },
-    async updateAtUserMentions (cards, user, userString) {
+    async addAtUserMention (card, user, userString) {
       const userNotificationStore = useUserNotificationStore()
-      for (const card of cards) {
-        const mention = {
-          id: nanoid(),
-          cardId: card.id,
-          userId: user.id,
-          stringMatch: userString
-        }
-        const atUserMentions = card.atUserMentions.concat(mention)
-        const update = {
-          id: card.id,
-          atUserMentions
-        }
-        await this.updateCard(update)
-        await userNotificationStore.addCardUserMention(mention)
-        this.updateCardsDimension(card.id)
+      const mention = {
+        id: nanoid(),
+        cardId: card.id,
+        userId: user.id,
+        stringMatch: userString
       }
+      const atUserMentions = card.atUserMentions.concat(mention)
+      const update = {
+        id: card.id,
+        atUserMentions
+      }
+      await this.updateCard(update)
+      await userNotificationStore.addCardUserMention(mention)
+      this.updateCardDimensions(card.id)
+    },
+    async removeAtUserMentions (card, userString) {
+      const atUserMentions = card.atUserMentions.filter(mention => {
+        return mention.stringMatch !== userString
+      })
+      const update = {
+        id: card.id,
+        atUserMentions
+      }
+      await this.updateCard(update)
+      this.updateCardDimensions(card.id)
     },
 
     // remove

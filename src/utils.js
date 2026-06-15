@@ -607,6 +607,13 @@ export default {
       return 'Alt'
     }
   },
+  cardUserAtMentionString (user) {
+    let userString = '@' + this.normalizeString(user.name)
+    if (!user.name) {
+      userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
+    }
+    return userString
+  },
   splitCardNameByParagraphAndSentence (prevName) {
     const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []

@@ -333,17 +333,26 @@ const replaceAtTextWithUserMention = async (event, user) => {
   if (!user) { return }
   for (const card of props.cards) {
     let newName = card.name
-    let userString = '@' + utils.normalizeString(user.name)
-    if (!user.name) {
-      userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
+    const userString = utils.cardUserAtMentionString(user)
+    const shouldRemove = newName.includes(userString)
+    // remove
+    if (shouldRemove) {
+      newName = newName.replaceAll(`${userString}`, '')
+      cardStore.updateCard({
+        id: card.id,
+        name: newName
+      })
+      cardStore.removeAtUserMentions(card, userString)
+    // add
+    } else {
+      newName = `${newName} ${userString}`
+      cardStore.updateCard({
+        id: card.id,
+        name: newName
+      })
+      await nextTick()
+      cardStore.addAtUserMention(card, user, userString)
     }
-    newName = `${newName} ${userString}`
-    cardStore.updateCard({
-      id: card.id,
-      name: newName
-    })
-    await nextTick()
-    cardStore.updateAtUserMentions(props.cards, user, userString)
   }
 }
 
