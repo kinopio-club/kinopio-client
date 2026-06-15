@@ -328,23 +328,6 @@ const toggleAtPickerIsVisible = async () => {
   closeDialogs()
   state.atPickerIsVisible = !isVisible
 }
-const createAtUserMention = async (user, userString) => {
-  for (const card of props.cards) {
-    const mention = {
-      id: nanoid(),
-      cardId: card.id,
-      userId: user.id,
-      stringMatch: userString
-    }
-    const atUserMentions = card.atUserMentions.concat(mention)
-    const update = {
-      id: card.id,
-      atUserMentions
-    }
-    await cardStore.updateCard(update)
-    await userNotificationStore.addCardUserMention(mention)
-  }
-}
 const replaceAtTextWithUserMention = async (event, user) => {
   closeDialogs()
   if (!user) { return }
@@ -360,7 +343,7 @@ const replaceAtTextWithUserMention = async (event, user) => {
       name: newName
     })
     await nextTick()
-    createAtUserMention(user, userString)
+    cardStore.updateAtUserMentions(props.cards, user, userString)
   }
 }
 

@@ -1445,21 +1445,6 @@ const checkIfShouldShowAtPicker = () => {
     hideAtPicker()
   }
 }
-const createAtUserMention = async (user, userString) => {
-  const mention = {
-    id: nanoid(),
-    cardId: card.value.id,
-    userId: user.id,
-    stringMatch: userString
-  }
-  const atUserMentions = cardAtUserMentions.value.concat(mention)
-  const update = {
-    id: card.value.id,
-    atUserMentions
-  }
-  await cardStore.updateCard(update)
-  await userNotificationStore.addCardUserMention(mention)
-}
 const replaceAtTextWithUserMention = async (event, user) => {
   hideAtPicker()
   if (!user) { return }
@@ -1481,7 +1466,7 @@ const replaceAtTextWithUserMention = async (event, user) => {
   await nextTick()
   focusName(newCursorPosition)
   globalStore.shouldPreventNextEnterKey = false
-  createAtUserMention(user, userString)
+  cardStore.updateAtUserMentions([card.value], user, userString)
   textareaSizes()
 }
 
