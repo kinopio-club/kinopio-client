@@ -571,7 +571,10 @@ export const useCardStore = defineStore('cards', {
       card.isRemoved = false
       const isLocal = this.getCard(card.id)
       if (isLocal) {
-        this.updateCard(card)
+        this.updateCard({
+          id: card.id,
+          isRemoved: false
+        })
       } else {
         this.addCardToState(card)
         await cache.updateSpace('cards', this.getAllCards, spaceStore.id)

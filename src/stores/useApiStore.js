@@ -25,6 +25,24 @@ const restoreSessionQueueFromBackup = async () => {
 }
 restoreSessionQueueFromBackup()
 
+const mergeOperationBody = (prev, next) => {
+  const merged = { ...prev, ...next }
+  // update name by most recent nameUpdatedAt
+  const prevHasName = Object.hasOwn(prev, 'name')
+  const nextHasName = Object.hasOwn(next, 'name')
+  if (!prevHasName || !nextHasName) { return merged }
+  let prevTime = 0
+  let nextTime = 0
+  if (prev.nameUpdatedAt) { prevTime = new Date(prev.nameUpdatedAt).getTime() }
+  if (next.nameUpdatedAt) { nextTime = new Date(next.nameUpdatedAt).getTime() }
+  const isPrevTimeMoreRecent = prevTime && prevTime >= nextTime
+  if (isPrevTimeMoreRecent) {
+    merged.name = prev.name
+    merged.nameUpdatedAt = prev.nameUpdatedAt
+  }
+  return merged
+}
+
 let otherItemsQueue
 const clearOtherItemsQueue = () => {
   otherItemsQueue = {
@@ -238,7 +256,7 @@ export const useApiStore = defineStore('api', {
           return newItem
         } else if (shouldMerge) {
           isPrevItem = true
-          newItem.body = { ...prevItem.body, ...newItem.body } // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } → { a: 1, b: 3, c:2 }
+          newItem.body = mergeOperationBody(prevItem.body, newItem.body) // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } → { a: 1, b: 3, c:2 }
           return newItem
         } else {
           return prevItem
