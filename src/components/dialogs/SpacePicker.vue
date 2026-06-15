@@ -44,7 +44,6 @@ const props = defineProps({
   parentIsCardDetails: Boolean,
   position: Object,
   search: String,
-  cursorPosition: Number,
   shouldShowNewSpace: Boolean
 })
 watch(() => props.visible, async (value, prevValue) => {

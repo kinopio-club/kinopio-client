@@ -1592,7 +1592,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
       TagPicker(
         :visible="state.tag.pickerIsVisible"
-        :cursorPosition="state.cursorPosition"
         :position="state.tag.pickerPosition"
         :search="state.tag.pickerSearch"
         @closeDialog="hideTagPicker"
@@ -1603,7 +1602,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       SpacePicker(
         :visible="state.space.pickerIsVisible"
         :parentIsCardDetails="true"
-        :cursorPosition="state.cursorPosition"
         :position="state.space.pickerPosition"
         :search="state.space.pickerSearch"
         :shouldExcludeCurrentSpace="true"
@@ -1614,7 +1612,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       AtPicker(
         :visible="state.at.pickerIsVisible"
         :position="state.at.pickerPosition"
-        :cursorPosition="state.cursorPosition"
         :search="state.at.pickerSearch"
         :cards="[card]"
         @closeDialog="hideAtPicker"

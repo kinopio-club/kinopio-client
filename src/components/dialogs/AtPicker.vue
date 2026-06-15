@@ -30,7 +30,8 @@ const props = defineProps({
   position: Object,
   search: String,
   cursorPosition: Number,
-  cards: Array
+  cards: Array,
+  searchIsDisabled: Boolean
 })
 
 const state = reactive({
@@ -62,6 +63,7 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 const filteredUsers = computed(() => {
   let users = spaceStore.getSpaceAndGroupMembers
+  if (!props.search) { return users }
   const options = {
     pre: '',
     post: '',
@@ -95,7 +97,7 @@ watch(() => props.search, async (value) => {
 
 <template lang="pug">
 dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="styles")
-  section.info-section(v-if="!props.search && currentUserIsSignedIn")
+  section.info-section(v-if="!props.search && currentUserIsSignedIn && !props.searchIsDisabled")
     p
       img.icon.search(src="@/assets/search.svg")
       span Type to search users
@@ -111,5 +113,6 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
 </template>
 
 <style lang="stylus">
-// dialog.at-picker
+dialog.at-picker
+  overflow auto
 </style>
