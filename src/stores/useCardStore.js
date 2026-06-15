@@ -505,6 +505,7 @@ export const useCardStore = defineStore('cards', {
         }
         await this.updateCard(update)
         await userNotificationStore.addCardUserMention(mention)
+        this.updateCardsDimension(card.id)
       }
     },
 
