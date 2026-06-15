@@ -116,14 +116,15 @@ const segmentTagColor = (segment) => {
     return currentUser.value.color
   }
 }
-const cardNameSegments = (name) => {
+const cardNameSegments = (card) => {
+  let name = card.name
   const url = utils.urlFromString(name)
   let imageUrl
   if (utils.urlIsImage(url)) {
     imageUrl = url
     name = name.replace(url, '')
   }
-  const segments = utils.cardNameSegments(name)
+  const segments = utils.cardNameSegments(name, card.atUserMentions)
   if (imageUrl) {
     segments.unshift({
       isImage: true,
@@ -131,8 +132,11 @@ const cardNameSegments = (name) => {
     })
   }
   return segments.map(segment => {
-    if (!segment.isTag) { return segment }
-    segment.color = segmentTagColor(segment)
+    if (segment.isAtUserMention) {
+      segment.user = spaceStore.getSpaceUserById(segment.userId) || globalStore.getOtherUserById(segment.userId)
+    } else if (segment.isTag) {
+      segment.color = segmentTagColor(segment)
+    }
     return segment
   })
 }
@@ -254,11 +258,11 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
             //- add to explore button
             .row.add-to-explore-row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore" :isSmall="true")
-            //- card details
-            .row.card-details-row(v-if="notification.cardId")
+            //- card name
+            .row.card-name-row(v-if="notification.cardId")
               a(:href="cardUrl(notification)")
                 .card-details.badge.button-badge(@click.stop.prevent="focusCard(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :style="{backgroundColor: notification.card.backgroundColor}")
-                  template(v-for="segment in cardNameSegments(notification.card.name)")
+                  template(v-for="segment in cardNameSegments(notification.card)")
                     NameSegment(:segment="segment" @showTagDetailsIsVisible="focusCard(notification)" :backgroundColorIsDark="cardBackgroundIsDark(notification.card)")
                   img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 </template>
@@ -375,4 +379,7 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
     margin-left 4px
     .group-badge
       margin-right 0
+  .card-name-row
+    .user-label-inline
+      pointer-events none
 </style>
