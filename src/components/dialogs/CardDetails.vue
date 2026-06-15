@@ -1123,7 +1123,7 @@ const uploadFile = async (file) => {
   }
 }
 
-// merge split
+// split
 
 const updateNameSplitIntoCardsCount = () => {
   const isPreview = true

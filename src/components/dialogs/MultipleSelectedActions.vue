@@ -10,6 +10,7 @@ import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import consts from '@/consts.js'
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardActions from '@/components/subsections/CardActions.vue'
@@ -21,7 +22,6 @@ import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vu
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
-import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
