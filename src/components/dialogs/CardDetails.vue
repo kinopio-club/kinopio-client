@@ -1135,6 +1135,15 @@ const updateNameSplitIntoCardsCount = () => {
     state.nameSplitIntoCardsCount = 0
   }
 }
+const splitCardsAtUserMentions = (id, newName) => {
+  let mentions = card.value.atUserMentions || []
+  mentions = mentions.filter(mention => newName.includes(mention.stringMatch))
+  return mentions.map(mention => {
+    mention.id = nanoid()
+    mention.cardId = id
+    return mention
+  })
+}
 const splitCards = (event, isPreview) => {
   const prevName = (state.pastedName || name.value).trim()
   const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
@@ -1148,14 +1157,16 @@ const splitCards = (event, isPreview) => {
     if (index === 0) {
       id = card.value.id
     }
+    const newName = cardName.trim()
     const newCard = {
       id,
-      name: cardName.trim(),
+      name: newName,
       x: card.value.x + indentX,
       y: card.value.y,
       frameId: card.value.frameId,
       backgroundColor: card.value.backgroundColor,
-      maxWidth: user.cardSettingsCardWrapWidth
+      maxWidth: user.cardSettingsCardWrapWidth,
+      atUserMentions: splitCardsAtUserMentions(id, newName)
     }
     return newCard
   })
