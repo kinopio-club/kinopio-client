@@ -384,10 +384,12 @@ section.subsection.style-actions(
     .button-wrap(title="Turn into Comment")
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
-    //- Surround with Box
-    .button-wrap(title="Surround with Box (B)")
-      button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
-        img.icon.box-icon(src="@/assets/box.svg")
+    .button-wrap
+      button(title="@mention User")
+        //- , Due Date, and Timer
+        span @
+      //- UserPicker
+
     //- Counter
     .button-wrap
       button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
