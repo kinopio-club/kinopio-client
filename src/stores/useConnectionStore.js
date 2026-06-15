@@ -299,6 +299,10 @@ export const useConnectionStore = defineStore('connections', {
         return
       }
       const ids = globalStore.multipleConnectionsSelectedIds
+      if (!ids.length) {
+        console.error('🚑 updateSelectedConnections no connections selected')
+        return
+      }
       const updates = ids.map(id => {
         const body = { id }
         if (name) {
