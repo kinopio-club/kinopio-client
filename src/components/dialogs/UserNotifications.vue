@@ -247,9 +247,10 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
                 template(v-if="notification.type === 'addSpaceToGroup'")
                   GroupLabel(:group="notification.group")
                 //- space
-                img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
-                span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }")
-                  span {{spaceName(notification.space.name)}}
+                template(v-if="notification.space")
+                  img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
+                  span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }")
+                    span {{spaceName(notification.space.name)}}
             //- add to explore button
             .row.add-to-explore-row(v-if="notification.type === 'askToAddToExplore'")
               AddToExplore(:space="notification.space" :visible="true" @updateAddToExplore="updateAddToExplore" :isSmall="true")
