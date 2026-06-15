@@ -16,6 +16,7 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let sessionQueue = []
+const cardNameUpdatedAtByCardId = {}
 
 const restoreSessionQueueFromBackup = async () => {
   sessionQueue = await cache.queueBackup()
@@ -41,6 +42,20 @@ const mergeOperationBody = (prev, next) => {
     merged.nameUpdatedAt = prev.nameUpdatedAt
   }
   return merged
+}
+
+// checks that body name is most recent nameUpdatedAt across queues
+const normalizeCardName = (body) => {
+  if (!Object.hasOwn(body, 'name')) { return }
+  if (!body.nameUpdatedAt) { return }
+  const newTime = new Date(body.nameUpdatedAt).getTime()
+  const prevTime = cardNameUpdatedAtByCardId[body.id] || 0
+  if (newTime < prevTime) {
+    delete body.name
+    delete body.nameUpdatedAt
+  } else {
+    cardNameUpdatedAtByCardId[body.id] = newTime
+  }
 }
 
 let otherItemsQueue
@@ -236,6 +251,7 @@ export const useApiStore = defineStore('api', {
       body.clientCreatedAt = new Date()
       const isSignedIn = userStore.getUserIsSignedIn
       if (!isSignedIn) { return }
+      if (name === 'updateCard') { normalizeCardName(body) }
       const newItem = {
         name,
         body
