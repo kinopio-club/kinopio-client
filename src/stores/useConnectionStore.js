@@ -291,6 +291,26 @@ export const useConnectionStore = defineStore('connections', {
     updateConnection (update) {
       this.updateConnections([update])
     },
+    // Used by extensions only
+    updateSelectedConnections ({ name, color }) {
+      const globalStore = useGlobalStore()
+      if (!name || !color) {
+        console.error('🚑 updateSelectedConnections missing name or color')
+        return
+      }
+      const ids = globalStore.multipleConnectionsSelectedIds
+      const updates = ids.map(id => {
+        const body = { id }
+        if (name) {
+          body.name = name
+        }
+        if (color) {
+          body.color = color
+        }
+        return body
+      })
+      this.updateConnections(updates)
+    },
 
     // remove
 
