@@ -58,6 +58,7 @@ watch(() => globalStore.isLoadingSpace, (value) => {
     img.icon(src="@/assets/anon-avatar.svg")
     img.icon(src="@/assets/apple.svg")
     img.icon(src="@/assets/arena.svg")
+    img.icon(src="@/assets/at.svg")
     img.icon(src="@/assets/autoplay.svg")
     img.icon(src="@/assets/box-empty.svg")
     img.icon(src="@/assets/box-filled.svg")

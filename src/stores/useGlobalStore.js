@@ -545,6 +545,7 @@ export const useGlobalStore = defineStore('global', {
     triggerPauseAllAudio () {},
     triggerScrollItemIntoView (cardId) {},
     triggerPickerNavigationKey (key) {},
+    triggerPickerNavigationFirst () {},
     triggerPickerSelect () {},
     triggerUpdateNotifications () {},
     triggerSpaceZoomReset () {},

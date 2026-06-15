@@ -40,6 +40,8 @@ onMounted(() => {
         } else if (key === 'ArrowDown') {
           focusNextItem(currentIndex)
         }
+      } else if (name === 'triggerPickerNavigationFirst') {
+        focusFirstItem()
       } else if (name === 'triggerPickerSelect') {
         const users = usersFiltered.value
         const currentUser = users.find(user => user.id === state.focusOnId)
@@ -156,6 +158,12 @@ const userIsSelected = (user) => {
 
 const closeDialog = () => {
   emit('closeDialog')
+}
+const focusFirstItem = () => {
+  const users = usersFiltered.value
+  const firstItem = users[0]
+  if (!firstItem) { return }
+  state.focusOnId = firstItem.id
 }
 const focusPreviousItem = (currentIndex) => {
   const users = usersFiltered.value

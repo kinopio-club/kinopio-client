@@ -1616,7 +1616,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :position="state.at.pickerPosition"
         :cursorPosition="state.cursorPosition"
         :search="state.at.pickerSearch"
-        :card="card"
+        :cards="[card]"
         @closeDialog="hideAtPicker"
         @selectUser="replaceAtTextWithUserMention"
       )

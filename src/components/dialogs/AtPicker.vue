@@ -8,6 +8,8 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 
+import fuzzy from '@/libs/fuzzy.js'
+
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -28,7 +30,7 @@ const props = defineProps({
   position: Object,
   search: String,
   cursorPosition: Number,
-  card: Object
+  cards: Array
 })
 
 const state = reactive({
@@ -57,19 +59,36 @@ const styles = computed(() => {
 })
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const users = computed(() => spaceStore.getSpaceAndGroupMembers)
-const filteredUsers = computed(() => []) // user names filtered by search
+
+const filteredUsers = computed(() => {
+  let users = spaceStore.getSpaceAndGroupMembers
+  const options = {
+    pre: '',
+    post: '',
+    extract: (item) => {
+      const name = item.name || ''
+      return name
+    }
+  }
+  const filtered = fuzzy.filter(props.search, users, options)
+  users = filtered.map(item => item.original)
+  return users.slice(0, 5)
+})
 
 const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
 
 const selectedUsers = computed(() => {
-  return userStore.getUsersByCardAtUserMentions(props.card)
+  let users = []
+  props.cards.forEach(card => {
+    users = users.concat(userStore.getUsersByCardAtUserMentions(card))
+  })
+  return users
 })
 
 watch(() => props.search, async (value) => {
-  console.log(props.search, users.value)
+  globalStore.triggerPickerNavigationFirst()
 })
 
 </script>
@@ -82,7 +101,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
       span Type to search users
 
   UserList(
-    :users="users"
+    :users="filteredUsers"
     :selectedUsers="selectedUsers"
     @selectUser="selectUser"
     :isClickable="true"
