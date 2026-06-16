@@ -53,7 +53,8 @@ const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const normalizedCards = computed(() => {
   const items = utils.clone(props.cards)
   return items.map(card => {
-    card = cardStore.cardWithNameSegments(card, true)
+    card = cardStore.cardWithNameSegments(card, true) // update w card.atUserMentions
+
     card.user = spaceStore.getSpaceUserById(card.userId)
     globalStore.updateOtherUsers(card.user)
     if (!card.user) {
