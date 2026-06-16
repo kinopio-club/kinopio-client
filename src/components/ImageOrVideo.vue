@@ -105,6 +105,31 @@ const lazyLoading = computed(() => {
   }
 })
 
+// pause when item details dialog is visible
+
+const handleItemDetailsDialogIsVisible = (value) => {
+  if (value) {
+    pause()
+  } else {
+    play()
+  }
+}
+watch(() => globalStore.cardDetailsIsVisibleForCardId, (value) => {
+  handleItemDetailsDialogIsVisible(value)
+})
+watch(() => globalStore.connectionDetailsIsVisibleForConnectionId, (value) => {
+  handleItemDetailsDialogIsVisible(value)
+})
+watch(() => globalStore.boxDetailsIsVisibleForBoxId, (value) => {
+  handleItemDetailsDialogIsVisible(value)
+})
+watch(() => globalStore.listDetailsIsVisibleForListId, (value) => {
+  handleItemDetailsDialogIsVisible(value)
+})
+watch(() => globalStore.lineDetailsIsVisibleForLineId, (value) => {
+  handleItemDetailsDialogIsVisible(value)
+})
+
 // video
 
 watch(() => props.videoIsPaused, (value) => {

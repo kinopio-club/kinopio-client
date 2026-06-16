@@ -79,7 +79,7 @@ const scrollIntoViewAndFocus = async () => {
   await scrollIntoView()
   if (utils.isMobile()) { return }
   const element = nameElement.value
-  const length = name.value.length
+  const length = name.value?.length || 0
   await nextTick()
   focusName()
   if (length && element) {
