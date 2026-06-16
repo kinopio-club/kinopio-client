@@ -118,4 +118,6 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
 <style lang="stylus">
 dialog.at-picker
   overflow auto
+  .user-list
+    max-height 150px
 </style>
