@@ -127,20 +127,30 @@ const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 
 // filters
 
-const filterResults = (results) => {
-  if (!globalStore.sidebarTasksFilters.shouldShowCompleted) {
-    results = results.filter(item => utils.nameIsUnchecked(item.name))
-  }
-  return results
+const shouldShowCompleted = computed(() => globalStore.sidebarTasksFilters.shouldShowCompleted)
+const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly)
+const atUserMentionsCurrentUser = (atUserMentions) => {
+  if (!atUserMentions) { return }
+  const currentUserId = userStore.id
+  return atUserMentions.find(mention => mention.userId === currentUserId)
 }
-const taskFiltersIsActive = computed(() => Boolean(globalStore.sidebarTasksFilters.shouldShowCompleted))
+const itemsFiltered = (items, type) => {
+  if (!shouldShowCompleted.value) {
+    items = items.filter(item => utils.nameIsUnchecked(item.name))
+  }
+  if (shouldShowAtUserMentionOnly.value && type === 'cards') {
+    items = items.filter(card => atUserMentionsCurrentUser(card.atUserMentions))
+  }
+  return items
+}
+const taskFiltersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
 const toggleTaskFiltersIsVisible = () => {
   const value = !state.taskFiltersIsVisible
   closeDialogs()
   state.taskFiltersIsVisible = value
 }
 const updateShouldShowCompleted = (value) => {
-  globalStore.sidebarTasksFilters.shouldShowCompleted = value
+  shouldShowCompleted.value = value
 }
 const clearAllFilters = () => {
   globalStore.triggerClearTaskFilters()
@@ -182,9 +192,6 @@ const allItems = computed(() => {
 })
 const todoItems = computed(() => itemsFiltered(allItems.value))
 const isTodoItems = computed(() => todoItems.value.length)
-const itemsFiltered = (value) => {
-  return filterResults(value)
-}
 
 // select
 
@@ -291,11 +298,11 @@ const itemsRemainingCount = computed(() => {
   template(v-if="isTodoItems")
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
-      ItemList(:cards="itemsFiltered(state.cards)" :boxes="itemsFiltered(state.boxes)" @selectItem="selectItem")
+      ItemList(:cards="itemsFiltered(state.cards, 'cards')" :boxes="itemsFiltered(state.boxes, 'boxes')" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="itemsFiltered(space.cards)" :boxes="itemsFiltered(space.boxes)" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
+        ItemList(:space="space" :cards="itemsFiltered(space.cards, 'cards')" :boxes="itemsFiltered(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
 
 </template>
 
@@ -303,6 +310,7 @@ const itemsRemainingCount = computed(() => {
 .tasks
   overflow auto
   border-top 1px solid var(--primary-border)
+  min-height 160px
   .button-wrap
     margin 0
   .tips-section
