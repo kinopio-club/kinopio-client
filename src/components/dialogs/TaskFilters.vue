@@ -2,10 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
+
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
+const userStore = useUserStore()
 
 let unsubscribes
 
@@ -59,14 +63,26 @@ watch(() => globalStore.sidebarTasksFilters.shouldShowCompleted, (value, prevVal
 
 const clearAllFilters = () => {
   globalStore.sidebarTasksFilters.shouldShowCompleted = false
+  globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly = false
 }
+const totalFiltersIsActive = computed(() => {
+  return shouldShowCompleted.value || shouldShowAtUserMentionOnly.value
+})
+
+// show completed
+
+const currentUser = computed(() => userStore.getUserAllState)
 const shouldShowCompleted = computed(() => globalStore.sidebarTasksFilters.shouldShowCompleted)
 const toggleShouldShowCompleted = () => {
   globalStore.sidebarTasksFilters.shouldShowCompleted = !globalStore.sidebarTasksFilters.shouldShowCompleted
 }
-const totalFiltersIsActive = computed(() => {
-  return globalStore.sidebarTasksFilters.shouldShowCompleted // ||
-})
+
+// show @user only
+
+const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly)
+const toggleShouldShowAtUserMentionOnly = () => {
+  globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly = !globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly
+}
 </script>
 
 <template lang="pug">
@@ -80,10 +96,17 @@ dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.lef
         span Clear
         span.badge.info.filter-is-active(v-if="totalFiltersIsActive")
   section
-    .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
-      label(:class="{ active: shouldShowCompleted }")
-        input(type="checkbox" v-model="shouldShowCompleted")
-        span Show Completed
+    .row
+      .button-wrap(@click.left.prevent="toggleShouldShowCompleted" @keydown.stop.enter="toggleShouldShowCompleted")
+        label(:class="{ active: shouldShowCompleted }")
+          input(type="checkbox" v-model="shouldShowCompleted")
+          span Show Completed
+    .row
+      .button-wrap(@click.left.prevent="toggleShouldShowAtUserMentionOnly" @keydown.stop.enter="toggleShouldShowCompleted")
+        label(:class="{ active: shouldShowAtUserMentionOnly }")
+          input(type="checkbox" v-model="shouldShowAtUserMentionOnly")
+          UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
+          span Only
 </template>
 
 <style lang="stylus">
@@ -91,4 +114,7 @@ dialog.task-filters
   left initial
   right 0
   width 200px
+  .user-label-inline
+    .anon-avatar
+      vertical-align 2px
 </style>
