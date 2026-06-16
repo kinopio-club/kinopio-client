@@ -125,7 +125,6 @@ const toggleAddToGroupIsVisible = () => {
 
 // users
 
-const users = computed(() => spaceStore.getSpaceAndGroupMembers)
 const toggleSpaceUsersIsVisible = () => {
   const value = !state.spaceUsersIsVisible
   closeDialogs()
