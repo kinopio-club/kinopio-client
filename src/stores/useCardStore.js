@@ -346,7 +346,7 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
+      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -371,6 +371,7 @@ export const useCardStore = defineStore('cards', {
       card.spaceId = spaceStore.id // currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
+      card.atUserMentions = atUserMentions || []
       return card
     },
     addCardToState (card) {
@@ -451,6 +452,14 @@ export const useCardStore = defineStore('cards', {
       keys = keys.filter(key => !ignoreKeys.includes(key))
       return Boolean(keys.length)
     },
+    updateCardNameUpdatedAt (updates) {
+      return updates.map(update => {
+        if (update.name) {
+          update.nameUpdatedAt = new Date()
+        }
+        return update
+      })
+    },
     async updateCards (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -458,6 +467,7 @@ export const useCardStore = defineStore('cards', {
       const broadcastStore = useBroadcastStore()
       const connectionStore = useConnectionStore()
       try {
+        updates = this.updateCardNameUpdatedAt(updates)
         this.updateCardsState(updates)
         if (!userStore.getUserCanEditSpace) { return }
         const ids = updates.map(update => update.id)
@@ -478,6 +488,34 @@ export const useCardStore = defineStore('cards', {
     },
     updateCard (update) {
       this.updateCards([update])
+    },
+    async addAtUserMention (card, user, userString) {
+      const userNotificationStore = useUserNotificationStore()
+      const mention = {
+        id: nanoid(),
+        cardId: card.id,
+        userId: user.id,
+        stringMatch: userString
+      }
+      const atUserMentions = card.atUserMentions.concat(mention)
+      const update = {
+        id: card.id,
+        atUserMentions
+      }
+      await this.updateCard(update)
+      await userNotificationStore.addCardUserMention(mention)
+      this.updateCardDimensions(card.id)
+    },
+    async removeAtUserMentions (card, userString) {
+      const atUserMentions = card.atUserMentions.filter(mention => {
+        return mention.stringMatch !== userString
+      })
+      const update = {
+        id: card.id,
+        atUserMentions
+      }
+      await this.updateCard(update)
+      this.updateCardDimensions(card.id)
     },
 
     // remove
@@ -561,7 +599,10 @@ export const useCardStore = defineStore('cards', {
       card.isRemoved = false
       const isLocal = this.getCard(card.id)
       if (isLocal) {
-        this.updateCard(card)
+        this.updateCard({
+          id: card.id,
+          isRemoved: false
+        })
       } else {
         this.addCardToState(card)
         await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
@@ -827,8 +868,7 @@ export const useCardStore = defineStore('cards', {
       }
       const update = {
         id,
-        name,
-        nameUpdatedAt: new Date()
+        name
       }
       this.updateCard(update)
     },
@@ -838,8 +878,7 @@ export const useCardStore = defineStore('cards', {
       name = name.replace('[x]', '').trim()
       const update = {
         id,
-        name,
-        nameUpdatedAt: new Date()
+        name
       }
       this.updateCard(update)
     },
@@ -856,7 +895,6 @@ export const useCardStore = defineStore('cards', {
       const update = {
         id,
         name,
-        nameUpdatedAt: new Date(),
         spaceId
       }
       await apiStore.updateCards([update])
@@ -990,6 +1028,7 @@ export const useCardStore = defineStore('cards', {
     // name
 
     cardWithNameSegments (card, excludeCheckboxString) {
+      const spaceStore = useSpaceStore()
       let name = card.name
       if (!name) {
         card.nameSegments = []
@@ -1005,7 +1044,7 @@ export const useCardStore = defineStore('cards', {
         imageUrl = url
         name = name.replace(url, '')
       }
-      const segments = utils.cardNameSegments(name)
+      const segments = utils.cardNameSegments(name, card.atUserMentions)
       if (imageUrl) {
         segments.unshift({
           isImage: true,
@@ -1013,8 +1052,11 @@ export const useCardStore = defineStore('cards', {
         })
       }
       card.nameSegments = segments.map(segment => {
-        if (!segment.isTag) { return segment }
-        segment.color = this.cardSegmentTagColor(segment)
+        if (segment.isTag) {
+          segment.color = this.cardSegmentTagColor(segment)
+        } else if (segment.isAtUserMention) {
+          segment.user = spaceStore.getSpaceUserById(segment.userId)
+        }
         return segment
       })
       return card

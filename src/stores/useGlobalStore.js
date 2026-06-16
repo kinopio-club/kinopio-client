@@ -66,6 +66,11 @@ export const useGlobalStore = defineStore('global', {
     isPinchZooming: false,
     isTouchScrolling: false,
 
+    // community spaces
+    exploreSpaces: [],
+    followingSpaces: [],
+    everyoneSpaces: [],
+
     // search
     searchIsVisible: false,
     search: '',
@@ -540,6 +545,7 @@ export const useGlobalStore = defineStore('global', {
     triggerPauseAllAudio () {},
     triggerScrollItemIntoView (cardId) {},
     triggerPickerNavigationKey (key) {},
+    triggerPickerNavigationFirst () {},
     triggerPickerSelect () {},
     triggerUpdateNotifications () {},
     triggerSpaceZoomReset () {},

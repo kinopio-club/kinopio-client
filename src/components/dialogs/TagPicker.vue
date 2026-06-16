@@ -53,8 +53,7 @@ const emit = defineEmits(['selectTag', 'closeDialog', 'currentTag', 'newTagColor
 const props = defineProps({
   visible: Boolean,
   position: Object,
-  search: String,
-  cursorPosition: Number
+  search: String
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {

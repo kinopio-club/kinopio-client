@@ -36,9 +36,10 @@ dialog.narrow.user-settings-cards-dialog(v-if="props.visible" :open="props.visib
 </template>
 
 <style lang="stylus">
-.user-settings-cards-dialog
+dialog.user-settings-cards-dialog
   left initial
   right 8px
+  top 20px
   &.narrow
     width 200px
   .title-section

@@ -607,6 +607,13 @@ export default {
       return 'Alt'
     }
   },
+  cardUserAtMentionString (user) {
+    let userString = '@' + this.normalizeString(user.name)
+    if (!user.name) {
+      userString = '@anon' + user.id.slice(user.id.length - 4, user.id.length)
+    }
+    return userString
+  },
   splitCardNameByParagraphAndSentence (prevName) {
     const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
@@ -1795,6 +1802,13 @@ export default {
       })
       card.id = newId
       card.userId = userId
+      // update @mentions
+      card.atUserMentions = card.atUserMentions || []
+      card.atUserMentions = card.atUserMentions.map(value => {
+        value.id = nanoid()
+        value.cardId = newId
+        return value
+      })
       return card
     })
     boxes = boxes.map(box => {
@@ -2736,8 +2750,9 @@ export default {
     segments = sortBy(segments, ['startPosition'])
     return segments
   },
-  cardNameSegments (name) {
+  cardNameSegments (name, atUserMentions) {
     if (!name) { return [] }
+    atUserMentions = atUserMentions || []
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
@@ -2785,6 +2800,23 @@ export default {
       const endPosition = startPosition + command.length
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
+    })
+    atUserMentions.forEach(mention => {
+      if (!mention.stringMatch) { return }
+      const startPositions = []
+      let index = name.indexOf(mention.stringMatch)
+      while (index !== -1) {
+        startPositions.push(index)
+        index = name.indexOf(mention.stringMatch, index + mention.stringMatch.length)
+      }
+      // use the first position not already covered by another segment
+      const startPosition = startPositions.find(position => {
+        const isUsed = segments.find(segment => position >= segment.startPosition && position < segment.endPosition)
+        return !isUsed
+      })
+      if (startPosition === undefined) { return }
+      const endPosition = startPosition + mention.stringMatch.length
+      segments.push({ startPosition, endPosition, name: mention.stringMatch, userId: mention.userId, isAtUserMention: true })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

@@ -8,13 +8,14 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import FontPicker from '@/components/dialogs/FontPicker.vue'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import AtPicker from '@/components/dialogs/AtPicker.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -28,8 +29,8 @@ const boxStore = useBoxStore()
 const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const analyticsStore = useAnalyticsStore()
 const themeStore = useThemeStore()
+const userNotificationStore = useUserNotificationStore()
 
 let unsubscribes
 
@@ -41,8 +42,6 @@ onMounted(() => {
       if (name === 'triggerCloseChildDialogs' && props.visible) {
         const shouldPreventEmit = true
         closeDialogs(shouldPreventEmit)
-      } else if (name === 'triggerSelectedCardsContainInBox') {
-        containItemsInNewBox()
       } else if (name === 'triggerUpdateTheme') {
         updateDefaultColor(utils.cssVariable('secondary-background'))
       }
@@ -75,6 +74,7 @@ const state = reactive({
   colorPickerIsVisible: false,
   fontPickerIsVisible: false,
   framePickerIsVisible: false,
+  atPickerIsVisible: false,
   defaultColor: '#e3e3e3'
 })
 
@@ -105,6 +105,7 @@ const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBo
 
 const closeDialogs = (shouldPreventEmit) => {
   state.tagPickerIsVisible = false
+  state.atPickerIsVisible = false
   state.colorPickerIsVisible = false
   state.fontPickerIsVisible = false
   state.framePickerIsVisible = false
@@ -172,28 +173,6 @@ const toggleTagPickerIsVisible = () => {
   const isVisible = state.tagPickerIsVisible
   closeDialogs()
   state.tagPickerIsVisible = !isVisible
-}
-
-// contain items in box
-
-const containItemsInNewBox = async () => {
-  if (isNotCollaborator.value) { return }
-  const rect = utils.boundaryRectFromItems(items.value)
-  const padding = consts.spaceBetweenCards
-  const paddingTop = 30 + padding
-  const box = {
-    id: nanoid(),
-    x: rect.x - padding,
-    y: rect.y - paddingTop,
-    resizeWidth: rect.width + (padding * 2),
-    resizeHeight: rect.height + (padding + paddingTop)
-  }
-  boxStore.createBox(box)
-  globalStore.closeAllDialogs()
-  await nextTick()
-  await nextTick()
-  globalStore.updateBoxDetailsIsVisibleForBoxId(box.id)
-  analyticsStore.event('containItemsInNewBox')
 }
 
 // color
@@ -342,6 +321,41 @@ const toggleCounterIsVisible = () => {
   })
 }
 
+// @ mention
+
+const toggleAtPickerIsVisible = async () => {
+  const isVisible = state.atPickerIsVisible
+  closeDialogs()
+  state.atPickerIsVisible = !isVisible
+}
+const replaceAtTextWithUserMention = async (event, user) => {
+  closeDialogs()
+  if (!user) { return }
+  for (const card of props.cards) {
+    let newName = card.name
+    const userString = utils.cardUserAtMentionString(user)
+    const shouldRemove = newName.includes(userString)
+    // remove
+    if (shouldRemove) {
+      newName = newName.replaceAll(`${userString}`, '')
+      cardStore.updateCard({
+        id: card.id,
+        name: newName
+      })
+      cardStore.removeAtUserMentions(card, userString)
+    // add
+    } else {
+      newName = `${newName} ${userString}`
+      cardStore.updateCard({
+        id: card.id,
+        name: newName
+      })
+      await nextTick()
+      cardStore.addAtUserMention(card, user, userString)
+    }
+  }
+}
+
 // card
 
 const updateCardDimensions = async () => {
@@ -379,17 +393,17 @@ section.subsection.style-actions(
       //- Fonts
       button.toggle-fonts-button.small-button(:disabled="!canEditAll" v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Aa
-      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="props.cards" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
     .button-wrap
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
         span Tag
-      TagPickerStyleActions(:visible="state.tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
+      TagPickerStyleActions(:visible="state.tagPickerIsVisible" :cards="props.cards" :tagNamesInCard="tagNamesInCard")
     //- Frame
     .button-wrap
       button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active: state.framePickerIsVisible || isFrames }")
         span Frame
-      FramePicker(:visible="state.framePickerIsVisible" :cards="cards")
+      FramePicker(:visible="state.framePickerIsVisible" :cards="props.cards")
     //- Color
     .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
       button.change-color(:disabled="!canEditAll" :class="{active: state.colorPickerIsVisible}" title="Color")
@@ -410,10 +424,18 @@ section.subsection.style-actions(
     .button-wrap(title="Turn into Comment")
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
-    //- Surround with Box
-    .button-wrap(title="Surround with Box (B)")
-      button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
-        img.icon.box-icon(src="@/assets/box.svg")
+    .button-wrap
+      button(title="@mention User" @click.stop="toggleAtPickerIsVisible" :class="{active: state.atPickerIsVisible}")
+        //- , Due Date, and Timer
+        span @
+      AtPicker(
+        :visible="state.atPickerIsVisible"
+        :cards="props.cards"
+        @closeDialog="closeDialogs"
+        :searchIsDisabled="true"
+        @selectUser="replaceAtTextWithUserMention"
+      )
+
     //- Counter
     .button-wrap
       button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")

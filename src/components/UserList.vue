@@ -14,6 +14,8 @@ import Loader from '@/components/Loader.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 
+import last from 'lodash-es/last'
+
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -27,6 +29,24 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
         closeDialogs()
+      } else if (name === 'triggerPickerNavigationKey') {
+        const key = args[0]
+        const users = usersFiltered.value
+        const currentIndex = users.findIndex(user => user.id === state.focusOnId)
+        if (!utils.arrayHasItems(users)) {
+          closeDialog()
+        } else if (key === 'ArrowUp') {
+          focusPreviousItem(currentIndex)
+        } else if (key === 'ArrowDown') {
+          focusNextItem(currentIndex)
+        }
+      } else if (name === 'triggerPickerNavigationFirst') {
+        focusFirstItem()
+      } else if (name === 'triggerPickerSelect') {
+        const users = usersFiltered.value
+        const currentUser = users.find(user => user.id === state.focusOnId)
+        selectUser(null, currentUser)
+        globalStore.shouldPreventNextEnterKey = true
       }
     }
   )
@@ -38,19 +58,22 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['selectUser', 'childDialogIsVisible'])
+const emit = defineEmits(['selectUser', 'childDialogIsVisible', 'closeDialog'])
 
 const props = defineProps({
   users: Array,
-  selectedUser: Object,
+  selectedUsers: Array,
   showCollaboratorActions: Boolean,
   showGroupUserActions: Boolean,
   group: Object,
-  filterPlaceholder: String
+  filterPlaceholder: String,
+  shouldHideOptionsButton: Boolean,
+  shouldHideResultsFilter: Boolean
 })
 const state = reactive({
   filter: '',
   filteredUsers: [],
+  focusOnId: '',
   groupUserRolePickerUserId: '',
   loading: {
     removeGroupUserId: ''
@@ -80,8 +103,8 @@ const users = computed(() => {
   })
   return items
 })
-const updateFilteredUsers = (users) => {
-  state.filteredUsers = users
+const updateUsers = (users) => {
+  state.users = users
 }
 const updateFilter = (filter) => {
   state.filter = filter
@@ -89,7 +112,7 @@ const updateFilter = (filter) => {
 const usersFiltered = computed(() => {
   let items
   if (state.filter) {
-    items = state.filteredUsers
+    items = state.users
   } else {
     items = users.value
   }
@@ -123,9 +146,47 @@ const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
 const userIsSelected = (user) => {
-  if (!utils.objectHasKeys(props.selectedUser)) { return }
-  const userId = props.selectedUser.id || globalStore.userDetailsUser.id
-  return userId === user.id
+  if (!props.selectedUsers?.length) { return }
+  return props.selectedUsers.some(selectedUser => {
+    if (!utils.objectHasKeys(selectedUser)) { return false }
+    const userId = selectedUser.id || globalStore.userDetailsUser.id
+    return userId === user.id
+  })
+}
+
+// keyboard focus
+
+const closeDialog = () => {
+  emit('closeDialog')
+}
+const focusFirstItem = () => {
+  const users = usersFiltered.value
+  const firstItem = users[0]
+  if (!firstItem) { return }
+  state.focusOnId = firstItem.id
+}
+const focusPreviousItem = (currentIndex) => {
+  const users = usersFiltered.value
+  const firstItem = users[0]
+  const previousItem = users[currentIndex - 1]
+  if (previousItem) {
+    state.focusOnId = previousItem.id
+  } else {
+    state.focusOnId = firstItem.id
+  }
+}
+const focusNextItem = (currentIndex) => {
+  const users = usersFiltered.value
+  const lastItem = last(users)
+  const lastItemIsFocused = lastItem.id === state.focusOnId
+  const nextItem = users[currentIndex + 1]
+  if (lastItemIsFocused) {
+    closeDialog()
+  } else if (nextItem) {
+    state.focusOnId = nextItem.id
+  } else {
+    state.focusOnId = lastItem.id
+  }
 }
 
 // space
@@ -230,16 +291,17 @@ const removeGroupUser = async (event, user) => {
 <template lang="pug">
 .user-list(@click.stop="closeDialogs")
   ResultsFilter(
+    v-if="!props.shouldHideResultsFilter"
     :items="props.users"
     @updateFilter="updateFilter"
-    @updateFilteredItems="updateFilteredUsers"
+    @updateFilteredItems="updateUsers"
     :placeholder="placeholder"
   )
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
-      li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
+      li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), hover: state.focusOnId === user.id }")
         //- options button
-        .button-wrap.options-button-wrap
+        .button-wrap.options-button-wrap(v-if="!props.shouldHideOptionsButton")
           button.small-button(@click.stop="toggleOptionsIsVisibleForUser(user)" :class="{active: isOptionsIsVisibleForUser(user)}")
             span.options-button-text …
 

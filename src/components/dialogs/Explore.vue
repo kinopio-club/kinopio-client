@@ -31,9 +31,6 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
-  exploreSpaces: Array,
-  followingSpaces: Array,
-  everyoneSpaces: Array,
   loading: Boolean,
   unreadExploreSpacesCount: Number,
   unreadFollowingSpacesCount: Number,
@@ -128,14 +125,16 @@ const updateCurrentSection = (value) => {
 const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
 const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
 const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
+const followingSpaces = computed(() => globalStore.followingSpaces)
+const everyoneSpaces = computed(() => globalStore.everyoneSpaces)
 const currentSpaces = computed(() => {
   let spaces
   if (currentSectionIsExplore.value) {
     spaces = exploreSpaces.value
   } else if (currentSectionIsFollowing.value) {
-    spaces = props.followingSpaces
+    spaces = followingSpaces.value
   } else if (currentSectionIsEveryone.value) {
-    spaces = props.everyoneSpaces
+    spaces = everyoneSpaces.value
   }
   return spaces || []
 })
@@ -156,7 +155,7 @@ const exploreSpaces = computed(() => {
   if (state.exploreSearchResults.length) {
     return state.exploreSearchResults
   } else {
-    return props.exploreSpaces
+    return globalStore.exploreSpaces
   }
 })
 const updateFilter = async (value) => {
@@ -190,7 +189,7 @@ const selectItem = () => {
 // blank slate info
 
 const followInfoIsVisible = computed(() => {
-  const isFavorites = Boolean(userStore.favoriteUsers.length || props.followingSpaces?.length)
+  const isFavorites = Boolean(userStore.favoriteUsers.length || followingSpaces.value.length)
   return !props.loading && !isFavorites && currentSectionIsFollowing.value
 })
 const randomUser = computed(() => {

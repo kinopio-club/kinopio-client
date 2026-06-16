@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -14,6 +15,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -37,7 +39,7 @@ const styles = computed(() => {
 const createdByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
-  let user = spaceStore.getSpaceUserById(userId) || globalStore.otherUsers[userId]
+  let user = userStore.getAtUserMentionById(userId)
   if (!user) {
     user = {
       name: '',

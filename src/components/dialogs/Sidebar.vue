@@ -14,7 +14,7 @@ import Removed from '@/components/sidebar/Removed.vue'
 import Stats from '@/components/sidebar/Stats.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
-import History from '@/components/sidebar/History.vue'
+import SpaceHistory from '@/components/sidebar/SpaceHistory.vue'
 import Tasks from '@/components/sidebar/Tasks.vue'
 import Note from '@/components/sidebar/Note.vue'
 import SidebarResize from '@/components/SidebarResize.vue'
@@ -239,7 +239,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Stats(:visible="state.statsIsVisible" :subsectionHeight="state.subsectionHeight")
   Inbox(:visible="state.inboxIsVisible" :subsectionHeight="state.subsectionHeight")
   Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
-  History(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
+  SpaceHistory(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
   Tasks(:visible="state.tasksIsVisible" :subsectionHeight="state.subsectionHeight")
   Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight" @updateDialogHeight="updateHeights")
 
