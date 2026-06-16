@@ -70,7 +70,7 @@ const styles = computed(() => {
 })
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const availableUsers = computed(() => spaceStore.getSpaceAndGroupMembers.concat(globalStore.otherUsers))
+const availableUsers = computed(() => spaceStore.getSpaceAndGroupMembers.concat(globalStore.getOtherUsers))
 const filteredUsers = computed(() => {
   let users = availableUsers.value
   if (!props.search) { return users }

@@ -325,7 +325,7 @@ export const useGlobalStore = defineStore('global', {
     spaceListFilterInfo: {},
 
     // session data
-    otherUsers: [], // { id, name color }
+    otherUsers: {}, // keyed by user id, { id, name color }
     otherItems: { spaces: [], cards: [] },
     sendingQueue: [],
     currentUserIsInvitedButCannotEditCurrentSpace: false,
@@ -432,6 +432,9 @@ export const useGlobalStore = defineStore('global', {
       const spaceStore = useSpaceStore()
       const tags = spaceStore.tags.concat(this.tags)
       return uniqBy(tags, 'name')
+    },
+    getOtherUsers () {
+      return Object.values(this.otherUsers)
     }
   },
 

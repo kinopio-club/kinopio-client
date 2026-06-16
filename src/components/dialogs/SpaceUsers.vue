@@ -52,6 +52,7 @@ const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
 // users
 
+const contributors = computed(() => globalStore.getOtherUsers)
 const users = computed(() => spaceStore.getSpaceAndGroupMembers)
 const selectedUser = computed(() => {
   const userDetailsIsVisible = globalStore.userDetailsIsVisible
@@ -108,6 +109,15 @@ dialog.narrow.space-users(
       p
         GroupLabel(:group="spaceGroup")
         span Group Members
+  section.title-section(v-if="contributors.length")
+    p Non-member contributors
+  section.results-section(v-if="contributors.length")
+    UserList(
+      :users="contributors"
+      :selectedUsers="[selectedUser]"
+      @selectUser="toggleUserDetails"
+      :shouldHideOptionsButton="true"
+    )
 </template>
 
 <style lang="stylus">
