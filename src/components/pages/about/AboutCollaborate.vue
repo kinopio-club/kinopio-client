@@ -122,7 +122,7 @@ const vPauseAnimation = {
 }
 defineExpose({ vPauseAnimation })
 
-const collaborationFeatures = computed(() => 'Collaboration Features ● Real-Time Collaboration ● Private or Public ● Invite to Edit or Read-Only ● Embed ● Groups to Manage Shared Team or Project Spaces')
+const collaborationFeatures = computed(() => 'Collaboration Features ● Real-Time Collaboration ● Private or Public ● Invite to Edit or Read-Only ● Embed ● Groups to Manage Shared Team or Project Spaces ● Assign Cards to @users')
 const toggleIsStatic = () => {
   state.isStatic = !state.isStatic
 }

@@ -154,7 +154,6 @@ dialog.narrow.card-history(v-if="props.visible" :open="props.visible" @click.lef
 dialog.card-history
   left initial
   right 8px
-  top 20px
   .row
     flex-wrap wrap
     row-gap 10px
