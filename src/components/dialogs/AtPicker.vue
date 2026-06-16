@@ -40,10 +40,20 @@ const state = reactive({
 
 watch(() => props.visible, async (value) => {
   if (value) {
+    await updateDialogHeight()
     await nextTick()
-    updateDialogHeight()
+    await scrollIntoView()
   }
 })
+
+const scrollIntoView = async () => {
+  // wait for element to be rendered before getting position
+  await nextTick()
+  await nextTick()
+  await nextTick()
+  const element = dialogElement.value
+  globalStore.scrollElementIntoView({ element })
+}
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -118,6 +128,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
 <style lang="stylus">
 dialog.at-picker
   overflow auto
+  min-height 200px
   .user-list
     max-height 150px
 </style>
