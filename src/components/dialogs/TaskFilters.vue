@@ -15,8 +15,6 @@ let unsubscribes
 
 const dialogElement = ref(null)
 
-// TODO: sortitemsby (updatedAt default) , show assigned to me only, byTags[], byGroupSpaces[]
-
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   const globalActionUnsubscribe = globalStore.$onAction(
@@ -34,8 +32,6 @@ onBeforeUnmount(() => {
   unsubscribes()
   window.removeEventListener('resize', updateDialogHeight)
 })
-
-const emit = defineEmits(['updateShouldShowCompleted'])
 
 const props = defineProps({
   visible: Boolean
@@ -56,10 +52,6 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-
-watch(() => globalStore.sidebarTasksFilters.shouldShowCompleted, (value, prevValue) => {
-  emit('updateShouldShowCompleted', value)
-})
 
 const clearAllFilters = () => {
   globalStore.sidebarTasksFilters.shouldShowCompleted = false

@@ -83,9 +83,6 @@ const state = reactive({
   taskFiltersIsVisible: false,
   isLoading: false,
   isError: false,
-  filters: {
-    shouldShowCompleted: false
-  },
   cards: [],
   boxes: []
 })
@@ -134,23 +131,11 @@ const atUserMentionsCurrentUser = (atUserMentions) => {
   const currentUserId = userStore.id
   return atUserMentions.find(mention => mention.userId === currentUserId)
 }
-const itemsFiltered = (items, type) => {
-  if (!shouldShowCompleted.value) {
-    items = items.filter(item => utils.nameIsUnchecked(item.name))
-  }
-  if (shouldShowAtUserMentionOnly.value && type === 'cards') {
-    items = items.filter(card => atUserMentionsCurrentUser(card.atUserMentions))
-  }
-  return items
-}
 const taskFiltersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
 const toggleTaskFiltersIsVisible = () => {
   const value = !state.taskFiltersIsVisible
   closeDialogs()
   state.taskFiltersIsVisible = value
-}
-const updateShouldShowCompleted = (value) => {
-  shouldShowCompleted.value = value
 }
 const clearAllFilters = () => {
   globalStore.triggerClearTaskFilters()
@@ -158,6 +143,22 @@ const clearAllFilters = () => {
 
 // items
 
+const itemsFilteredConditionallyCompleted = (items, type) => {
+  items = itemsFiltered(items, type)
+  if (!shouldShowCompleted.value) {
+    items = items.filter(item => utils.nameIsUnchecked(item.name))
+  }
+  return items
+}
+const itemsFiltered = (items, type) => {
+  const isCards = type === 'cards'
+  if (shouldShowAtUserMentionOnly.value && isCards) {
+    items = items.filter(card => atUserMentionsCurrentUser(card.atUserMentions))
+  } else if (shouldShowAtUserMentionOnly.value && !isCards) {
+    return []
+  }
+  return items
+}
 const updateItems = () => {
   if (scopeIsCurrentSpace.value) {
     state.cards = cardStore.getCardsIsTodoSortedByY
@@ -187,11 +188,13 @@ const updateItemsBySpace = async () => {
   }
   state.isLoading = false
 }
-const allItems = computed(() => {
-  return state.cards.concat(state.boxes)
+const filteredTodoItems = computed(() => {
+  const cards = itemsFiltered(state.cards, 'cards')
+  const boxes = itemsFiltered(state.boxes, 'boxes')
+  return cards.concat(boxes)
 })
-const todoItems = computed(() => itemsFiltered(allItems.value))
-const isTodoItems = computed(() => todoItems.value.length)
+const filteredCompleteTodoItems = computed(() => filteredTodoItems.value.filter(item => utils.nameIsChecked(item.name)))
+const isTodoItems = computed(() => filteredTodoItems.value.length)
 
 // select
 
@@ -230,16 +233,13 @@ const selectBox = (box) => {
 
 // progress
 
-const itemsCompleted = computed(() => {
-  return allItems.value.filter(item => utils.nameIsChecked(item.name))
-})
 const progressCircleTitle = computed(() => {
-  let value = todoItems.value.length / allItems.value.length
+  let value = itemsRemainingCount.value / filteredTodoItems.value.length
   value = Math.round(value * 100)
-  return `${todoItems.value.length}/${allItems.value.length}, ${value}% Completed`
+  return `${itemsRemainingCount.value}/${filteredTodoItems.value.length}, ${value}% Completed`
 })
 const itemsRemainingCount = computed(() => {
-  const value = allItems.value.filter(card => !utils.nameIsChecked(card.name))
+  const value = filteredTodoItems.value.filter(card => !utils.nameIsChecked(card.name))
   return value.length.toString()
 })
 
@@ -250,7 +250,7 @@ const itemsRemainingCount = computed(() => {
   section
     .row.title-row
       div
-        ProgressCircle(v-if="isTodoItems" :value="itemsCompleted.length" :max="allItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
+        ProgressCircle(v-if="isTodoItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
         span Tasks
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
@@ -271,7 +271,7 @@ const itemsRemainingCount = computed(() => {
 
             button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
-        TaskFilters(:visible="state.taskFiltersIsVisible" @updateShouldShowCompleted="updateShouldShowCompleted")
+        TaskFilters(:visible="state.taskFiltersIsVisible")
 
     .row
       .segmented-buttons
@@ -298,11 +298,11 @@ const itemsRemainingCount = computed(() => {
   template(v-if="isTodoItems")
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
-      ItemList(:cards="itemsFiltered(state.cards, 'cards')" :boxes="itemsFiltered(state.boxes, 'boxes')" @selectItem="selectItem")
+      ItemList(:cards="itemsFilteredConditionallyCompleted(state.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(state.boxes, 'boxes')" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="itemsFiltered(space.cards, 'cards')" :boxes="itemsFiltered(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
+        ItemList(:space="space" :cards="itemsFilteredConditionallyCompleted(space.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
 
 </template>
 
