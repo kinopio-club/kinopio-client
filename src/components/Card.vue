@@ -1009,7 +1009,7 @@ const nameSegments = computed(() => {
       segment.otherCard = globalStore.getOtherCardById(cardId)
     // @user mention
     } else if (segment.isAtUserMention) {
-      segment.user = spaceStore.getSpaceUserById(segment.userId) || globalStore.getOtherUserById(segment.userId)
+      segment.user = userStore.getAtUserMentionById(segment.userId)
     // text
     } else if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)
@@ -1579,7 +1579,7 @@ const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
-  let user = spaceStore.getSpaceUserById(userId) || globalStore.otherUsers[userId]
+  let user = userStore.getAtUserMentionById(userId)
   if (!user) {
     user = {
       name: '',

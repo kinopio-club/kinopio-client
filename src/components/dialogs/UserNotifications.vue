@@ -133,7 +133,7 @@ const cardNameSegments = (card) => {
   }
   return segments.map(segment => {
     if (segment.isAtUserMention) {
-      segment.user = spaceStore.getSpaceUserById(segment.userId) || globalStore.getOtherUserById(segment.userId)
+      segment.user = userStore.getAtUserMentionById(segment.userId)
     } else if (segment.isTag) {
       segment.color = segmentTagColor(segment)
     }
