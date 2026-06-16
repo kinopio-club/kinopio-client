@@ -60,9 +60,9 @@ const styles = computed(() => {
 })
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-
+const availableUsers = computed(() => spaceStore.getSpaceAndGroupMembers)
 const filteredUsers = computed(() => {
-  let users = spaceStore.getSpaceAndGroupMembers
+  let users = availableUsers.value
   if (!props.search) { return users }
   const options = {
     pre: '',
@@ -110,6 +110,9 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideOptionsButton="true"
     :shouldHideResultsFilter="true"
   )
+
+  section(v-if="availableUsers.length <= 1")
+    p.badge.info To @mention others, invite them to this space, or a group
 </template>
 
 <style lang="stylus">
