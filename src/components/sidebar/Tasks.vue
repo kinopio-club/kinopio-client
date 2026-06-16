@@ -135,15 +135,11 @@ const atUserMentionsCurrentUser = (atUserMentions) => {
   return atUserMentions.find(mention => mention.userId === currentUserId)
 }
 const itemsFiltered = (items, type) => {
-  console.log('👄',items, type)
   if (!shouldShowCompleted.value) {
     items = items.filter(item => utils.nameIsUnchecked(item.name))
   }
-  const isCards = type === 'cards'
-  if (shouldShowAtUserMentionOnly.value && isCards) {
+  if (shouldShowAtUserMentionOnly.value && type === 'cards') {
     items = items.filter(card => atUserMentionsCurrentUser(card.atUserMentions))
-  } else if (shouldShowAtUserMentionOnly.value && !isCards) {
-    return []
   }
   return items
 }
