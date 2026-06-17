@@ -1788,6 +1788,9 @@ export const useGlobalStore = defineStore('global', {
       utils.typeCheck({ value: updatedUser, type: 'object' })
       this.otherUsers[updatedUser.id] = updatedUser
     },
+    clearOtherUsers () {
+      this.otherUsers = {}
+    },
     updateOtherItems ({ cards, spaces }) {
       utils.typeCheck({ value: cards, type: 'array' })
       utils.typeCheck({ value: spaces, type: 'array' })
