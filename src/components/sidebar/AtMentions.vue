@@ -172,13 +172,13 @@ const updateItemsBySpace = async () => {
   try {
     state.isLoading = true
     state.isError = false
-    // if (!itemsBySpace.value) {
-    //   globalStore.sidebarAtMentionsItemsBySpace = await apiStore.getUserTodos()
-    // }
-    // // update items
-    // globalStore.sidebarAtMentionsItemsBySpace.forEach(space => {
-    //   state.cards = state.cards.concat(space.cards)
-    // })
+    if (!itemsBySpace.value) {
+      globalStore.sidebarAtMentionsItemsBySpace = await apiStore.getUserAtMentions()
+    }
+    // update items
+    globalStore.sidebarAtMentionsItemsBySpace.forEach(space => {
+      state.cards = state.cards.concat(space.cards)
+    })
   } catch (error) {
     console.error('🚒 updateItemsBySpace', error)
     state.isError = true
@@ -292,10 +292,10 @@ const selectCard = (card) => {
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
       ItemList(:cards="state.cards" @selectItem="selectItem")
-  //-   //- all spaces
-  //-   section.results-section(v-else)
-  //-     template(v-for="space in itemsBySpace" :key="space.id")
-  //-       ItemList(:space="space" :cards="itemsFiltered(space.cards, 'cards')" :boxes="itemsFiltered(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
+    //- all spaces
+    section.results-section(v-else)
+      template(v-for="space in itemsBySpace" :key="space.id")
+        ItemList(:space="space" :cards="space.cards" @selectItem="selectItem" @selectSpace="selectSpace")
 
 </template>
 

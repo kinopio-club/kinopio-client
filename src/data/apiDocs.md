@@ -64,6 +64,7 @@ Method | Path | Description | Scope
 `GET`   | <code class="users">/user/inbox-space</code>            | Get info on the user's `Inbox` space. whether a space is an inbox or not is based on name only, so it's possible to have multiple `Inbox` spaces, but only one the most recently updated Inbox will be returned | `read`
 `GET`   | <code class="users">/user/tags</code>                   | Get a list of the last edited <a href="#tags" class="badge button-badge tags">Tags</a> in your spaces                                                                  | `read`
 `GET`   | <code class="users">/user/todos</code>                  | Get todo cards and boxes (item names start with `[]`, `[ ]`, or `[x]`), grouped by space                                                                            | `read`
+`GET`   | <code class="users">/user/at-user-mentions</code>       | Get cards where the user is in `atUserMentions`                                                                                                             | `read`
 `PATCH` | <code class="users">/user</code>                        | Update the user based on an object body with updated user attributes. You can't patch `apiKey`, `password`, `emailIsVerified`, or `email`       | `edit`
 
 </div>
