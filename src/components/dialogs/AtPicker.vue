@@ -77,7 +77,10 @@ const styles = computed(() => {
     maxHeight: state.dialogHeight + 'px'
   }
   if (isMultipleAvailableUsers.value) {
-    value.minHeight = '200px'
+    const rowHeight = 33
+    let minHeight = availableUsers.value.length * rowHeight
+    minHeight = Math.min(minHeight, 200)
+    value.minHeight = minHeight + 'px'
   }
   return value
 })
