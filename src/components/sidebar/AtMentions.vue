@@ -9,14 +9,14 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import TaskFilters from '@/components/dialogs/TaskFilters.vue'
 import ItemList from '@/components/ItemList.vue'
-import ProgressCircle from '@/components/ProgressCircle.vue'
+// import ProgressCircle from '@/components/ProgressCircle.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 
 const globalStore = useGlobalStore()
-const boxStore = useBoxStore()
+// const boxStore = useBoxStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -66,7 +66,7 @@ onMounted(() => {
   // )
   unsubscribes = () => {
     globalActionUnsubscribe()
-    // cardActionUnsubscribe()
+    cardActionUnsubscribe()
     // boxActionUnsubscribe()
   }
 })
@@ -96,6 +96,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const spaceIsLoaded = computed(() => !globalStore.isLoadingSpace)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUser = computed(() => userStore.getUserAllState)
 const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
@@ -244,7 +245,8 @@ const selectCard = (card) => {
     .row.title-row
       div
         //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
-        span @Mentions
+        UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
+        //- span and Due Dates
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
 
@@ -348,4 +350,7 @@ const selectCard = (card) => {
   // .filter-button
   //   margin-top -5px
   //   margin-bottom -5px
+  .user-label-inline
+    .anon-avatar
+      vertical-align 2px
 </style>
