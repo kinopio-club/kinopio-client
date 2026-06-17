@@ -53,7 +53,7 @@ onMounted(() => {
         checkIfShouldNotifySpaceOutOfSync()
       } else if (name === 'triggerNotifyCouldNotSave') {
         if (!globalStore.isSpacePage) { return }
-        state.notifiyCouldNotSave = true
+        state.notifyCouldNotSave = true
       }
     }
   )
@@ -85,7 +85,7 @@ watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
 const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
-  notifiyCouldNotSave: false
+  notifyCouldNotSave: false
 })
 
 const closeAllDialogs = () => {
@@ -186,7 +186,7 @@ const notifyServerCouldNotSave = computed(() => {
 })
 const hideNotifyServerCouldNotSave = () => {
   globalStore.notifyServerCouldNotSave = false
-  state.notifiyCouldNotSave = false
+  state.notifyCouldNotSave = false
 }
 const notifyServerUnresponsive = computed(() => globalStore.notifyServerUnresponsive)
 const notifySpaceIsRemoved = computed(() => globalStore.notifySpaceIsRemoved)
@@ -497,7 +497,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 
-  .persistent-item.danger(v-if="state.notifiyCouldNotSave")
+  .persistent-item.danger(v-if="state.notifyCouldNotSave")
     p Error saving changes locally
     .row
       .button-wrap

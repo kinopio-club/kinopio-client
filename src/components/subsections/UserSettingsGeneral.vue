@@ -23,8 +23,6 @@ const spaceStore = useSpaceStore()
 let unsubscribes
 
 onMounted(() => {
-  window.addEventListener('resize', updateViewportHeightIsShort)
-  updateViewportHeightIsShort()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
@@ -37,7 +35,6 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateViewportHeightIsShort)
   unsubscribes()
 })
 
@@ -52,23 +49,13 @@ const state = reactive({
   userApiInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
   notificationSettingsIsVisible: false,
-  themeSettingsIsVisible: false,
-  viewportHeightIsShort: false
-})
-
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    updateViewportHeightIsShort()
-  }
+  themeSettingsIsVisible: false
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isModerator = computed(() => userStore.isModerator)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const updateViewportHeightIsShort = () => {
-  state.viewportHeightIsShort = globalStore.viewportHeight <= 700
-}
 
 // dialog
 
@@ -139,11 +126,8 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: state.notificationSettingsIsVisible}")
           img.icon.mail(src="@/assets/mail.svg")
           span Notifications
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             NotificationSettings(:visible="state.notificationSettingsIsVisible")
-        template(v-else)
-          NotificationSettings(:visible="state.notificationSettingsIsVisible")
 
     //- Theme and Colors
     .row
@@ -152,11 +136,8 @@ const toggleIsDebugMode = () => {
           ThemeToggle
           button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: state.themeSettingsIsVisible}")
             span Theme Settings
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             ThemeSettings(:visible="state.themeSettingsIsVisible")
-        template(v-else)
-          ThemeSettings(:visible="state.themeSettingsIsVisible")
 
   //- Account Settings
   section
@@ -166,22 +147,16 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: state.userAccountSettingsIsVisible}")
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
           span Account
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
-        template(v-else)
-          UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
 
       //- Billing
       .button-wrap
         button(@click.left.stop="toggleUserBillingSettingsIsVisible" :class="{active: state.userBillingSettingsIsVisible}")
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
-        template(v-else)
-          UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
 
   //- Developer Info
   section
@@ -191,11 +166,8 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleUserApiInfoIsVisible" :class="{active: state.userApiInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
           span API
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             UserApiInfo(:visible="state.userApiInfoIsVisible")
-        template(v-else)
-          UserApiInfo(:visible="state.userApiInfoIsVisible")
 
       //- debug
       .button-wrap
@@ -208,11 +180,8 @@ const toggleIsDebugMode = () => {
       .button-wrap
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
-        template(v-else)
-          ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
 
   //- Delete Account
   section.delete-account
@@ -221,11 +190,8 @@ const toggleIsDebugMode = () => {
         button.danger(@click.left.stop="toggleDeleteAccountConfirmationVisible" :class="{ active: state.deleteAccountConfirmationVisible }")
           img.icon(src="@/assets/remove.svg")
           span Delete Account
-        template(v-if="state.viewportHeightIsShort")
           teleport(to="#settings-child-dialogs")
             DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
-        template(v-else)
-          DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
 </template>
 
 <style lang="stylus">

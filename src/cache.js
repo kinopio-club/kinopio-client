@@ -33,6 +33,11 @@ export default {
       }
       await idb.set(key, value)
     } catch (error) {
+      if (document.visibilityState !== 'visible') {
+        // prevent false positives when switching to unloaded ios app
+        console.error('🚑 unloaded page saveLocal could not save to idb', { key, value, valueType: typeof value }, error)
+        return
+      }
       showDebugMessages = true
       console.error('🚒 saveLocal could not save to idb', { key, value, valueType: typeof value }, error)
       this.notifyCouldNotSave()
