@@ -126,7 +126,7 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: state.notificationSettingsIsVisible}")
           img.icon.mail(src="@/assets/mail.svg")
           span Notifications
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             NotificationSettings(:visible="state.notificationSettingsIsVisible")
 
     //- Theme and Colors
@@ -136,7 +136,7 @@ const toggleIsDebugMode = () => {
           ThemeToggle
           button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: state.themeSettingsIsVisible}")
             span Theme Settings
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             ThemeSettings(:visible="state.themeSettingsIsVisible")
 
   //- Account Settings
@@ -147,7 +147,7 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: state.userAccountSettingsIsVisible}")
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
           span Account
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
 
       //- Billing
@@ -155,7 +155,7 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleUserBillingSettingsIsVisible" :class="{active: state.userBillingSettingsIsVisible}")
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
 
   //- Developer Info
@@ -166,7 +166,7 @@ const toggleIsDebugMode = () => {
         button(@click.left.stop="toggleUserApiInfoIsVisible" :class="{active: state.userApiInfoIsVisible}")
           img.icon.key(src="@/assets/key.svg")
           span API
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             UserApiInfo(:visible="state.userApiInfoIsVisible")
 
       //- debug
@@ -180,7 +180,7 @@ const toggleIsDebugMode = () => {
       .button-wrap
         button(@click.left.stop="toggleModeratorActionsSettingsIsVisible" :class="{active: state.moderatorActionsSettingsIsVisible}")
           span Moderator
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             ModeratorActions(:visible="state.moderatorActionsSettingsIsVisible")
 
   //- Delete Account
@@ -190,7 +190,7 @@ const toggleIsDebugMode = () => {
         button.danger(@click.left.stop="toggleDeleteAccountConfirmationVisible" :class="{ active: state.deleteAccountConfirmationVisible }")
           img.icon(src="@/assets/remove.svg")
           span Delete Account
-          teleport(to="#settings-child-dialogs")
+          teleport(to="#settings-child-dialogs" defer)
             DeleteAccountConfirmation(:visible="state.deleteAccountConfirmationVisible" @toggleUserBillingSettingsIsVisible="toggleUserBillingSettingsIsVisible")
 </template>
 
