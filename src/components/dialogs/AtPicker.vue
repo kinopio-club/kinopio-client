@@ -24,7 +24,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['closeDialog', 'selectUser']) // TODO selectTimer
+const emit = defineEmits(['closeDialog', 'selectUser', 'selectDate'])
 
 const props = defineProps({
   visible: Boolean,
@@ -105,6 +105,9 @@ const filteredUsers = computed(() => {
 const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
+const selectDate = (event, daysFromToday) => {
+  emit('selectDate', event, daysFromToday)
+}
 
 const selectedUsers = computed(() => {
   let users = []
@@ -125,7 +128,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
   section.info-section(v-if="!props.search && currentUserIsSignedIn && !props.searchIsDisabled")
     p
       img.icon.search(src="@/assets/search.svg")
-      span Type to search users
+      span Type for users or dates
 
   UserList(
     :users="filteredUsers"
@@ -138,8 +141,39 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
   section(v-if="!isMultipleAvailableUsers")
     p.badge.info To @mention others, invite them to this space, or a group
 
-  section(v-if="!props.search")
-    p times asdfasdf
+  section.results-section(v-if="!props.search")
+    //- ^ search is not date
+    //- support @2d, @today, @tomorrow, @oct1, @oct20
+    //- @t,o,d,a,y
+    //- @n,o,v (default to 1st)
+
+    //- TODO how to handle keyboard
+    //- if no names, and a match for custom date, then show active state on li. enterkey = selectdate
+
+    //- TODO fix cal icon
+
+    //- if days are > 2 display as abs date
+    ul.results-list
+      template(v-if="!props.search")
+        li.date-list-item
+          //- @click.left=selectDate(1)
+          .badge.secondary
+            img.icon.time(src="@/assets/time.svg")
+            span 0d
+          span Today
+        li.date-list-item
+          .badge.secondary
+            //- @click.left=selectDate(1)
+            img.icon.time(src="@/assets/time.svg")
+            span 1d
+          span Tomorrow
+        li.date-list-item
+          .badge.secondary
+            img.icon.time(src="@/assets/time.svg")
+            span Custom Date
+
+      //- DatePicker (teleport to top of dialog)
+
 </template>
 
 <style lang="stylus">
@@ -148,4 +182,11 @@ dialog.at-picker
   .user-list
     max-height 100px // matches userListMaxHeight
     overflow auto
+  .date-list-item
+    display flex
+    align-items center
+    > .badge.secondary
+      display flex
+      align-items center
+      margin-left -4px
 </style>

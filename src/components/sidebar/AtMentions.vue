@@ -245,7 +245,9 @@ const selectCard = (card) => {
     .row.title-row
       div
         //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
-        UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
+        .title-label-wrap
+          UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
+          span.title-label Mentions
         //- span and Due Dates
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
@@ -306,6 +308,9 @@ const selectCard = (card) => {
   overflow auto
   border-top 1px solid var(--primary-border)
   min-height 160px
+  .title-label-wrap
+    > .title-label
+      vertical-align -1px
   .button-wrap
     margin 0
   // .tips-section

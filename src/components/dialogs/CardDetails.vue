@@ -1622,7 +1622,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @closeDialog="hideAtPicker"
         @selectUser="replaceAtTextWithUserMention"
       )
-        //- TODO ^ @selectTimer
+        //- TODO ^ @selectDate
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")
           span ?
