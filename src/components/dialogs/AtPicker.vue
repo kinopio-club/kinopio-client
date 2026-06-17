@@ -9,6 +9,7 @@ import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
+import uniqBy from 'lodash-es/uniqBy'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -62,15 +63,25 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const availableUsers = computed(() => {
+  let users = spaceStore.getSpaceAndGroupMembers.concat(globalStore.getOtherUsers)
+  users = uniqBy(users, 'id')
+  return users
+})
+const isMultipleAvailableUsers = computed(() => availableUsers.value.length > 1)
+
 const styles = computed(() => {
-  return {
+  const value = {
     top: props.position?.top + 'px',
     maxHeight: state.dialogHeight + 'px'
   }
+  if (isMultipleAvailableUsers.value) {
+    value.minHeight = '200px'
+  }
+  return value
 })
 
-const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const availableUsers = computed(() => spaceStore.getSpaceAndGroupMembers.concat(globalStore.getOtherUsers))
 const filteredUsers = computed(() => {
   let users = availableUsers.value
   if (!props.search) { return users }
@@ -121,14 +132,13 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideResultsFilter="true"
   )
 
-  section(v-if="availableUsers.length <= 1")
+  section(v-if="!isMultipleAvailableUsers")
     p.badge.info To @mention others, invite them to this space, or a group
 </template>
 
 <style lang="stylus">
 dialog.at-picker
   overflow auto
-  min-height 200px
   .user-list
     max-height 150px
 </style>
