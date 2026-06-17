@@ -17,6 +17,7 @@ import Favorites from '@/components/sidebar/Favorites.vue'
 import SpaceHistory from '@/components/sidebar/SpaceHistory.vue'
 import Tasks from '@/components/sidebar/Tasks.vue'
 import Note from '@/components/sidebar/Note.vue'
+import AtMentions from '@/components/sidebar/AtMentions.vue'
 import SidebarResize from '@/components/SidebarResize.vue'
 
 const globalStore = useGlobalStore()
@@ -65,7 +66,8 @@ const state = reactive({
   favoritesIsVisible: false,
   historyIsVisible: false,
   tasksIsVisible: false,
-  noteIsVisible: false
+  noteIsVisible: false,
+  atMentionsIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -92,6 +94,7 @@ const clearVisible = () => {
   state.historyIsVisible = false
   state.tasksIsVisible = false
   state.noteIsVisible = false
+  state.atMentionsIsVisible = false
 }
 const updateSubsectionHeight = () => {
   const element = titleElement.value
@@ -217,6 +220,9 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Tasks
           button(@click.left="toggleSection('tasks')" :class="{ active: state.tasksIsVisible}" title="Tasks")
             span Tasks
+          //- @
+          button(@click.left="toggleSection('atMentions')" :class="{ active: state.atMentionsIsVisible}" title="@User Mentions and Due Dates")
+            img.icon.at(src="@/assets/at.svg")
           //- Note
           button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
             img.icon.note(src="@/assets/note.svg")
@@ -241,6 +247,7 @@ dialog#sidebar.sidebar.is-pinnable(
   Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
   SpaceHistory(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
   Tasks(:visible="state.tasksIsVisible" :subsectionHeight="state.subsectionHeight")
+  AtMentions(:visible="state.atMentionsIsVisible" :subsectionHeight="state.subsectionHeight")
   Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight" @updateDialogHeight="updateHeights")
 
   SidebarResize

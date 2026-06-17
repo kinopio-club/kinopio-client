@@ -114,12 +114,12 @@ const closeDialogs = () => {
 }
 const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
 const updateScopeIsCurrentSpace = async (value) => {
-  if (globalStore.sidebarTasksItemsScopeIsCurrentSpace === value) { return }
-  globalStore.sidebarTasksItemsScopeIsCurrentSpace = value
+  if (globalStore.sidebarScopeIsCurrentSpace === value) { return }
+  globalStore.sidebarScopeIsCurrentSpace = value
   globalStore.sidebarTasksItemsBySpace = null
   updateItems()
 }
-const scopeIsCurrentSpace = computed(() => globalStore.sidebarTasksItemsScopeIsCurrentSpace)
+const scopeIsCurrentSpace = computed(() => globalStore.sidebarScopeIsCurrentSpace)
 const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 
 // filters
