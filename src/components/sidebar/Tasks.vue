@@ -291,7 +291,7 @@ const itemsRemainingCount = computed(() => {
     //- empty
     section.subsection.tips(v-if="!isTodoItems && !state.isLoading")
       span Prepend cards or boxes with
-        span.badge.info.brackers [ ]
+        span.badge.info [ ]
         span to create todo tasks that you can track here.
 
   //- items

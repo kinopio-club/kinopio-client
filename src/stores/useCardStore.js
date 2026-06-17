@@ -188,6 +188,14 @@ export const useCardStore = defineStore('cards', {
     getCardsWithLinkToSpaceId () {
       const cards = this.getAllCards
       return cards.filter(card => card.linkToSpaceId)
+    },
+    getCardsAtMentionCurrentUser () {
+      const userStore = useUserStore()
+      const cards = this.getAllCards
+      return cards.filter(card => {
+        console.log('🍒', card.atUserMentions?.userId, card.atUserMentions, userStore.id)
+        return card.atUserMentions?.find(mention => mention.userId === userStore.id)
+      })
     }
   },
 

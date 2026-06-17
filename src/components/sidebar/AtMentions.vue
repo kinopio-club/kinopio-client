@@ -27,8 +27,8 @@ let unsubscribes
 const resultsElement = ref(null)
 
 onMounted(() => {
-  // updateItems()
-  // clearPreviousResultItem()
+  updateItems()
+  clearPreviousResultItem()
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
@@ -36,20 +36,20 @@ onMounted(() => {
       }
     }
   )
-  // const cardActionUnsubscribe = cardStore.$onAction(
-  //   async ({ name, args }) => {
-  //     if (name === 'toggleCardChecked') {
-  //       await nextTick()
-  //       const cardId = args[0]
-  //       const updatedCard = cardStore.getCard(cardId)
-  //       state.cards = state.cards.map(card => {
-  //         if (card.id !== cardId) { return card }
-  //         card.name = updatedCard.name
-  //         return card
-  //       })
-  //     }
-  //   }
-  // )
+  const cardActionUnsubscribe = cardStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'toggleCardChecked') {
+        await nextTick()
+        const cardId = args[0]
+        const updatedCard = cardStore.getCard(cardId)
+        state.cards = state.cards.map(card => {
+          if (card.id !== cardId) { return card }
+          card.name = updatedCard.name
+          return card
+        })
+      }
+    }
+  )
   // const boxActionUnsubscribe = boxStore.$onAction(
   //   async ({ name, args }) => {
   //     if (name === 'toggleBoxChecked') {
@@ -116,11 +116,11 @@ const closeDialogs = () => {
 const updateScopeIsCurrentSpace = async (value) => {
   if (globalStore.sidebarScopeIsCurrentSpace === value) { return }
   globalStore.sidebarScopeIsCurrentSpace = value
-  globalStore.sidebarTasksItemsBySpace = null
+  globalStore.sidebarAtMentionsItemsBySpace = null
   updateItems()
 }
 const scopeIsCurrentSpace = computed(() => globalStore.sidebarScopeIsCurrentSpace)
-const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
+const itemsBySpace = computed(() => globalStore.sidebarAtMentionsItemsBySpace)
 
 // filters
 
@@ -143,7 +143,7 @@ const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 
 // items
 
-// const itemsFilteredConditionallyCompleted = (items, type) => {
+// const itemsFiltered = (items, type) => {
 //   items = itemsFiltered(items, type)
 //   if (!shouldShowCompleted.value) {
 //     items = items.filter(item => utils.nameIsUnchecked(item.name))
@@ -160,28 +160,25 @@ const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 //   return items
 // }
 const updateItems = () => {
-  // if (scopeIsCurrentSpace.value) {
-  //   state.cards = cardStore.getCardsIsTodoSortedByY
-  //   state.boxes = boxStore.getBoxesIsTodoSortedByY
-  // } else {
-  //   updateItemsBySpace()
-  // }
+  if (scopeIsCurrentSpace.value) {
+    state.cards = cardStore.getCardsAtMentionCurrentUser
+  } else {
+    updateItemsBySpace()
+  }
 }
 const updateItemsBySpace = async () => {
   if (!currentUserIsSignedIn.value) { return }
   state.cards = []
-  state.boxes = []
   try {
     state.isLoading = true
     state.isError = false
-    if (!itemsBySpace.value) {
-      globalStore.sidebarTasksItemsBySpace = await apiStore.getUserTodos()
-    }
-    // update items
-    globalStore.sidebarTasksItemsBySpace.forEach(space => {
-      state.cards = state.cards.concat(space.cards)
-      state.boxes = state.boxes.concat(space.boxes)
-    })
+    // if (!itemsBySpace.value) {
+    //   globalStore.sidebarAtMentionsItemsBySpace = await apiStore.getUserTodos()
+    // }
+    // // update items
+    // globalStore.sidebarAtMentionsItemsBySpace.forEach(space => {
+    //   state.cards = state.cards.concat(space.cards)
+    // })
   } catch (error) {
     console.error('🚒 updateItemsBySpace', error)
     state.isError = true
@@ -194,32 +191,28 @@ const updateItemsBySpace = async () => {
 //   return cards.concat(boxes)
 // })
 // const filteredCompleteTodoItems = computed(() => filteredTodoItems.value.filter(item => utils.nameIsChecked(item.name)))
-// const isTodoItems = computed(() => filteredTodoItems.value.length)
+const isItems = computed(() => Boolean(state.cards.length))
 
 // select
 
-// const selectSpace = (space) => {
-//   if (space.id === spaceStore.id) { return }
-//   spaceStore.changeSpace(space)
-// }
-// const selectItem = (item) => {
-//   if (item.itemType === 'box') {
-//     selectBox(item)
-//   } else if (item.itemType === 'card') {
-//     selectCard(item)
-//   }
-// }
-// const selectCard = (card) => {
-//   closeDialogs()
-//   const isCardInCurrentSpace = card.spaceId === spaceStore.id
-//   if (isCardInCurrentSpace) {
-//     globalStore.updateFocusOnItemId(card.id)
-//     globalStore.previousResultItem = card
-//   } else {
-//     globalStore.loadSpaceFocusOnItemId = card.id
-//     selectSpace({ id: card.spaceId })
-//   }
-// }
+const selectSpace = (space) => {
+  if (space.id === spaceStore.id) { return }
+  spaceStore.changeSpace(space)
+}
+const selectItem = (item) => {
+  selectCard(item)
+}
+const selectCard = (card) => {
+  closeDialogs()
+  const isCardInCurrentSpace = card.spaceId === spaceStore.id
+  if (isCardInCurrentSpace) {
+    globalStore.updateFocusOnItemId(card.id)
+    globalStore.previousResultItem = card
+  } else {
+    globalStore.loadSpaceFocusOnItemId = card.id
+    selectSpace({ id: card.spaceId })
+  }
+}
 // const selectBox = (box) => {
 //   closeDialogs()
 //   const isBoxInCurrentSpace = box.spaceId === spaceStore.id
@@ -250,7 +243,7 @@ const updateItemsBySpace = async () => {
   section
     .row.title-row
       div
-        //- ProgressCircle(v-if="isTodoItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
+        //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
         span @Mentions
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
@@ -280,29 +273,29 @@ const updateItemsBySpace = async () => {
         button(:class="{ active: !scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(false)")
           span All Spaces
 
-  //-   section.subsection(v-if="!currentUserIsSignedIn && !scopeIsCurrentSpace")
-  //-     .row.badge.info
-  //-       span Sign Up or In to search your spaces
-  //-     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+    section.subsection(v-if="!currentUserIsSignedIn && !scopeIsCurrentSpace")
+      .row.badge.info
+        span Sign Up or In to access your @mentions
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-  //-   //- error
-  //-   .badge.error-badge.danger(v-if="state.isError")
-  //-     span (シ_ _)シ Something went wrong, Please try again or contact support
-  //-   //- empty
-  //-   section.subsection.tips(v-if="!isTodoItems && !state.isLoading")
-  //-     span Prepend cards or boxes with
-  //-       span.badge.info.brackers [ ]
-  //-       span to create todo tasks that you can track here.
+    //- error
+    .badge.error-badge.danger(v-if="state.isError")
+      span (シ_ _)シ Something went wrong, Please try again or contact support
+    //- empty
+    section.subsection.tips(v-if="!isItems && !state.isLoading")
+      span Use{{' '}}
+        span.badge.info @
+        span to assign users and due dates to cards
 
   //- //- items
-  //- template(v-if="isTodoItems")
-  //-   //- current space
-  //-   section.results-section(v-if="scopeIsCurrentSpace")
-  //-     ItemList(:cards="itemsFilteredConditionallyCompleted(state.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(state.boxes, 'boxes')" @selectItem="selectItem")
+  template(v-if="isItems")
+    //- current space
+    section.results-section(v-if="scopeIsCurrentSpace")
+      ItemList(:cards="state.cards" @selectItem="selectItem")
   //-   //- all spaces
   //-   section.results-section(v-else)
   //-     template(v-for="space in itemsBySpace" :key="space.id")
-  //-       ItemList(:space="space" :cards="itemsFilteredConditionallyCompleted(space.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
+  //-       ItemList(:space="space" :cards="itemsFiltered(space.cards, 'cards')" :boxes="itemsFiltered(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
 
 </template>
 
