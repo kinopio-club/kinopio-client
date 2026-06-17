@@ -78,8 +78,9 @@ const styles = computed(() => {
   }
   if (isMultipleAvailableUsers.value) {
     const rowHeight = 33
-    let minHeight = availableUsers.value.length * rowHeight
-    minHeight = Math.min(minHeight, 200)
+    const userListMaxHeight = 100
+    let minHeight = filteredUsers.value.length * rowHeight
+    minHeight = Math.min(minHeight, userListMaxHeight)
     value.minHeight = minHeight + 'px'
   }
   return value
@@ -134,14 +135,17 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideOptionsButton="true"
     :shouldHideResultsFilter="true"
   )
-
   section(v-if="!isMultipleAvailableUsers")
     p.badge.info To @mention others, invite them to this space, or a group
+
+  section(v-if="!props.search")
+    p times asdfasdf
 </template>
 
 <style lang="stylus">
 dialog.at-picker
   overflow auto
   .user-list
-    max-height 150px
+    max-height 100px // matches userListMaxHeight
+    overflow auto
 </style>
