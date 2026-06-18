@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserList from '@/components/UserList.vue'
+import DatePicker from '@/components/dialogs/DatePicker.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -24,7 +25,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['closeDialog', 'selectUser', 'selectDate'])
+const emit = defineEmits(['selectUser', 'selectDate'])
 
 const props = defineProps({
   visible: Boolean,
@@ -36,10 +37,14 @@ const props = defineProps({
 })
 
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  tipsIsVisible: false,
+  datePickerIsVisible: false
 })
 
 watch(() => props.visible, async (value) => {
+  closeDialogs()
+  state.tipsIsVisible = false
   if (value) {
     await updateDialogHeight()
     await nextTick()
@@ -61,6 +66,10 @@ const updateDialogHeight = async () => {
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+}
+
+const closeDialogs = () => {
+  state.datePickerIsVisible = false
 }
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
@@ -105,6 +114,8 @@ const filteredUsers = computed(() => {
 const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
+// ??or dayjs string dayjs('apr-2,2003')
+// TODO selectDaysFromNow()
 const selectDate = (event, daysFromToday) => {
   emit('selectDate', event, daysFromToday)
 }
@@ -121,14 +132,46 @@ watch(() => props.search, async (value) => {
   globalStore.triggerPickerNavigationFirst()
 })
 
+// tips
+
+const toggleTipsIsVisible = () => {
+  state.tipsIsVisible = !state.tipsIsVisible
+}
+
+// date
+
+const toggleDatePickerIsVisible = () => {
+  const value = !state.datePickerIsVisible
+  closeDialogs()
+  state.datePickerIsVisible = value
+  console.log('🍒', state.datePickerIsVisible)
+}
+
 </script>
 
 <template lang="pug">
-dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="styles")
+dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="styles" :class="{ 'child-dialog-is-visible': state.datePickerIsVisible }")
+  //- template(v-if="state.datePickerIsVisible")
+  //-   section.results-section
+  //-     ul.results-list
+  //-       li.date-list-item.active(@click.stop="toggleDatePickerIsVisible")
+  //-         .badge.secondary
+  //-           img.icon.time(src="@/assets/time.svg")
+  //-           span Custom Date
+  //-       DatePicker(:visible="state.datePickerIsVisible")
+
+  //- template(v-else)
+
   section.info-section(v-if="!props.search && currentUserIsSignedIn && !props.searchIsDisabled")
-    p
-      img.icon.search(src="@/assets/search.svg")
-      span Type for users or dates
+    .row.title-row
+      div
+        img.icon.search(src="@/assets/search.svg")
+        span Type for users or dates
+      button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+        span ?
+
+    .row(v-if="state.tipsIsVisible")
+      p.badge.info To @mention others, invite them to this space, or a group
 
   UserList(
     :users="filteredUsers"
@@ -138,12 +181,10 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideOptionsButton="true"
     :shouldHideResultsFilter="true"
   )
-  section(v-if="!isMultipleAvailableUsers")
-    p.badge.info To @mention others, invite them to this space, or a group
 
   section.results-section(v-if="!props.search")
     //- ^ search is not date
-    //- support @2d, @today, @tomorrow, @oct1, @oct20
+    //- support @2d, @today, @tomorrow, @oct1, @oct20 (monthNumber = next occurance, same yr or next)
     //- @t,o,d,a,y
     //- @n,o,v (default to 1st)
 
@@ -155,30 +196,37 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     //- if days are > 2 display as abs date
     ul.results-list
       template(v-if="!props.search")
+        //- TODO v-if search is valid date (!search = true)
         li.date-list-item
-          //- @click.left=selectDate(1)
+          //- @click.left=selectDaysFromNow(1)
           .badge.secondary
             img.icon.time(src="@/assets/time.svg")
             span 0d
           span Today
         li.date-list-item
           .badge.secondary
-            //- @click.left=selectDate(1)
+            //- @click.left=selectDaysFromNow(1)
             img.icon.time(src="@/assets/time.svg")
             span 1d
           span Tomorrow
-        li.date-list-item
-          .badge.secondary
-            img.icon.time(src="@/assets/time.svg")
-            span Custom Date
+      li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
+        .badge.secondary
+          img.icon.time(src="@/assets/time.svg")
+          span Custom Date
 
-      //- DatePicker (teleport to top of dialog)
+      DatePicker(:visible="state.datePickerIsVisible")
+
+    //- no matches found (if no filteredusers and no filteredDates)
+
+    //- TODO DatePicker (design to be wrappable in DatePicker dialog.narrow)
 
 </template>
 
 <style lang="stylus">
 dialog.at-picker
   overflow auto
+  &.child-dialog-is-visible
+    overflow initial
   .user-list
     max-height 100px // matches userListMaxHeight
     overflow auto
@@ -189,4 +237,6 @@ dialog.at-picker
       display flex
       align-items center
       margin-left -4px
+  dialog.date-picker
+    top 20px
 </style>
