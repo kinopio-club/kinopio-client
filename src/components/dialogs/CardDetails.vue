@@ -1456,6 +1456,9 @@ const checkIfShouldShowAtPicker = () => {
     hideAtPicker()
   }
 }
+// TODO replaceAtTextWithDateMention
+// cardStore.removeAtDateMentions(card.value, userString)
+// cardStore.addAtDateMention(card.value, user, userString)
 const replaceAtTextWithUserMention = async (event, user) => {
   hideAtPicker()
   if (!user) { return }

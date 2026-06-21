@@ -8,6 +8,8 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
+import dayjs from 'dayjs'
+
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
@@ -36,7 +38,7 @@ let unsubscribes
 //   window.removeEventListener('resize', updateDialogHeight)
 // })
 
-const emit = defineEmits(['selectDate'])
+const emit = defineEmits(['selectDate', 'clearDate'])
 
 const props = defineProps({
   visible: Boolean
@@ -60,6 +62,19 @@ const state = reactive({
 //   state.dialogHeight = utils.elementHeight(element)
 // }
 
+// initialdateisToday
+
+// cosnt year = dayjs().format('YYYY')
+// const months = Array.from({ length: 12 }, (_, i) => {
+//   const date = dayjs(`${year}-${i + 1}-01`);
+//   return {
+//     month: date.format('MMM'),
+//     daysInMonth: date.daysInMonth(),
+//     startsOn: date.format('ddd'),
+//   };
+// });
+// Object { month: "Jan", daysInMonth: 31, startsOn: "Wed" }
+
 </script>
 
 <template lang="pug">
@@ -70,7 +85,7 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
   //- span.badge.info.inline-badge.space-today-badge(v-if="isCreatedToday" title="Created Today")
   //-   img.icon.today(src="@/assets/today.svg")
 
-  section
+  section.calendar
     .row
       p [] [] [] [] []
 </template>

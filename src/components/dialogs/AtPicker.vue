@@ -171,7 +171,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
         span ?
 
     .row(v-if="state.tipsIsVisible")
-      p.badge.info To @mention others, invite them to this space, or a group
+      p.badge.info To @mention other people, invite them to this space, or a group
 
   UserList(
     :users="filteredUsers"
@@ -199,20 +199,20 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
         //- TODO v-if search is valid date (!search = true)
         li.date-list-item
           //- @click.left=selectDaysFromNow(1)
-          .badge.secondary
-            img.icon.time(src="@/assets/time.svg")
+          .badge.info
+            img.icon.cal(src="@/assets/cal.svg")
             span 0d
           span Today
         li.date-list-item
           .badge.secondary
             //- @click.left=selectDaysFromNow(1)
-            img.icon.time(src="@/assets/time.svg")
+            img.icon.cal(src="@/assets/cal.svg")
             span 1d
           span Tomorrow
-      li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
-        .badge.secondary
-          img.icon.time(src="@/assets/time.svg")
-          span Custom Date
+        li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
+          .badge.secondary
+            img.icon.cal(src="@/assets/cal.svg")
+            span Custom Date
 
       DatePicker(:visible="state.datePickerIsVisible")
 
@@ -230,13 +230,10 @@ dialog.at-picker
   .user-list
     max-height 100px // matches userListMaxHeight
     overflow auto
+    padding 0 4px
   .date-list-item
     display flex
     align-items center
-    > .badge.secondary
-      display flex
-      align-items center
-      margin-left -4px
   dialog.date-picker
     top 20px
 </style>
