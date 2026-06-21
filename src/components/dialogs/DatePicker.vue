@@ -76,6 +76,10 @@ const isToday = (day) => {
   const isYear = year.value === today.value.year
   return isDay && isMonth && isYear
 }
+const isPast = computed(() => {
+  const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
+  return date.isBefore(dayjs(), 'day')
+})
 
 const toToday = () => {
   state.index = dayjs().month()
@@ -152,8 +156,8 @@ const selectDate = (day) => {
 dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
   section.title-section
     .row.title-row
-      p {{currentDayLabel}}
-
+      p {{currentDayLabel}}{{' '}}
+        span.badge.danger.badge-in-button(v-if="isPast") Past
       div
         .segmented-buttons
           //- prev
