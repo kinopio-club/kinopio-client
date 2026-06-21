@@ -44,6 +44,9 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
+  month: dayjs().month(), // 0-11 https://day.js.org/docs/en/get-set/month
+  day: dayjs().date(), // 1-31
+  year: dayjs().year() // 2026
   // count: 0,
   // dialogHeight: null
 })
@@ -55,6 +58,23 @@ const state = reactive({
 // })
 // watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
+const today = computed(() => {
+  return {
+    month: dayjs().month(),
+    day: dayjs().date()
+  }
+})
+
+const toToday = () => {
+  console.log(state.month, state.day)
+
+  state.month = dayjs().month()
+  state.day = dayjs().date()
+  console.log('☎️☎️', state.month, state.day, calendarData.value, calendarData.value[state.month])
+}
+const toPrevMonth = () => {}
+const toNextMonth = () => {}
+
 // const updateDialogHeight = async () => {
 //   if (!props.visible) { return }
 //   await nextTick()
@@ -64,15 +84,27 @@ const state = reactive({
 
 // initialdateisToday
 
-// cosnt year = dayjs().format('YYYY')
-// const months = Array.from({ length: 12 }, (_, i) => {
-//   const date = dayjs(`${year}-${i + 1}-01`);
-//   return {
-//     month: date.format('MMM'),
-//     daysInMonth: date.daysInMonth(),
-//     startsOn: date.format('ddd'),
-//   };
-// });
+// const currentMonth =
+
+const yearData = (year) => {
+  return Array.from({ length: 12 }, (item, index) => {
+    const date = dayjs(`${year}-${index + 1}-01`)
+    return {
+      month: date.format('MMM'),
+      daysInMonth: date.daysInMonth(),
+      startsOn: date.format('dd'),
+      year
+    }
+  })
+}
+const calendarData = computed(() => {
+  const year = dayjs().year()
+  const currentYearData = yearData(year)
+  const nextYearData = yearData(year + 1)
+  const data = currentYearData.concat(nextYearData) // 24 months
+  return data
+})
+
 // Object { month: "Jan", daysInMonth: 31, startsOn: "Wed" }
 
 </script>
@@ -84,33 +116,33 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
       p Jun 12, 2026
       div
         .segmented-buttons
-          button.small-button
+          //- prev
+          button.small-button(@click="toPrevMonth" title="Previous Month")
             img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          button.small-button
+          //- today
+          button.small-button(@click="toToday")
             span Today
-            //- span.badge.info.badge-in-button
-            //-   img.icon.today(src="@/assets/today.svg")
-          button.small-button
+          //- next
+          button.small-button(@click="toNextMonth" title="Next Month")
             img.icon.right-arrow(src="@/assets/down-arrow.svg")
 
-  //- span.badge.info.inline-badge.space-today-badge(v-if="isCreatedToday" title="Created Today")
-  //-   img.icon.today(src="@/assets/today.svg")
-
   section.calendar-day-labels
-    .day.day-label Su
-    .day.day-label Mo
-    .day.day-label Tu
-    .day.day-label We
-    .day.day-label Th
-    .day.day-label Fr
-    .day.day-label Sa
+    .day.day-label(data-label="Su") Su
+    .day.day-label(data-label="Mo") Mo
+    .day.day-label(data-label="Tu") Tu
+    .day.day-label(data-label="We") We
+    .day.day-label(data-label="Th") Th
+    .day.day-label(data-label="Fr") Fr
+    .day.day-label(data-label="Sa") Sa
 
   section.calendar
-    button.day 1
+    button.day
+      span 1
     button.day 2
     button.day 3
     button.day 4
-    button.day 5
+    button.day.active
+      span.badge.info.badge-in-button 5
     button.day 6
     button.day 7
     button.day 2
@@ -119,11 +151,6 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
     button.day 12
     button.day 22
     button.day 12
-
-  //- section.calendar
-  //-   .row
-
-      //- p [] [] [] [] []
 </template>
 
 <style lang="stylus">
@@ -158,6 +185,9 @@ dialog.date-picker
       // padding 0
       &:first-child
         grid-column-start var(--start-day, 1)
+      .badge
+        margin 0
+        padding 0 2px
   // .calendar-grid
   //   display grid
   //   grid-template-columns repeat(7, 1fr) /* 7 equal day columns */
