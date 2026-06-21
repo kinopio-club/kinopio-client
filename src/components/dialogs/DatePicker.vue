@@ -43,13 +43,13 @@ const emit = defineEmits(['selectDate']) // cleardate
 const props = defineProps({
   visible: Boolean
 })
+const baseYear = dayjs().year()
 const state = reactive({
-  month: dayjs().month(), // 0-11 https://day.js.org/docs/en/get-set/month
-  day: dayjs().date(), // 1-31
-  year: dayjs().year() // 2026
-  // count: 0,
-  // dialogHeight: null
+  index: dayjs().month(), // 0-23 index into calendarData (current month)
+  day: dayjs().date() // 1-31
 })
+const month = computed(() => state.index % 12) // 0-11
+const year = computed(() => baseYear + Math.floor(state.index / 12))
 
 // watch(() => props.visible, (value, prevValue) => {
 //   if (value) {
@@ -59,7 +59,7 @@ const state = reactive({
 // watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const currentDayLabel = computed(() => {
-  const date = dayjs(`${state.year}-${state.month + 1}-${state.day}`)
+  const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
   return date.format('MMM D, YYYY')
 })
 
@@ -72,22 +72,25 @@ const today = computed(() => {
 })
 const isToday = (day) => {
   const isDay = day === today.value.day
-  const isMonth = state.month === today.value.month
-  const isYear = state.year === today.value.year
-  console.log(day, isDay)
+  const isMonth = month.value === today.value.month
+  const isYear = year.value === today.value.year
   return isDay && isMonth && isYear
 }
 
 const toToday = () => {
-  console.log(state.month, state.day)
-
-  state.month = today.value.month
+  state.index = dayjs().month()
   state.day = today.value.day
-  state.year = today.value.year
-  console.log('☎️☎️', state.month, state.day, calendarData.value, calendarData.value[state.month])
 }
-const toPrevMonth = () => {}
-const toNextMonth = () => {}
+const toPrevMonth = () => {
+  if (state.index === 0) { return }
+  state.index = state.index - 1
+  state.day = 1
+}
+const toNextMonth = () => {
+  if (state.index >= calendarData.value.length - 1) { return }
+  state.index = state.index + 1
+  state.day = 1
+}
 
 // const updateDialogHeight = async () => {
 //   if (!props.visible) { return }
@@ -122,7 +125,7 @@ const calendarData = computed(() => {
 
 // Object { month: "Jan", daysInMonth: 31, startsOn: "Wed" }
 
-const currentMonthData = computed(() => calendarData.value[state.month])
+const currentMonthData = computed(() => calendarData.value[state.index])
 const days = computed(() => {
   const daysInMonth = currentMonthData.value.daysInMonth
   return Array.from({ length: daysInMonth }, (item, index) => index + 1)
@@ -135,9 +138,9 @@ const styles = (index) => {
 const selectDate = (day) => {
   state.day = day
   const value = {
-    month: state.month,
-    day: state.date,
-    year: state.year
+    month: month.value,
+    day,
+    year: year.value
   }
   console.log('🫐🫐', value)
   emit('selectDate', value)
