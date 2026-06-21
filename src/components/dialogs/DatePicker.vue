@@ -96,7 +96,7 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
   //- span.badge.info.inline-badge.space-today-badge(v-if="isCreatedToday" title="Created Today")
   //-   img.icon.today(src="@/assets/today.svg")
 
-  section.calendar.day-labels
+  section.calendar-day-labels
     .day.day-label Su
     .day.day-label Mo
     .day.day-label Tu
@@ -106,19 +106,19 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
     .day.day-label Sa
 
   section.calendar
-    button.small-button.day 1
-    button.small-button.day 22
-    button.small-button.day 12
-    button.small-button.day 22
-    button.small-button.day 12
-    button.small-button.day 22
-    button.small-button.day 12
-    button.small-button.day 2
-    button.small-button.day 2
-    button.small-button.day 1
-    button.small-button.day 12
-    button.small-button.day 22
-    button.small-button.day 12
+    button.day 1
+    button.day 2
+    button.day 3
+    button.day 4
+    button.day 5
+    button.day 6
+    button.day 7
+    button.day 2
+    button.day 2
+    button.day 1
+    button.day 12
+    button.day 22
+    button.day 12
 
   //- section.calendar
   //-   .row
@@ -130,6 +130,34 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
 dialog.date-picker
   .badge-in-button
     margin 0
+  section.calendar-day-labels + section.calendar
+    border-top 0
+    padding-top 0
+
+  section.calendar-day-labels,
+  section.calendar
+    display grid
+    grid-template-columns repeat(7, 1fr)
+    gap 6px
+    justify-items center
+
+  // section.calendar-day-labels
+  //   .day-label
+  //     color var(--secondary-active-background)
+
+  section.calendar
+    button.day
+      margin 0
+      width 100%
+      min-width 0
+      display flex
+      align-items center
+      justify-content center
+      text-align center
+
+      // padding 0
+      &:first-child
+        grid-column-start var(--start-day, 1)
   // .calendar-grid
   //   display grid
   //   grid-template-columns repeat(7, 1fr) /* 7 equal day columns */
