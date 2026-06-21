@@ -188,21 +188,6 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
 dialog.date-picker
   .badge-in-button
     margin 0
-  section.calendar-day-labels + section.calendar
-    border-top 0
-    padding-top 0
-
-  section.calendar-day-labels,
-  section.calendar
-    display grid
-    grid-template-columns repeat(7, 1fr)
-    gap 6px
-    justify-items center
-
-  // section.calendar-day-labels
-  //   .day-label
-  //     color var(--secondary-active-background)
-
   .today-badge-icon
     min-height 0
     display inline-block
@@ -211,48 +196,28 @@ dialog.date-picker
     width 10px
     height 10px
 
+  section.calendar-day-labels + section.calendar
+    border-top 0
+    padding-top 0
+  section.calendar-day-labels,
   section.calendar
-    button.day
+    display grid
+    grid-template-columns repeat(7, 1fr)
+    gap 6px
+    justify-items center
+
+  button.day
+    margin 0
+    width 100%
+    min-width 0
+    display flex
+    align-items center
+    justify-content center
+    text-align center
+    padding 2px 0
+    &:first-child
+      grid-column-start var(--start-day, 1)
+    .badge
       margin 0
-      width 100%
-      min-width 0
-      display flex
-      align-items center
-      justify-content center
-      text-align center
-      padding 2px 0
-
-      // padding 0
-      &:first-child
-        grid-column-start var(--start-day, 1)
-      .badge
-        margin 0
-        padding 0 1px
-  // .calendar-grid
-  //   display grid
-  //   grid-template-columns repeat(7, 1fr) /* 7 equal day columns */
-  //   gap 1px
-  // section.calendar + section.calendar
-  //   border-top 0
-  //   padding-top 0
-
-  // section.calendar
-  //   display flex
-  //   flex-wrap wrap
-  //   // align-content space-between
-  //   // gap 6px
-  //   &.day-labels
-  //     justify-content space-between
-  //     .day
-  //       width 18px
-  //   // .day-label
-  //   //   color var(--secondary-background)
-  //   button
-  //     margin 0
-  //     width fit-content
-  //   .day
-  //     width 24px
-    // div
-    //   margin 0
-
+      padding 0 1px
 </style>
