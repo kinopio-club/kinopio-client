@@ -38,7 +38,7 @@ let unsubscribes
 //   window.removeEventListener('resize', updateDialogHeight)
 // })
 
-const emit = defineEmits(['selectDate', 'clearDate'])
+const emit = defineEmits(['selectDate']) // cleardate
 
 const props = defineProps({
   visible: Boolean
@@ -70,6 +70,13 @@ const today = computed(() => {
     year: dayjs().year()
   }
 })
+const isToday = (day) => {
+  const isDay = day === today.value.day
+  const isMonth = state.month === today.value.month
+  const isYear = state.year === today.value.year
+  console.log(day, isDay)
+  return isDay && isMonth && isYear
+}
 
 const toToday = () => {
   console.log(state.month, state.day)
@@ -125,6 +132,17 @@ const styles = (index) => {
   return { '--start-day': currentMonthData.value.startsOnIndex + 1 }
 }
 
+const selectDate = (day) => {
+  state.day = day
+  const value = {
+    month: state.month,
+    day: state.date,
+    year: state.year
+  }
+  console.log('🫐🫐', value)
+  emit('selectDate', value)
+}
+
 </script>
 
 <template lang="pug">
@@ -160,8 +178,9 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
       :key="day"
       :class="{ active: day === state.day }"
       :style="styles(index)"
+      @click="selectDate(day)"
     )
-      span.badge.info.badge-in-button(v-if="day === state.day") {{ day }}
+      span.badge.info.badge-in-button(v-if="isToday(day)") {{ day }}
       span(v-else) {{ day }}
 </template>
 
