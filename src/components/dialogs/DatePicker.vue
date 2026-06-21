@@ -58,18 +58,25 @@ const state = reactive({
 // })
 // watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
+const currentDayLabel = computed(() => {
+  const date = dayjs(`${state.year}-${state.month + 1}-${state.day}`)
+  return date.format('MMM D, YYYY')
+})
+
 const today = computed(() => {
   return {
     month: dayjs().month(),
-    day: dayjs().date()
+    day: dayjs().date(),
+    year: dayjs().year()
   }
 })
 
 const toToday = () => {
   console.log(state.month, state.day)
 
-  state.month = dayjs().month()
-  state.day = dayjs().date()
+  state.month = today.value.month
+  state.day = today.value.day
+  state.year = today.value.year
   console.log('☎️☎️', state.month, state.day, calendarData.value, calendarData.value[state.month])
 }
 const toPrevMonth = () => {}
@@ -93,6 +100,7 @@ const yearData = (year) => {
       month: date.format('MMM'),
       daysInMonth: date.daysInMonth(),
       startsOn: date.format('dd'),
+      startsOnIndex: date.day(), // 0 Sun – 6 Sat
       year
     }
   })
@@ -107,13 +115,24 @@ const calendarData = computed(() => {
 
 // Object { month: "Jan", daysInMonth: 31, startsOn: "Wed" }
 
+const currentMonthData = computed(() => calendarData.value[state.month])
+const days = computed(() => {
+  const daysInMonth = currentMonthData.value.daysInMonth
+  return Array.from({ length: daysInMonth }, (item, index) => index + 1)
+})
+const styles = (index) => {
+  if (index !== 0) { return }
+  return { '--start-day': currentMonthData.value.startsOnIndex + 1 }
+}
+
 </script>
 
 <template lang="pug">
 dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
   section.title-section
     .row.title-row
-      p Jun 12, 2026
+      p {{currentDayLabel}}
+
       div
         .segmented-buttons
           //- prev
@@ -121,36 +140,29 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
             img.icon.left-arrow(src="@/assets/down-arrow.svg")
           //- today
           button.small-button(@click="toToday")
-            span Today
+            span.badge.info.badge-in-button.today-badge-icon
           //- next
           button.small-button(@click="toNextMonth" title="Next Month")
             img.icon.right-arrow(src="@/assets/down-arrow.svg")
 
   section.calendar-day-labels
-    .day.day-label(data-label="Su") Su
-    .day.day-label(data-label="Mo") Mo
-    .day.day-label(data-label="Tu") Tu
-    .day.day-label(data-label="We") We
-    .day.day-label(data-label="Th") Th
-    .day.day-label(data-label="Fr") Fr
-    .day.day-label(data-label="Sa") Sa
+    .day.day-label Su
+    .day.day-label Mo
+    .day.day-label Tu
+    .day.day-label We
+    .day.day-label Th
+    .day.day-label Fr
+    .day.day-label Sa
 
   section.calendar
-    button.day
-      span 1
-    button.day 2
-    button.day 3
-    button.day 4
-    button.day.active
-      span.badge.info.badge-in-button 5
-    button.day 6
-    button.day 7
-    button.day 2
-    button.day 2
-    button.day 1
-    button.day 12
-    button.day 22
-    button.day 12
+    button.day(
+      v-for="(day, index) in days"
+      :key="day"
+      :class="{ active: day === state.day }"
+      :style="styles(index)"
+    )
+      span.badge.info.badge-in-button(v-if="day === state.day") {{ day }}
+      span(v-else) {{ day }}
 </template>
 
 <style lang="stylus">
@@ -172,6 +184,14 @@ dialog.date-picker
   //   .day-label
   //     color var(--secondary-active-background)
 
+  .today-badge-icon
+    min-height 0
+    display inline-block
+    min-width 0
+    padding 0
+    width 10px
+    height 10px
+
   section.calendar
     button.day
       margin 0
@@ -181,13 +201,14 @@ dialog.date-picker
       align-items center
       justify-content center
       text-align center
+      padding 2px 0
 
       // padding 0
       &:first-child
         grid-column-start var(--start-day, 1)
       .badge
         margin 0
-        padding 0 2px
+        padding 0 1px
   // .calendar-grid
   //   display grid
   //   grid-template-columns repeat(7, 1fr) /* 7 equal day columns */
