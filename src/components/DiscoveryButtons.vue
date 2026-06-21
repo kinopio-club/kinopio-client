@@ -77,9 +77,9 @@ watch(() => globalStore.isSpacePage, async (value, prevValue) => {
   }
 })
 
-const exploreSpaces = computed(() => globalStore.exploreSpaces)
-const followingSpaces = computed(() => globalStore.followingSpaces)
-const everyoneSpaces = computed(() => globalStore.everyoneSpaces)
+const exploreSpaces = computed(() => globalStore.exploreSpaces || [])
+const followingSpaces = computed(() => globalStore.followingSpaces || [])
+const everyoneSpaces = computed(() => globalStore.everyoneSpaces || [])
 
 const closeDialogs = () => {
   state.exploreIsVisible = false
