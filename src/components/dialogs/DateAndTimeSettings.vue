@@ -52,18 +52,26 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const userTimezone = computed(() => userStore.timezone)
+// format
+
 const absoluteTimeLabel = computed(() => {
   const date = dayjs().add(2, 'day')
   return utils.shortAbsoluteDate(date)
 })
 
+// timezones
+
+const userTimezone = computed(() => userStore.timezone)
+const filteredTimezones = computed(() => timezones) // STUB
 const updateDefaultTimezone = (event) => {
   const timezone = dayjs.tz.guess()
   userStore.updateUser({ timezone })
   const position = utils.cursorPositionInPage(event)
   position.x += -40
   globalStore.addNotificationWithPosition({ message: 'Updated', position, type: 'success', layer: 'app', icon: 'checkmark' })
+}
+const timezoneIsSelected = (timezone) => {
+  return timezone.iana === userTimezone.value
 }
 const selectTimezone = (timezone) => {
   console.log('🫐', timezone)
@@ -92,17 +100,10 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
       span.badge.info {{userTimezone}}
   section.timezone-picker.results-section
     ul.results-list.timezone-list
-      template(v-for="timezone in timezones" :key="timezone.iana")
-        li(@click.left="selectTimezone(timezone)")
-
+      template(v-for="timezone in filteredTimezones" :key="timezone.iana")
+        li(@click.left="selectTimezone(timezone)" :class="{ active: timezoneIsSelected(timezone) }")
           span {{timezone.iana}}
           span.gmt-offset {{timezone.gmtOffset}}
-        //- li(:class="{ active: timezoneIsSelected(timezone) }" @click.stop="selecttimezone(timezone)")
-          //- timezoneLabel(:timezone="timezone" :showName="true")
-          //- timezoneDetails(:visible="timezoneDetailsIsVisible(timezone)" :timezone="timezone")
-
-    //- results list
-    //- list use default + timezones
 </template>
 
 <style lang="stylus">
