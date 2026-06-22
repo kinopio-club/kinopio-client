@@ -24,10 +24,13 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  console.log('🫐🫐🫐🫐🫐🫐', timezones)
+  window.addEventListener('pointermove', moveMapPointer)
+  window.addEventListener('pointerup', endMapPointer)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
+  window.removeEventListener('pointermove', moveMapPointer)
+  window.removeEventListener('pointerup', endMapPointer)
 })
 
 const emit = defineEmits(['updateCount'])
@@ -36,7 +39,8 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  isMapPointerDown: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -107,7 +111,7 @@ const userTimezoneOffsetHours = computed(() => {
   const match = timezones.find(timezone => timezone.iana === userTimezone.value)
   return parseGmtOffsetHours(match?.gmtOffset || 'GMT+0:00')
 })
-// map is equirectangular: full width spans -180°..180° longitude,
+// map width spans -180°..180° longitude,
 // each timezone hour = 15° of longitude
 const timezoneHighlightStyles = computed(() => {
   const widthDegrees = 15
@@ -119,13 +123,25 @@ const timezoneHighlightStyles = computed(() => {
     width: (widthDegrees / 360) * 100 + '%'
   }
 })
-// map click → nearest timezone offset → select
-const clickMap = (event) => {
-  const rect = event.currentTarget.getBoundingClientRect()
+// map pointer → nearest timezone offset → select
+const mapElement = ref(null)
+const updateTimezoneFromPointer = (event) => {
+  const rect = mapElement.value.getBoundingClientRect()
   const fraction = (event.clientX - rect.left) / rect.width
   const longitude = fraction * 360 - 180
   const gmt = Math.round(longitude / 15)
   selectTimezoneByGmt(gmt)
+}
+const startMapPointer = (event) => {
+  state.isMapPointerDown = true
+  updateTimezoneFromPointer(event)
+}
+const moveMapPointer = (event) => {
+  if (!state.isMapPointerDown) { return }
+  updateTimezoneFromPointer(event)
+}
+const endMapPointer = () => {
+  state.isMapPointerDown = false
 }
 </script>
 
@@ -146,12 +162,11 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
       button.small-button(@click="updateDefaultTimezone")
         span Auto Detect
     .row
-      span.badge.info {{userTimezone}}
-
-    .row
-      .earth-map(@click.left="clickMap")
+      .earth-map(ref="mapElement" @pointerdown.left="startMapPointer")
         .timezone-highlight(:style="timezoneHighlightStyles")
         .land
+        .badge.info.timezone-label {{userTimezone}}
+
   section.timezone-picker.results-section
     ul.results-list.timezone-list
       template(v-for="timezone in filteredTimezones" :key="timezone.iana")
@@ -173,6 +188,12 @@ dialog.date-and-time-settings
     overflow hidden
     background #0000b1 // earth blue
     cursor pointer
+    margin-right 6px
+    .timezone-label
+      position absolute
+      left 4px
+      top 4px
+      z-index 2
     .land
       position absolute
       top 0
@@ -187,7 +208,7 @@ dialog.date-and-time-settings
       position absolute
       top 0
       height 100%
-      background var(--button-background-translucent)
+      background rgba(255,255,255,0.4)
       pointer-events none
       z-index 1
   li

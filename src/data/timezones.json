@@ -1,77 +1,5 @@
 [
   {
-    "iana": "Africa/Abidjan",
-    "gmtOffset": "GMT+0:00",
-    "aliases": [
-      "Abidjan",
-      "Accra",
-      "Dakar",
-      "Conakry",
-      "Bamako",
-      "Freetown",
-      "Monrovia",
-      "Ouagadougou"
-    ]
-  },
-  {
-    "iana": "Africa/Cairo",
-    "gmtOffset": "GMT+2:00",
-    "aliases": [
-      "Cairo",
-      "Jerusalem",
-      "Tel Aviv",
-      "Beirut",
-      "Amman",
-      "Damascus",
-      "Khartoum",
-      "Tripoli",
-      "EET"
-    ]
-  },
-  {
-    "iana": "Africa/Johannesburg",
-    "gmtOffset": "GMT+2:00",
-    "aliases": [
-      "Johannesburg",
-      "Cape Town",
-      "Harare",
-      "Lusaka",
-      "Maputo",
-      "Gaborone",
-      "Windhoek",
-      "Pretoria",
-      "SAST"
-    ]
-  },
-  {
-    "iana": "Africa/Lagos",
-    "gmtOffset": "GMT+1:00",
-    "aliases": [
-      "Lagos",
-      "Kinshasa",
-      "Kano",
-      "Ibadan",
-      "Algiers",
-      "Tunis",
-      "Luanda",
-      "Douala",
-      "WAT"
-    ]
-  },
-  {
-    "iana": "Africa/Nairobi",
-    "gmtOffset": "GMT+3:00",
-    "aliases": [
-      "Nairobi",
-      "Addis Ababa",
-      "Dar es Salaam",
-      "Mogadishu",
-      "Kampala",
-      "Antananarivo",
-      "EAT"
-    ]
-  },
-  {
     "iana": "America/Anchorage",
     "gmtOffset": "GMT−9:00",
     "aliases": [
@@ -80,41 +8,6 @@
       "Juneau",
       "Fairbanks",
       "Nome"
-    ]
-  },
-  {
-    "iana": "America/Argentina/Buenos_Aires",
-    "gmtOffset": "GMT−3:00",
-    "aliases": [
-      "Buenos Aires",
-      "Montevideo",
-      "Argentina",
-      "Uruguay",
-      "Córdoba",
-      "Rosario",
-      "ART"
-    ]
-  },
-  {
-    "iana": "America/Bogota",
-    "gmtOffset": "GMT−5:00",
-    "aliases": [
-      "Bogotá",
-      "Lima",
-      "Quito",
-      "Panama City",
-      "Kingston",
-      "Ecuador",
-      "Peru",
-      "Colombia"
-    ]
-  },
-  {
-    "iana": "America/Caracas",
-    "gmtOffset": "GMT−4:00",
-    "aliases": [
-      "Caracas",
-      "Venezuela"
     ]
   },
   {
@@ -129,7 +22,16 @@
       "Winnipeg",
       "Central Time",
       "CST",
-      "CDT"
+      "CDT",
+      "Mexico City",
+      "Guadalajara",
+      "Monterrey",
+      "Guatemala City",
+      "San Salvador",
+      "Tegucigalpa",
+      "Managua",
+      "San José",
+      "Costa Rica"
     ]
   },
   {
@@ -143,13 +45,19 @@
       "Calgary",
       "Mountain Time",
       "MST",
-      "MDT"
+      "MDT",
+      "Phoenix (no DST)",
+      "Arizona",
+      "Tucson",
+      "Mesa"
     ]
   },
   {
     "iana": "America/Halifax",
     "gmtOffset": "GMT−4:00",
     "aliases": [
+      "Caracas",
+      "Venezuela",
       "Halifax",
       "Atlantic Time",
       "Santo Domingo",
@@ -180,24 +88,17 @@
     ]
   },
   {
-    "iana": "America/Mexico_City",
-    "gmtOffset": "GMT−6:00",
-    "aliases": [
-      "Mexico City",
-      "Guadalajara",
-      "Monterrey",
-      "Guatemala City",
-      "San Salvador",
-      "Tegucigalpa",
-      "Managua",
-      "San José",
-      "Costa Rica"
-    ]
-  },
-  {
     "iana": "America/New_York",
     "gmtOffset": "GMT−5:00",
     "aliases": [
+      "Bogotá",
+      "Lima",
+      "Quito",
+      "Panama City",
+      "Kingston",
+      "Ecuador",
+      "Peru",
+      "Colombia",
       "New York",
       "Boston",
       "Miami",
@@ -213,19 +114,16 @@
     ]
   },
   {
-    "iana": "America/Phoenix",
-    "gmtOffset": "GMT−7:00",
-    "aliases": [
-      "Phoenix (no DST)",
-      "Arizona",
-      "Tucson",
-      "Mesa"
-    ]
-  },
-  {
     "iana": "America/Sao_Paulo",
     "gmtOffset": "GMT−3:00",
     "aliases": [
+      "Buenos Aires",
+      "Montevideo",
+      "Argentina",
+      "Uruguay",
+      "Córdoba",
+      "Rosario",
+      "ART",
       "São Paulo",
       "Rio de Janeiro",
       "Brasília",
@@ -246,27 +144,6 @@
     ]
   },
   {
-    "iana": "Asia/Almaty",
-    "gmtOffset": "GMT+6:00",
-    "aliases": [
-      "Almaty",
-      "Astana",
-      "Bishkek",
-      "Kazakhstan",
-      "Kyrgyzstan",
-      "ALMT"
-    ]
-  },
-  {
-    "iana": "Asia/Baku",
-    "gmtOffset": "GMT+4:00",
-    "aliases": [
-      "Baku",
-      "Azerbaijan",
-      "AZT"
-    ]
-  },
-  {
     "iana": "Asia/Bangkok",
     "gmtOffset": "GMT+7:00",
     "aliases": [
@@ -278,13 +155,24 @@
       "Thailand",
       "Vietnam",
       "Cambodia",
-      "ICT"
+      "ICT",
+      "Jakarta",
+      "Surabaya",
+      "Medan",
+      "Indonesia",
+      "WIB"
     ]
   },
   {
     "iana": "Asia/Dhaka",
     "gmtOffset": "GMT+6:00",
     "aliases": [
+      "Almaty",
+      "Astana",
+      "Bishkek",
+      "Kazakhstan",
+      "Kyrgyzstan",
+      "ALMT",
       "Dhaka",
       "Chittagong",
       "Bangladesh",
@@ -295,6 +183,9 @@
     "iana": "Asia/Dubai",
     "gmtOffset": "GMT+4:00",
     "aliases": [
+      "Baku",
+      "Azerbaijan",
+      "AZT",
       "Dubai",
       "Abu Dhabi",
       "Muscat",
@@ -302,17 +193,6 @@
       "Yerevan",
       "UAE",
       "GST"
-    ]
-  },
-  {
-    "iana": "Asia/Jakarta",
-    "gmtOffset": "GMT+7:00",
-    "aliases": [
-      "Jakarta",
-      "Surabaya",
-      "Medan",
-      "Indonesia",
-      "WIB"
     ]
   },
   {
@@ -332,7 +212,12 @@
       "Islamabad",
       "Lahore",
       "Pakistan",
-      "PST"
+      "PST",
+      "Tashkent",
+      "Ashgabat",
+      "Dushanbe",
+      "Uzbekistan",
+      "UZT"
     ]
   },
   {
@@ -360,17 +245,6 @@
     ]
   },
   {
-    "iana": "Asia/Seoul",
-    "gmtOffset": "GMT+9:00",
-    "aliases": [
-      "Seoul",
-      "Busan",
-      "Incheon",
-      "Korea",
-      "KST"
-    ]
-  },
-  {
     "iana": "Asia/Shanghai",
     "gmtOffset": "GMT+8:00",
     "aliases": [
@@ -386,29 +260,15 @@
       "China",
       "CST",
       "HKT",
-      "PHT"
-    ]
-  },
-  {
-    "iana": "Asia/Singapore",
-    "gmtOffset": "GMT+8:00",
-    "aliases": [
+      "PHT",
       "Singapore",
       "Kuala Lumpur",
       "Malaysia",
       "SGT",
-      "MYT"
-    ]
-  },
-  {
-    "iana": "Asia/Tashkent",
-    "gmtOffset": "GMT+5:00",
-    "aliases": [
-      "Tashkent",
-      "Ashgabat",
-      "Dushanbe",
-      "Uzbekistan",
-      "UZT"
+      "MYT",
+      "Perth",
+      "Western Australia",
+      "AWST"
     ]
   },
   {
@@ -424,6 +284,11 @@
     "iana": "Asia/Tokyo",
     "gmtOffset": "GMT+9:00",
     "aliases": [
+      "Seoul",
+      "Busan",
+      "Incheon",
+      "Korea",
+      "KST",
       "Tokyo",
       "Osaka",
       "Sapporo",
@@ -449,13 +314,7 @@
     "gmtOffset": "GMT−1:00",
     "aliases": [
       "Azores",
-      "Ponta Delgada"
-    ]
-  },
-  {
-    "iana": "Atlantic/Cape_Verde",
-    "gmtOffset": "GMT−1:00",
-    "aliases": [
+      "Ponta Delgada",
       "Cape Verde",
       "Praia",
       "CVT"
@@ -499,15 +358,6 @@
     ]
   },
   {
-    "iana": "Australia/Perth",
-    "gmtOffset": "GMT+8:00",
-    "aliases": [
-      "Perth",
-      "Western Australia",
-      "AWST"
-    ]
-  },
-  {
     "iana": "Australia/Sydney",
     "gmtOffset": "GMT+10:00",
     "aliases": [
@@ -516,7 +366,10 @@
       "Brisbane",
       "Canberra",
       "Eastern Australia",
-      "AEST"
+      "AEST",
+      "Port Moresby",
+      "Papua New Guinea",
+      "PGT"
     ]
   },
   {
@@ -532,6 +385,24 @@
     "iana": "Europe/Helsinki",
     "gmtOffset": "GMT+2:00",
     "aliases": [
+      "Cairo",
+      "Jerusalem",
+      "Tel Aviv",
+      "Beirut",
+      "Amman",
+      "Damascus",
+      "Khartoum",
+      "Tripoli",
+      "EET",
+      "Johannesburg",
+      "Cape Town",
+      "Harare",
+      "Lusaka",
+      "Maputo",
+      "Gaborone",
+      "Windhoek",
+      "Pretoria",
+      "SAST",
       "Helsinki",
       "Kyiv",
       "Riga",
@@ -541,7 +412,6 @@
       "Sofia",
       "Athens",
       "Nicosia",
-      "EET",
       "EEST"
     ]
   },
@@ -549,16 +419,20 @@
     "iana": "Europe/London",
     "gmtOffset": "GMT+0:00",
     "aliases": [
+      "Abidjan",
+      "Accra",
+      "Dakar",
+      "Conakry",
+      "Bamako",
+      "Freetown",
+      "Monrovia",
+      "Ouagadougou",
       "London",
       "Dublin",
       "Edinburgh",
       "Lisbon",
       "Reykjavik",
       "Casablanca",
-      "Accra",
-      "Dakar",
-      "Abidjan",
-      "GMT",
       "GMT",
       "WET"
     ]
@@ -567,6 +441,13 @@
     "iana": "Europe/Moscow",
     "gmtOffset": "GMT+3:00",
     "aliases": [
+      "Nairobi",
+      "Addis Ababa",
+      "Dar es Salaam",
+      "Mogadishu",
+      "Kampala",
+      "Antananarivo",
+      "EAT",
       "Moscow",
       "Saint Petersburg",
       "Minsk",
@@ -575,7 +456,6 @@
       "Kuwait City",
       "Doha",
       "Aden",
-      "Nairobi",
       "MSK"
     ]
   },
@@ -583,6 +463,15 @@
     "iana": "Europe/Paris",
     "gmtOffset": "GMT+1:00",
     "aliases": [
+      "Lagos",
+      "Kinshasa",
+      "Kano",
+      "Ibadan",
+      "Algiers",
+      "Tunis",
+      "Luanda",
+      "Douala",
+      "WAT",
       "Paris",
       "Berlin",
       "Rome",
@@ -612,7 +501,13 @@
       "Wellington",
       "Christchurch",
       "New Zealand",
-      "NZST"
+      "NZST",
+      "Fiji",
+      "Suva",
+      "Tarawa",
+      "Majuro",
+      "Marshall Islands",
+      "FJT"
     ]
   },
   {
@@ -622,18 +517,6 @@
       "Chatham Islands",
       "Waitangi",
       "CHAST"
-    ]
-  },
-  {
-    "iana": "Pacific/Fiji",
-    "gmtOffset": "GMT+12:00",
-    "aliases": [
-      "Fiji",
-      "Suva",
-      "Tarawa",
-      "Majuro",
-      "Marshall Islands",
-      "FJT"
     ]
   },
   {
@@ -688,15 +571,6 @@
       "Midway",
       "Niue",
       "Samoa"
-    ]
-  },
-  {
-    "iana": "Pacific/Port_Moresby",
-    "gmtOffset": "GMT+10:00",
-    "aliases": [
-      "Port Moresby",
-      "Papua New Guinea",
-      "PGT"
     ]
   },
   {
