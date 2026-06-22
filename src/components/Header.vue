@@ -44,8 +44,6 @@ import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
-import DatePicker from '@/components/dialogs/DatePicker.vue'
-
 import sortBy from 'lodash-es/sortBy'
 
 const globalStore = useGlobalStore()
@@ -591,7 +589,6 @@ const clearNotifications = () => {
 
 <template lang="pug">
 header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
-  DatePicker(:visible="true")
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
