@@ -73,19 +73,39 @@ const updateDefaultTimezone = (event) => {
 const timezoneIsSelected = (timezone) => {
   return timezone.iana === userTimezone.value
 }
+const selectTimezoneByGmt = (gmt) => {
+  // find the timezone whose offset is closest to the clicked gmt hour
+  let closest
+  let smallestDelta = Infinity
+  timezones.forEach(timezone => {
+    const delta = Math.abs(parseGmtOffsetHours(timezone.gmtOffset) - gmt)
+    if (delta < smallestDelta) {
+      smallestDelta = delta
+      closest = timezone
+    }
+  })
+  if (closest) {
+    selectTimezone(closest)
+  }
+}
+const selectTimezone = (timezone) => {
+  userStore.updateUser({ timezone: timezone.iana })
+}
 
 // earth map highlight
 
-const userTimezoneOffsetHours = computed(() => {
-  const match = timezones.find(timezone => timezone.iana === userTimezone.value)
-  const gmtOffset = match?.gmtOffset || 'GMT+0:00'
-  // note: the data uses a unicode minus sign (−, U+2212), not an ascii hyphen
-  const parsed = gmtOffset.match(/GMT([+\-−])(\d+):(\d+)/)
+// note: the data uses a unicode minus sign (−, U+2212), not an ascii hyphen
+const parseGmtOffsetHours = (gmtOffset) => {
+  const parsed = (gmtOffset || '').match(/GMT([+\-−])(\d+):(\d+)/)
   if (!parsed) { return 0 }
   const sign = (parsed[1] === '-' || parsed[1] === '−') ? -1 : 1
   const hours = parseInt(parsed[2], 10)
   const minutes = parseInt(parsed[3], 10)
   return sign * (hours + minutes / 60)
+}
+const userTimezoneOffsetHours = computed(() => {
+  const match = timezones.find(timezone => timezone.iana === userTimezone.value)
+  return parseGmtOffsetHours(match?.gmtOffset || 'GMT+0:00')
 })
 // map is equirectangular: full width spans -180°..180° longitude,
 // each timezone hour = 15° of longitude
@@ -99,10 +119,14 @@ const timezoneHighlightStyles = computed(() => {
     width: (widthDegrees / 360) * 100 + '%'
   }
 })
-const selectTimezone = (timezone) => {
-  console.log('🫐', timezone)
+// map click → nearest timezone offset → select
+const clickMap = (event) => {
+  const rect = event.currentTarget.getBoundingClientRect()
+  const fraction = (event.clientX - rect.left) / rect.width
+  const longitude = fraction * 360 - 180
+  const gmt = Math.round(longitude / 15)
+  selectTimezoneByGmt(gmt)
 }
-
 </script>
 
 <template lang="pug">
@@ -125,7 +149,7 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
       span.badge.info {{userTimezone}}
 
     .row
-      .earth-map
+      .earth-map(@click.left="clickMap")
         .timezone-highlight(:style="timezoneHighlightStyles")
         .land
   section.timezone-picker.results-section
@@ -148,6 +172,7 @@ dialog.date-and-time-settings
     border-radius var(--entity-radius)
     overflow hidden
     background #0000b1 // earth blue
+    cursor pointer
     .land
       position absolute
       top 0
