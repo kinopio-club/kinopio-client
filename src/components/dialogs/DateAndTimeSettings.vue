@@ -84,11 +84,12 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
         span 2 days left
   section
     .row.title-row
-      p Timezone
-      span.badge.secondary.current-timezone {{userTimezone}}
-    .row
-      button(@click="updateDefaultTimezone")
+      span Timezone
+      button.small-button(@click="updateDefaultTimezone")
         span Auto Detect
+
+    .row
+      span.badge.info {{userTimezone}}
   section.timezone-picker.results-section
     ul.results-list.timezone-list
       template(v-for="timezone in timezones" :key="timezone.iana")
@@ -107,8 +108,6 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
 <style lang="stylus">
 dialog.date-and-time-settings
   overflow auto
-  .current-timezone
-    margin 0
   section.timezone-picker
     max-height 250px
   li
