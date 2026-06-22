@@ -76,7 +76,7 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
   section.title-section
     p Date and Time Settings
   section
-    p New Date Format
+    p Due Date Format
     .segmented-buttons
       button.active
         span {{absoluteTimeLabel}}
