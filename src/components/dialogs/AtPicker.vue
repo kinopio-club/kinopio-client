@@ -11,9 +11,6 @@ import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 import uniqBy from 'lodash-es/uniqBy'
-// import dayjs from 'dayjs'
-// import timezone from 'dayjs/plugin/timezone'
-// dayjs.extend(timezone)
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -145,7 +142,6 @@ const toggleDatePickerIsVisible = () => {
   console.log('🍒', state.datePickerIsVisible)
 }
 const selectDate = (date) => {
-  // dayjs.tz.guess()
   console.log('❤️❤️❤️❤️', date)
 }
 // ??or dayjs string dayjs('apr-2,2003')

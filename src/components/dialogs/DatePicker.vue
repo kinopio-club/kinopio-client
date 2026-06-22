@@ -144,7 +144,8 @@ const selectDate = (day) => {
   const value = {
     month: month.value,
     day,
-    year: year.value
+    year: year.value,
+    timezone: userStore.timezone
   }
   emit('selectDate', value)
 }
