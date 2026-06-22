@@ -145,7 +145,8 @@ const selectDate = (day) => {
     month: month.value,
     day,
     year: year.value,
-    timezone: userStore.timezone
+    timezone: userStore.timezone,
+    isRelative: userStore.atMentionDateIsRelative
   }
   emit('selectDate', value)
 }

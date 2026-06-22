@@ -1,18 +1,22 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
+// import { useGlobalStore } from '@/stores/useGlobalStore'
+// import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
-import { useSpaceStore } from '@/stores/useSpaceStore'
+// import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import timezones from '@/data/timezones.json'
 
-const globalStore = useGlobalStore()
-const cardStore = useCardStore()
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(timezone)
+
+// const globalStore = useGlobalStore()
+// const cardStore = useCardStore()
 const userStore = useUserStore()
-const spaceStore = useSpaceStore()
+// const spaceStore = useSpaceStore()
 
 let unsubscribes
 
@@ -32,7 +36,6 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  count: 0,
   dialogHeight: null
 })
 
@@ -41,7 +44,6 @@ watch(() => props.visible, (value, prevValue) => {
     updateDialogHeight()
   }
 })
-// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -55,9 +57,16 @@ const updateDialogHeight = async () => {
 <template lang="pug">
 dialog.narrow.timezone-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
-    p Timezone
+    p Date and Time Settings
   section
-    button yolo
+    p New Date Format
+    .segmented-buttons
+      button.active Aug 20, 2026
+      button 2 days left
+  section
+    p Timezone
+    //- results list
+    //- list use default + timezones
 </template>
 
 <style lang="stylus">

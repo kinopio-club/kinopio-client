@@ -76,7 +76,8 @@ Method | Path | Description | Scope
 Name | Type | Description
 --- | --- | ---
 <code class="users">id</code>                               | `String`  | The unique ID of the user. Is not user updateable
-<code class="users">apiKey</code>                           | `UUID`    | Used in Authentication headers to make API calls as the currentUser. Generated and returned only when user signs up or in. Is not user updateable
+<code class="users">apiKey</code>                           | `UUID`    | Used in Authentication headers to make API calls as the currentUser. Generated and returned only when user signs up or in. Is not user updateable. Grants `root` scope, so should not be shared.
+<code class="users">atMentionDateIsRelative</code>          | `Boolean`    | Whether @dates assigned to cards by the user should default to relative format (e.g. 2 days left), instead of the default absolute format.
 <code class="users">cardsCreatedCount</code>                | `Integer` | The number of cards the user has created if they're not a paid user, used to enforce the free user limit. Is not user updatable.
 <code class="users">cardsCreatedCountRaw</code>                | `Integer` | Similar to `cardsCreatedCount` except the raw version increments even if your're a free user on a paid user space. This is a vanity metric and is not used to enforce free user limits.
 <code class="users">cardSettingsDefaultCharacterLimit</code>            | `Integer` | The max number of characters you can enter in a card. Either 300 (default) or 4000 (max). Constrained character limits are meant to encourage using cards to represent single ideas. But this override exists for those who don't want that.
@@ -129,7 +130,7 @@ Name | Type | Description
 <code class="users">showInExploreUpdatedAt</code>           | `String` | When the user last opened the Explore dialog. Used to determine new/unread Explore spaces
 <code class="users">showItemActions</code>                  | `Boolean` | Whether the user has chosen to show expanded options and info in both the `card-details` and `multiple-selected-actions` dialogs
 <code class="users">sidebarResizeWidth</code>              | `Integer` | Manually resized width of the sidebar dialog
-<code class="users">timezone</code>                         | `String` | The user's timezone [abbreviation](https://github.com/vvo/tzdb)
+<code class="users">timezone</code>                         | `String` | The user's timezone, in [IANA](https://data.iana.org/time-zones/tzdb-2021a/zone1970.tab) name format
 <code class="users">updatedAt</code>                        | `String`  | The date when any changes to the user was made. Also is updated whenever the user starts a Kinopio session
 <code class="users">website</code>                          | `String`  | The user's website, url validity is not checked
 <code class="users">prevSettingsSection</code>            | `String`  | The last used settings section. Can be `general`, `controls`, or `cards`

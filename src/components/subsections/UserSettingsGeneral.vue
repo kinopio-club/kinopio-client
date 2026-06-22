@@ -13,7 +13,7 @@ import DeleteAccountConfirmation from '@/components/dialogs/DeleteAccountConfirm
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
-import TimezonePicker from '@/components/dialogs/TimezonePicker.vue'
+import DateAndTimeSettings from '@/components/dialogs/DateAndTimeSettings.vue'
 import User from '@/components/User.vue'
 import consts from '@/consts.js'
 
@@ -46,7 +46,7 @@ const props = defineProps({
 const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
-  userTimezoneSettingsIsVisible: false,
+  userDateAndTimeSettingsIsVisible: false,
   deleteAccountConfirmationVisible: false,
   userApiInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
@@ -64,7 +64,7 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const closeDialogs = () => {
   state.userBillingSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
-  state.userTimezoneSettingsIsVisible = false
+  state.userDateAndTimeSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
   state.userApiInfoIsVisible = false
@@ -109,10 +109,10 @@ const toggleModeratorActionsSettingsIsVisible = () => {
   closeDialogs()
   state.moderatorActionsSettingsIsVisible = !isVisible
 }
-const toggleUserTimezoneSettingsIsVisible = () => {
-  const isVisible = state.userTimezoneSettingsIsVisible
+const toggleUserDateAndTimeSettingsIsVisible = () => {
+  const isVisible = state.userDateAndTimeSettingsIsVisible
   closeDialogs()
-  state.userTimezoneSettingsIsVisible = !isVisible
+  state.userDateAndTimeSettingsIsVisible = !isVisible
 }
 
 // debug mode
@@ -166,12 +166,13 @@ const toggleIsDebugMode = () => {
           teleport(to="#settings-child-dialogs" defer)
             UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
     .row
-      //- Timezone
+      //- Date and Time
       .button-wrap
-        button(@click.left.stop="toggleUserTimezoneSettingsIsVisible" :class="{active: state.userTimezoneSettingsIsVisible}")
-          span Timezone
+        button(@click.left.stop="toggleUserDateAndTimeSettingsIsVisible" :class="{active: state.userDateAndTimeSettingsIsVisible}")
+          img.icon.time(src="@/assets/time.svg")
+          span Date and Time
           teleport(to="#settings-child-dialogs" defer)
-            TimezonePicker(:visible="state.userTimezoneSettingsIsVisible")
+            DateAndTimeSettings(:visible="state.userDateAndTimeSettingsIsVisible")
 
   //- Developer Info
   section
