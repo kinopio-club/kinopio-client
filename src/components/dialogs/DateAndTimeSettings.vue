@@ -73,6 +73,32 @@ const updateDefaultTimezone = (event) => {
 const timezoneIsSelected = (timezone) => {
   return timezone.iana === userTimezone.value
 }
+
+// earth map highlight
+
+const userTimezoneOffsetHours = computed(() => {
+  const match = timezones.find(timezone => timezone.iana === userTimezone.value)
+  const gmtOffset = match?.gmtOffset || 'GMT+0:00'
+  // note: the data uses a unicode minus sign (−, U+2212), not an ascii hyphen
+  const parsed = gmtOffset.match(/GMT([+\-−])(\d+):(\d+)/)
+  if (!parsed) { return 0 }
+  const sign = (parsed[1] === '-' || parsed[1] === '−') ? -1 : 1
+  const hours = parseInt(parsed[2], 10)
+  const minutes = parseInt(parsed[3], 10)
+  return sign * (hours + minutes / 60)
+})
+// map is equirectangular: full width spans -180°..180° longitude,
+// each timezone hour = 15° of longitude
+const timezoneHighlightStyles = computed(() => {
+  const widthDegrees = 15
+  const longitude = userTimezoneOffsetHours.value * 15
+  let left = ((180 + longitude - widthDegrees / 2) / 360) * 100
+  left = Math.max(0, Math.min(100 - (widthDegrees / 360) * 100, left))
+  return {
+    left: left + '%',
+    width: (widthDegrees / 360) * 100 + '%'
+  }
+})
 const selectTimezone = (timezone) => {
   console.log('🫐', timezone)
 }
@@ -95,9 +121,13 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
       span Timezone
       button.small-button(@click="updateDefaultTimezone")
         span Auto Detect
-
     .row
       span.badge.info {{userTimezone}}
+
+    .row
+      .earth-map
+        .timezone-highlight(:style="timezoneHighlightStyles")
+        .land
   section.timezone-picker.results-section
     ul.results-list.timezone-list
       template(v-for="timezone in filteredTimezones" :key="timezone.iana")
@@ -111,6 +141,30 @@ dialog.date-and-time-settings
   overflow auto
   section.timezone-picker
     max-height 250px
+  .earth-map
+    position relative
+    width 100%
+    aspect-ratio 2
+    border-radius var(--entity-radius)
+    overflow hidden
+    background #0000b1 // earth blue
+    .land
+      position absolute
+      top 0
+      left 0
+      width 100%
+      height 100%
+      background-color #027f00 // earth land
+      -webkit-mask url('../../assets/world-map.svg?1') no-repeat center / contain
+      mask url('../../assets/world-map.svg?1') no-repeat center / contain
+      pointer-events none
+    .timezone-highlight
+      position absolute
+      top 0
+      height 100%
+      background var(--button-background-translucent)
+      pointer-events none
+      z-index 1
   li
     display flex
     width 100%
