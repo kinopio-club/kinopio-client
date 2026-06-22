@@ -33,9 +33,6 @@ onMounted(() => {
         if (props.parentIsPinned) { return }
         clearFilter()
       }
-      if (name === 'triggerSelectTemplateCategory') {
-        clearFilter()
-      }
       if (name === 'triggerFocusResultsFilter') {
         forceShowFilterState()
         await nextTick()

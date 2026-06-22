@@ -535,7 +535,6 @@ export const useGlobalStore = defineStore('global', {
     triggerArenaAuthenticationError () {},
     triggerKeyboardShortcutsIsVisible () {},
     triggerReadOnlyJiggle () {},
-    triggerSelectTemplateCategory () {},
     triggerUpdatePaintSelectCanvasPositionOffset () {},
     triggerPaintFramePosition (event) {},
     triggerAddRemotePaintingCircle () {},
