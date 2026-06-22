@@ -1,6 +1,6 @@
 [
   {
-    "iana": "America/Anchorage",
+    "name": "America/Anchorage",
     "gmtOffset": "GMT−9:00",
     "aliases": [
       "Anchorage",
@@ -11,7 +11,7 @@
     ]
   },
   {
-    "iana": "America/Chicago",
+    "name": "America/Chicago",
     "gmtOffset": "GMT−6:00",
     "aliases": [
       "Chicago",
@@ -35,7 +35,7 @@
     ]
   },
   {
-    "iana": "America/Denver",
+    "name": "America/Denver",
     "gmtOffset": "GMT−7:00",
     "aliases": [
       "Denver",
@@ -53,7 +53,7 @@
     ]
   },
   {
-    "iana": "America/Halifax",
+    "name": "America/Halifax",
     "gmtOffset": "GMT−4:00",
     "aliases": [
       "Caracas",
@@ -73,7 +73,7 @@
     ]
   },
   {
-    "iana": "America/Los_Angeles",
+    "name": "America/Los_Angeles",
     "gmtOffset": "GMT−8:00",
     "aliases": [
       "Los Angeles",
@@ -88,7 +88,7 @@
     ]
   },
   {
-    "iana": "America/New_York",
+    "name": "America/New_York",
     "gmtOffset": "GMT−5:00",
     "aliases": [
       "Bogotá",
@@ -114,7 +114,7 @@
     ]
   },
   {
-    "iana": "America/Sao_Paulo",
+    "name": "America/Sao_Paulo",
     "gmtOffset": "GMT−3:00",
     "aliases": [
       "Buenos Aires",
@@ -135,7 +135,7 @@
     ]
   },
   {
-    "iana": "America/St_Johns",
+    "name": "America/St_Johns",
     "gmtOffset": "GMT−3:30",
     "aliases": [
       "St. John's",
@@ -144,7 +144,7 @@
     ]
   },
   {
-    "iana": "Asia/Bangkok",
+    "name": "Asia/Bangkok",
     "gmtOffset": "GMT+7:00",
     "aliases": [
       "Bangkok",
@@ -164,7 +164,7 @@
     ]
   },
   {
-    "iana": "Asia/Dhaka",
+    "name": "Asia/Dhaka",
     "gmtOffset": "GMT+6:00",
     "aliases": [
       "Almaty",
@@ -180,7 +180,7 @@
     ]
   },
   {
-    "iana": "Asia/Dubai",
+    "name": "Asia/Dubai",
     "gmtOffset": "GMT+4:00",
     "aliases": [
       "Baku",
@@ -196,7 +196,7 @@
     ]
   },
   {
-    "iana": "Asia/Kabul",
+    "name": "Asia/Kabul",
     "gmtOffset": "GMT+4:30",
     "aliases": [
       "Kabul",
@@ -205,7 +205,7 @@
     ]
   },
   {
-    "iana": "Asia/Karachi",
+    "name": "Asia/Karachi",
     "gmtOffset": "GMT+5:00",
     "aliases": [
       "Karachi",
@@ -221,7 +221,7 @@
     ]
   },
   {
-    "iana": "Asia/Kathmandu",
+    "name": "Asia/Kathmandu",
     "gmtOffset": "GMT+5:45",
     "aliases": [
       "Kathmandu",
@@ -230,7 +230,7 @@
     ]
   },
   {
-    "iana": "Asia/Kolkata",
+    "name": "Asia/Kolkata",
     "gmtOffset": "GMT+5:30",
     "aliases": [
       "Kolkata",
@@ -245,7 +245,7 @@
     ]
   },
   {
-    "iana": "Asia/Shanghai",
+    "name": "Asia/Shanghai",
     "gmtOffset": "GMT+8:00",
     "aliases": [
       "Shanghai",
@@ -272,7 +272,7 @@
     ]
   },
   {
-    "iana": "Asia/Tehran",
+    "name": "Asia/Tehran",
     "gmtOffset": "GMT+3:30",
     "aliases": [
       "Tehran",
@@ -281,7 +281,7 @@
     ]
   },
   {
-    "iana": "Asia/Tokyo",
+    "name": "Asia/Tokyo",
     "gmtOffset": "GMT+9:00",
     "aliases": [
       "Seoul",
@@ -299,7 +299,7 @@
     ]
   },
   {
-    "iana": "Asia/Yangon",
+    "name": "Asia/Yangon",
     "gmtOffset": "GMT+6:30",
     "aliases": [
       "Yangon",
@@ -310,7 +310,7 @@
     ]
   },
   {
-    "iana": "Atlantic/Azores",
+    "name": "Atlantic/Azores",
     "gmtOffset": "GMT−1:00",
     "aliases": [
       "Azores",
@@ -321,7 +321,7 @@
     ]
   },
   {
-    "iana": "Atlantic/South_Georgia",
+    "name": "Atlantic/South_Georgia",
     "gmtOffset": "GMT−2:00",
     "aliases": [
       "South Georgia",
@@ -330,7 +330,7 @@
     ]
   },
   {
-    "iana": "Australia/Adelaide",
+    "name": "Australia/Adelaide",
     "gmtOffset": "GMT+9:30",
     "aliases": [
       "Adelaide",
@@ -341,7 +341,7 @@
     ]
   },
   {
-    "iana": "Australia/Eucla",
+    "name": "Australia/Eucla",
     "gmtOffset": "GMT+8:45",
     "aliases": [
       "Eucla",
@@ -350,7 +350,7 @@
     ]
   },
   {
-    "iana": "Australia/Lord_Howe",
+    "name": "Australia/Lord_Howe",
     "gmtOffset": "GMT+10:30",
     "aliases": [
       "Lord Howe Island",
@@ -358,7 +358,7 @@
     ]
   },
   {
-    "iana": "Australia/Sydney",
+    "name": "Australia/Sydney",
     "gmtOffset": "GMT+10:00",
     "aliases": [
       "Sydney",
@@ -373,7 +373,7 @@
     ]
   },
   {
-    "iana": "Etc/GMT+12",
+    "name": "Etc/GMT+12",
     "gmtOffset": "GMT−12:00",
     "aliases": [
       "International Date Line West",
@@ -382,7 +382,7 @@
     ]
   },
   {
-    "iana": "Europe/Helsinki",
+    "name": "Europe/Helsinki",
     "gmtOffset": "GMT+2:00",
     "aliases": [
       "Cairo",
@@ -416,7 +416,7 @@
     ]
   },
   {
-    "iana": "Europe/London",
+    "name": "Europe/London",
     "gmtOffset": "GMT+0:00",
     "aliases": [
       "Abidjan",
@@ -438,7 +438,7 @@
     ]
   },
   {
-    "iana": "Europe/Moscow",
+    "name": "Europe/Moscow",
     "gmtOffset": "GMT+3:00",
     "aliases": [
       "Nairobi",
@@ -460,7 +460,7 @@
     ]
   },
   {
-    "iana": "Europe/Paris",
+    "name": "Europe/Paris",
     "gmtOffset": "GMT+1:00",
     "aliases": [
       "Lagos",
@@ -494,7 +494,7 @@
     ]
   },
   {
-    "iana": "Pacific/Auckland",
+    "name": "Pacific/Auckland",
     "gmtOffset": "GMT+12:00",
     "aliases": [
       "Auckland",
@@ -511,7 +511,7 @@
     ]
   },
   {
-    "iana": "Pacific/Chatham",
+    "name": "Pacific/Chatham",
     "gmtOffset": "GMT+12:45",
     "aliases": [
       "Chatham Islands",
@@ -520,7 +520,7 @@
     ]
   },
   {
-    "iana": "Pacific/Honolulu",
+    "name": "Pacific/Honolulu",
     "gmtOffset": "GMT−10:00",
     "aliases": [
       "Honolulu",
@@ -532,7 +532,7 @@
     ]
   },
   {
-    "iana": "Pacific/Kiritimati",
+    "name": "Pacific/Kiritimati",
     "gmtOffset": "GMT+14:00",
     "aliases": [
       "Kiritimati",
@@ -543,7 +543,7 @@
     ]
   },
   {
-    "iana": "Pacific/Marquesas",
+    "name": "Pacific/Marquesas",
     "gmtOffset": "GMT−9:30",
     "aliases": [
       "Marquesas Islands",
@@ -552,7 +552,7 @@
     ]
   },
   {
-    "iana": "Pacific/Noumea",
+    "name": "Pacific/Noumea",
     "gmtOffset": "GMT+11:00",
     "aliases": [
       "Nouméa",
@@ -563,7 +563,7 @@
     ]
   },
   {
-    "iana": "Pacific/Pago_Pago",
+    "name": "Pacific/Pago_Pago",
     "gmtOffset": "GMT−11:00",
     "aliases": [
       "Pago Pago",
@@ -574,7 +574,7 @@
     ]
   },
   {
-    "iana": "Pacific/Tongatapu",
+    "name": "Pacific/Tongatapu",
     "gmtOffset": "GMT+13:00",
     "aliases": [
       "Tongatapu",

@@ -74,7 +74,8 @@ const props = defineProps({
   isLoading: Boolean,
   parentIsPinned: Boolean,
   showCreateNewSpaceFromSearch: Boolean,
-  isInitialValueFromSpaceListFilterInfo: Boolean
+  isInitialValueFromSpaceListFilterInfo: Boolean,
+  includeAliases: Boolean
 })
 
 const state = reactive({
@@ -152,7 +153,13 @@ const updateFilter = (newValue) => {
   state.filter = newValue
   emit('updateFilter', state.filter)
   const fuzzySearch = createFuzzySearch(props.items, {
-    getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
+    getText: (item) => {
+      let name = item.name
+      if (props.includeAliases) {
+        name += item.aliases.join(' ')
+      }
+      return [name, item.urlPreviewTitle, item.urlPreviewDescription]
+    }
   })
   const results = fuzzySearch(state.filter)
   const items = results.map(result => {

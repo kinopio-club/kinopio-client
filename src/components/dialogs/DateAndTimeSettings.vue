@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import timezones from '@/data/timezones.json'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -40,7 +41,9 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
-  isMapPointerDown: false
+  isMapPointerDown: false,
+  filter: '',
+  filteredTimezones: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -66,7 +69,6 @@ const absoluteTimeLabel = computed(() => {
 // timezones
 
 const userTimezone = computed(() => userStore.timezone)
-const filteredTimezones = computed(() => timezones) // STUB
 const updateDefaultTimezone = (event) => {
   const timezone = dayjs.tz.guess()
   userStore.updateUser({ timezone })
@@ -95,6 +97,38 @@ const selectTimezoneByGmt = (gmt) => {
 const selectTimezone = (timezone) => {
   userStore.updateUser({ timezone: timezone.iana })
 }
+
+// filter
+
+const timezonesFiltered = computed(() => {
+  let items
+  if (state.filter) {
+    items = state.filteredTimezones
+  } else {
+    items = timezones
+  }
+  return items
+})
+const updateFilter = (filter) => {
+  state.filter = filter
+}
+const updateFilteredTimezones = (timezones) => {
+  console.log('🍒', state.filter, timezones)
+  state.filteredTimezones = timezones
+}
+// const timezoneFilterAliases = (timezone) => {
+//   let timezoneMatches = state.filteredTimezones.filter(timezone => {
+//     return timezone.aliases.filter(alias => {
+//       const city = alias.toLowerCase()
+//       const filter = state.filter.toLowerCase()
+//       return city.includes(filter)
+//     })
+//   })
+//   // let name = ''
+//   timezoneMatches = timezoneMatches.map(timezone => )
+//   console.log('🚒',matches, name)
+//   return matches
+// }
 
 // earth map highlight
 
@@ -168,11 +202,21 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
         .badge.info.timezone-label {{userTimezone}}
 
   section.timezone-picker.results-section
+    ResultsFilter(
+      :items="timezones"
+      :includeAliases="true"
+      @updateFilter="updateFilter"
+      @updateFilteredItems="updateFilteredTimezones"
+      placeholder="Search by City"
+    )
     ul.results-list.timezone-list
-      template(v-for="timezone in filteredTimezones" :key="timezone.iana")
+      template(v-for="timezone in timezonesFiltered" :key="timezone.iana")
         li(@click.left="selectTimezone(timezone)" :class="{ active: timezoneIsSelected(timezone) }")
-          span {{timezone.iana}}
+          span {{timezone.name}}
           span.gmt-offset {{timezone.gmtOffset}}
+          //- template(v-if="state.filter && timezoneFilterAliases(timezone).length")
+          //-   span {{timezoneFilterAliases(timezone)}}
+
 </template>
 
 <style lang="stylus">
