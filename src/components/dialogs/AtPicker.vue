@@ -11,6 +11,9 @@ import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 import uniqBy from 'lodash-es/uniqBy'
+// import dayjs from 'dayjs'
+// import timezone from 'dayjs/plugin/timezone'
+// dayjs.extend(timezone)
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -73,12 +76,6 @@ const closeDialogs = () => {
 }
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const availableUsers = computed(() => {
-  let users = spaceStore.getSpaceAndGroupMembers.concat(globalStore.getOtherUsers)
-  users = uniqBy(users, 'id')
-  return users
-})
-const isMultipleAvailableUsers = computed(() => availableUsers.value.length > 1)
 
 const styles = computed(() => {
   const value = {
@@ -95,6 +92,14 @@ const styles = computed(() => {
   return value
 })
 
+// users
+
+const availableUsers = computed(() => {
+  let users = spaceStore.getSpaceAndGroupMembers.concat(globalStore.getOtherUsers)
+  users = uniqBy(users, 'id')
+  return users
+})
+const isMultipleAvailableUsers = computed(() => availableUsers.value.length > 1)
 const filteredUsers = computed(() => {
   let users = availableUsers.value
   if (!props.search) { return users }
@@ -110,16 +115,9 @@ const filteredUsers = computed(() => {
   users = filtered.map(item => item.original)
   return users.slice(0, 5)
 })
-
 const selectUser = (event, user) => {
   emit('selectUser', event, user)
 }
-// ??or dayjs string dayjs('apr-2,2003')
-// TODO selectDaysFromNow()
-const selectDate = (event, daysFromToday) => {
-  emit('selectDate', event, daysFromToday)
-}
-
 const selectedUsers = computed(() => {
   let users = []
   props.cards.forEach(card => {
@@ -145,6 +143,15 @@ const toggleDatePickerIsVisible = () => {
   closeDialogs()
   state.datePickerIsVisible = value
   console.log('🍒', state.datePickerIsVisible)
+}
+const selectDate = (date) => {
+  // dayjs.tz.guess()
+  console.log('❤️❤️❤️❤️', date)
+}
+// ??or dayjs string dayjs('apr-2,2003')
+// TODO selectDaysFromNow()
+const selectDay = (event, daysFromToday) => {
+  // emit('selectDate', event, daysFromToday)
 }
 
 </script>
@@ -189,7 +196,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     //- @n,o,v (default to 1st)
 
     //- TODO how to handle keyboard
-    //- if no names, and a match for custom date, then show active state on li. enterkey = selectdate
+    //- if no names, and a match for custom date, then show active state on li. enterkey = selectDay
 
     //- TODO fix cal icon
 
@@ -214,7 +221,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
             img.icon.cal(src="@/assets/cal.svg")
             span Custom Date
 
-      DatePicker(:visible="state.datePickerIsVisible")
+      DatePicker(:visible="state.datePickerIsVisible" @selectDate="selectDate")
 
     //- no matches found (if no filteredusers and no filteredDates)
 

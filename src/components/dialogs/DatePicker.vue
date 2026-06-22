@@ -146,7 +146,6 @@ const selectDate = (day) => {
     day,
     year: year.value
   }
-  console.log('🫐🫐', value)
   emit('selectDate', value)
 }
 
