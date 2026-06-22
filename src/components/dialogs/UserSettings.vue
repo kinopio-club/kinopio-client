@@ -144,5 +144,7 @@ dialog.user-settings
     > dialog.user-api-info
       left initial
       right 8px
+    > dialog.date-and-time-settings
+      left -8px
 
 </style>

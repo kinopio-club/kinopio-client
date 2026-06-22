@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-// import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useGlobalStore } from '@/stores/useGlobalStore'
 // import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 // import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 dayjs.extend(timezone)
 
-// const globalStore = useGlobalStore()
+const globalStore = useGlobalStore()
 // const cardStore = useCardStore()
 const userStore = useUserStore()
 // const spaceStore = useSpaceStore()
@@ -36,8 +36,7 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null,
-  timezoneIsDefault: false
+  dialogHeight: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -59,20 +58,21 @@ const absoluteTimeLabel = computed(() => {
   return utils.shortAbsoluteDate(date)
 })
 
-const updateDefaultTimezone = () => {
+const updateDefaultTimezone = (event) => {
   const timezone = dayjs.tz.guess()
   userStore.updateUser({ timezone })
-  state.timezoneIsDefault = true
+  const position = utils.cursorPositionInPage(event)
+  position.x += -40
+  globalStore.addNotificationWithPosition({ message: 'Updated', position, type: 'success', layer: 'app', icon: 'checkmark' })
 }
 const selectTimezone = (timezone) => {
   console.log('🫐', timezone)
-  state.timezoneIsDefault = false
 }
 
 </script>
 
 <template lang="pug">
-dialog.narrow.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p Date and Time Settings
   section
@@ -83,19 +83,19 @@ dialog.narrow.date-and-time-settings(v-if="props.visible" :open="props.visible" 
       button
         span 2 days left
   section
-    p Timezone
+    .row.title-row
+      p Timezone
+      span.badge.secondary.current-timezone {{userTimezone}}
     .row
       button(@click="updateDefaultTimezone")
         span Auto Detect
-    .row(v-if="state.timezoneIsDefault")
-      .badge.success {{userTimezone}}
   section.timezone-picker.results-section
     ul.results-list.timezone-list
       template(v-for="timezone in timezones" :key="timezone.iana")
         li(@click.left="selectTimezone(timezone)")
 
-          span {{timezone.label}}
-          span {{timezone.gmtOffset}}
+          span {{timezone.iana}}
+          span.gmt-offset {{timezone.gmtOffset}}
         //- li(:class="{ active: timezoneIsSelected(timezone) }" @click.stop="selecttimezone(timezone)")
           //- timezoneLabel(:timezone="timezone" :showName="true")
           //- timezoneDetails(:visible="timezoneDetailsIsVisible(timezone)" :timezone="timezone")
@@ -107,10 +107,14 @@ dialog.narrow.date-and-time-settings(v-if="props.visible" :open="props.visible" 
 <style lang="stylus">
 dialog.date-and-time-settings
   overflow auto
+  .current-timezone
+    margin 0
   section.timezone-picker
     max-height 250px
   li
     display flex
     width 100%
     justify-content space-between
+    .gmt-offset
+      flex-shrink 0
 </style>

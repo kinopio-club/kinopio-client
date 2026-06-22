@@ -1,350 +1,713 @@
 [
   {
-    "iana": "Etc/GMT+12",
-    "label": "International Date Line West",
-    "gmtOffset": "UTC−12:00",
-    "cityAliases": ["Baker Island", "Howland Island"]
-  },
-  {
-    "iana": "Pacific/Pago_Pago",
-    "label": "Pago Pago",
-    "gmtOffset": "UTC−11:00",
-    "cityAliases": ["Apia", "Midway", "Niue", "Samoa"]
-  },
-  {
-    "iana": "Pacific/Honolulu",
-    "label": "Honolulu",
-    "gmtOffset": "UTC−10:00",
-    "cityAliases": ["Hawaii", "Tahiti", "Papeete", "Rarotonga", "Cook Islands"]
-  },
-  {
-    "iana": "Pacific/Marquesas",
-    "label": "Marquesas Islands",
-    "gmtOffset": "UTC−9:30",
-    "cityAliases": ["Nuku Hiva", "French Polynesia"]
-  },
-  {
-    "iana": "America/Anchorage",
-    "label": "Anchorage",
-    "gmtOffset": "UTC−9:00",
-    "cityAliases": ["Alaska", "Juneau", "Fairbanks", "Nome"]
-  },
-  {
-    "iana": "America/Los_Angeles",
-    "label": "Los Angeles",
-    "gmtOffset": "UTC−8:00",
-    "cityAliases": ["San Francisco", "Seattle", "Portland", "Las Vegas", "Vancouver", "Pacific Time", "PST", "PDT"]
-  },
-  {
-    "iana": "America/Denver",
-    "label": "Denver",
-    "gmtOffset": "UTC−7:00",
-    "cityAliases": ["Salt Lake City", "Boise", "Albuquerque", "Calgary", "Mountain Time", "MST", "MDT"]
-  },
-  {
-    "iana": "America/Phoenix",
-    "label": "Phoenix (no DST)",
-    "gmtOffset": "UTC−7:00",
-    "cityAliases": ["Arizona", "Tucson", "Mesa"]
-  },
-  {
-    "iana": "America/Chicago",
-    "label": "Chicago",
-    "gmtOffset": "UTC−6:00",
-    "cityAliases": ["Dallas", "Houston", "Minneapolis", "Kansas City", "Winnipeg", "Central Time", "CST", "CDT"]
-  },
-  {
-    "iana": "America/Mexico_City",
-    "label": "Mexico City",
-    "gmtOffset": "UTC−6:00",
-    "cityAliases": ["Guadalajara", "Monterrey", "Guatemala City", "San Salvador", "Tegucigalpa", "Managua", "San José", "Costa Rica"]
-  },
-  {
-    "iana": "America/New_York",
-    "label": "New York",
-    "gmtOffset": "UTC−5:00",
-    "cityAliases": ["Boston", "Miami", "Atlanta", "Philadelphia", "Washington DC", "Detroit", "Toronto", "Montreal", "Eastern Time", "EST", "EDT"]
-  },
-  {
-    "iana": "America/Bogota",
-    "label": "Bogotá",
-    "gmtOffset": "UTC−5:00",
-    "cityAliases": ["Lima", "Quito", "Panama City", "Kingston", "Ecuador", "Peru", "Colombia"]
-  },
-  {
-    "iana": "America/Halifax",
-    "label": "Halifax",
-    "gmtOffset": "UTC−4:00",
-    "cityAliases": ["Atlantic Time", "Santo Domingo", "Port of Spain", "Trinidad", "Barbados", "La Paz", "Bolivia", "Guyana", "Georgetown", "Santiago", "Manaus"]
-  },
-  {
-    "iana": "America/Caracas",
-    "label": "Caracas",
-    "gmtOffset": "UTC−4:00",
-    "cityAliases": ["Venezuela"]
-  },
-  {
-    "iana": "America/St_Johns",
-    "label": "St. John's",
-    "gmtOffset": "UTC−3:30",
-    "cityAliases": ["Newfoundland", "NST"]
-  },
-  {
-    "iana": "America/Sao_Paulo",
-    "label": "São Paulo",
-    "gmtOffset": "UTC−3:00",
-    "cityAliases": ["Rio de Janeiro", "Brasília", "Recife", "Salvador", "Fortaleza", "Brazil", "BRT"]
-  },
-  {
-    "iana": "America/Argentina/Buenos_Aires",
-    "label": "Buenos Aires",
-    "gmtOffset": "UTC−3:00",
-    "cityAliases": ["Montevideo", "Argentina", "Uruguay", "Córdoba", "Rosario", "ART"]
-  },
-  {
-    "iana": "Atlantic/South_Georgia",
-    "label": "South Georgia",
-    "gmtOffset": "UTC−2:00",
-    "cityAliases": ["Noronha", "Fernando de Noronha"]
-  },
-  {
-    "iana": "Atlantic/Azores",
-    "label": "Azores",
-    "gmtOffset": "UTC−1:00",
-    "cityAliases": ["Ponta Delgada"]
-  },
-  {
-    "iana": "Atlantic/Cape_Verde",
-    "label": "Cape Verde",
-    "gmtOffset": "UTC−1:00",
-    "cityAliases": ["Praia", "CVT"]
-  },
-  {
-    "iana": "Europe/London",
-    "label": "London",
-    "gmtOffset": "UTC+0:00",
-    "cityAliases": ["Dublin", "Edinburgh", "Lisbon", "Reykjavik", "Casablanca", "Accra", "Dakar", "Abidjan", "GMT", "UTC", "WET"]
-  },
-  {
     "iana": "Africa/Abidjan",
-    "label": "Abidjan",
-    "gmtOffset": "UTC+0:00",
-    "cityAliases": ["Accra", "Dakar", "Conakry", "Bamako", "Freetown", "Monrovia", "Ouagadougou"]
-  },
-  {
-    "iana": "Europe/Paris",
-    "label": "Paris",
-    "gmtOffset": "UTC+1:00",
-    "cityAliases": ["Berlin", "Rome", "Madrid", "Amsterdam", "Brussels", "Vienna", "Warsaw", "Prague", "Budapest", "Stockholm", "Oslo", "Copenhagen", "Zurich", "Geneva", "Barcelona", "Milan", "CET", "CEST"]
-  },
-  {
-    "iana": "Africa/Lagos",
-    "label": "Lagos",
-    "gmtOffset": "UTC+1:00",
-    "cityAliases": ["Kinshasa", "Kano", "Ibadan", "Algiers", "Tunis", "Luanda", "Douala", "WAT"]
-  },
-  {
-    "iana": "Europe/Helsinki",
-    "label": "Helsinki",
-    "gmtOffset": "UTC+2:00",
-    "cityAliases": ["Kyiv", "Riga", "Tallinn", "Vilnius", "Bucharest", "Sofia", "Athens", "Nicosia", "EET", "EEST"]
+    "gmtOffset": "GMT+0:00",
+    "aliases": [
+      "Abidjan",
+      "Accra",
+      "Dakar",
+      "Conakry",
+      "Bamako",
+      "Freetown",
+      "Monrovia",
+      "Ouagadougou"
+    ]
   },
   {
     "iana": "Africa/Cairo",
-    "label": "Cairo",
-    "gmtOffset": "UTC+2:00",
-    "cityAliases": ["Jerusalem", "Tel Aviv", "Beirut", "Amman", "Damascus", "Khartoum", "Tripoli", "EET"]
+    "gmtOffset": "GMT+2:00",
+    "aliases": [
+      "Cairo",
+      "Jerusalem",
+      "Tel Aviv",
+      "Beirut",
+      "Amman",
+      "Damascus",
+      "Khartoum",
+      "Tripoli",
+      "EET"
+    ]
   },
   {
     "iana": "Africa/Johannesburg",
-    "label": "Johannesburg",
-    "gmtOffset": "UTC+2:00",
-    "cityAliases": ["Cape Town", "Harare", "Lusaka", "Maputo", "Gaborone", "Windhoek", "Pretoria", "SAST"]
+    "gmtOffset": "GMT+2:00",
+    "aliases": [
+      "Johannesburg",
+      "Cape Town",
+      "Harare",
+      "Lusaka",
+      "Maputo",
+      "Gaborone",
+      "Windhoek",
+      "Pretoria",
+      "SAST"
+    ]
   },
   {
-    "iana": "Europe/Moscow",
-    "label": "Moscow",
-    "gmtOffset": "UTC+3:00",
-    "cityAliases": ["Saint Petersburg", "Minsk", "Baghdad", "Riyadh", "Kuwait City", "Doha", "Aden", "Nairobi", "MSK"]
+    "iana": "Africa/Lagos",
+    "gmtOffset": "GMT+1:00",
+    "aliases": [
+      "Lagos",
+      "Kinshasa",
+      "Kano",
+      "Ibadan",
+      "Algiers",
+      "Tunis",
+      "Luanda",
+      "Douala",
+      "WAT"
+    ]
   },
   {
     "iana": "Africa/Nairobi",
-    "label": "Nairobi",
-    "gmtOffset": "UTC+3:00",
-    "cityAliases": ["Addis Ababa", "Dar es Salaam", "Mogadishu", "Kampala", "Antananarivo", "EAT"]
+    "gmtOffset": "GMT+3:00",
+    "aliases": [
+      "Nairobi",
+      "Addis Ababa",
+      "Dar es Salaam",
+      "Mogadishu",
+      "Kampala",
+      "Antananarivo",
+      "EAT"
+    ]
   },
   {
-    "iana": "Asia/Tehran",
-    "label": "Tehran",
-    "gmtOffset": "UTC+3:30",
-    "cityAliases": ["Iran", "IRST"]
+    "iana": "America/Anchorage",
+    "gmtOffset": "GMT−9:00",
+    "aliases": [
+      "Anchorage",
+      "Alaska",
+      "Juneau",
+      "Fairbanks",
+      "Nome"
+    ]
   },
   {
-    "iana": "Asia/Dubai",
-    "label": "Dubai",
-    "gmtOffset": "UTC+4:00",
-    "cityAliases": ["Abu Dhabi", "Muscat", "Tbilisi", "Yerevan", "UAE", "GST"]
+    "iana": "America/Argentina/Buenos_Aires",
+    "gmtOffset": "GMT−3:00",
+    "aliases": [
+      "Buenos Aires",
+      "Montevideo",
+      "Argentina",
+      "Uruguay",
+      "Córdoba",
+      "Rosario",
+      "ART"
+    ]
   },
   {
-    "iana": "Asia/Baku",
-    "label": "Baku",
-    "gmtOffset": "UTC+4:00",
-    "cityAliases": ["Azerbaijan", "AZT"]
+    "iana": "America/Bogota",
+    "gmtOffset": "GMT−5:00",
+    "aliases": [
+      "Bogotá",
+      "Lima",
+      "Quito",
+      "Panama City",
+      "Kingston",
+      "Ecuador",
+      "Peru",
+      "Colombia"
+    ]
   },
   {
-    "iana": "Asia/Kabul",
-    "label": "Kabul",
-    "gmtOffset": "UTC+4:30",
-    "cityAliases": ["Afghanistan", "AFT"]
+    "iana": "America/Caracas",
+    "gmtOffset": "GMT−4:00",
+    "aliases": [
+      "Caracas",
+      "Venezuela"
+    ]
   },
   {
-    "iana": "Asia/Karachi",
-    "label": "Karachi",
-    "gmtOffset": "UTC+5:00",
-    "cityAliases": ["Islamabad", "Lahore", "Pakistan", "PST"]
+    "iana": "America/Chicago",
+    "gmtOffset": "GMT−6:00",
+    "aliases": [
+      "Chicago",
+      "Dallas",
+      "Houston",
+      "Minneapolis",
+      "Kansas City",
+      "Winnipeg",
+      "Central Time",
+      "CST",
+      "CDT"
+    ]
   },
   {
-    "iana": "Asia/Tashkent",
-    "label": "Tashkent",
-    "gmtOffset": "UTC+5:00",
-    "cityAliases": ["Ashgabat", "Dushanbe", "Uzbekistan", "UZT"]
+    "iana": "America/Denver",
+    "gmtOffset": "GMT−7:00",
+    "aliases": [
+      "Denver",
+      "Salt Lake City",
+      "Boise",
+      "Albuquerque",
+      "Calgary",
+      "Mountain Time",
+      "MST",
+      "MDT"
+    ]
   },
   {
-    "iana": "Asia/Kolkata",
-    "label": "Kolkata",
-    "gmtOffset": "UTC+5:30",
-    "cityAliases": ["Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad", "Ahmedabad", "India", "IST"]
+    "iana": "America/Halifax",
+    "gmtOffset": "GMT−4:00",
+    "aliases": [
+      "Halifax",
+      "Atlantic Time",
+      "Santo Domingo",
+      "Port of Spain",
+      "Trinidad",
+      "Barbados",
+      "La Paz",
+      "Bolivia",
+      "Guyana",
+      "Georgetown",
+      "Santiago",
+      "Manaus"
+    ]
   },
   {
-    "iana": "Asia/Kathmandu",
-    "label": "Kathmandu",
-    "gmtOffset": "UTC+5:45",
-    "cityAliases": ["Nepal", "NPT"]
+    "iana": "America/Los_Angeles",
+    "gmtOffset": "GMT−8:00",
+    "aliases": [
+      "Los Angeles",
+      "San Francisco",
+      "Seattle",
+      "Portland",
+      "Las Vegas",
+      "Vancouver",
+      "Pacific Time",
+      "PST",
+      "PDT"
+    ]
   },
   {
-    "iana": "Asia/Dhaka",
-    "label": "Dhaka",
-    "gmtOffset": "UTC+6:00",
-    "cityAliases": ["Chittagong", "Bangladesh", "BST"]
+    "iana": "America/Mexico_City",
+    "gmtOffset": "GMT−6:00",
+    "aliases": [
+      "Mexico City",
+      "Guadalajara",
+      "Monterrey",
+      "Guatemala City",
+      "San Salvador",
+      "Tegucigalpa",
+      "Managua",
+      "San José",
+      "Costa Rica"
+    ]
+  },
+  {
+    "iana": "America/New_York",
+    "gmtOffset": "GMT−5:00",
+    "aliases": [
+      "New York",
+      "Boston",
+      "Miami",
+      "Atlanta",
+      "Philadelphia",
+      "Washington DC",
+      "Detroit",
+      "Toronto",
+      "Montreal",
+      "Eastern Time",
+      "EST",
+      "EDT"
+    ]
+  },
+  {
+    "iana": "America/Phoenix",
+    "gmtOffset": "GMT−7:00",
+    "aliases": [
+      "Phoenix (no DST)",
+      "Arizona",
+      "Tucson",
+      "Mesa"
+    ]
+  },
+  {
+    "iana": "America/Sao_Paulo",
+    "gmtOffset": "GMT−3:00",
+    "aliases": [
+      "São Paulo",
+      "Rio de Janeiro",
+      "Brasília",
+      "Recife",
+      "Salvador",
+      "Fortaleza",
+      "Brazil",
+      "BRT"
+    ]
+  },
+  {
+    "iana": "America/St_Johns",
+    "gmtOffset": "GMT−3:30",
+    "aliases": [
+      "St. John's",
+      "Newfoundland",
+      "NST"
+    ]
   },
   {
     "iana": "Asia/Almaty",
-    "label": "Almaty",
-    "gmtOffset": "UTC+6:00",
-    "cityAliases": ["Astana", "Bishkek", "Kazakhstan", "Kyrgyzstan", "ALMT"]
+    "gmtOffset": "GMT+6:00",
+    "aliases": [
+      "Almaty",
+      "Astana",
+      "Bishkek",
+      "Kazakhstan",
+      "Kyrgyzstan",
+      "ALMT"
+    ]
   },
   {
-    "iana": "Asia/Yangon",
-    "label": "Yangon",
-    "gmtOffset": "UTC+6:30",
-    "cityAliases": ["Mandalay", "Myanmar", "Burma", "MMT"]
+    "iana": "Asia/Baku",
+    "gmtOffset": "GMT+4:00",
+    "aliases": [
+      "Baku",
+      "Azerbaijan",
+      "AZT"
+    ]
   },
   {
     "iana": "Asia/Bangkok",
-    "label": "Bangkok",
-    "gmtOffset": "UTC+7:00",
-    "cityAliases": ["Ho Chi Minh City", "Hanoi", "Phnom Penh", "Vientiane", "Thailand", "Vietnam", "Cambodia", "ICT"]
+    "gmtOffset": "GMT+7:00",
+    "aliases": [
+      "Bangkok",
+      "Ho Chi Minh City",
+      "Hanoi",
+      "Phnom Penh",
+      "Vientiane",
+      "Thailand",
+      "Vietnam",
+      "Cambodia",
+      "ICT"
+    ]
+  },
+  {
+    "iana": "Asia/Dhaka",
+    "gmtOffset": "GMT+6:00",
+    "aliases": [
+      "Dhaka",
+      "Chittagong",
+      "Bangladesh",
+      "BST"
+    ]
+  },
+  {
+    "iana": "Asia/Dubai",
+    "gmtOffset": "GMT+4:00",
+    "aliases": [
+      "Dubai",
+      "Abu Dhabi",
+      "Muscat",
+      "Tbilisi",
+      "Yerevan",
+      "UAE",
+      "GST"
+    ]
   },
   {
     "iana": "Asia/Jakarta",
-    "label": "Jakarta",
-    "gmtOffset": "UTC+7:00",
-    "cityAliases": ["Surabaya", "Medan", "Indonesia", "WIB"]
+    "gmtOffset": "GMT+7:00",
+    "aliases": [
+      "Jakarta",
+      "Surabaya",
+      "Medan",
+      "Indonesia",
+      "WIB"
+    ]
   },
   {
-    "iana": "Asia/Singapore",
-    "label": "Singapore",
-    "gmtOffset": "UTC+8:00",
-    "cityAliases": ["Kuala Lumpur", "Malaysia", "SGT", "MYT"]
+    "iana": "Asia/Kabul",
+    "gmtOffset": "GMT+4:30",
+    "aliases": [
+      "Kabul",
+      "Afghanistan",
+      "AFT"
+    ]
   },
   {
-    "iana": "Asia/Shanghai",
-    "label": "Shanghai",
-    "gmtOffset": "UTC+8:00",
-    "cityAliases": ["Beijing", "Shenzhen", "Guangzhou", "Chengdu", "Wuhan", "Hong Kong", "Taipei", "Manila", "China", "CST", "HKT", "PHT"]
+    "iana": "Asia/Karachi",
+    "gmtOffset": "GMT+5:00",
+    "aliases": [
+      "Karachi",
+      "Islamabad",
+      "Lahore",
+      "Pakistan",
+      "PST"
+    ]
   },
   {
-    "iana": "Australia/Perth",
-    "label": "Perth",
-    "gmtOffset": "UTC+8:00",
-    "cityAliases": ["Western Australia", "AWST"]
+    "iana": "Asia/Kathmandu",
+    "gmtOffset": "GMT+5:45",
+    "aliases": [
+      "Kathmandu",
+      "Nepal",
+      "NPT"
+    ]
   },
   {
-    "iana": "Australia/Eucla",
-    "label": "Eucla",
-    "gmtOffset": "UTC+8:45",
-    "cityAliases": ["Australian Central Western", "ACWST"]
-  },
-  {
-    "iana": "Asia/Tokyo",
-    "label": "Tokyo",
-    "gmtOffset": "UTC+9:00",
-    "cityAliases": ["Osaka", "Sapporo", "Fukuoka", "Nagoya", "Japan", "JST"]
+    "iana": "Asia/Kolkata",
+    "gmtOffset": "GMT+5:30",
+    "aliases": [
+      "Kolkata",
+      "Mumbai",
+      "Delhi",
+      "Bangalore",
+      "Chennai",
+      "Hyderabad",
+      "Ahmedabad",
+      "India",
+      "IST"
+    ]
   },
   {
     "iana": "Asia/Seoul",
-    "label": "Seoul",
-    "gmtOffset": "UTC+9:00",
-    "cityAliases": ["Busan", "Incheon", "Korea", "KST"]
+    "gmtOffset": "GMT+9:00",
+    "aliases": [
+      "Seoul",
+      "Busan",
+      "Incheon",
+      "Korea",
+      "KST"
+    ]
+  },
+  {
+    "iana": "Asia/Shanghai",
+    "gmtOffset": "GMT+8:00",
+    "aliases": [
+      "Shanghai",
+      "Beijing",
+      "Shenzhen",
+      "Guangzhou",
+      "Chengdu",
+      "Wuhan",
+      "Hong Kong",
+      "Taipei",
+      "Manila",
+      "China",
+      "CST",
+      "HKT",
+      "PHT"
+    ]
+  },
+  {
+    "iana": "Asia/Singapore",
+    "gmtOffset": "GMT+8:00",
+    "aliases": [
+      "Singapore",
+      "Kuala Lumpur",
+      "Malaysia",
+      "SGT",
+      "MYT"
+    ]
+  },
+  {
+    "iana": "Asia/Tashkent",
+    "gmtOffset": "GMT+5:00",
+    "aliases": [
+      "Tashkent",
+      "Ashgabat",
+      "Dushanbe",
+      "Uzbekistan",
+      "UZT"
+    ]
+  },
+  {
+    "iana": "Asia/Tehran",
+    "gmtOffset": "GMT+3:30",
+    "aliases": [
+      "Tehran",
+      "Iran",
+      "IRST"
+    ]
+  },
+  {
+    "iana": "Asia/Tokyo",
+    "gmtOffset": "GMT+9:00",
+    "aliases": [
+      "Tokyo",
+      "Osaka",
+      "Sapporo",
+      "Fukuoka",
+      "Nagoya",
+      "Japan",
+      "JST"
+    ]
+  },
+  {
+    "iana": "Asia/Yangon",
+    "gmtOffset": "GMT+6:30",
+    "aliases": [
+      "Yangon",
+      "Mandalay",
+      "Myanmar",
+      "Burma",
+      "MMT"
+    ]
+  },
+  {
+    "iana": "Atlantic/Azores",
+    "gmtOffset": "GMT−1:00",
+    "aliases": [
+      "Azores",
+      "Ponta Delgada"
+    ]
+  },
+  {
+    "iana": "Atlantic/Cape_Verde",
+    "gmtOffset": "GMT−1:00",
+    "aliases": [
+      "Cape Verde",
+      "Praia",
+      "CVT"
+    ]
+  },
+  {
+    "iana": "Atlantic/South_Georgia",
+    "gmtOffset": "GMT−2:00",
+    "aliases": [
+      "South Georgia",
+      "Noronha",
+      "Fernando de Noronha"
+    ]
   },
   {
     "iana": "Australia/Adelaide",
-    "label": "Adelaide",
-    "gmtOffset": "UTC+9:30",
-    "cityAliases": ["Darwin", "South Australia", "Northern Territory", "ACST"]
+    "gmtOffset": "GMT+9:30",
+    "aliases": [
+      "Adelaide",
+      "Darwin",
+      "South Australia",
+      "Northern Territory",
+      "ACST"
+    ]
   },
   {
-    "iana": "Australia/Sydney",
-    "label": "Sydney",
-    "gmtOffset": "UTC+10:00",
-    "cityAliases": ["Melbourne", "Brisbane", "Canberra", "Eastern Australia", "AEST"]
-  },
-  {
-    "iana": "Pacific/Port_Moresby",
-    "label": "Port Moresby",
-    "gmtOffset": "UTC+10:00",
-    "cityAliases": ["Papua New Guinea", "PGT"]
+    "iana": "Australia/Eucla",
+    "gmtOffset": "GMT+8:45",
+    "aliases": [
+      "Eucla",
+      "Australian Central Western",
+      "ACWST"
+    ]
   },
   {
     "iana": "Australia/Lord_Howe",
-    "label": "Lord Howe Island",
-    "gmtOffset": "UTC+10:30",
-    "cityAliases": ["LHST"]
+    "gmtOffset": "GMT+10:30",
+    "aliases": [
+      "Lord Howe Island",
+      "LHST"
+    ]
   },
   {
-    "iana": "Pacific/Noumea",
-    "label": "Nouméa",
-    "gmtOffset": "UTC+11:00",
-    "cityAliases": ["New Caledonia", "Honiara", "Solomon Islands", "NCT"]
+    "iana": "Australia/Perth",
+    "gmtOffset": "GMT+8:00",
+    "aliases": [
+      "Perth",
+      "Western Australia",
+      "AWST"
+    ]
+  },
+  {
+    "iana": "Australia/Sydney",
+    "gmtOffset": "GMT+10:00",
+    "aliases": [
+      "Sydney",
+      "Melbourne",
+      "Brisbane",
+      "Canberra",
+      "Eastern Australia",
+      "AEST"
+    ]
+  },
+  {
+    "iana": "Etc/GMT+12",
+    "gmtOffset": "GMT−12:00",
+    "aliases": [
+      "International Date Line West",
+      "Baker Island",
+      "Howland Island"
+    ]
+  },
+  {
+    "iana": "Europe/Helsinki",
+    "gmtOffset": "GMT+2:00",
+    "aliases": [
+      "Helsinki",
+      "Kyiv",
+      "Riga",
+      "Tallinn",
+      "Vilnius",
+      "Bucharest",
+      "Sofia",
+      "Athens",
+      "Nicosia",
+      "EET",
+      "EEST"
+    ]
+  },
+  {
+    "iana": "Europe/London",
+    "gmtOffset": "GMT+0:00",
+    "aliases": [
+      "London",
+      "Dublin",
+      "Edinburgh",
+      "Lisbon",
+      "Reykjavik",
+      "Casablanca",
+      "Accra",
+      "Dakar",
+      "Abidjan",
+      "GMT",
+      "GMT",
+      "WET"
+    ]
+  },
+  {
+    "iana": "Europe/Moscow",
+    "gmtOffset": "GMT+3:00",
+    "aliases": [
+      "Moscow",
+      "Saint Petersburg",
+      "Minsk",
+      "Baghdad",
+      "Riyadh",
+      "Kuwait City",
+      "Doha",
+      "Aden",
+      "Nairobi",
+      "MSK"
+    ]
+  },
+  {
+    "iana": "Europe/Paris",
+    "gmtOffset": "GMT+1:00",
+    "aliases": [
+      "Paris",
+      "Berlin",
+      "Rome",
+      "Madrid",
+      "Amsterdam",
+      "Brussels",
+      "Vienna",
+      "Warsaw",
+      "Prague",
+      "Budapest",
+      "Stockholm",
+      "Oslo",
+      "Copenhagen",
+      "Zurich",
+      "Geneva",
+      "Barcelona",
+      "Milan",
+      "CET",
+      "CEST"
+    ]
   },
   {
     "iana": "Pacific/Auckland",
-    "label": "Auckland",
-    "gmtOffset": "UTC+12:00",
-    "cityAliases": ["Wellington", "Christchurch", "New Zealand", "NZST"]
-  },
-  {
-    "iana": "Pacific/Fiji",
-    "label": "Fiji",
-    "gmtOffset": "UTC+12:00",
-    "cityAliases": ["Suva", "Tarawa", "Majuro", "Marshall Islands", "FJT"]
+    "gmtOffset": "GMT+12:00",
+    "aliases": [
+      "Auckland",
+      "Wellington",
+      "Christchurch",
+      "New Zealand",
+      "NZST"
+    ]
   },
   {
     "iana": "Pacific/Chatham",
-    "label": "Chatham Islands",
-    "gmtOffset": "UTC+12:45",
-    "cityAliases": ["Waitangi", "CHAST"]
+    "gmtOffset": "GMT+12:45",
+    "aliases": [
+      "Chatham Islands",
+      "Waitangi",
+      "CHAST"
+    ]
   },
   {
-    "iana": "Pacific/Tongatapu",
-    "label": "Tongatapu",
-    "gmtOffset": "UTC+13:00",
-    "cityAliases": ["Tonga", "Nuku'alofa", "Apia", "TOT"]
+    "iana": "Pacific/Fiji",
+    "gmtOffset": "GMT+12:00",
+    "aliases": [
+      "Fiji",
+      "Suva",
+      "Tarawa",
+      "Majuro",
+      "Marshall Islands",
+      "FJT"
+    ]
+  },
+  {
+    "iana": "Pacific/Honolulu",
+    "gmtOffset": "GMT−10:00",
+    "aliases": [
+      "Honolulu",
+      "Hawaii",
+      "Tahiti",
+      "Papeete",
+      "Rarotonga",
+      "Cook Islands"
+    ]
   },
   {
     "iana": "Pacific/Kiritimati",
-    "label": "Kiritimati",
-    "gmtOffset": "UTC+14:00",
-    "cityAliases": ["Christmas Island", "Line Islands", "Kiribati", "LINT"]
+    "gmtOffset": "GMT+14:00",
+    "aliases": [
+      "Kiritimati",
+      "Christmas Island",
+      "Line Islands",
+      "Kiribati",
+      "LINT"
+    ]
+  },
+  {
+    "iana": "Pacific/Marquesas",
+    "gmtOffset": "GMT−9:30",
+    "aliases": [
+      "Marquesas Islands",
+      "Nuku Hiva",
+      "French Polynesia"
+    ]
+  },
+  {
+    "iana": "Pacific/Noumea",
+    "gmtOffset": "GMT+11:00",
+    "aliases": [
+      "Nouméa",
+      "New Caledonia",
+      "Honiara",
+      "Solomon Islands",
+      "NCT"
+    ]
+  },
+  {
+    "iana": "Pacific/Pago_Pago",
+    "gmtOffset": "GMT−11:00",
+    "aliases": [
+      "Pago Pago",
+      "Apia",
+      "Midway",
+      "Niue",
+      "Samoa"
+    ]
+  },
+  {
+    "iana": "Pacific/Port_Moresby",
+    "gmtOffset": "GMT+10:00",
+    "aliases": [
+      "Port Moresby",
+      "Papua New Guinea",
+      "PGT"
+    ]
+  },
+  {
+    "iana": "Pacific/Tongatapu",
+    "gmtOffset": "GMT+13:00",
+    "aliases": [
+      "Tongatapu",
+      "Tonga",
+      "Nuku'alofa",
+      "Apia",
+      "TOT"
+    ]
   }
 ]
