@@ -98,6 +98,7 @@ Name | Type | Description
 <code class="users">filterComments</code>                   | `Boolean` | Whether comment cards are hidden to the user
 <code class="users">filterShowDateUpdated</code>            | `Boolean` | Whether the user has has toggled the card date filter
 <code class="users">filterShowUsers</code>                  | `Boolean` | Whether the user has has toggled the card user filter
+<code class="users">groups</code>                             | `JSON Array` | The groups a user belongs to, including public metadata on the other `users` in each group
 <code class="users">isAmbassador</code>                     | `Boolean` | Whether the user is in the [friends of kinopio](https://kinopio.club/friends-of-kinopio-ambassadors-YNmS6C3fofN3R9mYgO1Bu) affiliate program. Is not user updatable.
 <code class="users">isDonor</code>                          | `Boolean` | Whether the user has donated to Kinopio. Is not user updatable.
 <code class="users">isModerator</code>                      | `Boolean` | Whether the user is a moderator of the community forums or discord. Is not user updatable.
@@ -128,7 +129,7 @@ Name | Type | Description
 <code class="users">showInExploreUpdatedAt</code>           | `String` | When the user last opened the Explore dialog. Used to determine new/unread Explore spaces
 <code class="users">showItemActions</code>                  | `Boolean` | Whether the user has chosen to show expanded options and info in both the `card-details` and `multiple-selected-actions` dialogs
 <code class="users">sidebarResizeWidth</code>              | `Integer` | Manually resized width of the sidebar dialog
-<code class="users">groups</code>                             | `JSON Array` | The groups a user belongs to, including public metadata on the other `users` in each group
+<code class="users">timezone</code>                         | `String` | The user's timezone [abbreviation](https://github.com/vvo/tzdb)
 <code class="users">updatedAt</code>                        | `String`  | The date when any changes to the user was made. Also is updated whenever the user starts a Kinopio session
 <code class="users">website</code>                          | `String`  | The user's website, url validity is not checked
 <code class="users">prevSettingsSection</code>            | `String`  | The last used settings section. Can be `general`, `controls`, or `cards`
