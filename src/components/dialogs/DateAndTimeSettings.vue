@@ -198,7 +198,7 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
   section.timezone-picker.results-section
     ResultsFilter(
       :items="timezones"
-      :includeAliases="true"
+      :searchByAliases="true"
       @updateFilter="updateFilter"
       @updateFilteredItems="updateFilteredTimezones"
       placeholder="Search by City"
@@ -208,7 +208,9 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
         li(@click.left="selectTimezone(timezone)" :class="{ active: timezoneIsSelected(timezone) }")
           span {{timezone.name}}
             template(v-if="matchingAliases(timezone).length")
-              span.badge.search(v-for="alias in matchingAliases(timezone)" :key="alias") {{alias}}
+              template(v-for="alias in matchingAliases(timezone)" :key="alias")
+                br
+                span.badge.search {{alias}}
           span.gmt-offset {{timezone.gmtOffset}}
 </template>
 

@@ -7,7 +7,9 @@
       "Alaska",
       "Juneau",
       "Fairbanks",
-      "Nome"
+      "Nome",
+      "Sitka",
+      "Ketchikan"
     ]
   },
   {
@@ -31,7 +33,26 @@
       "Tegucigalpa",
       "Managua",
       "San José",
-      "Costa Rica"
+      "Costa Rica",
+      "San Antonio",
+      "Austin",
+      "Memphis",
+      "New Orleans",
+      "Milwaukee",
+      "Oklahoma City",
+      "Omaha",
+      "Belmopan",
+      "Belize City",
+      "St. Louis",
+      "Nashville",
+      "Louisville",
+      "Indianapolis",
+      "Little Rock",
+      "Des Moines",
+      "Madison",
+      "Lincoln",
+      "Wichita",
+      "Tulsa"
     ]
   },
   {
@@ -49,7 +70,14 @@
       "Phoenix (no DST)",
       "Arizona",
       "Tucson",
-      "Mesa"
+      "Mesa",
+      "Colorado Springs",
+      "El Paso",
+      "Edmonton",
+      "Santa Fe",
+      "Cheyenne",
+      "Helena",
+      "Bismarck"
     ]
   },
   {
@@ -69,7 +97,31 @@
       "Guyana",
       "Georgetown",
       "Santiago",
-      "Manaus"
+      "Manaus",
+      "Bridgetown",
+      "Castries",
+      "Saint Lucia",
+      "Kingstown",
+      "Saint Vincent",
+      "Roseau",
+      "Dominica",
+      "Saint George's",
+      "Grenada",
+      "Basseterre",
+      "Saint Kitts",
+      "Oranjestad",
+      "Aruba",
+      "Willemstad",
+      "Curaçao",
+      "Paramaribo",
+      "Suriname",
+      "Cayenne",
+      "French Guiana",
+      "Sucre",
+      "Maracaibo",
+      "Asunción",
+      "Paraguay",
+      "Campo Grande"
     ]
   },
   {
@@ -84,7 +136,12 @@
       "Vancouver",
       "Pacific Time",
       "PST",
-      "PDT"
+      "PDT",
+      "San Diego",
+      "Sacramento",
+      "Victoria",
+      "Tijuana",
+      "Ensenada"
     ]
   },
   {
@@ -110,7 +167,37 @@
       "Montreal",
       "Eastern Time",
       "EST",
-      "EDT"
+      "EDT",
+      "Charlotte",
+      "Raleigh",
+      "Orlando",
+      "Tampa",
+      "Jacksonville",
+      "Baltimore",
+      "Pittsburgh",
+      "Cleveland",
+      "Columbus",
+      "Cincinnati",
+      "Indianapolis",
+      "Nashville (ET)",
+      "Ottawa",
+      "Quebec City",
+      "Halifax (ET overlap)",
+      "Port-au-Prince",
+      "Haiti",
+      "Nassau",
+      "Bahamas",
+      "Havana",
+      "Cuba",
+      "San Juan",
+      "Puerto Rico",
+      "Medellín",
+      "Cali",
+      "Barranquilla",
+      "Guayaquil",
+      "Callao",
+      "Arequipa",
+      "Trujillo"
     ]
   },
   {
@@ -131,7 +218,21 @@
       "Salvador",
       "Fortaleza",
       "Brazil",
-      "BRT"
+      "BRT",
+      "Asunción (summer)",
+      "Mendoza",
+      "Tucumán",
+      "Mar del Plata",
+      "Belo Horizonte",
+      "Curitiba",
+      "Porto Alegre",
+      "Belém",
+      "Natal",
+      "Maceió",
+      "São Luís",
+      "Teresina",
+      "Campo Grande",
+      "Goiânia"
     ]
   },
   {
@@ -140,7 +241,9 @@
     "aliases": [
       "St. John's",
       "Newfoundland",
-      "NST"
+      "NST",
+      "Corner Brook",
+      "Labrador City"
     ]
   },
   {
@@ -160,7 +263,25 @@
       "Surabaya",
       "Medan",
       "Indonesia",
-      "WIB"
+      "WIB",
+      "Chiang Mai",
+      "Pattaya",
+      "Phuket",
+      "Da Nang",
+      "Haiphong",
+      "Hue",
+      "Nha Trang",
+      "Siem Reap",
+      "Sihanoukville",
+      "Bandung",
+      "Bekasi",
+      "Palembang",
+      "Makassar (WIB region)",
+      "Kuching (overlap)",
+      "Novosibirsk",
+      "Tomsk",
+      "Krasnoyarsk (winter)",
+      "Barnaul"
     ]
   },
   {
@@ -176,7 +297,14 @@
       "Dhaka",
       "Chittagong",
       "Bangladesh",
-      "BST"
+      "BST",
+      "Nur-Sultan",
+      "Shymkent",
+      "Karaganda",
+      "Osh",
+      "Khulna",
+      "Rajshahi",
+      "Sylhet"
     ]
   },
   {
@@ -192,7 +320,24 @@
       "Tbilisi",
       "Yerevan",
       "UAE",
-      "GST"
+      "GST",
+      "Sharjah",
+      "Oman",
+      "Sohar",
+      "Salalah",
+      "Rustavi",
+      "Ganja",
+      "Sumqayit",
+      "Réunion",
+      "Saint-Denis",
+      "Port Louis",
+      "Mauritius",
+      "Victoria",
+      "Seychelles",
+      "Moroni",
+      "Comoros",
+      "Mayotte",
+      "Mamoudzou"
     ]
   },
   {
@@ -201,7 +346,11 @@
     "aliases": [
       "Kabul",
       "Afghanistan",
-      "AFT"
+      "AFT",
+      "Kandahar",
+      "Herat",
+      "Mazar-i-Sharif",
+      "Jalalabad"
     ]
   },
   {
@@ -217,7 +366,22 @@
       "Ashgabat",
       "Dushanbe",
       "Uzbekistan",
-      "UZT"
+      "UZT",
+      "Faisalabad",
+      "Rawalpindi",
+      "Multan",
+      "Gujranwala",
+      "Peshawar",
+      "Quetta",
+      "Samarkand",
+      "Namangan",
+      "Andijan",
+      "Bukhara",
+      "Mary",
+      "Türkmenabat",
+      "Khujand",
+      "Maldives",
+      "Malé"
     ]
   },
   {
@@ -226,7 +390,11 @@
     "aliases": [
       "Kathmandu",
       "Nepal",
-      "NPT"
+      "NPT",
+      "Pokhara",
+      "Biratnagar",
+      "Birgunj",
+      "Lalitpur"
     ]
   },
   {
@@ -242,7 +410,23 @@
       "Hyderabad",
       "Ahmedabad",
       "India",
-      "IST"
+      "IST",
+      "New Delhi",
+      "Pune",
+      "Surat",
+      "Jaipur",
+      "Lucknow",
+      "Kanpur",
+      "Nagpur",
+      "Patna",
+      "Indore",
+      "Thane",
+      "Bhopal",
+      "Visakhapatnam",
+      "Kochi",
+      "Sri Lanka",
+      "Colombo",
+      "Sri Jayawardenepura Kotte"
     ]
   },
   {
@@ -269,7 +453,38 @@
       "MYT",
       "Perth",
       "Western Australia",
-      "AWST"
+      "AWST",
+      "Tianjin",
+      "Chongqing",
+      "Nanjing",
+      "Xian",
+      "Hangzhou",
+      "Shenyang",
+      "Harbin",
+      "Qingdao",
+      "Dalian",
+      "Zhengzhou",
+      "Jinan",
+      "Changsha",
+      "Kunming",
+      "Ürümqi",
+      "Macau",
+      "George Town",
+      "Penang",
+      "Johor Bahru",
+      "Ipoh",
+      "Cebu",
+      "Davao",
+      "Quezon City",
+      "Caloocan",
+      "Bandar Seri Begawan",
+      "Brunei",
+      "Dili",
+      "East Timor",
+      "Timor-Leste",
+      "Kota Kinabalu",
+      "Sandakan",
+      "Krasnoyarsk"
     ]
   },
   {
@@ -278,7 +493,13 @@
     "aliases": [
       "Tehran",
       "Iran",
-      "IRST"
+      "IRST",
+      "Isfahan",
+      "Mashhad",
+      "Tabriz",
+      "Shiraz",
+      "Ahvaz",
+      "Karaj"
     ]
   },
   {
@@ -296,7 +517,26 @@
       "Fukuoka",
       "Nagoya",
       "Japan",
-      "JST"
+      "JST",
+      "Yokohama",
+      "Kawasaki",
+      "Kobe",
+      "Kyoto",
+      "Hiroshima",
+      "Sendai",
+      "Kitakyushu",
+      "Daegu",
+      "Daejeon",
+      "Gwangju",
+      "Ulsan",
+      "Suwon",
+      "Pyongyang",
+      "North Korea",
+      "Yakutsk (partial)",
+      "Palau",
+      "Ngerulmud",
+      "Jayapura",
+      "Papua (Indonesia)"
     ]
   },
   {
@@ -307,7 +547,10 @@
       "Mandalay",
       "Myanmar",
       "Burma",
-      "MMT"
+      "MMT",
+      "Naypyidaw",
+      "Mawlamyine",
+      "Bago"
     ]
   },
   {
@@ -318,7 +561,9 @@
       "Ponta Delgada",
       "Cape Verde",
       "Praia",
-      "CVT"
+      "CVT",
+      "Mindelo",
+      "Horta"
     ]
   },
   {
@@ -338,7 +583,11 @@
       "Darwin",
       "South Australia",
       "Northern Territory",
-      "ACST"
+      "ACST",
+      "Alice Springs",
+      "Whyalla",
+      "Mount Gambier",
+      "Palmerston"
     ]
   },
   {
@@ -370,7 +619,24 @@
       "AEST",
       "Port Moresby",
       "Papua New Guinea",
-      "PGT"
+      "PGT",
+      "Gold Coast",
+      "Newcastle",
+      "Wollongong",
+      "Hobart",
+      "Geelong",
+      "Townsville",
+      "Cairns",
+      "Toowoomba",
+      "Ballarat",
+      "Bendigo",
+      "Launceston",
+      "Vladivostok",
+      "Guam",
+      "Hagåtña",
+      "Saipan",
+      "Northern Mariana Islands",
+      "Yakutsk"
     ]
   },
   {
@@ -413,7 +679,37 @@
       "Sofia",
       "Athens",
       "Nicosia",
-      "EEST"
+      "EEST",
+      "Durban",
+      "Blantyre",
+      "Malawi",
+      "Lilongwe",
+      "Mbabane",
+      "Eswatini",
+      "Maseru",
+      "Lesotho",
+      "Gaza",
+      "West Bank",
+      "Alexandria",
+      "Giza",
+      "Port Said",
+      "Suez",
+      "Benghazi",
+      "Misrata",
+      "Thessaloniki",
+      "Gdańsk",
+      "Kaliningrad",
+      "Chisinau",
+      "Moldova",
+      "Minsk (EET period)",
+      "Kharkiv",
+      "Odessa",
+      "Dnipro",
+      "Donetsk",
+      "Zaporizhzhia",
+      "Lviv",
+      "Lubumbashi",
+      "DRC"
     ]
   },
   {
@@ -435,7 +731,38 @@
       "Reykjavik",
       "Casablanca",
       "GMT",
-      "WET"
+      "WET",
+      "Belfast",
+      "Cardiff",
+      "Manchester",
+      "Birmingham",
+      "Glasgow",
+      "Liverpool",
+      "Bristol",
+      "Leeds",
+      "Sheffield",
+      "Rabat",
+      "Marrakech",
+      "Fes",
+      "Bissau",
+      "Guinea-Bissau",
+      "Banjul",
+      "Gambia",
+      "Nouakchott",
+      "Mauritania",
+      "Yamoussoukro",
+      "Côte d'Ivoire",
+      "Lomé",
+      "Togo",
+      "Cotonou",
+      "Benin",
+      "Porto-Novo",
+      "Niamey",
+      "Niger",
+      "Malabo",
+      "Equatorial Guinea",
+      "São Tomé",
+      "São Tomé and Príncipe"
     ]
   },
   {
@@ -457,7 +784,43 @@
       "Kuwait City",
       "Doha",
       "Aden",
-      "MSK"
+      "MSK",
+      "Ankara",
+      "Istanbul",
+      "Izmir",
+      "Bursa",
+      "Antalya",
+      "Adana",
+      "Konya",
+      "Diyarbakır",
+      "Sanaa",
+      "Yemen",
+      "Manama",
+      "Bahrain",
+      "Asmara",
+      "Eritrea",
+      "Djibouti",
+      "Djibouti City",
+      "Jeddah",
+      "Mecca",
+      "Medina",
+      "Kigali",
+      "Rwanda",
+      "Bujumbura",
+      "Burundi",
+      "Juba",
+      "South Sudan",
+      "Mombasa",
+      "Kisumu",
+      "Dodoma",
+      "Zanzibar",
+      "Entebbe",
+      "Novosibirsk (MSK+4 transition)",
+      "Simferopol",
+      "Volgograd",
+      "Rostov-on-Don",
+      "Krasnodar",
+      "Sochi"
     ]
   },
   {
@@ -491,7 +854,66 @@
       "Barcelona",
       "Milan",
       "CET",
-      "CEST"
+      "CEST",
+      "Abuja",
+      "Accra (WAT overlap)",
+      "Brazzaville",
+      "Republic of Congo",
+      "Bangui",
+      "Central African Republic",
+      "Libreville",
+      "Gabon",
+      "Yaoundé",
+      "Cameroon",
+      "N'Djamena",
+      "Chad",
+      "Niamey (WAT)",
+      "Ndjamena",
+      "Bern",
+      "Vaduz",
+      "Liechtenstein",
+      "Luxembourg City",
+      "Monaco",
+      "Andorra la Vella",
+      "San Marino",
+      "Vatican City",
+      "Ljubljana",
+      "Slovenia",
+      "Zagreb",
+      "Croatia",
+      "Sarajevo",
+      "Bosnia and Herzegovina",
+      "Podgorica",
+      "Montenegro",
+      "Pristina",
+      "Kosovo",
+      "Belgrade",
+      "Serbia",
+      "Skopje",
+      "North Macedonia",
+      "Tirana",
+      "Albania",
+      "Valletta",
+      "Malta",
+      "Bratislava",
+      "Slovakia",
+      "Hamburg",
+      "Munich",
+      "Frankfurt",
+      "Cologne",
+      "Stuttgart",
+      "Düsseldorf",
+      "Naples",
+      "Turin",
+      "Palermo",
+      "Seville",
+      "Valencia",
+      "Bilbao",
+      "Porto",
+      "Kraków",
+      "Wrocław",
+      "Łódź",
+      "Poznań"
     ]
   },
   {
@@ -508,7 +930,18 @@
       "Tarawa",
       "Majuro",
       "Marshall Islands",
-      "FJT"
+      "FJT",
+      "Hamilton",
+      "Tauranga",
+      "Dunedin",
+      "Palmerston North",
+      "Lautoka",
+      "Nadi",
+      "Funafuti",
+      "Tuvalu",
+      "Yaren",
+      "Nauru",
+      "Petropavlovsk-Kamchatsky"
     ]
   },
   {
@@ -529,7 +962,9 @@
       "Tahiti",
       "Papeete",
       "Rarotonga",
-      "Cook Islands"
+      "Cook Islands",
+      "Hilo",
+      "Kailua-Kona"
     ]
   },
   {
@@ -560,7 +995,14 @@
       "New Caledonia",
       "Honiara",
       "Solomon Islands",
-      "NCT"
+      "NCT",
+      "Port Vila",
+      "Vanuatu",
+      "Palikir",
+      "Micronesia",
+      "Pohnpei",
+      "Magadan",
+      "Sakhalin"
     ]
   },
   {
@@ -571,7 +1013,8 @@
       "Apia",
       "Midway",
       "Niue",
-      "Samoa"
+      "Samoa",
+      "American Samoa"
     ]
   },
   {
@@ -582,7 +1025,10 @@
       "Tonga",
       "Nuku'alofa",
       "Apia",
-      "TOT"
+      "TOT",
+      "Samoa (DST)",
+      "Fakaofo",
+      "Tokelau"
     ]
   }
 ]
