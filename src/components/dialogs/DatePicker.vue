@@ -60,7 +60,7 @@ const year = computed(() => baseYear + Math.floor(state.index / 12))
 
 const currentDayLabel = computed(() => {
   const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
-  return date.format('MMM D, YYYY')
+  return utils.shortAbsoluteDate(date)
 })
 
 const today = computed(() => {

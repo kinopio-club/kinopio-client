@@ -780,7 +780,7 @@ export default {
   },
   shortAbsoluteDate (date) {
     if (!date) { return }
-    return dayjs(date).format('MMMM D, YYYY')
+    return dayjs(date).format('MMM D, YYYY')
   },
   isEvenNumber (number) {
     if (number % 2 === 0) {
