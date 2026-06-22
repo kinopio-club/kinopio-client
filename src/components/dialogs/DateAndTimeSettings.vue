@@ -10,6 +10,7 @@ import utils from '@/utils.js'
 import timezones from '@/data/timezones.json'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 
+import createFuzzySearch from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 dayjs.extend(timezone)
@@ -77,7 +78,7 @@ const updateDefaultTimezone = (event) => {
   globalStore.addNotificationWithPosition({ message: 'Updated', position, type: 'success', layer: 'app', icon: 'checkmark' })
 }
 const timezoneIsSelected = (timezone) => {
-  return timezone.iana === userTimezone.value
+  return timezone.name === userTimezone.value
 }
 const selectTimezoneByGmt = (gmt) => {
   // find the timezone whose offset is closest to the clicked gmt hour
@@ -95,7 +96,7 @@ const selectTimezoneByGmt = (gmt) => {
   }
 }
 const selectTimezone = (timezone) => {
-  userStore.updateUser({ timezone: timezone.iana })
+  userStore.updateUser({ timezone: timezone.name })
 }
 
 // filter
@@ -113,22 +114,15 @@ const updateFilter = (filter) => {
   state.filter = filter
 }
 const updateFilteredTimezones = (timezones) => {
-  console.log('🍒', state.filter, timezones)
   state.filteredTimezones = timezones
 }
-// const timezoneFilterAliases = (timezone) => {
-//   let timezoneMatches = state.filteredTimezones.filter(timezone => {
-//     return timezone.aliases.filter(alias => {
-//       const city = alias.toLowerCase()
-//       const filter = state.filter.toLowerCase()
-//       return city.includes(filter)
-//     })
-//   })
-//   // let name = ''
-//   timezoneMatches = timezoneMatches.map(timezone => )
-//   console.log('🚒',matches, name)
-//   return matches
-// }
+// aliases of a timezone that fuzzy match the current filter
+const matchingAliases = (timezone) => {
+  const aliases = timezone.aliases || []
+  if (!state.filter || !aliases.length) { return [] }
+  const fuzzySearch = createFuzzySearch(aliases)
+  return fuzzySearch(state.filter).map(result => result.item)
+}
 
 // earth map highlight
 
@@ -142,7 +136,7 @@ const parseGmtOffsetHours = (gmtOffset) => {
   return sign * (hours + minutes / 60)
 }
 const userTimezoneOffsetHours = computed(() => {
-  const match = timezones.find(timezone => timezone.iana === userTimezone.value)
+  const match = timezones.find(timezone => timezone.name === userTimezone.value)
   return parseGmtOffsetHours(match?.gmtOffset || 'GMT+0:00')
 })
 // map width spans -180°..180° longitude,
@@ -210,13 +204,12 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
       placeholder="Search by City"
     )
     ul.results-list.timezone-list
-      template(v-for="timezone in timezonesFiltered" :key="timezone.iana")
+      template(v-for="timezone in timezonesFiltered" :key="timezone.name")
         li(@click.left="selectTimezone(timezone)" :class="{ active: timezoneIsSelected(timezone) }")
           span {{timezone.name}}
+            template(v-if="matchingAliases(timezone).length")
+              span.badge.search(v-for="alias in matchingAliases(timezone)" :key="alias") {{alias}}
           span.gmt-offset {{timezone.gmtOffset}}
-          //- template(v-if="state.filter && timezoneFilterAliases(timezone).length")
-          //-   span {{timezoneFilterAliases(timezone)}}
-
 </template>
 
 <style lang="stylus">
