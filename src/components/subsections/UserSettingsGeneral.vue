@@ -13,6 +13,7 @@ import DeleteAccountConfirmation from '@/components/dialogs/DeleteAccountConfirm
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
+import TimezonePicker from '@/components/dialogs/TimezonePicker.vue'
 import User from '@/components/User.vue'
 import consts from '@/consts.js'
 
@@ -45,6 +46,7 @@ const props = defineProps({
 const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
+  userTimezoneSettingsIsVisible: false,
   deleteAccountConfirmationVisible: false,
   userApiInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
@@ -62,6 +64,7 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const closeDialogs = () => {
   state.userBillingSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
+  state.userTimezoneSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
   state.userApiInfoIsVisible = false
@@ -105,6 +108,11 @@ const toggleModeratorActionsSettingsIsVisible = () => {
   const isVisible = state.moderatorActionsSettingsIsVisible
   closeDialogs()
   state.moderatorActionsSettingsIsVisible = !isVisible
+}
+const toggleUserTimezoneSettingsIsVisible = () => {
+  const isVisible = state.userTimezoneSettingsIsVisible
+  closeDialogs()
+  state.userTimezoneSettingsIsVisible = !isVisible
 }
 
 // debug mode
@@ -157,6 +165,13 @@ const toggleIsDebugMode = () => {
           span(v-else) Billing
           teleport(to="#settings-child-dialogs" defer)
             UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+    .row
+      //- Timezone
+      .button-wrap
+        button(@click.left.stop="toggleUserTimezoneSettingsIsVisible" :class="{active: state.userTimezoneSettingsIsVisible}")
+          span Timezone
+          teleport(to="#settings-child-dialogs" defer)
+            TimezonePicker(:visible="state.userTimezoneSettingsIsVisible")
 
   //- Developer Info
   section

@@ -1,0 +1,198 @@
+[
+  {
+    "iana": "Pacific/Honolulu",
+    "label": "Hawaii Time",
+    "gmtOffset": "UTC−10:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "America/Anchorage",
+    "label": "Alaska Time",
+    "gmtOffset": "UTC−9:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Los_Angeles",
+    "label": "Pacific Time",
+    "gmtOffset": "UTC−8:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Denver",
+    "label": "Mountain Time",
+    "gmtOffset": "UTC−7:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Phoenix",
+    "label": "Mountain Time (no DST)",
+    "gmtOffset": "UTC−7:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Chicago",
+    "label": "Central Time",
+    "gmtOffset": "UTC−6:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/New_York",
+    "label": "Eastern Time",
+    "gmtOffset": "UTC−5:00",
+    "countryEmoji": "🇺🇸",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Halifax",
+    "label": "Atlantic Time",
+    "gmtOffset": "UTC−4:00",
+    "countryEmoji": "🇨🇦",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Sao_Paulo",
+    "label": "Brasília Time",
+    "gmtOffset": "UTC−3:00",
+    "countryEmoji": "🇧🇷",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "America/Argentina/Buenos_Aires",
+    "label": "Argentina Time",
+    "gmtOffset": "UTC−3:00",
+    "countryEmoji": "🇦🇷",
+    "globeEmoji": "🌎"
+  },
+  {
+    "iana": "Europe/London",
+    "label": "London",
+    "gmtOffset": "UTC+0:00",
+    "countryEmoji": "🇬🇧",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Europe/Paris",
+    "label": "Central European Time",
+    "gmtOffset": "UTC+1:00",
+    "countryEmoji": "🇫🇷",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Europe/Helsinki",
+    "label": "Eastern European Time",
+    "gmtOffset": "UTC+2:00",
+    "countryEmoji": "🇫🇮",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Africa/Cairo",
+    "label": "Cairo",
+    "gmtOffset": "UTC+2:00",
+    "countryEmoji": "🇪🇬",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Africa/Johannesburg",
+    "label": "South Africa Time",
+    "gmtOffset": "UTC+2:00",
+    "countryEmoji": "🇿🇦",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Asia/Dubai",
+    "label": "Dubai",
+    "gmtOffset": "UTC+4:00",
+    "countryEmoji": "🇦🇪",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Asia/Tehran",
+    "label": "Iran Time",
+    "gmtOffset": "UTC+3:30",
+    "countryEmoji": "🇮🇷",
+    "globeEmoji": "🌍"
+  },
+  {
+    "iana": "Asia/Karachi",
+    "label": "Pakistan Time",
+    "gmtOffset": "UTC+5:00",
+    "countryEmoji": "🇵🇰",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Asia/Kolkata",
+    "label": "India Time",
+    "gmtOffset": "UTC+5:30",
+    "countryEmoji": "🇮🇳",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Asia/Dhaka",
+    "label": "Bangladesh Time",
+    "gmtOffset": "UTC+6:00",
+    "countryEmoji": "🇧🇩",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Asia/Bangkok",
+    "label": "Bangkok",
+    "gmtOffset": "UTC+7:00",
+    "countryEmoji": "🇹🇭",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Asia/Singapore",
+    "label": "Singapore",
+    "gmtOffset": "UTC+8:00",
+    "countryEmoji": "🇸🇬",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Asia/Tokyo",
+    "label": "Japan Time",
+    "gmtOffset": "UTC+9:00",
+    "countryEmoji": "🇯🇵",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Asia/Seoul",
+    "label": "Korea Time",
+    "gmtOffset": "UTC+9:00",
+    "countryEmoji": "🇰🇷",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Australia/Perth",
+    "label": "Australian Western Time",
+    "gmtOffset": "UTC+8:00",
+    "countryEmoji": "🇦🇺",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Australia/Adelaide",
+    "label": "Australian Central Time",
+    "gmtOffset": "UTC+9:30",
+    "countryEmoji": "🇦🇺",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Australia/Sydney",
+    "label": "Australian Eastern Time",
+    "gmtOffset": "UTC+10:00",
+    "countryEmoji": "🇦🇺",
+    "globeEmoji": "🌏"
+  },
+  {
+    "iana": "Pacific/Auckland",
+    "label": "New Zealand Time",
+    "gmtOffset": "UTC+12:00",
+    "countryEmoji": "🇳🇿",
+    "globeEmoji": "🌏"
+  }
+]
