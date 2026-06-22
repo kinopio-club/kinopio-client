@@ -169,7 +169,7 @@ const toggleIsDebugMode = () => {
       //- Date and Time
       .button-wrap
         button(@click.left.stop="toggleUserDateAndTimeSettingsIsVisible" :class="{active: state.userDateAndTimeSettingsIsVisible}")
-          img.icon.time(src="@/assets/time.svg")
+          img.icon.cal(src="@/assets/cal.svg")
           span Date and Time
           teleport(to="#settings-child-dialogs" defer)
             DateAndTimeSettings(:visible="state.userDateAndTimeSettingsIsVisible")
@@ -215,4 +215,6 @@ const toggleIsDebugMode = () => {
   > section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
+  .icon.cal
+    vertical-align -1px
 </style>

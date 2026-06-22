@@ -36,7 +36,8 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  timezoneIsDefault: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -52,23 +53,64 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const userTimezone = computed(() => userStore.timezone)
+const absoluteTimeLabel = computed(() => {
+  const date = dayjs().add(2, 'day')
+  return utils.shortAbsoluteDate(date)
+})
+
+const updateDefaultTimezone = () => {
+  const timezone = dayjs.tz.guess()
+  userStore.updateUser({ timezone })
+  state.timezoneIsDefault = true
+}
+const selectTimezone = (timezone) => {
+  console.log('🫐', timezone)
+  state.timezoneIsDefault = false
+}
+
 </script>
 
 <template lang="pug">
-dialog.narrow.timezone-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p Date and Time Settings
   section
     p New Date Format
     .segmented-buttons
-      button.active Aug 20, 2026
-      button 2 days left
+      button.active
+        span {{absoluteTimeLabel}}
+      button
+        span 2 days left
   section
     p Timezone
+    .row
+      button(@click="updateDefaultTimezone")
+        span Auto Detect
+    .row(v-if="state.timezoneIsDefault")
+      .badge.success {{userTimezone}}
+  section.timezone-picker.results-section
+    ul.results-list.timezone-list
+      template(v-for="timezone in timezones" :key="timezone.iana")
+        li(@click.left="selectTimezone(timezone)")
+
+          span {{timezone.label}}
+          span {{timezone.gmtOffset}}
+        //- li(:class="{ active: timezoneIsSelected(timezone) }" @click.stop="selecttimezone(timezone)")
+          //- timezoneLabel(:timezone="timezone" :showName="true")
+          //- timezoneDetails(:visible="timezoneDetailsIsVisible(timezone)" :timezone="timezone")
+
     //- results list
     //- list use default + timezones
 </template>
 
 <style lang="stylus">
-// dialog.timezone-picker
+dialog.date-and-time-settings
+  overflow auto
+  section.timezone-picker
+    max-height 250px
+  li
+    display flex
+    width 100%
+    justify-content space-between
 </style>

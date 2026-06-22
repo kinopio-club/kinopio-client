@@ -778,6 +778,7 @@ export default {
     time = time.replace(' years', 'y')
     return time
   },
+  // TODO shortRelativeDate (date) {}, '2 days left', 'Past'
   shortAbsoluteDate (date) {
     if (!date) { return }
     return dayjs(date).format('MMM D, YYYY')

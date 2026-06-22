@@ -1,198 +1,350 @@
 [
   {
+    "iana": "Etc/GMT+12",
+    "label": "International Date Line West",
+    "gmtOffset": "UTC−12:00",
+    "cityAliases": ["Baker Island", "Howland Island"]
+  },
+  {
+    "iana": "Pacific/Pago_Pago",
+    "label": "Pago Pago",
+    "gmtOffset": "UTC−11:00",
+    "cityAliases": ["Apia", "Midway", "Niue", "Samoa"]
+  },
+  {
     "iana": "Pacific/Honolulu",
-    "label": "Hawaii Time",
+    "label": "Honolulu",
     "gmtOffset": "UTC−10:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Hawaii", "Tahiti", "Papeete", "Rarotonga", "Cook Islands"]
+  },
+  {
+    "iana": "Pacific/Marquesas",
+    "label": "Marquesas Islands",
+    "gmtOffset": "UTC−9:30",
+    "cityAliases": ["Nuku Hiva", "French Polynesia"]
   },
   {
     "iana": "America/Anchorage",
-    "label": "Alaska Time",
+    "label": "Anchorage",
     "gmtOffset": "UTC−9:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Alaska", "Juneau", "Fairbanks", "Nome"]
   },
   {
     "iana": "America/Los_Angeles",
-    "label": "Pacific Time",
+    "label": "Los Angeles",
     "gmtOffset": "UTC−8:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌎"
+    "cityAliases": ["San Francisco", "Seattle", "Portland", "Las Vegas", "Vancouver", "Pacific Time", "PST", "PDT"]
   },
   {
     "iana": "America/Denver",
-    "label": "Mountain Time",
+    "label": "Denver",
     "gmtOffset": "UTC−7:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Salt Lake City", "Boise", "Albuquerque", "Calgary", "Mountain Time", "MST", "MDT"]
   },
   {
     "iana": "America/Phoenix",
-    "label": "Mountain Time (no DST)",
+    "label": "Phoenix (no DST)",
     "gmtOffset": "UTC−7:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Arizona", "Tucson", "Mesa"]
   },
   {
     "iana": "America/Chicago",
-    "label": "Central Time",
+    "label": "Chicago",
     "gmtOffset": "UTC−6:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Dallas", "Houston", "Minneapolis", "Kansas City", "Winnipeg", "Central Time", "CST", "CDT"]
+  },
+  {
+    "iana": "America/Mexico_City",
+    "label": "Mexico City",
+    "gmtOffset": "UTC−6:00",
+    "cityAliases": ["Guadalajara", "Monterrey", "Guatemala City", "San Salvador", "Tegucigalpa", "Managua", "San José", "Costa Rica"]
   },
   {
     "iana": "America/New_York",
-    "label": "Eastern Time",
+    "label": "New York",
     "gmtOffset": "UTC−5:00",
-    "countryEmoji": "🇺🇸",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Boston", "Miami", "Atlanta", "Philadelphia", "Washington DC", "Detroit", "Toronto", "Montreal", "Eastern Time", "EST", "EDT"]
+  },
+  {
+    "iana": "America/Bogota",
+    "label": "Bogotá",
+    "gmtOffset": "UTC−5:00",
+    "cityAliases": ["Lima", "Quito", "Panama City", "Kingston", "Ecuador", "Peru", "Colombia"]
   },
   {
     "iana": "America/Halifax",
-    "label": "Atlantic Time",
+    "label": "Halifax",
     "gmtOffset": "UTC−4:00",
-    "countryEmoji": "🇨🇦",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Atlantic Time", "Santo Domingo", "Port of Spain", "Trinidad", "Barbados", "La Paz", "Bolivia", "Guyana", "Georgetown", "Santiago", "Manaus"]
+  },
+  {
+    "iana": "America/Caracas",
+    "label": "Caracas",
+    "gmtOffset": "UTC−4:00",
+    "cityAliases": ["Venezuela"]
+  },
+  {
+    "iana": "America/St_Johns",
+    "label": "St. John's",
+    "gmtOffset": "UTC−3:30",
+    "cityAliases": ["Newfoundland", "NST"]
   },
   {
     "iana": "America/Sao_Paulo",
-    "label": "Brasília Time",
+    "label": "São Paulo",
     "gmtOffset": "UTC−3:00",
-    "countryEmoji": "🇧🇷",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Rio de Janeiro", "Brasília", "Recife", "Salvador", "Fortaleza", "Brazil", "BRT"]
   },
   {
     "iana": "America/Argentina/Buenos_Aires",
-    "label": "Argentina Time",
+    "label": "Buenos Aires",
     "gmtOffset": "UTC−3:00",
-    "countryEmoji": "🇦🇷",
-    "globeEmoji": "🌎"
+    "cityAliases": ["Montevideo", "Argentina", "Uruguay", "Córdoba", "Rosario", "ART"]
+  },
+  {
+    "iana": "Atlantic/South_Georgia",
+    "label": "South Georgia",
+    "gmtOffset": "UTC−2:00",
+    "cityAliases": ["Noronha", "Fernando de Noronha"]
+  },
+  {
+    "iana": "Atlantic/Azores",
+    "label": "Azores",
+    "gmtOffset": "UTC−1:00",
+    "cityAliases": ["Ponta Delgada"]
+  },
+  {
+    "iana": "Atlantic/Cape_Verde",
+    "label": "Cape Verde",
+    "gmtOffset": "UTC−1:00",
+    "cityAliases": ["Praia", "CVT"]
   },
   {
     "iana": "Europe/London",
     "label": "London",
     "gmtOffset": "UTC+0:00",
-    "countryEmoji": "🇬🇧",
-    "globeEmoji": "🌍"
+    "cityAliases": ["Dublin", "Edinburgh", "Lisbon", "Reykjavik", "Casablanca", "Accra", "Dakar", "Abidjan", "GMT", "UTC", "WET"]
+  },
+  {
+    "iana": "Africa/Abidjan",
+    "label": "Abidjan",
+    "gmtOffset": "UTC+0:00",
+    "cityAliases": ["Accra", "Dakar", "Conakry", "Bamako", "Freetown", "Monrovia", "Ouagadougou"]
   },
   {
     "iana": "Europe/Paris",
-    "label": "Central European Time",
+    "label": "Paris",
     "gmtOffset": "UTC+1:00",
-    "countryEmoji": "🇫🇷",
-    "globeEmoji": "🌍"
+    "cityAliases": ["Berlin", "Rome", "Madrid", "Amsterdam", "Brussels", "Vienna", "Warsaw", "Prague", "Budapest", "Stockholm", "Oslo", "Copenhagen", "Zurich", "Geneva", "Barcelona", "Milan", "CET", "CEST"]
+  },
+  {
+    "iana": "Africa/Lagos",
+    "label": "Lagos",
+    "gmtOffset": "UTC+1:00",
+    "cityAliases": ["Kinshasa", "Kano", "Ibadan", "Algiers", "Tunis", "Luanda", "Douala", "WAT"]
   },
   {
     "iana": "Europe/Helsinki",
-    "label": "Eastern European Time",
+    "label": "Helsinki",
     "gmtOffset": "UTC+2:00",
-    "countryEmoji": "🇫🇮",
-    "globeEmoji": "🌍"
+    "cityAliases": ["Kyiv", "Riga", "Tallinn", "Vilnius", "Bucharest", "Sofia", "Athens", "Nicosia", "EET", "EEST"]
   },
   {
     "iana": "Africa/Cairo",
     "label": "Cairo",
     "gmtOffset": "UTC+2:00",
-    "countryEmoji": "🇪🇬",
-    "globeEmoji": "🌍"
+    "cityAliases": ["Jerusalem", "Tel Aviv", "Beirut", "Amman", "Damascus", "Khartoum", "Tripoli", "EET"]
   },
   {
     "iana": "Africa/Johannesburg",
-    "label": "South Africa Time",
+    "label": "Johannesburg",
     "gmtOffset": "UTC+2:00",
-    "countryEmoji": "🇿🇦",
-    "globeEmoji": "🌍"
+    "cityAliases": ["Cape Town", "Harare", "Lusaka", "Maputo", "Gaborone", "Windhoek", "Pretoria", "SAST"]
+  },
+  {
+    "iana": "Europe/Moscow",
+    "label": "Moscow",
+    "gmtOffset": "UTC+3:00",
+    "cityAliases": ["Saint Petersburg", "Minsk", "Baghdad", "Riyadh", "Kuwait City", "Doha", "Aden", "Nairobi", "MSK"]
+  },
+  {
+    "iana": "Africa/Nairobi",
+    "label": "Nairobi",
+    "gmtOffset": "UTC+3:00",
+    "cityAliases": ["Addis Ababa", "Dar es Salaam", "Mogadishu", "Kampala", "Antananarivo", "EAT"]
+  },
+  {
+    "iana": "Asia/Tehran",
+    "label": "Tehran",
+    "gmtOffset": "UTC+3:30",
+    "cityAliases": ["Iran", "IRST"]
   },
   {
     "iana": "Asia/Dubai",
     "label": "Dubai",
     "gmtOffset": "UTC+4:00",
-    "countryEmoji": "🇦🇪",
-    "globeEmoji": "🌍"
+    "cityAliases": ["Abu Dhabi", "Muscat", "Tbilisi", "Yerevan", "UAE", "GST"]
   },
   {
-    "iana": "Asia/Tehran",
-    "label": "Iran Time",
-    "gmtOffset": "UTC+3:30",
-    "countryEmoji": "🇮🇷",
-    "globeEmoji": "🌍"
+    "iana": "Asia/Baku",
+    "label": "Baku",
+    "gmtOffset": "UTC+4:00",
+    "cityAliases": ["Azerbaijan", "AZT"]
+  },
+  {
+    "iana": "Asia/Kabul",
+    "label": "Kabul",
+    "gmtOffset": "UTC+4:30",
+    "cityAliases": ["Afghanistan", "AFT"]
   },
   {
     "iana": "Asia/Karachi",
-    "label": "Pakistan Time",
+    "label": "Karachi",
     "gmtOffset": "UTC+5:00",
-    "countryEmoji": "🇵🇰",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Islamabad", "Lahore", "Pakistan", "PST"]
+  },
+  {
+    "iana": "Asia/Tashkent",
+    "label": "Tashkent",
+    "gmtOffset": "UTC+5:00",
+    "cityAliases": ["Ashgabat", "Dushanbe", "Uzbekistan", "UZT"]
   },
   {
     "iana": "Asia/Kolkata",
-    "label": "India Time",
+    "label": "Kolkata",
     "gmtOffset": "UTC+5:30",
-    "countryEmoji": "🇮🇳",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad", "Ahmedabad", "India", "IST"]
+  },
+  {
+    "iana": "Asia/Kathmandu",
+    "label": "Kathmandu",
+    "gmtOffset": "UTC+5:45",
+    "cityAliases": ["Nepal", "NPT"]
   },
   {
     "iana": "Asia/Dhaka",
-    "label": "Bangladesh Time",
+    "label": "Dhaka",
     "gmtOffset": "UTC+6:00",
-    "countryEmoji": "🇧🇩",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Chittagong", "Bangladesh", "BST"]
+  },
+  {
+    "iana": "Asia/Almaty",
+    "label": "Almaty",
+    "gmtOffset": "UTC+6:00",
+    "cityAliases": ["Astana", "Bishkek", "Kazakhstan", "Kyrgyzstan", "ALMT"]
+  },
+  {
+    "iana": "Asia/Yangon",
+    "label": "Yangon",
+    "gmtOffset": "UTC+6:30",
+    "cityAliases": ["Mandalay", "Myanmar", "Burma", "MMT"]
   },
   {
     "iana": "Asia/Bangkok",
     "label": "Bangkok",
     "gmtOffset": "UTC+7:00",
-    "countryEmoji": "🇹🇭",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Ho Chi Minh City", "Hanoi", "Phnom Penh", "Vientiane", "Thailand", "Vietnam", "Cambodia", "ICT"]
+  },
+  {
+    "iana": "Asia/Jakarta",
+    "label": "Jakarta",
+    "gmtOffset": "UTC+7:00",
+    "cityAliases": ["Surabaya", "Medan", "Indonesia", "WIB"]
   },
   {
     "iana": "Asia/Singapore",
     "label": "Singapore",
     "gmtOffset": "UTC+8:00",
-    "countryEmoji": "🇸🇬",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Kuala Lumpur", "Malaysia", "SGT", "MYT"]
   },
   {
-    "iana": "Asia/Tokyo",
-    "label": "Japan Time",
-    "gmtOffset": "UTC+9:00",
-    "countryEmoji": "🇯🇵",
-    "globeEmoji": "🌏"
-  },
-  {
-    "iana": "Asia/Seoul",
-    "label": "Korea Time",
-    "gmtOffset": "UTC+9:00",
-    "countryEmoji": "🇰🇷",
-    "globeEmoji": "🌏"
+    "iana": "Asia/Shanghai",
+    "label": "Shanghai",
+    "gmtOffset": "UTC+8:00",
+    "cityAliases": ["Beijing", "Shenzhen", "Guangzhou", "Chengdu", "Wuhan", "Hong Kong", "Taipei", "Manila", "China", "CST", "HKT", "PHT"]
   },
   {
     "iana": "Australia/Perth",
-    "label": "Australian Western Time",
+    "label": "Perth",
     "gmtOffset": "UTC+8:00",
-    "countryEmoji": "🇦🇺",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Western Australia", "AWST"]
+  },
+  {
+    "iana": "Australia/Eucla",
+    "label": "Eucla",
+    "gmtOffset": "UTC+8:45",
+    "cityAliases": ["Australian Central Western", "ACWST"]
+  },
+  {
+    "iana": "Asia/Tokyo",
+    "label": "Tokyo",
+    "gmtOffset": "UTC+9:00",
+    "cityAliases": ["Osaka", "Sapporo", "Fukuoka", "Nagoya", "Japan", "JST"]
+  },
+  {
+    "iana": "Asia/Seoul",
+    "label": "Seoul",
+    "gmtOffset": "UTC+9:00",
+    "cityAliases": ["Busan", "Incheon", "Korea", "KST"]
   },
   {
     "iana": "Australia/Adelaide",
-    "label": "Australian Central Time",
+    "label": "Adelaide",
     "gmtOffset": "UTC+9:30",
-    "countryEmoji": "🇦🇺",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Darwin", "South Australia", "Northern Territory", "ACST"]
   },
   {
     "iana": "Australia/Sydney",
-    "label": "Australian Eastern Time",
+    "label": "Sydney",
     "gmtOffset": "UTC+10:00",
-    "countryEmoji": "🇦🇺",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Melbourne", "Brisbane", "Canberra", "Eastern Australia", "AEST"]
+  },
+  {
+    "iana": "Pacific/Port_Moresby",
+    "label": "Port Moresby",
+    "gmtOffset": "UTC+10:00",
+    "cityAliases": ["Papua New Guinea", "PGT"]
+  },
+  {
+    "iana": "Australia/Lord_Howe",
+    "label": "Lord Howe Island",
+    "gmtOffset": "UTC+10:30",
+    "cityAliases": ["LHST"]
+  },
+  {
+    "iana": "Pacific/Noumea",
+    "label": "Nouméa",
+    "gmtOffset": "UTC+11:00",
+    "cityAliases": ["New Caledonia", "Honiara", "Solomon Islands", "NCT"]
   },
   {
     "iana": "Pacific/Auckland",
-    "label": "New Zealand Time",
+    "label": "Auckland",
     "gmtOffset": "UTC+12:00",
-    "countryEmoji": "🇳🇿",
-    "globeEmoji": "🌏"
+    "cityAliases": ["Wellington", "Christchurch", "New Zealand", "NZST"]
+  },
+  {
+    "iana": "Pacific/Fiji",
+    "label": "Fiji",
+    "gmtOffset": "UTC+12:00",
+    "cityAliases": ["Suva", "Tarawa", "Majuro", "Marshall Islands", "FJT"]
+  },
+  {
+    "iana": "Pacific/Chatham",
+    "label": "Chatham Islands",
+    "gmtOffset": "UTC+12:45",
+    "cityAliases": ["Waitangi", "CHAST"]
+  },
+  {
+    "iana": "Pacific/Tongatapu",
+    "label": "Tongatapu",
+    "gmtOffset": "UTC+13:00",
+    "cityAliases": ["Tonga", "Nuku'alofa", "Apia", "TOT"]
+  },
+  {
+    "iana": "Pacific/Kiritimati",
+    "label": "Kiritimati",
+    "gmtOffset": "UTC+14:00",
+    "cityAliases": ["Christmas Island", "Line Islands", "Kiribati", "LINT"]
   }
 ]
