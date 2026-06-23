@@ -135,11 +135,14 @@ const toggleTipsIsVisible = () => {
 
 // date
 
+const triggerDateAndTimeSettingsIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerDateAndTimeSettingsIsVisible()
+}
 const toggleDatePickerIsVisible = () => {
   const value = !state.datePickerIsVisible
   closeDialogs()
   state.datePickerIsVisible = value
-  console.log('🍒', state.datePickerIsVisible)
 }
 const selectDate = (date) => {
   console.log('❤️❤️❤️❤️', date)
@@ -147,6 +150,7 @@ const selectDate = (date) => {
 // ??or dayjs string dayjs('apr-2,2003')
 // TODO selectDaysFromNow()
 const selectDay = (event, daysFromToday) => {
+  console.log('👄', event, daysFromToday)
   // emit('selectDate', event, daysFromToday)
 }
 
@@ -171,11 +175,10 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
         img.icon.search(src="@/assets/search.svg")
         span Type users or date
       div
-        button.small-button
-          //- (@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }" title="Date and Time Settings")
-
+        //- settings
+        button.small-button(@click.stop="triggerDateAndTimeSettingsIsVisible" title="Date and Time Settings")
           img.icon.settings(src="@/assets/settings.svg")
-
+        //- tips
         button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
           span ?
 

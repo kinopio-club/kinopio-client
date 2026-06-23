@@ -544,6 +544,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateHeaderAndFooterPosition () {},
     triggerHideTouchInterface () {},
     triggerUpgradeUserIsVisible () {},
+    triggerDateAndTimeSettingsIsVisible () {},
     triggerDonateIsVisible () {},
     triggerUploadComplete (updates) {},
     triggerPauseAllAudio () {},
