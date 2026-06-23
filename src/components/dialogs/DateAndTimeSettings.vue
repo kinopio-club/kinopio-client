@@ -66,6 +66,11 @@ const absoluteTimeLabel = computed(() => {
   const date = dayjs().add(2, 'day')
   return utils.shortAbsoluteDate(date)
 })
+const userAtMentionDateIsRelative = computed(() => userStore.atMentionDateIsRelative)
+const updateAtMentionDateIsRelative = (value) => {
+  if (value === userAtMentionDateIsRelative.value) { return }
+  userStore.updateUser({ atMentionDateIsRelative: value })
+}
 
 // timezones
 
@@ -180,9 +185,9 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
   section
     p Due Date Format
     .segmented-buttons
-      button.active
+      button(@click="updateAtMentionDateIsRelative(false)" :class="{active: !userAtMentionDateIsRelative}")
         span {{absoluteTimeLabel}}
-      button
+      button(@click="updateAtMentionDateIsRelative(true)" :class="{active: userAtMentionDateIsRelative}")
         span 2 days left
   section
     .row.title-row
