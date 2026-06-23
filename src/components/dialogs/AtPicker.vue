@@ -21,11 +21,27 @@ const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
+let unsubscribes
+
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerPickerSelect') {
+        if (filteredUsers.value.length) { return }
+        if (dateFromSearch.value) {
+          selectDate(dateFromSearch.value)
+        }
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
+  unsubscribes()
 })
 
 const emit = defineEmits(['selectUser', 'selectDate'])
@@ -195,7 +211,6 @@ const toggleDatePickerIsVisible = () => {
   state.datePickerIsVisible = value
 }
 const selectDate = (date) => {
-  console.log('❤️❤️❤️❤️', date)
   emit('selectDate', date)
 }
 const dateDaysFromToday = (number) => {
@@ -251,8 +266,6 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
           span {{dateSearchLabel}}
   //- default dates
   .date-list(v-if="!props.search")
-    //- TODO how to handle keyboard
-    //- if no names, and a match for custom date, then show active state on li. enterkey = selectDaysFromToday
     ul.results-list
       li.date-list-item(@click.left="selectDaysFromToday(0)")
         .badge.info
