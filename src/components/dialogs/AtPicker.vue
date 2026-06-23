@@ -135,6 +135,11 @@ const toggleTipsIsVisible = () => {
 
 // date
 
+const searchIsDate = computed(() => {
+  if (!props.search) { return true }
+  return true
+})
+
 const triggerDateAndTimeSettingsIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerDateAndTimeSettingsIsVisible()
@@ -185,7 +190,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideResultsFilter="true"
   )
 
-  section.results-section(v-if="!props.search")
+  section.results-section(v-if="searchIsDate")
     //- ^ search is not date
     //- support @2d, @today, @tomorrow, @oct1, @oct20 (monthNumber = next occurance, same yr or next)
     //- @t,o,d,a,y
@@ -198,28 +203,26 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
 
     //- if days are > 2 display as abs date
     ul.results-list
-      template(v-if="!props.search")
-        //- TODO v-if search is valid date (!search = true)
-        li.date-list-item(@click.left="selectDaysFromToday(0)")
-          .badge.info
-            img.icon.cal(src="@/assets/cal.svg")
-            span 0d
-          span Today
-        li.date-list-item(@click.left="selectDaysFromToday(1)")
-          .badge.secondary
-            img.icon.cal(src="@/assets/cal.svg")
-            span 1d
-          span Tomorrow
-        li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
-          .badge.secondary
-            img.icon.cal(src="@/assets/cal.svg")
-            span Custom Date
+      //- template(v-if="!props.search")
+      //- TODO v-if search is valid date (!search = true)
+      li.date-list-item(@click.left="selectDaysFromToday(0)")
+        .badge.info
+          img.icon.cal(src="@/assets/cal.svg")
+          span 0d
+        span Today
+      li.date-list-item(@click.left="selectDaysFromToday(1)")
+        .badge.secondary
+          img.icon.cal(src="@/assets/cal.svg")
+          span 1d
+        span Tomorrow
+      li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
+        .badge.secondary
+          img.icon.cal(src="@/assets/cal.svg")
+          span Custom Date
 
       DatePicker(:visible="state.datePickerIsVisible" @selectDate="selectDate")
 
-    //- no matches found (if no filteredusers and no filteredDates)
-
-    //- TODO DatePicker (design to be wrappable in DatePicker dialog.narrow)
+    //- TODO no matches found (if no filteredusers and no filteredDates)
 
 </template>
 
