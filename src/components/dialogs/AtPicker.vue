@@ -148,9 +148,11 @@ const selectDate = (date) => {
   console.log('❤️❤️❤️❤️', date)
 }
 // ??or dayjs string dayjs('apr-2,2003')
-// TODO selectDaysFromNow()
-const selectDay = (event, daysFromToday) => {
-  console.log('👄', event, daysFromToday)
+// const selectDaysFromNow (daysFromToday) => {
+
+// }
+const selectDaysFromToday = (count) => {
+  console.log('👄', count)
   // emit('selectDate', event, daysFromToday)
 }
 
@@ -158,17 +160,6 @@ const selectDay = (event, daysFromToday) => {
 
 <template lang="pug">
 dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="styles" :class="{ 'child-dialog-is-visible': state.datePickerIsVisible }")
-  //- template(v-if="state.datePickerIsVisible")
-  //-   section.results-section
-  //-     ul.results-list
-  //-       li.date-list-item.active(@click.stop="toggleDatePickerIsVisible")
-  //-         .badge.secondary
-  //-           img.icon.time(src="@/assets/time.svg")
-  //-           span Custom Date
-  //-       DatePicker(:visible="state.datePickerIsVisible")
-
-  //- template(v-else)
-
   section.info-section(v-if="!props.search && currentUserIsSignedIn && !props.searchIsDisabled")
     .row.title-row
       div
@@ -201,7 +192,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     //- @n,o,v (default to 1st)
 
     //- TODO how to handle keyboard
-    //- if no names, and a match for custom date, then show active state on li. enterkey = selectDay
+    //- if no names, and a match for custom date, then show active state on li. enterkey = selectDaysFromToday
 
     //- TODO fix cal icon
 
@@ -209,15 +200,13 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     ul.results-list
       template(v-if="!props.search")
         //- TODO v-if search is valid date (!search = true)
-        li.date-list-item
-          //- @click.left=selectDaysFromNow(1)
+        li.date-list-item(@click.left="selectDaysFromToday(0)")
           .badge.info
             img.icon.cal(src="@/assets/cal.svg")
             span 0d
           span Today
-        li.date-list-item
+        li.date-list-item(@click.left="selectDaysFromToday(1)")
           .badge.secondary
-            //- @click.left=selectDaysFromNow(1)
             img.icon.cal(src="@/assets/cal.svg")
             span 1d
           span Tomorrow
