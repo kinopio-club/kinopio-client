@@ -779,9 +779,10 @@ export default {
     return time
   },
   // TODO shortRelativeDate (date) {}, '2 days left', 'Past'
+
   shortAbsoluteDate (date) {
     if (!date) { return }
-    return dayjs(date).format('MMM D, YYYY')
+    return dayjs(date).format('MMM D, YYYY') // Jan 20, 2026
   },
   isEvenNumber (number) {
     if (number % 2 === 0) {

@@ -11,6 +11,9 @@ import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 import uniqBy from 'lodash-es/uniqBy'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -135,11 +138,53 @@ const toggleTipsIsVisible = () => {
 
 // date
 
-const searchIsDate = computed(() => {
-  if (!props.search) { return true }
-  return true
-})
+const parseDateString = (input) => {
+  const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+  const lower = input.toLowerCase()
+  const monthPart = lower.slice(0, 3)
+  const dayPart = lower.slice(3)
+  if (!months.includes(monthPart)) { return }
+  const month = months.indexOf(monthPart)
+  const day = parseInt(dayPart, 10) || 1 // if no day, use 1
+  const year = dayjs().year()
+  let date = dayjs(new Date(year, month, day))
+  if (date.isBefore(dayjs(), 'day')) date = date.add(1, 'year') // if date is past, use next year
+  return date
+}
 
+const dateFromSearch = computed(() => {
+  if (!props.search) { return }
+  // @2d
+  // https://regexr.com/8nef7
+  const dayPattern = /^\d{1,2}d$/i // 1-2 digits + d
+  const isDays = dayPattern.test(props.search)
+  if (isDays) {
+    return dateDaysFromToday(parseInt(props.search))
+  }
+  // @today
+  const isToday = 'today'.startsWith(props.search)
+  if (isToday) {
+    return dateDaysFromToday(0)
+  }
+  // @tomorrow
+  const isTomorrow = 'tomorrow'.startsWith(props.search)
+  if (isTomorrow) {
+    return dateDaysFromToday(1)
+  }
+  // @nov20
+  const datePattern = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d{0,2}$/i // match + 0-2 digits
+  const isDate = datePattern.test(props.search)
+  if (isDate) {
+    return parseDateString(props.search)
+  }
+  return null
+})
+const dateSearchLabel = computed(() => {
+  const date = dateFromSearch.value
+  if (!date) { return }
+  return utils.shortAbsoluteDate(date)
+})
+const dateSearchIsToday = computed(() => dateFromSearch.value.isSame(dayjs(), 'day'))
 const triggerDateAndTimeSettingsIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerDateAndTimeSettingsIsVisible()
@@ -151,16 +196,24 @@ const toggleDatePickerIsVisible = () => {
 }
 const selectDate = (date) => {
   console.log('❤️❤️❤️❤️', date)
+  emit('selectDate', date)
 }
-// ??or dayjs string dayjs('apr-2,2003')
-// const selectDaysFromNow (daysFromToday) => {
-
-// }
-const selectDaysFromToday = (count) => {
-  console.log('👄', count)
-  // emit('selectDate', event, daysFromToday)
+const dateDaysFromToday = (number) => {
+  const date = dayjs().add(number, 'day')
+  console.log('🧞‍♀️', number, date)
+  return date
+}
+const selectDaysFromToday = (number) => {
+  const date = dateDaysFromToday(number)
+  selectDate(date)
 }
 
+const isNoResults = computed(() => {
+  if (!props.search) { return }
+  const isUsers = Boolean(filteredUsers.value.length)
+  const isDate = Boolean(dateFromSearch.value)
+  return !isUsers && !isDate
+})
 </script>
 
 <template lang="pug">
@@ -177,10 +230,10 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
         //- tips
         button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
           span ?
-
+    //- tips
     .row(v-if="state.tipsIsVisible")
       p.badge.info To @mention other people, invite them to this space, or a group
-
+  //- users
   UserList(
     :users="filteredUsers"
     :selectedUsers="selectedUsers"
@@ -189,22 +242,18 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideOptionsButton="true"
     :shouldHideResultsFilter="true"
   )
-
-  section.results-section(v-if="searchIsDate")
-    //- ^ search is not date
-    //- support @2d, @today, @tomorrow, @oct1, @oct20 (monthNumber = next occurance, same yr or next)
-    //- @t,o,d,a,y
-    //- @n,o,v (default to 1st)
-
+  //- date search
+  .date-list(v-if="dateFromSearch")
+    ul.results-list
+      li.date-list-item(@click.left="selectDate(dateFromSearch)" :class="{ hover: !filteredUsers.length }")
+        .badge(:class="{ info: dateSearchIsToday, secondary: !dateSearchIsToday }")
+          img.icon.cal(src="@/assets/cal.svg")
+          span {{dateSearchLabel}}
+  //- default dates
+  .date-list(v-if="!props.search")
     //- TODO how to handle keyboard
     //- if no names, and a match for custom date, then show active state on li. enterkey = selectDaysFromToday
-
-    //- TODO fix cal icon
-
-    //- if days are > 2 display as abs date
     ul.results-list
-      //- template(v-if="!props.search")
-      //- TODO v-if search is valid date (!search = true)
       li.date-list-item(@click.left="selectDaysFromToday(0)")
         .badge.info
           img.icon.cal(src="@/assets/cal.svg")
@@ -219,11 +268,9 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
         .badge.secondary
           img.icon.cal(src="@/assets/cal.svg")
           span Custom Date
-
       DatePicker(:visible="state.datePickerIsVisible" @selectDate="selectDate")
-
-    //- TODO no matches found (if no filteredusers and no filteredDates)
-
+  //- no matches
+  section(v-if="isNoResults") No matches found
 </template>
 
 <style lang="stylus">
@@ -234,6 +281,8 @@ dialog.at-picker
   .user-list
     max-height 100px // matches userListMaxHeight
     overflow auto
+    padding 0 4px
+  .date-list
     padding 0 4px
   .date-list-item
     display flex
