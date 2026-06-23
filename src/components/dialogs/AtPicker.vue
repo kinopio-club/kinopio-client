@@ -171,13 +171,11 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
         img.icon.search(src="@/assets/search.svg")
         span Type users or date
       div
-        button.small-button
-          //- (@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }" title="Date and Time Settings")
-
-          img.icon.settings(src="@/assets/settings.svg")
-
         button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
           span ?
+        button.small-button
+          //- (@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }" title="Date and Time Settings")
+          img.icon.settings(src="@/assets/settings.svg")
 
     .row(v-if="state.tipsIsVisible")
       p.badge.info To @mention other people, invite them to this space, or a group
