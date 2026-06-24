@@ -1247,7 +1247,8 @@ const handleEnterKey = (event) => {
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
   console.info('🎹 enter', {
     shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
-    pickersIsVisible
+    pickersIsVisible,
+    isCompositionEvent
   })
   if (globalStore.shouldPreventNextEnterKey) {
     globalStore.shouldPreventNextEnterKey = false

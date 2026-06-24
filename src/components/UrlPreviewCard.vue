@@ -195,7 +195,7 @@ const handleImageLoaded = (event) => {
 const title = computed(() => {
   let title = props.card.urlPreviewTitle
   if (!title) {
-    return props.card.urlPreviewUrl
+    return utils.truncated(props.card.urlPreviewUrl)
   }
   title = title.replace('on Twitter', '')
   return title
@@ -255,7 +255,6 @@ const openUrl = async (event, url) => {
 </script>
 
 <template lang="pug">
-//- image
 .url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}" :data-card-id="props.card.id")
   //- image
   template(v-if="!shouldDisplayIframe")
