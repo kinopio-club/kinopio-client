@@ -488,12 +488,26 @@ const updateNameCardUserMentions = (newName) => {
   }
   cardStore.updateCard(update)
 }
+const updateNameCardDateMentions = (newName) => {
+  const isDelete = newName.length < card.value.name.length
+  if (!isDelete) { return }
+  const mentions = card.value.atDateMentions || []
+  const newMentions = mentions.filter(mention => newName.includes(mention.stringMatch))
+  const isChanged = mentions.length !== newMentions.length
+  if (!isChanged) { return }
+  const update = {
+    id: card.value.id,
+    atDateMentions: newMentions
+  }
+  cardStore.updateCard(update)
+}
 const name = computed({
   get () {
     return card.value.name || ''
   },
   set (newName) {
     updateNameCardUserMentions(newName)
+    updateNameCardDateMentions(newName)
     if (globalStore.shouldPreventNextEnterKey) {
       globalStore.shouldPreventNextEnterKey = false
       updateCardName(newName.trim())
