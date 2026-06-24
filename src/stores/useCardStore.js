@@ -545,7 +545,8 @@ export const useCardStore = defineStore('cards', {
       const atDateMentions = card.atDateMentions.concat(mention)
       const update = {
         id: card.id,
-        atDateMentions
+        atDateMentions,
+        atMentionDateIsRelative: userStore.atMentionDateIsRelative
       }
       await this.updateCard(update)
       await userNotificationStore.addCardDateMention(mention)
