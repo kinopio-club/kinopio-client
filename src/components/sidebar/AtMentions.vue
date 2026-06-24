@@ -304,58 +304,59 @@ const selectCard = (card) => {
 </template>
 
 <style lang="stylus">
-.at-mentions
-  overflow auto
-  border-top 1px solid var(--primary-border)
-  min-height 160px
-  .title-label-wrap
-    > .title-label
+.sidebar
+  .at-mentions
+    overflow auto
+    border-top 1px solid var(--primary-border)
+    min-height 160px
+    .title-label-wrap
+      > .title-label
+        vertical-align -1px
+    .button-wrap
+      margin 0
+    // .tips-section
+    //   border 0
+    //   padding-top 0
+    // .subsection
+    //   padding 4px
+    //   border-radius var(--entity-radius)
+    //   &.tips
+    //     .badge
+    //       white-space nowrap
+    // label
+    //   .user
+    //     vertical-align -3px
+    //     transform translateY(-1px)
+    //     margin-right 0
+    //     .user-avatar
+    //       width 17px
+    //       height 16px
+    // .boxes-list
+    //   padding-left 2px
+    //   padding-right 2px
+    //   padding-bottom 2px
+    // .progress-circle
+    //   vertical-align -2px
+    // .filter-is-active
+    //   margin 0
+    //   min-height initial
+    //   min-width initial
+    //   display inline-block
+    //   width 10px
+    //   height 10px
+    //   padding 0
+    //   border-radius 100px
+    //   margin-left 3px
+    .loader
       vertical-align -1px
-  .button-wrap
-    margin 0
-  // .tips-section
-  //   border 0
-  //   padding-top 0
-  // .subsection
-  //   padding 4px
-  //   border-radius var(--entity-radius)
-  //   &.tips
-  //     .badge
-  //       white-space nowrap
-  // label
-  //   .user
-  //     vertical-align -3px
-  //     transform translateY(-1px)
-  //     margin-right 0
-  //     .user-avatar
-  //       width 17px
-  //       height 16px
-  // .boxes-list
-  //   padding-left 2px
-  //   padding-right 2px
-  //   padding-bottom 2px
-  // .progress-circle
-  //   vertical-align -2px
-  // .filter-is-active
-  //   margin 0
-  //   min-height initial
-  //   min-width initial
-  //   display inline-block
-  //   width 10px
-  //   height 10px
-  //   padding 0
-  //   border-radius 100px
-  //   margin-left 3px
-  .loader
-    vertical-align -1px
-    margin-left 6px
-  .offline-badge
-    display inline-block
-    margin-left 5px
-  // .filter-button
-  //   margin-top -5px
-  //   margin-bottom -5px
-  .user-label-inline
-    .anon-avatar
-      vertical-align 2px
+      margin-left 6px
+    .offline-badge
+      display inline-block
+      margin-left 5px
+    // .filter-button
+    //   margin-top -5px
+    //   margin-bottom -5px
+    .user-label-inline
+      .anon-avatar
+        vertical-align 2px
 </style>

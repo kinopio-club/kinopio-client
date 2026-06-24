@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import DateLabel from '@/components/DateLabel.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
@@ -86,21 +87,6 @@ const dataTagColor = computed(() => {
 const dataTagName = computed(() => {
   if (!props.segment.isTag) { return }
   return props.segment.name
-})
-const dateMentionIsToday = computed(() => {
-  const segment = props.segment
-  if (!segment.date) { return }
-  return utils.dateIsToday(segment.date)
-})
-const dateMentionLabel = computed(() => {
-  const segment = props.segment
-  if (!segment.date) { return }
-  // TODO change to cardStore atMentionDateIsRelative bool, set on date create
-  if (userStore.atMentionDateIsRelative) {
-    return utils.shortRelativeDate(segment.date)
-  } else {
-    return utils.shortAbsoluteDate(segment.date)
-  }
 })
 const isSpaceLink = (segment) => {
   if (segment.cardId) { return }
@@ -196,14 +182,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     Tag(:tag="props.segment" :isClickable="true" :isActive="currentSelectedTag.name === props.segment.name" @clickTag="showTagDetailsIsVisible")
   //- @User Mentions
   template(v-if="props.segment.isAtUserMention")
-    UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :isClickable="true" :isAtMention="true")
-    span.markdown(v-else :class="textClasses")
-      span {{props.segment.name}}
+    UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :truncateNameToLength="15" :isAtMention="true")
   //- @Date Mentions
   template(v-if="props.segment.isAtDateMention")
-    span.badge.secondary-on-dark-background(:class="{info: dateMentionIsToday}")
-      img.icon.cal(src="@/assets/cal.svg")
-      span {{dateMentionLabel}}
+    DateLabel(:date="segment.date")
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")
@@ -340,8 +322,4 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     > .loader
       margin-left 0 !important
       vertical-align -2px !important
-    &.info
-      background var(--info-background) !important
-      .icon.cal
-        vertical-align -1px
 </style>
