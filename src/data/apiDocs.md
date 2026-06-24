@@ -65,6 +65,7 @@ Method | Path | Description | Scope
 `GET`   | <code class="users">/user/tags</code>                   | Get a list of the last edited <a href="#tags" class="badge button-badge tags">Tags</a> in your spaces                                                                  | `read`
 `GET`   | <code class="users">/user/todos</code>                  | Get todo cards and boxes (item names start with `[]`, `[ ]`, or `[x]`), grouped by space                                                                            | `read`
 `GET`   | <code class="users">/user/at-user-mentions</code>       | Get cards where the user is in `atUserMentions`                                                                                                             | `read`
+`GET`   | <code class="users">/user/at-date-mentions</code>       | Get cards in your spaces with `atDateMentions` (i.e. assigned dates)                                                                                                             | `read`
 `PATCH` | <code class="users">/user</code>                        | Update the user based on an object body with updated user attributes. You can't patch `apiKey`, `password`, `emailIsVerified`, or `email`       | `edit`
 
 </div>
@@ -107,7 +108,7 @@ Name | Type | Description
 <code class="users">isUpgraded</code>                       | `Boolean` | Whether the user currently has a paid subscription. Is not user updatable.
 <code class="users">lastReadNewStuffId</code>               | `String`  | The id of the last read article from the 'new stuff' newsfeed
 <code class="users">lastUsedImagePickerService</code>       | `String`  | The user's last used image picker service, is either `stickers`, `gifs`, `bing`, `backgrounds`, `recent`, `ai`
-<code class="users">lastSidebarSection</code>               | `String`  | The shortname of the sidebar section last viewed. Can be `stats`, `inbox`, `removed`, `links`, `favorites`, `history`, `minimap`, `tags`, `tasks`, `note`. Defaults to `inbox`.
+<code class="users">lastSidebarSection</code>               | `String`  | The shortname of the sidebar section last viewed. Can be `stats`, `inbox`, `removed`, `links`, `favorites`, `history`, `minimap`, `tags`, `tasks`, `note`, `atUserMentions`, `atDateMentions`. Defaults to `inbox`.
 <code class="users">lastSpaceId</code>                      | `String`  | The spaceId of the last space edited. Used to return you to the same space the next time you visit kinopio.club
 <code class="users">name</code>                             | `String`  | The unique name of the user. Is a url-safe string (no spaces or special characters) because it's also used for url slugs
 <code class="users">prevHeaderFontId</code>                 | `Integer` | The id of the previous header font selected. Default value is `0` for Recoleta

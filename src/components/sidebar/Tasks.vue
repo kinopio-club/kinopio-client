@@ -259,12 +259,12 @@ const itemsRemainingCount = computed(() => {
       .button-wrap
         //- no filters
         template(v-if="!taskFiltersIsActive")
-          .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
+          .button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
             button.small-button(:class="{ active: state.taskFiltersIsVisible }")
               img.icon(src="@/assets/filter.svg")
         //- filters active
         template(v-if="taskFiltersIsActive")
-          .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
+          .segmented-buttons.section-top.filter-button
             button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active

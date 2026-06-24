@@ -240,14 +240,14 @@ const selectCard = (card) => {
 </script>
 
 <template lang="pug">
-.at-mentions(v-if="props.visible" :style="styles" @click.stop="closeDialogs")
+.at-user-mentions(v-if="props.visible" :style="styles" @click.stop="closeDialogs")
   section
     .row.title-row
       div
         //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
         .title-label-wrap
           UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
-          span.title-label Mentions
+          span.title-label Cards
         //- span and Due Dates
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
@@ -289,7 +289,7 @@ const selectCard = (card) => {
     section.subsection.tips(v-if="!isItems && !state.isLoading")
       span Use{{' '}}
         span.badge.info @
-        span to assign users and due dates to cards
+        span to assign users to cards
 
   //- //- items
   template(v-if="isItems")
@@ -305,7 +305,7 @@ const selectCard = (card) => {
 
 <style lang="stylus">
 .sidebar
-  .at-mentions
+  .at-user-mentions
     overflow auto
     border-top 1px solid var(--primary-border)
     min-height 160px
