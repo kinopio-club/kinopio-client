@@ -497,6 +497,9 @@ export const useCardStore = defineStore('cards', {
     updateCard (update) {
       this.updateCards([update])
     },
+
+    // @user mentions
+
     async addAtUserMention (card, user, userString) {
       const userNotificationStore = useUserNotificationStore()
       const mention = {
@@ -521,6 +524,39 @@ export const useCardStore = defineStore('cards', {
       const update = {
         id: card.id,
         atUserMentions
+      }
+      await this.updateCard(update)
+      this.updateCardDimensions(card.id)
+    },
+
+    // @date mentions
+
+    async addAtDateMention (card, date, dateString) {
+      const userNotificationStore = useUserNotificationStore()
+      const mention = {
+        id: nanoid(),
+        cardId: card.id,
+        date,
+        stringMatch: dateString
+      }
+      // TODO server: notifications have cardAtDateMentionId
+      // cards have atDateMentions
+      const atDateMentions = card.atDateMentions.concat(mention)
+      const update = {
+        id: card.id,
+        atDateMentions
+      }
+      await this.updateCard(update)
+      await userNotificationStore.addCardDateMention(mention)
+      this.updateCardDimensions(card.id)
+    },
+    async removeAtDateMentions (card, dateString) {
+      const atDateMentions = card.atDateMentions.filter(mention => {
+        return mention.stringMatch !== dateString
+      })
+      const update = {
+        id: card.id,
+        atDateMentions
       }
       await this.updateCard(update)
       this.updateCardDimensions(card.id)

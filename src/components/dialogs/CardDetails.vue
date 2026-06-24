@@ -1456,10 +1456,40 @@ const checkIfShouldShowAtPicker = () => {
     hideAtPicker()
   }
 }
-// TODO replaceAtTextWithDateMention
-// cardStore.removeAtDateMentions(card.value, userString)
-// cardStore.addAtDateMention(card.value, user, userString)
-const replaceAtTextWithUserMention = async (event, user) => {
+const replaceAtTextWithDateMention = async (date) => {
+  hideAtPicker()
+  if (!date) { return }
+  let newName = card.value.name
+  const position = atTextPosition()
+  const dateString = utils.cardDateAtMentionString(date)
+  // remove
+  const shouldRemove = newName.includes(dateString)
+  if (shouldRemove) {
+    newName = newName.replaceAll(`${dateString}`, '')
+    cardStore.updateCard({
+      id: card.value.id,
+      name: newName
+    })
+    cardStore.removeAtDateMentions(card.value, dateString)
+  // add
+  } else {
+    const start = newName.substring(0, position)
+    const end = newName.substring(position + atTextToCursor().length, newName.length)
+    let mention = dateString
+    if (!utils.hasBlankCharacters(end.charAt(0))) {
+      mention = mention + ' ' // separate mention from following text
+    }
+    newName = start + mention + end
+    updateCardName(newName)
+    const newCursorPosition = position + mention.length
+    await nextTick()
+    focusName(newCursorPosition)
+    globalStore.shouldPreventNextEnterKey = false
+    cardStore.addAtDateMention(card.value, date, dateString)
+  }
+  textareaSizes()
+}
+const replaceAtTextWithUserMention = async (user) => {
   hideAtPicker()
   if (!user) { return }
   let newName = card.value.name
@@ -1624,6 +1654,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :cards="[card]"
         @closeDialog="hideAtPicker"
         @selectUser="replaceAtTextWithUserMention"
+        @selectDate="replaceAtTextWithDateMention"
       )
         //- TODO ^ @selectDate
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")

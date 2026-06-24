@@ -132,7 +132,7 @@ const filteredUsers = computed(() => {
   return users.slice(0, 5)
 })
 const selectUser = (event, user) => {
-  emit('selectUser', event, user)
+  emit('selectUser', user)
 }
 const selectedUsers = computed(() => {
   let users = []

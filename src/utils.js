@@ -614,6 +614,11 @@ export default {
     }
     return userString
   },
+  cardDateAtMentionString (date) {
+    let dateString = this.shortAbsoluteDate(date).toLowerCase()
+    dateString = this.normalizeString(dateString)
+    return '@' + dateString // @jan-2-2026
+  },
   splitCardNameByParagraphAndSentence (prevName) {
     const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
