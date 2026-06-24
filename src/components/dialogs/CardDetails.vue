@@ -1144,6 +1144,15 @@ const splitCardsAtUserMentions = (id, newName) => {
     return mention
   })
 }
+const splitCardsAtDateMentions = (id, newName) => {
+  let mentions = card.value.atDateMentions || []
+  mentions = mentions.filter(mention => newName.includes(mention.stringMatch))
+  return mentions.map(mention => {
+    mention.id = nanoid()
+    mention.cardId = id
+    return mention
+  })
+}
 const splitCards = (event, isPreview) => {
   const prevName = (state.pastedName || name.value).trim()
   const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
@@ -1166,7 +1175,8 @@ const splitCards = (event, isPreview) => {
       frameId: card.value.frameId,
       backgroundColor: card.value.backgroundColor,
       maxWidth: user.cardSettingsCardWrapWidth,
-      atUserMentions: splitCardsAtUserMentions(id, newName)
+      atUserMentions: splitCardsAtUserMentions(id, newName),
+      atDateMentions: splitCardsAtDateMentions(id, newName)
     }
     return newCard
   })
@@ -1392,10 +1402,11 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
   textareaSizes()
 }
 
-// @mention picker
+// @user and @date mentions
 
 const cardAtUserMentions = computed(() => card.value.atUserMentions || [])
-const isAtUserMentions = computed(() => utils.arrayHasItems(cardAtUserMentions.value))
+const cardAtDateMentions = computed(() => card.value.atDateMentions || [])
+const isAtMentions = computed(() => utils.arrayHasItems(cardAtUserMentions.value) || utils.arrayHasItems(cardAtDateMentions.value))
 const showAtPicker = () => {
   if (!state.at.pickerIsVisible) {
     closeDialogs()
@@ -1694,7 +1705,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           ShareItem(:visible="state.shareItemIsVisible" :item="card" type="card" :isReadOnly="!canEditCard")
 
       CardActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard" :backgroundColorIsFromTheme="true")
-      CardCollaborationInfo(:visible="shouldShowItemActions || isComment || isAtUserMentions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+      CardCollaborationInfo(:visible="shouldShowItemActions || isComment || isAtMentions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
       .row(v-if="nameMetaRowIsVisible && canEditCard")
         //- Split by Line Breaks
@@ -1786,7 +1797,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
       template(v-if="state.error.unknownUploadError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ItemDetailsDebug(:item="card" :keys="['atUserMentions']")
+      ItemDetailsDebug(:item="card" :keys="['atUserMentions', 'atDateMentions']")
     CardDetailsResize
 </template>
 
