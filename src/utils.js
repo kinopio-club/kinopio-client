@@ -783,8 +783,19 @@ export default {
     time = time.replace(' years', 'y')
     return time
   },
-  // TODO shortRelativeDate (date) {}, '2 days left', 'Past'
+  dateIsToday (date) {
+    return dayjs().isSame(date, 'day')
 
+    // date.isSame(dayjs(), 'day')
+  },
+  shortRelativeDate (date) {
+    if (!date) { return }
+    const diff = date.startOf('day').diff(dayjs().startOf('day'), 'day')
+    if (diff < 0) { return 'Past' }
+    if (diff === 0) { return 'Today' }
+    if (diff === 1) { return 'Tomorrow' }
+    return `${diff} days left`
+  },
   shortAbsoluteDate (date) {
     if (!date) { return }
     return dayjs(date).format('MMM D, YYYY') // Jan 20, 2026
@@ -1816,6 +1827,12 @@ export default {
         value.cardId = newId
         return value
       })
+      card.atDateMentions = card.atDateMentions || []
+      card.atDateMentions = card.atDateMentions.map(value => {
+        value.id = nanoid()
+        value.cardId = newId
+        return value
+      })
       return card
     })
     boxes = boxes.map(box => {
@@ -2757,9 +2774,9 @@ export default {
     segments = sortBy(segments, ['startPosition'])
     return segments
   },
-  cardNameSegments (name, atUserMentions) {
+  cardNameSegments (name, atMentions) {
     if (!name) { return [] }
-    atUserMentions = atUserMentions || []
+    atMentions = atMentions || []
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
@@ -2808,7 +2825,7 @@ export default {
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
     })
-    atUserMentions.forEach(mention => {
+    atMentions.forEach(mention => {
       if (!mention.stringMatch) { return }
       const startPositions = []
       let index = name.indexOf(mention.stringMatch)
@@ -2823,7 +2840,17 @@ export default {
       })
       if (startPosition === undefined) { return }
       const endPosition = startPosition + mention.stringMatch.length
-      segments.push({ startPosition, endPosition, name: mention.stringMatch, userId: mention.userId, isAtUserMention: true })
+      // date mentions have a date property, user mentions have a userId
+      const isAtDateMention = Boolean(mention.date)
+      segments.push({
+        startPosition,
+        endPosition,
+        name: mention.stringMatch,
+        userId: mention.userId,
+        date: mention.date,
+        isAtDateMention,
+        isAtUserMention: !isAtDateMention
+      })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

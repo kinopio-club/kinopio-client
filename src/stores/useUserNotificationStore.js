@@ -184,7 +184,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       if (!date) { return }
       const recipientUserIds = this.recipientUserIds
       const notification = {
-        type: 'cardUserMention',
+        type: 'cardDateMention',
         cardId,
         userId: userStore.id,
         recipientUserIds,

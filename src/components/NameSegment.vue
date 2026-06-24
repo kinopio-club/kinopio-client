@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
@@ -15,6 +16,7 @@ import createFuzzySearch from '@nozbe/microfuzz'
 import smartquotes from 'smartquotes'
 
 const globalStore = useGlobalStore()
+const userStore = useUserStore()
 
 let shouldCancel = false
 
@@ -84,6 +86,21 @@ const dataTagColor = computed(() => {
 const dataTagName = computed(() => {
   if (!props.segment.isTag) { return }
   return props.segment.name
+})
+const dateMentionIsToday = computed(() => {
+  const segment = props.segment
+  if (!segment.date) { return }
+  return utils.dateIsToday(segment.date)
+})
+const dateMentionLabel = computed(() => {
+  const segment = props.segment
+  if (!segment.date) { return }
+  // TODO change to cardStore atMentionDateIsRelative bool, set on date create
+  if (userStore.atMentionDateIsRelative) {
+    return utils.shortRelativeDate(segment.date)
+  } else {
+    return utils.shortAbsoluteDate(segment.date)
+  }
 })
 const isSpaceLink = (segment) => {
   if (segment.cardId) { return }
@@ -182,6 +199,11 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :isClickable="true" :isAtMention="true")
     span.markdown(v-else :class="textClasses")
       span {{props.segment.name}}
+  //- @Date Mentions
+  template(v-if="props.segment.isAtDateMention")
+    span.badge.secondary-on-dark-background(:class="{info: dateMentionIsToday}")
+      img.icon.cal(src="@/assets/cal.svg")
+      span {{dateMentionLabel}}
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")
@@ -318,4 +340,8 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     > .loader
       margin-left 0 !important
       vertical-align -2px !important
+    &.info
+      background var(--info-background) !important
+      .icon.cal
+        vertical-align -1px
 </style>

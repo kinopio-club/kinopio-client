@@ -354,7 +354,7 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions } = card
+      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions, atDateMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -380,6 +380,7 @@ export const useCardStore = defineStore('cards', {
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
       card.atUserMentions = atUserMentions || []
+      card.atDateMentions = atDateMentions || []
       return card
     },
     addCardToState (card) {
@@ -533,14 +534,14 @@ export const useCardStore = defineStore('cards', {
 
     async addAtDateMention (card, date, dateString) {
       const userNotificationStore = useUserNotificationStore()
+      const userStore = useUserStore()
       const mention = {
         id: nanoid(),
         cardId: card.id,
+        userId: userStore.id,
         date,
         stringMatch: dateString
       }
-      // TODO server: notifications have cardAtDateMentionId
-      // cards have atDateMentions
       const atDateMentions = card.atDateMentions.concat(mention)
       const update = {
         id: card.id,
@@ -1088,7 +1089,8 @@ export const useCardStore = defineStore('cards', {
         imageUrl = url
         name = name.replace(url, '')
       }
-      const segments = utils.cardNameSegments(name, card.atUserMentions)
+      const atMentions = (card.atUserMentions || []).concat(card.atDateMentions || [])
+      const segments = utils.cardNameSegments(name, atMentions)
       if (imageUrl) {
         segments.unshift({
           isImage: true,

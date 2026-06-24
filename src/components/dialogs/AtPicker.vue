@@ -215,7 +215,6 @@ const selectDate = (date) => {
 }
 const dateDaysFromToday = (number) => {
   const date = dayjs().add(number, 'day')
-  console.log('🧞‍♀️', number, date)
   return date
 }
 const selectDaysFromToday = (number) => {
