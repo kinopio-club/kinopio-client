@@ -147,7 +147,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 
 <template lang="pug">
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="nameSegmentClasses")
-  template(v-if="props.segment.isText && props.segment.content")
+  template(v-if="props.segment.isText && props.segment.content.trim()")
     //- Name markdown
     span.markdown(v-if="props.segment.markdown" :class="textClasses")
       template(v-for="markdown in props.segment.markdown")
