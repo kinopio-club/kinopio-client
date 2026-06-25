@@ -111,7 +111,7 @@ const styles = computed(() => {
 // users
 
 const availableUsers = computed(() => {
-  let users = spaceStore.getSpaceAndGroupMembers.concat(globalStore.getOtherUsers)
+  let users = spaceStore.getSpaceAndGroupMembers
   users = uniqBy(users, 'id')
   return users
 })
