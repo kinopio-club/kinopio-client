@@ -328,7 +328,7 @@ const toggleAtPickerIsVisible = async () => {
   closeDialogs()
   state.atPickerIsVisible = !isVisible
 }
-const replaceAtTextWithUserMention = async (event, user) => {
+const replaceAtTextWithUserMention = async (user) => {
   closeDialogs()
   if (!user) { return }
   for (const card of props.cards) {
@@ -352,6 +352,33 @@ const replaceAtTextWithUserMention = async (event, user) => {
       })
       await nextTick()
       cardStore.addAtUserMention(card, user, userString)
+    }
+  }
+}
+const replaceAtTextWithDateMention = async (date) => {
+  closeDialogs()
+  if (!date) { return }
+  for (const card of props.cards) {
+    let newName = card.name
+    const dateString = utils.cardDateAtMentionString(date)
+    const shouldRemove = newName.includes(dateString)
+    // remove
+    if (shouldRemove) {
+      newName = newName.replaceAll(`${dateString}`, '')
+      cardStore.updateCard({
+        id: card.id,
+        name: newName
+      })
+      cardStore.removeAtDateMentions(card, dateString)
+    // add
+    } else {
+      newName = `${newName} ${dateString}`
+      cardStore.updateCard({
+        id: card.id,
+        name: newName
+      })
+      await nextTick()
+      cardStore.addAtDateMention(card, date, dateString)
     }
   }
 }
@@ -425,8 +452,7 @@ section.subsection.style-actions(
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
     .button-wrap
-      button(title="@mention User" @click.stop="toggleAtPickerIsVisible" :class="{active: state.atPickerIsVisible}")
-        //- , Due Date, and Timer
+      button(title="Assign @User or @Date" @click.stop="toggleAtPickerIsVisible" :class="{active: state.atPickerIsVisible}")
         span @
       AtPicker(
         :visible="state.atPickerIsVisible"
@@ -434,6 +460,7 @@ section.subsection.style-actions(
         @closeDialog="closeDialogs"
         :searchIsDisabled="true"
         @selectUser="replaceAtTextWithUserMention"
+        @selectDate="replaceAtTextWithDateMention"
       )
 
     //- Counter
