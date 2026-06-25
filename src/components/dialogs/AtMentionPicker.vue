@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserList from '@/components/UserList.vue'
-import DatePicker from '@/components/dialogs/DatePicker.vue'
+import DateList from '@/components/DateList.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -195,12 +195,6 @@ const dateFromSearch = computed(() => {
   }
   return null
 })
-const dateSearchLabel = computed(() => {
-  const date = dateFromSearch.value
-  if (!date) { return }
-  return utils.shortAbsoluteDate(date)
-})
-const dateSearchIsToday = computed(() => dateFromSearch.value.isSame(dayjs(), 'day'))
 const triggerDateAndTimeSettingsIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerDateAndTimeSettingsIsVisible()
@@ -216,10 +210,6 @@ const selectDate = (date) => {
 const dateDaysFromToday = (number) => {
   const date = dayjs().add(number, 'day')
   return date
-}
-const selectDaysFromToday = (number) => {
-  const date = dateDaysFromToday(number)
-  selectDate(date)
 }
 
 const isNoResults = computed(() => {
@@ -256,31 +246,15 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :shouldHideOptionsButton="true"
     :shouldHideResultsFilter="true"
   )
-  //- date search
-  .date-list(v-if="dateFromSearch")
-    ul.results-list
-      li.date-list-item(@click.left="selectDate(dateFromSearch)" :class="{ hover: !filteredUsers.length }")
-        .badge(:class="{ info: dateSearchIsToday, secondary: !dateSearchIsToday }")
-          img.icon.cal(src="@/assets/cal.svg")
-          span {{dateSearchLabel}}
-  //- default dates
-  .date-list(v-if="!props.search")
-    ul.results-list
-      li.date-list-item(@click.left="selectDaysFromToday(0)")
-        .badge.info
-          img.icon.cal(src="@/assets/cal.svg")
-          span 0d
-        span Today
-      li.date-list-item(@click.left="selectDaysFromToday(1)")
-        .badge.secondary
-          img.icon.cal(src="@/assets/cal.svg")
-          span 1d
-        span Tomorrow
-      li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
-        .badge.secondary
-          img.icon.cal(src="@/assets/cal.svg")
-          span Custom Date
-      DatePicker(:visible="state.datePickerIsVisible" @selectDate="selectDate")
+  //- dates
+  DateList(
+    :search="props.search"
+    :dateFromSearch="dateFromSearch"
+    :hasFilteredUsers="Boolean(filteredUsers.length)"
+    :datePickerIsVisible="state.datePickerIsVisible"
+    @selectDate="selectDate"
+    @toggleDatePicker="toggleDatePickerIsVisible"
+  )
   //- no matches
   section(v-if="isNoResults") No matches found
 </template>
@@ -294,11 +268,4 @@ dialog.at-picker
     max-height 100px // matches userListMaxHeight
     overflow auto
     padding 0 4px
-  .date-list
-    padding 0 4px
-  .date-list-item
-    display flex
-    align-items center
-  dialog.date-picker
-    top 20px
 </style>
