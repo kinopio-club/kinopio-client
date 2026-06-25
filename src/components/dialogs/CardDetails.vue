@@ -18,7 +18,7 @@ import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Tag from '@/components/Tag.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import AtPicker from '@/components/dialogs/AtPicker.vue'
+import AtMentionPicker from '@/components/dialogs/AtMentionPicker.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
@@ -131,7 +131,7 @@ const state = reactive({
     pickerPosition: {},
     pickerSearch: ''
   },
-  at: {
+  atMention: {
     pickerIsVisible: false,
     pickerPosition: {},
     pickerSearch: ''
@@ -173,7 +173,7 @@ watch(() => userStore.cardDetailsResizeWidth, (value, prevValue) => {
 
 const parentElement = computed(() => dialogElement.value)
 const closeCardAndFocus = (event) => {
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.atMention.pickerIsVisible
   if (pickersIsVisible) {
     hidePickers()
     return
@@ -565,8 +565,8 @@ const clickName = (event) => {
     updateSpacePickerSearch()
     event.stopPropagation()
   } else if (isCursorInsideAtCommand()) {
-    showAtPicker()
-    updateAtPickerSearch()
+    showAtMentionPicker()
+    updateAtMentionPickerSearch()
     event.stopPropagation()
   }
 }
@@ -825,7 +825,7 @@ const setSelectionRange = (start, end) => {
 const hidePickers = () => {
   hideTagPicker()
   hideSpacePicker()
-  hideAtPicker()
+  hideAtMentionPicker()
 }
 const hideTagPicker = () => {
   state.tag.pickerIsVisible = false
@@ -838,16 +838,16 @@ const hideSpacePicker = () => {
 const checkIfShouldShowPicker = () => {
   checkIfShouldShowTagPicker()
   checkIfShouldShowSpacePicker()
-  checkIfShouldShowAtPicker()
+  checkIfShouldShowAtMentionPicker()
 }
 const checkIfShouldHidePicker = () => {
   checkIfShouldHideTagPicker()
   checkIfShouldHideSpacePicker()
-  checkIfShouldHideAtPicker()
+  checkIfShouldHideAtMentionPicker()
 }
 const triggerPickerNavigation = (event) => {
   const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.atMention.pickerIsVisible
   const shouldTrigger = pickerIsVisible && !modifierKey
   if (shouldTrigger) {
     globalStore.triggerPickerNavigationKey(event.key)
@@ -856,7 +856,7 @@ const triggerPickerNavigation = (event) => {
 }
 const triggerPickerSelectItem = (event) => {
   const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.atMention.pickerIsVisible
   const shouldTrigger = pickerIsVisible && !modifierKey
   if (shouldTrigger) {
     globalStore.triggerPickerSelect()
@@ -882,8 +882,8 @@ const updatePickerSearch = () => {
     updateTagPickerSearch()
   } else if (state.space.pickerIsVisible) {
     updateSpacePickerSearch()
-  } else if (state.at.pickerIsVisible) {
-    updateAtPickerSearch()
+  } else if (state.atMention.pickerIsVisible) {
+    updateAtMentionPickerSearch()
   }
 }
 
@@ -1268,7 +1268,7 @@ const addListCard = () => {
 // 🎹 enter
 const handleEnterKey = (event) => {
   const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.at.pickerIsVisible
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.atMention.pickerIsVisible
   console.info('🎹 enter', {
     shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
     pickersIsVisible,
@@ -1421,19 +1421,19 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
 const cardAtUserMentions = computed(() => card.value.atUserMentions || [])
 const cardAtDateMentions = computed(() => card.value.atDateMentions || [])
 const isAtMentions = computed(() => utils.arrayHasItems(cardAtUserMentions.value) || utils.arrayHasItems(cardAtDateMentions.value))
-const showAtPicker = () => {
-  if (!state.at.pickerIsVisible) {
+const showAtMentionPicker = () => {
+  if (!state.atMention.pickerIsVisible) {
     closeDialogs()
   }
   const nameRect = nameElement.value.getBoundingClientRect()
-  state.at.pickerPosition = {
+  state.atMention.pickerPosition = {
     top: nameRect.height - 2
   }
-  state.at.pickerIsVisible = true
+  state.atMention.pickerIsVisible = true
 }
-const hideAtPicker = () => {
-  state.at.pickerSearch = ''
-  state.at.pickerIsVisible = false
+const hideAtMentionPicker = () => {
+  state.atMention.pickerSearch = ''
+  state.atMention.pickerIsVisible = false
 }
 const atText = () => {
   const cursorStart = selectionStartPosition()
@@ -1464,26 +1464,26 @@ const isCursorInsideAtCommand = () => {
   const textIsValid = !utils.hasBlankCharacters(text)
   return textIsValid && characterBeforeAtIsBlank
 }
-const updateAtPickerSearch = () => {
-  if (!state.at.pickerIsVisible) { return }
+const updateAtMentionPickerSearch = () => {
+  if (!state.atMention.pickerIsVisible) { return }
   const text = atText()
-  state.at.pickerSearch = text.substring(1, text.length)
+  state.atMention.pickerSearch = text.substring(1, text.length)
 }
-const checkIfShouldHideAtPicker = () => {
-  if (!state.at.pickerIsVisible) { return }
+const checkIfShouldHideAtMentionPicker = () => {
+  if (!state.atMention.pickerIsVisible) { return }
   if (!isCursorInsideAtCommand()) {
-    hideAtPicker()
+    hideAtMentionPicker()
   }
 }
-const checkIfShouldShowAtPicker = () => {
+const checkIfShouldShowAtMentionPicker = () => {
   if (isCursorInsideAtCommand()) {
-    showAtPicker()
+    showAtMentionPicker()
   } else {
-    hideAtPicker()
+    hideAtMentionPicker()
   }
 }
 const replaceAtTextWithDateMention = async (date) => {
-  hideAtPicker()
+  hideAtMentionPicker()
   if (!date) { return }
   let newName = card.value.name
   const position = atTextPosition()
@@ -1516,7 +1516,7 @@ const replaceAtTextWithDateMention = async (date) => {
   textareaSizes()
 }
 const replaceAtTextWithUserMention = async (user) => {
-  hideAtPicker()
+  hideAtMentionPicker()
   if (!user) { return }
   let newName = card.value.name
   const position = atTextPosition()
@@ -1567,17 +1567,17 @@ const updatePicker = (event) => {
   }
   if (utils.hasBlankCharacters(key)) {
     hideSpacePicker()
-    hideAtPicker()
+    hideAtMentionPicker()
   } else if (key === '/' && previousCharacterIsBlank) {
     showSpacePicker()
   } else if (key === '@' && previousCharacterIsBlank) {
-    showAtPicker()
+    showAtMentionPicker()
   } else if (cursorStart === 0) {
     return
   } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
     showSpacePicker()
   } else if (keyIsLettterOrNumber && isCursorInsideAtCommand()) {
-    showAtPicker()
+    showAtMentionPicker()
   } else if (key === '[' && previousCharacter === '[') {
     showTagPicker()
     addTagClosingBrackets()
@@ -1673,12 +1673,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      AtPicker(
-        :visible="state.at.pickerIsVisible"
-        :position="state.at.pickerPosition"
-        :search="state.at.pickerSearch"
+      AtMentionPicker(
+        :visible="state.atMention.pickerIsVisible"
+        :position="state.atMention.pickerPosition"
+        :search="state.atMention.pickerSearch"
         :cards="[card]"
-        @closeDialog="hideAtPicker"
+        @closeDialog="hideAtMentionPicker"
         @selectUser="replaceAtTextWithUserMention"
         @selectDate="replaceAtTextWithDateMention"
       )

@@ -15,7 +15,7 @@ import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vu
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import FontPicker from '@/components/dialogs/FontPicker.vue'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
-import AtPicker from '@/components/dialogs/AtPicker.vue'
+import AtMentionPicker from '@/components/dialogs/AtMentionPicker.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -74,7 +74,7 @@ const state = reactive({
   colorPickerIsVisible: false,
   fontPickerIsVisible: false,
   framePickerIsVisible: false,
-  atPickerIsVisible: false,
+  atMentionPickerIsVisible: false,
   defaultColor: '#e3e3e3'
 })
 
@@ -105,7 +105,7 @@ const isBoxDetails = computed(() => Boolean(globalStore.boxDetailsIsVisibleForBo
 
 const closeDialogs = (shouldPreventEmit) => {
   state.tagPickerIsVisible = false
-  state.atPickerIsVisible = false
+  state.atMentionPickerIsVisible = false
   state.colorPickerIsVisible = false
   state.fontPickerIsVisible = false
   state.framePickerIsVisible = false
@@ -323,10 +323,10 @@ const toggleCounterIsVisible = () => {
 
 // @ mention
 
-const toggleAtPickerIsVisible = async () => {
-  const isVisible = state.atPickerIsVisible
+const toggleAtMentionPickerIsVisible = async () => {
+  const isVisible = state.atMentionPickerIsVisible
   closeDialogs()
-  state.atPickerIsVisible = !isVisible
+  state.atMentionPickerIsVisible = !isVisible
 }
 const replaceAtTextWithUserMention = async (user) => {
   closeDialogs()
@@ -452,10 +452,10 @@ section.subsection.style-actions(
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
     .button-wrap
-      button(title="Assign @User or @Date" @click.stop="toggleAtPickerIsVisible" :class="{active: state.atPickerIsVisible}")
+      button(title="Assign @User or @Date" @click.stop="toggleAtMentionPickerIsVisible" :class="{active: state.atMentionPickerIsVisible}")
         span @
-      AtPicker(
-        :visible="state.atPickerIsVisible"
+      AtMentionPicker(
+        :visible="state.atMentionPickerIsVisible"
         :cards="props.cards"
         @closeDialog="closeDialogs"
         :searchIsDisabled="true"
