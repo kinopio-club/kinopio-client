@@ -1,30 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
-import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
-const globalStore = useGlobalStore()
-const cardStore = useCardStore()
+import dayjs from 'dayjs'
+
 const userStore = useUserStore()
 
 let unsubscribes
 
 const props = defineProps({
-  date: String
+  date: Object
 })
 
 const dateIsToday = computed(() => {
-  // const segment = props.segment
-  // if (!date) { return }
   return utils.dateIsToday(props.date)
 })
 const dateLabel = computed(() => {
-  // takes optional prop card
-  // TODO change to cardStore atMentionDateIsRelative bool, set on date create
   if (userStore.atMentionDateIsRelative) {
     return utils.shortRelativeDate(props.date)
   } else {

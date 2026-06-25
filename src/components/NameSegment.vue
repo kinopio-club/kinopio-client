@@ -15,6 +15,7 @@ import fonts from '@/data/fonts.js'
 
 import createFuzzySearch from '@nozbe/microfuzz'
 import smartquotes from 'smartquotes'
+import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -97,6 +98,9 @@ const escapedUrl = (url) => {
     return null
   }
   return url
+}
+const date = (segment) => {
+  return dayjs(segment.date)
 }
 
 // search
@@ -185,7 +189,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :truncateNameToLength="15" :isAtMention="true")
   //- @Date Mentions
   template(v-if="props.segment.isAtDateMention")
-    DateLabel(:date="segment.date")
+    DateLabel(:date="date(segment)")
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")

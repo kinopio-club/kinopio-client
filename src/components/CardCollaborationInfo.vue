@@ -12,6 +12,7 @@ import CardHistory from '@/components/dialogs/CardHistory.vue'
 import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
+import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -87,7 +88,9 @@ const atUsers = computed(() => userStore.getUsersByCardAtUserMentions(props.card
 // @date mentions
 
 const atDates = computed(() => props.card.atDateMentions || [])
-
+const date = (mention) => {
+  return dayjs(mention.date)
+}
 // card settings
 
 const cardSettingsTitle = computed(() => {
@@ -127,7 +130,7 @@ const toggleCardHistoryIsVisible = () => {
     //- @dates
     .at-date-mentions
       template(v-for="mention in atDates" :key="mention.id")
-        DateLabel(:date="mention.date")
+        DateLabel(:date="date(mention)")
     //- votes
     .badge.info(v-if="card.counterIsVisible")
       span {{card.counterValue || 0}}

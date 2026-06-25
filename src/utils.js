@@ -785,12 +785,12 @@ export default {
   },
   dateIsToday (date) {
     return dayjs().isSame(date, 'day')
-
-    // date.isSame(dayjs(), 'day')
   },
   shortRelativeDate (date) {
     if (!date) { return }
-    const diff = date.startOf('day').diff(dayjs().startOf('day'), 'day')
+    date = dayjs(date)
+    const today = dayjs(new Date())
+    const diff = date.diff(today, 'day')
     if (diff < 0) { return 'Past' }
     if (diff === 0) { return 'Today' }
     if (diff === 1) { return 'Tomorrow' }
