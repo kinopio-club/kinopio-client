@@ -14,6 +14,7 @@ import ItemList from '@/components/ItemList.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import sortBy from 'lodash-es/sortBy'
 
 const globalStore = useGlobalStore()
 // const boxStore = useBoxStore()
@@ -193,6 +194,9 @@ const updateItemsBySpace = async () => {
 // })
 // const filteredCompleteTodoItems = computed(() => filteredTodoItems.value.filter(item => utils.nameIsChecked(item.name)))
 const isItems = computed(() => Boolean(state.cards.length))
+const sortByDateMention = (cards) => {
+  return sortBy(cards, 'atDateMentions[0].date')
+}
 
 // select
 
@@ -242,34 +246,32 @@ const selectCard = (card) => {
 <template lang="pug">
 .at-date-mentions(v-if="props.visible" :style="styles" @click.stop="closeDialogs")
   section
-    .row.title-row
-      div
+    .row
         //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
-        .title-label-wrap
-          span Date Cards
+        span Date Cards
           //- UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
           //- span.title-label Mentions
         //- span and Due Dates
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
 
-      //- //- Filters
-      //- .button-wrap
-      //-   //- no filters
-      //-   template(v-if="!taskFiltersIsActive")
-      //-     .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
-      //-       button.small-button(:class="{ active: state.taskFiltersIsVisible }")
-      //-         img.icon(src="@/assets/filter.svg")
-      //-   //- filters active
-      //-   template(v-if="taskFiltersIsActive")
-      //-     .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
-      //-       button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
-      //-         img.icon(src="@/assets/filter.svg")
-      //-         .badge.info.filter-is-active
+        //- //- Filters
+        //- .button-wrap
+        //-   //- no filters
+        //-   template(v-if="!taskFiltersIsActive")
+        //-     .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
+        //-       button.small-button(:class="{ active: state.taskFiltersIsVisible }")
+        //-         img.icon(src="@/assets/filter.svg")
+        //-   //- filters active
+        //-   template(v-if="taskFiltersIsActive")
+        //-     .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
+        //-       button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
+        //-         img.icon(src="@/assets/filter.svg")
+        //-         .badge.info.filter-is-active
 
-      //-       button.small-button(@click.left.stop="clearAllFilters")
-      //-         img.icon.cancel(src="@/assets/add.svg")
-      //-   TaskFilters(:visible="state.taskFiltersIsVisible")
+        //-       button.small-button(@click.left.stop="clearAllFilters")
+        //-         img.icon.cancel(src="@/assets/add.svg")
+        //-   TaskFilters(:visible="state.taskFiltersIsVisible")
 
     .row
       .segmented-buttons
@@ -296,11 +298,11 @@ const selectCard = (card) => {
   template(v-if="isItems")
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
-      ItemList(:cards="state.cards" @selectItem="selectItem")
+      ItemList(:cards="sortByDateMention(state.cards)" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="space.cards" @selectItem="selectItem" @selectSpace="selectSpace")
+        ItemList(:space="space" :cards="sortByDateMention(space.cards)" @selectItem="selectItem" @selectSpace="selectSpace")
 
 </template>
 
