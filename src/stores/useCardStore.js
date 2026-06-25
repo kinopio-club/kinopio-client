@@ -197,12 +197,10 @@ export const useCardStore = defineStore('cards', {
       })
     },
     getCardsAtDateMentions () {
-      let cards = this.getAllCards
-      cards = cards.filter(card => {
+      const cards = this.getAllCards
+      return cards.filter(card => {
         return utils.arrayHasItems(card.atDateMentions)
       })
-      cards = sortBy(cards, 'atDateMentions[0].date')
-      return cards
     }
   },
 
