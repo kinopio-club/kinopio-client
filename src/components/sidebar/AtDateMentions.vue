@@ -4,7 +4,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
-import { useBoxStore } from '@/stores/useBoxStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
@@ -17,7 +16,6 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import sortBy from 'lodash-es/sortBy'
 
 const globalStore = useGlobalStore()
-// const boxStore = useBoxStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -51,24 +49,9 @@ onMounted(() => {
       }
     }
   )
-  // const boxActionUnsubscribe = boxStore.$onAction(
-  //   async ({ name, args }) => {
-  //     if (name === 'toggleBoxChecked') {
-  //       await nextTick()
-  //       const boxId = args[0]
-  //       const updatedBox = boxStore.getBox(boxId)
-  //       state.boxes = state.boxes.map(box => {
-  //         if (box.id !== boxId) { return box }
-  //         box.name = updatedBox.name
-  //         return box
-  //       })
-  //     }
-  //   }
-  // )
   unsubscribes = () => {
     globalActionUnsubscribe()
     cardActionUnsubscribe()
-    // boxActionUnsubscribe()
   }
 })
 
@@ -137,24 +120,30 @@ const triggerDateAndTimeSettingsIsVisible = () => {
 //   return atUserMentions.find(mention => mention.userId === currentUserId)
 // }
 // const filtersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
-const filtersIsActive = computed(() => false)
-const toggleFiltersIsVisible = () => {
-  const value = !state.filtersIsVisible
-  closeDialogs()
-  state.filtersIsVisible = value
-}
+
+// const itemDates = computed(() => {
+//   const array = state.cards.map(card => {
+//     const mention = card.atDateMentions[0]
+//     return mention.date
+//   })
+//   return array
+// })
+// const selectDate = (date) => {
+//   console.log('💐💐💐💐',date) // update global datefilter
+// }
+// const filtersIsActive = computed(() => false)
+// const toggleFiltersIsVisible = () => {
+//   const value = !state.filtersIsVisible
+//   closeDialogs()
+//   state.filtersIsVisible = value
+// }
+
 // const clearAllFilters = () => {
 //   globalStore.triggerClearTaskFilters()
 // }
 
 // items
 
-const itemDates = computed(() => {
-  return state.cards.map(card => {
-    const mention = card.atDateMentions[0]
-    return mention.date
-  })
-})
 // const itemsFiltered = (items, type) => {
 //   items = itemsFiltered(items, type)
 //   if (!shouldShowCompleted.value) {
@@ -197,12 +186,6 @@ const updateItemsBySpace = async () => {
   }
   state.isLoading = false
 }
-// const filteredTodoItems = computed(() => {
-//   const cards = itemsFiltered(state.cards, 'cards')
-//   const boxes = itemsFiltered(state.boxes, 'boxes')
-//   return cards.concat(boxes)
-// })
-// const filteredCompleteTodoItems = computed(() => filteredTodoItems.value.filter(item => utils.nameIsChecked(item.name)))
 const isItems = computed(() => Boolean(state.cards.length))
 
 // select
@@ -225,29 +208,6 @@ const selectCard = (card) => {
     selectSpace({ id: card.spaceId })
   }
 }
-// const selectBox = (box) => {
-//   closeDialogs()
-//   const isBoxInCurrentSpace = box.spaceId === spaceStore.id
-//   if (isBoxInCurrentSpace) {
-//     globalStore.updateFocusOnItemId(box.id)
-//   } else {
-//     globalStore.loadSpaceFocusOnItemId = box.id
-//     selectSpace({ id: box.spaceId })
-//   }
-// }
-
-// progress
-
-// const progressCircleTitle = computed(() => {
-//   let value = itemsRemainingCount.value / filteredTodoItems.value.length
-//   value = Math.round(value * 100)
-//   return `${itemsRemainingCount.value}/${filteredTodoItems.value.length}, ${value}% Completed`
-// })
-// const itemsRemainingCount = computed(() => {
-//   const value = filteredTodoItems.value.filter(card => !utils.nameIsChecked(card.name))
-//   return value.length.toString()
-// })
-
 </script>
 
 <template lang="pug">
@@ -264,23 +224,22 @@ const selectCard = (card) => {
             img.icon.settings(src="@/assets/settings.svg")
 
           //- //- Filters
-          .button-wrap.filters-button-wrap
-            //- no filters
-            template(v-if="!filtersIsActive")
-              .button-wrap.filter-button(@click.left.stop="toggleFiltersIsVisible")
-                button.small-button(:class="{ active: state.filtersIsVisible }" title="Filter By Date")
-                  img.icon(src="@/assets/filter.svg")
-            //- filters active
-            template(v-if="filtersIsActive")
-              .segmented-buttons.filter-button
-                button.small-button(@click.left.stop="toggleFiltersIsVisible" :class="{ active: state.filtersIsVisible || filtersIsActive }" title="Filter By Date")
-                  img.icon(src="@/assets/filter.svg")
-                  .badge.info.filter-is-active
-                //- clear filters
-                button.small-button(@click.left.stop="clearAllFilters" title="Clear Filter")
-                  img.icon.cancel(src="@/assets/add.svg")
-            DatePicker(:visible="state.filtersIsVisible" @selectDate)
-              //- @activeDates=[cards]
+          //- .button-wrap.filters-button-wrap
+          //-   //- no filters
+          //-   template(v-if="!filtersIsActive")
+          //-     .button-wrap.filter-button(@click.left.stop="toggleFiltersIsVisible")
+          //-       button.small-button(:class="{ active: state.filtersIsVisible }" title="Filter By Date")
+          //-         img.icon(src="@/assets/filter.svg")
+          //-   //- filters active
+          //-   template(v-if="filtersIsActive")
+          //-     .segmented-buttons.filter-button
+          //-       button.small-button(@click.left.stop="toggleFiltersIsVisible" :class="{ active: state.filtersIsVisible || filtersIsActive }" title="Filter By Date")
+          //-         img.icon(src="@/assets/filter.svg")
+          //-         .badge.info.filter-is-active
+          //-       //- clear filters
+          //-       button.small-button(@click.left.stop="clearAllFilters" title="Clear Filter")
+          //-         img.icon.cancel(src="@/assets/add.svg")
+          //-   DatePicker(:visible="state.filtersIsVisible" :prevDates="itemDates" @selectDate="selectDate")
 
     .row
       .segmented-buttons
@@ -318,36 +277,12 @@ const selectCard = (card) => {
 <style lang="stylus">
 .sidebar
   .at-date-mentions
-    // overflow auto
     border-top 1px solid var(--primary-border)
     min-height 160px
     &.overflow-auto
       overflow auto
     .button-wrap
       margin 0
-    // .tips-section
-    //   border 0
-    //   padding-top 0
-    // .subsection
-    //   padding 4px
-    //   border-radius var(--entity-radius)
-    //   &.tips
-    //     .badge
-    //       white-space nowrap
-    // label
-    //   .user
-    //     vertical-align -3px
-    //     transform translateY(-1px)
-    //     margin-right 0
-    //     .user-avatar
-    //       width 17px
-    //       height 16px
-    // .boxes-list
-    //   padding-left 2px
-    //   padding-right 2px
-    //   padding-bottom 2px
-    // .progress-circle
-    //   vertical-align -2px
     // .filter-is-active
     //   margin 0
     //   min-height initial
@@ -370,8 +305,8 @@ const selectCard = (card) => {
     .user-label-inline
       .anon-avatar
         vertical-align 2px
-    .settings-button
-      margin-right 6px
+    // .settings-button
+    //   margin-right 6px
 
     dialog.date-picker
       left initial
