@@ -112,7 +112,7 @@ export const useGlobalStore = defineStore('global', {
 
     // sidebar state
     sidebarTasksItemsBySpace: undefined,
-    sidebarAtMentionsItemsBySpace: undefined,
+    sidebarAtUserMentionsItemsBySpace: undefined,
     sidebarScopeIsCurrentSpace: false,
     sidebarTasksFilters: {
       shouldShowCompleted: false,
