@@ -232,7 +232,6 @@ dialog.date-and-time-settings
     overflow hidden
     background #0000b1 // earth blue
     cursor pointer
-    margin-right 6px
     .timezone-label
       position absolute
       left 4px

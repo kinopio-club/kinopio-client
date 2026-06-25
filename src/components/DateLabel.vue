@@ -18,6 +18,9 @@ const props = defineProps({
 const dateIsToday = computed(() => {
   return utils.dateIsToday(props.date)
 })
+const dateIsPast = computed(() => {
+  return utils.dateIsPast(props.date)
+})
 const dateLabel = computed(() => {
   if (userStore.atMentionDateIsRelative) {
     return utils.shortRelativeDate(props.date)
@@ -29,7 +32,7 @@ const dateLabel = computed(() => {
 
 <template lang="pug">
 .date-label(v-if="props.date")
-    span.badge.secondary-on-dark-background(:class="{info: dateIsToday}")
+    span.badge.secondary-on-dark-background(:class="{info: dateIsToday, danger: dateIsPast}")
       img.icon.cal(src="@/assets/cal.svg")
       span {{dateLabel}}
 </template>
@@ -39,6 +42,8 @@ const dateLabel = computed(() => {
   .badge
     &.info
       background var(--info-background) !important
-      .icon.cal
-        vertical-align -1px
+    &.danger
+      background var(--danger-background) !important
+    .icon.cal
+      vertical-align -1px
 </style>
