@@ -535,10 +535,12 @@ export const useCardStore = defineStore('cards', {
     async addAtDateMention (card, date, dateString) {
       const userNotificationStore = useUserNotificationStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const mention = {
         id: nanoid(),
         cardId: card.id,
         userId: userStore.id,
+        spaceId: spaceStore.id,
         date,
         stringMatch: dateString
       }
