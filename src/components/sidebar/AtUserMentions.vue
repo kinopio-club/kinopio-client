@@ -162,7 +162,7 @@ const itemsBySpace = computed(() => globalStore.sidebarAtUserMentionsItemsBySpac
 // }
 const updateItems = () => {
   if (scopeIsCurrentSpace.value) {
-    state.cards = cardStore.getCardsAtMentionCurrentUser
+    state.cards = cardStore.getCardsAtUserMentionsCurrentUser
   } else {
     updateItemsBySpace()
   }
@@ -174,7 +174,7 @@ const updateItemsBySpace = async () => {
     state.isLoading = true
     state.isError = false
     if (!itemsBySpace.value) {
-      globalStore.sidebarAtUserMentionsItemsBySpace = await apiStore.getUserAtMentions()
+      globalStore.sidebarAtUserMentionsItemsBySpace = await apiStore.getUserAtUserMentions()
     }
     // update items
     globalStore.sidebarAtUserMentionsItemsBySpace.forEach(space => {

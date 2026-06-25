@@ -31,7 +31,7 @@ const dateLabel = computed(() => {
 </script>
 
 <template lang="pug">
-.date-label(v-if="props.date")
+span.date-label(v-if="props.date")
     span.badge.secondary-on-dark-background(:class="{info: dateIsToday, danger: dateIsPast}")
       img.icon.cal(src="@/assets/cal.svg")
       span {{dateLabel}}

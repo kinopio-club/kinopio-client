@@ -117,11 +117,11 @@ const closeDialogs = () => {
 const updateScopeIsCurrentSpace = async (value) => {
   if (globalStore.sidebarScopeIsCurrentSpace === value) { return }
   globalStore.sidebarScopeIsCurrentSpace = value
-  globalStore.sidebarAtUserMentionsItemsBySpace = null
+  globalStore.sidebarAtDateMentionsItemsBySpace = null
   updateItems()
 }
 const scopeIsCurrentSpace = computed(() => globalStore.sidebarScopeIsCurrentSpace)
-const itemsBySpace = computed(() => globalStore.sidebarAtUserMentionsItemsBySpace)
+const itemsBySpace = computed(() => globalStore.sidebarAtDateMentionsItemsBySpace)
 
 // filters
 
@@ -162,7 +162,7 @@ const itemsBySpace = computed(() => globalStore.sidebarAtUserMentionsItemsBySpac
 // }
 const updateItems = () => {
   if (scopeIsCurrentSpace.value) {
-    state.cards = cardStore.getCardsAtMentionCurrentUser
+    state.cards = cardStore.getCardsAtDateMentions
   } else {
     updateItemsBySpace()
   }
@@ -174,10 +174,10 @@ const updateItemsBySpace = async () => {
     state.isLoading = true
     state.isError = false
     if (!itemsBySpace.value) {
-      globalStore.sidebarAtUserMentionsItemsBySpace = await apiStore.getUserAtMentions()
+      globalStore.sidebarAtDateMentionsItemsBySpace = await apiStore.getUserAtDateMentions()
     }
     // update items
-    globalStore.sidebarAtUserMentionsItemsBySpace.forEach(space => {
+    globalStore.sidebarAtDateMentionsItemsBySpace.forEach(space => {
       state.cards = state.cards.concat(space.cards)
     })
   } catch (error) {

@@ -411,7 +411,7 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getUser', error })
       }
     },
-    async getUserAtMentions () {
+    async getUserAtUserMentions () {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
@@ -420,6 +420,20 @@ export const useApiStore = defineStore('api', {
       try {
         const options = await this.requestOptions({ method: 'GET' })
         const response = await fetchWithTimeout(`${consts.apiHost()}/user/at-user-mentions`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'getUser', error })
+      }
+    },
+    async getUserAtDateMentions () {
+      const globalStore = useGlobalStore()
+      const userStore = useUserStore()
+      const apiKey = userStore.apiKey
+      const isOnline = globalStore.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await this.requestOptions({ method: 'GET' })
+        const response = await fetchWithTimeout(`${consts.apiHost()}/user/at-date-mentions`, options)
         return normalizeResponse(response)
       } catch (error) {
         this.handleServerError({ name: 'getUser', error })
