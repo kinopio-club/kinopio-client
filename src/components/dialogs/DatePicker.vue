@@ -19,28 +19,7 @@ const spaceStore = useSpaceStore()
 
 let unsubscribes
 
-// const dialogElement = ref(null)
-
-// onMounted(() => {
-//   window.addEventListener('resize', updateDialogHeight)
-
-//   const globalActionUnsubscribe = globalStore.$onAction(
-//     ({ name, args }) => {
-//       if (name === 'clearDraggingItems') {
-//         console.log('clearDraggingItems')
-//       }
-//     }
-//   )
-//   unsubscribes = () => {
-//     globalActionUnsubscribe()
-//   }
-// })
-// onBeforeUnmount(() => {
-//   unsubscribes()
-//   window.removeEventListener('resize', updateDialogHeight)
-// })
-
-const emit = defineEmits(['selectDate']) // cleardate
+const emit = defineEmits(['selectDate'])
 
 const props = defineProps({
   visible: Boolean
@@ -52,36 +31,12 @@ const state = reactive({
 })
 const month = computed(() => state.index % 12) // 0-11
 const year = computed(() => baseYear + Math.floor(state.index / 12))
-
-// watch(() => props.visible, (value, prevValue) => {
-//   if (value) {
-//     updateDialogHeight()
-//   }
-// })
-// watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
-
 const currentDayLabel = computed(() => {
   const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
   return utils.shortAbsoluteDate(date)
 })
 
-const today = computed(() => {
-  return {
-    month: dayjs().month(),
-    day: dayjs().date(),
-    year: dayjs().year()
-  }
-})
-const isToday = (day) => {
-  const isDay = day === today.value.day
-  const isMonth = month.value === today.value.month
-  const isYear = year.value === today.value.year
-  return isDay && isMonth && isYear
-}
-const isPast = computed(() => {
-  const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
-  return date.isBefore(dayjs(), 'day')
-})
+// nav
 
 const toToday = () => {
   state.index = dayjs().month()
@@ -98,16 +53,7 @@ const toNextMonth = () => {
   state.day = 1
 }
 
-// const updateDialogHeight = async () => {
-//   if (!props.visible) { return }
-//   await nextTick()
-//   const element = dialogElement.value
-//   state.dialogHeight = utils.elementHeight(element)
-// }
-
-// initialdateisToday
-
-// const currentMonth =
+// cal
 
 const yearData = (year) => {
   return Array.from({ length: 12 }, (item, index) => {
@@ -128,25 +74,43 @@ const calendarData = computed(() => {
   const data = currentYearData.concat(nextYearData) // 24 months
   return data
 })
-
-// Object { month: "Jan", daysInMonth: 31, startsOn: "Wed" }
-
-const currentMonthData = computed(() => calendarData.value[state.index])
 const days = computed(() => {
   const daysInMonth = currentMonthData.value.daysInMonth
   return Array.from({ length: daysInMonth }, (item, index) => index + 1)
 })
-const styles = (index) => {
+const currentMonthData = computed(() => calendarData.value[state.index])
+const dayStyles = (index) => {
   if (index !== 0) { return }
   return { '--start-day': currentMonthData.value.startsOnIndex + 1 }
 }
+
+// parse date
+
+const today = computed(() => {
+  return {
+    month: dayjs().month(),
+    day: dayjs().date(),
+    year: dayjs().year()
+  }
+})
+const isToday = (day) => {
+  const isDay = day === today.value.day
+  const isMonth = month.value === today.value.month
+  const isYear = year.value === today.value.year
+  return isDay && isMonth && isYear
+}
+const isPast = computed(() => {
+  const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
+  return date.isBefore(dayjs(), 'day')
+})
+
+// select
 
 const selectDate = (day) => {
   const string = `${year.value}-${month.value + 1}-${day}`
   const date = dayjs(string, 'YYYY-M-D')
   emit('selectDate', date)
 }
-
 </script>
 
 <template lang="pug">
@@ -181,7 +145,7 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
       v-for="(day, index) in days"
       :key="day"
       :class="{ active: day === state.day }"
-      :style="styles(index)"
+      :style="dayStyles(index)"
       @click="selectDate(day)"
     )
       span.badge.info.badge-in-button(v-if="isToday(day)") {{ day }}

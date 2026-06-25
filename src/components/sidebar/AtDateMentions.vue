@@ -149,6 +149,12 @@ const toggleFiltersIsVisible = () => {
 
 // items
 
+const itemDates = computed(() => {
+  return state.cards.map(card => {
+    const mention = card.atDateMentions[0]
+    return mention.date
+  })
+})
 // const itemsFiltered = (items, type) => {
 //   items = itemsFiltered(items, type)
 //   if (!shouldShowCompleted.value) {
@@ -262,19 +268,19 @@ const selectCard = (card) => {
             //- no filters
             template(v-if="!filtersIsActive")
               .button-wrap.filter-button(@click.left.stop="toggleFiltersIsVisible")
-                button.small-button(:class="{ active: state.filtersIsVisible }")
+                button.small-button(:class="{ active: state.filtersIsVisible }" title="Filter By Date")
                   img.icon(src="@/assets/filter.svg")
             //- filters active
             template(v-if="filtersIsActive")
               .segmented-buttons.filter-button
-                button.small-button(@click.left.stop="toggleFiltersIsVisible" :class="{ active: state.filtersIsVisible || filtersIsActive }")
+                button.small-button(@click.left.stop="toggleFiltersIsVisible" :class="{ active: state.filtersIsVisible || filtersIsActive }" title="Filter By Date")
                   img.icon(src="@/assets/filter.svg")
                   .badge.info.filter-is-active
-
-                button.small-button(@click.left.stop="clearAllFilters")
+                //- clear filters
+                button.small-button(@click.left.stop="clearAllFilters" title="Clear Filter")
                   img.icon.cancel(src="@/assets/add.svg")
-            DatePicker(:visible="state.filtersIsVisible" :showClearButton="true")
-              //- @activeDates
+            DatePicker(:visible="state.filtersIsVisible" @selectDate)
+              //- @activeDates=[cards]
 
     .row
       .segmented-buttons
