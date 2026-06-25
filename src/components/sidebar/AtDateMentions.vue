@@ -194,9 +194,6 @@ const updateItemsBySpace = async () => {
 // })
 // const filteredCompleteTodoItems = computed(() => filteredTodoItems.value.filter(item => utils.nameIsChecked(item.name)))
 const isItems = computed(() => Boolean(state.cards.length))
-const sortByDateMention = (cards) => {
-  return sortBy(cards, 'atDateMentions[0].date')
-}
 
 // select
 
@@ -298,11 +295,11 @@ const selectCard = (card) => {
   template(v-if="isItems")
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
-      ItemList(:cards="sortByDateMention(state.cards)" @selectItem="selectItem")
+      ItemList(:cards="state.cards" @selectItem="selectItem")
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="sortByDateMention(space.cards)" @selectItem="selectItem" @selectSpace="selectSpace")
+        ItemList(:space="space" :cards="space.cards" @selectItem="selectItem" @selectSpace="selectSpace")
 
 </template>
 

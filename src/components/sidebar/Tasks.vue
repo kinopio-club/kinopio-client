@@ -298,11 +298,11 @@ const itemsRemainingCount = computed(() => {
   template(v-if="isTodoItems")
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
-      ItemList(:cards="itemsFilteredConditionallyCompleted(state.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(state.boxes, 'boxes')" @selectItem="selectItem")
+      ItemList(:cards="itemsFilteredConditionallyCompleted(state.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(state.boxes, 'boxes')" @selectItem="selectItem" :shouldSortByY="true")
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="itemsFilteredConditionallyCompleted(space.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
+        ItemList(:space="space" :cards="itemsFilteredConditionallyCompleted(space.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true" :shouldSortByY="true")
 
 </template>
 
