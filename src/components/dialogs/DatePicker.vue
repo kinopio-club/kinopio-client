@@ -9,6 +9,8 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -140,15 +142,9 @@ const styles = (index) => {
 }
 
 const selectDate = (day) => {
-  state.day = day
-  const value = {
-    month: month.value,
-    day,
-    year: year.value,
-    timezone: userStore.timezone,
-    isRelative: userStore.atMentionDateIsRelative
-  }
-  emit('selectDate', value)
+  const string = `${year.value}-${month.value + 1}-${day}`
+  const date = dayjs(string, 'YYYY-M-D')
+  emit('selectDate', date)
 }
 
 </script>
