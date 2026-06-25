@@ -124,7 +124,8 @@ const cardNameSegments = (card) => {
     imageUrl = url
     name = name.replace(url, '')
   }
-  const segments = utils.cardNameSegments(name, card.atUserMentions)
+  const atMentions = (card.atUserMentions || []).concat(card.atDateMentions || [])
+  const segments = utils.cardNameSegments(name, atMentions)
   if (imageUrl) {
     segments.unshift({
       isImage: true,

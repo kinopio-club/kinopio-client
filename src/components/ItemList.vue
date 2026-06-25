@@ -40,7 +40,8 @@ const props = defineProps({
     default: () => []
   },
   space: Object,
-  shouldShowMarkAllComplete: Boolean
+  shouldShowMarkAllComplete: Boolean,
+  shouldSortByY: Boolean
 })
 
 const state = reactive({
@@ -90,7 +91,9 @@ const allItems = computed(() => {
     return card
   })
   let items = lines.concat(lists, boxes, cards)
-  items = utils.sortByY(items)
+  if (props.shouldSortByY) {
+    items = utils.sortByY(items)
+  }
   return items
 })
 

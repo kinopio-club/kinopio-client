@@ -176,6 +176,23 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       }
       await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
+    async addCardDateMention ({ id, cardId, date }) { // to date mention
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      if (this.shouldPreventCardNotification(cardId)) { return }
+      if (!date) { return }
+      const recipientUserIds = this.recipientUserIds
+      const notification = {
+        type: 'cardDateMention',
+        cardId,
+        userId: userStore.id,
+        recipientUserIds,
+        cardAtDateMentionId: id,
+        spaceId: spaceStore.id
+      }
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
+    },
 
     // Group
 

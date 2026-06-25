@@ -112,7 +112,9 @@ export const useGlobalStore = defineStore('global', {
 
     // sidebar state
     sidebarTasksItemsBySpace: undefined,
-    sidebarTasksItemsScopeIsCurrentSpace: false,
+    sidebarAtUserMentionsItemsBySpace: undefined,
+    sidebarAtDateMentionsItemsBySpace: undefined,
+    sidebarScopeIsCurrentSpace: false,
     sidebarTasksFilters: {
       shouldShowCompleted: false,
       shouldShowAtUserMentionOnly: false
@@ -534,7 +536,6 @@ export const useGlobalStore = defineStore('global', {
     triggerArenaAuthenticationError () {},
     triggerKeyboardShortcutsIsVisible () {},
     triggerReadOnlyJiggle () {},
-    triggerSelectTemplateCategory () {},
     triggerUpdatePaintSelectCanvasPositionOffset () {},
     triggerPaintFramePosition (event) {},
     triggerAddRemotePaintingCircle () {},
@@ -544,6 +545,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateHeaderAndFooterPosition () {},
     triggerHideTouchInterface () {},
     triggerUpgradeUserIsVisible () {},
+    triggerDateAndTimeSettingsIsVisible () {},
     triggerDonateIsVisible () {},
     triggerUploadComplete (updates) {},
     triggerPauseAllAudio () {},
@@ -1786,6 +1788,9 @@ export const useGlobalStore = defineStore('global', {
       if (!updatedUser) { return }
       utils.typeCheck({ value: updatedUser, type: 'object' })
       this.otherUsers[updatedUser.id] = updatedUser
+    },
+    clearOtherUsers () {
+      this.otherUsers = {}
     },
     updateOtherItems ({ cards, spaces }) {
       utils.typeCheck({ value: cards, type: 'array' })

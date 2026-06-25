@@ -614,6 +614,11 @@ export default {
     }
     return userString
   },
+  cardDateAtMentionString (date) {
+    let dateString = this.shortAbsoluteDate(date).toLowerCase()
+    dateString = this.normalizeString(dateString)
+    return '@' + dateString // @jan-2-2026
+  },
   splitCardNameByParagraphAndSentence (prevName) {
     const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
@@ -778,9 +783,28 @@ export default {
     time = time.replace(' years', 'y')
     return time
   },
+  dateIsToday (date) {
+    return dayjs().isSame(date, 'day')
+  },
+  dateIsPast (date) {
+    date = dayjs(date)
+    const today = dayjs(new Date())
+    const diff = date.diff(today, 'day')
+    return diff < 0
+  },
+  shortRelativeDate (date) {
+    if (!date) { return }
+    date = dayjs(date)
+    const today = dayjs(new Date())
+    const diff = date.diff(today, 'day')
+    if (diff < 0) { return 'Past' }
+    if (diff === 0) { return 'Today' }
+    if (diff === 1) { return 'Tomorrow' }
+    return `${diff} days left`
+  },
   shortAbsoluteDate (date) {
     if (!date) { return }
-    return dayjs(date).format('MMMM D, YYYY')
+    return dayjs(date).format('MMM D, YYYY') // Jan 20, 2026
   },
   isEvenNumber (number) {
     if (number % 2 === 0) {
@@ -1809,6 +1833,12 @@ export default {
         value.cardId = newId
         return value
       })
+      card.atDateMentions = card.atDateMentions || []
+      card.atDateMentions = card.atDateMentions.map(value => {
+        value.id = nanoid()
+        value.cardId = newId
+        return value
+      })
       return card
     })
     boxes = boxes.map(box => {
@@ -2750,9 +2780,9 @@ export default {
     segments = sortBy(segments, ['startPosition'])
     return segments
   },
-  cardNameSegments (name, atUserMentions) {
+  cardNameSegments (name, atMentions) {
     if (!name) { return [] }
-    atUserMentions = atUserMentions || []
+    atMentions = atMentions || []
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
@@ -2801,7 +2831,7 @@ export default {
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
     })
-    atUserMentions.forEach(mention => {
+    atMentions.forEach(mention => {
       if (!mention.stringMatch) { return }
       const startPositions = []
       let index = name.indexOf(mention.stringMatch)
@@ -2816,7 +2846,17 @@ export default {
       })
       if (startPosition === undefined) { return }
       const endPosition = startPosition + mention.stringMatch.length
-      segments.push({ startPosition, endPosition, name: mention.stringMatch, userId: mention.userId, isAtUserMention: true })
+      // date mentions have a date property, user mentions have a userId
+      const isAtDateMention = Boolean(mention.date)
+      segments.push({
+        startPosition,
+        endPosition,
+        name: mention.stringMatch,
+        userId: mention.userId,
+        date: mention.date,
+        isAtDateMention,
+        isAtUserMention: !isAtDateMention
+      })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

@@ -926,6 +926,7 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const cards = cardStore.getAllCards
       let userIds = []
+      globalStore.clearOtherUsers()
       const spaceMemberIds = this.users.map(user => user.id)
       const spaceCollaboratorIds = this.collaborators.map(user => user.id)
       userIds = userIds.concat(spaceMemberIds)
