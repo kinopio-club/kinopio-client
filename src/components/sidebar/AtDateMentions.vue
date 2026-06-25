@@ -10,7 +10,7 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import ItemList from '@/components/ItemList.vue'
-// import ProgressCircle from '@/components/ProgressCircle.vue'
+import DatePicker from '@/components/dialogs/DatePicker.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -81,11 +81,10 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  // taskFiltersIsVisible: false,
+  filtersIsVisible: false,
   isLoading: false,
   isError: false,
   cards: []
-  // boxes: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -112,9 +111,9 @@ const styles = computed(() => {
   }
 })
 const closeDialogs = () => {
-  // state.taskFiltersIsVisible = false
+  state.filtersIsVisible = false
 }
-// const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
+const childDialogIsVisible = computed(() => state.filtersIsVisible)
 const updateScopeIsCurrentSpace = async (value) => {
   if (globalStore.sidebarScopeIsCurrentSpace === value) { return }
   globalStore.sidebarScopeIsCurrentSpace = value
@@ -123,6 +122,10 @@ const updateScopeIsCurrentSpace = async (value) => {
 }
 const scopeIsCurrentSpace = computed(() => globalStore.sidebarScopeIsCurrentSpace)
 const itemsBySpace = computed(() => globalStore.sidebarAtDateMentionsItemsBySpace)
+const triggerDateAndTimeSettingsIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerDateAndTimeSettingsIsVisible()
+}
 
 // filters
 
@@ -133,12 +136,13 @@ const itemsBySpace = computed(() => globalStore.sidebarAtDateMentionsItemsBySpac
 //   const currentUserId = userStore.id
 //   return atUserMentions.find(mention => mention.userId === currentUserId)
 // }
-// const taskFiltersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
-// const toggleTaskFiltersIsVisible = () => {
-//   const value = !state.taskFiltersIsVisible
-//   closeDialogs()
-//   state.taskFiltersIsVisible = value
-// }
+// const filtersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
+const filtersIsActive = computed(() => false)
+const toggleFiltersIsVisible = () => {
+  const value = !state.filtersIsVisible
+  closeDialogs()
+  state.filtersIsVisible = value
+}
 // const clearAllFilters = () => {
 //   globalStore.triggerClearTaskFilters()
 // }
@@ -241,34 +245,36 @@ const selectCard = (card) => {
 </script>
 
 <template lang="pug">
-.at-date-mentions(v-if="props.visible" :style="styles" @click.stop="closeDialogs")
+.at-date-mentions(v-if="props.visible" :style="styles" @click.stop="closeDialogs" :class="{'overflow-auto': !childDialogIsVisible}")
   section
-    .row
-        //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
-        span Date Cards
-          //- UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
-          //- span.title-label Mentions
-        //- span and Due Dates
-        Loader(:visible="state.isLoading" :isSmall="true")
-        OfflineBadge
+    .row.title-row
+        div
+          span Date Cards
+          Loader(:visible="state.isLoading" :isSmall="true")
+          OfflineBadge
+        div
+          //- settings
+          button.small-button.settings-button(@click.stop="triggerDateAndTimeSettingsIsVisible" title="Date and Time Settings")
+            img.icon.settings(src="@/assets/settings.svg")
 
-        //- //- Filters
-        //- .button-wrap
-        //-   //- no filters
-        //-   template(v-if="!taskFiltersIsActive")
-        //-     .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
-        //-       button.small-button(:class="{ active: state.taskFiltersIsVisible }")
-        //-         img.icon(src="@/assets/filter.svg")
-        //-   //- filters active
-        //-   template(v-if="taskFiltersIsActive")
-        //-     .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
-        //-       button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
-        //-         img.icon(src="@/assets/filter.svg")
-        //-         .badge.info.filter-is-active
+          //- //- Filters
+          .button-wrap.filters-button-wrap
+            //- no filters
+            template(v-if="!filtersIsActive")
+              .button-wrap.filter-button(@click.left.stop="toggleFiltersIsVisible")
+                button.small-button(:class="{ active: state.filtersIsVisible }")
+                  img.icon(src="@/assets/filter.svg")
+            //- filters active
+            template(v-if="filtersIsActive")
+              .segmented-buttons.filter-button
+                button.small-button(@click.left.stop="toggleFiltersIsVisible" :class="{ active: state.filtersIsVisible || filtersIsActive }")
+                  img.icon(src="@/assets/filter.svg")
+                  .badge.info.filter-is-active
 
-        //-       button.small-button(@click.left.stop="clearAllFilters")
-        //-         img.icon.cancel(src="@/assets/add.svg")
-        //-   TaskFilters(:visible="state.taskFiltersIsVisible")
+                button.small-button(@click.left.stop="clearAllFilters")
+                  img.icon.cancel(src="@/assets/add.svg")
+            DatePicker(:visible="state.filtersIsVisible" :showClearButton="true")
+              //- @activeDates
 
     .row
       .segmented-buttons
@@ -306,12 +312,11 @@ const selectCard = (card) => {
 <style lang="stylus">
 .sidebar
   .at-date-mentions
-    overflow auto
+    // overflow auto
     border-top 1px solid var(--primary-border)
     min-height 160px
-    // .title-label-wrap
-      // > .title-label
-      //   vertical-align -1px
+    &.overflow-auto
+      overflow auto
     .button-wrap
       margin 0
     // .tips-section
@@ -359,4 +364,10 @@ const selectCard = (card) => {
     .user-label-inline
       .anon-avatar
         vertical-align 2px
+    .settings-button
+      margin-right 6px
+
+    dialog.date-picker
+      left initial
+      right 2px
 </style>

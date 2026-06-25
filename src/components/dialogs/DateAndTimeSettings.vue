@@ -183,7 +183,7 @@ dialog.date-and-time-settings(v-if="props.visible" :open="props.visible" @click.
   section.title-section
     p Date and Time Settings
   section
-    p Due Date Format
+    p Date Format
     .segmented-buttons
       button(@click="updateAtMentionDateIsRelative(false)" :class="{active: !userAtMentionDateIsRelative}")
         span {{absoluteTimeLabel}}
