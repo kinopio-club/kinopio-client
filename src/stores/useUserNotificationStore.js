@@ -182,7 +182,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       const spaceStore = useSpaceStore()
       if (this.shouldPreventCardNotification(cardId)) { return }
       if (!date) { return }
-      const recipientUserIds = this.recipientUserIds
+      const recipientUserIds = this.recipientUserIds.concat(userStore.id) // date mentions also notify current user
       const notification = {
         type: 'cardDateMention',
         cardId,
