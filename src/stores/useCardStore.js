@@ -22,38 +22,173 @@ import sortBy from 'lodash-es/sortBy'
 import last from 'lodash-es/last'
 import { generateNKeysBetween } from 'fractional-indexing'
 
+/**
+ * TODO: Move typedefs to more appropriate files. (e.g.: Maybe Segment goes to utils.js)
+ * Currently they live here because this is the only file initially being given type information to keep the
+ * blast radius of changes in on commit smaller.
+ *
+ * @typedef {Object} Segment
+ * @property {number} [startPosition]
+ * @property {number} [endPosition]
+ * @property {string} [name]
+ * @property {string} [color]
+ * @property {?} [user]
+ * @property {string} [spaceId]
+ * @property {string} [spaceUrl]
+ * @property {string} [cardId]
+ * @property {string} [userId]
+ * @property {string} [tag]
+ * @property {boolean} [isTag]
+ * @property {string} [link]
+ * @property {boolean} [isLink]
+ * @property {string} [file]
+ * @property {boolean} [isFile]
+ * @property {string} [command]
+ * @property {boolean} [isCommand]
+ * @property {string} [url]
+ * @property {boolean} [isAtUserMention]
+ * @property {boolean} [isInviteLink]
+ * @property {boolean} [isImage]
+ * @property {string} [collaboratorKey]
+ *
+ * @typedef {Object} CardSnapGuides
+ * @property {any} side
+ * @property {any} origin
+ * @property {any} target
+ *
+ * @typedef {Object} Position
+ * @property {number} x
+ * @property {number} y
+ * @property {number} width
+ * @property {number} height
+ *
+ * @typedef {Object} CardList
+ * @property {string} id
+ * @property {number} x
+ * @property {number} y
+ * @property {number} [resizeWidth]
+ *
+ * @typedef {Object} Card
+ * @property {string} id
+ * @property {Date} createdAt
+ * @property {Date} udpatedAt
+ * @property {string|null} listId
+ * @property {string} linkToCardId
+ * @property {string} linkToSpaceId
+ * @property {string} linkToSpaceCollaboratorKey
+ * @property {string} name The main text of the card. Limited to 4000 characters.
+ * @property {Segment[]} nameSegments
+ * @property {Date} nameUpdatedAt
+ * @property {string} nameUpdatedByUserId
+ * @property {string|null} listPositionIndex
+ * @property {Position} position
+ * @property {number} [headerFontId=0]
+ * @property {string} headerFontSize
+ * @property {number} x
+ * @property {number} y
+ * @property {number} z
+ * @property {number|null} width
+ * @property {number} height
+ * @property {number} prevWidth
+ * @property {number} prevHeight
+ * @property {number} maxWidth
+ * @property {number} [tilt=0]
+ * @property {number} xDisplay
+ * @property {number} yDisplay
+ * @property {number|null} resizeWidth The width a user manually set a card to be.
+ * @property {string|null} backgroundColor
+ * @property {number} [frameId]
+ * @property {User} user
+ * @property {string} userId
+ * @property {string} spaceId
+ * @property {number} headerFontId
+ * @property {boolean} urlIsHidden
+ * @property {boolean} urlIsVisible
+ * @property {boolean} urlPreviewIsVisible
+ * @property {string} urlPreviewDescription
+ * @property {string} urlPreviewErrorUrl
+ * @property {string} urlPreviewFavicon
+ * @property {string} urlPreviewImage
+ * @property {string} urlPreviewTitle
+ * @property {string} urlPreviewUrl
+ * @property {string} urlPreviewEmbedHtml
+ * @property {string} urlPreviewIframeUrl
+ * @property {boolean} isParentCard
+ * @property {boolean} isLocked
+ * @property {boolean} isRemoved
+ * @property {boolean} isComment
+ * @property {boolean} isTodo
+ * @property {boolean} isFromBroadcast
+ * @property {boolean} isCreatedThroughPublicApi
+ * @property {boolean} videoIsPaused
+ * @property {boolean} shouldHideUrlPreviewImage
+ * @property {boolean} shouldHideUrlPreviewInfo
+ * @property {boolean} shouldUpdateUrlPreview
+ * @property {boolean} shouldShowOtherSpacePreviewImage
+ * @property {boolean} shouldSnapAlignToXDisplay
+ * @property {boolean} shouldSnapAlignToYDisplay
+ * @property {any[]} atUserMentions
+ * @property {string} codeBlockLanguage
+ * @property {boolean} counterIsVisible
+ * @property {number} [counterValue=0]
+ *
+ * @typedef {Partial<Card>} CardUpdate
+ *
+ * @typedef {Object} CardStoreState
+ * @property {Object.<string, Card>} byId
+ * @property {string[]} allIds;
+ * @property {SnapGuide[]} cardSnapGuides
+ *
+ * @typedef {Object} User
+ * @property {string} id
+ *
+ * @typedef {Object} SnapGuide
+ * @property {"top" | "bottom"} side
+ * @property {Card} item
+ * @property {Card} target
+ * @property {number} time
+ * @property {number} distance
+ * @property {number} sizeOutside
+ */
+
 let tallestCardHeight = 0
 
 export const useCardStore = defineStore('cards', {
+  /** @return {CardStoreState} */
   state: () => ({
-    byId: {},
-    allIds: [],
+    byId: {}, // TODO: This should probably be a Map.
+    allIds: [], // TODO: This should maybe be a Set.
     cardSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
   getters: {
+    /** @return {Card[]} */
     getAllCards () {
       let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => Boolean(card) && !card.isRemoved)
       return cards
     },
+    /** @return {Card[]} */
     getAllCardsSortedByX () {
       let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'x')
       return cards
     },
+    /** @return {Card[]} */
     getAllCardsSortedByY () {
       let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards
     },
+    /** @return {Card[]} */
     getAllRemovedCards () {
       let cards = this.getAllCards
       cards = cards.filter(card => card.isRemoved)
       return cards
     },
+    /** @return {{cards: Card[], yIndex: number[]}} */
     getCardsSelectableByY () {
       const globalStore = useGlobalStore()
       let cards = this.getAllCards
@@ -66,6 +201,7 @@ export const useCardStore = defineStore('cards', {
       })
       // sort by y
       cards = sortBy(cards, ['y'])
+      /** @type {number[]} */
       const yIndex = []
       cards.forEach(card => yIndex.push(card.y))
       return {
@@ -73,16 +209,20 @@ export const useCardStore = defineStore('cards', {
         yIndex
       }
     },
+    /** @return {Card[]} */
     getCardsIsLocked () {
       const cards = this.getAllCards
       return cards.filter(card => Boolean(card) && card.isLocked && !card.isRemoved)
     },
+    /** @return {Card[]} */
     getCardsIsNotLocked () {
       const cards = this.getAllCards
       return cards.filter(card => Boolean(card) && !card.isLocked && !card.isRemoved)
     },
+    /** @return {Card[]} */
     getCardsSelected () {
       const globalStore = useGlobalStore()
+      /** @type {string[]} */
       let ids = globalStore.multipleCardsSelectedIds
       if (!ids.length) {
         ids = [globalStore.currentDraggingCardId]
@@ -91,13 +231,17 @@ export const useCardStore = defineStore('cards', {
       const cards = ids.map(id => this.byId[id])
       return cards
     },
+    /** @return {Card} */
     getCurrentDraggingCard () {
       const globalStore = useGlobalStore()
       const cardId = globalStore.currentDraggingCardId
+      // TODO: This shows a type error as not being available. Maybe getters aren't supposed to use actions?
       return this.getCard(cardId)
     },
+    /** @return {Object<string, string[]>} */
     getCardIdsGroupedByList () {
       const cards = this.getAllCards
+      /** @type {Object<string, string[]>} */
       const result = {}
       for (const card of cards) {
         if (!card.listId) continue
@@ -108,14 +252,17 @@ export const useCardStore = defineStore('cards', {
       }
       return result // { listId: [cardId1, cardId2], .. }
     },
+    /** @return {Card[]} */
     getCommentCards () {
       const cards = this.getAllCards.filter(card => {
         return card.isComment || utils.isNameComment(card.name)
       })
       return cards
     },
+    /** @return {string[]} */
     getCommentCardUsers () {
       const spaceStore = useSpaceStore()
+      /** @type {string[]} */
       let users = []
       const cards = this.getCommentCards
       cards.forEach(card => {
@@ -128,8 +275,11 @@ export const useCardStore = defineStore('cards', {
       return users
     },
     getCardsWithSpaceOrInviteLinks () {
+      /** @type {string[]} */
       const cardIds = []
+      /** @type {string[]} */
       const spaceIds = []
+      /** @type {{spaceId: string, collaboratorKey: string}[]} */
       const invites = []
       let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
@@ -147,15 +297,18 @@ export const useCardStore = defineStore('cards', {
       })
       return { cardIds, spaceIds, invites }
     },
+    /** @return {string[]} */
     getCardColors () {
       const cards = this.getAllCards
       let colors = cards.map(card => card.backgroundColor)
       colors = colors.filter(color => Boolean(color))
-      return uniq(colors)
+      return /** @type {string[]} */ (uniq(colors))
     },
+    /** @return {Card[]} */
     getCardsInteracting () {
       const globalStore = useGlobalStore()
       const currentDraggingCardId = globalStore.currentDraggingCardId
+      /** @type {Card[]} */
       const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
       let cards
       if (multipleCardsSelectedIds.length) {
@@ -167,24 +320,28 @@ export const useCardStore = defineStore('cards', {
       cards = cards.filter(card => Boolean(card))
       return cards
     },
+    /** @return {Card[]} */
     getCardsIsTodoSortedByY () {
       let cards = this.getAllCards
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards.filter(card => utils.checkboxFromString(card.name))
     },
+    /** @return {Card[]} */
     getCardsNearLeftEdge () {
       const cards = this.getAllCards
       return cards.filter(card => {
         return card.x <= consts.edgeThreshold
       })
     },
+    /** @return {Card[]} */
     getCardsNearTopEdge () {
       const cards = this.getAllCards
       return cards.filter(card => {
         return card.y <= consts.edgeThreshold
       })
     },
+    /** @return {Card[]} */
     getCardsWithLinkToSpaceId () {
       const cards = this.getAllCards
       return cards.filter(card => card.linkToSpaceId)
@@ -193,9 +350,17 @@ export const useCardStore = defineStore('cards', {
 
   actions: {
 
+    /**
+     * @param {string} id
+     * @return {Card}
+     */
     getCard (id) {
       return this.byId[id]
     },
+    /**
+     * @param {string} listId
+     * @return {Card[]}
+     */
     getCardsByList (listId) {
       const cardsByList = this.getCardIdsGroupedByList
       const cardIds = cardsByList[listId]
@@ -204,9 +369,18 @@ export const useCardStore = defineStore('cards', {
       cards = sortBy(cards, 'listPositionIndex')
       return cards
     },
+    /**
+     * @param {Card} card
+     * @return {boolean}
+     */
     getIsCommentCard (card) {
       return card.isComment || utils.isNameComment(card.name)
     },
+    /**
+     * @param {string} cardId
+     * @param {number} [deltaHeight=0]
+     * @return {Card[]}
+     */
     getVerticallyAlignedCardsBelow (cardId, deltaHeight = 0) {
       let cards = this.getAllCardsSortedByX
       let parentCard = this.byId[cardId]
@@ -222,8 +396,10 @@ export const useCardStore = defineStore('cards', {
       })
       // recursion: match cards alignedY successively
       const alignedCards = []
-      let prevAlignedCard
+      /** @type {Card|null} */
+      let prevAlignedCard = null
       do {
+        /** @type {Card} */
         const parent = prevAlignedCard || parentCard
         const match = cards.find(card => {
           const isAlignedY = parent.y + parent.height + consts.spaceBetweenCards === card.y
@@ -239,53 +415,75 @@ export const useCardStore = defineStore('cards', {
       } while (prevAlignedCard)
       return alignedCards
     },
-    getCardsBelowY (y, zoom = 1, cards) {
+    /**
+     * @param {number} y
+     * @param {number} [zoom=1]
+     * @param {Card[]} [cards=[]]
+     * @return {Card[]}
+     */
+    getCardsBelowY (y, zoom = 1, cards = []) {
       let i = 0
       while (i < cards.length && (cards[i].y * zoom) <= y) {
         i++
       }
       return cards.slice(i)
     },
-    getCardsAboveY (y, zoom = 1, cards) {
+    /**
+     * @param {number} y
+     * @param {number} [zoom=1]
+     * @param {Card[]} [cards=[]]
+     * @return {Card[]}
+     */
+    getCardsAboveY (y, zoom = 1, cards = []) {
       let i = 0
       while (i < cards.length && (cards[i].y * zoom) <= y) {
         i++
       }
       return cards.slice(0, i)
     },
-    getCardsRightOfX (x, zoom = 1, cards) {
+    /**
+     * @param {number} x
+     * @param {number} [zoom=1]
+     * @param {Card[]} [cards=[]]
+     * @return {Card[]}
+     */
+    getCardsRightOfX (x, zoom = 1, cards = []) {
       let i = 0
       while (i < cards.length && (cards[i].x * zoom) <= x) {
         i++
       }
       return cards.slice(i)
     },
-    getCardsLeftOfX (x, zoom = 1, cards) {
+    /**
+     * @param {number} x
+     * @param {number} [zoom=1]
+     * @param {Card[]} [cards=[]]
+     * @return {Card[]}
+     */
+    getCardsLeftOfX (x, zoom = 1, cards = []) {
       let i = 0
       while (i < cards.length && (cards[i].x * zoom) <= x) {
         i++
       }
       return cards.slice(0, i)
     },
+    /** @return {Card[]} */
     getCardsSelectableInViewport () {
+      /** @type NodeListOf<HTMLElement> */
       const elements = document.querySelectorAll('.card-wrap')
+      /** @type {Card[]} */
       const cards = []
       elements.forEach(element => {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         if (element.dataset.isLocked === 'true') { return }
-        const id = element.dataset.cardId
+        const id = /** @type {string} */ (element.dataset.cardId)
         const data = this.getCard(id)
-        const { tilt, listId, listPositionIndex } = data
+        const { tilt, listId, listPositionIndex } = data // TODO: Unused, maybe should be deleted?
         const rect = element.getBoundingClientRect()
         const card = {
-          id: data.id,
-          x: data.x,
-          y: data.y,
+          ...data,
           width: Math.round(rect.width || data.width),
-          height: Math.round(rect.height || data.height),
-          tilt,
-          listId,
-          listPositionIndex
+          height: Math.round(rect.height || data.height)
         }
         cards.push(card)
       })
@@ -294,8 +492,11 @@ export const useCardStore = defineStore('cards', {
 
     // init
 
+    /** @param {Card[]} [cards=[]] */
     initializeCards (cards = []) {
+      /** @type {Object.<string, Card>} */
       const byId = {}
+      /** @type {string[]} */
       const allIds = []
       cards.forEach(card => {
         card.backgroundColor = this.normalizeCardBackgroundColor(card.backgroundColor)
@@ -320,6 +521,7 @@ export const useCardStore = defineStore('cards', {
         globalStore.multipleCardsSelectedIds = []
       }, 100)
     },
+    /** @param {Card[]} remoteCards */
     initializeRemoteCards (remoteCards) {
       const localCards = utils.clone(this.getAllCards)
       const { updateItems, addItems, removeItems } = utils.syncItems(remoteCards, localCards)
@@ -328,6 +530,10 @@ export const useCardStore = defineStore('cards', {
       addItems.forEach(card => this.addCardToState(card))
       removeItems.forEach(card => this.removeCardFromState(card))
     },
+    /**
+     * @param {string|null} color
+     * @return {string|null}
+     */
     normalizeCardBackgroundColor (color) {
       const themeStore = useThemeStore()
       if (color) {
@@ -341,12 +547,16 @@ export const useCardStore = defineStore('cards', {
 
     // create
 
+    /**
+     * @param {Card} card
+     * @return {Card}
+     */
     normalizeNewCard (card) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions } = card
+      const { x, y, z, position, name, id, backgroundColor, width, height, atUserMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -374,10 +584,17 @@ export const useCardStore = defineStore('cards', {
       card.atUserMentions = atUserMentions || []
       return card
     },
+    /**
+     * @param {Card} card
+     */
     addCardToState (card) {
       this.byId[card.id] = card
       this.allIds.push(card.id)
     },
+    /**
+     * @param {Card} card
+     * @param {boolean} [skipCardDetailsIsVisible]
+     */
     async createCard (card, skipCardDetailsIsVisible) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
@@ -404,9 +621,11 @@ export const useCardStore = defineStore('cards', {
       await apiStore.addToQueue({ name: 'createCard', body: card })
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
     },
+    /**
+     * @param {Card[]} cards
+     * @param {boolean} shouldOffsetPosition
+     */
     async createCards (cards, shouldOffsetPosition) {
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
       cards = cards.map(card => {
         let x = card.x
         let y = card.y
@@ -427,6 +646,7 @@ export const useCardStore = defineStore('cards', {
 
     // update
 
+    /** @param {CardUpdate[]} updates */
     async updateCardsState (updates) {
       updates = updates.map(update => { // normalize
         if (update.backgroundColor) {
@@ -442,8 +662,15 @@ export const useCardStore = defineStore('cards', {
         }
       })
     },
+    /**
+     * @param {CardUpdate[]} updates
+     * @return {boolean}
+     */
     shouldUpdateSpaceEditedAt (updates) {
+      // TODO: Change to a set and maybe make global to this file.
       const ignoreKeys = ['id', 'z', 'xDisplay', 'yDisplay']
+      // TODO: Change to use a Set.
+      /** @type {string[]} */
       let keys = []
       for (const card of updates) {
         Object.keys(card).forEach(key => keys.push(key))
@@ -452,6 +679,10 @@ export const useCardStore = defineStore('cards', {
       keys = keys.filter(key => !ignoreKeys.includes(key))
       return Boolean(keys.length)
     },
+    /**
+     * @param {CardUpdate[]} updates
+     * @return {CardUpdate[]}
+     */
     updateCardNameUpdatedAt (updates) {
       return updates.map(update => {
         if (update.name) {
@@ -460,6 +691,7 @@ export const useCardStore = defineStore('cards', {
         return update
       })
     },
+    /** @param {CardUpdate[]} updates */
     async updateCards (updates) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -486,9 +718,15 @@ export const useCardStore = defineStore('cards', {
         console.error('🚒 updateCards', error, updates)
       }
     },
+    /** @param {CardUpdate} update */
     updateCard (update) {
       this.updateCards([update])
     },
+    /**
+     * @param {Card} card
+     * @param {User} user
+     * @param {string} userString
+     */
     async addAtUserMention (card, user, userString) {
       const userNotificationStore = useUserNotificationStore()
       const mention = {
@@ -498,6 +736,7 @@ export const useCardStore = defineStore('cards', {
         stringMatch: userString
       }
       const atUserMentions = card.atUserMentions.concat(mention)
+      /** @type {CardUpdate} */
       const update = {
         id: card.id,
         atUserMentions
@@ -506,6 +745,10 @@ export const useCardStore = defineStore('cards', {
       await userNotificationStore.addCardUserMention(mention)
       this.updateCardDimensions(card.id)
     },
+    /**
+     * @param {Card} card
+     * @param {string} userString
+     */
     async removeAtUserMentions (card, userString) {
       const atUserMentions = card.atUserMentions.filter(mention => {
         return mention.stringMatch !== userString
@@ -514,18 +757,20 @@ export const useCardStore = defineStore('cards', {
         id: card.id,
         atUserMentions
       }
-      await this.updateCard(update)
+      await this.updateCard(update) // TODO: Awaiting on a non-async function, remove.
       this.updateCardDimensions(card.id)
     },
 
     // remove
 
+    /** @param {Card} card */
     removeCardFromState (card) {
       const idIndex = this.allIds.indexOf(card.id)
       if (utils.isNullish(idIndex)) { return }
       this.allIds.splice(idIndex, 1)
       delete this.byId[card.id]
     },
+    /** @param {Card[]} cards */
     async deleteCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -538,6 +783,7 @@ export const useCardStore = defineStore('cards', {
         await apiStore.addToQueue({ name: 'deleteCard', body: card })
       }
     },
+    /** @param {Card} card */
     async deleteCard (card) {
       await this.deleteCards([card])
     },
@@ -551,15 +797,20 @@ export const useCardStore = defineStore('cards', {
       await this.deleteCards(cards)
       await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } })
     },
+    /** @param {string[]} ids */
     removeCards (ids) {
       const connectionStore = useConnectionStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const listStore = useListStore()
+      /** @type {CardUpdate[]} */
       const updates = []
+      /** @type {Card[]} */
       const cardsToRemove = []
+      /** @type {Card[]} */
       const cardsToDelete = []
       const cards = ids.map(id => this.getCard(id))
+      /** @type {string[]} */
       let listIds = []
       cards.forEach(card => {
         if (!card) { return }
@@ -589,9 +840,11 @@ export const useCardStore = defineStore('cards', {
         this.updateCardPositionsInList(list)
       })
     },
+    /** @param {string} id */
     removeCard (id) {
       this.removeCards([id])
     },
+    /** @param {Card} card */
     async restoreRemovedCard (card) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
@@ -613,6 +866,7 @@ export const useCardStore = defineStore('cards', {
 
     // position
 
+    /** @param {Card} card */
     updatePageSize (card) {
       if (!card) { return }
       const globalStore = useGlobalStore()
@@ -625,10 +879,12 @@ export const useCardStore = defineStore('cards', {
         globalStore.pageWidth = cardX
       }
     },
+    /** @param {string[]} cardIds */
     checkIfShouldSnapAlignCards (cardIds) {
       cardIds = cardIds.filter(id => Boolean(id))
       const updates = cardIds.map(id => {
         const card = this.getCard(id)
+        /** @type {CardUpdate} */
         const update = {
           id,
           xDisplay: undefined,
@@ -644,9 +900,16 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
+    /**
+     * @param {Object} param
+     * @param {Position} [param.endCursor]
+     * @param {Position} [param.prevCursor]
+     * @param {Position} [param.delta]
+     * @param {Card[]} param.cards
+     */
     moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
-      const connectionStore = useConnectionStore()
+      const connectionStore = useConnectionStore() // TODO: Unused, maybe remove.
       const boxStore = useBoxStore()
       const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
@@ -696,6 +959,7 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
+    /** @param {string} id */
     incrementCardZ (id) {
       const globalStore = useGlobalStore()
       // highest z
@@ -707,7 +971,9 @@ export const useCardStore = defineStore('cards', {
         highestZ = 1
       }
       // update
+      /** @type {CardUpdate[]} */
       const updates = []
+      /** @type {string[]} */
       let ids = globalStore.multipleCardsSelectedIds
       if (!ids.length) {
         ids = [id]
@@ -721,6 +987,7 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
+    /** @param {Card} card */
     async updateTallestCardHeight (card) {
       await nextTick()
       if (!card.height) {
@@ -731,6 +998,11 @@ export const useCardStore = defineStore('cards', {
         tallestCardHeight = Math.ceil(height)
       }
     },
+    /**
+     * @param {Object} param
+     * @param {string[]} param.cardIds
+     * @param {string} param.cardId
+     */
     resetDimensions ({ cardIds, cardId }) {
       if (cardId) {
         this.clearResizeCards([cardId])
@@ -738,6 +1010,7 @@ export const useCardStore = defineStore('cards', {
         this.clearResizeCards(cardIds)
       }
     },
+    /** @param {Card[]} cards */
     async distributeCardsVertically (cards) {
       const globalStore = useGlobalStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
@@ -760,10 +1033,11 @@ export const useCardStore = defineStore('cards', {
           width: rect.width,
           height: rect.height || card.height
         }
-        await this.updateCard(update)
+        await this.updateCard(update) // TODO: Awaiting on a non-async function, remove await.
         index += 1
       }
     },
+    /** @param {CardUpdate[]} updates */
     async updateCardsBelowPosition (updates) {
       const listStore = useListStore()
       let listIds = []
@@ -793,6 +1067,7 @@ export const useCardStore = defineStore('cards', {
         this.updateCardPositionsInList(list)
       })
     },
+    /** @param {string[]} ids */
     async updateCardsDimensions (ids) {
       const globalStore = useGlobalStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
@@ -802,8 +1077,9 @@ export const useCardStore = defineStore('cards', {
       // cards = utils.clone(cards) // temp?
       if (!cards.length) { return }
       await nextTick()
-      const updatedCards = []
+      const updatedCards = [] // TODO: Unused, maybe delete?
       globalStore.updateShouldExplicitlyRenderCardIds(ids)
+      /** @type {CardUpdate[]} */
       const updates = []
       cards.forEach(card => {
         card.prevWidth = Math.round(card.width)
@@ -840,12 +1116,14 @@ export const useCardStore = defineStore('cards', {
       await this.updateCards(updates)
       await this.updateCardsBelowPosition(updates)
     },
+    /** @param {string} id */
     async updateCardDimensions (id) {
       await this.updateCardsDimensions([id])
     },
 
     // card details
 
+    /** @param {string} id */
     showCardDetails (id) {
       const globalStore = useGlobalStore()
       this.incrementCardZ(id)
@@ -856,6 +1134,10 @@ export const useCardStore = defineStore('cards', {
 
     // checked
 
+    /**
+     * @param {string} id
+     * @param {boolean} value
+     */
     toggleCardChecked (id, value) {
       const card = this.getCard(id)
       let { name } = card
@@ -872,6 +1154,7 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
     },
+    /** @param {string} id */
     clearCardChecked (id) {
       const card = this.getCard(id)
       let name = card.name
@@ -882,6 +1165,10 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
     },
+    /**
+     * @param {Card} card
+     * @param {boolean} value
+     */
     async toggleOtherSpaceCardChecked (card, value) {
       const apiStore = useApiStore()
       let { id, name, spaceId } = card
@@ -911,8 +1198,13 @@ export const useCardStore = defineStore('cards', {
 
     // tilt
 
+    /**
+     * @param {string[]} ids
+     * @param {number} delta
+     */
     tiltCards (ids, delta) {
       const maxDegrees = 90
+      /** @type {CardUpdate[]} */
       const updates = []
       ids.forEach(id => {
         const card = this.getCard(id)
@@ -925,6 +1217,7 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
+    /** @param {string[]} ids */
     clearTiltCards (ids) {
       ids.forEach(id => {
         const update = { id, tilt: 0 }
@@ -935,10 +1228,15 @@ export const useCardStore = defineStore('cards', {
 
     // resize
 
+    /**
+     * @param {string[]} ids
+     * @param {number} deltaX
+     */
     resizeCards (ids, deltaX) {
-      const connectionStore = useConnectionStore()
-      const broadcastStore = useBroadcastStore()
+      const connectionStore = useConnectionStore() // TODO: Unused, maybe remove.
+      const broadcastStore = useBroadcastStore() // TODO: Unused, maybe remove.
       const minImageWidth = 64
+      /** @type {CardUpdate[]} */
       const updates = []
       ids.forEach(id => {
         const card = this.getCard(id)
@@ -950,10 +1248,16 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
+    /**
+     * @param {string[]} ids
+     * @param {boolean} [shouldRemoveResizeWidth]
+     */
     async clearResizeCards (ids, shouldRemoveResizeWidth) {
       const connectionStore = useConnectionStore()
+      /** @type {CardUpdate[]} */
       const updates = []
       ids.forEach(id => {
+        /** @type {CardUpdate} */
         const update = { id, width: null }
         if (shouldRemoveResizeWidth) {
           update.resizeWidth = null
@@ -970,6 +1274,12 @@ export const useCardStore = defineStore('cards', {
 
     // vote
 
+    /**
+     * @param {Object} param
+     * @param {Card} param.card
+     * @param {boolean} param.shouldIncrement
+     * @param {boolean} param.shouldDecrement
+     */
     updateCardVote ({ card, shouldIncrement, shouldDecrement }) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
@@ -988,6 +1298,7 @@ export const useCardStore = defineStore('cards', {
 
     // paste
 
+    /** @param {string} id */
     normalizeCardUrls (id) {
       setTimeout(() => {
         const card = this.getCard(id)
@@ -1000,6 +1311,10 @@ export const useCardStore = defineStore('cards', {
         this.updateCard(update)
       }, 100)
     },
+    /**
+     * @param {Card} card
+     * @param {string} id
+     */
     async pasteCard (card, id) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
@@ -1013,13 +1328,13 @@ export const useCardStore = defineStore('cards', {
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
         tags.forEach(tag => {
-          tag = globalStore.getNewTag({
+          const newTag = globalStore.getNewTag({
             name: tag,
             defaultColor: userStore.color,
             cardId: card.id,
             spaceId
           })
-          spaceStore.addTag(tag)
+          spaceStore.addTag(newTag)
         })
       }
       this.createCard(card)
@@ -1027,6 +1342,11 @@ export const useCardStore = defineStore('cards', {
 
     // name
 
+    /**
+     * @param {Card} card
+     * @param {boolean} excludeCheckboxString
+     * @return {Card}
+     */
     cardWithNameSegments (card, excludeCheckboxString) {
       const spaceStore = useSpaceStore()
       let name = card.name
@@ -1061,6 +1381,10 @@ export const useCardStore = defineStore('cards', {
       })
       return card
     },
+    /**
+     * @param {Segment} segment
+     * @return {string}
+     */
     cardSegmentTagColor (segment) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -1074,6 +1398,10 @@ export const useCardStore = defineStore('cards', {
         return userStore.color
       }
     },
+    /**
+     * @param {{name: string}} file
+     * @param {string} id
+     */
     insertCardUploadPlaceholder (file, id) {
       const card = this.getCard(id)
       if (!card) { return }
@@ -1086,6 +1414,7 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
     },
+    /** @param {string} id */
     clearCardNameUploadPlaceholder (id) {
       const card = this.getCard(id)
       if (!card) { return }
@@ -1096,6 +1425,7 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
     },
+    /** @param {string} tagName */
     getCardsWithTagName (tagName) {
       let cards = this.getAllCards
       cards = utils.clone(cards)
@@ -1109,12 +1439,15 @@ export const useCardStore = defineStore('cards', {
 
     // list
 
+    /** @param {CardList} list */
     async updateCardPositionsInList (list) {
       const listStore = useListStore()
-      const globalStore = useGlobalStore()
+      const globalStore = useGlobalStore() // TODO: Unused, maybe remove.
       if (!list) { return }
       const cards = this.getCardsByList(list.id)
+      /** @type {CardUpdate[]} */
       const updates = []
+      /** @type {CardUpdate[]} */
       const prevCards = []
       const originY = list.y + consts.listInfoHeight
       cards.forEach((card, index) => {
@@ -1136,6 +1469,10 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
       listStore.updateListDimensions(list)
     },
+    /**
+     * @param {Card} card
+     * @param {CardList} list
+     */
     async prependCardToList (card, list) {
       let targetPositionIndex = null
       const cards = this.getCardsByList(list.id)
@@ -1144,6 +1481,10 @@ export const useCardStore = defineStore('cards', {
       }
       await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: true })
     },
+    /**
+     * @param {Card} card
+     * @param {CardList} list
+     */
     async appendCardToList (card, list) {
       let targetPositionIndex = null
       const cards = this.getCardsByList(list.id)
@@ -1152,8 +1493,13 @@ export const useCardStore = defineStore('cards', {
       }
       await this.addCardsToList({ cards: [card], list, targetPositionIndex, shouldPrepend: false })
     },
+    /**
+     * @param {Card[]} cards
+     * @param {CardList} list
+     */
     checkIfShouldUpdatePrevListDimensions (cards, list) {
       const listStore = useListStore()
+      /** @type {string[]} */
       let prevListIds = []
       // get moved cards prev listIds
       cards.forEach(card => {
@@ -1169,6 +1515,13 @@ export const useCardStore = defineStore('cards', {
         listStore.updateListDimensions(list)
       })
     },
+    /**
+     * @param {Object} param
+     * @param {Card[]} param.cards
+     * @param {CardList} param.list
+     * @param {string|null} [param.targetPositionIndex=null]
+     * @param {boolean} [param.shouldPrepend]
+     */
     async addCardsToList ({ cards, list, targetPositionIndex = null, shouldPrepend }) {
       const globalStore = useGlobalStore()
       try {
@@ -1187,6 +1540,7 @@ export const useCardStore = defineStore('cards', {
         }
         // add cards to list
         const resizeWidth = utils.listChildWidth(list.resizeWidth)
+        /** @type {CardUpdate[]} */
         const updates = cards.map((card, index) => {
           return {
             id: card.id,
@@ -1208,8 +1562,10 @@ export const useCardStore = defineStore('cards', {
         console.error('🚒 addCardsToList', error)
       }
     },
+    /** @param {Card[]} cards */
     async removeCardsFromLists (cards) {
       const listStore = useListStore()
+      /** @type {string[]} */
       let listIds = []
       const ids = cards.map(card => {
         if (card.listId) {
@@ -1218,6 +1574,7 @@ export const useCardStore = defineStore('cards', {
         return card.id
       })
       listIds = uniq(listIds)
+      /** @type {CardUpdate[]} */
       const updates = ids.map(id => {
         return {
           id,
@@ -1235,25 +1592,31 @@ export const useCardStore = defineStore('cards', {
         listStore.updateListDimensions(list)
       }
     },
+    /** @param {string[]} listIds */
     async removeCardsFromListsByLists (listIds) {
       listIds.forEach(id => {
         const cards = this.getCardsByList(id)
         this.removeCardsFromLists(cards)
       })
     },
+    /**
+     * @param {Card[]} cards
+     * @return {boolean}
+     */
     cardsIsInListTogether (cards) {
-      if (!cards.length) { return }
+      if (!cards.length) { return false }
       const listId = cards[0].listId
-      if (!listId) { return }
+      if (!listId) { return false }
       const value = cards.every(card => card.listId === listId)
       return value
     },
+    /** @param {Card[]} cards */
     async toggleListCards (cards) {
       const globalStore = useGlobalStore()
       const listStore = useListStore()
       let list
       let listCards = []
-      let listHasOtherCards = []
+      let listHasOtherCards = false
 
       if (this.cardsIsInListTogether(cards)) {
         list = listStore.getList(cards[0].listId)
@@ -1295,12 +1658,27 @@ export const useCardStore = defineStore('cards', {
 
     // snap guides
 
+    /**
+     * @param {Object} param
+     * @param {Position} param.cursor
+     * @param {Card} param.targetCard
+     * @param {number} param.edgeY
+     * @return {number}
+     */
     distanceCursorToCardEdge ({ cursor, targetCard, edgeY }) {
       const nearestEdgeX = Math.max(targetCard.x, Math.min(cursor.x, targetCard.x + targetCard.width))
       const dx = cursor.x - nearestEdgeX
       const dy = cursor.y - edgeY
       return Math.sqrt(dx * dx + dy * dy)
     },
+    /**
+     * @param {Object} param
+     * @param {"top" | "bottom"} param.side
+     * @param {Card} param.item
+     * @param {Card} param.targetCard
+     * @param {Position} param.cursor
+     * @return {SnapGuide|undefined}
+     */
     createCardSnapGuide ({ side, item, targetCard, cursor }) {
       const edgeParams = {
         top: {
@@ -1319,16 +1697,22 @@ export const useCardStore = defineStore('cards', {
       const distance = this.distanceCursorToCardEdge({ cursor, targetCard, edgeY })
       return { side, item, target: targetCard, time, distance, sizeOutside }
     },
+    /**
+     * @param {Object} param
+     * @param {any[]} param.items
+     * @param {Position} param.cursor
+     */
     updateCardSnapGuides ({ items, cursor }) {
       const globalStore = useGlobalStore()
       const listStore = useListStore()
       if (globalStore.preventItemSnapping) { return }
-      if (!items.length) { return }
+      if (!items.length) { return } // TODO: Only usage of items, maybe remove?
       if (globalStore.shouldSnapAlign) { return }
-      const snapThreshold = 10
+      const snapThreshold = 10 // TODO: Unused, maybe remove?
       const spaceEdgeThreshold = 100
       const targetCards = this.getCardsSelectableInViewport()
-      const prevSnapGuides = globalStore.snapGuides
+      const prevSnapGuides = globalStore.snapGuides // TODO: Unused, maybe remove?
+      /** @type {SnapGuide[]} */
       let snapGuides = []
       // find
       const card = this.getCard(globalStore.currentDraggingCardId) // only current dragging card can snap
@@ -1348,8 +1732,8 @@ export const useCardStore = defineStore('cards', {
         const targetRight = target.x + target.width
         const targetTop = target.y
         const targetBottom = target.y + target.height
-        const targetIsMinX = target.x <= spaceEdgeThreshold
-        const targetIsMinY = target.y <= spaceEdgeThreshold
+        const targetIsMinX = target.x <= spaceEdgeThreshold // TODO: Unused, maybe remove?
+        const targetIsMinY = target.y <= spaceEdgeThreshold // TODO: Unused, maybe remove?
         // card side is on target edge
         const cardOverlapsTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
         const cardOverlapsTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })
