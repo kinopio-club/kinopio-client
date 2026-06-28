@@ -308,7 +308,7 @@ Name | Type | Description
 <code class="cards">urlPreviewEmbedHtml</code>            | `String`  | `DEPRECATED` html embed code returned by iframely. Used to display url previews when available (like youtube videos). Html containing `<script>` tags is run inside an iframe.
 <code class="cards">urlPreviewIframeUrl</code>            | `String`  | Iframe url returned by iframely. Used to display url previews when available (like youtube videos). Cannot be patched.
 <code class="cards">videoIsPaused</code>                | `Boolean` | Whether video file (mp4) playback in a card will be paused
-<code class="cards">width</code>                  | `String`  | The reference width of the card. Used to generate space preview images
+<code class="cards">width</code>                  | `Integer`  | The reference width of the card. Used to generate space preview images
 <code class="cards">x</code>                        | `Integer` | The x-axis position
 <code class="cards">y</code>                        | `Integer` | The y-axis position
 <code class="cards">z</code>                        | `Integer` | The z-axis position
