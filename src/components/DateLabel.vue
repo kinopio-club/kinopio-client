@@ -28,11 +28,18 @@ const dateLabel = computed(() => {
     return utils.shortAbsoluteDate(props.date)
   }
 })
+const titleLabel = computed(() => {
+  if (userStore.atMentionDateIsRelative) {
+    return utils.shortAbsoluteDate(props.date)
+  } else {
+    return utils.shortRelativeDate(props.date)
+  }
+})
 </script>
 
 <template lang="pug">
 span.date-label(v-if="props.date")
-    span.badge.secondary-on-dark-background(:class="{info: dateIsToday, danger: dateIsPast}")
+    span.badge.secondary-on-dark-background(:class="{info: dateIsToday, danger: dateIsPast}" :title="titleLabel")
       img.icon.cal(src="@/assets/cal.svg")
       span {{dateLabel}}
 </template>
