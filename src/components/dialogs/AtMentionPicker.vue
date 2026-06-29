@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserList from '@/components/UserList.vue'
-import DatePicker from '@/components/dialogs/DatePicker.vue'
+import DateList from '@/components/DateList.vue'
 import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
@@ -21,27 +21,11 @@ const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
-let unsubscribes
-
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'triggerPickerSelect') {
-        if (filteredUsers.value.length) { return }
-        if (dateFromSearch.value) {
-          selectDate(dateFromSearch.value)
-        }
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-  unsubscribes()
 })
 
 const emit = defineEmits(['selectUser', 'selectDate'])
@@ -58,7 +42,8 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   tipsIsVisible: false,
-  datePickerIsVisible: false
+  datePickerIsVisible: false,
+  focusedList: 'users' // 'users', 'dates'
 })
 
 watch(() => props.visible, async (value) => {
@@ -68,7 +53,13 @@ watch(() => props.visible, async (value) => {
     await updateDialogHeight()
     await nextTick()
     await scrollIntoView()
+    updateFocusedList()
   }
+})
+
+watch(() => props.search, async (value) => {
+  await nextTick()
+  updateFocusOnSearch()
 })
 
 const scrollIntoView = async () => {
@@ -108,6 +99,33 @@ const styles = computed(() => {
   return value
 })
 
+// keyboard focus across lists
+
+const updateFocusedList = () => {
+  if (filteredUsers.value.length) {
+    state.focusedList = 'users'
+  } else {
+    state.focusedList = 'dates'
+  }
+}
+const updateFocusOnSearch = () => {
+  updateFocusedList()
+  globalStore.triggerPickerFocusPosition({ list: state.focusedList, position: 'first' })
+}
+// ArrowDown past the end of UserList -> first DateList item
+const focusDateList = () => {
+  const isDates = Boolean(dateFromSearch.value) || !props.search
+  if (!isDates) { return }
+  state.focusedList = 'dates'
+  globalStore.triggerPickerFocusPosition({ list: 'dates', position: 'first' })
+}
+// ArrowUp past the first DateList item -> last UserList item
+const focusUserList = () => {
+  if (!filteredUsers.value.length) { return }
+  state.focusedList = 'users'
+  globalStore.triggerPickerFocusPosition({ list: 'users', position: 'last' })
+}
+
 // users
 
 const availableUsers = computed(() => {
@@ -140,10 +158,6 @@ const selectedUsers = computed(() => {
     users = users.concat(userStore.getUsersByCardAtUserMentions(card))
   })
   return users
-})
-
-watch(() => props.search, async (value) => {
-  globalStore.triggerPickerNavigationFirst()
 })
 
 // tips
@@ -195,12 +209,6 @@ const dateFromSearch = computed(() => {
   }
   return null
 })
-const dateSearchLabel = computed(() => {
-  const date = dateFromSearch.value
-  if (!date) { return }
-  return utils.shortAbsoluteDate(date)
-})
-const dateSearchIsToday = computed(() => dateFromSearch.value.isSame(dayjs(), 'day'))
 const triggerDateAndTimeSettingsIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerDateAndTimeSettingsIsVisible()
@@ -216,10 +224,6 @@ const selectDate = (date) => {
 const dateDaysFromToday = (number) => {
   const date = dayjs().add(number, 'day')
   return date
-}
-const selectDaysFromToday = (number) => {
-  const date = dateDaysFromToday(number)
-  selectDate(date)
 }
 
 const isNoResults = computed(() => {
@@ -255,32 +259,19 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
     :isClickable="true"
     :shouldHideOptionsButton="true"
     :shouldHideResultsFilter="true"
+    :isFocused="state.focusedList === 'users'"
+    @focusNextList="focusDateList"
   )
-  //- date search
-  .date-list(v-if="dateFromSearch")
-    ul.results-list
-      li.date-list-item(@click.left="selectDate(dateFromSearch)" :class="{ hover: !filteredUsers.length }")
-        .badge(:class="{ info: dateSearchIsToday, secondary: !dateSearchIsToday }")
-          img.icon.cal(src="@/assets/cal.svg")
-          span {{dateSearchLabel}}
-  //- default dates
-  .date-list(v-if="!props.search")
-    ul.results-list
-      li.date-list-item(@click.left="selectDaysFromToday(0)")
-        .badge.info
-          img.icon.cal(src="@/assets/cal.svg")
-          span 0d
-        span Today
-      li.date-list-item(@click.left="selectDaysFromToday(1)")
-        .badge.secondary
-          img.icon.cal(src="@/assets/cal.svg")
-          span 1d
-        span Tomorrow
-      li.date-list-item(@click.stop="toggleDatePickerIsVisible" :class="{ active: state.datePickerIsVisible }")
-        .badge.secondary
-          img.icon.cal(src="@/assets/cal.svg")
-          span Custom Date
-      DatePicker(:visible="state.datePickerIsVisible" @selectDate="selectDate")
+  //- dates
+  DateList(
+    :search="props.search"
+    :dateFromSearch="dateFromSearch"
+    :datePickerIsVisible="state.datePickerIsVisible"
+    :isFocused="state.focusedList === 'dates'"
+    @selectDate="selectDate"
+    @toggleDatePicker="toggleDatePickerIsVisible"
+    @focusPreviousList="focusUserList"
+  )
   //- no matches
   section(v-if="isNoResults") No matches found
 </template>
@@ -294,11 +285,4 @@ dialog.at-picker
     max-height 100px // matches userListMaxHeight
     overflow auto
     padding 0 4px
-  .date-list
-    padding 0 4px
-  .date-list-item
-    display flex
-    align-items center
-  dialog.date-picker
-    top 20px
 </style>
