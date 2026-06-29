@@ -362,9 +362,9 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
       display inline-block
       margin-right 0
   .user-label-inline
-    margin-right 3px
+    margin-right 4px
   .badge
-    margin-right 3px
+    margin-right 4px
   .new-unread-badge
     position absolute
     top 0
@@ -384,7 +384,7 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
     border-radius var(--small-entity-radius)
     image-rendering crisp-edges
     flex-shrink 0
-    margin-right 3px
+    margin-right 4px
     vertical-align middle
   .group-label
     margin-left 4px
