@@ -1276,6 +1276,8 @@ const handleEnterKey = (event) => {
   })
   if (globalStore.shouldPreventNextEnterKey) {
     globalStore.shouldPreventNextEnterKey = false
+  } else if (state.atMention.pickerIsVisible) {
+    triggerPickerSelectItem(event)
   } else if (pickersIsVisible) {
     triggerPickerSelectItem(event)
     hidePickers()

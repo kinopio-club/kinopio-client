@@ -29,7 +29,19 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerCloseChildDialogs') {
         closeDialogs()
+      } else if (name === 'triggerPickerFocusPosition') {
+        const { list, position } = args[0]
+        if (list !== 'users') {
+          state.focusOnId = ''
+          return
+        }
+        if (position === 'last') {
+          focusLastItem()
+        } else {
+          focusFirstItem()
+        }
       } else if (name === 'triggerPickerNavigationKey') {
+        if (!props.isFocused) { return }
         const key = args[0]
         const users = usersFiltered.value
         const currentIndex = users.findIndex(user => user.id === state.focusOnId)
@@ -40,9 +52,8 @@ onMounted(() => {
         } else if (key === 'ArrowDown') {
           focusNextItem(currentIndex)
         }
-      } else if (name === 'triggerPickerNavigationFirst') {
-        focusFirstItem()
       } else if (name === 'triggerPickerSelect') {
+        if (!props.isFocused) { return }
         const users = usersFiltered.value
         const currentUser = users.find(user => user.id === state.focusOnId)
         selectUser(null, currentUser)
@@ -58,7 +69,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['selectUser', 'childDialogIsVisible', 'closeDialog'])
+const emit = defineEmits(['selectUser', 'childDialogIsVisible', 'closeDialog', 'focusNextList'])
 
 const props = defineProps({
   users: Array,
@@ -68,7 +79,8 @@ const props = defineProps({
   group: Object,
   filterPlaceholder: String,
   shouldHideOptionsButton: Boolean,
-  shouldHideResultsFilter: Boolean
+  shouldHideResultsFilter: Boolean,
+  isFocused: Boolean
 })
 const state = reactive({
   filter: '',
@@ -165,6 +177,12 @@ const focusFirstItem = () => {
   if (!firstItem) { return }
   state.focusOnId = firstItem.id
 }
+const focusLastItem = () => {
+  const users = usersFiltered.value
+  const lastItem = last(users)
+  if (!lastItem) { return }
+  state.focusOnId = lastItem.id
+}
 const focusPreviousItem = (currentIndex) => {
   const users = usersFiltered.value
   const firstItem = users[0]
@@ -181,7 +199,7 @@ const focusNextItem = (currentIndex) => {
   const lastItemIsFocused = lastItem.id === state.focusOnId
   const nextItem = users[currentIndex + 1]
   if (lastItemIsFocused) {
-    closeDialog()
+    emit('focusNextList')
   } else if (nextItem) {
     state.focusOnId = nextItem.id
   } else {

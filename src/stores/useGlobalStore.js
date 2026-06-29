@@ -553,6 +553,7 @@ export const useGlobalStore = defineStore('global', {
     triggerPickerNavigationKey (key) {},
     triggerPickerNavigationFirst () {},
     triggerPickerSelect () {},
+    triggerPickerFocusPosition (options) {}, // { list, position }
     triggerUpdateNotifications () {},
     triggerSpaceZoomReset () {},
     triggerSpaceZoomOutMax (options) {},
