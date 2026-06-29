@@ -23,10 +23,6 @@ import last from 'lodash-es/last'
 import { generateNKeysBetween } from 'fractional-indexing'
 
 /**
- * TODO: Move typedefs to more appropriate files. (e.g.: Maybe Segment goes to utils.js)
- * Currently they live here because this is the only file initially being given type information to keep the
- * blast radius of changes in on commit smaller.
- *
  * @import {Segment, Position, CardList, Card, CardUpdate, CardStoreState, User, SnapGuide} from "./useCardStore"
  */
 

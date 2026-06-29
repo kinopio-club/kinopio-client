@@ -1,3 +1,9 @@
+/**
+ * TODO: Move types to more appropriate files. (e.g.: Maybe Segment goes to utils)
+ * Currently they live here because this is the only file initially being given type information to keep the
+ * blast radius of changes in on commit smaller.
+ */
+
 export interface Segment {
 	startPosition?: number;
 	endPosition?: number;
