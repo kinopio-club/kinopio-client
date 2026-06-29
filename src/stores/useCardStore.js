@@ -62,7 +62,6 @@ export const useCardStore = defineStore('cards', {
       cards = cards.filter(card => {
         if (card.isLocked) { return }
         if (card.isRemoved) { return }
-        if (userStore.filterComments && card.isComment) { return }
         return true
       })
       // sort by y
