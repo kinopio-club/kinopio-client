@@ -55,8 +55,6 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardsSelectableByY () {
-      const globalStore = useGlobalStore()
-      const userStore = useUserStore()
       let cards = this.getAllCards
       // filter
       cards = cards.filter(card => {
