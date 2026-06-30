@@ -124,7 +124,8 @@ const cardNameSegments = (card) => {
     imageUrl = url
     name = name.replace(url, '')
   }
-  const segments = utils.cardNameSegments(name, card.atUserMentions)
+  const atMentions = (card.atUserMentions || []).concat(card.atDateMentions || [])
+  const segments = utils.cardNameSegments(name, atMentions)
   if (imageUrl) {
     segments.unshift({
       isImage: true,
@@ -154,6 +155,10 @@ const cardBackgroundIsDark = (card) => {
 
 // user
 
+const userIsVisible = (notification) => {
+  if (notification.type === 'cardDateMention') { return }
+  return Boolean(notification.user)
+}
 const userColor = (notification) => {
   if (notification.user) {
     return notification.user.color
@@ -244,8 +249,10 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
                 img.icon.sunglasses(v-if="notification.iconClass === 'sunglasses'" src="@/assets/sunglasses.svg")
                 .badge(v-if="notification.iconClass === 'at'" :style="{ backgroundColor: currentUser.color }")
                   img.icon.at(src="@/assets/at.svg")
+                .badge.info(v-if="notification.iconClass === 'cal'")
+                  img.icon.at(src="@/assets/cal.svg")
                 //- user
-                span.user-wrap
+                span.user-wrap(v-if="userIsVisible(notification)")
                   UserLabelInline(:user="notification.user")
                 //- message
                 span {{notification.message}}&nbsp;
@@ -355,7 +362,9 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
       display inline-block
       margin-right 0
   .user-label-inline
-    margin-right 3px
+    margin-right 4px
+  .badge
+    margin-right 4px
   .new-unread-badge
     position absolute
     top 0
@@ -375,7 +384,7 @@ dialog.user-notifications(v-if="props.visible" :open="props.visible" ref="dialog
     border-radius var(--small-entity-radius)
     image-rendering crisp-edges
     flex-shrink 0
-    margin-right 3px
+    margin-right 4px
     vertical-align middle
   .group-label
     margin-left 4px

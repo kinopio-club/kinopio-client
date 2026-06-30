@@ -17,6 +17,8 @@ import Favorites from '@/components/sidebar/Favorites.vue'
 import SpaceHistory from '@/components/sidebar/SpaceHistory.vue'
 import Tasks from '@/components/sidebar/Tasks.vue'
 import Note from '@/components/sidebar/Note.vue'
+import AtUserMentions from '@/components/sidebar/AtUserMentions.vue'
+import AtDateMentions from '@/components/sidebar/AtDateMentions.vue'
 import SidebarResize from '@/components/SidebarResize.vue'
 
 const globalStore = useGlobalStore()
@@ -65,7 +67,9 @@ const state = reactive({
   favoritesIsVisible: false,
   historyIsVisible: false,
   tasksIsVisible: false,
-  noteIsVisible: false
+  noteIsVisible: false,
+  atUserMentionsIsVisible: false,
+  atDateMentionsIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -92,6 +96,8 @@ const clearVisible = () => {
   state.historyIsVisible = false
   state.tasksIsVisible = false
   state.noteIsVisible = false
+  state.atUserMentionsIsVisible = false
+  state.atDateMentionsIsVisible = false
 }
 const updateSubsectionHeight = () => {
   const element = titleElement.value
@@ -156,7 +162,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = userStore.lastSidebarSection
-  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'tasks', 'note'] // listed in api docs
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'tasks', 'note', 'atUserMentions', 'atDateMentions'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -217,6 +223,12 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Tasks
           button(@click.left="toggleSection('tasks')" :class="{ active: state.tasksIsVisible}" title="Tasks")
             span Tasks
+          //- @
+          button(@click.left="toggleSection('atUserMentions')" :class="{ active: state.atUserMentionsIsVisible}" title="@User Mentions")
+            img.icon.at(src="@/assets/at.svg")
+          //- Dates
+          button(@click.left="toggleSection('atDateMentions')" :class="{ active: state.atDateMentionsIsVisible}" title="Due Dates")
+            img.icon.cal(src="@/assets/cal.svg")
           //- Note
           button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")
             img.icon.note(src="@/assets/note.svg")
@@ -241,6 +253,8 @@ dialog#sidebar.sidebar.is-pinnable(
   Favorites(:visible="state.favoritesIsVisible" :subsectionHeight="state.subsectionHeight")
   SpaceHistory(:visible="state.historyIsVisible" :subsectionHeight="state.subsectionHeight")
   Tasks(:visible="state.tasksIsVisible" :subsectionHeight="state.subsectionHeight")
+  AtUserMentions(:visible="state.atUserMentionsIsVisible" :subsectionHeight="state.subsectionHeight")
+  AtDateMentions(:visible="state.atDateMentionsIsVisible" :subsectionHeight="state.subsectionHeight")
   Note(:visible="state.noteIsVisible" :subsectionHeight="state.subsectionHeight" @updateDialogHeight="updateHeights")
 
   SidebarResize
@@ -262,8 +276,11 @@ dialog#sidebar.sidebar.is-pinnable(
   .icon.flower
     vertical-align -1px
     height 11px
-  .icon.time
+  .icon.time,
+  .icon.at
     vertical-align -1px
+  .icon.cal
+    vertical-align -2px
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
@@ -291,12 +308,18 @@ dialog#sidebar.sidebar.is-pinnable(
       //     // &:last-child
       //       // border-top-right-radius 0
       // last row
+      &:first-child
+        button,
+        label
+          &:last-child
+            border-bottom-right-radius 0
+
       &:last-child
         button,
         label
           &:first-child
             border-top-left-radius 0
           &:last-child
-            border-top-right-radius 0
+            border-top-right-radius var(--entity-radius)
 
 </style>

@@ -65,13 +65,11 @@ export const useCardStore = defineStore('cards', {
     },
     /** @return {{cards: Card[], yIndex: number[]}} */
     getCardsSelectableByY () {
-      const globalStore = useGlobalStore()
       let cards = this.getAllCards
       // filter
       cards = cards.filter(card => {
         if (card.isLocked) { return }
         if (card.isRemoved) { return }
-        if (globalStore.filterComments && card.isComment) { return }
         return true
       })
       // sort by y
@@ -220,6 +218,21 @@ export const useCardStore = defineStore('cards', {
     getCardsWithLinkToSpaceId () {
       const cards = this.getAllCards
       return cards.filter(card => card.linkToSpaceId)
+    },
+    getCardsAtUserMentionsCurrentUser () {
+      const userStore = useUserStore()
+      const cards = this.getAllCards
+      return cards.filter(card => {
+        return card.atUserMentions?.find(mention => mention.userId === userStore.id)
+      })
+    },
+    getCardsAtDateMentions () {
+      let cards = this.getAllCards
+      cards = cards.filter(card => {
+        return utils.arrayHasItems(card.atDateMentions)
+      })
+      cards = sortBy(cards, 'atDateMentions[0].date').reverse()
+      return cards
     }
   },
 
@@ -431,7 +444,7 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, name, id, backgroundColor, width, height, atUserMentions } = card
+      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions, atDateMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -457,6 +470,7 @@ export const useCardStore = defineStore('cards', {
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
       card.atUserMentions = atUserMentions || []
+      card.atDateMentions = atDateMentions || []
       return card
     },
     /**
@@ -598,6 +612,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards([update])
     },
     /**
+     * @user mentions
      * @param {Card} card
      * @param {User} user
      * @param {string} userString
@@ -633,6 +648,42 @@ export const useCardStore = defineStore('cards', {
         atUserMentions
       }
       await this.updateCard(update) // TODO: Awaiting on a non-async function, remove.
+      this.updateCardDimensions(card.id)
+    },
+
+    // @date mentions
+
+    async addAtDateMention (card, date, dateString) {
+      const userNotificationStore = useUserNotificationStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const mention = {
+        id: nanoid(),
+        cardId: card.id,
+        userId: userStore.id,
+        spaceId: spaceStore.id,
+        date,
+        stringMatch: dateString
+      }
+      const atDateMentions = card.atDateMentions.concat(mention)
+      const update = {
+        id: card.id,
+        atDateMentions,
+        atMentionDateIsRelative: userStore.atMentionDateIsRelative
+      }
+      await this.updateCard(update)
+      await userNotificationStore.addCardDateMention(mention)
+      this.updateCardDimensions(card.id)
+    },
+    async removeAtDateMentions (card, dateString) {
+      const atDateMentions = card.atDateMentions.filter(mention => {
+        return mention.stringMatch !== dateString
+      })
+      const update = {
+        id: card.id,
+        atDateMentions
+      }
+      await this.updateCard(update)
       this.updateCardDimensions(card.id)
     },
 
@@ -1239,7 +1290,8 @@ export const useCardStore = defineStore('cards', {
         imageUrl = url
         name = name.replace(url, '')
       }
-      const segments = utils.cardNameSegments(name, card.atUserMentions)
+      const atMentions = (card.atUserMentions || []).concat(card.atDateMentions || [])
+      const segments = utils.cardNameSegments(name, atMentions)
       if (imageUrl) {
         segments.unshift({
           isImage: true,

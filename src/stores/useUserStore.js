@@ -17,8 +17,10 @@ import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
-import dayjs from 'dayjs'
 import uniqBy from 'lodash-es/uniqBy'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+dayjs.extend(timezone)
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -309,6 +311,11 @@ export const useUserStore = defineStore('user', {
       this.$state = user
       await cache.saveUser(user)
     },
+    updateUserDefaultTimezone () {
+      if (this.timezone) { return }
+      const timezone = dayjs.tz.guess()
+      this.updateUser({ timezone })
+    },
 
     // create
 
@@ -406,6 +413,7 @@ export const useUserStore = defineStore('user', {
       }
       globalStore.triggerUserIsLoaded()
       this.checkIfShouldJoinGroup()
+      this.updateUserDefaultTimezone()
       console.log('🍍 initializeUser', this.getUserAllState)
     },
 

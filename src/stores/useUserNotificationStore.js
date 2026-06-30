@@ -158,7 +158,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       notifiedCardIds.push(cardId)
       await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
     },
-    async addCardUserMention ({ id, cardId, userId }) { // to user mention
+    async addCardUserMention ({ id, cardId, userId }) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -172,6 +172,23 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         userId: userStore.id,
         recipientUserIds,
         cardAtUserMentionId: id,
+        spaceId: spaceStore.id
+      }
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification })
+    },
+    async addCardDateMention ({ id, cardId, date }) {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      if (this.shouldPreventCardNotification(cardId)) { return }
+      if (!date) { return }
+      const recipientUserIds = this.recipientUserIds.concat(userStore.id) // date mentions also notify current user
+      const notification = {
+        type: 'cardDateMention',
+        cardId,
+        userId: userStore.id,
+        recipientUserIds,
+        cardAtDateMentionId: id,
         spaceId: spaceStore.id
       }
       await apiStore.addToQueue({ name: 'createUserNotification', body: notification })

@@ -64,6 +64,8 @@ Method | Path | Description | Scope
 `GET`   | <code class="users">/user/inbox-space</code>            | Get info on the user's `Inbox` space. whether a space is an inbox or not is based on name only, so it's possible to have multiple `Inbox` spaces, but only one the most recently updated Inbox will be returned | `read`
 `GET`   | <code class="users">/user/tags</code>                   | Get a list of the last edited <a href="#tags" class="badge button-badge tags">Tags</a> in your spaces                                                                  | `read`
 `GET`   | <code class="users">/user/todos</code>                  | Get todo cards and boxes (item names start with `[]`, `[ ]`, or `[x]`), grouped by space                                                                            | `read`
+`GET`   | <code class="users">/user/at-user-mentions</code>       | Get cards where the user is in `atUserMentions`                                                                                                             | `read`
+`GET`   | <code class="users">/user/at-date-mentions</code>       | Get cards in your spaces with `atDateMentions` (i.e. due dates)                                                                                                             | `read`
 `PATCH` | <code class="users">/user</code>                        | Update the user based on an object body with updated user attributes. You can't patch `apiKey`, `password`, `emailIsVerified`, or `email`       | `edit`
 
 </div>
@@ -75,7 +77,8 @@ Method | Path | Description | Scope
 Name | Type | Description
 --- | --- | ---
 <code class="users">id</code>                               | `String`  | The unique ID of the user. Is not user updateable
-<code class="users">apiKey</code>                           | `UUID`    | Used in Authentication headers to make API calls as the currentUser. Generated and returned only when user signs up or in. Is not user updateable
+<code class="users">apiKey</code>                           | `UUID`    | Used in Authentication headers to make API calls as the currentUser. Generated and returned only when user signs up or in. Is not user updateable. Grants `root` scope, so should not be shared.
+<code class="users">atMentionDateIsRelative</code>          | `Boolean`    | Whether @dates assigned to cards by the user should default to relative format ('2 days left'), instead of the default absolute format ('Jan 2, 2026').
 <code class="users">cardsCreatedCount</code>                | `Integer` | The number of cards the user has created if they're not a paid user, used to enforce the free user limit. Is not user updatable.
 <code class="users">cardsCreatedCountRaw</code>                | `Integer` | Similar to `cardsCreatedCount` except the raw version increments even if your're a free user on a paid user space. This is a vanity metric and is not used to enforce free user limits.
 <code class="users">cardSettingsDefaultCharacterLimit</code>            | `Integer` | The max number of characters you can enter in a card. Either 300 (default) or 4000 (max). Constrained character limits are meant to encourage using cards to represent single ideas. But this override exists for those who don't want that.
@@ -97,6 +100,7 @@ Name | Type | Description
 <code class="users">filterComments</code>                   | `Boolean` | Whether comment cards are hidden to the user
 <code class="users">filterShowDateUpdated</code>            | `Boolean` | Whether the user has has toggled the card date filter
 <code class="users">filterShowUsers</code>                  | `Boolean` | Whether the user has has toggled the card user filter
+<code class="users">groups</code>                             | `JSON Array` | The groups a user belongs to, including public metadata on the other `users` in each group
 <code class="users">isAmbassador</code>                     | `Boolean` | Whether the user is in the [friends of kinopio](https://kinopio.club/friends-of-kinopio-ambassadors-YNmS6C3fofN3R9mYgO1Bu) affiliate program. Is not user updatable.
 <code class="users">isDonor</code>                          | `Boolean` | Whether the user has donated to Kinopio. Is not user updatable.
 <code class="users">isModerator</code>                      | `Boolean` | Whether the user is a moderator of the community forums or discord. Is not user updatable.
@@ -104,7 +108,7 @@ Name | Type | Description
 <code class="users">isUpgraded</code>                       | `Boolean` | Whether the user currently has a paid subscription. Is not user updatable.
 <code class="users">lastReadNewStuffId</code>               | `String`  | The id of the last read article from the 'new stuff' newsfeed
 <code class="users">lastUsedImagePickerService</code>       | `String`  | The user's last used image picker service, is either `stickers`, `gifs`, `bing`, `backgrounds`, `recent`, `ai`
-<code class="users">lastSidebarSection</code>               | `String`  | The shortname of the sidebar section last viewed. Can be `stats`, `inbox`, `removed`, `links`, `favorites`, `history`, `minimap`, `tags`, `tasks`, `note`. Defaults to `inbox`.
+<code class="users">lastSidebarSection</code>               | `String`  | The shortname of the sidebar section last viewed. Can be `stats`, `inbox`, `removed`, `links`, `favorites`, `history`, `minimap`, `tags`, `tasks`, `note`, `atUserMentions`, `atDateMentions`. Defaults to `inbox`.
 <code class="users">lastSpaceId</code>                      | `String`  | The spaceId of the last space edited. Used to return you to the same space the next time you visit kinopio.club
 <code class="users">name</code>                             | `String`  | The unique name of the user. Is a url-safe string (no spaces or special characters) because it's also used for url slugs
 <code class="users">prevHeaderFontId</code>                 | `Integer` | The id of the previous header font selected. Default value is `0` for Recoleta
@@ -127,7 +131,7 @@ Name | Type | Description
 <code class="users">showInExploreUpdatedAt</code>           | `String` | When the user last opened the Explore dialog. Used to determine new/unread Explore spaces
 <code class="users">showItemActions</code>                  | `Boolean` | Whether the user has chosen to show expanded options and info in both the `card-details` and `multiple-selected-actions` dialogs
 <code class="users">sidebarResizeWidth</code>              | `Integer` | Manually resized width of the sidebar dialog
-<code class="users">groups</code>                             | `JSON Array` | The groups a user belongs to, including public metadata on the other `users` in each group
+<code class="users">timezone</code>                         | `String` | The user's timezone, in [IANA](https://data.iana.org/time-zones/tzdb-2021a/zone1970.tab) name format
 <code class="users">updatedAt</code>                        | `String`  | The date when any changes to the user was made. Also is updated whenever the user starts a Kinopio session
 <code class="users">website</code>                          | `String`  | The user's website, url validity is not checked
 <code class="users">prevSettingsSection</code>            | `String`  | The last used settings section. Can be `general`, `controls`, or `cards`
@@ -168,6 +172,7 @@ Method | Path | Description | Scope
 `GET`    | <code class="spaces">/space/date-image</code>        | Get the image url for today's date card image                                                         | —
 `POST`   | <code class="spaces">/space</code>                       | Create a new space(s) from object(s) in request body. The owner will be the apiKey user           | `edit`
 `POST`   | <code class="spaces">/space/search-explore-spaces</code>   | Get all `showInExplore` spaces based on space name. Body object must contain `query`. Searches are not case-insensitive           | —
+`POST`   | <code class="spaces">/screenshot</code>           | generates and returns the space screenshot url. Body object must contain `spaceId`, `format` (either `pdf`,` png`, `jpeg`, `webp`, `html`, `webm`, `md`), and optional `isDarkTheme` bool  | `read`
 `PATCH`  | <code class="spaces">/space</code>                       | Update space(s) from object(s) in request body                                                    | `edit`
 `PATCH`  | <code class="spaces">/space/restore/:spaceId</code>               | Restore removed space(s)  from object(s) in request body                                          | `edit`
 `DELETE` | <code class="spaces">/space</code>                       | Remove space(s) specified in request body                                                         | `delete`
@@ -308,7 +313,7 @@ Name | Type | Description
 <code class="cards">urlPreviewEmbedHtml</code>            | `String`  | `DEPRECATED` html embed code returned by iframely. Used to display url previews when available (like youtube videos). Html containing `<script>` tags is run inside an iframe.
 <code class="cards">urlPreviewIframeUrl</code>            | `String`  | Iframe url returned by iframely. Used to display url previews when available (like youtube videos). Cannot be patched.
 <code class="cards">videoIsPaused</code>                | `Boolean` | Whether video file (mp4) playback in a card will be paused
-<code class="cards">width</code>                  | `String`  | The reference width of the card. Used to generate space preview images
+<code class="cards">width</code>                  | `Integer`  | The reference width of the card. Used to generate space preview images
 <code class="cards">x</code>                        | `Integer` | The x-axis position
 <code class="cards">y</code>                        | `Integer` | The y-axis position
 <code class="cards">z</code>                        | `Integer` | The z-axis position

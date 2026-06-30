@@ -979,7 +979,8 @@ const isNormalizedNameOrHiddenUrl = computed(() => {
   return normalizedName.value
 })
 const nameSegments = computed(() => {
-  let segments = utils.cardNameSegments(normalizedName.value, props.card.atUserMentions)
+  const atMentions = (props.card.atUserMentions || []).concat(props.card.atDateMentions || [])
+  let segments = utils.cardNameSegments(normalizedName.value, atMentions)
   segments = segments.map(segment => {
     segment.isDark = backgroundColorIsDark.value
     // tags

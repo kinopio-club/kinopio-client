@@ -97,7 +97,7 @@ dialog.narrow.toc.is-pinnable#toc(
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
   section.results-section
-    ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem")
+    ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem" :shouldSortByY="true")
 </template>
 
 <style lang="stylus">
