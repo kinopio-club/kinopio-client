@@ -224,10 +224,10 @@ dialog#sidebar.sidebar.is-pinnable(
           button(@click.left="toggleSection('tasks')" :class="{ active: state.tasksIsVisible}" title="Tasks")
             span Tasks
           //- @
-          button(@click.left="toggleSection('atUserMentions')" :class="{ active: state.atUserMentionsIsVisible}" title="@User Cards")
+          button(@click.left="toggleSection('atUserMentions')" :class="{ active: state.atUserMentionsIsVisible}" title="@User Mentions")
             img.icon.at(src="@/assets/at.svg")
           //- Dates
-          button(@click.left="toggleSection('atDateMentions')" :class="{ active: state.atDateMentionsIsVisible}" title="@Date Cards")
+          button(@click.left="toggleSection('atDateMentions')" :class="{ active: state.atDateMentionsIsVisible}" title="Due Dates")
             img.icon.cal(src="@/assets/cal.svg")
           //- Note
           button(@click.left="toggleSection('note')" :class="{ active: state.noteIsVisible}" title="Note")

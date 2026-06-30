@@ -215,7 +215,7 @@ const selectCard = (card) => {
   section
     .row.title-row
         div
-          span Date Cards
+          span Due Dates
           Loader(:visible="state.isLoading" :isSmall="true")
           OfflineBadge
         div

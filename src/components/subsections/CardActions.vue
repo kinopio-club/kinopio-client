@@ -452,7 +452,7 @@ section.subsection.style-actions(
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
     .button-wrap
-      button(title="Assign @User or @Date" @click.stop="toggleAtMentionPickerIsVisible" :class="{active: state.atMentionPickerIsVisible}")
+      button(title="Add @User or @Date" @click.stop="toggleAtMentionPickerIsVisible" :class="{active: state.atMentionPickerIsVisible}")
         span @
       AtMentionPicker(
         :visible="state.atMentionPickerIsVisible"

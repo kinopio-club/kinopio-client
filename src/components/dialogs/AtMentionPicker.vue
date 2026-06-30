@@ -250,7 +250,9 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
           span ?
     //- tips
     .row(v-if="state.tipsIsVisible")
-      p.badge.info To @mention other people, invite them to this space, or a group
+      p.badge.info.tips-badge
+        p To @mention other people, invite them to this space, or a group.
+        p Type dates with '5d', 'today', 'tomorrow', or 'nov20' syntax.
   //- users
   UserList(
     :users="filteredUsers"
@@ -285,4 +287,6 @@ dialog.at-picker
     max-height 100px // matches userListMaxHeight
     overflow auto
     padding 0 4px
+  .tips-badge
+    margin 0
 </style>

@@ -247,7 +247,7 @@ const selectCard = (card) => {
         //- ProgressCircle(v-if="isItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
         .title-label-wrap
           UserLabelInline(:user="currentUser" :shouldHideName="true" :isAtMention="true")
-          span.title-label Cards
+          span.title-label Mentions
         //- span and Due Dates
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
