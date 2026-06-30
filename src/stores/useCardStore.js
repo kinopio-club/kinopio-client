@@ -31,8 +31,8 @@ let tallestCardHeight = 0
 export const useCardStore = defineStore('cards', {
   /** @return {CardStoreState} */
   state: () => ({
-    byId: {}, // TODO: This should probably be a Map.
-    allIds: [], // TODO: This should maybe be a Set.
+    byId: {},
+    allIds: [],
     cardSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
