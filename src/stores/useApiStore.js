@@ -1483,7 +1483,7 @@ export const useApiStore = defineStore('api', {
           isDarkTheme: themeStore.getIsThemeDark
         }
         const options = await this.requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${consts.apiHost()}/services/pdf`, options)
+        const response = await fetch(`${consts.apiHost()}/services/screenshot`, options)
         let url = await normalizeResponse(response)
         url = url.url
         return url
