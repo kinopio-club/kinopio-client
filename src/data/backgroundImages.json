@@ -206,5 +206,11 @@
     "previewUrl": "https://bk.kinopio.club/debug-grid-preview-light-2x.webp",
     "darkPreviewUrl": "https://bk.kinopio.club/debug-grid-preview-dark-2x.webp",
     "thumbnailUrl": "https://bk.kinopio.club/grid-debug-preview-3.png"
-  }  
+  },
+  {
+    "url": "https://bk.kinopio.club/confetti-grid-2x.png",
+    "darkUrl": "https://bk.kinopio.club/confetti-grid-dark-2x.png",
+    "previewUrl": "https://bk.kinopio.club/confetti-grid-2x.png",
+    "darkPreviewUrl": "https://bk.kinopio.club/confetti-grid-dark-2x.png"
+  }
 ]
