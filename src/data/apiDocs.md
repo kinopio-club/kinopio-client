@@ -172,6 +172,7 @@ Method | Path | Description | Scope
 `GET`    | <code class="spaces">/space/date-image</code>        | Get the image url for today's date card image                                                         | —
 `POST`   | <code class="spaces">/space</code>                       | Create a new space(s) from object(s) in request body. The owner will be the apiKey user           | `edit`
 `POST`   | <code class="spaces">/space/search-explore-spaces</code>   | Get all `showInExplore` spaces based on space name. Body object must contain `query`. Searches are not case-insensitive           | —
+`POST`   | <code class="spaces">/screenshot</code>           | generates and returns the space screenshot url. Body object must contain `spaceId`, `format` (either `pdf`,` png`, `jpeg`, `webp`, `html`, `webm`, `md`), and optional `isDarkTheme` bool  | `read`
 `PATCH`  | <code class="spaces">/space</code>                       | Update space(s) from object(s) in request body                                                    | `edit`
 `PATCH`  | <code class="spaces">/space/restore/:spaceId</code>               | Restore removed space(s)  from object(s) in request body                                          | `edit`
 `DELETE` | <code class="spaces">/space</code>                       | Remove space(s) specified in request body                                                         | `delete`
