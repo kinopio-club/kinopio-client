@@ -55,13 +55,11 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardsSelectableByY () {
-      const globalStore = useGlobalStore()
       let cards = this.getAllCards
       // filter
       cards = cards.filter(card => {
         if (card.isLocked) { return }
         if (card.isRemoved) { return }
-        if (globalStore.filterComments && card.isComment) { return }
         return true
       })
       // sort by y
