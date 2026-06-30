@@ -438,7 +438,15 @@ const mergeSelectedCards = () => {
       }
     })
     atUserMentions = atUserMentions.concat(card.atUserMentions || [])
+    atUserMentions = atUserMentions.map(mention => {
+      mention.id = nanoid()
+      return mention
+    })
     atDateMentions = atDateMentions.concat(card.atDateMentions || [])
+    atDateMentions = atDateMentions.map(mention => {
+      mention.id = nanoid()
+      return mention
+    })
   })
   name = name.trim()
   let newName
