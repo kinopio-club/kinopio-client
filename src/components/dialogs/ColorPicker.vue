@@ -326,16 +326,17 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
     display flex
     flex-wrap wrap
     margin-bottom 6px
+    gap 6px
   .recent-colors
     margin-bottom 8px
-    margin-left 2px
+    display flex
+    gap 6px
   button.color
     width 17%
     max-width 30px
     height 22px
-    margin-bottom 5px
-    margin-right 5px
     position relative
+    margin 0
     .color-background,
     .transparent-background
       position absolute
@@ -348,8 +349,6 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       background-image url('https://bk.kinopio.club/transparent-background.webp')
   button.color + button.color
     margin 0
-    margin-bottom 5px
-    margin-right 5px
   .refresh
     margin 0
     height 11px
@@ -379,11 +378,10 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
     flex-wrap wrap
     align-items center
     margin-bottom -5px
+    gap 6px
     button.toggle-favorite-color
       display flex
       align-items center
-      margin-right 5px
-      margin-bottom 5px
     .current-color
       height 14px
       width 14px

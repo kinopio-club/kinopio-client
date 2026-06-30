@@ -424,11 +424,18 @@ const cardsSortedByY = () => {
     return a.y - b.y
   })
 }
+const uniqueAtMentions = (mentions = []) => {
+  return mentions.map(mention => {
+    mention.id = nanoid()
+    return mention
+  })
+}
 const mergeSelectedCards = () => {
   let name = ''
   const cards = cardsSortedByY()
   const urlPreview = {}
   let atUserMentions = []
+  let atDateMentions = []
   cards.forEach(card => {
     name = `${name}\n\n${card.name.trim()}`
     Object.keys(card).forEach(key => {
@@ -436,7 +443,10 @@ const mergeSelectedCards = () => {
         urlPreview[key] = card[key]
       }
     })
+    card.atUserMentions = uniqueAtMentions(card.atUserMentions)
     atUserMentions = atUserMentions.concat(card.atUserMentions)
+    card.atDateMentions = uniqueAtMentions(card.atDateMentions)
+    atDateMentions = atDateMentions.concat(card.atDateMentions)
   })
   name = name.trim()
   let newName
@@ -469,6 +479,11 @@ const mergeSelectedCards = () => {
     mention.cardId = newCardId
     return mention
   })
+  const dateMentions = atDateMentions.map(mention => {
+    mention.id = nanoid()
+    mention.cardId = newCardId
+    return mention
+  })
   const newCard = {
     id: newCardId,
     name: newName,
@@ -476,7 +491,8 @@ const mergeSelectedCards = () => {
     y: position.y,
     backgroundColor: cardBackgroundColor || userCardBackgroundColor,
     ...urlPreview,
-    atUserMentions: mentions
+    atUserMentions: mentions,
+    atDateMentions: dateMentions
   }
   cardStore.createCard(newCard)
   prevCards = [newCard] // for history
