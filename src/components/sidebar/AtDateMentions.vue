@@ -110,56 +110,8 @@ const triggerDateAndTimeSettingsIsVisible = () => {
   globalStore.triggerDateAndTimeSettingsIsVisible()
 }
 
-// filters
+// update
 
-// const shouldShowCompleted = computed(() => globalStore.sidebarTasksFilters.shouldShowCompleted)
-// const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly)
-// const atUserMentionsCurrentUser = (atUserMentions) => {
-//   if (!atUserMentions) { return }
-//   const currentUserId = userStore.id
-//   return atUserMentions.find(mention => mention.userId === currentUserId)
-// }
-// const filtersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
-
-// const itemDates = computed(() => {
-//   const array = state.cards.map(card => {
-//     const mention = card.atDateMentions[0]
-//     return mention.date
-//   })
-//   return array
-// })
-// const selectDate = (date) => {
-//   console.log('💐💐💐💐',date) // update global datefilter
-// }
-// const filtersIsActive = computed(() => false)
-// const toggleFiltersIsVisible = () => {
-//   const value = !state.filtersIsVisible
-//   closeDialogs()
-//   state.filtersIsVisible = value
-// }
-
-// const clearAllFilters = () => {
-//   globalStore.triggerClearTaskFilters()
-// }
-
-// items
-
-// const itemsFiltered = (items, type) => {
-//   items = itemsFiltered(items, type)
-//   if (!shouldShowCompleted.value) {
-//     items = items.filter(item => utils.nameIsUnchecked(item.name))
-//   }
-//   return items
-// }
-// const itemsFiltered = (items, type) => {
-//   const isCards = type === 'cards'
-//   if (shouldShowAtUserMentionOnly.value && isCards) {
-//     items = items.filter(card => atUserMentionsCurrentUser(card.atUserMentions))
-//   } else if (shouldShowAtUserMentionOnly.value && !isCards) {
-//     return []
-//   }
-//   return items
-// }
 const updateItems = () => {
   if (scopeIsCurrentSpace.value) {
     state.cards = cardStore.getCardsAtDateMentions
@@ -223,24 +175,6 @@ const selectCard = (card) => {
           button.small-button.settings-button(@click.stop="triggerDateAndTimeSettingsIsVisible" title="Date and Time Settings")
             img.icon.settings(src="@/assets/settings.svg")
 
-          //- //- Filters
-          //- .button-wrap.filters-button-wrap
-          //-   //- no filters
-          //-   template(v-if="!filtersIsActive")
-          //-     .button-wrap.filter-button(@click.left.stop="toggleFiltersIsVisible")
-          //-       button.small-button(:class="{ active: state.filtersIsVisible }" title="Filter By Date")
-          //-         img.icon(src="@/assets/filter.svg")
-          //-   //- filters active
-          //-   template(v-if="filtersIsActive")
-          //-     .segmented-buttons.filter-button
-          //-       button.small-button(@click.left.stop="toggleFiltersIsVisible" :class="{ active: state.filtersIsVisible || filtersIsActive }" title="Filter By Date")
-          //-         img.icon(src="@/assets/filter.svg")
-          //-         .badge.info.filter-is-active
-          //-       //- clear filters
-          //-       button.small-button(@click.left.stop="clearAllFilters" title="Clear Filter")
-          //-         img.icon.cancel(src="@/assets/add.svg")
-          //-   DatePicker(:visible="state.filtersIsVisible" :prevDates="itemDates" @selectDate="selectDate")
-
     .row
       .segmented-buttons
         button(:class="{ active: scopeIsCurrentSpace }" @click="updateScopeIsCurrentSpace(true)")
@@ -271,7 +205,6 @@ const selectCard = (card) => {
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
         ItemList(:space="space" :cards="space.cards" @selectItem="selectItem" @selectSpace="selectSpace")
-
 </template>
 
 <style lang="stylus">
@@ -283,30 +216,15 @@ const selectCard = (card) => {
       overflow auto
     .button-wrap
       margin 0
-    // .filter-is-active
-    //   margin 0
-    //   min-height initial
-    //   min-width initial
-    //   display inline-block
-    //   width 10px
-    //   height 10px
-    //   padding 0
-    //   border-radius 100px
-    //   margin-left 3px
     .loader
       vertical-align -1px
       margin-left 6px
     .offline-badge
       display inline-block
       margin-left 5px
-    // .filter-button
-    //   margin-top -5px
-    //   margin-bottom -5px
     .user-label-inline
       .anon-avatar
         vertical-align 2px
-    // .settings-button
-    //   margin-right 6px
 
     dialog.date-picker
       left initial

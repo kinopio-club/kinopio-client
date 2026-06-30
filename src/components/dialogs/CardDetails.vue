@@ -1418,7 +1418,7 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
   textareaSizes()
 }
 
-// @user and @date mentions
+// @user, @date mentions
 
 const cardAtUserMentions = computed(() => card.value.atUserMentions || [])
 const cardAtDateMentions = computed(() => card.value.atDateMentions || [])
