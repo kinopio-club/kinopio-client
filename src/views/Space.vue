@@ -1117,7 +1117,7 @@ const cardCommentPreviewIsVisible = computed(() => {
 const shouldPrevent = computed(() => {
   const isHoveringOverConnector = globalStore.currentUserIsHoveringOverConnectorItemId
   const isHoveringOverCheckbox = globalStore.currentUserIsHoveringOverCheckboxCardId
-  const isHoveringOverLinkButton = globalStore.currentUserIsHoveringOverUrlButtonCardId
+  const isHoveringOverLinkButton = globalStore.currentUserIsHoveringOverButtonCardId
   const isInteractingWithItem = globalStore.getIsInteractingWithItem
   return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox || isHoveringOverLinkButton
 })

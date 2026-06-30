@@ -518,7 +518,7 @@ const cardClasses = computed(() => {
     'is-locked': isLocked.value,
     'has-url-preview': cardUrlPreviewIsVisible.value,
     'is-dark': backgroundColorIsDark.value,
-    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value,
+    'child-is-hovered': currentUserIsHoveringOverButtonCardId.value && !currentCardIsBeingDragged.value,
     'is-in-checked-box': isInCheckedBox.value,
     'is-checked': isChecked.value,
     'is-comment': isComment.value
@@ -674,8 +674,8 @@ const connectedConnections = computed(() => connectionStore.getConnectionsByItem
 
 // card buttons
 
-const currentUserIsHoveringOverUrlButton = computed(() => {
-  return globalStore.currentUserIsHoveringOverUrlButtonCardId === props.card.id
+const currentUserIsHoveringOverButtonCardId = computed(() => {
+  return globalStore.currentUserIsHoveringOverButtonCardId === props.card.id
 })
 const connectorIsVisible = computed(() => {
   const isMember = userStore.getUserIsSpaceMember
@@ -1470,6 +1470,8 @@ const showCardDetails = (event) => {
   if (globalStore.currentUserIsResizingList || globalStore.currentUserIsDraggingList) { return }
   if (globalStore.shouldSnapAlign) { return }
   if (!canEditCard.value) { globalStore.triggerReadOnlyJiggle() }
+  const isButtonBadge = event.target.closest('.button-badge')
+  if (isButtonBadge) { return }
   const shouldToggleSelected = event.shiftKey && !globalStore.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {
     globalStore.toggleCardSelected(props.card.id)
@@ -1654,10 +1656,10 @@ const handleMouseLeave = () => {
   globalStore.currentUserIsHoveringOverCardId = ''
 }
 const handleMouseEnterUrlButton = () => {
-  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
+  globalStore.currentUserIsHoveringOverButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
-  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
+  globalStore.currentUserIsHoveringOverButtonCardId = ''
 }
 const handleMouseEnterPlayButton = () => {
   globalStore.preventDraggedCardFromShowingDetails = true
@@ -1673,7 +1675,7 @@ const shouldNotStick = computed(() => {
   if (iframeIsVisible.value) { return true }
   if (globalStore.codeLanguagePickerIsVisible) { return true }
   if (globalStore.currentUserIsDraggingConnectionIdLabel) { return true }
-  if (currentUserIsHoveringOverUrlButton.value) { return true }
+  if (currentUserIsHoveringOverButtonCardId.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
   return (

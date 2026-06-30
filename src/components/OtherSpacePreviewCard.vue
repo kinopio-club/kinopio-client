@@ -98,11 +98,11 @@ const enableIsActive = () => {
   state.isActive = true
 }
 const handleMouseEnterUrlButton = () => {
-  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
+  globalStore.currentUserIsHoveringOverButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
   if (globalStore.currentUserIsDraggingCard) { return }
-  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
+  globalStore.currentUserIsHoveringOverButtonCardId = ''
 }
 const url = computed(() => utils.urlFromSpaceAndItem({ spaceId: props.otherSpace?.url || props.otherSpace?.id }))
 const openUrl = async (event) => {

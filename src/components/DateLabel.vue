@@ -1,18 +1,21 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 
 let unsubscribes
 
 const props = defineProps({
-  date: Object
+  date: Object,
+  parentCardId: String
 })
 
 const dateIsToday = computed(() => {
@@ -35,11 +38,28 @@ const titleLabel = computed(() => {
     return utils.shortRelativeDate(props.date)
   }
 })
+const selectDate = () => {
+  const value = !userStore.atMentionDateIsRelative
+  userStore.updateUser({ atMentionDateIsRelative: value })
+}
+const toggleCurrentUserIsOverCard = (value) => {
+  if (!props.parentCardId) { return }
+  if (value) {
+    globalStore.currentUserIsHoveringOverButtonCardId = props.parentCardId
+  } else {
+    globalStore.currentUserIsHoveringOverButtonCardId = ''
+  }
+}
 </script>
 
 <template lang="pug">
-span.date-label(v-if="props.date")
-    span.badge.secondary-on-dark-background(:class="{info: dateIsToday, danger: dateIsPast}" :title="titleLabel")
+span.date-label(
+  v-if="props.date"
+  @click.stop="selectDate"
+  @mouseover="toggleCurrentUserIsOverCard(true)"
+  @mouseleave="toggleCurrentUserIsOverCard(false)"
+)
+    span.badge.secondary-on-dark-background.button-badge(:class="{info: dateIsToday, danger: dateIsPast}" :title="titleLabel")
       img.icon.cal(src="@/assets/cal.svg")
       span {{dateLabel}}
 </template>

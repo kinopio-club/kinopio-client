@@ -189,7 +189,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :truncateNameToLength="15" :isAtMention="true")
   //- @Date Mentions
   template(v-if="props.segment.isAtDateMention")
-    DateLabel(:date="date(segment)")
+    DateLabel(:date="date(segment)" :parentCardId="parentCardId")
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")

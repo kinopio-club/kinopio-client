@@ -45,11 +45,11 @@ const enableIsActive = () => {
   state.isActive = true
 }
 const handleMouseEnterUrlButton = () => {
-  globalStore.currentUserIsHoveringOverUrlButtonCardId = props.card.id
+  globalStore.currentUserIsHoveringOverButtonCardId = props.card.id
 }
 const handleMouseLeaveUrlButton = () => {
   if (globalStore.currentUserIsDraggingCard) { return }
-  globalStore.currentUserIsHoveringOverUrlButtonCardId = ''
+  globalStore.currentUserIsHoveringOverButtonCardId = ''
 }
 const openUrl = async (event) => {
   const prevIsActive = state.isActive

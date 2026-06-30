@@ -96,7 +96,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsHoveringOverBoxId: '',
     currentUserIsHoveringOverCheckboxCardId: '',
     currentUserIsHoveringOverConnectorItemId: '',
-    currentUserIsHoveringOverUrlButtonCardId: '',
+    currentUserIsHoveringOverButtonCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box, drawing, line, list
