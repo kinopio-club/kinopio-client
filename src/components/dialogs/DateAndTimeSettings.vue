@@ -227,10 +227,9 @@ dialog.date-and-time-settings
   .earth-map
     position relative
     width 100%
-    aspect-ratio 2
+    aspect-ratio 2.15
     border-radius var(--entity-radius)
     overflow hidden
-    background #0000b1 // earth blue
     cursor pointer
     .timezone-label
       position absolute
@@ -243,9 +242,10 @@ dialog.date-and-time-settings
       left 0
       width 100%
       height 100%
-      background-color #027f00 // earth land
-      -webkit-mask url('../../assets/world-map.svg?1') no-repeat center / contain
-      mask url('../../assets/world-map.svg?1') no-repeat center / contain
+      background-image url('../../assets/world-map.png')
+      background-repeat no-repeat
+      background-position center
+      background-size contain
       pointer-events none
     .timezone-highlight
       position absolute
