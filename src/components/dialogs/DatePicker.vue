@@ -101,7 +101,6 @@ const isToday = (day) => {
   return isDay && isMonth && isYear
 }
 const isPast = computed(() => {
-  console.log('👄👄👄', props.prevDates)
   const date = dayjs(`${year.value}-${month.value + 1}-${state.day}`)
   return date.isBefore(dayjs(), 'day')
 })
@@ -150,7 +149,6 @@ dialog.narrow.date-picker(v-if="props.visible" :open="props.visible" @click.left
       :style="dayStyles(index)"
       @click="selectDate(day)"
     )
-      //- floating badge if day is in props.prevdates . isPrevDate(day)
       span.badge.info.badge-in-button(v-if="isToday(day)") {{ day }}
       span(v-else) {{ day }}
 </template>

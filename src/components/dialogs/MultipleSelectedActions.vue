@@ -424,6 +424,12 @@ const cardsSortedByY = () => {
     return a.y - b.y
   })
 }
+const uniqueAtMentions = (mentions = []) => {
+  return mentions.map(mention => {
+    mention.id = nanoid()
+    return mention
+  })
+}
 const mergeSelectedCards = () => {
   let name = ''
   const cards = cardsSortedByY()
@@ -437,16 +443,10 @@ const mergeSelectedCards = () => {
         urlPreview[key] = card[key]
       }
     })
-    atUserMentions = atUserMentions.concat(card.atUserMentions || [])
-    atUserMentions = atUserMentions.map(mention => {
-      mention.id = nanoid()
-      return mention
-    })
-    atDateMentions = atDateMentions.concat(card.atDateMentions || [])
-    atDateMentions = atDateMentions.map(mention => {
-      mention.id = nanoid()
-      return mention
-    })
+    card.atUserMentions = uniqueAtMentions(card.atUserMentions)
+    atUserMentions = atUserMentions.concat(card.atUserMentions)
+    card.atDateMentions = uniqueAtMentions(card.atDateMentions)
+    atDateMentions = atDateMentions.concat(card.atDateMentions)
   })
   name = name.trim()
   let newName
