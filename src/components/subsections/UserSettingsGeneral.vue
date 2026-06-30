@@ -13,6 +13,7 @@ import DeleteAccountConfirmation from '@/components/dialogs/DeleteAccountConfirm
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ModeratorActions from '@/components/dialogs/ModeratorActions.vue'
+import DateAndTimeSettings from '@/components/dialogs/DateAndTimeSettings.vue'
 import User from '@/components/User.vue'
 import consts from '@/consts.js'
 
@@ -45,6 +46,7 @@ const props = defineProps({
 const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
+  userDateAndTimeSettingsIsVisible: false,
   deleteAccountConfirmationVisible: false,
   userApiInfoIsVisible: false,
   moderatorActionsSettingsIsVisible: false,
@@ -62,6 +64,7 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const closeDialogs = () => {
   state.userBillingSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
+  state.userDateAndTimeSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
   state.userApiInfoIsVisible = false
@@ -105,6 +108,11 @@ const toggleModeratorActionsSettingsIsVisible = () => {
   const isVisible = state.moderatorActionsSettingsIsVisible
   closeDialogs()
   state.moderatorActionsSettingsIsVisible = !isVisible
+}
+const toggleUserDateAndTimeSettingsIsVisible = () => {
+  const isVisible = state.userDateAndTimeSettingsIsVisible
+  closeDialogs()
+  state.userDateAndTimeSettingsIsVisible = !isVisible
 }
 
 // debug mode
@@ -157,6 +165,14 @@ const toggleIsDebugMode = () => {
           span(v-else) Billing
           teleport(to="#settings-child-dialogs" defer)
             UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+    .row
+      //- Date and Time
+      .button-wrap
+        button(@click.left.stop="toggleUserDateAndTimeSettingsIsVisible" :class="{active: state.userDateAndTimeSettingsIsVisible}")
+          img.icon.cal(src="@/assets/cal.svg")
+          span Date and Time
+          teleport(to="#settings-child-dialogs" defer)
+            DateAndTimeSettings(:visible="state.userDateAndTimeSettingsIsVisible")
 
   //- Developer Info
   section
@@ -199,4 +215,6 @@ const toggleIsDebugMode = () => {
   > section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
+  .icon.cal
+    vertical-align -1px
 </style>

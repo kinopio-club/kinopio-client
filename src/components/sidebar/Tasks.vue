@@ -114,12 +114,12 @@ const closeDialogs = () => {
 }
 const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
 const updateScopeIsCurrentSpace = async (value) => {
-  if (globalStore.sidebarTasksItemsScopeIsCurrentSpace === value) { return }
-  globalStore.sidebarTasksItemsScopeIsCurrentSpace = value
+  if (globalStore.sidebarScopeIsCurrentSpace === value) { return }
+  globalStore.sidebarScopeIsCurrentSpace = value
   globalStore.sidebarTasksItemsBySpace = null
   updateItems()
 }
-const scopeIsCurrentSpace = computed(() => globalStore.sidebarTasksItemsScopeIsCurrentSpace)
+const scopeIsCurrentSpace = computed(() => globalStore.sidebarScopeIsCurrentSpace)
 const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
 
 // filters
@@ -259,12 +259,12 @@ const itemsRemainingCount = computed(() => {
       .button-wrap
         //- no filters
         template(v-if="!taskFiltersIsActive")
-          .button-wrap.title-row-small-button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
+          .button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
             button.small-button(:class="{ active: state.taskFiltersIsVisible }")
               img.icon(src="@/assets/filter.svg")
         //- filters active
         template(v-if="taskFiltersIsActive")
-          .segmented-buttons.title-row-small-button-wrap.section-top.filter-button
+          .segmented-buttons.section-top.filter-button
             button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active
@@ -291,18 +291,18 @@ const itemsRemainingCount = computed(() => {
     //- empty
     section.subsection.tips(v-if="!isTodoItems && !state.isLoading")
       span Prepend cards or boxes with
-        span.badge.info.brackers [ ]
+        span.badge.info [ ]
         span to create todo tasks that you can track here.
 
   //- items
   template(v-if="isTodoItems")
     //- current space
     section.results-section(v-if="scopeIsCurrentSpace")
-      ItemList(:cards="itemsFilteredConditionallyCompleted(state.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(state.boxes, 'boxes')" @selectItem="selectItem")
+      ItemList(:cards="itemsFilteredConditionallyCompleted(state.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(state.boxes, 'boxes')" @selectItem="selectItem" :shouldSortByY="true")
     //- all spaces
     section.results-section(v-else)
       template(v-for="space in itemsBySpace" :key="space.id")
-        ItemList(:space="space" :cards="itemsFilteredConditionallyCompleted(space.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true")
+        ItemList(:space="space" :cards="itemsFilteredConditionallyCompleted(space.cards, 'cards')" :boxes="itemsFilteredConditionallyCompleted(space.boxes, 'boxes')" @selectItem="selectItem" @selectSpace="selectSpace" :shouldShowMarkAllComplete="true" :shouldSortByY="true")
 
 </template>
 

@@ -2,10 +2,12 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import DateLabel from '@/components/DateLabel.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
@@ -13,8 +15,10 @@ import fonts from '@/data/fonts.js'
 
 import createFuzzySearch from '@nozbe/microfuzz'
 import smartquotes from 'smartquotes'
+import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
+const userStore = useUserStore()
 
 let shouldCancel = false
 
@@ -95,6 +99,9 @@ const escapedUrl = (url) => {
   }
   return url
 }
+const date = (segment) => {
+  return dayjs(segment.date)
+}
 
 // search
 
@@ -140,7 +147,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 
 <template lang="pug">
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="nameSegmentClasses")
-  template(v-if="props.segment.isText && props.segment.content")
+  template(v-if="props.segment.isText && props.segment.content.trim()")
     //- Name markdown
     span.markdown(v-if="props.segment.markdown" :class="textClasses")
       template(v-for="markdown in props.segment.markdown")
@@ -179,9 +186,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     Tag(:tag="props.segment" :isClickable="true" :isActive="currentSelectedTag.name === props.segment.name" @clickTag="showTagDetailsIsVisible")
   //- @User Mentions
   template(v-if="props.segment.isAtUserMention")
-    UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :isClickable="true" :isAtMention="true")
-    span.markdown(v-else :class="textClasses")
-      span {{props.segment.name}}
+    UserLabelInline(v-if="props.segment.user" :user="props.segment.user" :truncateNameToLength="15" :isAtMention="true")
+  //- @Date Mentions
+  template(v-if="props.segment.isAtDateMention")
+    DateLabel(:date="date(segment)")
   //- File
   span.badge.secondary-on-dark-background(v-if="props.segment.isFile")
     img.icon(src="@/assets/file.svg")

@@ -6,11 +6,13 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import DateLabel from '@/components/DateLabel.vue'
 import UserSettingsCards from '@/components/dialogs/UserSettingsCards.vue'
 import CardHistory from '@/components/dialogs/CardHistory.vue'
 import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
+import dayjs from 'dayjs'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -83,6 +85,12 @@ const scrollParentIntoView = () => {
 
 const atUsers = computed(() => userStore.getUsersByCardAtUserMentions(props.card))
 
+// @date mentions
+
+const atDates = computed(() => props.card.atDateMentions || [])
+const date = (mention) => {
+  return dayjs(mention.date)
+}
 // card settings
 
 const cardSettingsTitle = computed(() => {
@@ -119,6 +127,10 @@ const toggleCardHistoryIsVisible = () => {
     .at-user-mentions
       template(v-for="user in atUsers" :key="user.id")
         UserLabelInline(:user="user" :isClickable="true" :truncateNameToLength="15" :isAtMention="true")
+    //- @dates
+    .at-date-mentions
+      template(v-for="mention in atDates" :key="mention.id")
+        DateLabel(:date="date(mention)")
     //- votes
     .badge.info(v-if="card.counterIsVisible")
       span {{card.counterValue || 0}}

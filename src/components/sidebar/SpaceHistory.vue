@@ -155,7 +155,7 @@ section.space-history(v-if="props.visible" :style="styles")
         Loader(:visible="state.isLoading" :isSmall="true")
       div
         .button-wrap(v-if="!state.isLoading")
-          button.small-button(@click="refreshOperations" title="Refresh latest history")
+          button.small-button.refresh-button(@click="refreshOperations" title="Refresh latest history")
             img.icon(src="@/assets/refresh.svg")
         .button-wrap(v-if="!state.isLoading" title="Copy All JSON")
           button.small-button(@click="copyOperations")
@@ -207,4 +207,6 @@ section.space-history
     .user
       vertical-align -4px
       margin-right 5px
+  .refresh-button
+    margin-right 6px
 </style>

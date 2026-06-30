@@ -33,9 +33,6 @@ onMounted(() => {
         if (props.parentIsPinned) { return }
         clearFilter()
       }
-      if (name === 'triggerSelectTemplateCategory') {
-        clearFilter()
-      }
       if (name === 'triggerFocusResultsFilter') {
         forceShowFilterState()
         await nextTick()
@@ -74,7 +71,8 @@ const props = defineProps({
   isLoading: Boolean,
   parentIsPinned: Boolean,
   showCreateNewSpaceFromSearch: Boolean,
-  isInitialValueFromSpaceListFilterInfo: Boolean
+  isInitialValueFromSpaceListFilterInfo: Boolean,
+  searchByAliases: Boolean
 })
 
 const state = reactive({
@@ -152,7 +150,15 @@ const updateFilter = (newValue) => {
   state.filter = newValue
   emit('updateFilter', state.filter)
   const fuzzySearch = createFuzzySearch(props.items, {
-    getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
+    getText: (item) => {
+      let name = ''
+      if (props.searchByAliases) {
+        name += item.aliases.join(' ')
+      } else {
+        name = item.name
+      }
+      return [name, item.urlPreviewTitle, item.urlPreviewDescription]
+    }
   })
   const results = fuzzySearch(state.filter)
   const items = results.map(result => {

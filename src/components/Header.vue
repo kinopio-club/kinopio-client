@@ -25,6 +25,7 @@ import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
+import DateAndTimeSettings from '@/components/dialogs/DateAndTimeSettings.vue'
 import Search from '@/components/dialogs/Search.vue'
 import Templates from '@/components/dialogs/Templates.vue'
 import Sidebar from '@/components/dialogs/Sidebar.vue'
@@ -92,6 +93,8 @@ onMounted(() => {
         updateKeyboardShortcutsIsVisible(true)
       } else if (name === 'triggerUpgradeUserIsVisible') {
         updateUpgradeUserIsVisible(true)
+      } else if (name === 'triggerDateAndTimeSettingsIsVisible') {
+        updateDateAndTimeSettingsIsVisible(true)
       } else if (name === 'triggerDonateIsVisible') {
         updateDonateIsVisible(true)
       } else if (name === 'triggerReadOnlyJiggle') {
@@ -144,6 +147,7 @@ const state = reactive({
   keyboardShortcutsIsVisible: false,
   appsAndExtensionsIsVisible: false,
   upgradeUserIsVisible: false,
+  dateAndTimeSettingsIsVisible: false,
   spaceStatusIsVisible: false,
   position: {},
   readOnlyJiggle: false,
@@ -359,6 +363,7 @@ const closeAllDialogs = () => {
   state.keyboardShortcutsIsVisible = false
   state.appsAndExtensionsIsVisible = false
   state.upgradeUserIsVisible = false
+  state.dateAndTimeSettingsIsVisible = false
   state.donateIsVisible = false
   state.spaceStatusIsVisible = false
   state.notificationsIsVisible = false
@@ -459,6 +464,9 @@ const setLoadingSignUpOrIn = (value) => {
 }
 const updateUpgradeUserIsVisible = (value) => {
   state.upgradeUserIsVisible = value
+}
+const updateDateAndTimeSettingsIsVisible = (value) => {
+  state.dateAndTimeSettingsIsVisible = value
 }
 const toggleUpgradeUserIsVisible = () => {
   const isVisible = state.upgradeUserIsVisible
@@ -752,6 +760,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               Offline(:visible="offlineIsVisible")
 
       .right
+        DateAndTimeSettings(:visible="state.dateAndTimeSettingsIsVisible")
         //- Pricing
         .button-wrap.pricing-button-wrap(v-if="!isUpgraded")
           button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -822,6 +831,9 @@ header
         display flex
         justify-content flex-end
         max-width 100%
+
+  dialog.date-and-time-settings
+    left initial
 
   nav
     display flex
