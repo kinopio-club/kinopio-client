@@ -17,6 +17,9 @@ const props = defineProps({
   date: Object,
   parentCardId: String
 })
+const state = reactive({
+  pointerdownPosition: { x: 0, y: 0 }
+})
 
 const dateIsToday = computed(() => {
   return utils.dateIsToday(props.date)
@@ -38,7 +41,13 @@ const titleLabel = computed(() => {
     return utils.shortRelativeDate(props.date)
   }
 })
-const selectDate = () => {
+const updatePointerdownPosition = (event) => {
+  state.pointerdownPosition = utils.cursorPositionInSpace(event)
+}
+const selectDate = (event) => {
+  const position = utils.cursorPositionInSpace(event)
+  const isClick = utils.cursorsAreClose(state.pointerdownPosition, position)
+  if (!isClick) { return }
   const value = !userStore.atMentionDateIsRelative
   userStore.updateUser({ atMentionDateIsRelative: value })
 }
@@ -56,6 +65,7 @@ const toggleCurrentUserIsOverCard = (value) => {
 span.date-label(
   v-if="props.date"
   @click.stop="selectDate"
+  @pointerdown="updatePointerdownPosition"
   @mouseover="toggleCurrentUserIsOverCard(true)"
   @mouseleave="toggleCurrentUserIsOverCard(false)"
 )
