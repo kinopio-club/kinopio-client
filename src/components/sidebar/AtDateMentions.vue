@@ -14,6 +14,7 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import sortBy from 'lodash-es/sortBy'
+import uniqBy from 'lodash-es/uniqBy'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -41,11 +42,12 @@ onMounted(() => {
         await nextTick()
         const cardId = args[0]
         const updatedCard = cardStore.getCard(cardId)
-        state.cards = state.cards.map(card => {
+        const cards = state.cards.map(card => {
           if (card.id !== cardId) { return card }
           card.name = updatedCard.name
           return card
         })
+        updateCards(cards)
       }
     }
   )
@@ -112,16 +114,19 @@ const triggerDateAndTimeSettingsIsVisible = () => {
 
 // update
 
+const updateCards = (cards) => {
+  state.cards = uniqBy(cards, 'id')
+}
 const updateItems = () => {
   if (scopeIsCurrentSpace.value) {
-    state.cards = cardStore.getCardsAtDateMentions
+    updateCards(cardStore.getCardsAtDateMentions)
   } else {
     updateItemsBySpace()
   }
 }
 const updateItemsBySpace = async () => {
   if (!currentUserIsSignedIn.value) { return }
-  state.cards = []
+  updateCards([])
   try {
     state.isLoading = true
     state.isError = false
@@ -130,7 +135,7 @@ const updateItemsBySpace = async () => {
     }
     // update items
     globalStore.sidebarAtDateMentionsItemsBySpace.forEach(space => {
-      state.cards = state.cards.concat(space.cards)
+      updateCards(state.cards.concat(space.cards))
     })
   } catch (error) {
     console.error('🚒 updateItemsBySpace', error)
