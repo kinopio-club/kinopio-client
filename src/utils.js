@@ -792,7 +792,7 @@ export default {
     date = dayjs(date)
     const today = dayjs(new Date())
     const diff = date.diff(today, 'day')
-    return diff <= 0 && !this.dateIsToday(date)
+    return diff <= -1 && !this.dateIsToday(date)
   },
   shortRelativeDate (date) {
     if (!date) { return }
@@ -803,8 +803,8 @@ export default {
       return date.fromNow() // 2 hours ago
     }
     if (this.dateIsToday(date)) { return 'Today' }
-    if (diff === 1) { return 'Tomorrow' }
-    if (diff <= 0) { return 'Yesterday' }
+    if (diff === 0) { return 'Tomorrow' }
+    if (diff <= -1) { return 'Yesterday' }
     return `${diff} days left`
   },
   shortAbsoluteDate (date) {
