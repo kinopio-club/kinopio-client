@@ -12,6 +12,7 @@ import times from 'lodash-es/times'
 import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import isToday from 'dayjs/plugin/isToday'
 import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
@@ -23,6 +24,7 @@ import randomColor from 'randomcolor'
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
+dayjs.extend(isToday)
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
@@ -784,13 +786,13 @@ export default {
     return time
   },
   dateIsToday (date) {
-    return dayjs().isSame(date, 'day')
+    return dayjs(date).isToday()
   },
   dateIsPast (date) {
     date = dayjs(date)
     const today = dayjs(new Date())
     const diff = date.diff(today, 'day')
-    return diff < 0
+    return diff <= 0 && !this.dateIsToday(date)
   },
   shortRelativeDate (date) {
     if (!date) { return }
@@ -800,8 +802,9 @@ export default {
     if (diff < 0) {
       return date.fromNow() // 2 hours ago
     }
-    if (diff === 0) { return 'Today' }
+    if (this.dateIsToday(date)) { return 'Today' }
     if (diff === 1) { return 'Tomorrow' }
+    if (diff <= 0) { return 'Yesterday' }
     return `${diff} days left`
   },
   shortAbsoluteDate (date) {
