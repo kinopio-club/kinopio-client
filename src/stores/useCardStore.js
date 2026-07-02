@@ -108,7 +108,6 @@ export const useCardStore = defineStore('cards', {
     getCurrentDraggingCard () {
       const globalStore = useGlobalStore()
       const cardId = globalStore.currentDraggingCardId
-      // TODO: This shows a type error as not being available. Maybe getters aren't supposed to use actions?
       return this.getCard(cardId)
     },
     /** @return {Object<string, string[]>} */
@@ -366,7 +365,6 @@ export const useCardStore = defineStore('cards', {
         if (element.dataset.isLocked === 'true') { return }
         const id = /** @type {string} */ (element.dataset.cardId)
         const data = this.getCard(id)
-        const { tilt, listId, listPositionIndex } = data // TODO: Unused, maybe should be deleted?
         const rect = element.getBoundingClientRect()
         const card = {
           ...data,
@@ -444,7 +442,7 @@ export const useCardStore = defineStore('cards', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (card.isFromBroadcast) { return card }
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height, atUserMentions, atDateMentions } = card
+      const { x, y, z, position, name, id, backgroundColor, width, height, atUserMentions, atDateMentions } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = userStore.defaultCardBackgroundColor
@@ -556,9 +554,7 @@ export const useCardStore = defineStore('cards', {
      * @return {boolean}
      */
     shouldUpdateSpaceEditedAt (updates) {
-      // TODO: Change to a set and maybe make global to this file.
       const ignoreKeys = ['id', 'z', 'xDisplay', 'yDisplay']
-      // TODO: Change to use a Set.
       /** @type {string[]} */
       let keys = []
       for (const card of updates) {
@@ -608,11 +604,11 @@ export const useCardStore = defineStore('cards', {
       }
     },
     /** @param {CardUpdate} update */
-    updateCard (update) {
-      this.updateCards([update])
+    async updateCard (update) {
+      await this.updateCards([update])
     },
     /**
-     * @user mentions
+     * `@user` mentions
      * @param {Card} card
      * @param {User} user
      * @param {string} userString
@@ -647,7 +643,7 @@ export const useCardStore = defineStore('cards', {
         id: card.id,
         atUserMentions
       }
-      await this.updateCard(update) // TODO: Awaiting on a non-async function, remove.
+      await this.updateCard(update)
       this.updateCardDimensions(card.id)
     },
 
@@ -778,7 +774,7 @@ export const useCardStore = defineStore('cards', {
       card.isRemoved = false
       const isLocal = this.getCard(card.id)
       if (isLocal) {
-        this.updateCard({
+        await this.updateCard({
           id: card.id,
           isRemoved: false
         })
@@ -835,7 +831,6 @@ export const useCardStore = defineStore('cards', {
      */
     moveCards ({ endCursor, prevCursor, delta, cards }) {
       const globalStore = useGlobalStore()
-      const connectionStore = useConnectionStore() // TODO: Unused, maybe remove.
       const boxStore = useBoxStore()
       const listStore = useListStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
@@ -959,7 +954,7 @@ export const useCardStore = defineStore('cards', {
           width: rect.width,
           height: rect.height || card.height
         }
-        await this.updateCard(update) // TODO: Awaiting on a non-async function, remove await.
+        await this.updateCard(update)
         index += 1
       }
     },
@@ -1003,7 +998,6 @@ export const useCardStore = defineStore('cards', {
       // cards = utils.clone(cards) // temp?
       if (!cards.length) { return }
       await nextTick()
-      const updatedCards = [] // TODO: Unused, maybe delete?
       globalStore.updateShouldExplicitlyRenderCardIds(ids)
       /** @type {CardUpdate[]} */
       const updates = []
@@ -1159,8 +1153,6 @@ export const useCardStore = defineStore('cards', {
      * @param {number} deltaX
      */
     resizeCards (ids, deltaX) {
-      const connectionStore = useConnectionStore() // TODO: Unused, maybe remove.
-      const broadcastStore = useBroadcastStore() // TODO: Unused, maybe remove.
       const minImageWidth = 64
       /** @type {CardUpdate[]} */
       const updates = []
@@ -1369,7 +1361,6 @@ export const useCardStore = defineStore('cards', {
     /** @param {CardList} list */
     async updateCardPositionsInList (list) {
       const listStore = useListStore()
-      const globalStore = useGlobalStore() // TODO: Unused, maybe remove.
       if (!list) { return }
       const cards = this.getCardsByList(list.id)
       /** @type {CardUpdate[]} */
@@ -1625,20 +1616,23 @@ export const useCardStore = defineStore('cards', {
       return { side, item, target: targetCard, time, distance, sizeOutside }
     },
     /**
+     * Preconditions:
+     *
+     * - `useGlobalStore().preventItemSnapping` is true
+     * - `param.items.length` is not 0.
+     *
+     * If either precondition is not met, this function will return early and do no work.
      * @param {Object} param
-     * @param {any[]} param.items
+     * @param {any[]} param.items Items in the parent (e.g.: selected cards).
      * @param {Position} param.cursor
      */
     updateCardSnapGuides ({ items, cursor }) {
       const globalStore = useGlobalStore()
       const listStore = useListStore()
       if (globalStore.preventItemSnapping) { return }
-      if (!items.length) { return } // TODO: Only usage of items, maybe remove?
+      if (!items.length) { return }
       if (globalStore.shouldSnapAlign) { return }
-      const snapThreshold = 10 // TODO: Unused, maybe remove?
-      const spaceEdgeThreshold = 100
       const targetCards = this.getCardsSelectableInViewport()
-      const prevSnapGuides = globalStore.snapGuides // TODO: Unused, maybe remove?
       /** @type {SnapGuide[]} */
       let snapGuides = []
       // find
@@ -1659,8 +1653,6 @@ export const useCardStore = defineStore('cards', {
         const targetRight = target.x + target.width
         const targetTop = target.y
         const targetBottom = target.y + target.height
-        const targetIsMinX = target.x <= spaceEdgeThreshold // TODO: Unused, maybe remove?
-        const targetIsMinY = target.y <= spaceEdgeThreshold // TODO: Unused, maybe remove?
         // card side is on target edge
         const cardOverlapsTargetTop = utils.isBetween({ value: targetTop, min: cardTop, max: cardBottom })
         const cardOverlapsTargetBottom = utils.isBetween({ value: targetBottom, min: cardTop, max: cardBottom })

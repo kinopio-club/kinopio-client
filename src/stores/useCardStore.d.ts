@@ -109,6 +109,7 @@ export interface Card {
 	shouldSnapAlignToXDisplay: boolean;
 	shouldSnapAlignToYDisplay: boolean;
 	atUserMentions: any[];
+	atDateMentions: any[];
 	codeBlockLanguage: string;
 	counterIsVisible: boolean;
 	counterValue: number;
