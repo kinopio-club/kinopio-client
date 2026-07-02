@@ -15,7 +15,7 @@ export interface Segment {
 	cardId?: string;
 	userId?: string;
 	tag?: string;
-	boolean?: isTag;
+	isTag?: boolean;
 	link?: string;
 	isLink?: boolean;
 	file?: string;
