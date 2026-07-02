@@ -24,7 +24,7 @@ export interface Segment {
 	isCommand?: boolean;
 	url?: string;
 	isAtUserMention?: boolean;
-	isInviteLinke?: boolean;
+	isInviteLink?: boolean;
 	isImage?: boolean;
 	collaboratorKey?: string;
 }
