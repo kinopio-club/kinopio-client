@@ -1,7 +1,6 @@
 {
 	"extends": "@vue/tsconfig/tsconfig.json",
 	"compilerOptions": {
-		"noImplicitAny": false,
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"paths": {
