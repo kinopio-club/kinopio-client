@@ -1,0 +1,11 @@
+{
+	"extends": "@vue/tsconfig/tsconfig.json",
+	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"checkJs": true
+	}
+}
