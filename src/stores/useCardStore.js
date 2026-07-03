@@ -1612,12 +1612,6 @@ export const useCardStore = defineStore('cards', {
       return { side, item, target: targetCard, time, distance, sizeOutside }
     },
     /**
-     * Preconditions:
-     *
-     * - `useGlobalStore().preventItemSnapping` is true
-     * - `param.items.length` is not 0.
-     *
-     * If either precondition is not met, this function will return early and do no work.
      * @param {Object} param
      * @param {any[]} param.items Items in the parent (e.g.: selected cards).
      * @param {Position} param.cursor
