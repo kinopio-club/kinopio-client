@@ -44,10 +44,15 @@ const createSPAPlugin = () => {
   return {
     name: 'create-spa-app',
     apply: 'build',
-    closeBundle () {
-      const indexPath = path.resolve(__dirname, 'dist/index.html')
-      const appPath = path.resolve(__dirname, 'dist/app.html')
-      fs.copyFileSync(indexPath, appPath)
+    enforce: 'post',
+    generateBundle (options, bundle) {
+      const indexHtml = bundle['index.html']
+      if (!indexHtml) { return }
+      this.emitFile({
+        type: 'asset',
+        fileName: 'app.html',
+        source: indexHtml.source
+      })
       console.log('✓ Created SPA version at dist/app.html')
     }
   }

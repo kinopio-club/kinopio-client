@@ -116,7 +116,7 @@ header
   position fixed
   top 0
   user-select none
-  z-index var(--max-z - 1)
+  z-index calc(var(--max-z) - 1)
   width 100%
   padding 8px
   display flex
