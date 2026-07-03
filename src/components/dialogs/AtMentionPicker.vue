@@ -81,6 +81,10 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.datePickerIsVisible = false
 }
+const triggerSignUpOrInIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerSignUpOrInIsVisible()
+}
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
@@ -236,46 +240,53 @@ const isNoResults = computed(() => {
 
 <template lang="pug">
 dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="styles" :class="{ 'child-dialog-is-visible': state.datePickerIsVisible }")
-  section.info-section(v-if="!props.search && currentUserIsSignedIn && !props.searchIsDisabled")
-    .row.title-row
-      div
-        img.icon.search(src="@/assets/search.svg")
-        span Type users or date
-      div
-        //- settings
-        button.small-button(@click.stop="triggerDateAndTimeSettingsIsVisible" title="Date and Time Settings")
-          img.icon.settings(src="@/assets/settings.svg")
-        //- tips
-        button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
-          span ?
-    //- tips
-    .row(v-if="state.tipsIsVisible")
-      span.badge.info.tips-badge
-        p To @mention other people, invite them to this space, or a group.
-        p Type dates with '5d', 'today', 'tomorrow', or 'nov20' syntax.
-  //- users
-  UserList(
-    :users="filteredUsers"
-    :selectedUsers="selectedUsers"
-    @selectUser="selectUser"
-    :isClickable="true"
-    :shouldHideOptionsButton="true"
-    :shouldHideResultsFilter="true"
-    :isFocused="state.focusedList === 'users'"
-    @focusNextList="focusDateList"
-  )
-  //- dates
-  DateList(
-    :search="props.search"
-    :dateFromSearch="dateFromSearch"
-    :datePickerIsVisible="state.datePickerIsVisible"
-    :isFocused="state.focusedList === 'dates'"
-    @selectDate="selectDate"
-    @toggleDatePicker="toggleDatePickerIsVisible"
-    @focusPreviousList="focusUserList"
-  )
-  //- no matches
-  section(v-if="isNoResults") No matches found
+  template(v-if="!currentUserIsSignedIn")
+    section
+      p.badge.info
+        span Sign Up or In for @mentions and due dates
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
+  template(v-else)
+    section.info-section(v-if="!props.search && !props.searchIsDisabled")
+      .row.title-row
+        div
+          img.icon.search(src="@/assets/search.svg")
+          span Type users or date
+        div
+          //- settings
+          button.small-button(@click.stop="triggerDateAndTimeSettingsIsVisible" title="Date and Time Settings")
+            img.icon.settings(src="@/assets/settings.svg")
+          //- tips
+          button.small-button(@click.stop="toggleTipsIsVisible" :class="{ active: state.tipsIsVisible }")
+            span ?
+      //- tips
+      .row(v-if="state.tipsIsVisible")
+        span.badge.info.tips-badge
+          p To @mention other people, invite them to this space, or a group.
+          p Type dates with '5d', 'today', 'tomorrow', or 'nov20' syntax.
+    //- users
+    UserList(
+      :users="filteredUsers"
+      :selectedUsers="selectedUsers"
+      @selectUser="selectUser"
+      :isClickable="true"
+      :shouldHideOptionsButton="true"
+      :shouldHideResultsFilter="true"
+      :isFocused="state.focusedList === 'users'"
+      @focusNextList="focusDateList"
+    )
+    //- dates
+    DateList(
+      :search="props.search"
+      :dateFromSearch="dateFromSearch"
+      :datePickerIsVisible="state.datePickerIsVisible"
+      :isFocused="state.focusedList === 'dates'"
+      @selectDate="selectDate"
+      @toggleDatePicker="toggleDatePickerIsVisible"
+      @focusPreviousList="focusUserList"
+    )
+    //- no matches
+    section(v-if="isNoResults") No matches found
 </template>
 
 <style lang="stylus">
