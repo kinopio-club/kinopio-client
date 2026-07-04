@@ -237,7 +237,8 @@ const styles = computed(() => {
   const offset = 8
   const left = `${card.value.x + offset}px`
   const top = `${card.value.y + offset}px`
-  return { transform, left, top, width }
+  const zIndex = `${card.value.z + offset}px`
+  return { transform, left, top, width, zIndex }
 })
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
