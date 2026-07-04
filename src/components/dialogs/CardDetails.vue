@@ -1820,6 +1820,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 <style lang="stylus">
 .card-details
   transform-origin top left
+  z-index var(--max-z)
   > section
     background-color var(--secondary-background)
   .textarea-wrap
