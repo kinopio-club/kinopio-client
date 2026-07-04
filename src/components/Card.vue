@@ -412,7 +412,7 @@ const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
   if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
-    z = 2147483646 // max z
+    z = consts.maxZ
   } else if (isLocked.value) {
     pointerEvents = 'none'
   }

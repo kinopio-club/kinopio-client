@@ -177,7 +177,7 @@ const updatePositionInVisualViewport = () => {
   display flex
   justify-content space-between
   align-items flex-end
-  --footer-max-z 2147483644 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
+  --footer-max-z 999997 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
   z-index var(--footer-max-z)
   position fixed
   left 0

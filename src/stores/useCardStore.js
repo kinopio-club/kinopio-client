@@ -881,7 +881,7 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       // highest z
       const cards = this.getAllCards
-      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      const maxInt = consts.maxItemZ
       let highestZ = utils.highestItemZ(cards)
       if (highestZ > maxInt) {
         this.clearAllCardsZ()

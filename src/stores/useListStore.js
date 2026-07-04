@@ -358,7 +358,7 @@ export const useListStore = defineStore('lists', {
       // highest z
       const lists = this.getAllLists
       let highestZ = this.getListHighestZ
-      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      const maxInt = consts.maxItemZ
       if (highestZ > maxInt) {
         this.clearAllListsZ()
         highestZ = 1

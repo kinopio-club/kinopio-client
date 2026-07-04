@@ -373,7 +373,7 @@ export const useBoxStore = defineStore('boxes', {
     incrementBoxZ (id) {
       // highest z
       const boxes = this.getAllBoxes
-      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      const maxInt = consts.maxItemZ
       let highestZ = utils.highestItemZ(boxes)
       if (highestZ > maxInt) {
         this.clearAllBoxesZ()

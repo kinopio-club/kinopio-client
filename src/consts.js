@@ -53,6 +53,7 @@ export default {
   itemSnapOpacity: 0.5,
   itemSnapAlignThreshold: 10,
   edgeThreshold: 30,
+  maxItemZ: 999999 - 1000,
   itemTypes: ['cards', 'connections', 'boxes', 'lists', 'lines', 'drawingStrokes'],
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
