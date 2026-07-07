@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, defineAsyncComponent } from 'vue'
+import { reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useHead } from '@unhead/vue'
 
@@ -10,8 +10,9 @@ import Header from '@/components/pages/Header.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
 import Footer from '@/components/pages/Footer.vue'
-import helpPages from 'virtual:help-pages'
+import helpPages from 'virtual:help-pages' // pages [{ slug, title, description, category }, {…}] from vite build
 import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
@@ -26,11 +27,14 @@ onMounted(() => {
   }
 })
 
+const state = reactive({
+  filter: '',
+  filteredPages: []
+})
+
 // each md file becomes its own lazy-loaded chunk
 const pageModules = import.meta.glob('../help/*.md')
-// post metadata ({ slug, title, description, category }) parsed from md
-// frontmatter at build time by the help-pages plugin in vite.config.js,
-// so listing posts doesn't pull their content chunks into this one
+
 const categories = helpPages
   .reduce((list, page) => {
     const category = list.find(item => item.name === page.category)
@@ -54,10 +58,22 @@ const asyncPageComponent = (slug) => {
   return asyncPageComponents[slug]
 }
 
+const closeAllDialogs = () => {
+  globalStore.closeAllDialogs()
+}
+
 const currentSlug = computed(() => route.params.page)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
 const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
+const searchPages = computed(() => {
+  const pages = []
+  return helpPages.map(page => {
+    page.name = page.title
+    page.aliases = page.description.split(' ')
+    return page
+  })
+})
 
 useHead(() => {
   let title = 'Kinopio Help'
@@ -78,13 +94,6 @@ useHead(() => {
   }
 })
 
-const closeAllDialogs = () => {
-  globalStore.closeAllDialogs()
-}
-
-const categoryBadgeClass = (category) => {
-  return utils.normalizeString(category.name)
-}
 const badgeClasses = (page) => {
   const classes = []
   if (currentSlug.value === page.slug) {
@@ -94,6 +103,26 @@ const badgeClasses = (page) => {
   return classes
 }
 
+const categoryBadgeClass = (category) => {
+  return utils.normalizeString(category.name)
+}
+const currentPage = computed(() => {
+  const page = helpPages.find(page => page.slug === currentSlug.value)
+
+  console.log('🎨🎨', categories, '❤️❤️❤️', page)
+  return page
+})
+const currentCategory = computed(() => {
+  const x = categories.find(category => category.name === currentPage.value.category)
+  console.log('🎨🎨🎨🎨', x)
+  return x
+  // return utils.normalizeString(category?.name)
+})
+const currentCategoryClass = computed(() => utils.normalizeString(currentCategory.value.name))
+// const currentCategoryName = computed(() => {
+//   return currentCategory?.name
+// })
+
 // theme
 
 const isThemeDark = computed(() => themeStore.getIsThemeDark)
@@ -101,10 +130,28 @@ const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
 
-// TODO
-// @/assets/pages/help/404-poster.webp
-// - https://updates.kinopio.club/pages/..
+// filter
 
+const pagesFiltered = computed(() => {
+  let items
+  if (state.filter) {
+    items = state.filteredPages
+  } else {
+    items = searchPages
+  }
+  return items
+})
+const clearFilter = () => {
+  state.filter = ''
+}
+const updateFilter = (filter) => {
+  state.filter = filter
+  console.log('❤️❤️❤️', state.filter)
+}
+const updateFilteredPages = (pages) => {
+  state.filteredPages = pages
+  console.log('🗺️🗺️🗺️', state.filteredPages)
+}
 </script>
 
 <template lang="pug">
@@ -117,22 +164,25 @@ const updateSystemTheme = () => {
         router-link(to="/help")
           h2.page-title Help
 
-      section
-        p [jump to topics], search _______________
+      section.search
+        ResultsFilter(
+          :items="searchPages"
+          :searchByAliases="true"
+          @updateFilter="updateFilter"
+          @updateFilteredItems="updateFilteredPages"
+          @clearFilter="clearFilter"
+          placeholder="Search Help Topics"
+        )
 
       section
-        AboutHowTo(v-if="currentSlugIsRoot")
+        AboutHowTo(v-if="currentSlugIsRoot && !state.filter")
+
         nav
-          section.category(v-for="category in categories" :key="category.name")
-            //- p.category-name {{ category.name }}
+          section.category(v-if="currentSlugIsRoot || state.filter" v-for="category in categories" :key="category.name")
             p.category-name
               .badge.category-circle(:class="categoryBadgeClass(category)")
               span {{category.name}}
             ul
-              //- li
-              //-   .badge.category-name
-              //-     .badge.category-circle(:class="categoryBadgeClass(category)")
-              //-     span {{category.name}}
               li(v-for="page in category.pages" :key="page.slug")
                 router-link(:to="`/help/${page.slug}`")
                   .badge.button-badge(:class="badgeClasses(page)")
@@ -140,7 +190,12 @@ const updateSystemTheme = () => {
 
         article
           //- post
-          component(v-if="pageContent" :is="pageContent")
+          template(v-if="pageContent")
+            p.category-name
+              .badge.category-circle(:class="currentCategoryClass")
+                //- (:class="pageCategoryBadgeClass(pageContent)")
+              span {{currentCategory?.name}}
+            component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
             h1 404 – Page not found
@@ -168,18 +223,25 @@ main.help-page-wrap
     text-decoration none
   h2.page-title
     width fit-content
-    color var(--primary-on-light-background)
+    color var(--primary)
     &:hover
       text-decoration underline
 
+  section.intro
+    margin-bottom 1rem
+    h2
+      margin-bottom 0
+
+  section.search
+    max-width 400px
+
+  .category-name
+    display flex
+    align-items center
+    margin-right 0
+    margin-bottom 10px
+
   nav
-    .category-name
-      // margin-bottom 4px
-      // font-weight bold
-      display flex
-      align-items center
-      margin-right 0
-      margin-bottom 10px
     section.category + section.category
       margin-top 1rem
     ul
@@ -188,10 +250,10 @@ main.help-page-wrap
       display flex
       flex-wrap wrap
       gap 10px 4px
+      // border-bottom 1px solid var(--primary-border)
+      // padding-bottom 1rem
     li
       list-style none
-      // display inline-block
-      // margin-right 4px
       margin 0
     a
       text-decoration none
@@ -211,14 +273,27 @@ main.help-page-wrap
       display none
 
   article
-    margin-top 3rem
-    margin-bottom 3rem
+    line-height 1.35
+    // margin-top 3rem
+    // margin-bottom 3rem
+    // border-top 1px solid var(--primary-border)
+    // padding-top 1rem
+
+    // section.subsection
+    //   border-radius var(--page-entity-radius)
+    //   padding 2rem
     h1
+      margin-top 0
       font-size 24px
     h2
       font-size 18px
     h3
       font-size 16px
+    p
+      max-width 450px
+    img,
+    video
+      border-radius var(--page-entity-radius)
 
   .badge
     color var(--primary-on-light-background)

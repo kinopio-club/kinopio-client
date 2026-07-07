@@ -1,6 +1,6 @@
 ---
-title: Adding Images to Cards
-description: Card Images, Files, Video, Audio, Embeds, Code
+title: Card Images
+description: Adding images, files, video, audio, embeds, and codeblocks to cards
 category: Basics
 
 ---
