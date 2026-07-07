@@ -200,6 +200,8 @@ export default defineConfig(async ({ command, mode }) => {
             /^\/blog(?:\/.*)?$/
           ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
+          // help pages and their media are online-only, keep them out of the app precache
+          globIgnores: ['help.html', 'help/**'],
           runtimeCaching: [
             createCache('cdn-cache', /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i), // match all except mp3/mp4
             createCache('img-cache', /^https:\/\/img\.kinopio\.club\/.*/i),
@@ -235,6 +237,23 @@ export default defineConfig(async ({ command, mode }) => {
       sourcemap: true,
       // skip non-important build warnings
       rollupOptions: {
+        output: {
+          // emit help post media and content chunks into help/ so the service
+          // worker globIgnores above can exclude them from the app precache
+          assetFileNames (assetInfo) {
+            const original = assetInfo.originalFileNames?.[0] || ''
+            if (original.includes('assets/pages/help/')) {
+              return 'help/assets/[name]-[hash][extname]'
+            }
+            return 'assets/[name]-[hash][extname]'
+          },
+          chunkFileNames (chunkInfo) {
+            if (chunkInfo.facadeModuleId?.includes('/src/help/')) {
+              return 'help/assets/[name]-[hash].js'
+            }
+            return 'assets/[name]-[hash].js'
+          }
+        },
         onwarn (warning, warn) {
           if (
             warning.message.includes('onUnmounted') ||

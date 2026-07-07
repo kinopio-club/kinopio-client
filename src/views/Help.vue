@@ -175,24 +175,44 @@ main.help-page-wrap
     a
       text-decoration none
 
-    .badge
-      color var(--primary-on-light-background)
-      &.basics
-        background-color yellow
-      &.reference
-        background-color pink
-
   section.how-to
     margin-top 2rem
     h2
       display none
+
   article
     margin-top 3rem
     margin-bottom 3rem
     h1
-      font-size 20px
+      font-size 24px
     h2
       font-size 18px
     h3
       font-size 16px
+
+  .badge
+    color var(--primary-on-light-background)
+    &.basics
+      background-color khaki
+    &.getting-around
+      background-color pink
+    &.advanced-use
+      background-color #b9a8ff
+    &.collaboration
+      background-color violet
+    &.importing-and-exporting
+      background-color lightskyblue
+    &.about-kinopio
+      background-color mediumaquamarine
+    &.community
+      background-color burlywood
+    &.user-settings
+      background-color #deb1ff
+    &.troubleshooting
+      background-color #a4dfdc
+    &.policies-and-privacy
+      background-color salmon
+    &.press
+      background-color #c4c4c4
+
 </style>
