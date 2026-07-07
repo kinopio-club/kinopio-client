@@ -53,23 +53,21 @@ export const useHistoryStore = defineStore('history', {
     // card
     cardUpdatesProcessing: new Map(),
     prevCardUpdatesProcessing: new Map(),
-    cardUpdateKeysProcessing: new Set(),
+    // card details visible session
+    cardNameUpdateSessionId: '',
+    cardNameUpdateSessionPrev: null,
     // box
     boxUpdatesProcessing: new Map(),
     prevBoxUpdatesProcessing: new Map(),
-    boxUpdateKeysProcessing: new Set(),
     // connection
     connectionUpdatesProcessing: new Map(),
     prevConnectionUpdatesProcessing: new Map(),
-    connectionUpdateKeysProcessing: new Set(),
     // line
     // lineUpdatesProcessing: new Map(),
     // prevLineUpdatesProcessing: new Map(),
-    // lineUpdateKeysProcessing: new Set(),
     // list
     listUpdatesProcessing: new Map(),
-    prevListUpdatesProcessing: new Map(),
-    listUpdateKeysProcessing: new Set()
+    prevListUpdatesProcessing: new Map()
 
   }),
   actions: {
@@ -119,6 +117,8 @@ export const useHistoryStore = defineStore('history', {
       this.patches = []
       this.pointer = 0
       this.pendingPatch = []
+      this.cardNameUpdateSessionId = ''
+      this.cardNameUpdateSessionPrev = null
       if (showDebugMessages) {
         console.info('reset history')
       }
@@ -144,6 +144,7 @@ export const useHistoryStore = defineStore('history', {
       this.subscribeToConnections()
       // this.subscribeToLines() // todo
       this.subscribeToLists()
+      this.watchCardDetailsVisible()
     },
 
     // card events
@@ -153,13 +154,12 @@ export const useHistoryStore = defineStore('history', {
       const ignoreKeys = ['id', 'nameUpdatedAt', 'height', 'width', 'z', 'prevHeight', 'prevWidth', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview', 'linkToCardId']
       const cardStore = useCardStore()
       const patch = []
-      this.cardUpdatesProcessing.forEach((update, id) => {
-        const keys = Array.from(this.cardUpdateKeysProcessing)
+      this.cardUpdatesProcessing.forEach((newCard, id) => {
+        const keys = Object.keys(newCard)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
         let prevCard = this.prevCardUpdatesProcessing.get(id)
         prevCard = utils.objectPickKeys(prevCard, keys)
-        const newCard = this.cardUpdatesProcessing.get(id)
         patch.push({
           action: 'cardUpdated',
           prev: prevCard,
@@ -171,7 +171,6 @@ export const useHistoryStore = defineStore('history', {
       }
       this.cardUpdatesProcessing = new Map()
       this.prevCardUpdatesProcessing = new Map()
-      this.cardUpdateKeysProcessing = new Set()
     },
     processCardsCreated (updates) {
       const patch = updates.map(update => {
@@ -193,6 +192,58 @@ export const useHistoryStore = defineStore('history', {
       })
       this.addPatch(patch)
     },
+    // name edits from card details are per-keystroke, so they are coalesced into a single patch committed when the dialog closes
+    cardNameUpdateFromSession (update) {
+      const globalStore = useGlobalStore()
+      const cardStore = useCardStore()
+      const isNameEdit = Object.hasOwn(update, 'name') && update.id === globalStore.cardDetailsIsVisibleForCardId
+      if (!isNameEdit) { return update }
+      if (this.cardNameUpdateSessionId && this.cardNameUpdateSessionId !== update.id) {
+        this.commitCardNameUpdateSessionPatch()
+      }
+      if (!this.cardNameUpdateSessionId) {
+        const prevCard = cardStore.getCard(update.id)
+        if (!prevCard) { return update }
+        this.cardNameUpdateSessionId = update.id
+        this.cardNameUpdateSessionPrev = {
+          name: prevCard.name,
+          nameUpdatedByUserId: prevCard.nameUpdatedByUserId
+        }
+      }
+      update = { ...update }
+      delete update.name
+      delete update.nameUpdatedByUserId
+      delete update.nameUpdatedAt
+      const remainingKeys = Object.keys(update).filter(key => key !== 'id')
+      if (!remainingKeys.length) { return null }
+      return update
+    },
+    commitCardNameUpdateSessionPatch () {
+      const cardStore = useCardStore()
+      const cardId = this.cardNameUpdateSessionId
+      const prev = this.cardNameUpdateSessionPrev
+      this.cardNameUpdateSessionId = ''
+      this.cardNameUpdateSessionPrev = null
+      if (!cardId) { return }
+      const card = cardStore.getCard(cardId)
+      if (!card) { return }
+      if (card.name === prev.name) { return }
+      const patch = [{
+        action: 'cardUpdated',
+        prev: { id: cardId, name: prev.name, nameUpdatedByUserId: prev.nameUpdatedByUserId },
+        new: { id: cardId, name: card.name, nameUpdatedByUserId: card.nameUpdatedByUserId }
+      }]
+      this.addPatch(patch)
+    },
+    watchCardDetailsVisible () {
+      const globalStore = useGlobalStore()
+      watch(
+        () => globalStore.cardDetailsIsVisibleForCardId,
+        () => {
+          this.commitCardNameUpdateSessionPatch()
+        }
+      )
+    },
     subscribeToCards () {
       const cardStore = useCardStore()
       cardStore.$onAction(({ name, args, after, onError }) => {
@@ -201,8 +252,8 @@ export const useHistoryStore = defineStore('history', {
         switch (name) {
           case 'updateCards':
             updates.forEach(update => {
-              const keys = Object.keys(update)
-              keys.forEach(key => this.cardUpdateKeysProcessing.add(key))
+              update = this.cardNameUpdateFromSession(update)
+              if (!update) { return }
               if (this.cardUpdatesProcessing.has(update.id)) {
                 // Merge with existing object
                 this.cardUpdatesProcessing.set(update.id, { ...this.cardUpdatesProcessing.get(update.id), ...update })
@@ -232,13 +283,12 @@ export const useHistoryStore = defineStore('history', {
       if (!this.boxUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'z']
       const patch = []
-      this.boxUpdatesProcessing.forEach((update, id) => {
-        const keys = Array.from(this.boxUpdateKeysProcessing)
+      this.boxUpdatesProcessing.forEach((newBox, id) => {
+        const keys = Object.keys(newBox)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
         let prevBox = this.prevBoxUpdatesProcessing.get(id)
         prevBox = utils.objectPickKeys(prevBox, keys)
-        const newBox = this.boxUpdatesProcessing.get(id)
         patch.push({
           action: 'boxUpdated',
           prev: prevBox,
@@ -250,7 +300,6 @@ export const useHistoryStore = defineStore('history', {
       }
       this.boxUpdatesProcessing = new Map()
       this.prevBoxUpdatesProcessing = new Map()
-      this.boxUpdateKeysProcessing = new Set()
     },
     processBoxCreated (updates) {
       const patch = [{
@@ -278,8 +327,6 @@ export const useHistoryStore = defineStore('history', {
         switch (name) {
           case 'updateBoxes':
             updates.forEach(update => {
-              const keys = Object.keys(update)
-              keys.forEach(key => this.boxUpdateKeysProcessing.add(key))
               if (this.boxUpdatesProcessing.has(update.id)) {
                 // Merge with existing object
                 this.boxUpdatesProcessing.set(update.id, { ...this.boxUpdatesProcessing.get(update.id), ...update })
@@ -309,13 +356,12 @@ export const useHistoryStore = defineStore('history', {
       if (!this.listUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'z']
       const patch = []
-      this.listUpdatesProcessing.forEach((update, id) => {
-        const keys = Array.from(this.listUpdateKeysProcessing)
+      this.listUpdatesProcessing.forEach((newList, id) => {
+        const keys = Object.keys(newList)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
         let prevList = this.prevListUpdatesProcessing.get(id)
         prevList = utils.objectPickKeys(prevList, keys)
-        const newList = this.listUpdatesProcessing.get(id)
         patch.push({
           action: 'listUpdated',
           prev: prevList,
@@ -327,7 +373,6 @@ export const useHistoryStore = defineStore('history', {
       }
       this.listUpdatesProcessing = new Map()
       this.prevListUpdatesProcessing = new Map()
-      this.listUpdateKeysProcessing = new Set()
     },
     processListCreated (updates) {
       const patch = [{
@@ -355,8 +400,6 @@ export const useHistoryStore = defineStore('history', {
         switch (name) {
           case 'updateLists':
             updates.forEach(update => {
-              const keys = Object.keys(update)
-              keys.forEach(key => this.listUpdateKeysProcessing.add(key))
               if (this.listUpdatesProcessing.has(update.id)) {
                 // Merge with existing object
                 this.listUpdatesProcessing.set(update.id, { ...this.listUpdatesProcessing.get(update.id), ...update })
@@ -386,13 +429,12 @@ export const useHistoryStore = defineStore('history', {
       if (!this.connectionUpdatesProcessing.size) { return }
       const ignoreKeys = ['id', 'path']
       const patch = []
-      this.connectionUpdatesProcessing.forEach((update, id) => {
-        const keys = Array.from(this.connectionUpdateKeysProcessing)
+      this.connectionUpdatesProcessing.forEach((newConnection, id) => {
+        const keys = Object.keys(newConnection)
         const everyKeyIsIgnored = keys.every(key => ignoreKeys.includes(key))
         if (everyKeyIsIgnored) { return }
         let prevConnection = this.prevConnectionUpdatesProcessing.get(id)
         prevConnection = utils.objectPickKeys(prevConnection, keys)
-        const newConnection = this.connectionUpdatesProcessing.get(id)
         patch.push({
           action: 'connectionUpdated',
           prev: prevConnection,
@@ -404,7 +446,6 @@ export const useHistoryStore = defineStore('history', {
       }
       this.connectionUpdatesProcessing = new Map()
       this.prevConnectionUpdatesProcessing = new Map()
-      this.connectionUpdateKeysProcessing = new Set()
     },
     processConnectionCreated (updates) {
       const patch = [{
@@ -432,8 +473,6 @@ export const useHistoryStore = defineStore('history', {
         switch (name) {
           case 'updateConnections':
             updates.forEach(update => {
-              const keys = Object.keys(update)
-              keys.forEach(key => this.connectionUpdateKeysProcessing.add(key))
               if (this.connectionUpdatesProcessing.has(update.id)) {
                 // Merge with existing object
                 this.connectionUpdatesProcessing.set(update.id, { ...this.connectionUpdatesProcessing.get(update.id), ...update })
@@ -470,11 +509,11 @@ export const useHistoryStore = defineStore('history', {
         globalStore.triggerDrawingUndo()
         return
       }
-      this.shouldPreventPatchUpdates = true
       if (this.pointer === 0) {
         console.info('⏩ undo cancelled, pointer is at start', this.pointer)
         return
       }
+      this.shouldPreventPatchUpdates = true
       const index = this.pointer - 1
       const patch = this.patches[index]
       for (const item of patch) {
@@ -487,6 +526,9 @@ export const useHistoryStore = defineStore('history', {
             card = item.prev
             cardStore.updateCard(card)
             await nextTick()
+            if (Object.hasOwn(card, 'name')) {
+              await cardStore.updateCardDimensions(card.id)
+            }
             connectionStore.updateConnectionPathByItemId(card.id)
             break
           case 'cardCreated':
@@ -596,6 +638,9 @@ export const useHistoryStore = defineStore('history', {
               cardStore.createCard(card, true)
             }
             await nextTick()
+            if (Object.hasOwn(card, 'name')) {
+              await cardStore.updateCardDimensions(card.id)
+            }
             connectionStore.updateConnectionPathByItemId(card.id)
             break
           case 'cardCreated':
