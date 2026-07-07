@@ -275,38 +275,35 @@ main.help-page-wrap
 
   article
     line-height 1.35
-    // margin-top 3rem
-    // margin-bottom 3rem
-    // border-top 1px solid var(--primary-border)
-    // padding-top 1rem
-
-    // section.subsection
-    //   border-radius var(--page-entity-radius)
-    //   padding 2rem
     h1
       margin-top 0
       font-size 24px
     h2
+      border-top 1px solid var(--primary-border)
+      padding-top 10px
       font-size 18px
     h3
       font-size 16px
     p
-      max-width 450px
+      max-width 500px
     img,
     video
       border-radius var(--page-entity-radius)
-      max-width 450px
+      max-width 500px
       margin-top 10px
-      // margin-bottom 10px
       &.large
         max-width 100%
+      &.small
+        max-width 300px
     ul
-      max-width 450px
+      max-width 500px
       padding-left 15px
     blockquote
       margin-left 0
       border-left 1px solid var(--primary-border)
       padding-left 8px
+    // .markdown-body
+    //   margin-top 10px
 
   .badge
     color var(--primary-on-light-background)
