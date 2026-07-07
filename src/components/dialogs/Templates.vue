@@ -35,7 +35,7 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   resultsSectionsHeight: null,
-  selectedCategory: 'All',
+  selectedCategoryName: 'All',
   isLoadingUserTemplates: true,
   isLoadingSystemTemplates: true,
   userTemplates: [],
@@ -49,7 +49,7 @@ watch(() => props.visible, (value, prevValue) => {
   updateUserTemplates()
   updateSystemTemplates()
   updateHeight()
-  state.selectedCategory = 'All'
+  state.selectedCategoryName = 'All'
   state.error.unknownServerError = false
 })
 
@@ -78,7 +78,7 @@ const updateUserTemplates = async () => {
   updateHeight()
 }
 const isUserTemplatesVisible = computed(() => {
-  if (state.selectedCategory !== 'All') { return }
+  if (state.selectedCategoryName !== 'All') { return }
   if (state.isLoadingUserTemplates) { return }
   return Boolean(state.userTemplates.length)
 })
@@ -109,6 +109,9 @@ const updateSystemTemplates = async () => {
   await nextTick()
   updateHeight()
 }
+const systemTemplatesByCategory = (category) => {
+  return state.systemTemplates.filter(space => space.categoryId === category.id)
+}
 
 // filter
 
@@ -123,28 +126,16 @@ const updateFilteredItems = (items) => {
 // categories
 
 const categories = computed(() => templates.categories())
-const updateSelectedCategory = (name) => {
-  state.selectedCategory = name
+const templateCategories = computed(() => categories.value.filter(category => category.name !== 'All'))
+const updateSelectedCategoryName = (category) => {
+  state.selectedCategoryName = category.name
 }
-const categoryIsActive = (name) => {
-  return state.selectedCategory === name
+const categoryIsVisible = (category) => {
+  return state.selectedCategoryName === 'All' || state.selectedCategoryName === category.name
 }
-const categoryIsVisible = (name) => {
-  return state.selectedCategory === 'All' || state.selectedCategory === name
+const categoryIsActive = (category) => {
+  return state.selectedCategoryName === category.name
 }
-const categoryByName = (name) => {
-  return categories.value.find(category => category.name === name)
-}
-const categoryColor = (name) => {
-  const color = categoryByName(name).color
-  return color
-}
-const systemTemplatesByCategoryLife = computed(() => {
-  return state.systemTemplates.filter(space => space.categoryId === 1)
-})
-const systemTemplatesByCategoryWork = computed(() => {
-  return state.systemTemplates.filter(space => space.categoryId === 2)
-})
 
 // dialog height
 
@@ -184,8 +175,8 @@ dialog.templates(
         span My Spaces
     //- categories
     .categories
-      template(v-for="category in categories" :key="category.name")
-        span.badge.secondary.button-badge(:class="{ active: categoryIsActive(category.name) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategory(category.name)") {{category.name}}
+      template(v-for="category in categories" :key="category.id")
+        span.badge.secondary.button-badge(:class="{ active: categoryIsActive(category) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategoryName(category)") {{category.name}}
     //- errors
     OfflineBadge(:isDanger="true" :isInline="true")
     p.badge.error-badge.danger(v-if="state.error.unknownServerError")
@@ -206,28 +197,14 @@ dialog.templates(
         :hideTemplatesIcon="true"
       )
     //- system templates
-    template(v-if="!state.error.unknownServerError")
-      //- Life
-      section.results-section.results-section-border-top(v-if="categoryIsVisible('Life')")
+    template(v-if="!state.error.unknownServerError" v-for="category in templateCategories" :key="category.id")
+
+      section.results-section.results-section-border-top(v-if="categoryIsVisible(category)")
         p.category
-          span.badge.secondary(:style="{ 'background-color': categories[1].color }" @click="updateSelectedCategory(categories[1].name)") {{categories[1].name}}
+          span.badge.secondary.category-name(:style="{ 'background-color': category.color }" @click="updateSelectedCategoryName(category)")
+            span {{category.name}}
         SpaceList(
-          :spaces="systemTemplatesByCategoryLife"
-          :showCategory="true"
-          @selectSpace="changeSpace"
-          :isLoading="state.isLoadingUserTemplates"
-          :parentDialog="parentDialog"
-          :hideFilter="true"
-          :showSpaceGroups="true"
-          :hideTodayBadge="true"
-          :hideExploreBadge="true"
-        )
-      //- Work
-      section.results-section.results-section-border-top(v-if="categoryIsVisible('Work & School')")
-        p.category
-          span.badge.secondary(:style="{ 'background-color': categories[2].color }" @click="updateSelectedCategory(categories[2].name)") {{categories[2].name}}
-        SpaceList(
-          :spaces="systemTemplatesByCategoryWork"
+          :spaces="systemTemplatesByCategory(category)"
           :showCategory="true"
           @selectSpace="changeSpace"
           :isLoading="state.isLoadingUserTemplates"
@@ -256,6 +233,8 @@ dialog.templates
     margin 4px
     margin-bottom 10px
     padding-top 0
+    .category-name
+      color var(--primary-on-light-background)
   .offline-badge
     margin-top 10px
   .results-filter

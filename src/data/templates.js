@@ -8,6 +8,11 @@ export default {
         color: ''
       },
       {
+        id: 3,
+        name: "Fran's Picks",
+        color: 'orange'
+      },
+      {
         id: 1,
         name: 'Life',
         color: '#ec87f4'
@@ -71,6 +76,22 @@ export default {
         name: 'Time Tracking',
         id: '-ou2kHxO40-rDFZymIn1A',
         categoryId: 2
+      },
+
+      {
+        name: 'Monthly Blog Space',
+        id: 'v-84fZYmEXgTK9FjAv3UO',
+        categoryId: 3
+      },
+      {
+        name: 'Digital Birthday Card',
+        id: 'E4GkMuiG9X_sVHt2F3akd',
+        categoryId: 3
+      },
+      {
+        name: 'My Monthly Space',
+        id: 'JHDr598KhqoI1FU9ZzrDQ',
+        categoryId: 3
       }
     ]
   },
