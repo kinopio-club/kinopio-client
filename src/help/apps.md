@@ -24,4 +24,4 @@ The desktop app makes Kinopio easier to open and create spaces without having to
 
 The desktop app supports tabs and page refreshing like a web browser. It also gives you more control over the size of your window to let you keep your tasks visible while you work.
 
-![](https://files.kinopio.club/kinopio-app-small.png)
+<img src="https://files.kinopio.club/kinopio-app-small.png" alt="">

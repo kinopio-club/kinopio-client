@@ -22,11 +22,11 @@ To add a tag into a card you can either type `[[` and start typing your tag, the
 
 Click on a card tag to change it's color or to jump to other cards with that tag in other spaces.
 
-![](@/assets/pages/help/posts/tag-details.png)
+<img src="@/assets/pages/help/posts/tag-details.png" alt="">
 
 Use the sidebar to get an see all your tags and jump to matching cards.
 
-![](@/assets/pages/help/posts/tag-sidebar.png)
+<img src="@/assets/pages/help/posts/tag-sidebar.png" alt="">
 
 
 ## Some Ways to Use Tags

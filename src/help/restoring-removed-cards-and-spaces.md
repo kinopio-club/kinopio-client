@@ -9,6 +9,6 @@ category: Advanced Use
 If you've accidentally removed/deleted a card or space, you can restore it back through `Sidebar → Removed`. From there, you'll be able to restore or permanently delete cards or spaces. Removed items are never permanently deleted without you explicitly doing so.
 
 
-![removed-dialog](@/assets/pages/help/posts/removed-dialog.png)
+<img src="@/assets/pages/help/posts/removed-dialog.png" alt="removed-dialog">
 
 > A permanently removed card or space is immediately deleted from the database and cannot be restored, so be careful.

@@ -28,7 +28,7 @@ Hold shift to Box Select. Box selecting can be helpful when you want to make a b
 
 Painting over items also lets you take bulk actions on them, including moving them to another space.
 
-![move-cards](@/assets/pages/help/posts/selecting-and-bulk-actions/select-move.webp)
+<img src="@/assets/pages/help/posts/selecting-and-bulk-actions/select-move.webp" alt="move-cards">
 
 
 ## Select All, Below, To the Right

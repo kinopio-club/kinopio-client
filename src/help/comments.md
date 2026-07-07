@@ -18,7 +18,7 @@ You can turn cards into comments via either `Card → More Options → Comment`,
 If you have a space that you want to share with your team, but want to ensure that they only leave comments on, you can get a comment-only invite link through `Share → Invite Collaborators → Comment`.
 
 
-![invite](@/assets/pages/help/posts/comments/invite.webp)
+<img src="@/assets/pages/help/posts/comments/invite.webp" alt="invite">
 
 
 Other uses for comments:

@@ -8,7 +8,7 @@ category: Basics
 
 `Card → down arrow` toggles advanced card options like header fonts, tags, frames, colors, and more.
 
-![](@/assets/pages/help/posts/styling-cards/card-details.webp)
+<img src="@/assets/pages/help/posts/styling-cards/card-details.webp" alt="">
 
 You can also paint multiple cards to style them together,
 
@@ -19,7 +19,7 @@ You can also paint multiple cards to style them together,
 
 If you're often using the same card color, or want to use a specific color in a space, you can quick change your default New Card Color from the footer. 
 
-![](@/assets/pages/help/posts/styling-cards/new-card-color2.webp)
+<img src="@/assets/pages/help/posts/styling-cards/new-card-color2.webp" alt="">
 
 
 Happy styling ヾ(＾∇＾)

@@ -12,7 +12,7 @@ Explore is a list of cool spaces made and explicitly shared by other people (lik
 
 To add or remove your own cool space to Explore, toggle `Spaces → Add to Explore`.
 
-![show-in-explore](@/assets/pages/help/posts/add-to-explore.png)
+<img src="@/assets/pages/help/posts/add-to-explore.png" alt="show-in-explore">
 
 
 ## Live

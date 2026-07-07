@@ -16,7 +16,7 @@ You should think of collaborators as people you fully trust because they'll be a
 
 Send someone a collaborator invite by copying the URL found in `Spaces → Invite Collaborators`
 
-![invite-collaborators](@/assets/pages/help/posts/invite-collaborators.png)
+<img src="@/assets/pages/help/posts/invite-collaborators.png" alt="invite-collaborators">
 
 ## Collaborators can
 

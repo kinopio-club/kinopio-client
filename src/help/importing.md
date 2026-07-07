@@ -10,7 +10,7 @@ category: Importing and Exporting
 
 You can import the JSON of exported spaces you've saved to your computer with `Share → Import → [JSON] Select File`
 
-![import-space](@/assets/pages/help/posts/import-space.png)
+<img src="@/assets/pages/help/posts/import-space.png" alt="import-space">
 
 ## Importing an Are.na Channel
 

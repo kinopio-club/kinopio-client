@@ -8,7 +8,7 @@ category: Community
 
 <span>Get started with templates by clicking the <img src="@/assets/templates.svg" class="icon templates"> template button in the top left.</span>
 
-![templates](https://files.kinopio.club/templates-dialog.png)
+<img src="https://files.kinopio.club/templates-dialog.png" alt="templates">
 
 # Creating and Using Personal Templates
 

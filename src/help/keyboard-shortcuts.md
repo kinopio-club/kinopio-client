@@ -14,7 +14,7 @@ category: Getting Around
 
 This allows you to quickly make structures like
 
-![](https://files.kinopio.club/keyboard-shortcuts-tree.png)
+<img src="https://files.kinopio.club/keyboard-shortcuts-tree.png" alt="">
 
 ## Select, then copy and paste cards
 

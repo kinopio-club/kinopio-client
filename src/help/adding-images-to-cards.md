@@ -33,7 +33,7 @@ Some websites obscure their image URLs to not include the file extension `https:
 
 To view the image fullsize, click to open the card, and then click again on the image preview
 
-![image-card](@/assets/pages/help/posts/adding-images-to-cards/card-details.webp)
+<img src="@/assets/pages/help/posts/adding-images-to-cards/card-details.webp" alt="image-card">
 
 ## Gifs
 

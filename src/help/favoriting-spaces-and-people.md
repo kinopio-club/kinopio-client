@@ -12,13 +12,13 @@ You can bookmark spaces or people to return to later by favoriting them.
 
 Toggle the `Favorite` button at the bottom of the screen. You can also favorite your own spaces to quickly.
 
-![favorite-space](@/assets/pages/help/posts/favorite-space.png)
+<img src="@/assets/pages/help/posts/favorite-space.png" alt="favorite-space">
 
 ## Favorite a Person
 
 In a space with someone interesting, click their avatar in the header. Then, toggle the `Favorite` button.
 
-![favorite-user](@/assets/pages/help/posts/favorite-user.png)
+<img src="@/assets/pages/help/posts/favorite-user.png" alt="favorite-user">
 
 ## Your Favorites
 

@@ -8,7 +8,7 @@ category: Collaboration
 
 By default, whenever a collaborator (or anyone in your open spaces) adds a card you will receive a notification about it.
 
-![](https://files.kinopio.club/notifications-dialog.png)
+<img src="https://files.kinopio.club/notifications-dialog.png" alt="">
 
 ## When Notifications are Emailed
 
@@ -21,4 +21,4 @@ When you view your notifications in Kinopio, those notifications will be marked 
 
 If you don't want to be emailed notifications, you can unsubscribe with the link at the bottom of the email, or in your `User → Settings`
 
-![](https://files.kinopio.club/notifications-settings.png)
+<img src="https://files.kinopio.club/notifications-settings.png" alt="">
