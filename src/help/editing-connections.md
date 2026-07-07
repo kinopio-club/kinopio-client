@@ -14,7 +14,7 @@ By default new connections will use the last connection type, but you can make n
 
 Use connections and labels to add flexible meaning, grouping, and structure to your spaces.
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/editing-connections/demo.mp4">
 </video>
 
@@ -22,6 +22,6 @@ Use connections and labels to add flexible meaning, grouping, and structure to y
 
 Paint to select multiple connections lets you assign them all to the same connection type.
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/editing-connections/bulk2.mp4">
 </video>

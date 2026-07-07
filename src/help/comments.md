@@ -10,7 +10,7 @@ Comment cards are smaller than normal cards and a bit transparent, letting you g
 
 You can turn cards into comments via either `Card → More Options → Comment`, or by typing `((`.
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/comments/demo.mp4">
 </video>
 

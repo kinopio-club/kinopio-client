@@ -14,7 +14,7 @@ category: About Kinopio
 
 Or add the site to your Android phone homescreen by following the instructions in `About → Apps`
 
-<video class="wide" autoplay loop muted playsinline>
+<video class="large" autoplay loop muted playsinline>
   <source src="https://files.kinopio.club/kinopio-desktop-apps.mp4">
 </video>
 

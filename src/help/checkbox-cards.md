@@ -20,14 +20,14 @@ Differentiate thoughts from plans with checkbox cards,
 
 Filtering by todos to fades out regular and completed todos cards
 
-<img src="@/assets/pages/help/posts/checkbox-cards/filter.webp" class="wide"/>
+<img src="@/assets/pages/help/posts/checkbox-cards/filter.webp" class="large"/>
 
 When your brain is in "Todo Mode" you can now open the Sidebar to see a simple list of all your [] checkbox boxes and cards.
 
 Helpful for getting things done after planning out a project, or for checking off groceries.
 
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/checkbox-cards/sidebar.mp4">
 </video>
 

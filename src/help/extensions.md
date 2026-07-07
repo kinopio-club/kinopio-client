@@ -6,17 +6,15 @@ category: About Kinopio
 
 # Browser Extensions and Integrations
 
-For quickly recording thoughts, inspirations, and urls to your [Inbox](/posts/inbox/) while you're out making waves on the world wide web.
+For quickly recording thoughts, inspirations, and urls to your [Inbox](/help/inbox/) while you're out making waves on the world wide web.
 
 Download for:
 
-- [Firefox →](https://addons.mozilla.org/en-US/firefox/addon/add-to-kinopio)
-- [Chrome, Vivaldi, Edge, Brave →](https://chrome.google.com/webstore/detail/kinopio/hodmmkfpchpgmaemlicohlkiigpejakn)
-- [Safari →](https://apps.apple.com/app/add-to-kinopio/id1614926102)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/add-to-kinopio)
+- [Chrome, Vivaldi, Edge, Brave](https://chrome.google.com/webstore/detail/kinopio/hodmmkfpchpgmaemlicohlkiigpejakn)
+- [Safari](https://apps.apple.com/app/add-to-kinopio/id1614926102)
 
-<p>
-  <img src="https://us-east-1.linodeobjects.com/kinopio-uploads/IWdfvX-mofsE8vS3b2gF2/firefox-extension.webp" class="wide">
-</p>
+<img src="https://us-east-1.linodeobjects.com/kinopio-uploads/IWdfvX-mofsE8vS3b2gF2/firefox-extension.webp" class="large">
 
 ## SMS, Telegram, Zapier and more Integrations
 
@@ -24,9 +22,7 @@ Kinopio is also supported by [phonetonote](https://phonetonote.com/), which lets
 
 ## Security and Privacy
 
-<p>
-  <img src="https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78/witch.png" class="no-shadow" style="width: 150px"/>
-</p>
+<img src="https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78/witch.png" class="no-shadow" style="width: 150px"/>
 
 > When clicked, the browser extension prefils its card name field with the current browser tab URL. No other browser data is transmitted.
 

@@ -11,32 +11,32 @@ category: Press
 <img src="@/assets/pages/help/posts/press-kit/logo-base.png" class="no-shadow"/>
 <br><br>
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/press-kit/example-space.mp4">
 </video>
 <br><br>
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/press-kit/screenrec2.mp4">
 </video>
 <br><br>
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/press-kit/real-time-collaboration.mp4">
 </video>
 <br><br>
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="https://files.kinopio.club/animated-background.mp4">
 </video>
 <br><br>
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="https://files.kinopio.club/collaborative-tags.mp4">
 </video>
 <br><br>
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="https://files.kinopio.club/free-plants-in-brooklyn.mp4">
 </video>
 <br><br>

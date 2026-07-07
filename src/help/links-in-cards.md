@@ -6,7 +6,7 @@ category: Advanced Use
 
 # Links in Cards
 
-<video class="wide" autoplay loop muted playsinline>
+<video class="large" autoplay loop muted playsinline>
   <source src="@/assets/pages/help/posts/add-url-to-card.mp4">
 </video>
 
@@ -14,7 +14,7 @@ So you might know that adding a URL (like [spacejam.com](https://spacejam.com)) 
 
 ## Multiple URLs
 
-<video class="wide" autoplay loop muted playsinline>
+<video class="large" autoplay loop muted playsinline>
   <source src="@/assets/pages/help/posts/multiple-urls-in-card.mp4">
 </video>
 
@@ -31,7 +31,7 @@ The `→` will link to [folklore.org](folklore.org)
 
 ## Hiding Links
 
-<video class="wide" autoplay loop muted playsinline>
+<video class="large" autoplay loop muted playsinline>
   <source src="https://files.kinopio.club/hide-links-button.mp4">
 </video>
 

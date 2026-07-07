@@ -10,7 +10,7 @@ Use an Inbox space to collect thoughts, todos, and ideas that don't have a place
 
 (if you don't already have an Inbox, you can create one by renaming a space to `Inbox`)
 
-<img src="@/assets/pages/help/posts/inbox/inbox.webp" class="wide">
+<img src="@/assets/pages/help/posts/inbox/inbox.webp" class="">
 
 ## Add Ideas and URLs from Anywhere
 
@@ -20,4 +20,4 @@ Add anything to your inbox on the go with the Kinopio [browser extensions](http:
 
 You can access the cards in your Inbox anytime from `Sidebar → Inbox`. Click a card in the list to move it from the inbox to your current space.
 
-<img src="@/assets/pages/help/posts/inbox/sidebar.webp" class="">
+<img src="@/assets/pages/help/posts/inbox/sidebar.webp" class="small">

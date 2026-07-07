@@ -172,6 +172,7 @@ const updateFilteredPages = (pages) => {
           @updateFilteredItems="updateFilteredPages"
           @clearFilter="clearFilter"
           placeholder="Search Help Topics"
+          :shouldNotAutofocus="true"
         )
 
       section
@@ -294,6 +295,18 @@ main.help-page-wrap
     img,
     video
       border-radius var(--page-entity-radius)
+      max-width 450px
+      margin-top 10px
+      // margin-bottom 10px
+      &.large
+        max-width 100%
+    ul
+      max-width 450px
+      padding-left 15px
+    blockquote
+      margin-left 0
+      border-left 1px solid var(--primary-border)
+      padding-left 8px
 
   .badge
     color var(--primary-on-light-background)

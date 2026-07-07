@@ -8,7 +8,7 @@ category: Basics
 
 Lists let you vertically group and easily reorder cards.
 
-<img src="@/assets/pages/help/posts/lists/lists.webp" class="wide"/>
+<img src="@/assets/pages/help/posts/lists/lists.webp" class="large"/>
 
 They allow you to add more rigid structures like Kanban-style project management and task tracking in the same spaces that you used to figure out the plan. Kinopio spaces with Lists allow you to keep contributors aligned not only with “what we need to do”, but also with “why we’re doing this”.
 

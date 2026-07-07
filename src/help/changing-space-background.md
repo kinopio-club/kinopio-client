@@ -8,7 +8,7 @@ category: Basics
 
 ## Personalize your spaces and set the mood
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/change-space-background/demo.mp4">
 </video>
 

@@ -16,7 +16,7 @@ You can import the JSON of exported spaces you've saved to your computer with `S
 
 Import [are.na](http://are.na) channels to make collaborative mood boards
 
-<img src="@/assets/pages/help/posts/arena-space.png" class="wide"/>
+<img src="@/assets/pages/help/posts/arena-space.png" class="large"/>
 
 `Share → Import → Are.na Channel`
 

@@ -8,7 +8,7 @@ category: Getting Around
 
 ## Enter and Shift-Enter to make card trees
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="https://files.kinopio.club/keyboard-shortcuts2.mp4">
 </video>
 
@@ -18,7 +18,7 @@ This allows you to quickly make structures like
 
 ## Select, then copy and paste cards
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="https://files.kinopio.club/keyboard-shortcuts-copy-paste.mp4">
 </video>
 

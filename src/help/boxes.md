@@ -10,7 +10,7 @@ Boxes help you group, add structure, and guide collaborators around cards,
 
 Helpful for adding sections, groups, lists, venn diagrams, or even swimlanes to your spaces
 
-<video autoplay loop muted playsinline class="wide">
+<video autoplay loop muted playsinline class="large">
   <source src="@/assets/pages/help/posts/boxes/demo.mp4">
 </video>
 

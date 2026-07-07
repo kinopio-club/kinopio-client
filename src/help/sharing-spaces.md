@@ -28,7 +28,7 @@ You can also reference specific cards via `Card → Share`. This URL will open t
 
 When you invite others you'll see their cursors, paint strokes, and other actions in real time. Here's an [example](https://x.com/sfpc/status/1597727116556390404) by the School For Poetic Computation (SFPC).
 
-<video class="wide" autoplay loop muted playsinline>
+<video class="large" autoplay loop muted playsinline>
   <source src="@/assets/pages/help/posts/sharing-spaces/collab.mp4">
 </video>
 

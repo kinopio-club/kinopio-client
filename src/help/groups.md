@@ -8,9 +8,7 @@ category: Advanced Use
 
 Group related spaces together and share them with multiple people at once. Each Group member can see and edit all of the spaces in a Group.
 
-<p>
-<img src="@/assets/pages/help/posts/groups/groups.webp" class="wide"/>
-</p>
+<img src="@/assets/pages/help/posts/groups/groups.webp" class=""/>
 
 Groups are helpful if you want to share and collaborate often with the same people on whiteboards, brainstorms, meeting notes, and diagrams.
 
@@ -26,18 +24,14 @@ There are two ways to create new Groups:
 - Through `Spaces → Groups → + New`,
 - Or via `Yourself → My Groups → + New`. You'll be able to change the color and name of the Group at any time.
 
-<p>
-<img src="@/assets/pages/help/posts/groups/new.webp" class="wide"/>
-</p>
+<img src="@/assets/pages/help/posts/groups/new.webp" class=""/>
 
 
 ## Adding Spaces to Groups
 
 From your Spaces list, you can see your personal spaces as well as spaces added to your Groups. To add your own space to the Group, open your space, click the Group button, and then select a Group.
 
-<p>
-<img src="@/assets/pages/help/posts/groups/added.webp" class="wide"/>
-</p>
+<img src="@/assets/pages/help/posts/groups/added.webp" class=""/>
 
 Each space can only belong to a single Group. Spaces can be added to Groups by any member of that group.
 
