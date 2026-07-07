@@ -181,7 +181,7 @@ const updateFilteredPages = (pages) => {
         nav
           section.category(v-if="currentSlugIsRoot || state.filter" v-for="category in categories" :key="category.name")
             p.category-name
-              .badge.category-circle(:class="categoryBadgeClass(category)")
+              span.badge.category-circle(:class="categoryBadgeClass(category)")
               span {{category.name}}
             ul
               li(v-for="page in category.pages" :key="page.slug")
@@ -193,7 +193,7 @@ const updateFilteredPages = (pages) => {
           //- post
           template(v-if="pageContent")
             p.category-name
-              .badge.category-circle(:class="currentCategoryClass")
+              span.badge.category-circle(:class="currentCategoryClass")
                 //- (:class="pageCategoryBadgeClass(pageContent)")
               span {{currentCategory?.name}}
             component(:is="pageContent")
