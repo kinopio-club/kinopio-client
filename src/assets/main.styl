@@ -206,13 +206,12 @@ video
   max-width 100%
 
 input,
-textarea
+textarea,
+.stripe-element
   color var(--primary)
   touch-action manipulation
   margin 0
-  font-size 1em
-  @supports (-webkit-touch-callout: none)
-    font-size 16px // disable ios input zooming
+  font-size 1em // required to disable ios input zooming
   resize none
   width 100%
   min-width 0 // firefox hack
