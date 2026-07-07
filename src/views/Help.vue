@@ -234,7 +234,7 @@ main.help-page-wrap
       margin-bottom 0
 
   section.search
-    max-width 400px
+    max-width 350px
 
   .category-name
     display flex
@@ -275,6 +275,10 @@ main.help-page-wrap
 
   article
     line-height 1.35
+    h1,
+    h2,
+    h3
+      font-family var(--header-font-4)
     h1
       margin-top 0
       font-size 24px
