@@ -56,7 +56,7 @@ const asyncPageComponent = (slug) => {
 
 const currentSlug = computed(() => route.params.page)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
-const PageContent = computed(() => asyncPageComponent(currentSlug.value))
+const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
 
 useHead(() => {
@@ -82,6 +82,9 @@ const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
 
+const categoryBadgeClass = (category) => {
+  return utils.normalizeString(category.name)
+}
 const badgeClasses = (page) => {
   const classes = []
   if (currentSlug.value === page.slug) {
@@ -114,22 +117,32 @@ const updateSystemTheme = () => {
         router-link(to="/help")
           h2.page-title Help
 
+      section
+        p [jump to topics], search _______________
+
+      section
+        AboutHowTo(v-if="currentSlugIsRoot")
         nav
           section.category(v-for="category in categories" :key="category.name")
-            p.category-name {{ category.name }}
+            //- p.category-name {{ category.name }}
+            p.category-name
+              .badge.category-circle(:class="categoryBadgeClass(category)")
+              span {{category.name}}
             ul
+              //- li
+              //-   .badge.category-name
+              //-     .badge.category-circle(:class="categoryBadgeClass(category)")
+              //-     span {{category.name}}
               li(v-for="page in category.pages" :key="page.slug")
                 router-link(:to="`/help/${page.slug}`")
                   .badge.button-badge(:class="badgeClasses(page)")
                     span {{ page.title }}
 
         article
-          //- home
-          AboutHowTo(v-if="currentSlugIsRoot")
           //- post
-          component(v-else-if="PageContent" :is="PageContent")
+          component(v-if="pageContent" :is="pageContent")
           //- 404
-          template(v-else)
+          template(v-if="!pageContent && !currentSlugIsRoot")
             h1 404 – Page not found
             video(
               autoplay
@@ -161,22 +174,39 @@ main.help-page-wrap
 
   nav
     .category-name
-      margin-bottom 4px
-      font-weight bold
+      // margin-bottom 4px
+      // font-weight bold
+      display flex
+      align-items center
+      margin-right 0
+      margin-bottom 10px
     section.category + section.category
-      margin-top 10px
+      margin-top 1rem
     ul
       padding 0
       margin 0
+      display flex
+      flex-wrap wrap
+      gap 10px 4px
     li
       list-style none
-      display inline-block
-      margin-right 4px
+      // display inline-block
+      // margin-right 4px
+      margin 0
     a
       text-decoration none
 
+  .category-circle
+    width 10px
+    height 10px
+    min-width initial
+    min-height initial
+    border-radius 100px
+    display inline-block
+
   section.how-to
     margin-top 2rem
+    margin-bottom 2rem
     h2
       display none
 
