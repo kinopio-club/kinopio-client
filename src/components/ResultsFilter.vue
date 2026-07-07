@@ -72,7 +72,8 @@ const props = defineProps({
   parentIsPinned: Boolean,
   showCreateNewSpaceFromSearch: Boolean,
   isInitialValueFromSpaceListFilterInfo: Boolean,
-  searchByAliases: Boolean
+  searchByAliases: Boolean,
+  shouldNotAutofocus: Boolean
 })
 
 const state = reactive({
@@ -143,6 +144,7 @@ const filterItems = computed({
 })
 const autoFocus = async () => {
   if (globalStore.isTouchDevice) { return }
+  if (props.shouldNotAutofocus) { return }
   await nextTick()
   focusFilterInput()
 }
