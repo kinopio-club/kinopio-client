@@ -162,7 +162,7 @@ const updateFilteredPages = (pages) => {
       section.intro
         Wordmark
         router-link(to="/help")
-          h2.page-title Help
+          h2.page-title Help Topics
 
       section.search
         ResultsFilter(
@@ -171,7 +171,7 @@ const updateFilteredPages = (pages) => {
           @updateFilter="updateFilter"
           @updateFilteredItems="updateFilteredPages"
           @clearFilter="clearFilter"
-          placeholder="Search Help Topics"
+          placeholder="Search Help"
           :shouldNotAutofocus="true"
         )
 
@@ -251,8 +251,6 @@ main.help-page-wrap
       display flex
       flex-wrap wrap
       gap 10px 4px
-      // border-bottom 1px solid var(--primary-border)
-      // padding-bottom 1rem
     li
       list-style none
       margin 0
@@ -274,40 +272,34 @@ main.help-page-wrap
       display none
 
   article
-    line-height 1.35
-    h1,
-    h2,
-    h3
-      font-family var(--header-font-4)
-    h1
-      margin-top 0
-      font-size 24px
-    h2
-      border-top 1px solid var(--primary-border)
-      padding-top 10px
-      font-size 18px
-    h3
-      font-size 16px
-    p
-      max-width 500px
-    img,
-    video
-      border-radius var(--page-entity-radius)
-      max-width 500px
-      margin-top 10px
-      &.large
-        max-width 100%
-      &.small
-        max-width 300px
-    ul
-      max-width 500px
-      padding-left 15px
-    blockquote
-      margin-left 0
-      border-left 1px solid var(--primary-border)
-      padding-left 8px
-    // .markdown-body
-    //   margin-top 10px
+    .markdown-body
+      line-height 1.35
+      h1
+        margin-top 0
+        font-size 24px
+      h2
+        font-size 18px
+      h3
+        font-size 16px
+      p
+        max-width 500px
+      img,
+      video
+        border-radius var(--page-entity-radius)
+        max-width 500px
+        margin-top 10px
+        &.large
+          max-width 100%
+        &.small
+          max-width 300px
+      ul
+        max-width 500px
+        padding-left 15px
+      blockquote
+        margin-left 0
+        border-left 1px solid var(--primary-border)
+        padding-left 8px
+        color var(--primary-transparent)
 
   .badge
     color var(--primary-on-light-background)
@@ -329,7 +321,7 @@ main.help-page-wrap
       background-color #deb1ff
     &.troubleshooting
       background-color #a4dfdc
-    &.policies-and-privacy
+    &.policies
       background-color salmon
     &.press
       background-color #c4c4c4

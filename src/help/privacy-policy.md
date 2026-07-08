@@ -1,12 +1,14 @@
 ---
 title: Privacy Policy
 description: "Friends don't spy on friends."
-category: Policies and Privacy
+category: Policies
 ---
 
 # Privacy Policy
 
 > Friends don't spy on friends.
+
+<img src="https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78/witch.png" class="no-shadow" style="width: 150px"/>
 
 - Kinopio won’t show you ads of any kind, or sell your data.
 - Children, and anyone else, will be able to use Kinopio anonymously. Without an account, none of your data will be transmitted to Kinopio servers. (👀 [How Your Data is Stored](/posts/how-your-data-is-stored/))

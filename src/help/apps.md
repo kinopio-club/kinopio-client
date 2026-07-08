@@ -1,7 +1,7 @@
 ---
 title: Desktop and Mobile Apps
 description: Download desktop apps for macOS, Windows, or Linux
-category: About Kinopio
+category: Basics
 ---
 
 # Desktop and Mobile Apps

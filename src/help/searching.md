@@ -10,7 +10,7 @@ category: Getting Around
 
 To quickly access spaces you can type to filter them by name
 
-<video class="narrow" autoplay loop muted playsinline>
+<video class="small" autoplay loop muted playsinline>
   <source src="https://files.kinopio.club/type-to-filter-spaces.mp4">
 </video>
 

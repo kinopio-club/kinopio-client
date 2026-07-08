@@ -1,7 +1,7 @@
 ---
 title: Encryption
 description: Kinopio uses current best practices for securing your information, including encrypting data in-flight, salting/hashing user passwords, and not recording sensitive or private information in logs.
-category: Policies and Privacy
+category: Policies
 ---
 
 # Encryption

@@ -20,7 +20,7 @@ Import [are.na](http://are.na) channels to make collaborative mood boards
 
 `Share → Import → Are.na Channel`
 
-<img src="@/assets/pages/help/posts/import-arena.png" class="narrow"/>
+<img src="@/assets/pages/help/posts/import-arena.png" class="small"/>
 
 
 If this is your first time using this feature, you'll be redirected to an Are.na authentication page. Afterwards you'll be redirected back to Kinopio and are able to input a channel URL to import (eg `https://www.are.na/kinopio/kinopio-moods`).

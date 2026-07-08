@@ -1,10 +1,10 @@
 ---
-title: Browser Extensions and Integrations
+title: Browser Extensions
 description: "For quickly recording thoughts, inspirations, and urls to your Inbox while you're out making waves on the world wide web."
-category: About Kinopio
+category: Basics
 ---
 
-# Browser Extensions and Integrations
+# Browser Extensions
 
 For quickly recording thoughts, inspirations, and urls to your [Inbox](/help/inbox/) while you're out making waves on the world wide web.
 
@@ -19,13 +19,3 @@ Download for:
 ## SMS, Telegram, Zapier and more Integrations
 
 Kinopio is also supported by [phonetonote](https://phonetonote.com/), which lets you add cards to your inbox via SMS, Telegram, Zapier, Email, Alfred, and more. API keys saved to phonetonote are encrypted and your messages are never stored there.
-
-## Security and Privacy
-
-<img src="https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78/witch.png" class="no-shadow" style="width: 150px"/>
-
-> When clicked, the browser extension prefils its card name field with the current browser tab URL. No other browser data is transmitted.
-
-> Like the rest of Kinopio, the extension contains no tracking.
-
-You can review the code for yourself on [Github](https://github.com/kinopio-club/kinopio-browser-extensions)

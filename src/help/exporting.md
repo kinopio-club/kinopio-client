@@ -10,7 +10,7 @@ category: Importing and Exporting
 
 You can export your space in a plain text, JSON and PDF formats via `Share → Export`
 
-<img src="@/assets/pages/help/posts/export-space.png" class="narrow" />
+<img src="@/assets/pages/help/posts/export-space.png" class="small" />
 
 ## Export Selected Cards
 
