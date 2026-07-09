@@ -66,14 +66,9 @@ const currentSlug = computed(() => route.params.page)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
 const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
-const searchPages = computed(() => {
-  const pages = []
-  return helpPages.map(page => {
-    page.name = page.title
-    page.aliases = page.description.split(' ')
-    return page
-  })
-})
+const currentPage = computed(() => helpPages.find(page => page.slug === currentSlug.value))
+const currentCategory = computed(() => categories.find(category => category.name === currentPage.value.category))
+const currentCategoryClass = computed(() => utils.normalizeString(currentCategory.value.name))
 
 useHead(() => {
   let title = 'Kinopio Help'
@@ -94,6 +89,12 @@ useHead(() => {
   }
 })
 
+// styles
+
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const updateSystemTheme = () => {
+  themeStore.updateSystemTheme()
+}
 const badgeClasses = (page) => {
   const classes = []
   if (currentSlug.value === page.slug) {
@@ -102,55 +103,45 @@ const badgeClasses = (page) => {
   classes.push(utils.normalizeString(page.category))
   return classes
 }
-
 const categoryBadgeClass = (category) => {
   return utils.normalizeString(category.name)
-}
-const currentPage = computed(() => {
-  const page = helpPages.find(page => page.slug === currentSlug.value)
-
-  console.log('🎨🎨', categories, '❤️❤️❤️', page)
-  return page
-})
-const currentCategory = computed(() => {
-  const x = categories.find(category => category.name === currentPage.value.category)
-  console.log('🎨🎨🎨🎨', x)
-  return x
-  // return utils.normalizeString(category?.name)
-})
-const currentCategoryClass = computed(() => utils.normalizeString(currentCategory.value.name))
-// const currentCategoryName = computed(() => {
-//   return currentCategory?.name
-// })
-
-// theme
-
-const isThemeDark = computed(() => themeStore.getIsThemeDark)
-const updateSystemTheme = () => {
-  themeStore.updateSystemTheme()
 }
 
 // filter
 
+const searchPages = computed(() => {
+  const blahWords = ['and', 'of', 'the', 'in', 'a', 'if', 'on', 'is', 'was', 'with', 'your', 'can']
+  const pages = []
+  return helpPages.map(page => {
+    page.name = page.title
+    const meta = `${page.title} ${page.description}`
+    let keywords = meta.toLowerCase().split(' ')
+    keywords = keywords.filter(keyword => !blahWords.includes(keyword))
+    page.aliases = keywords
+    console.log(keywords)
+    return page
+  })
+})
 const pagesFiltered = computed(() => {
   let items
   if (state.filter) {
     items = state.filteredPages
   } else {
-    items = searchPages
+    items = searchPages.value
   }
   return items
 })
+const pagesFilteredByCategory = (category) => {
+  return pagesFiltered.value.filter(page => page.category === category.name)
+}
 const clearFilter = () => {
   state.filter = ''
 }
 const updateFilter = (filter) => {
   state.filter = filter
-  console.log('❤️❤️❤️', state.filter)
 }
 const updateFilteredPages = (pages) => {
   state.filteredPages = pages
-  console.log('🗺️🗺️🗺️', state.filteredPages)
 }
 </script>
 
@@ -179,22 +170,25 @@ const updateFilteredPages = (pages) => {
         AboutHowTo(v-if="currentSlugIsRoot && !state.filter")
 
         nav
-          section.category(v-if="currentSlugIsRoot || state.filter" v-for="category in categories" :key="category.name")
-            p.category-name
-              span.badge.category-circle(:class="categoryBadgeClass(category)")
-              span {{category.name}}
-            ul
-              li(v-for="page in category.pages" :key="page.slug")
-                router-link(:to="`/help/${page.slug}`")
-                  .badge.button-badge(:class="badgeClasses(page)")
-                    span {{ page.title }}
+          template(v-for="category in categories")
+            template(v-if="!state.filter || pagesFilteredByCategory(category).length")
+              section.category(v-if="currentSlugIsRoot || state.filter" :key="category.name")
+                //- category name
+                p.category-name
+                  span.badge.category-circle(:class="categoryBadgeClass(category)")
+                  span {{category.name}}
+                //- pages
+                ul
+                  li(v-for="page in pagesFilteredByCategory(category)" :key="page.slug")
+                    router-link(:to="`/help/${page.slug}`")
+                      .badge.button-badge(:class="badgeClasses(page)")
+                        span {{ page.title }}
 
         article
           //- post
           template(v-if="pageContent")
             p.category-name
               span.badge.category-circle(:class="currentCategoryClass")
-                //- (:class="pageCategoryBadgeClass(pageContent)")
               span {{currentCategory?.name}}
             component(:is="pageContent")
           //- 404
