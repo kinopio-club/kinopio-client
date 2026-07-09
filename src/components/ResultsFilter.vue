@@ -28,7 +28,9 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (name === 'closeAllDialogs') {
+        const origin = args[0]
         const element = resultsFilterElement.value
+        if (origin === 'page') { return }
         if (!element) { return }
         if (props.filterIsPersistent) { return }
         if (props.parentIsPinned) { return }

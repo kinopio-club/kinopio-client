@@ -59,7 +59,7 @@ const asyncPageComponent = (slug) => {
 }
 
 const closeAllDialogs = () => {
-  globalStore.closeAllDialogs()
+  globalStore.closeAllDialogs('page')
 }
 
 const currentSlug = computed(() => route.params.page)
@@ -118,7 +118,6 @@ const searchPages = computed(() => {
     let keywords = meta.toLowerCase().split(' ')
     keywords = keywords.filter(keyword => !blahWords.includes(keyword))
     page.aliases = keywords
-    console.log(keywords)
     return page
   })
 })
@@ -142,6 +141,13 @@ const updateFilter = (filter) => {
 }
 const updateFilteredPages = (pages) => {
   state.filteredPages = pages
+}
+const categoryIsVisible = (category) => {
+  if (state.filter) {
+    return Boolean(pagesFilteredByCategory(category).length)
+  } else {
+    return currentSlugIsRoot.value
+  }
 }
 </script>
 
@@ -171,18 +177,17 @@ const updateFilteredPages = (pages) => {
 
         nav
           template(v-for="category in categories")
-            template(v-if="!state.filter || pagesFilteredByCategory(category).length")
-              section.category(v-if="currentSlugIsRoot || state.filter" :key="category.name")
-                //- category name
-                p.category-name
-                  span.badge.category-circle(:class="categoryBadgeClass(category)")
-                  span {{category.name}}
-                //- pages
-                ul
-                  li(v-for="page in pagesFilteredByCategory(category)" :key="page.slug")
-                    router-link(:to="`/help/${page.slug}`")
-                      .badge.button-badge(:class="badgeClasses(page)")
-                        span {{ page.title }}
+            section.category(v-if="categoryIsVisible(category)" :key="category.name")
+              //- category name
+              p.category-name
+                span.badge.category-circle(:class="categoryBadgeClass(category)")
+                span {{category.name}}
+              //- pages
+              ul
+                li(v-for="page in pagesFilteredByCategory(category)" :key="page.slug")
+                  router-link(:to="`/help/${page.slug}`")
+                    .badge.button-badge(:class="badgeClasses(page)")
+                      span {{ page.title }}
 
         article
           //- post
