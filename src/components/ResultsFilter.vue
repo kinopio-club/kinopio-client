@@ -7,8 +7,9 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-import createFuzzySearch from '@nozbe/microfuzz'
+import microfuzz from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
+const createFuzzySearch = microfuzz.default || microfuzz
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()

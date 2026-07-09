@@ -10,9 +10,10 @@ import utils from '@/utils.js'
 import timezones from '@/data/timezones.json'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 
-import createFuzzySearch from '@nozbe/microfuzz'
+import microfuzz from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
+const createFuzzySearch = microfuzz.default || microfuzz
 dayjs.extend(timezone)
 
 const globalStore = useGlobalStore()
