@@ -158,7 +158,7 @@ const updateDialogHeight = async () => {
 </script>
 
 <template lang="pug">
-dialog.templates(
+dialog.templates.wide(
   v-if="visible"
   :open="visible"
   @touchend.stop
@@ -201,6 +201,7 @@ dialog.templates(
 
       section.results-section.results-section-border-top(v-if="categoryIsVisible(category)")
         p.category
+          img.category-image(v-if="category.imageUrl" :src="category.imageUrl")
           span.badge.secondary.category-name(:style="{ 'background-color': category.color }" @click="updateSelectedCategoryName(category)")
             span {{category.name}}
         SpaceList(
@@ -231,8 +232,12 @@ dialog.templates
       color var(--primary-on-light-background)
   p.category
     margin 4px
-    margin-bottom 10px
     padding-top 0
+    display flex
+    align-items center
+    .category-image
+      width 40px
+      margin-right 5px
     .category-name
       color var(--primary-on-light-background)
   .offline-badge

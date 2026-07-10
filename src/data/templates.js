@@ -10,7 +10,8 @@ export default {
       {
         id: 3,
         name: "Fran's Picks",
-        color: 'orange'
+        color: 'orange',
+        imageUrl: 'https://media1.giphy.com/media/v1.Y2lkPWQ0NzBmMmM4bWt5eTY0ZzN5am9mendjNno2dWdoM2NzMno5Y3VxOGZ3ajR2OW5ieSZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/6Ji0dOHPjPEIR6lRxj/giphy.gif'
       },
       {
         id: 1,
