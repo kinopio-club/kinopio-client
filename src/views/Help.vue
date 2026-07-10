@@ -34,20 +34,6 @@ const state = reactive({
 
 // each md file becomes its own lazy-loaded chunk
 const pageModules = import.meta.glob('../help/*.md')
-
-const categories = helpPages
-  .reduce((list, page) => {
-    const category = list.find(item => item.name === page.category)
-    if (category) {
-      category.pages.push(page)
-    } else {
-      list.push({ name: page.category, pages: [page] })
-    }
-    return list
-  }, [])
-  .sort((a, b) => a.name.localeCompare(b.name))
-categories.forEach(category => category.pages.sort((a, b) => a.title.localeCompare(b.title)))
-
 const asyncPageComponents = {}
 const asyncPageComponent = (slug) => {
   const loader = pageModules[`../help/${slug}.md`]
@@ -58,6 +44,40 @@ const asyncPageComponent = (slug) => {
   return asyncPageComponents[slug]
 }
 
+const normalizeNewCategory = (name) => {
+  const categoryColors = {
+    basics: 'khaki',
+    'getting-around': 'pink',
+    'advanced-use': '#b9a8ff',
+    collaboration: 'violet',
+    'importing-and-exporting': 'lightskyblue',
+    'about-kinopio': 'mediumaquamarine',
+    community: 'burlywood',
+    'user-settings': '#deb1ff',
+    troubleshooting: '#a4dfdc',
+    policies: 'salmon',
+    press: '#c4c4c4'
+  }
+  const slug = utils.normalizeString(name)
+  const color = categoryColors[slug]
+  return { name, slug, color }
+}
+const categories = helpPages
+  .reduce((list, page) => {
+    const category = list.find(item => item.name === page.category)
+    if (category) {
+      category.pages.push(page)
+    } else {
+      const newCategory = normalizeNewCategory(page.category)
+      newCategory.pages = [page]
+      list.push(newCategory)
+    }
+    return list
+  }, [])
+  .sort((a, b) => a.name.localeCompare(b.name))
+
+categories.forEach(category => category.pages.sort((a, b) => a.title.localeCompare(b.title)))
+
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs('page')
 }
@@ -67,8 +87,10 @@ const currentSlugIsRoot = computed(() => !currentSlug.value)
 const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
 const currentPage = computed(() => helpPages.find(page => page.slug === currentSlug.value))
-const currentCategory = computed(() => categories.find(category => category.name === currentPage.value.category))
-const currentCategoryClass = computed(() => utils.normalizeString(currentCategory.value.name))
+const currentCategory = computed(() => categories.find(category => category.name === currentPage.value?.category))
+const categoryByPage = (page) => {
+  return categories.find(category => page.category === category.name)
+}
 
 useHead(() => {
   let title = 'Kinopio Help'
@@ -100,12 +122,26 @@ const badgeClasses = (page) => {
   if (currentSlug.value === page.slug) {
     classes.push('active')
   }
-  classes.push(utils.normalizeString(page.category))
+  const category = categoryByPage(page)
+  classes.push(category.slug)
+  console.log('🍒🍒🍒', classes, category.slug)
   return classes
 }
-const categoryBadgeClass = (category) => {
-  return utils.normalizeString(category.name)
-}
+const articleStyles = computed(() => {
+  const categoryColor = utils.cssVariable(currentCategory.value?.slug)
+
+  console.log('🫑🫑🫑🫑🫑🫑🫑🫑🫑🫑', categoryColor, categories)
+
+  // colord
+
+  if (isThemeDark.value) {
+    console.log(1)
+  } else {
+    console.log(1)
+  }
+  // - todo , lighten to 10 !isThemeDark, darken to 10 isThemeDark
+  return ''
+})
 
 // filter
 
@@ -175,12 +211,12 @@ const categoryIsVisible = (category) => {
       section
         AboutHowTo(v-if="currentSlugIsRoot && !state.filter")
 
-        nav
+        nav(v-if="currentSlugIsRoot || state.filter")
           template(v-for="category in categories")
             section.category(v-if="categoryIsVisible(category)" :key="category.name")
               //- category name
               p.category-name
-                span.badge.category-circle(:class="categoryBadgeClass(category)")
+                span.badge.category-circle(:class="category.slug")
                 span {{category.name}}
               //- pages
               ul
@@ -189,11 +225,11 @@ const categoryIsVisible = (category) => {
                     .badge.button-badge(:class="badgeClasses(page)")
                       span {{ page.title }}
 
-        article
+        article(:style="articleStyles")
           //- post
           template(v-if="pageContent")
             p.category-name
-              span.badge.category-circle(:class="currentCategoryClass")
+              span.badge.category-circle(:class="currentCategory.slug")
               span {{currentCategory?.name}}
             component(:is="pageContent")
           //- 404
@@ -213,6 +249,19 @@ const categoryIsVisible = (category) => {
 </template>
 
 <style lang="stylus">
+:root
+  --basics khaki
+  --getting-around pink
+  --advanced-use #b9a8ff
+  --collaboration violet
+  --importing-and-exporting lightskyblue
+  --about-kinopio mediumaquamarine
+  --community burlywood
+  --user-settings #deb1ff
+  --troubleshooting #a4dfdc
+  --policies salmon
+  --press #c4c4c4
+
 main.help-page-wrap
   // .page-wrap
   //   max-width 900px
@@ -242,6 +291,7 @@ main.help-page-wrap
     margin-bottom 10px
 
   nav
+    margin-bottom 2rem
     section.category + section.category
       margin-top 1rem
     ul
@@ -294,6 +344,10 @@ main.help-page-wrap
       ul
         max-width 500px
         padding-left 15px
+      li
+        line-height 1.35
+      li + li
+        margin-top 0.5rem
       blockquote
         margin-left 0
         border-left 1px solid var(--primary-border)
@@ -303,26 +357,26 @@ main.help-page-wrap
   .badge
     color var(--primary-on-light-background)
     &.basics
-      background-color khaki
+      background-color var(--basics)
     &.getting-around
-      background-color pink
+      background-color var(--getting-around)
     &.advanced-use
-      background-color #b9a8ff
+      background-color  var(--advanced-use)
     &.collaboration
-      background-color violet
+      background-color  var(--collaboration)
     &.importing-and-exporting
-      background-color lightskyblue
+      background-color  var(--importing-and-exporting)
     &.about-kinopio
-      background-color mediumaquamarine
+      background-color  var(--about-kinopio)
     &.community
-      background-color burlywood
+      background-color  var(--community)
     &.user-settings
-      background-color #deb1ff
+      background-color  var(--user-settings)
     &.troubleshooting
-      background-color #a4dfdc
+      background-color  var(--troubleshooting)
     &.policies
-      background-color salmon
+      background-color  var(--policies)
     &.press
-      background-color #c4c4c4
+      background-color  var(--press)
 
 </style>
