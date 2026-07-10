@@ -347,6 +347,18 @@ main.help-page-wrap
         border-left 1px solid var(--primary-border)
         padding-left 8px
         color var(--primary-transparent)
+    .category-name
+      display flex
+      align-items center
+      a
+        text-decoration none
+        padding-right 5px
+        transform translateY(-2px)
+        &:hover
+          span
+            text-decoration underline
+        span
+          color var(--primary)
 
   .badge
     color var(--primary-on-light-background)
