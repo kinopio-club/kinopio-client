@@ -20,11 +20,27 @@ const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const route = useRoute()
 
+const categoryColors = {
+  basics: 'khaki',
+  'getting-around': 'pink',
+  'advanced-use': '#b9a8ff',
+  collaboration: 'violet',
+  'importing-and-exporting': 'lightskyblue',
+  'about-kinopio': 'mediumaquamarine',
+  community: 'burlywood',
+  'user-settings': '#deb1ff',
+  troubleshooting: '#a4dfdc',
+  policies: 'salmon',
+  press: '#c4c4c4'
+}
+
 onMounted(() => {
   if (!consts.isStaticPrerenderingPage) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
     themeStore.restoreTheme()
   }
+  // css category colors
+  Object.keys(categoryColors).forEach(key => utils.setCssVariable(key, categoryColors[key]))
 })
 
 const state = reactive({
@@ -45,19 +61,6 @@ const asyncPageComponent = (slug) => {
 }
 
 const normalizeNewCategory = (name) => {
-  const categoryColors = {
-    basics: 'khaki',
-    'getting-around': 'pink',
-    'advanced-use': '#b9a8ff',
-    collaboration: 'violet',
-    'importing-and-exporting': 'lightskyblue',
-    'about-kinopio': 'mediumaquamarine',
-    community: 'burlywood',
-    'user-settings': '#deb1ff',
-    troubleshooting: '#a4dfdc',
-    policies: 'salmon',
-    press: '#c4c4c4'
-  }
   const slug = utils.normalizeString(name)
   const color = categoryColors[slug]
   return { name, slug, color }
@@ -229,6 +232,8 @@ const categoryIsVisible = (category) => {
           //- post
           template(v-if="pageContent")
             p.category-name
+              router-link(to="/help")
+                span ←
               span.badge.category-circle(:class="currentCategory.slug")
               span {{currentCategory?.name}}
             component(:is="pageContent")
@@ -249,18 +254,6 @@ const categoryIsVisible = (category) => {
 </template>
 
 <style lang="stylus">
-:root
-  --basics khaki
-  --getting-around pink
-  --advanced-use #b9a8ff
-  --collaboration violet
-  --importing-and-exporting lightskyblue
-  --about-kinopio mediumaquamarine
-  --community burlywood
-  --user-settings #deb1ff
-  --troubleshooting #a4dfdc
-  --policies salmon
-  --press #c4c4c4
 
 main.help-page-wrap
   // .page-wrap
@@ -315,6 +308,7 @@ main.help-page-wrap
     display inline-block
 
   section.how-to
+    // max-width 715px
     margin-top 2rem
     margin-bottom 2rem
     h2
