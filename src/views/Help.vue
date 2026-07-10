@@ -16,6 +16,10 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
+extend([namesPlugin])
+
 const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const route = useRoute()
@@ -127,23 +131,18 @@ const badgeClasses = (page) => {
   }
   const category = categoryByPage(page)
   classes.push(category.slug)
-  console.log('🍒🍒🍒', classes, category.slug)
   return classes
 }
-const articleStyles = computed(() => {
-  const categoryColor = utils.cssVariable(currentCategory.value?.slug)
-
-  console.log('🫑🫑🫑🫑🫑🫑🫑🫑🫑🫑', categoryColor, categories)
-
-  // colord
-
+const markdownBodyStyles = computed(() => {
+  let color = currentCategory.value.color
   if (isThemeDark.value) {
-    console.log(1)
+    color = colord(color).darken(0.6).toRgbString()
   } else {
-    console.log(1)
+    color = colord(color).alpha(0.3).toRgbString()
   }
-  // - todo , lighten to 10 !isThemeDark, darken to 10 isThemeDark
-  return ''
+  return {
+    backgroundColor: color
+  }
 })
 
 // filter
@@ -228,14 +227,15 @@ const categoryIsVisible = (category) => {
                     .badge.button-badge(:class="badgeClasses(page)")
                       span {{ page.title }}
 
-        article(:style="articleStyles")
+        article
           //- post
           template(v-if="pageContent")
             p.category-name
               router-link(to="/help")
                 span.badge.category-circle(:class="currentCategory.slug")
                 span {{currentCategory?.name}}
-            component(:is="pageContent")
+            .markdown-body-wrap(:style="markdownBodyStyles")
+              component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
             h1 404 – Page not found
@@ -255,9 +255,6 @@ const categoryIsVisible = (category) => {
 <style lang="stylus">
 
 main.help-page-wrap
-  // .page-wrap
-  //   max-width 900px
-
   h1 + a
     display block
     width fit-content
@@ -315,13 +312,17 @@ main.help-page-wrap
       display none
 
   article
+    .markdown-body-wrap
+      padding 2rem
+      padding-bottom 30px
+      border-radius var(--page-entity-radius)
     .markdown-body
       line-height 1.35
       h1
         margin-top 0
-        font-size 24px
+        font-size 28px
       h2
-        font-size 18px
+        font-size 20px
       h3
         font-size 16px
       p
@@ -346,7 +347,6 @@ main.help-page-wrap
         margin-left 0
         border-left 1px solid var(--primary-border)
         padding-left 8px
-        color var(--primary-transparent)
     .category-name
       a
         text-decoration none

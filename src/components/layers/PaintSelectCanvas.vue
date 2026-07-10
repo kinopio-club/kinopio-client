@@ -17,7 +17,7 @@ import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
-import { colord, extend } from 'colord'
+import { colord } from 'colord'
 import uniqBy from 'lodash-es/uniqBy'
 
 const globalStore = useGlobalStore()
