@@ -233,9 +233,8 @@ const categoryIsVisible = (category) => {
           template(v-if="pageContent")
             p.category-name
               router-link(to="/help")
-                span ←
-              span.badge.category-circle(:class="currentCategory.slug")
-              span {{currentCategory?.name}}
+                span.badge.category-circle(:class="currentCategory.slug")
+                span {{currentCategory?.name}}
             component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
@@ -306,6 +305,7 @@ main.help-page-wrap
     min-height initial
     border-radius 100px
     display inline-block
+    margin-top -2px
 
   section.how-to
     // max-width 715px
@@ -325,7 +325,7 @@ main.help-page-wrap
       h3
         font-size 16px
       p
-        max-width 500px
+        max-width 520px
       img,
       video
         border-radius var(--page-entity-radius)
@@ -348,12 +348,8 @@ main.help-page-wrap
         padding-left 8px
         color var(--primary-transparent)
     .category-name
-      display flex
-      align-items center
       a
         text-decoration none
-        padding-right 5px
-        transform translateY(-2px)
         &:hover
           span
             text-decoration underline
