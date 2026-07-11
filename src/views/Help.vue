@@ -16,6 +16,7 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
+import sortBy from 'lodash-es/sortBy'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
 extend([namesPlugin])
@@ -24,27 +25,59 @@ const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const route = useRoute()
 
-const categoryColors = {
-  basics: 'khaki',
-  'getting-around': 'pink',
-  'advanced-use': '#b9a8ff',
-  collaboration: 'violet',
-  'importing-and-exporting': 'lightskyblue',
-  'about-kinopio': 'mediumaquamarine',
-  community: 'burlywood',
-  'user-settings': '#deb1ff',
-  troubleshooting: '#a4dfdc',
-  policies: 'salmon',
-  press: '#c4c4c4'
+const categoryDetails = {
+  basics: {
+    index: 0,
+    color: 'khaki'
+  },
+  'advanced-use': {
+    index: 1,
+    color: '#b9a8ff'
+  },
+  'getting-around': {
+    index: 0,
+    color: 'pink'
+  },
+  collaboration: {
+    index: 0,
+    color: 'violet'
+  },
+  'importing-and-exporting': {
+    index: 0,
+    color: 'lightskyblue'
+  },
+  'about-kinopio': {
+    index: 0,
+    color: 'mediumaquamarine'
+  },
+  community: {
+    index: 0,
+    color: 'burlywood'
+  },
+  'user-settings': {
+    index: 0,
+    color: '#deb1ff'
+  },
+  troubleshooting: {
+    index: 0,
+    color: '#a4dfdc'
+  },
+  policies: {
+    index: 0,
+    color: 'salmon'
+  },
+  press: {
+    index: 0,
+    color: '#c4c4c4'
+  }
 }
-
 onMounted(() => {
   if (!consts.isStaticPrerenderingPage) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
     themeStore.restoreTheme()
   }
   // css category colors
-  Object.keys(categoryColors).forEach(key => utils.setCssVariable(key, categoryColors[key]))
+  Object.keys(categoryDetails).forEach(key => utils.setCssVariable(key, categoryDetails[key].color))
 })
 
 const state = reactive({
@@ -66,23 +99,22 @@ const asyncPageComponent = (slug) => {
 
 const normalizeNewCategory = (name) => {
   const slug = utils.normalizeString(name)
-  const color = categoryColors[slug]
-  return { name, slug, color }
+  const color = categoryDetails[slug].color
+  const index = categoryDetails[slug].index
+  return { name, slug, color, index }
 }
-const categories = helpPages
-  .reduce((list, page) => {
-    const category = list.find(item => item.name === page.category)
-    if (category) {
-      category.pages.push(page)
-    } else {
-      const newCategory = normalizeNewCategory(page.category)
-      newCategory.pages = [page]
-      list.push(newCategory)
-    }
-    return list
-  }, [])
-  .sort((a, b) => a.name.localeCompare(b.name))
-
+let categories = helpPages.reduce((list, page) => {
+  const category = list.find(item => item.name === page.category)
+  if (category) {
+    category.pages.push(page)
+  } else {
+    const newCategory = normalizeNewCategory(page.category)
+    newCategory.pages = [page]
+    list.push(newCategory)
+  }
+  return list
+}, [])
+categories = sortBy(categories, ['index'])
 categories.forEach(category => category.pages.sort((a, b) => a.title.localeCompare(b.title)))
 
 const closeAllDialogs = () => {
