@@ -1,7 +1,7 @@
 ---
 title: Keyboard Shortcuts
 description: Work faster in Kinopio with keyboard shortcuts for making card trees, copying and pasting cards, and more
-category: Getting Around
+category: Navigating
 ---
 
 # Keyboard Shortcuts

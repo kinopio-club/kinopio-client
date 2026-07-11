@@ -34,41 +34,41 @@ const categoryDetails = {
     index: 1,
     color: '#b9a8ff'
   },
-  'getting-around': {
-    index: 0,
+  navigating: {
+    index: 2,
     color: 'pink'
   },
   collaboration: {
-    index: 0,
+    index: 3,
     color: 'violet'
   },
   'importing-and-exporting': {
-    index: 0,
+    index: 4,
     color: 'lightskyblue'
   },
-  'about-kinopio': {
-    index: 0,
-    color: 'mediumaquamarine'
-  },
   community: {
-    index: 0,
+    index: 5,
     color: 'burlywood'
   },
   'user-settings': {
-    index: 0,
+    index: 6,
     color: '#deb1ff'
   },
-  troubleshooting: {
-    index: 0,
-    color: '#a4dfdc'
-  },
   policies: {
-    index: 0,
+    index: 7,
     color: 'salmon'
   },
+  'about-kinopio': {
+    index: 8,
+    color: 'mediumaquamarine'
+  },
   press: {
-    index: 0,
+    index: 9,
     color: '#c4c4c4'
+  },
+  troubleshooting: {
+    index: 10,
+    color: '#a4dfdc'
   }
 }
 onMounted(() => {
@@ -392,8 +392,8 @@ main.help-page-wrap
     color var(--primary-on-light-background)
     &.basics
       background-color var(--basics)
-    &.getting-around
-      background-color var(--getting-around)
+    &.navigating
+      background-color var(--navigating)
     &.advanced-use
       background-color  var(--advanced-use)
     &.collaboration

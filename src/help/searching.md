@@ -1,7 +1,7 @@
 ---
 title: Searching
 description: To quickly access spaces you can type to filter them by name
-category: Getting Around
+category: Navigating
 ---
 
 # Searching
