@@ -202,8 +202,8 @@ const clearFilter = (shouldClearFilterInfo) => {
 
 // event handlers
 
-const focus = () => {
-  emit('onFocus')
+const focus = (event) => {
+  emit('onFocus', event)
   resetPinchCounterZoomDecimal()
 }
 const resetPinchCounterZoomDecimal = () => {

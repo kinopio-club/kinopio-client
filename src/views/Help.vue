@@ -219,6 +219,12 @@ const categoryIsVisible = (category) => {
     return currentSlugIsRoot.value
   }
 }
+const updateFilterOnSearchFocus = (event) => {
+  const value = event.target.value
+  if (value) {
+    updateFilter(value)
+  }
+}
 </script>
 
 <template lang="pug">
@@ -240,6 +246,7 @@ const categoryIsVisible = (category) => {
           @clearFilter="clearFilter"
           placeholder="Search Help"
           :shouldNotAutofocus="true"
+          @onFocus="updateFilterOnSearchFocus"
         )
 
       section
@@ -254,7 +261,7 @@ const categoryIsVisible = (category) => {
                 span {{category.name}}
               //- pages
               ul
-                li(v-for="page in pagesFilteredByCategory(category)" :key="page.slug")
+                li(v-for="page in pagesFilteredByCategory(category)" :key="page.slug" @click.stop="clearFilter")
                   router-link(:to="`/help/${page.slug}`")
                     .badge.button-badge(:class="badgeClasses(page)")
                       span {{ page.title }}
@@ -362,7 +369,7 @@ main.help-page-wrap
       img,
       video
         border-radius var(--page-entity-radius)
-        max-width 500px
+        // max-width 100%
         margin-top 10px
         &.large
           max-width 100%
