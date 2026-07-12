@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import templates from '@/data/templates.js'
@@ -17,6 +18,7 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 const resultsSectionsElement = ref(null)
@@ -136,6 +138,21 @@ const categoryIsVisible = (category) => {
 const categoryIsActive = (category) => {
   return state.selectedCategoryName === category.name
 }
+const categoryClasses = (category) => {
+  const classes = [utils.normalizeString(category.name)]
+  const isDarkTheme = themeStore.getIsThemeDark
+  if (isDarkTheme) {
+    classes.push('dark-theme-background')
+  }
+  return classes
+}
+const categoryBadgeClasses = (category) => {
+  const classes = categoryClasses(category)
+  if (categoryIsActive(category)) {
+    classes.push('active')
+  }
+  return classes
+}
 
 // dialog height
 
@@ -176,7 +193,8 @@ dialog.templates.wide(
     //- categories
     .categories
       template(v-for="category in categories" :key="category.id")
-        span.badge.secondary.button-badge(:class="{ active: categoryIsActive(category) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategoryName(category)") {{category.name}}
+        span.badge.secondary.button-badge(:class="categoryBadgeClasses(category)" :style="{ 'background-color': category.color }" @click="updateSelectedCategoryName(category)")
+          span {{category.name}}
     //- errors
     OfflineBadge(:isDanger="true" :isInline="true")
     p.badge.error-badge.danger(v-if="state.error.unknownServerError")
@@ -198,10 +216,9 @@ dialog.templates.wide(
       )
     //- system templates
     template(v-if="!state.error.unknownServerError" v-for="category in templateCategories" :key="category.id")
-
-      section.results-section.results-section-border-top(v-if="categoryIsVisible(category)")
+      section.results-section.results-section-border-top(v-if="categoryIsVisible(category)" :class="categoryClasses(category)")
         p.category
-          img.category-image(v-if="category.imageUrl" :src="category.imageUrl")
+          img.icon.petals(src="@/assets/petals.svg" v-if="category.id === 3")
           span.badge.secondary.category-name(:style="{ 'background-color': category.color }" @click="updateSelectedCategoryName(category)")
             span {{category.name}}
         SpaceList(
@@ -230,14 +247,13 @@ dialog.templates
     .button-badge
       margin-top 6px
       color var(--primary-on-light-background)
+      &.all
+        color var(--primary)
   p.category
     margin 4px
     padding-top 0
     display flex
     align-items center
-    .category-image
-      width 40px
-      margin-right 5px
     .category-name
       color var(--primary-on-light-background)
   .offline-badge
@@ -249,4 +265,14 @@ dialog.templates
       margin-top 0
     input
       margin-bottom 0
+
+  // special category styles
+
+  .icon.petals
+    width 15px
+  .results-section
+    &.frans-picks
+      background radial-gradient(closest-corner, #e3c9ce, rgba(255, 212, 220, 0.61), transparent)
+      &.dark-theme-background
+        background radial-gradient(closest-corner, #7b6165, rgba(128, 101, 106, 0.6), transparent)
 </style>

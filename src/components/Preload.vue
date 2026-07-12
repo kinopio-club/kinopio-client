@@ -125,6 +125,7 @@ watch(() => globalStore.isLoadingSpace, (value) => {
     img.icon(src="@/assets/open.svg")
     img.icon(src="@/assets/pause.svg")
     img.icon(src="@/assets/pencil.svg")
+    img.icon(src="@/assets/petals.svg")
     img.icon(src="@/assets/phone.svg")
     img.icon(src="@/assets/pin.svg")
     img.icon(src="@/assets/play.svg")
