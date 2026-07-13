@@ -265,5 +265,6 @@ dialog.about
     button
       margin 0
   dialog.apps
-    left 8px
+    left 8px !important
+    right initial !important
 </style>
