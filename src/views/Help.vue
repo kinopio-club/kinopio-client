@@ -116,14 +116,6 @@ let categories = helpPages.reduce((list, page) => {
 }, [])
 categories = sortBy(categories, ['index'])
 
-// todo sort pages by alpha
-categories.map(category => {
-  category.pages = sortBy(category.pages, ['slug'])
-  console.log('❤️❤️❤️❤️❤️', category.pages)
-  return category
-})
-// categories.forEach(category => category.pages.sort((a, b) => a.title.localeCompare(b.title)))
-
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs('page')
 }
@@ -208,7 +200,9 @@ const pagesFiltered = computed(() => {
   return items
 })
 const pagesFilteredByCategory = (category) => {
-  return pagesFiltered.value.filter(page => page.category === category.name)
+  let pages = pagesFiltered.value.filter(page => page.category === category.name)
+  pages = sortBy(pages, ['title'])
+  return pages
 }
 const clearFilter = () => {
   state.filter = ''
