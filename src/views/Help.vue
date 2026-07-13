@@ -115,7 +115,14 @@ let categories = helpPages.reduce((list, page) => {
   return list
 }, [])
 categories = sortBy(categories, ['index'])
-categories.forEach(category => category.pages.sort((a, b) => a.title.localeCompare(b.title)))
+
+// todo sort pages by alpha
+categories.map(category => {
+  category.pages = sortBy(category.pages, ['slug'])
+  console.log('❤️❤️❤️❤️❤️', category.pages)
+  return category
+})
+// categories.forEach(category => category.pages.sort((a, b) => a.title.localeCompare(b.title)))
 
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs('page')
