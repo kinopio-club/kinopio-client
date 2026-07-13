@@ -1,10 +1,10 @@
 ---
-title: Cards Colors, Formatting, Frames, Resizing and more
-description: Card → down arrow toggles advanced card options like header fonts, tags, frames, colors, and more.
+title: Card Styling
+description: Cards colors, formatting, frames, resizing, header fonts, tags, frames, colors, and more.
 category: Basics
 ---
 
-# Cards Colors, Formatting, Frames, Resizing and more
+# Styling Cards
 
 `Card → down arrow` toggles advanced card options like header fonts, tags, frames, colors, and more.
 

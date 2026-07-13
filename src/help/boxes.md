@@ -36,3 +36,4 @@ Expand: Boxes can also grow to envelop cards when you drag them over an *inner* 
 - drag the bottom-right box corner to resize
 - click box label to change their color and give them a background image
 - filter by box to focus only on what's in the box, everything outside will be faded out
+- You can add background images to boxes as well

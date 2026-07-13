@@ -379,6 +379,10 @@ main.help-page-wrap
           max-width 100%
         &.small
           max-width 300px
+      code
+        background-color var(--secondary-background)
+        vertical-align 0
+        margin 0
       ul
         max-width 500px
         padding-left 15px
