@@ -251,7 +251,9 @@ const updateFilterOnSearchFocus = (event) => {
         )
 
       section
-        AboutHowTo(v-if="currentSlugIsRoot && !state.filter")
+        template(v-if="currentSlugIsRoot && !state.filter")
+          p Kinopio is a spatial canvas to collect and connect your thoughts, ideas, and plans – by yourself or collaboratively.
+          AboutHowTo
 
         nav(v-if="currentSlugIsRoot || state.filter")
           template(v-for="category in categories")
@@ -311,6 +313,7 @@ main.help-page-wrap
       margin-bottom 0
 
   section.search
+    margin-bottom 0
     max-width 350px
 
   .category-name
