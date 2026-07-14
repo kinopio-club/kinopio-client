@@ -1,27 +1,21 @@
 ---
-title: Connection Labels
-description: The connection lines between cards all have a connection type. These connection types have a name and color that can be shared amongst the connections on your space.
+title: Connections
+description: Connection colors and labels
 category: Advanced Use
 ---
 
-# Connection Labels
+# Connections
 
-## Types and Labels
+Use connections and labels to add structure by connecting related ideas together.
 
-The connection lines between cards all have a connection type. These connection types have a name and color that can be shared amongst the connections on your space.
+## New Connection Colors
 
-By default new connections will use the last connection type, but you can make new connections use unique types/colors by unchecking `Use Last Type`
+By default, new connection lines that you make use the same color as the last one. If you want each new connection to have a random color you can set that in `Settings → Connections → Use Last Color`
 
-Use connections and labels to add flexible meaning, grouping, and structure to your spaces.
+## Labels
 
-<video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/editing-connections/demo.mp4">
-</video>
+To add explicit meaning to connection lines or colors, toggle on the `Label`. You can drag to reposition the label within the confines of the connection line.
 
-## Bulk Edit
-
-Paint to select multiple connections lets you assign them all to the same connection type.
-
-<video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/editing-connections/bulk2.mp4">
+<video autoplay loop muted playsinline class="">
+  <source src="@/assets/pages/help/posts/editing-connections/labels.mp4">
 </video>
