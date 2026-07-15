@@ -345,7 +345,6 @@ main.help-page-wrap
     min-height initial
     border-radius 100px
     display inline-block
-    margin-top -2px
 
   section.how-to
     // max-width 715px
