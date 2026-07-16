@@ -14,6 +14,26 @@ const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
+let unsubscribes
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateConnectorPreviewColor') {
+        updateConnectorPreviewColor()
+      } else if (name === 'triggerClearConnectorPreviewColor') {
+        clearConnectorPreviewColor()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
+
 const emit = defineEmits(['shouldRenderParent'])
 
 const props = defineProps({
@@ -31,10 +51,14 @@ const props = defineProps({
 })
 
 const state = reactive({
-  connectionPreviewColor: ''
+  connectorPreviewColor: ''
 })
 
 const item = computed(() => props.card || props.box)
+const itemIsSelected = computed(() => {
+  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  return multipleItemsSelectedIds.includes(item.value.id)
+})
 
 // space
 
@@ -120,7 +144,7 @@ const connectorButtonBackground = computed(() => {
   if (globalStore.currentUserIsDraggingCard) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
   if (props.backgroundIsTransparent) { return }
-  if (state.connectionPreviewColor) { return state.connectionPreviewColor }
+  if (state.connectorPreviewColor) { return state.connectorPreviewColor }
   if (isImageCard.value) {
     return 'transparent'
   }
@@ -223,6 +247,16 @@ const currentUserIsCreatingConnectionColor = computed(() => {
   return globalStore.currentConnectionColor
 })
 
+// connector preview color
+
+const updateConnectorPreviewColor = () => {
+  if (!itemIsSelected.value) { return }
+  state.connectorPreviewColor = connectionStore.getNewConnectionColor
+}
+const clearConnectorPreviewColor = () => {
+  state.connectorPreviewColor = ''
+}
+
 // handle events
 
 const startConnecting = (event) => {
@@ -239,12 +273,15 @@ const startConnecting = (event) => {
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
   connectionStore.updateNewConnectionColor()
-  state.connectionPreviewColor = connectionStore.getNewConnectionColor
+  globalStore.triggerUpdateConnectorPreviewColor()
+  state.connectorPreviewColor = connectionStore.getNewConnectionColor
 }
 const handleMouseLeaveConnector = () => {
   globalStore.currentUserIsHoveringOverConnectorItemId = ''
-  state.connectionPreviewColor = ''
+  globalStore.triggerClearConnectorPreviewColor()
+  clearConnectorPreviewColor()
 }
+
 </script>
 
 <template lang="pug">
