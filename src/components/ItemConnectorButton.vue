@@ -240,17 +240,11 @@ const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
   connectionStore.updateNewConnectionColor()
   state.connectionPreviewColor = connectionStore.getNewConnectionColor
-  state.isHover = true
 }
 const handleMouseLeaveConnector = () => {
   globalStore.currentUserIsHoveringOverConnectorItemId = ''
   state.connectionPreviewColor = ''
-  state.isHover = false
 }
-const shouldAnimate = computed(() => {
-  // if (props.isConnectingTo || props.isConnectingFrom) { return }
-  return state.isHover
-})
 </script>
 
 <template lang="pug">
@@ -274,7 +268,7 @@ const shouldAnimate = computed(() => {
       .color(:style="{ background: connection?.color}")
 
   button.inline-button.connector-button(
-    :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light': isConnectorBackgroundColorLight, 'is-dark': !isConnectorBackgroundColorLight, 'pulse-opacity': shouldAnimate }"
+    :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light': isConnectorBackgroundColorLight, 'is-dark': !isConnectorBackgroundColorLight }"
     :style="buttonStyles"
     tabindex="-1"
   )
