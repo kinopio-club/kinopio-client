@@ -54,6 +54,7 @@ export const useConnectionStore = defineStore('connections', {
     getNewConnectionColor () {
       const userStore = useUserStore()
       const globalStore = useGlobalStore()
+      const themeStore = useThemeStore()
       const userId = userStore.id
       let useLastColor = userStore.shouldUseLastConnectionColor
       if (globalStore.currentConnectionShiftKeyIsActive) {
@@ -61,6 +62,8 @@ export const useConnectionStore = defineStore('connections', {
       }
       if (useLastColor && this.getConnectionColors.length) {
         return this.getLastConnectionColor
+      } else if (useLastColor) {
+        return themeStore.randomColor()
       } else {
         return this.newCurrentConnectionColor
       }
