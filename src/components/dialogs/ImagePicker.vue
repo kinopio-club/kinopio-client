@@ -58,7 +58,7 @@ const emit = defineEmits(['removeImage', 'selectImage'])
 const state = reactive({
   images: [],
   search: '',
-  service: 'stickers', // 'stickers', 'gifs', 'pexels'
+  service: 'pexels', // 'stickers', 'gifs', 'pexels'
   loading: true,
   dialogHeight: null,
   resultsSectionHeight: null,
@@ -383,10 +383,10 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
   section
     .row.title-row-flex
       .segmented-buttons
-        button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
-          img.icon.sticker(src="@/assets/sticker.svg")
         button(@click.left.stop="toggleServiceIsPexels" :class="{active : serviceIsPexels}" title="pexels")
           img.icon(src="@/assets/search.svg")
+        button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
+          img.icon.sticker(src="@/assets/sticker.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
       .button-wrap
