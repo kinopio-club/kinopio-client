@@ -30,6 +30,10 @@ const props = defineProps({
   backgroundIsTransparent: Boolean
 })
 
+const state = reactive({
+  connectionPreviewColor: ''
+})
+
 const item = computed(() => props.card || props.box)
 
 // space
@@ -116,6 +120,7 @@ const connectorButtonBackground = computed(() => {
   if (globalStore.currentUserIsDraggingCard) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
   if (props.backgroundIsTransparent) { return }
+  if (state.connectionPreviewColor) { return state.connectionPreviewColor }
   if (isImageCard.value) {
     return 'transparent'
   }
@@ -233,11 +238,19 @@ const startConnecting = (event) => {
 }
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
+  connectionStore.updateNewConnectionColor()
+  state.connectionPreviewColor = connectionStore.getNewConnectionColor
+  state.isHover = true
 }
 const handleMouseLeaveConnector = () => {
   globalStore.currentUserIsHoveringOverConnectorItemId = ''
+  state.connectionPreviewColor = ''
+  state.isHover = false
 }
-
+const shouldAnimate = computed(() => {
+  // if (props.isConnectingTo || props.isConnectingFrom) { return }
+  return state.isHover
+})
 </script>
 
 <template lang="pug">
@@ -261,7 +274,7 @@ const handleMouseLeaveConnector = () => {
       .color(:style="{ background: connection?.color}")
 
   button.inline-button.connector-button(
-    :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light': isConnectorBackgroundColorLight, 'is-dark': !isConnectorBackgroundColorLight }"
+    :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light': isConnectorBackgroundColorLight, 'is-dark': !isConnectorBackgroundColorLight, 'pulse-opacity': shouldAnimate }"
     :style="buttonStyles"
     tabindex="-1"
   )
