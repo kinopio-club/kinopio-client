@@ -5,6 +5,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import last from 'lodash-es/last'
@@ -13,6 +14,27 @@ const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
+
+let unsubscribes
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerUpdateCurrentConnectorColor') {
+        updateCurrentConnectorColor()
+      } else if (name === 'triggerClearCurrentConnectorColor') {
+        clearCurrentConnectorColor()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
 
 const emit = defineEmits(['shouldRenderParent'])
 
@@ -30,7 +52,15 @@ const props = defineProps({
   backgroundIsTransparent: Boolean
 })
 
+const state = reactive({
+  currentConnectorColor: ''
+})
+
 const item = computed(() => props.card || props.box)
+const itemIsSelected = computed(() => {
+  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  return multipleItemsSelectedIds.includes(item.value.id)
+})
 
 // space
 
@@ -116,6 +146,7 @@ const connectorButtonBackground = computed(() => {
   if (globalStore.currentUserIsDraggingCard) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
   if (props.backgroundIsTransparent) { return }
+  if (state.currentConnectorColor) { return state.currentConnectorColor }
   if (isImageCard.value) {
     return 'transparent'
   }
@@ -218,6 +249,22 @@ const currentUserIsCreatingConnectionColor = computed(() => {
   return globalStore.currentConnectionColor
 })
 
+// connector preview color
+
+const updateCurrentConnectionColor = () => {
+  connectionStore.newCurrentConnectionColor = themeStore.randomColor()
+  globalStore.currentConnectionColor = connectionStore.getNewConnectionColor
+  globalStore.triggerUpdateCurrentConnectorColor()
+  state.currentConnectorColor = globalStore.currentConnectionColor
+}
+const updateCurrentConnectorColor = () => {
+  if (!itemIsSelected.value) { return }
+  state.currentConnectorColor = globalStore.currentConnectionColor
+}
+const clearCurrentConnectorColor = () => {
+  state.currentConnectorColor = ''
+}
+
 // handle events
 
 const startConnecting = (event) => {
@@ -233,9 +280,13 @@ const startConnecting = (event) => {
 }
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
+  if (globalStore.currentUserIsDrawingConnection) { return }
+  updateCurrentConnectionColor()
 }
 const handleMouseLeaveConnector = () => {
   globalStore.currentUserIsHoveringOverConnectorItemId = ''
+  globalStore.triggerClearCurrentConnectorColor()
+  clearCurrentConnectorColor()
 }
 
 </script>
@@ -255,6 +306,8 @@ const handleMouseLeaveConnector = () => {
   .connected-colors
     template(v-if="props.isConnectingTo || props.isConnectingFrom")
       .color(:style="{ background: currentConnectionColor}")
+    template(v-else-if="state.currentConnectorColor")
+      .color(:style="{ background: state.currentConnectorColor }")
     template(v-else-if="props.isRemoteConnecting")
       .color(:style="{ background: props.remoteConnectionColor }")
     template(v-else v-for="connection in connectedConnections")

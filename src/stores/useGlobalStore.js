@@ -562,6 +562,8 @@ export const useGlobalStore = defineStore('global', {
     triggerShowPreviousSearchCard () {},
     triggerMoreFiltersIsNotVisible () {},
     triggerConnectionDetailsIsVisible (options) {},
+    triggerClearCurrentConnectorColor () {},
+    triggerUpdateCurrentConnectorColor () {},
     triggerUpdateWindowHistory (options) {},
     triggerAddCard (options) {},
     triggerAddChildCard (options) {},
