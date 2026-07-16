@@ -26,7 +26,7 @@ export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
     allIds: [],
-    newRandomConnectionColor: '',
+    newCurrentConnectionColor: '',
     prevConnectionColor: '',
     // indexes
     byStartItemId: {}, // { itemId: [ id1, id2 ] }
@@ -59,10 +59,10 @@ export const useConnectionStore = defineStore('connections', {
       if (globalStore.currentConnectionShiftKeyIsActive) {
         useLastColor = !useLastColor
       }
-      if (this.getConnectionColors.length && useLastColor) {
+      if (useLastColor && this.getConnectionColors.length) {
         return this.getLastConnectionColor
       } else {
-        return this.newRandomConnectionColor
+        return this.newCurrentConnectionColor
       }
     }
   },
@@ -313,13 +313,6 @@ export const useConnectionStore = defineStore('connections', {
         return body
       })
       this.updateConnections(updates)
-    },
-    updateNewConnectionColor () {
-      const themeStore = useThemeStore()
-      this.newRandomConnectionColor = themeStore.randomColor()
-    },
-    clearNewConnectionColor () {
-      this.newRandomConnectionColor = ''
     },
 
     // remove
