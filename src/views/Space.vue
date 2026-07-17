@@ -414,7 +414,8 @@ const resizeCards = async (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = globalStore.currentUserIsResizingCardIds
-  const deltaX = endCursor.x - prevCursor.x
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  const deltaX = Math.round((endCursor.x - prevCursor.x) * zoom)
   cardStore.resizeCards(cardIds, deltaX)
   await nextTick()
   cardStore.updateCardsDimensions(cardIds)
