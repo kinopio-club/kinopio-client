@@ -9,6 +9,8 @@ import { useHistoryStore } from '@/stores/useHistoryStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import debounce from 'lodash-es/debounce'
+
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -71,9 +73,14 @@ const updateZoomOrigin = (event) => {
   globalStore.updateZoomOrigin(cursor)
 }
 const scroll = () => {
+  updatePrevSpacePagePosition()
   if (globalStore.userHasScrolled) { return }
   globalStore.userHasScrolled = true
 }
+const updatePrevSpacePagePosition = debounce(() => {
+  if (globalStore.isLoadingSpace) { return }
+  globalStore.updatePrevSpacePagePosition(spaceStore.id)
+}, 250)
 
 // touch start
 

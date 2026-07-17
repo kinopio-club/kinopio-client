@@ -464,7 +464,7 @@ export const useSpaceStore = defineStore('space', {
     },
     async restorePrevPagePosition (space) {
       const globalStore = useGlobalStore()
-      const position = globalStore.prevSpacePagePosition[space?.id]
+      const position = await cache.prevSpacePagePosition(space?.id)
       if (position) {
         globalStore.pageHeight = position.pageHeight
         globalStore.pageWidth = position.pageWidth
