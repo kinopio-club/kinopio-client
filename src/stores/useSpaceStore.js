@@ -1284,6 +1284,7 @@ export const useSpaceStore = defineStore('space', {
       lists.forEach(list => listStore.createList({ list }))
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
+      lists.forEach(list => cardStore.updateCardPositionsInList(list))
       for (const connection of connections) {
         await connectionStore.createConnection(connection)
         await connectionStore.updateConnectionPathByItemId(connection.startItemId)
