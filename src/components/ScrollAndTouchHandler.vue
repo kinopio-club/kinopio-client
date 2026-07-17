@@ -5,6 +5,10 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -15,6 +19,10 @@ const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const historyStore = useHistoryStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const lineStore = useLineStore()
+const listStore = useListStore()
 
 let multiTouchAction, shouldCancelUndo
 
@@ -47,7 +55,10 @@ const handleMouseWheelEvents = (event) => {
   const max = consts.spaceZoom.max
   const maxSpeed = 10 // windows deltaY fix
   const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
-  if (!isMeta) { return }
+  if (!isMeta) {
+    moveDraggingItemsWithScroll(event)
+    return
+  }
   event.preventDefault()
   const deltaY = event.deltaY
   let shouldZoomIn = deltaY < 0
@@ -64,6 +75,25 @@ const handleMouseWheelEvents = (event) => {
   speed = Math.min(maxSpeed, speed)
   updateZoomOrigin(event)
   globalStore.zoomSpace({ shouldZoomIn, shouldZoomOut, speed })
+}
+
+// items being dragged should follow wheel/trackpad scroll panning
+const moveDraggingItemsWithScroll = (event) => {
+  const isDraggingItem = (
+    globalStore.currentUserIsDraggingCard ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsDraggingLine ||
+    globalStore.currentUserIsDraggingList
+  )
+  if (!isDraggingItem) { return }
+  const delta = {
+    x: event.deltaX,
+    y: event.deltaY
+  }
+  cardStore.moveCards({ delta })
+  boxStore.moveBoxes({ delta })
+  lineStore.moveLines({ delta })
+  listStore.moveLists({ delta })
 }
 
 // scroll
