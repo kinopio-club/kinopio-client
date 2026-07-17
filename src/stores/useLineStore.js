@@ -154,7 +154,7 @@ export const useLineStore = defineStore('lines', {
       if (!userStore.getUserIsSpaceMember) { return }
       const globalStore = useGlobalStore()
       const zoom = globalStore.getSpaceCounterZoomDecimal
-      if (!endCursor || !prevCursor) { return }
+      if ((!endCursor || !prevCursor) && !delta) { return }
       delta = delta || {
         y: endCursor.y - prevCursor.y
       }

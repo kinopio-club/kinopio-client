@@ -57,8 +57,7 @@ const props = defineProps({
   startItemId: String
 })
 const state = reactive({
-  currentConnectionPath: undefined,
-  currentConnectionColor: undefined
+  currentConnectionPath: undefined
 })
 
 // drawing
@@ -68,6 +67,7 @@ const interact = (event) => {
     drawCurrentConnection(event)
   }
 }
+const currentConnectionColor = computed(() => globalStore.currentConnectionColor)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
   const end = utils.cursorPositionInSpace(event)
@@ -79,7 +79,6 @@ const drawCurrentConnection = (event) => {
   const color = connectionStore.getNewConnectionColor
   globalStore.currentConnectionShiftKeyIsActive = event.shiftKey
   state.currentConnectionPath = path
-  state.currentConnectionColor = color
   globalStore.currentConnectionColor = color
   const updates = {
     userId: userStore.id,
@@ -229,7 +228,7 @@ svg.current-connection(:style="connectionStyles")
     v-if="isDrawingConnection"
     fill="none"
     stroke-width="5"
-    :stroke="state.currentConnectionColor"
+    :stroke="currentConnectionColor"
     stroke-linecap="round"
     :d="state.currentConnectionPath"
     :style="connectionPathStyles"

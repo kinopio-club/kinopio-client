@@ -119,6 +119,33 @@ export default {
     await this.saveLocal('user', user)
   },
 
+  // Prev Space Page Position
+
+  prunePrevSpacePagePositions (positions) {
+    const maxAge = 30 * 60 * 1000 // 30 minutes
+    const prunedPositions = {}
+    Object.keys(positions).forEach(spaceId => {
+      const position = positions[spaceId]
+      const isStale = Date.now() - position.updatedAt > maxAge
+      if (isStale) { return }
+      prunedPositions[spaceId] = position
+    })
+    return prunedPositions
+  },
+  async prevSpacePagePosition (spaceId) {
+    if (!spaceId) { return }
+    let positions = await this.getLocal('prevSpacePagePosition') || {} // { abc123S: {x,y, updatedAt}, … }
+    positions = this.prunePrevSpacePagePositions(positions)
+    return positions[spaceId]
+  },
+  async updatePrevSpacePagePosition (spaceId, position) {
+    if (!spaceId) { return }
+    let positions = await this.getLocal('prevSpacePagePosition') || {} // { abc123S: {x,y, updatedAt}, … }
+    positions = this.prunePrevSpacePagePositions(positions)
+    positions[spaceId] = { ...position, updatedAt: Date.now() }
+    await this.saveLocal('prevSpacePagePosition', positions)
+  },
+
   // Space
 
   async space (spaceId) {

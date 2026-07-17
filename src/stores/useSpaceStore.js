@@ -464,7 +464,7 @@ export const useSpaceStore = defineStore('space', {
     },
     async restorePrevPagePosition (space) {
       const globalStore = useGlobalStore()
-      const position = globalStore.prevSpacePagePosition[space?.id]
+      const position = await cache.prevSpacePagePosition(space?.id)
       if (position) {
         globalStore.pageHeight = position.pageHeight
         globalStore.pageWidth = position.pageWidth
@@ -1284,6 +1284,7 @@ export const useSpaceStore = defineStore('space', {
       lists.forEach(list => listStore.createList({ list }))
       cards.forEach(card => cardStore.createCard(card))
       boxes.forEach(box => boxStore.createBox(box))
+      lists.forEach(list => cardStore.updateCardPositionsInList(list))
       for (const connection of connections) {
         await connectionStore.createConnection(connection)
         await connectionStore.updateConnectionPathByItemId(connection.startItemId)

@@ -13,9 +13,9 @@ import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
 
-import microfuzz from '@nozbe/microfuzz'
 import smartquotes from 'smartquotes'
 import dayjs from 'dayjs'
+import microfuzz from '@nozbe/microfuzz'
 const createFuzzySearch = microfuzz.default || microfuzz
 
 const globalStore = useGlobalStore()

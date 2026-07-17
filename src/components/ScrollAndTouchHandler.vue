@@ -5,14 +5,24 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useHistoryStore } from '@/stores/useHistoryStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useLineStore } from '@/stores/useLineStore'
+import { useListStore } from '@/stores/useListStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
+import debounce from 'lodash-es/debounce'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const historyStore = useHistoryStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const lineStore = useLineStore()
+const listStore = useListStore()
 
 let multiTouchAction, shouldCancelUndo
 
@@ -45,7 +55,11 @@ const handleMouseWheelEvents = (event) => {
   const max = consts.spaceZoom.max
   const maxSpeed = 10 // windows deltaY fix
   const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
-  if (!isMeta) { return }
+  if (!isMeta) {
+    moveDraggingItemsWithScroll(event)
+    resizeItemsWithScroll(event)
+    return
+  }
   event.preventDefault()
   const deltaY = event.deltaY
   let shouldZoomIn = deltaY < 0
@@ -64,6 +78,47 @@ const handleMouseWheelEvents = (event) => {
   globalStore.zoomSpace({ shouldZoomIn, shouldZoomOut, speed })
 }
 
+// items being dragged should follow wheel/trackpad scroll panning
+const moveDraggingItemsWithScroll = (event) => {
+  const isDraggingItem = (
+    globalStore.currentUserIsDraggingCard ||
+    globalStore.currentUserIsDraggingBox ||
+    globalStore.currentUserIsDraggingLine ||
+    globalStore.currentUserIsDraggingList
+  )
+  if (!isDraggingItem) { return }
+  const delta = {
+    x: event.deltaX,
+    y: event.deltaY
+  }
+  cardStore.moveCards({ delta })
+  boxStore.moveBoxes({ delta })
+  lineStore.moveLines({ delta })
+  listStore.moveLists({ delta })
+}
+// items being resized should grow/shrink with wheel/trackpad scroll panning
+const resizeItemsWithScroll = (event) => {
+  const isResizingItem = (
+    globalStore.currentUserIsResizingBox ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsResizingList
+  )
+  if (!isResizingItem) { return }
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  const delta = {
+    x: Math.round(event.deltaX * zoom),
+    y: Math.round(event.deltaY * zoom)
+  }
+  if (globalStore.currentUserIsResizingBox) {
+    boxStore.resizeBoxes(globalStore.currentUserIsResizingBoxIds, delta)
+  } else if (globalStore.currentUserIsResizingCard) {
+    cardStore.resizeCards(globalStore.currentUserIsResizingCardIds, delta.x)
+  } else if (globalStore.currentUserIsResizingList) {
+    listStore.resizeLists(globalStore.currentUserIsResizingListIds, delta)
+  }
+  globalStore.updatePageSizes()
+}
+
 // scroll
 
 const updateZoomOrigin = (event) => {
@@ -71,9 +126,14 @@ const updateZoomOrigin = (event) => {
   globalStore.updateZoomOrigin(cursor)
 }
 const scroll = () => {
+  updatePrevSpacePagePosition()
   if (globalStore.userHasScrolled) { return }
   globalStore.userHasScrolled = true
 }
+const updatePrevSpacePagePosition = debounce(() => {
+  if (globalStore.isLoadingSpace) { return }
+  globalStore.updatePrevSpacePagePosition(spaceStore.id)
+}, 250)
 
 // touch start
 

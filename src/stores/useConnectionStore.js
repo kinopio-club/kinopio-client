@@ -26,6 +26,7 @@ export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
     allIds: [],
+    newCurrentConnectionColor: '',
     prevConnectionColor: '',
     // indexes
     byStartItemId: {}, // { itemId: [ id1, id2 ] }
@@ -52,23 +53,24 @@ export const useConnectionStore = defineStore('connections', {
     },
     getNewConnectionColor () {
       const userStore = useUserStore()
-      const themeStore = useThemeStore()
       const globalStore = useGlobalStore()
+      const themeStore = useThemeStore()
       const userId = userStore.id
       let useLastColor = userStore.shouldUseLastConnectionColor
       if (globalStore.currentConnectionShiftKeyIsActive) {
         useLastColor = !useLastColor
       }
-      if (this.getConnectionColors.length && useLastColor) {
+      if (useLastColor && this.getConnectionColors.length) {
         return this.getLastConnectionColor
-      } else {
+      } else if (useLastColor) {
         return themeStore.randomColor()
+      } else {
+        return this.newCurrentConnectionColor
       }
     }
   },
 
   actions: {
-
     getAllConnectionsInViewport () {
       const elements = document.querySelectorAll('svg.connection')
       const paths = []

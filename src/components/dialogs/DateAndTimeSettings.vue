@@ -13,8 +13,8 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import microfuzz from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
-const createFuzzySearch = microfuzz.default || microfuzz
 dayjs.extend(timezone)
+const createFuzzySearch = microfuzz.default || microfuzz
 
 const globalStore = useGlobalStore()
 // const cardStore = useCardStore()
