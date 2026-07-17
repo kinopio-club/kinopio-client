@@ -57,6 +57,7 @@ const handleMouseWheelEvents = (event) => {
   const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
   if (!isMeta) {
     moveDraggingItemsWithScroll(event)
+    resizeItemsWithScroll(event)
     return
   }
   event.preventDefault()
@@ -94,6 +95,28 @@ const moveDraggingItemsWithScroll = (event) => {
   boxStore.moveBoxes({ delta })
   lineStore.moveLines({ delta })
   listStore.moveLists({ delta })
+}
+// items being resized should grow/shrink with wheel/trackpad scroll panning
+const resizeItemsWithScroll = (event) => {
+  const isResizingItem = (
+    globalStore.currentUserIsResizingBox ||
+    globalStore.currentUserIsResizingCard ||
+    globalStore.currentUserIsResizingList
+  )
+  if (!isResizingItem) { return }
+  const zoom = globalStore.getSpaceCounterZoomDecimal
+  const delta = {
+    x: Math.round(event.deltaX * zoom),
+    y: Math.round(event.deltaY * zoom)
+  }
+  if (globalStore.currentUserIsResizingBox) {
+    boxStore.resizeBoxes(globalStore.currentUserIsResizingBoxIds, delta)
+  } else if (globalStore.currentUserIsResizingCard) {
+    cardStore.resizeCards(globalStore.currentUserIsResizingCardIds, delta.x)
+  } else if (globalStore.currentUserIsResizingList) {
+    listStore.resizeLists(globalStore.currentUserIsResizingListIds, delta)
+  }
+  globalStore.updatePageSizes()
 }
 
 // scroll
