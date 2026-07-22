@@ -2019,7 +2019,7 @@ const toggleVideoIsPaused = () => {
 
         //- Lock
         template(v-if="isLocked")
-          //- based on CardUnlockButton.vue
+          //- based on CardUnlockButtons.vue
           //- .connector maintains connection paths when card is locked
           .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
             button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
