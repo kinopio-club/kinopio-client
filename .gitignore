@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /dist
+.obsidian/
 
 # local env files
 .env.local
@@ -25,4 +26,3 @@ yarn-error.log*
 
 # Local HTTPS certs (mkcert)
 /.cert
-

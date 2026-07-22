@@ -39,6 +39,56 @@ const createCache = (name, pattern) => {
   }
 }
 
+// Help pages, prerendered from src/help/*.md
+// Frontmatter (title, description, category) is parsed here at build time and
+// served to Help.vue as the 'virtual:help-pages' module, so post metadata can be
+// listed without statically importing the md files (which would merge their
+// lazy-loaded chunks into the Help chunk)
+
+const helpDir = './src/help'
+const parseFrontmatter = (markdown) => {
+  const match = markdown.match(/^---\n([\s\S]*?)\n---/)
+  if (!match) { return {} }
+  const data = {}
+  match[1].split('\n').forEach(line => {
+    const separatorIndex = line.indexOf(':')
+    if (separatorIndex === -1) { return }
+    const key = line.slice(0, separatorIndex).trim()
+    const value = line.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, '')
+    data[key] = value
+  })
+  return data
+}
+const helpPages = () => {
+  return fs.readdirSync(helpDir)
+    .filter(file => file.endsWith('.md') && file !== 'index.md')
+    .map(file => {
+      const markdown = fs.readFileSync(path.join(helpDir, file), 'utf8')
+      const slug = file.replace('.md', '')
+      return { slug, ...parseFrontmatter(markdown) }
+    })
+}
+const helpPagesPlugin = () => {
+  const virtualId = 'virtual:help-pages'
+  const resolvedVirtualId = '\0' + virtualId
+  return {
+    name: 'help-pages',
+    resolveId (id) {
+      if (id === virtualId) { return resolvedVirtualId }
+    },
+    load (id) {
+      if (id !== resolvedVirtualId) { return }
+      return `export default ${JSON.stringify(helpPages())}`
+    },
+    // reload when frontmatter changes during dev
+    handleHotUpdate ({ file, server }) {
+      if (!file.includes('/src/help/')) { return }
+      const module = server.moduleGraph.getModuleById(resolvedVirtualId)
+      if (module) { server.moduleGraph.invalidateModule(module) }
+    }
+  }
+}
+
 // Custom plugin to create SPA version of app.html
 const createSPAPlugin = () => {
   return {
@@ -59,6 +109,7 @@ const createSPAPlugin = () => {
 }
 
 export default defineConfig(async ({ command, mode }) => {
+  const helpRoutes = ['/help'].concat(helpPages().map(page => `/help/${page.slug}`))
   // sitemap routes
   const routes = [
     '/about',
@@ -67,9 +118,8 @@ export default defineConfig(async ({ command, mode }) => {
     '/changelog',
     '/discord',
     '/forum',
-    '/help',
     '/roadmap'
-  ]
+  ].concat(helpRoutes)
   // TODO
   // pascal sitemap rec: get all public spaces with content, mark each as user generated
   // update once a day (maybe not at the build stage, but in netlify functions)
@@ -90,7 +140,7 @@ export default defineConfig(async ({ command, mode }) => {
     ssgOptions: {
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
-        return ['/', '/about', '/api']
+        return ['/', '/about', '/api'].concat(helpRoutes)
       }
     },
     test: {
@@ -117,6 +167,8 @@ export default defineConfig(async ({ command, mode }) => {
       Markdown({
         markdownItOptions: { html: true }
       }),
+      // help page metadata for Help.vue
+      helpPagesPlugin(),
       // Create SPA version of app.html
       createSPAPlugin(),
       // offline support
@@ -148,6 +200,8 @@ export default defineConfig(async ({ command, mode }) => {
             /^\/blog(?:\/.*)?$/
           ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
+          // help pages and their media are online-only, keep them out of the app precache
+          globIgnores: ['help.html', 'help/**'],
           runtimeCaching: [
             createCache('cdn-cache', /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i), // match all except mp3/mp4
             createCache('img-cache', /^https:\/\/img\.kinopio\.club\/.*/i),
@@ -183,6 +237,23 @@ export default defineConfig(async ({ command, mode }) => {
       sourcemap: true,
       // skip non-important build warnings
       rollupOptions: {
+        output: {
+          // emit help post media and content chunks into help/ so the service
+          // worker globIgnores above can exclude them from the app precache
+          assetFileNames (assetInfo) {
+            const original = assetInfo.originalFileNames?.[0] || ''
+            if (original.includes('assets/pages/help/')) {
+              return 'help/assets/[name]-[hash][extname]'
+            }
+            return 'assets/[name]-[hash][extname]'
+          },
+          chunkFileNames (chunkInfo) {
+            if (chunkInfo.facadeModuleId?.includes('/src/help/')) {
+              return 'help/assets/[name]-[hash].js'
+            }
+            return 'assets/[name]-[hash].js'
+          }
+        },
         onwarn (warning, warn) {
           if (
             warning.message.includes('onUnmounted') ||

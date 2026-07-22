@@ -33,7 +33,7 @@ footer.sitemap
   background #223c2f
   border-radius var(--page-entity-radius)
   max-width 100%
-  margin 2rem 12px
+  margin var(--page-section-padding)
   width max-content
   p
     margin-top 0

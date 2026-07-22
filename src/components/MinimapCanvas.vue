@@ -15,7 +15,7 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 import throttle from 'lodash-es/throttle'
-import { colord, extend } from 'colord'
+import { colord } from 'colord'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()

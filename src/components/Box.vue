@@ -17,7 +17,7 @@ import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
-import { colord, extend } from 'colord'
+import { colord } from 'colord'
 
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()

@@ -11,7 +11,6 @@ import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import WhoMakesKinopio from '@/components/WhoMakesKinopio.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 import dayjs from 'dayjs'
@@ -36,6 +35,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     closeDialogs()
+    state.fundingTipsIsVisible = false
     updateDialogHeight()
     globalStore.shouldExplicitlyHideFooter = true
   } else {
@@ -47,7 +47,8 @@ const state = reactive({
   whatsNewIsVisible: false,
   appsAndExtensionsIsVisible: false,
   helpIsVisible: false,
-  dialogHeight: null
+  dialogHeight: null,
+  fundingTipsIsVisible: false
 })
 
 const childDialogIsVisible = computed(() => {
@@ -61,6 +62,7 @@ const closeDialogs = () => {
   state.whatsNewIsVisible = false
   state.appsAndExtensionsIsVisible = false
   state.helpIsVisible = false
+  // state.fundingTipsIsVisible = false
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -121,6 +123,14 @@ const toggleHelpIsVisible = () => {
   closeDialogs()
   state.helpIsVisible = !isVisible
 }
+
+// funding
+
+const toggleFundingTipsIsVisible = () => {
+  const isVisible = state.fundingTipsIsVisible
+  closeDialogs()
+  state.fundingTipsIsVisible = !isVisible
+}
 </script>
 
 <template lang="pug">
@@ -153,12 +163,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
           button(@click.left.stop.prevent="changeSpaceToChangelog" :class="{ active: currentSpaceIsChangelog }")
             span Changelog
             img.updated.icon(src="@/assets/updated.gif")
-    .row
-      .button-wrap
-        a(href="https://kinopio.club/friends-of-kinopio-affiliate-program-YNmS6C3fofN3R9mYgO1Bu")
-          button(@click.left.stop.prevent="changeSpaceToAffiliate" :class="{ active: currentSpaceIsAffiliate }")
-            span Affiliate Program
-            img.new.icon(src="@/assets/new.gif")
 
             //- v-if="changelogIsUpdated"
     //- .row
@@ -180,22 +184,43 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
           .badge.keyboard-shortcut.badge-in-button ?
           span Keyboard Shortcuts
   section
-    .row
+    .row.title-row.funding-row
       p 100% funded and made possible by people like you
+      button.small-button(@click.left.stop="toggleFundingTipsIsVisible" :class="{active: state.fundingTipsIsVisible}")
+        span ?
       //- The best way to support Kinopio is by spreading the word
     //- .row
     //-   .button-wrap
     //-     a(href="https://kinopio.club/blog")
     //-       button
     //-         span Help Spread the Word →
-    .row
-      .button-wrap(v-if="!isSecureAppContextIOS")
-        button(@click.left.stop="triggerDonateIsVisible")
-          img.icon(src="@/assets/heart-empty.svg")
-          span Donate
-    .row
-      WhoMakesKinopio
+    section.subsection(v-if="state.fundingTipsIsVisible")
+      p Hi I'm{{' '}}
+        a(href="https://pketh.org") Piri
+        span , and I started building Kinopio in 2018.
+      p I believe in building ethical, economically-sustainable,
+        span {{' '}}
+        a(href="https://pketh.org/organic-software.html") organic software
+        span {{' '}}
+        span designed by artists, built by craftspeople, and funded by the people who enjoy it.
+      p If you're curious, I wrote{{' '}}
+        a(href="https://pketh.org/how-kinopio-is-made.html")
+          span How Kinopio is Made
+        span .
+      .row
+        .button-wrap(v-if="!isSecureAppContextIOS")
+          button(@click.left.stop="triggerDonateIsVisible")
+            img.icon(src="@/assets/heart-empty.svg")
+            span Donate
+    //- .row
+    //-   WhoMakesKinopio
   section
+    .row
+      .button-wrap
+        a(href="https://kinopio.club/friends-of-kinopio-affiliate-program-YNmS6C3fofN3R9mYgO1Bu")
+          button(@click.left.stop.prevent="changeSpaceToAffiliate" :class="{ active: currentSpaceIsAffiliate }")
+            span Affiliate Program
+            img.new.icon(src="@/assets/new.gif")
     .row
       .button-wrap
         a(href="https://kinopio.club/discord" target="_blank")
@@ -235,6 +260,11 @@ dialog.about
     display flex
     .segmented-buttons
       margin-right 6px
+  .funding-row
+    align-items flex-start
+    button
+      margin 0
   dialog.apps
-    left 8px
+    left 8px !important
+    right initial !important
 </style>

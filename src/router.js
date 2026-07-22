@@ -54,6 +54,14 @@ const router = {
         next()
       }
     }, {
+      path: '/help/:page?',
+      name: 'help',
+      component: () => import('./views/Help.vue'),
+      beforeEnter: (to, from, next) => {
+        resetStoresForStaticPage()
+        next()
+      }
+    }, {
       path: '/from/:promoCode',
       redirect: to => ({
         path: '/',
