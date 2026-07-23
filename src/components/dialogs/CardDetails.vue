@@ -236,7 +236,7 @@ const styles = computed(() => {
   const transform = `scale(${zoom})`
   const offset = 8
   const left = `${card.value.x + offset}px`
-  const top = `${card.value.y + offset}px`
+  const top = `${card.value.y + card.value.height - offset}px`
   return { transform, left, top, width }
 })
 const updateDialogHeight = async () => {
