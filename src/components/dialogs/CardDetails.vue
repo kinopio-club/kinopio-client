@@ -238,11 +238,9 @@ const styles = computed(() => {
   const left = `${card.value.x + offset}px`
   let top
   // conditional top pos
-  // const dialogIsBelowViewport = topUnderCard + cardDetailsHeight > globalStore.viewportHeight + window.scrollY
   if (userStore.cardDetailsIsBelowCard) {
     const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
     top = card.value.y + card.value.height - offset
-    // top = `${topUnderCard}px`
   } else {
     top = card.value.y + offset
   }
