@@ -238,14 +238,15 @@ const styles = computed(() => {
   const left = `${card.value.x + offset}px`
   let top
   // conditional top pos
-  const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
-  const topUnderCard = card.value.y + card.value.height - offset
-  const dialogIsBelowViewport = topUnderCard + cardDetailsHeight > globalStore.viewportHeight + window.scrollY
-  if (dialogIsBelowViewport) {
-    top = `${card.value.y + offset}px`
+  // const dialogIsBelowViewport = topUnderCard + cardDetailsHeight > globalStore.viewportHeight + window.scrollY
+  if (userStore.cardDetailsIsBelowCard) {
+    const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
+    top = card.value.y + card.value.height - offset
+    // top = `${topUnderCard}px`
   } else {
-    top = `${topUnderCard}px`
+    top = card.value.y + offset
   }
+  top = top + 'px'
   return { transform, left, top, width }
 })
 const updateDialogHeight = async () => {
@@ -1829,6 +1830,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 <style lang="stylus">
 .card-details
   transform-origin top left
+  transition top 0.1s
   z-index var(--max-z)
   > section
     background-color var(--secondary-background)
