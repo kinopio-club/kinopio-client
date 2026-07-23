@@ -236,7 +236,16 @@ const styles = computed(() => {
   const transform = `scale(${zoom})`
   const offset = 8
   const left = `${card.value.x + offset}px`
-  const top = `${card.value.y + card.value.height - offset}px`
+  let top
+  // conditional top pos
+  const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
+  const topUnderCard = card.value.y + card.value.height - offset
+  const dialogIsBelowViewport = topUnderCard + cardDetailsHeight > globalStore.viewportHeight + window.scrollY
+  if (dialogIsBelowViewport) {
+    top = `${card.value.y + offset}px`
+  } else {
+    top = `${topUnderCard}px`
+  }
   return { transform, left, top, width }
 })
 const updateDialogHeight = async () => {
