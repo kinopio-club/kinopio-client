@@ -70,7 +70,14 @@ const updateTextareaSize = () => {
   const modifier = 0
   textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
 }
+const handleEnterKey = (event) => {
+  if (utils.isCompositionKeyboardEvent(event)) { return }
+  event.preventDefault()
+  addCard()
+}
+
 const insertLineBreak = async (event) => {
+  if (utils.isCompositionKeyboardEvent(event)) { return }
   const position = textareaElement.value.selectionEnd
   const name = state.newName
   const newName = name.substring(0, position) + '\n' + name.substring(position)
@@ -159,7 +166,7 @@ section.add-to-inbox(v-if="props.visible")
         :placeholder="textareaPlaceholder"
         v-model="name"
         :maxlength="maxCardCharacterLimit"
-        @keydown.enter.exact.prevent="addCard"
+        @keydown.enter.exact="handleEnterKey"
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"

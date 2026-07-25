@@ -225,6 +225,11 @@ const closeDialogs = () => {
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
+const handleEnterKey = (event) => {
+  if (utils.isCompositionKeyboardEvent(event)) { return }
+  event.preventDefault()
+  closeAllDialogs()
+}
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
@@ -290,7 +295,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           rows="1"
           placeholder="Box Name"
           v-model="name"
-          @keydown.enter.stop.prevent="closeAllDialogs"
+          @keydown.enter.stop="handleEnterKey"
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
           @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"

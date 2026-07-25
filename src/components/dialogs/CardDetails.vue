@@ -50,7 +50,6 @@ const apiStore = useApiStore()
 
 let prevCardId, prevCardName
 let previousTags = []
-let compositionEventEndTime = 0
 
 const openingPreDuration = 5 // ms
 const openingDuration = 400 // ms
@@ -349,11 +348,6 @@ const broadcastShowCardDetails = () => {
 
 // card
 
-const updateCompositionEventEndTime = (event) => {
-  // for non-latin input
-  // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
-  compositionEventEndTime = event.timeStamp
-}
 const removeCard = () => {
   if (!canEditCard.value) { return }
   cardStore.removeCards([cardId.value])
@@ -1275,12 +1269,12 @@ const addListCard = () => {
 
 // 🎹 enter
 const handleEnterKey = (event) => {
-  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  if (utils.isCompositionKeyboardEvent(event)) { return }
+  event.preventDefault()
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.atMention.pickerIsVisible
   console.info('🎹 enter', {
     shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
-    pickersIsVisible,
-    isCompositionEvent
+    pickersIsVisible
   })
   if (globalStore.shouldPreventNextEnterKey) {
     globalStore.shouldPreventNextEnterKey = false
@@ -1291,8 +1285,6 @@ const handleEnterKey = (event) => {
     hidePickers()
   } else if (state.insertedLineBreak) {
     state.insertedLineBreak = false
-  // eslint-disable-next-line no-empty
-  } else if (isCompositionEvent) {
   } else if (card.value.listId) {
     addListCard()
   } else {
@@ -1621,9 +1613,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         rows="1"
         placeholder="Type here, or paste a URL"
         v-model="name"
-        @keydown.prevent.enter.exact
 
-        @compositionend="updateCompositionEventEndTime"
         @keydown.enter.exact="handleEnterKey"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"

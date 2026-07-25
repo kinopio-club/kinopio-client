@@ -218,7 +218,9 @@ const focusNextItem = () => {
 const focusPreviousItem = () => {
   emit('focusPreviousItem')
 }
-const selectItem = () => {
+const selectItem = (event) => {
+  if (utils.isCompositionKeyboardEvent(event)) { return }
+  event.preventDefault()
   emit('selectItem')
 }
 </script>
@@ -240,7 +242,7 @@ const selectItem = () => {
     @blur="blur"
     @keydown.down.exact="focusNextItem"
     @keydown.up.exact="focusPreviousItem"
-    @keydown.enter.exact.stop.prevent="selectItem"
+    @keydown.enter.exact.stop="selectItem"
     @keyup.space.prevent
     @keyup.backspace.stop
     @keyup.delete.stop

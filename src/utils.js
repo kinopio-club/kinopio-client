@@ -28,6 +28,18 @@ dayjs.extend(isToday)
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
+let isComposionEvent = false
+let compositionEventEndTime = 0
+if (typeof window !== 'undefined') {
+  window.addEventListener('compositionstart', () => {
+    isComposionEvent = true
+  })
+  window.addEventListener('compositionend', (event) => {
+    isComposionEvent = false
+    compositionEventEndTime = event.timeStamp
+  })
+}
+
 const uuidLength = 21
 const randomRGBA = (alpha) => {
   const hex = randomColor({ hue: 'random', luminosity: 'random' })
@@ -576,6 +588,18 @@ export default {
     if (event.touches) {
       return event.touches.length > 1
     }
+  },
+  // non-latin (IME) input for japanese kanji
+  isCompositionKeyboardEvent (event) {
+    if (isComposionEvent) { return true }
+    if (event.isComposing) { return true }
+    // older chromium and android fallback
+    if (event.keyCode === 229) { return true }
+    // safari fallback
+    if (compositionEventEndTime && event.timeStamp) {
+      return Math.abs(event.timeStamp - compositionEventEndTime) < 100
+    }
+    return false
   },
   focusTextarea (element) {
     if (!element) { return }
