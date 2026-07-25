@@ -115,6 +115,14 @@ const toggleCardHistoryIsVisible = () => {
   closeDialogs()
   state.cardHistoryIsVisible = value
 }
+
+// card details position
+
+const cardDetailsIsBelowCard = computed(() => userStore.cardDetailsIsBelowCard)
+const toggleCardDetailsIsBelowCard = () => {
+  const value = !userStore.cardDetailsIsBelowCard
+  userStore.updateUser({ cardDetailsIsBelowCard: value })
+}
 </script>
 
 <template lang="pug">
@@ -141,6 +149,9 @@ const toggleCardHistoryIsVisible = () => {
       button.small-button.history-button.inline-button(@click.stop="toggleCardHistoryIsVisible" title="Card History" :class="{active: state.cardHistoryIsVisible}")
         img.icon.time(src="@/assets/time.svg")
       CardHistory(:visible="state.cardHistoryIsVisible" :card="props.card" :createdByUser="props.createdByUser" :updatedByUser="props.updatedByUser")
+    .button-wrap
+      button.small-button.history-button.inline-button(@click.stop="toggleCardDetailsIsBelowCard" title="Edit Below Card" :class="{active: cardDetailsIsBelowCard}")
+        img.below.icon(src="@/assets/below.svg" :class="{above: cardDetailsIsBelowCard}")
     //- settings
     .button-wrap
       button.small-button.settings-button.inline-button(@click.stop="toggleCardsSettingsIsVisible" :title="cardSettingsTitle" :class="{active: state.cardsSettingsIsVisible}")
@@ -168,4 +179,9 @@ const toggleCardHistoryIsVisible = () => {
       cursor pointer
     .icon.time
       vertical-align -1.5px
+    .icon.below
+      vertical-align -1px
+      padding-left 1px
+      &.above
+        transform scaleY(-1)
 </style>

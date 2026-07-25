@@ -64,10 +64,13 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 // styles
 
 const positionStyles = computed(() => {
-  const buttonWidth = 34
+  let buttonsWidth = 34
+  if (props.card.urlPreviewUrl) {
+    buttonsWidth += 22
+  }
   const xOffset = 2
   const width = props.card.width || props.card.resizeWidth
-  const x = props.card.x + width - buttonWidth + xOffset
+  const x = props.card.x + width - buttonsWidth + xOffset
   return {
     left: x + 'px',
     top: props.card.y + 'px',
@@ -101,33 +104,49 @@ const unlockCard = (event) => {
 </script>
 
 <template lang="pug">
-.card-unlock-button.inline-button-wrap.item-unlock-button(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-item-id="card.id")
-  button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
-    .connected-colors
-      template(v-for="connection in connections" :key="connection.id")
-        .color(:style="{ background: connection.color}")
-    img.icon.lock-icon(src="@/assets/lock.svg")
+.card-unlock-buttons.inline-button-wrap.item-unlock-button(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-item-id="card.id")
+  //- url link
+  a.url-wrap(v-if="props.card.urlPreviewUrl" :href="props.card.urlPreviewUrl" @mouseup.exact.prevent.stop @click.stop @touchend.prevent target="_blank")
+    .url.inline-button-wrap
+      button.inline-button.url-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
+        img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+  //- unlock
+  .inline-button-wrap
+    button.inline-button.lock-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
+      .connected-colors
+        template(v-for="connection in connections" :key="connection.id")
+          .color(:style="{ background: connection.color}")
+      img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 
 <style lang="stylus">
-.card-unlock-button
+.card-unlock-buttons
   transform-origin top left
   pointer-events all
   cursor pointer
   position absolute
+  padding 0
+  display flex
   button
     cursor pointer
-    width fit-content
     padding 5px 8px
-  &:hover
-    .lock-icon
-      opacity 1
+  .lock-button
+    width fit-content
+    &:hover
+      .lock-icon
+        opacity 1
   .lock-icon
     position absolute
     left 4px
     top 2px
     height 10px
     opacity 0.3
+  .arrow-icon
+    position absolute
+    left 5px
+    top 3.5px
+    opacity 0.3
+
   // from Card.vue
   .connected-colors
     position absolute
@@ -149,4 +168,18 @@ const unlockCard = (event) => {
     .icon
       filter invert()
 
+  .url-wrap
+    padding 0
+    margin 0
+    vertical-align -1px
+    .url
+      display inline-block
+      cursor pointer
+      padding-left 0
+      padding-right 0
+      button
+        cursor pointer
+    &:hover
+      .arrow-icon
+        opacity 1
 </style>

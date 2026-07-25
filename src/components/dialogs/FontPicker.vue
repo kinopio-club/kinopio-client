@@ -3,12 +3,14 @@ import { reactive, computed, onBeforeUnmount, onMounted, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import fonts from '@/data/fonts.js'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -145,6 +147,7 @@ const currentFontSizeString = computed(() => {
 // font preview
 
 const preview = computed(() => {
+  if (userStore.cardDetailsIsBelowCard) { return }
   // normalize name
   let name = utils.truncated(state.previewItem?.name)
   const checkbox = utils.checkboxFromString(name)
