@@ -189,6 +189,7 @@ const isSelectedOrDragging = computed(() => {
     remoteUserTiltingCardsColor.value
   )
 })
+const isHovering = computed(() => globalStore.currentUserIsHoveringOverCardId === props.card.id)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserColor = computed(() => userStore.color)
 
@@ -411,7 +412,7 @@ const isSnappingToItem = computed(() => {
 const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
-  if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
+  if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value || isHovering.value) {
     z = consts.maxItemZ
   } else if (isLocked.value) {
     pointerEvents = 'none'
@@ -690,7 +691,7 @@ const connectorIsVisible = computed(() => {
 const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
   const isPresentationMode = globalStore.isPresentationMode
-  const isNotHovering = globalStore.currentUserIsHoveringOverCardId !== props.card.id
+  const isNotHovering = !isHovering.value
   const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
   return isPresentationMode && isNotHovering && isNotConnected
 })
