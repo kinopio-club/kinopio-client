@@ -419,28 +419,27 @@ const updateScroll = () => {
 }
 const viewportStyle = computed(() => {
   const counterZoom = globalStore.getSpaceCounterZoomDecimal
-  const origin = globalStore.zoomOrigin
+  const offset = globalStore.spaceZoomOffset
   const color = userStore.color
-  // viewport size in space coordinates (correct regardless of origin)
-  let width = (globalStore.viewportWidth * counterZoom) * ratio.value
-  let height = (globalStore.viewportHeight * counterZoom) * ratio.value
-  // convert scroll position to space coordinates, accounting for zoom origin offset
-  let left = (state.scrollX * counterZoom - origin.x * (counterZoom - 1)) * ratio.value
-  let top = (state.scrollY * counterZoom - origin.y * (counterZoom - 1)) * ratio.value
-  // constraints
-  if (Math.round(left + width) > state.pageWidth) {
-    left = Math.min(left, state.pageWidth)
-    width = state.pageWidth - left
-  }
-  if (Math.round(top + height) > state.pageHeight) {
-    top = Math.min(top, state.pageHeight)
-    height = state.pageHeight - top
-  }
+  // viewport size in space coordinates
+  const width = (globalStore.viewportWidth * counterZoom) * ratio.value
+  const height = (globalStore.viewportHeight * counterZoom) * ratio.value
+  // convert scroll position to space coordinates
+  // the box is the intersection of the visible area with the space,
+  // when zoomed out far enough to encompass the space it covers the whole minimap
+  let left = ((state.scrollX - offset.x) * counterZoom) * ratio.value
+  let top = ((state.scrollY - offset.y) * counterZoom) * ratio.value
+  let right = Math.min(left + width, state.pageWidth)
+  let bottom = Math.min(top + height, state.pageHeight)
+  left = Math.max(left, 0)
+  top = Math.max(top, 0)
+  right = Math.max(right, left)
+  bottom = Math.max(bottom, top)
   const styles = {
     left: `${left}px`,
     top: `${top}px`,
-    width: `${width}px`,
-    height: `${height}px`,
+    width: `${right - left}px`,
+    height: `${bottom - top}px`,
     borderColor: color
   }
   if (state.isPanningViewport) {
@@ -464,10 +463,10 @@ const positionInSpace = (event) => {
 const spaceToScroll = (spacePos) => {
   // convert a space coordinate to a scroll position, inverse of the viewport mapping
   const zoom = globalStore.getSpaceZoomDecimal
-  const origin = globalStore.zoomOrigin
+  const offset = globalStore.spaceZoomOffset
   return {
-    x: origin.x * (1 - zoom) + zoom * spacePos.x,
-    y: origin.y * (1 - zoom) + zoom * spacePos.y
+    x: (zoom * spacePos.x) + offset.x,
+    y: (zoom * spacePos.y) + offset.y
   }
 }
 const positionInViewportCenter = (position) => {

@@ -525,6 +525,7 @@ export const useSpaceStore = defineStore('space', {
       space = utils.migrateConnectionTypes(space)
       if (!globalStore.isEmbedMode) {
         globalStore.spaceZoomPercent = 100
+        globalStore.spaceZoomOffset = { x: 0, y: 0 }
       }
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space

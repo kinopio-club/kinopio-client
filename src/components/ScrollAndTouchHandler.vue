@@ -74,8 +74,8 @@ const handleMouseWheelEvents = (event) => {
   }
   let speed = Math.max(Math.abs(deltaY), 1)
   speed = Math.min(maxSpeed, speed)
-  updateZoomOrigin(event)
-  globalStore.zoomSpace({ shouldZoomIn, shouldZoomOut, speed })
+  const anchor = { x: event.clientX, y: event.clientY }
+  globalStore.zoomSpace({ shouldZoomIn, shouldZoomOut, speed, anchor })
 }
 
 // items being dragged should follow wheel/trackpad scroll panning
@@ -121,10 +121,6 @@ const resizeItemsWithScroll = (event) => {
 
 // scroll
 
-const updateZoomOrigin = (event) => {
-  const cursor = utils.cursorPositionInPage(event)
-  globalStore.updateZoomOrigin(cursor)
-}
 const scroll = () => {
   updatePrevSpacePagePosition()
   if (globalStore.userHasScrolled) { return }
