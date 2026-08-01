@@ -5,7 +5,8 @@ const env = import.meta.env
 export default {
   spaceZoom: {
     max: 180,
-    min: 20
+    min: 20,
+    default: 100
   },
   spaceBetweenCards: 12,
   cardCharacterLimit: 4000,

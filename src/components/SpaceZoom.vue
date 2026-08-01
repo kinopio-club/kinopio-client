@@ -37,6 +37,7 @@ const state = reactive({
 
 const max = computed(() => consts.spaceZoom.max) // 180
 const min = computed(() => consts.spaceZoom.min) // 20
+const defaultValue = computed(() => consts.spaceZoom.default) // 100
 const spaceZoomPercent = computed(() => globalStore.spaceZoomPercent)
 const minKeyboardShortcut = computed(() => 'Z')
 
@@ -51,7 +52,7 @@ const closeAllDialogs = () => {
 // zoom
 
 const resetSpaceZoom = async () => {
-  await globalStore.zoomSpaceTo({ percent: 100 })
+  await globalStore.zoomSpaceTo({ percent: defaultValue.value })
   globalStore.spaceZoomOffset = { x: 0, y: 0 }
   window.scrollTo(0, 0)
 }
@@ -64,7 +65,7 @@ const zoomOutOrInMax = () => {
   } else if (isMin) {
     globalStore.zoomSpaceTo({ percent: max.value })
   } else if (isMax) {
-    globalStore.zoomSpaceTo({ percent: 100 })
+    globalStore.zoomSpaceTo({ percent: defaultValue.value })
   }
 }
 
@@ -89,7 +90,7 @@ const removeAnimations = () => {
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"
-    :defaultValue="100"
+    :defaultValue="defaultValue"
     :animateJiggleRight="state.animateJiggleRight"
     :animateJiggleLeft="state.animateJiggleLeft"
     @removeAnimations="removeAnimations"
