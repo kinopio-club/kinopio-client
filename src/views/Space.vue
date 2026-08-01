@@ -298,13 +298,15 @@ const isSpacePage = computed(() => globalStore.isSpacePage)
 
 const appPageWidth = computed(() => {
   if (!isSpacePage.value) { return }
-  const size = Math.max(globalStore.pageWidth, globalStore.viewportWidth)
-  return size + 'px'
+  const zoom = globalStore.getSpaceZoomDecimal
+  const offset = globalStore.spaceZoomOffset
+  return Math.max(globalStore.pageWidth * zoom + offset.x, globalStore.pageWidth, globalStore.viewportWidth)
 })
 const appPageHeight = computed(() => {
   if (!isSpacePage.value) { return }
-  const size = Math.max(globalStore.pageHeight, globalStore.viewportHeight)
-  return size + 'px'
+  const zoom = globalStore.getSpaceZoomDecimal
+  const offset = globalStore.spaceZoomOffset
+  return Math.max(globalStore.pageHeight * zoom + offset.y, globalStore.pageHeight, globalStore.viewportHeight)
 })
 const pageCursor = computed(() => {
   const isPanning = globalStore.currentUserIsPanning
@@ -324,10 +326,9 @@ const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
-  const zoom = globalStore.getSpaceCounterZoomDecimal
   return {
-    width: `${pageWidth.value * zoom}px`,
-    height: `${pageHeight.value * zoom}px`,
+    width: `${pageWidth.value}px`,
+    height: `${pageHeight.value}px`,
     transform: globalStore.getZoomTransform
   }
 })

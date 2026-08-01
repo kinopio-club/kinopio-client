@@ -325,7 +325,7 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
   .colors
     display flex
     flex-wrap wrap
-    margin-bottom 6px
+    margin-bottom 8px
     gap 6px
   .recent-colors
     margin-bottom 8px

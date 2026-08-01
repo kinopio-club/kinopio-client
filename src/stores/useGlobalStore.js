@@ -60,8 +60,8 @@ export const useGlobalStore = defineStore('global', {
 
     // zoom and scroll
     spaceZoomPercent: 100,
+    spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
     pinchCounterZoomDecimal: 1,
-    zoomOrigin: { x: 0, y: 0 },
     isPinchZooming: false,
     isTouchScrolling: false,
 
@@ -357,9 +357,8 @@ export const useGlobalStore = defineStore('global', {
     },
     getZoomTransform () {
       const zoom = this.getSpaceZoomDecimal
-      const origin = this.zoomOrigin
-      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      return transform
+      const offset = this.spaceZoomOffset
+      return `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`
     },
     getIsInteractingWithItem () {
       return (
@@ -577,7 +576,6 @@ export const useGlobalStore = defineStore('global', {
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},
     triggerUpdateLockedItemButtonPositionCardId (cardId) {},
-    triggerCenterZoomOrigin () {},
     triggerRemoveCardFromCardList (card) {},
     triggerUpdateTheme () {},
     triggerUserIsLoaded () {},
@@ -2197,30 +2195,62 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    updateZoomOrigin (origin) {
-      utils.typeCheck({ value: origin, type: 'object' })
-      const prevOrigin = this.zoomOrigin
-      const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || (prevOrigin.x === 0 && prevOrigin.y === 0)
-      if (zoomOriginIsZero) {
-        this.zoomOrigin = origin
-      } else {
-        origin = utils.pointBetweenTwoPoints(prevOrigin, origin)
-        this.zoomOrigin = origin
+    async zoomSpaceTo ({ percent, origin }) {
+      percent = Math.max(percent, consts.spaceZoom.min)
+      percent = Math.min(percent, consts.spaceZoom.max)
+      const prevZoom = this.getSpaceZoomDecimal
+      const zoom = percent / 100
+      if (zoom === prevZoom) { return }
+      const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
+      origin = origin || viewportCenter
+      const offset = this.spaceZoomOffset
+      // space point currently under the origin
+      const point = {
+        x: (window.scrollX + origin.x - offset.x) / prevZoom,
+        y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
+      // the scroll that keeps point under the origin
+      // when it would be negative, grow the outside space offset instead, so the space shifts away from the top left
+      // when it is positive, shrink the offset back down first
+      const newOffset = { x: offset.x, y: offset.y }
+      const scroll = {
+        x: (point.x * zoom) + offset.x - origin.x,
+        y: (point.y * zoom) + offset.y - origin.y
+      }
+      const axes = ['x', 'y']
+      axes.forEach(axis => {
+        if (scroll[axis] < 0) {
+          newOffset[axis] = offset[axis] - scroll[axis]
+          scroll[axis] = 0
+        } else {
+          const delta = Math.min(offset[axis], scroll[axis])
+          newOffset[axis] = offset[axis] - delta
+          scroll[axis] = scroll[axis] - delta
+        }
+      })
+      // at 100% there should be no outside space margin
+      if (percent === consts.spaceZoom.max) {
+        axes.forEach(axis => {
+          scroll[axis] = Math.max(scroll[axis] - newOffset[axis], 0)
+          newOffset[axis] = 0
+        })
+      }
+      this.spaceZoomPercent = percent
+      this.spaceZoomOffset = newOffset
+      // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
+      await nextTick()
+      window.scrollTo(scroll.x, scroll.y)
     },
-    zoomSpace ({ shouldZoomIn, shouldZoomOut, speed }) {
-      let percent
-      const currentPercent = this.spaceZoomPercent
+    zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
+      let percent = this.spaceZoomPercent
       if (shouldZoomIn) {
-        percent = currentPercent + speed
+        percent = percent + speed
       } else if (shouldZoomOut) {
-        percent = currentPercent - speed
+        percent = percent - speed
       } else {
         return
       }
-      percent = Math.max(percent, consts.spaceZoom.min)
-      percent = Math.min(percent, consts.spaceZoom.max)
-      this.spaceZoomPercent = percent
+      return this.zoomSpaceTo({ percent, origin })
     },
 
     // toolbar mode
