@@ -324,9 +324,6 @@ export const useUserStore = defineStore('user', {
       console.info('🌸 Create new user')
       this.themeIsSystem = true
       this.appleAppAccountToken = self.crypto.randomUUID()
-      if (utils.isMobile()) {
-        this.shouldShowMinimap = false
-      }
       const allState = { ...this.$state }
       cache.saveUser(allState)
     },
