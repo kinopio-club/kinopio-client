@@ -124,7 +124,7 @@ section.subsection.connection-actions(
       span.label(:class="colorClasses") {{ props.label }}
     .row.edit-connection-colors
       //- Color
-      .button-wrap(v-if="!props.hideType")
+      .color-button-wrap.button-wrap(v-if="!props.hideType")
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPickerIsVisible" :class="{active: state.colorPickerIsVisible}")
           .segmented-colors
             template(v-for="connection in connectionColorSwatches")
@@ -139,7 +139,7 @@ section.subsection.connection-actions(
           :shouldHideOpacity="true"
           @selectedColor="updateColor"
         )
-    .row
+    .row.connection-decorators
       //- Label, Direction, Reverse, Curved
       ConnectionDecorators(:connections="props.connections")
   //- collapsed horizontal label
@@ -164,13 +164,12 @@ dialog section.connection-actions
     border-color var(--primary-border-on-light-background) !important
   &.is-background-dark
     border-color var(--primary-border-on-dark-background) !important
-  .row
+  > .row
     margin 0
-  .button-wrap
+  .color-button-wrap
     margin-left 0
     margin-right 4px
     margin-bottom 4px
-
   .label
     &.is-background-light
       color var(--primary-on-light-background)

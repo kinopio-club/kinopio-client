@@ -165,6 +165,10 @@ const togglePathIsStraight = (isStraight) => {
 </template>
 
 <style lang="stylus" scoped>
+.button-wrap
+  margin-left 0
+  margin-right 4px
+  margin-bottom 4px
 button
   .icon
     &.clear

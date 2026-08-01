@@ -35,7 +35,7 @@ export default {
   requestTimeout: 40000, // 40s
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
-  systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
+  systemCommands: { explore: 'Explore', newSpace: 'New', templates: 'Templates', apps: 'Apps and Extensions' },
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
