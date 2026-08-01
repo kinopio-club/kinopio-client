@@ -729,6 +729,7 @@ export const useSpaceStore = defineStore('space', {
       const themeStore = useThemeStore()
       const user = userStore.getUserAllState
       globalStore.triggerSpaceZoomReset()
+      window.scrollTo(0, 0)
       let space = utils.clone(newSpace)
       space = utils.resetSpaceMeta({ space, user })
       space.name = name || utils.newSpaceName()
