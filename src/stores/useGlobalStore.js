@@ -60,8 +60,7 @@ export const useGlobalStore = defineStore('global', {
 
     // zoom and scroll
     spaceZoomPercent: 100,
-    // blank outside space margin above and left of the space, so zooming out can anchor near the top left edges
-    spaceZoomOffset: { x: 0, y: 0 },
+    spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
     pinchCounterZoomDecimal: 1,
     isPinchZooming: false,
     isTouchScrolling: false,
@@ -2196,27 +2195,27 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    // anchor is a client (viewport) position that should stay fixed while zooming, defaults to viewport center
-    async zoomSpaceTo ({ percent, anchor }) {
+    async zoomSpaceTo ({ percent, origin }) {
       percent = Math.max(percent, consts.spaceZoom.min)
       percent = Math.min(percent, consts.spaceZoom.max)
       const prevZoom = this.getSpaceZoomDecimal
       const zoom = percent / 100
       if (zoom === prevZoom) { return }
-      anchor = anchor || { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
+      const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
+      origin = origin || viewportCenter
       const offset = this.spaceZoomOffset
-      // space point currently under the anchor
+      // space point currently under the origin
       const point = {
-        x: (window.scrollX + anchor.x - offset.x) / prevZoom,
-        y: (window.scrollY + anchor.y - offset.y) / prevZoom
+        x: (window.scrollX + origin.x - offset.x) / prevZoom,
+        y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
-      // the scroll that keeps point under the anchor
+      // the scroll that keeps point under the origin
       // when it would be negative, grow the outside space offset instead, so the space shifts away from the top left
       // when it is positive, shrink the offset back down first
       const newOffset = { x: offset.x, y: offset.y }
       const scroll = {
-        x: (point.x * zoom) + offset.x - anchor.x,
-        y: (point.y * zoom) + offset.y - anchor.y
+        x: (point.x * zoom) + offset.x - origin.x,
+        y: (point.y * zoom) + offset.y - origin.y
       }
       const axes = ['x', 'y']
       axes.forEach(axis => {
@@ -2242,7 +2241,7 @@ export const useGlobalStore = defineStore('global', {
       await nextTick()
       window.scrollTo(scroll.x, scroll.y)
     },
-    zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, anchor }) {
+    zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
       let percent = this.spaceZoomPercent
       if (shouldZoomIn) {
         percent = percent + speed
@@ -2251,7 +2250,7 @@ export const useGlobalStore = defineStore('global', {
       } else {
         return
       }
-      return this.zoomSpaceTo({ percent, anchor })
+      return this.zoomSpaceTo({ percent, origin })
     },
 
     // toolbar mode
