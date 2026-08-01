@@ -220,7 +220,6 @@ export default {
   cursorPositionInSpace (event, position) {
     position = position || this.cursorPositionInPage(event)
     if (!position) { return }
-    // #space is scaled from its top left corner, so its client rect origin is unaffected by zoom
     const space = document.getElementById('space')
     if (!space) { return }
     const spaceRect = space.getBoundingClientRect()
@@ -252,7 +251,6 @@ export default {
     return isOutsideX || isOutsideY
   },
   outsideSpaceOffset () {
-    // the document position of the space's top left corner, in page coordinates
     const space = document.getElementById('space')
     if (!space) { return }
     const spaceRect = space.getBoundingClientRect()
