@@ -60,7 +60,7 @@ const defaultValue = computed(() => props.defaultValue || props.maxValue)
 
 const zoomPercentBadgeIsVisible = computed(() => {
   if (props.shouldHideBadge) { return }
-  if (props.value !== props.maxValue) {
+  if (props.value !== defaultValue.value) {
     return true
   } else {
     return false
@@ -82,12 +82,17 @@ const removeAnimations = () => {
 const integerValue = computed(() => Math.round(props.value))
 const currentValueIsMin = computed(() => integerValue.value === props.minValue)
 const sliderValue = computed(() => {
-  const value = utils.percentageBetween({
+  let value = utils.percentageBetween({
     value: props.value,
     min: props.minValue,
     max: props.maxValue
   })
+  value = Math.round(value)
   return value
+})
+const progressSliderValue = computed(() => {
+  const maxValueRatio = defaultValue.value / props.maxValue
+  return sliderValue.value / maxValueRatio
 })
 
 // update value
@@ -164,7 +169,12 @@ const stopMovingPlayhead = () => {
 
 const resetPlayhead = async () => {
   state.playheadIsBeingDragged = false
-  emit('updatePlayhead', defaultValue.value)
+  const resetValue = utils.percentageBetween({
+    value: defaultValue.value,
+    min: props.minValue,
+    max: props.maxValue
+  })
+  emit('updatePlayhead', resetValue)
   emit('resetPlayhead')
   await nextTick()
   updateButtonPosition()
@@ -189,6 +199,7 @@ const resetPlayhead = async () => {
   :data-slider-value="sliderValue"
   :data-max="props.maxValue"
   :data-min="props.minValue"
+  :data-default-value="defaultValue"
 )
   span.badge.info.zoom-percent-badge(
     ref="badgeElement"
@@ -202,7 +213,7 @@ const resetPlayhead = async () => {
       img.icon.close(src="@/assets/add.svg")
 
   progress(
-    :value="sliderValue"
+    :value="progressSliderValue"
     :max="props.maxValue"
     :min="props.minValue"
     ref="progressElement"
