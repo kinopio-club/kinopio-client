@@ -50,7 +50,7 @@
     "jsdom": "^26.1.0",
     "lint-staged": "^13.2.1",
     "nodemon": "^3.1.10",
-    "postcss": "^8.5.14",
+    "postcss": "^8.5.25",
     "pug": "^3.0.3",
     "stylus": "^0.63",
     "stylus-loader": "^3.0.2",
