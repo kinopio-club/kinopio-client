@@ -74,7 +74,6 @@ watch(() => currentTag.value, async (tag, prevValue) => {
   if (tag && visible.value) {
     state.newPosition = {}
     updateCards()
-    updatePinchCounterZoomDecimal()
     closeDialogs()
     await nextTick()
     scrollIntoView()
@@ -91,10 +90,6 @@ const name = computed(() => {
 
 // styles and position
 
-const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
-const updatePinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-}
 const visibleFromTagList = computed(() => globalStore.tagDetailsIsVisibleFromTagList)
 const position = computed(() => {
   if (utils.objectHasKeys(state.newPosition)) {
@@ -111,14 +106,9 @@ const styles = computed(() => {
   }
   const x = zoom * position.value.x
   const y = zoom * position.value.y
-  let scale
-  if (utils.isSignificantlyPinchZoomed()) {
-    scale = pinchCounterZoomDecimal.value
-  }
   return {
     left: `${x}px`,
     top: `${y}px`,
-    transform: `scale(${scale})`,
     maxHeight: state.dialogHeight + 'px'
   }
 })

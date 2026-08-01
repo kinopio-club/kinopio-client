@@ -618,7 +618,7 @@ const tiltResizeIsVisible = computed(() => {
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
   // on mobile, resize handlers get in the way of touching when zoomed out
   if (globalStore.isTouchDevice || utils.isMobile()) {
-    if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+    if (globalStore.spaceZoomPercent < 50) { return }
   }
   return true
 })

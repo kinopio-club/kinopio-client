@@ -24,8 +24,7 @@ let updateLiveSpacesIntervalTimer, updateCommunitySpacesIntervalTimer
 const footerElement = ref(null)
 
 const hiddenOnTouchDuration = 20
-const updatePositionDuration = 60
-let hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer
+let hiddenOnTouchIteration, hiddenOnTouchTimer
 
 onMounted(() => {
   // community spaces
@@ -102,22 +101,6 @@ const updateCommunitySpaces = () => {
 }
 
 // position
-
-const isPinchZooming = computed(() => globalStore.isPinchZooming)
-watch(() => isPinchZooming.value, (value, prevValue) => {
-  if (value) {
-    updatePosition()
-  }
-})
-const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
-watch(() => isTouchScrolling.value, (value, prevValue) => {
-  if (value) {
-    if (!utils.isAndroid()) { return }
-    if (value) {
-      updatePosition()
-    }
-  }
-})
 
 const isAddPage = computed(() => globalStore.isAddPage)
 const isEmbedMode = computed(() => globalStore.isEmbedMode)
@@ -218,48 +201,17 @@ const cancelHidden = () => {
 
 // position
 
-const updatePosition = async (event) => {
+const updatePosition = (event) => {
   if (event) {
     state.isScrolled = true
   }
-  if (!globalStore.isTouchScrolling) {
-    updatePositionFrame()
-    return
-  }
-  await nextTick()
-  updatePositionIteration = 0
-  if (updatePositionTimer) { return }
-  updatePositionTimer = window.requestAnimationFrame(updatePositionFrame)
-}
-const cancelUpdatePosition = () => {
-  window.cancelAnimationFrame(updatePositionTimer)
-  updatePositionTimer = undefined
-}
-const updatePositionFrame = () => {
-  updatePositionIteration++
-  updatePositionInVisualViewport()
-  if (updatePositionIteration < updatePositionDuration) {
-    window.requestAnimationFrame(updatePositionFrame)
-  } else {
-    cancelUpdatePosition()
-  }
-}
-const updatePositionInVisualViewport = () => {
-  const viewport = utils.visualViewport()
-  const scale = utils.roundFloat(viewport.scale)
-  const counterScale = utils.roundFloat(1 / viewport.scale)
-  const left = Math.round(viewport.offsetLeft)
-  if (!footerElement.value) { return }
   let bottom = 0
   if (window.navigator.shouldAddSafeAreaPaddingBottom) {
     bottom = 40
   }
-  const style = {
-    transform: `translate(${left}px, 0px) scale(${counterScale})`,
-    maxWidth: Math.round(viewport.width * scale) + 'px',
+  state.position = {
     bottom: `max(${bottom}px, env(safe-area-inset-bottom))`
   }
-  state.position = style
 }
 </script>
 

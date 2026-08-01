@@ -92,13 +92,7 @@ const scrollIntoViewAndFocus = async () => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
-  if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
-  } else if (globalStore.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = 1
-  }
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   const styles = {
     transform: `scale(${zoom})`,
     left: `${currentList.value.x + 8}px`,

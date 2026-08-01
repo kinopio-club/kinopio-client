@@ -78,9 +78,6 @@ const scrollIntoView = async () => {
   const element = dialogElement.value
   globalStore.scrollElementIntoView({ element })
 }
-const resetPinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = 1
-}
 const triggerUpdateHeaderAndFooterPosition = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
@@ -255,7 +252,7 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
     p {{props.dialogTitle}}
   section(:style="{backgroundColor: props.currentColor}")
     .row
-      input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
+      input(v-model="color" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
       button.small-button.remove-button(v-if="props.removeIsVisible" title="remove" @click="removeColor")
         img.icon.cancel(src="@/assets/add.svg")
   section

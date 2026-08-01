@@ -92,7 +92,7 @@ export default {
     if (!element) { return }
     element = element.getBoundingClientRect()
     const viewport = this.visualViewport()
-    const offset = (viewport.width * viewport.scale) - (element.x + element.width)
+    const offset = viewport.width - (element.x + element.width)
     if (offset < 0) {
       return true
     } else {
@@ -112,10 +112,6 @@ export default {
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
     }
-    const zoomScale = viewport.scale
-    if (zoomScale > 1) {
-      height = height * zoomScale
-    }
     return height
   },
   elementHeight (element, isChildElement) {
@@ -129,10 +125,6 @@ export default {
       const dialog = element.closest('dialog')
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
-    }
-    const zoomScale = this.visualViewport().scale
-    if (zoomScale > 1) {
-      height = height * zoomScale
     }
     return height
   },
@@ -175,18 +167,6 @@ export default {
     const fromHeader = event.target.closest('header')
     const fromFooter = event.target.closest('footer')
     return fromDialog || fromHeader || fromFooter || dialogIsVisible
-  },
-  disablePinchZoom () {
-    if (this.isIPhone()) {
-      const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, user-scalable=0, maximum-scale=1')
-    }
-  },
-  enablePinchZoom () {
-    if (this.isIPhone()) {
-      const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
-    }
   },
   cursorPositionInViewport (event) {
     let x, y
@@ -288,45 +268,19 @@ export default {
   },
   visualViewport () {
     const visualViewport = window.visualViewport
-    let viewport
-    if (visualViewport) {
-      viewport = {
-        width: visualViewport.width,
-        height: visualViewport.height,
-        scale: visualViewport.scale,
-        offsetLeft: Math.max(visualViewport.offsetLeft, 0),
-        offsetTop: Math.max(visualViewport.offsetTop, 0),
-        pageLeft: visualViewport.pageLeft,
-        pageTop: visualViewport.pageTop
-      }
-    } else {
-      // firefox fallback, doesn't support pinch zooming
-      viewport = {
-        width: document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight,
-        scale: document.documentElement.clientWidth / window.innerWidth,
-        offsetLeft: 0,
-        offsetTop: 0,
-        pageLeft: window.scrollX,
-        pageTop: window.scrollY
-      }
+    const viewport = {
+      width: visualViewport.width,
+      height: visualViewport.height,
+      offsetLeft: Math.max(visualViewport.offsetLeft, 0),
+      offsetTop: Math.max(visualViewport.offsetTop, 0),
+      pageLeft: visualViewport.pageLeft,
+      pageTop: visualViewport.pageTop
     }
     viewport.offsetLeft = Math.round(viewport.offsetLeft)
     viewport.offsetTop = Math.round(viewport.offsetTop)
     viewport.pageLeft = Math.round(viewport.pageLeft)
     viewport.pageTop = Math.round(viewport.pageTop)
     return viewport
-  },
-  pinchCounterZoomDecimal () {
-    return 1 / this.visualViewport().scale
-  },
-  isSignificantlyPinchZoomed () {
-    const pinchZoomScale = this.visualViewport().scale
-    return !this.isBetween({
-      value: pinchZoomScale,
-      min: 0.8,
-      max: 1.3
-    })
   },
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))

@@ -61,14 +61,11 @@ let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
 const hiddenDuration = 20
-const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, shouldCancelFadeOut
 
 const readOnlyElement = ref(null)
 
 onMounted(() => {
-  window.addEventListener('scroll', updatePosition)
-  updatePosition()
   updateNotifications()
   globalStore.isLoadingSpace = true
   updateNotificationsIntervalTimer = setInterval(() => {
@@ -81,8 +78,6 @@ onMounted(() => {
         closeAllDialogs()
       } else if (name === 'triggerSpaceDetailsVisible') {
         updateSpaceDetailsIsVisible(true)
-      } else if (name === 'triggerUpdateHeaderAndFooterPosition') {
-        updatePosition()
       } else if (name === 'triggerSpaceDetailsInfoIsVisible') {
         updateSpaceDetailsInfoIsVisible(true)
       } else if (name === 'triggerSignUpOrInIsVisible') {
@@ -125,7 +120,6 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
   unsubscribes()
 })
@@ -149,7 +143,6 @@ const state = reactive({
   upgradeUserIsVisible: false,
   dateAndTimeSettingsIsVisible: false,
   spaceStatusIsVisible: false,
-  position: {},
   readOnlyJiggle: false,
   notificationsIsLoading: true,
   isHidden: false,
@@ -163,7 +156,6 @@ const isPinchZooming = computed(() => globalStore.isPinchZooming)
 watch(() => isPinchZooming.value, (value, prevValue) => {
   if (value) {
     fadeOut()
-    updatePosition()
   } else {
     shouldCancelFadeOut = true
     cancelFadeOut()
@@ -173,7 +165,6 @@ const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
 watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
     fadeOut()
-    updatePosition()
   } else {
     shouldCancelFadeOut = true
     cancelFadeOut()
@@ -510,8 +501,6 @@ const cancelFadeOut = () => {
   window.cancelAnimationFrame(fadeOutTimer)
   fadeOutTimer = undefined
   globalStore.isFadingOutDuringTouch = false
-  cancelUpdatePosition()
-  updatePosition()
 }
 const fadeOutFrame = () => {
   fadeOutIteration++
@@ -521,44 +510,6 @@ const fadeOutFrame = () => {
   } else if (fadeOutIteration < fadeOutDuration) {
     window.requestAnimationFrame(fadeOutFrame)
   }
-}
-
-// position
-
-const updatePosition = () => {
-  if (!globalStore.getIsTouchDevice) { return }
-  updatePositionIteration = 0
-  if (updatePositionTimer) { return }
-  updatePositionTimer = window.requestAnimationFrame(updatePositionFrame)
-}
-const cancelUpdatePosition = () => {
-  window.cancelAnimationFrame(updatePositionTimer)
-  updatePositionTimer = undefined
-}
-const updatePositionFrame = () => {
-  updatePositionIteration++
-  updatePositionInVisualViewport()
-  if (updatePositionIteration < updatePositionDuration) {
-    window.requestAnimationFrame(updatePositionFrame)
-  } else {
-    cancelUpdatePosition()
-  }
-}
-const updatePositionInVisualViewport = () => {
-  const viewport = utils.visualViewport()
-  const scale = utils.roundFloat(viewport.scale)
-  const counterScale = utils.roundFloat(1 / viewport.scale)
-  const left = Math.round(viewport.offsetLeft)
-  const top = Math.round(viewport.offsetTop)
-  const style = {
-    transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-    maxWidth: Math.round(viewport.width * scale) + 'px'
-  }
-  if (utils.isIPhone() && scale <= 1) {
-    style.transform = 'none'
-    style.zoom = counterScale
-  }
-  state.position = style
 }
 
 // notifications
@@ -596,7 +547,7 @@ const clearNotifications = () => {
 </script>
 
 <template lang="pug">
-header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
+header(v-if="isVisible" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")

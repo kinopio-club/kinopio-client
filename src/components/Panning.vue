@@ -3,30 +3,20 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 
+import { usePanMomentum } from '@/composables/usePanMomentum'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 
-// Adjust this value to change the momentum decay
-// Lower values (closer to 0.92) make the scrolling slower and smoother
-// Higher values (closer to 0.96) make the scrolling faster and more abrupt
-const momentumDeceleration = 0.95
-
-// Threshold for stopping when velocity is low
-// A smaller threshold ensures the scrolling stops only when it's very slow.
-const momentumThreshold = 0.5
+const panMomentum = usePanMomentum()
 
 let shouldStartPanning,
   startPosition,
-  currentPosition,
   panningTimer,
   shouldCancelPanningTimer,
   panningDelta,
   shouldPanNextFrame,
-  velocity,
-  momentumTimer,
-  shouldCancelMomentumTimer,
-  currentScroll
+  velocity
 
 let unsubscribes
 
@@ -66,12 +56,12 @@ const checkIfShouldStartPanning = (event) => {
 }
 const checkIfShouldStartMomentum = () => {
   if (panningDelta) {
-    startMomentum()
+    panMomentum.start(velocity)
   }
   shouldCancelPanningTimer = true
 }
 const cancelMomentum = (event) => {
-  shouldCancelMomentumTimer = true
+  panMomentum.cancel()
   if (event?.type === 'wheel') {
     shouldCancelPanningTimer = true
     startPosition = null
@@ -80,29 +70,15 @@ const cancelMomentum = (event) => {
   }
 }
 
-// safari fix
-
-const updatecurrentScrollByDelta = (delta) => {
-  currentScroll.x += delta.x
-  currentScroll.y += delta.y
-}
-const safariFix = () => {
-  // force safari to recompute internal element positions after panning
-  // https://forum.kinopio.club/t/cursor-position-is-wrong-after-right-click-drag-to-pan/1799
-  if (!utils.isSafari()) { return }
-  window.scrollTo(currentScroll.x, currentScroll.y)
-}
-
 // panning
 
 const initPanning = (event) => {
   const position = utils.cursorPositionInPage(event)
-  currentScroll = { x: window.scrollX, y: window.scrollY }
   if (shouldStartPanning) {
+    panMomentum.cancel()
     startPosition = position
     shouldStartPanning = false
     shouldCancelPanningTimer = false
-    shouldCancelMomentumTimer = false
     panningTimer = window.requestAnimationFrame(panningFrame)
   }
 }
@@ -122,7 +98,6 @@ const panningFrame = () => {
   // scroll frame
   if (shouldPanNextFrame) {
     window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
-    updatecurrentScrollByDelta(panningDelta)
     shouldPanNextFrame = false
   }
   panningTimer = window.requestAnimationFrame(panningFrame)
@@ -132,27 +107,6 @@ const panningFrame = () => {
     panningTimer = null
     startPosition = null
   }
-}
-
-// momentum scrolling, post-panning
-
-const startMomentum = () => {
-  const momentumFrame = () => {
-    // cancel
-    const velocityIsLow = Math.abs(velocity.x) < momentumThreshold && Math.abs(velocity.y) < momentumThreshold
-    if (velocityIsLow || shouldPanNextFrame || shouldCancelMomentumTimer) {
-      window.cancelAnimationFrame(momentumTimer)
-      safariFix()
-      return
-    }
-    // scroll frame
-    velocity.x *= momentumDeceleration
-    velocity.y *= momentumDeceleration
-    window.scrollBy(velocity.x, velocity.y, 'instant')
-    updatecurrentScrollByDelta(velocity)
-    momentumTimer = window.requestAnimationFrame(momentumFrame)
-  }
-  momentumTimer = window.requestAnimationFrame(momentumFrame)
 }
 </script>
 

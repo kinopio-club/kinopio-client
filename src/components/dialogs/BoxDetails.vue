@@ -89,13 +89,7 @@ const update = (updates) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
-  if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
-  } else if (globalStore.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = 1
-  }
+  const zoom = globalStore.getSpaceCounterZoomDecimal
 
   const backgroundColor = colord(currentBox.value.color).alpha(1).toRgbString()
   const styles = {

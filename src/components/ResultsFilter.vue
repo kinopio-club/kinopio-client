@@ -200,10 +200,6 @@ const clearFilter = (shouldClearFilterInfo) => {
 
 const focus = () => {
   emit('onFocus')
-  resetPinchCounterZoomDecimal()
-}
-const resetPinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = 1
 }
 const blur = () => {
   emit('onBlur')
