@@ -39,8 +39,10 @@ export function usePanMomentum () {
     velocity.x = velocity.x * momentumDeceleration
     velocity.y = velocity.y * momentumDeceleration
     window.scrollBy(velocity.x, velocity.y)
-    currentScroll.x = currentScroll.x + velocity.x
-    currentScroll.y = currentScroll.y + velocity.y
+    // track the applied scroll position, accumulating velocity instead drifts from
+    // browser rounding and edge clamping, which made the safariFix scrollTo visibly jump
+    currentScroll.x = window.scrollX
+    currentScroll.y = window.scrollY
     momentumTimer = window.requestAnimationFrame(frame)
   }
   // initialVelocity is the scroll delta per frame, { x, y }
