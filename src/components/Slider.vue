@@ -38,6 +38,7 @@ const emit = defineEmits(['updatePlayhead', 'resetPlayhead', 'removeAnimations']
 const props = defineProps({
   minValue: Number,
   maxValue: Number,
+  defaultValue: Number,
   value: Number,
   animateJiggleRight: Boolean,
   animateJiggleLeft: Boolean,
@@ -52,6 +53,8 @@ const state = reactive({
   playheadIsBeingDragged: false,
   buttonPosition: 100
 })
+
+const defaultValue = computed(() => props.defaultValue || props.maxValue)
 
 // badge
 
@@ -161,7 +164,7 @@ const stopMovingPlayhead = () => {
 
 const resetPlayhead = async () => {
   state.playheadIsBeingDragged = false
-  emit('updatePlayhead', props.maxValue)
+  emit('updatePlayhead', defaultValue.value)
   emit('resetPlayhead')
   await nextTick()
   updateButtonPosition()
