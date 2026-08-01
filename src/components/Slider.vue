@@ -98,6 +98,7 @@ const progressSliderValue = computed(() => {
 // update value
 
 const movePlayhead = (event) => {
+  event.stopPropagation()
   const rect = progressElement.value.getBoundingClientRect()
   const progressStartX = rect.x + window.scrollX
   const progressWidth = rect.width - 2
