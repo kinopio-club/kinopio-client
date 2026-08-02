@@ -109,6 +109,23 @@ const eraserMask = computed(() => {
   if (!hasEraserPaths) { return null }
   return 'url(#eraserMask)'
 })
+// size the svgs to the strokes drawn, instead of the whole page.
+// page size svgs with mix-blend-mode allocate compositing surfaces for the entire space,
+// which crashes mobile browsers on large spaces when zooming or scrolling
+const drawingSize = computed(() => {
+  const padding = 100 // headroom for round stroke caps, which extend beyond point coords
+  let width = 0
+  let height = 0
+  state.paths.forEach(path => {
+    if (!path.rect) { return }
+    width = Math.max(width, path.rect.x + path.rect.width)
+    height = Math.max(height, path.rect.y + path.rect.height)
+  })
+  return {
+    width: Math.round(Math.min(width + padding, pageWidth.value)),
+    height: Math.round(Math.min(height + padding, pageHeight.value))
+  }
+})
 
 // clear
 const clearDrawing = () => {
@@ -213,8 +230,11 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
 const updateDrawingDataUrl = async () => {
   await nextTick()
   const element = document.querySelector('svg.drawing-strokes')
-  const svgString = new XMLSerializer().serializeToString(element)
-  const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
+  let dataUrl = ''
+  if (element) {
+    const svgString = new XMLSerializer().serializeToString(element)
+    dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
+  }
   globalStore.drawingDataUrl = dataUrl
   broadcastStore.update({
     action: 'triggerUpdateDrawingDataUrl'
@@ -251,6 +271,7 @@ const erasePath = (id) => {
 const erase = (event) => {
   const point = utils.cursorPositionInSpace(event)
   const svg = document.querySelector('svg.drawing-strokes')
+  if (!svg) { return }
   const svgPoint = svg.createSVGPoint()
   svgPoint.x = point.x
   svgPoint.y = point.y
@@ -396,14 +417,15 @@ const updatePageSizes = () => {
 
 <template lang="pug">
 svg.drawing-strokes(
-  :width="pageWidth"
-  :height="pageHeight"
+  v-if="state.paths.length"
+  :width="drawingSize.width"
+  :height="drawingSize.height"
 )
-  defs
+  defs(v-if="eraserMask")
     //- eraserMask is legacy
     //- current version does not have isEraser strokes
     mask#eraserMask
-      rect(:width="pageWidth" :height="pageHeight" fill="white")
+      rect(:width="drawingSize.width" :height="drawingSize.height" fill="white")
       template(v-for="path in state.paths" :key="path.id")
         template(v-if="path.isEraser")
           path(
@@ -438,16 +460,16 @@ svg.drawing-strokes(
         )
 
 //- duplicate ^ into Space.vue
-teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
+teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted && state.paths.length")
   svg.drawing-strokes(
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="drawingSize.width"
+    :height="drawingSize.height"
   )
-    defs
+    defs(v-if="eraserMask")
       //- eraserMask is legacy
       //- current version does not have isEraser strokes
       mask#eraserMask
-        rect(:width="pageWidth" :height="pageHeight" fill="white")
+        rect(:width="drawingSize.width" :height="drawingSize.height" fill="white")
         template(v-for="path in state.paths" :key="path.id")
           template(v-if="path.isEraser")
             path(
