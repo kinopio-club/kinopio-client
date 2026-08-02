@@ -29,7 +29,7 @@ const spaceStore = useSpaceStore()
 let canvas, context
 let offscreenCanvas, offscreenContext
 let cachedDrawingImage, cachedDrawingDataUrl
-let startPanningPosition
+let panningPointerId
 const itemRadius = 1
 const canvasElement = ref(null)
 
@@ -40,6 +40,7 @@ onMounted(async () => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', update)
   window.addEventListener('pointerup', endPanningViewport)
+  window.addEventListener('pointercancel', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
 
   const globalStoreActions = [
@@ -140,6 +141,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', update)
   window.removeEventListener('pointerup', endPanningViewport)
+  window.removeEventListener('pointercancel', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
   unsubscribes()
 })
@@ -165,8 +167,7 @@ const props = defineProps({
 const state = reactive({
   scrollX: 0,
   scrollY: 0,
-  isPanningViewport: false,
-  prevPosition: {}
+  isPanningViewport: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -488,37 +489,32 @@ const panToPositionRightLeftClick = (event) => {
 const startPanningViewport = (event) => {
   if (props.viewportIsHidden) { return }
   state.isPanningViewport = true
+  panningPointerId = event.pointerId
   panToPosition(event)
 }
-const panToPosition = (event) => {
+const panToPosition = (event, behavior = 'smooth') => {
   const position = positionInSpace(event)
+  if (!position) { return }
   const centerPosition = positionInViewportCenter(position)
   // convert space coordinates back to scroll coordinates
   const scroll = spaceToScroll(centerPosition)
   window.scrollTo({
     top: scroll.y,
     left: scroll.x,
-    behavior: 'smooth'
+    behavior
   })
-  state.prevPosition = position
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
-  if (utils.isMobile(event)) { return } // disable touch pan because jittery
-  if (event.touches) { return } // ^
-  const position = positionInSpace(event)
-  if (!position) { return }
-  const delta = {
-    x: position.x - state.prevPosition.x,
-    y: position.y - state.prevPosition.y
-  }
-  // delta is in space coordinates, scale to scroll coordinates
-  const zoom = globalStore.getSpaceZoomDecimal
-  window.scrollBy(delta.x * zoom, delta.y * zoom, 'instant')
-  state.prevPosition = position
+  if (event.pointerId !== panningPointerId) { return }
+  // instant scroll centered on the pointer, panning with deltas instead
+  // fights the smooth scroll started on pointerdown, which jitters
+  panToPosition(event, 'instant')
 }
 const endPanningViewport = (event) => {
+  if (event.pointerId !== panningPointerId) { return }
   state.isPanningViewport = false
+  panningPointerId = null
 }
 const viewportIsVisible = computed(() => {
   if (props.viewportIsHidden) { return }
