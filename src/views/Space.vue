@@ -1165,7 +1165,7 @@ const shouldPrevent = computed(() => {
     Lines
     Lists
     ItemUnlockButtons
-    //- DrawingStrokes
+    DrawingStrokes
     BoxDetails
     LineDetails
     ListDetails
