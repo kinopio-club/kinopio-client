@@ -485,6 +485,7 @@ const panToPositionRightLeftClick = (event) => {
   if (!isRightAndLeftClick) { return }
   panToPosition(event)
 }
+const shouldPreventInteraction = computed(() => utils.isMobile() && !props.parentIsDialog)
 const startPanningViewport = (event) => {
   if (props.viewportIsHidden) { return }
   state.isPanningViewport = true
@@ -504,7 +505,7 @@ const panToPosition = (event) => {
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
-  if (utils.isMobile(event)) { return } // disable touch pan because jittery
+  if (utils.isMobile()) { return } // disable touch pan because jittery
   if (event.touches) { return } // ^
   const position = positionInSpace(event)
   if (!position) { return }
@@ -527,7 +528,7 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast, 'prevent-interaction': shouldPreventInteraction }")
   canvas#minimap-canvas(ref="canvasElement")
   .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
 </template>
@@ -541,6 +542,8 @@ const viewportIsVisible = computed(() => {
   padding 0
   &.translucent-minimap
     backdrop-filter blur(8px)
+  &.prevent-interaction
+    pointer-events none
   .viewport
     cursor grab
     position absolute
