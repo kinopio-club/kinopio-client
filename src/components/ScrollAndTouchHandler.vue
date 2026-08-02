@@ -36,8 +36,8 @@ const panMomentum = usePanMomentum()
 let prevTouchPosition
 let touchVelocitySamples = []
 let totalPanDistance = 0
-let pinchBaseline, prevPinchMidpoint
-let pinchFrameTimer, pinchFrameZoom, pinchFramePan
+let pinchBaseline
+let pinchGestureStart, pinchGestureCurrent, pinchFrameTimer
 
 // touches on these elements keep their native behavior (dialog scrolling, slider dragging)
 const nativeTouchSelector = 'dialog, header, .footer-wrap, .minimap-canvas-wrap'
@@ -198,6 +198,8 @@ const touchStart = (event) => {
     totalPanDistance = 0
     pinchBaseline = null
   } else {
+    // commit first so the new baseline reads the settled zoom (e.g. adding a third finger mid-pinch)
+    commitPinchZoom()
     updatePinchBaseline(event)
   }
   if (!utils.isMultiTouch(event)) {
@@ -267,6 +269,9 @@ const startTouchMomentum = (event) => {
 }
 
 // pinch zooming, with two finger panning
+// while pinching, zoom and pan are previewed with a compositor-only transform on the space,
+// the real layout zoom is committed once when the gesture ends.
+// zooming layout zoom per touch frame relayouts and rerasterizes the whole space, which crashes mobile browsers
 
 const pinchValues = (event) => {
   const touch0 = event.touches[0]
@@ -285,7 +290,6 @@ const updatePinchBaseline = (event) => {
     midpoint: values.midpoint,
     percent: globalStore.spaceZoomPercent
   }
-  prevPinchMidpoint = values.midpoint
 }
 const pinchMove = (event) => {
   if (!pinchBaseline) {
@@ -301,29 +305,56 @@ const pinchMove = (event) => {
     if (distanceDelta < pinchEngageThreshold && midpointDelta < pinchEngageThreshold) { return }
     globalStore.isPinchZooming = true
     shouldCancelUndo = true
+    pinchGestureStart = {
+      scroll: { x: window.scrollX, y: window.scrollY },
+      offset: { ...globalStore.spaceZoomOffset },
+      midpoint: pinchBaseline.midpoint,
+      percent: pinchBaseline.percent
+    }
   }
-  pinchFrameZoom = {
-    percent: pinchBaseline.percent * (values.distance / pinchBaseline.distance),
-    origin: values.midpoint
+  // clamp scale so the preview matches the zoom that will be committed
+  let percent = pinchBaseline.percent * (values.distance / pinchBaseline.distance)
+  percent = Math.max(percent, consts.spaceZoom.min)
+  percent = Math.min(percent, consts.spaceZoom.max)
+  pinchGestureCurrent = {
+    scale: percent / pinchGestureStart.percent,
+    midpoint: values.midpoint
   }
-  pinchFramePan = pinchFramePan || { x: 0, y: 0 }
-  pinchFramePan.x = pinchFramePan.x + (prevPinchMidpoint.x - values.midpoint.x)
-  pinchFramePan.y = pinchFramePan.y + (prevPinchMidpoint.y - values.midpoint.y)
-  prevPinchMidpoint = values.midpoint
   if (!pinchFrameTimer) {
     pinchFrameTimer = window.requestAnimationFrame(pinchFrame)
   }
 }
 const pinchFrame = () => {
   pinchFrameTimer = null
-  if (pinchFramePan) {
-    window.scrollBy(pinchFramePan.x, pinchFramePan.y)
-    pinchFramePan = null
+  if (!pinchGestureStart || !pinchGestureCurrent) { return }
+  const start = pinchGestureStart
+  const current = pinchGestureCurrent
+  // keep the space point that started under the midpoint attached to the midpoint as it moves,
+  // in document coordinates: point → (scale * point) + translate
+  globalStore.pinchGestureTransform = {
+    x: (start.scroll.x + current.midpoint.x) - (current.scale * (start.scroll.x + start.midpoint.x)),
+    y: (start.scroll.y + current.midpoint.y) - (current.scale * (start.scroll.y + start.midpoint.y)),
+    scale: current.scale
   }
-  if (pinchFrameZoom) {
-    globalStore.zoomSpaceTo(pinchFrameZoom)
-    pinchFrameZoom = null
+}
+const commitPinchZoom = () => {
+  if (!pinchGestureStart || !pinchGestureCurrent) { return }
+  window.cancelAnimationFrame(pinchFrameTimer)
+  pinchFrameTimer = null
+  const start = pinchGestureStart
+  const current = pinchGestureCurrent
+  pinchGestureStart = null
+  pinchGestureCurrent = null
+  const prevZoom = start.percent / 100
+  // the space point that tracked the midpoint through the gesture preview
+  const spacePoint = {
+    x: (start.scroll.x + start.midpoint.x - start.offset.x) / prevZoom,
+    y: (start.scroll.y + start.midpoint.y - start.offset.y) / prevZoom
   }
+  const percent = start.percent * current.scale
+  // clearing the preview and updating the zoom happen in the same render
+  globalStore.pinchGestureTransform = null
+  globalStore.zoomSpaceTo({ percent, origin: current.midpoint, spacePoint })
 }
 
 // touch end
@@ -333,15 +364,18 @@ const touchEnd = (event) => {
   const touches = event.touches
   // fingers remain, re-baseline the continuing gesture
   if (touches.length === 1) {
+    commitPinchZoom()
     globalStore.isPinchZooming = false
     pinchBaseline = null
     prevTouchPosition = touchPosition(touches[0])
     return
   } else if (touches.length > 1) {
+    commitPinchZoom()
     updatePinchBaseline(event)
     return
   }
   // all fingers lifted
+  commitPinchZoom()
   globalStore.isPinchZooming = false
   pinchBaseline = null
   prevTouchPosition = null

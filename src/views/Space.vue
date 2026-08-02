@@ -326,11 +326,15 @@ const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const pageHeight = computed(() => globalStore.pageHeight)
 const pageWidth = computed(() => globalStore.pageWidth)
 const styles = computed(() => {
-  return {
+  const styles = {
     width: `${pageWidth.value}px`,
     height: `${pageHeight.value}px`,
     transform: globalStore.getZoomTransform
   }
+  if (globalStore.pinchGestureTransform) {
+    styles.willChange = 'transform'
+  }
+  return styles
 })
 
 const unloadPage = () => {
@@ -939,8 +943,8 @@ const isDevelpmentBadgeVisible = computed(() => {
   return consts.isDevelopment()
 })
 const handleTouchEnd = (event) => {
-  globalStore.isPinchZooming = false
-  globalStore.isTouchScrolling = false
+  // isPinchZooming and isTouchScrolling are owned by ScrollAndTouchHandler,
+  // isTouchScrolling stays true until momentum scrolling ends
   stopInteractions(event)
 }
 const resetGlobalStoreState = () => {

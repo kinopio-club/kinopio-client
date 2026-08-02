@@ -247,7 +247,7 @@ const imgproxyUrl = (imageUrl, width, height) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
-  const containerBreakpoints = [400, 600, 800, 1200, 3000]
+  const containerBreakpoints = [100, 400, 600, 800, 1200, 3000]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
   // when the space is zoomed out, cards are displayed smaller, so request smaller images
   const zoom = Math.min(globalStore.getSpaceZoomDecimal, 1)

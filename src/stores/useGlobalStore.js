@@ -61,6 +61,7 @@ export const useGlobalStore = defineStore('global', {
     // zoom and scroll
     spaceZoomPercent: consts.spaceZoom.default,
     spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
+    pinchGestureTransform: null, // { x, y, scale }, transform-only zoom preview while pinching, committed on touch end
     isPinchZooming: false,
     isTouchScrolling: false,
 
@@ -357,7 +358,14 @@ export const useGlobalStore = defineStore('global', {
     getZoomTransform () {
       const zoom = this.getSpaceZoomDecimal
       const offset = this.spaceZoomOffset
-      return `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`
+      let transform = `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`
+      // while pinching, zoom is previewed with a compositor-only transform,
+      // layout zoom is committed once when the gesture ends
+      const gesture = this.pinchGestureTransform
+      if (gesture) {
+        transform = `translate(${gesture.x}px, ${gesture.y}px) scale(${gesture.scale}) ${transform}`
+      }
+      return transform
     },
     getIsInteractingWithItem () {
       return (
@@ -2193,17 +2201,17 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    async zoomSpaceTo ({ percent, origin }) {
+    async zoomSpaceTo ({ percent, origin, spacePoint }) {
       percent = Math.max(percent, consts.spaceZoom.min)
       percent = Math.min(percent, consts.spaceZoom.max)
       const prevZoom = this.getSpaceZoomDecimal
       const zoom = percent / 100
-      if (zoom === prevZoom) { return }
+      if (zoom === prevZoom && !spacePoint) { return }
       const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
       origin = origin || viewportCenter
       const offset = this.spaceZoomOffset
-      // space point currently under the origin
-      const point = {
+      // space point currently under the origin, or an explicit point to place under the origin
+      const point = spacePoint || {
         x: (window.scrollX + origin.x - offset.x) / prevZoom,
         y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
