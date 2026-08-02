@@ -59,7 +59,7 @@ export const useGlobalStore = defineStore('global', {
     spaceComponentIsMounted: false,
 
     // zoom and scroll
-    spaceZoomPercent: 100,
+    spaceZoomPercent: consts.spaceZoom.default,
     spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
     pinchCounterZoomDecimal: 1,
     isPinchZooming: false,
@@ -492,7 +492,7 @@ export const useGlobalStore = defineStore('global', {
       }
     },
     updateSpaceBorderRadiusStyles (styles) {
-      const isZoomed = this.spaceZoomPercent !== 100
+      const isZoomed = this.spaceZoomPercent !== consts.spaceZoom.default
       const isMobile = consts.isSecureAppContext || utils.isMobile()
       const radius = parseInt(utils.cssVariable('entity-radius')) * 3
       if (isZoomed) {
@@ -2228,8 +2228,8 @@ export const useGlobalStore = defineStore('global', {
           scroll[axis] = scroll[axis] - delta
         }
       })
-      // at 100% there should be no outside space margin
-      if (percent === consts.spaceZoom.max) {
+      // at >100% there should be no outside space margin
+      if (percent >= consts.spaceZoom.default) {
         axes.forEach(axis => {
           scroll[axis] = Math.max(scroll[axis] - newOffset[axis], 0)
           newOffset[axis] = 0
