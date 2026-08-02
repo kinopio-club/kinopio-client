@@ -122,9 +122,8 @@ const updateScroll = async () => {
 // list render optimization
 
 const updateCurrentPage = () => {
-  const zoom = utils.pinchCounterZoomDecimal()
   const perPageHeight = itemsPerPage * minItemHeight
-  const isNextPage = (state.scrollY * zoom) + perPageHeight >= state.pageHeight
+  const isNextPage = state.scrollY + perPageHeight >= state.pageHeight
   if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }

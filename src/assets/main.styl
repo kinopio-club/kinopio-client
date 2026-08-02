@@ -177,6 +177,11 @@
 
 html
   background transparent
+  // block native pinch zooming of the page, but allow native panning.
+  // space panning and zooming on touch devices is handled by ScrollAndTouchHandler
+  touch-action pan-x pan-y
+  // prevent pull-to-refresh and rubber-band overscroll
+  overscroll-behavior none
 
 body
   background transparent

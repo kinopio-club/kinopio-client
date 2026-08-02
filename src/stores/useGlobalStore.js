@@ -59,9 +59,9 @@ export const useGlobalStore = defineStore('global', {
     spaceComponentIsMounted: false,
 
     // zoom and scroll
-    spaceZoomPercent: 100,
+    spaceZoomPercent: consts.spaceZoom.default,
     spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
-    pinchCounterZoomDecimal: 1,
+    pinchGestureTransform: null, // { x, y, scale }, transform-only zoom preview while pinching, committed on touch end
     isPinchZooming: false,
     isTouchScrolling: false,
 
@@ -358,7 +358,14 @@ export const useGlobalStore = defineStore('global', {
     getZoomTransform () {
       const zoom = this.getSpaceZoomDecimal
       const offset = this.spaceZoomOffset
-      return `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`
+      let transform = `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`
+      // while pinching, zoom is previewed with a compositor-only transform,
+      // layout zoom is committed once when the gesture ends
+      const gesture = this.pinchGestureTransform
+      if (gesture) {
+        transform = `translate(${gesture.x}px, ${gesture.y}px) scale(${gesture.scale}) ${transform}`
+      }
+      return transform
     },
     getIsInteractingWithItem () {
       return (
@@ -445,7 +452,6 @@ export const useGlobalStore = defineStore('global', {
       return utils.updatePositionWithSpaceOffset(scroll)
     },
     getShouldScrollAtEdges (event) {
-      if (window.visualViewport.scale > 1) { return }
       let isPaintSelecting
       if (event.touches) {
         isPaintSelecting = this.currentUserIsPaintSelectingLocked
@@ -492,7 +498,7 @@ export const useGlobalStore = defineStore('global', {
       }
     },
     updateSpaceBorderRadiusStyles (styles) {
-      const isZoomed = this.spaceZoomPercent !== 100
+      const isZoomed = this.spaceZoomPercent !== consts.spaceZoom.default
       const isMobile = consts.isSecureAppContext || utils.isMobile()
       const radius = parseInt(utils.cssVariable('entity-radius')) * 3
       if (isZoomed) {
@@ -2195,17 +2201,17 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    async zoomSpaceTo ({ percent, origin }) {
+    async zoomSpaceTo ({ percent, origin, spacePoint }) {
       percent = Math.max(percent, consts.spaceZoom.min)
       percent = Math.min(percent, consts.spaceZoom.max)
       const prevZoom = this.getSpaceZoomDecimal
       const zoom = percent / 100
-      if (zoom === prevZoom) { return }
+      if (zoom === prevZoom && !spacePoint) { return }
       const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
       origin = origin || viewportCenter
       const offset = this.spaceZoomOffset
-      // space point currently under the origin
-      const point = {
+      // space point currently under the origin, or an explicit point to place under the origin
+      const point = spacePoint || {
         x: (window.scrollX + origin.x - offset.x) / prevZoom,
         y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
@@ -2228,8 +2234,8 @@ export const useGlobalStore = defineStore('global', {
           scroll[axis] = scroll[axis] - delta
         }
       })
-      // at 100% there should be no outside space margin
-      if (percent === consts.spaceZoom.max) {
+      // at >100% there should be no outside space margin
+      if (percent >= consts.spaceZoom.default) {
         axes.forEach(axis => {
           scroll[axis] = Math.max(scroll[axis] - newOffset[axis], 0)
           newOffset[axis] = 0

@@ -190,9 +190,6 @@ const focusAndSelectSearchInput = async () => {
   if (!length) { return }
   element.setSelectionRange(0, length)
 }
-const resetPinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = 1
-}
 const toggleUrlInputIsVisible = () => {
   state.urlInputIsVisible = !state.urlInputIsVisible
 }
@@ -622,7 +619,6 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             placeholder="Search Images on Pexels"
             v-model="searchInput"
             ref="searchInputElement"
-            @focus="resetPinchCounterZoomDecimal"
             @keyup.stop.backspace
             @keyup.stop.enter
             @mouseup.stop

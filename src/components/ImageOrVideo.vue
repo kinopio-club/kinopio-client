@@ -6,6 +6,43 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import debounce from 'lodash-es/debounce'
+
+// deferred image loading queue, module scope, shared by all instances.
+// unloaded images render as placeholders, then load a few at a time once zooming and scrolling ends.
+// loading everything at once crashes mobile browsers on image heavy spaces
+const maxConcurrentLoads = 10
+const loadQueue = []
+let activeLoadCount = 0
+let isGesturing = false
+const processLoadQueue = () => {
+  if (isGesturing) { return }
+  while (activeLoadCount < maxConcurrentLoads && loadQueue.length) {
+    const item = loadQueue.shift()
+    activeLoadCount = activeLoadCount + 1
+    item.load(() => {
+      activeLoadCount = activeLoadCount - 1
+      processLoadQueue()
+    })
+  }
+}
+const addToLoadQueue = (item) => {
+  loadQueue.push(item)
+  processLoadQueue()
+}
+const removeFromLoadQueue = (item) => {
+  const index = loadQueue.indexOf(item)
+  if (index >= 0) {
+    loadQueue.splice(index, 1)
+  }
+}
+const updateIsGesturing = (value) => {
+  isGesturing = value
+  if (!value) {
+    processLoadQueue()
+  }
+}
+
 const globalStore = useGlobalStore()
 
 const videoElement = ref(null)
@@ -14,7 +51,7 @@ const imageElement = ref(null)
 let unsubscribes
 
 onMounted(() => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  requestImageUrl()
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
   window.addEventListener('focus', updateIsPlaying)
@@ -37,6 +74,10 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  if (queuedLoadItem) {
+    removeFromLoadQueue(queuedLoadItem)
+    queuedLoadItem = null
+  }
   window.removeEventListener('mousemove', updateCanvasSelectedClass)
   window.removeEventListener('touchmove', updateCanvasSelectedClass)
   window.removeEventListener('focus', updateIsPlaying)
@@ -60,7 +101,7 @@ const props = defineProps({
 
 const state = reactive({
   imageUrl: null,
-  imageProxySrcSet: null
+  imageBreakpoint: 0 // largest imgproxy size loaded so far, Infinity is original size
 })
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
@@ -68,18 +109,9 @@ const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTo
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
     state.imageUrl = null
-    state.imageProxySrcSet = null
   }
-  const onLoaded = () => {
-    state.imageUrl = imgproxyUrl(url, props.width, props.height)
-  }
-  const image = new Image()
-  image.addEventListener('load', onLoaded)
-  image.addEventListener('error', handleError)
-  image.src = url
-  if (image.complete) {
-    onLoaded()
-  }
+  state.imageBreakpoint = 0
+  requestImageUrl()
 })
 watch(() => props.pendingUploadDataUrl, (url) => {
   if (url) {
@@ -87,10 +119,10 @@ watch(() => props.pendingUploadDataUrl, (url) => {
   }
 })
 watch(() => props.width, (width) => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  requestImageUrl()
 })
 watch(() => props.height, (height) => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  requestImageUrl()
 })
 watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
   if (value) { return }
@@ -163,6 +195,7 @@ const playVideo = () => {
 // gif
 
 watch(() => isTouching.value, (value) => {
+  updateIsGesturing(value)
   if (value) {
     pause()
   } else {
@@ -239,23 +272,80 @@ const removeCanvasSelectedClass = () => {
   canvas.classList.remove('selected')
 }
 
-// serve smaller images w imgproxy
+// serve smaller images w imgproxy, loaded through the shared queue
 
-const imgproxyUrl = (imageUrl, width, height) => {
-  if (props.pendingUploadDataUrl) {
-    return props.pendingUploadDataUrl
+let queuedLoadItem = null
+
+const imgproxyUrl = (imageUrl, breakpoint) => {
+  if (breakpoint === Infinity) {
+    return utils.imgproxyUrl(imageUrl)
   }
-  const containerBreakpoints = [400, 600, 800, 1200, 3000]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
-  const maxDimensions = Math.max(width, height)
-  let url = utils.imgproxyUrl(imageUrl)
-  for (const breakpoint of containerBreakpoints) {
-    if (maxDimensions <= breakpoint) {
-      url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
+  return utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
+}
+// when the space is zoomed out, cards are displayed smaller, so request smaller images
+const targetBreakpoint = () => {
+  const containerBreakpoints = [100, 400, 600, 800, 1200, 3000]
+  const zoom = Math.min(globalStore.getSpaceZoomDecimal, 1)
+  const maxDimensions = Math.max(props.width, props.height) * zoom
+  return containerBreakpoints.find(breakpoint => maxDimensions <= breakpoint) || Infinity
+}
+const requestImageUrl = () => {
+  if (props.pendingUploadDataUrl) {
+    state.imageUrl = props.pendingUploadDataUrl
+    return
+  }
+  const imageUrl = props.image
+  if (!imageUrl) { return }
+  const breakpoint = targetBreakpoint()
+  // only upgrade sizes: browsers downscale loaded images fine, and swapping in a smaller image is jarring
+  if (breakpoint <= state.imageBreakpoint) { return }
+  if (queuedLoadItem) {
+    queuedLoadItem.breakpoint = Math.max(queuedLoadItem.breakpoint, breakpoint)
+    return
+  }
+  const item = {
+    breakpoint,
+    load (done) {
+      queuedLoadItem = null
+      const url = imgproxyUrl(imageUrl, item.breakpoint)
+      // preload, then swap in place so the image never flashes
+      const complete = () => {
+        state.imageUrl = url
+        state.imageBreakpoint = item.breakpoint
+        done()
+      }
+      const image = new Image()
+      image.addEventListener('load', complete)
+      image.addEventListener('error', complete)
+      image.src = url
     }
   }
-  return url
+  queuedLoadItem = item
+  addToLoadQueue(item)
 }
+// after zooming in ends, load sharper images for the new zoom level
+const requestImageUrlDebounced = debounce(() => {
+  requestImageUrl()
+}, 500)
+watch(() => globalStore.getSpaceZoomDecimal, (value, prevValue) => {
+  requestImageUrlDebounced()
+})
+
+// placeholder, shown until the image loads
+
+const placeholderIsVisible = computed(() => {
+  return !state.imageUrl && Boolean(props.image) && !props.video
+})
+const placeholderStyles = computed(() => {
+  const styles = { backgroundColor: '#333' }
+  if (props.width && props.height) {
+    styles.aspectRatio = `${props.width} / ${props.height}`
+  } else {
+    styles.height = '100px'
+  }
+  return styles
+})
 
 // events
 
@@ -279,7 +369,10 @@ img.image(
   @load="handleSuccess"
   @error="handleError"
   :loading="lazyLoading"
+  decoding="async"
 )
+//- placeholder until the image loads through the queue
+.image-placeholder(v-else-if="placeholderIsVisible" :style="placeholderStyles")
 </template>
 
 <style lang="stylus">
@@ -292,4 +385,8 @@ img.image(
     content-visibility auto
     &.selected
       mix-blend-mode color-burn
+  .image-placeholder
+    display block
+    width 100%
+    border-radius var(--entity-radius)
 </style>

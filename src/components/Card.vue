@@ -75,6 +75,7 @@ const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
 let observer
+let isVisibleInViewportPending
 
 let unsubscribes
 
@@ -618,7 +619,7 @@ const tiltResizeIsVisible = computed(() => {
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
   // on mobile, resize handlers get in the way of touching when zoomed out
   if (globalStore.isTouchDevice || utils.isMobile()) {
-    if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+    if (globalStore.spaceZoomPercent < 50) { return }
   }
   return true
 })
@@ -1600,15 +1601,33 @@ const userDetailsIsUser = computed(() => {
 
 // is visible in viewport, perf, should render
 
+// defer mounting cards revealed mid-gesture until touch panning/zooming ends,
+// this prevents image decode storms that can crash mobile browsers while scrolling zoomed out spaces
+const isTouchGesturing = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
+const showCardInViewport = () => {
+  if (isTouchGesturing.value) {
+    isVisibleInViewportPending = true
+    return
+  }
+  state.isVisibleInViewport = true
+  checkIfShouldUpdateDimensions()
+}
+watch(() => isTouchGesturing.value, (value, prevValue) => {
+  if (!value && isVisibleInViewportPending) {
+    isVisibleInViewportPending = false
+    state.isVisibleInViewport = true
+    checkIfShouldUpdateDimensions()
+  }
+})
 const initViewportObserver = async () => {
   await nextTick()
   try {
     const callback = (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          state.isVisibleInViewport = true
-          checkIfShouldUpdateDimensions()
+          showCardInViewport()
         } else {
+          isVisibleInViewportPending = false
           state.isVisibleInViewport = false
         }
       })

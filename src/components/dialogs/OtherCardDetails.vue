@@ -70,10 +70,7 @@ const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 
 const styles = computed(() => {
   const position = globalStore.otherItemDetailsPosition
-  let zoom = globalStore.getSpaceCounterZoomDecimal
-  if (globalStore.isTouchDevice) {
-    zoom = 1 / utils.visualViewport().scale
-  }
+  const zoom = globalStore.getSpaceCounterZoomDecimal
   const left = `${position.x + 8}px`
   const top = `${position.y + 8}px`
   return { transform: `scale(${zoom})`, left, top }

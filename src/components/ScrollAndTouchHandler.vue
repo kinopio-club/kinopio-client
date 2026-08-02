@@ -10,6 +10,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 
+import { usePanMomentum } from '@/composables/usePanMomentum'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -26,7 +27,20 @@ const listStore = useListStore()
 
 let multiTouchAction, shouldCancelUndo
 
-let inertiaScrollEndIntervalTimer, prevPosition
+// touch panning and pinch zooming
+// replaces native swipe scrolling and native pinch zooming,
+// so the page never scales – only the space does (no counter-scaling needed for fixed UI)
+const pinchEngageThreshold = 10 // min px moved before a multi-touch gesture is a pinch, preserves multi-touch tap gestures
+const momentumMaxSampleAge = 100 // ms of trailing touchmove samples used for momentum velocity
+const panMomentum = usePanMomentum()
+let prevTouchPosition
+let touchVelocitySamples = []
+let totalPanDistance = 0
+let pinchBaseline
+let pinchGestureStart, pinchGestureCurrent, pinchFrameTimer
+
+// touches on these elements keep their native behavior (dialog scrolling, slider dragging)
+const nativeTouchSelector = 'dialog, header, .footer-wrap, .minimap-canvas-wrap'
 
 onMounted(() => {
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
@@ -36,17 +50,31 @@ onMounted(() => {
     window.addEventListener('scroll', scroll)
   }, 100)
   window.addEventListener('touchstart', touchStart)
-  window.addEventListener('touchmove', touchMove)
+  window.addEventListener('touchmove', touchMove, { passive: false })
   window.addEventListener('touchend', touchEnd)
+  window.addEventListener('touchcancel', touchEnd)
+  // safari fires non-standard gesture events for native pinch zooming, which ignores meta viewport user-scalable=no
+  window.addEventListener('gesturestart', preventNativeZoom)
+  window.addEventListener('gesturechange', preventNativeZoom)
+  window.addEventListener('gestureend', preventNativeZoom)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
+  window.removeEventListener('scroll', scroll)
   window.removeEventListener('touchstart', touchStart)
-  window.removeEventListener('touchmove', touchMove)
+  window.removeEventListener('touchmove', touchMove, { passive: false })
   window.removeEventListener('touchend', touchEnd)
+  window.removeEventListener('touchcancel', touchEnd)
+  window.removeEventListener('gesturestart', preventNativeZoom)
+  window.removeEventListener('gesturechange', preventNativeZoom)
+  window.removeEventListener('gestureend', preventNativeZoom)
 })
 
 const isSpacePage = computed(() => globalStore.isSpacePage)
+
+const preventNativeZoom = (event) => {
+  event.preventDefault()
+}
 
 // wheel
 
@@ -131,49 +159,231 @@ const updatePrevSpacePagePosition = debounce(() => {
   globalStore.updatePrevSpacePagePosition(spaceStore.id)
 }, 250)
 
+// touch gating
+
+const isNativeTouchTarget = (event) => {
+  if (!(event.target instanceof Element)) { return false }
+  return Boolean(event.target.closest(nativeTouchSelector))
+}
+// true when another handler owns the current touches (dragging, resizing, painting, drawing)
+const isTouchInteractingWithItem = () => {
+  return (
+    globalStore.getIsInteractingWithItem ||
+    globalStore.currentUserIsDraggingLine ||
+    globalStore.currentUserIsTiltingCard ||
+    globalStore.currentUserIsPaintSelecting ||
+    globalStore.currentUserIsPaintSelectingLocked ||
+    globalStore.currentUserIsBoxSelecting
+  )
+}
+const shouldPreventPan = () => {
+  return isTouchInteractingWithItem() || globalStore.getToolbarIsDrawing
+}
+const shouldPreventPinch = () => {
+  // pinching is allowed in drawing mode (unlike panning), but not mid-stroke
+  return isTouchInteractingWithItem() || globalStore.currentUserIsDrawing
+}
+
 // touch start
 
 const touchStart = (event) => {
   shouldCancelUndo = false
+  if (!isSpacePage.value) { return }
+  if (isNativeTouchTarget(event)) { return }
+  panMomentum.cancel()
+  const touches = event.touches
+  if (touches.length === 1) {
+    prevTouchPosition = touchPosition(touches[0])
+    touchVelocitySamples = []
+    totalPanDistance = 0
+    pinchBaseline = null
+  } else {
+    // commit first so the new baseline reads the settled zoom (e.g. adding a third finger mid-pinch)
+    commitPinchZoom()
+    updatePinchBaseline(event)
+  }
   if (!utils.isMultiTouch(event)) {
     multiTouchAction = null
     return
   }
   globalStore.shouldAddCard = false
-  const touches = event.touches.length
-  if (touches >= 2) {
-    toggleIsPinchZooming(event)
-  }
   // undo/redo
-  if (touches === 2) {
+  if (touches.length === 2) {
     multiTouchAction = 'undo'
-  } else if (touches === 3) {
+  } else if (touches.length === 3) {
     multiTouchAction = 'redo'
   }
 }
 
 // touch move
 
+const touchPosition = (touch) => {
+  return { x: touch.clientX, y: touch.clientY }
+}
 const touchMove = (event) => {
-  const isFromDialog = event.target.closest('dialog')
-  if (isFromDialog) { return }
-  shouldCancelUndo = true
+  if (!isSpacePage.value) { return }
+  if (isNativeTouchTarget(event)) { return }
+  if (event.cancelable) { event.preventDefault() }
+  if (event.touches.length >= 2) {
+    pinchMove(event)
+  } else {
+    panMove(event)
+  }
+}
+
+// one finger panning
+
+const panMove = (event) => {
+  const position = touchPosition(event.touches[0])
+  const prevPosition = prevTouchPosition
+  prevTouchPosition = position
+  if (!prevPosition) { return }
+  if (shouldPreventPan()) { return }
+  const delta = {
+    x: prevPosition.x - position.x,
+    y: prevPosition.y - position.y
+  }
+  window.scrollBy(delta.x, delta.y)
+  touchVelocitySamples.push({ x: delta.x, y: delta.y, time: event.timeStamp })
+  touchVelocitySamples = touchVelocitySamples.slice(-5)
+  totalPanDistance = totalPanDistance + Math.hypot(delta.x, delta.y)
+  if (totalPanDistance > pinchEngageThreshold) {
+    shouldCancelUndo = true
+  }
   globalStore.isTouchScrolling = true
+}
+const startTouchMomentum = (event) => {
+  const samples = touchVelocitySamples.filter(sample => event.timeStamp - sample.time <= momentumMaxSampleAge)
+  touchVelocitySamples = []
+  if (!samples.length) {
+    globalStore.isTouchScrolling = false
+    return
+  }
+  const velocity = {
+    x: samples.reduce((total, sample) => total + sample.x, 0) / samples.length,
+    y: samples.reduce((total, sample) => total + sample.y, 0) / samples.length
+  }
+  panMomentum.start(velocity, () => {
+    globalStore.isTouchScrolling = false
+  })
+}
+
+// pinch zooming, with two finger panning
+// while pinching, zoom and pan are previewed with a compositor-only transform on the space,
+// the real layout zoom is committed once when the gesture ends.
+// zooming layout zoom per touch frame relayouts and rerasterizes the whole space, which crashes mobile browsers
+
+const pinchValues = (event) => {
+  const touch0 = event.touches[0]
+  const touch1 = event.touches[1]
+  const distance = Math.hypot(touch1.clientX - touch0.clientX, touch1.clientY - touch0.clientY)
+  const midpoint = {
+    x: (touch0.clientX + touch1.clientX) / 2,
+    y: (touch0.clientY + touch1.clientY) / 2
+  }
+  return { distance, midpoint }
+}
+const updatePinchBaseline = (event) => {
+  const values = pinchValues(event)
+  pinchBaseline = {
+    distance: values.distance,
+    midpoint: values.midpoint,
+    percent: globalStore.spaceZoomPercent
+  }
+}
+const pinchMove = (event) => {
+  if (!pinchBaseline) {
+    updatePinchBaseline(event)
+    return
+  }
+  if (shouldPreventPinch()) { return }
+  const values = pinchValues(event)
+  // engage after a movement threshold so multi-touch tap gestures (undo/redo) still fire
+  if (!globalStore.isPinchZooming) {
+    const distanceDelta = Math.abs(values.distance - pinchBaseline.distance)
+    const midpointDelta = Math.hypot(values.midpoint.x - pinchBaseline.midpoint.x, values.midpoint.y - pinchBaseline.midpoint.y)
+    if (distanceDelta < pinchEngageThreshold && midpointDelta < pinchEngageThreshold) { return }
+    globalStore.isPinchZooming = true
+    shouldCancelUndo = true
+    pinchGestureStart = {
+      scroll: { x: window.scrollX, y: window.scrollY },
+      offset: { ...globalStore.spaceZoomOffset },
+      midpoint: pinchBaseline.midpoint,
+      percent: pinchBaseline.percent
+    }
+  }
+  // clamp scale so the preview matches the zoom that will be committed
+  let percent = pinchBaseline.percent * (values.distance / pinchBaseline.distance)
+  percent = Math.max(percent, consts.spaceZoom.min)
+  percent = Math.min(percent, consts.spaceZoom.max)
+  pinchGestureCurrent = {
+    scale: percent / pinchGestureStart.percent,
+    midpoint: values.midpoint
+  }
+  if (!pinchFrameTimer) {
+    pinchFrameTimer = window.requestAnimationFrame(pinchFrame)
+  }
+}
+const pinchFrame = () => {
+  pinchFrameTimer = null
+  if (!pinchGestureStart || !pinchGestureCurrent) { return }
+  const start = pinchGestureStart
+  const current = pinchGestureCurrent
+  // keep the space point that started under the midpoint attached to the midpoint as it moves,
+  // in document coordinates: point → (scale * point) + translate
+  globalStore.pinchGestureTransform = {
+    x: (start.scroll.x + current.midpoint.x) - (current.scale * (start.scroll.x + start.midpoint.x)),
+    y: (start.scroll.y + current.midpoint.y) - (current.scale * (start.scroll.y + start.midpoint.y)),
+    scale: current.scale
+  }
+}
+const commitPinchZoom = () => {
+  if (!pinchGestureStart || !pinchGestureCurrent) { return }
+  window.cancelAnimationFrame(pinchFrameTimer)
+  pinchFrameTimer = null
+  const start = pinchGestureStart
+  const current = pinchGestureCurrent
+  pinchGestureStart = null
+  pinchGestureCurrent = null
+  const prevZoom = start.percent / 100
+  // the space point that tracked the midpoint through the gesture preview
+  const spacePoint = {
+    x: (start.scroll.x + start.midpoint.x - start.offset.x) / prevZoom,
+    y: (start.scroll.y + start.midpoint.y - start.offset.y) / prevZoom
+  }
+  const percent = start.percent * current.scale
+  // clearing the preview and updating the zoom happen in the same render
+  globalStore.pinchGestureTransform = null
+  globalStore.zoomSpaceTo({ percent, origin: current.midpoint, spacePoint })
 }
 
 // touch end
 
-const touchEnd = () => {
+const touchEnd = (event) => {
   if (!isSpacePage.value) { return }
-  globalStore.isPinchZooming = false
-  checkIfInertiaScrollEnd()
-  if (shouldCancelUndo) {
-    shouldCancelUndo = false
-    multiTouchAction = ''
+  const touches = event.touches
+  // fingers remain, re-baseline the continuing gesture
+  if (touches.length === 1) {
+    commitPinchZoom()
+    globalStore.isPinchZooming = false
+    pinchBaseline = null
+    prevTouchPosition = touchPosition(touches[0])
+    return
+  } else if (touches.length > 1) {
+    commitPinchZoom()
+    updatePinchBaseline(event)
     return
   }
-  if (!multiTouchAction) { return }
-  if (multiTouchAction === 'undo') {
+  // all fingers lifted
+  commitPinchZoom()
+  globalStore.isPinchZooming = false
+  pinchBaseline = null
+  prevTouchPosition = null
+  // undo/redo
+  if (shouldCancelUndo) {
+    shouldCancelUndo = false
+    multiTouchAction = null
+  } else if (multiTouchAction === 'undo') {
     historyStore.undo()
     globalStore.addNotification({ message: 'Undo', icon: 'undo' })
   } else if (multiTouchAction === 'redo') {
@@ -181,34 +391,7 @@ const touchEnd = () => {
     globalStore.addNotification({ message: 'Redo', icon: 'redo' })
   }
   multiTouchAction = null
-}
-const checkIfInertiaScrollEnd = () => {
-  if (!utils.isAndroid) { return }
-  if (inertiaScrollEndIntervalTimer) { return }
-  prevPosition = null
-  inertiaScrollEndIntervalTimer = setInterval(() => {
-    const viewport = utils.visualViewport()
-    const current = {
-      left: viewport.offsetLeft,
-      top: viewport.offsetTop
-    }
-    if (!prevPosition) {
-      prevPosition = current
-    } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
-      clearInterval(inertiaScrollEndIntervalTimer)
-      inertiaScrollEndIntervalTimer = null
-      globalStore.isTouchScrolling = false
-    } else {
-      prevPosition = current
-    }
-  }, 250)
-}
-
-// pinch zoom
-
-const toggleIsPinchZooming = (event) => {
-  if (utils.shouldIgnoreTouchInteraction(event)) { return }
-  globalStore.isPinchZooming = true
+  startTouchMomentum(event)
 }
 </script>
 
