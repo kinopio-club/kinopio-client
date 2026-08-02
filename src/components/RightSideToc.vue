@@ -63,18 +63,20 @@ const focusItem = (item) => {
 <template lang="pug">
 nav.right-side-toc
   template(v-for="item in allItems" :key="item.id")
-    .badge.button-badge.info(
-      :class="classes(item)"
-      :style="{background: item.color}"
+    .badge-wrap(
       @click="focusItem(item)"
       @mouseover="updateHoverItem(item.id)"
       @mouseleave="updateHoverItem('')"
     )
-      .row(v-show="isHoverItem(item)")
-        img.icon.line-icon(src="@/assets/line.svg" v-if="item.itemType === 'line'" :class="colorClasses(item)")
-        img.icon.box-icon(src="@/assets/box.svg" v-if="item.itemType === 'box'" :class="colorClasses(item)")
-        img.icon.list-icon(src="@/assets/list.svg" v-if="item.itemType === 'list'" :class="colorClasses(item)")
-        span {{item.name}}
+      .badge.button-badge.info(
+        :class="classes(item)"
+        :style="{background: item.color}"
+      )
+        .row(v-show="isHoverItem(item)")
+          img.icon.line-icon(src="@/assets/line.svg" v-if="item.itemType === 'line'" :class="colorClasses(item)")
+          img.icon.box-icon(src="@/assets/box.svg" v-if="item.itemType === 'box'" :class="colorClasses(item)")
+          img.icon.list-icon(src="@/assets/list.svg" v-if="item.itemType === 'list'" :class="colorClasses(item)")
+          span.name {{item.name}}
 </template>
 
 <style lang="stylus">
@@ -90,12 +92,15 @@ nav.right-side-toc
     cursor pointer
     transition 0.2s all
     width fit-content
+    height 18px
     margin-left auto
     &.line-item
       border-radius 100px
     .row
       display flex
       align-items center
-  .badge + .badge
-    margin-top 4px
+      span.name
+        margin-top -2px
+  .badge-wrap + .badge-wrap
+    padding-top 4px
 </style>
