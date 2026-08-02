@@ -51,10 +51,8 @@ const classes = (item) => {
 }
 const updateHoverItem = (itemId) => {
   state.hoverItemId = itemId
-  console.log('❤️', itemId)
 }
 const isHoverItem = (item) => {
-  console.log('💐💐💐💐💐', item.id, state.hoverItemId === item.id)
   return state.hoverItemId === item.id
 }
 const focusItem = (item) => {
