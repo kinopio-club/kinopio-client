@@ -4,7 +4,7 @@ const env = import.meta.env
 
 export default {
   spaceZoom: {
-    max: 180,
+    max: 300,
     min: 20,
     default: 100
   },

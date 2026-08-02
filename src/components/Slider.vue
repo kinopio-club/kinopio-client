@@ -43,7 +43,8 @@ const props = defineProps({
   animateJiggleRight: Boolean,
   animateJiggleLeft: Boolean,
   minKeyboardShortcut: String,
-  shouldHideBadge: Boolean
+  shouldHideBadge: Boolean,
+  verticalTickMiddle: Number
 })
 watch(() => props.value, (value, prevValue) => {
   updateButtonPosition()
@@ -55,6 +56,12 @@ const state = reactive({
 })
 
 const defaultValue = computed(() => props.defaultValue || props.maxValue)
+const verticalTickMiddleStyles = computed(() => {
+  if (!props.verticalTickMiddle) { return }
+  return {
+    left: props.verticalTickMiddle + 'px'
+  }
+})
 
 // badge
 
@@ -220,7 +227,7 @@ const resetPlayhead = async () => {
     ref="progressElement"
   )
   img.vertical-line.first-child(src="@/assets/vertical-line.svg")
-  img.vertical-line.second-child(src="@/assets/vertical-line.svg")
+  img.vertical-line.second-child(src="@/assets/vertical-line.svg" :style="verticalTickMiddleStyles")
   img.vertical-line.last-child(src="@/assets/vertical-line.svg")
   button.slider-button(
     ref="buttonElement"

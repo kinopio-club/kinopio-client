@@ -95,6 +95,7 @@ const removeAnimations = () => {
     @removeAnimations="removeAnimations"
     @pointerdown="closeAllDialogs"
     :minKeyboardShortcut="minKeyboardShortcut"
+    :verticalTickMiddle="27"
   )
 </template>
 
