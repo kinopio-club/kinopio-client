@@ -6,6 +6,8 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import debounce from 'lodash-es/debounce'
+
 const globalStore = useGlobalStore()
 
 const videoElement = ref(null)
@@ -247,15 +249,27 @@ const imgproxyUrl = (imageUrl, width, height) => {
   }
   const containerBreakpoints = [400, 600, 800, 1200, 3000]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
-  const maxDimensions = Math.max(width, height)
+  // when the space is zoomed out, cards are displayed smaller, so request smaller images
+  const zoom = Math.min(globalStore.getSpaceZoomDecimal, 1)
+  const maxDimensions = Math.max(width, height) * zoom
   let url = utils.imgproxyUrl(imageUrl)
   for (const breakpoint of containerBreakpoints) {
     if (maxDimensions <= breakpoint) {
       url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
+      break
     }
   }
   return url
 }
+// after zooming ends, update image sizes for the new zoom level
+const updateImageUrlForZoom = debounce(() => {
+  if (!props.image) { return }
+  if (props.pendingUploadDataUrl) { return }
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+}, 500)
+watch(() => globalStore.getSpaceZoomDecimal, (value, prevValue) => {
+  updateImageUrlForZoom()
+})
 
 // events
 
@@ -279,6 +293,7 @@ img.image(
   @load="handleSuccess"
   @error="handleError"
   :loading="lazyLoading"
+  decoding="async"
 )
 </template>
 
