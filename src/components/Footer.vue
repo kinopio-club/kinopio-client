@@ -10,7 +10,6 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
-import Toc from '@/components/dialogs/Toc.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -52,12 +51,6 @@ onMounted(() => {
         updatePosition()
       } else if (name === 'triggerHideTouchInterface') {
         hideOnTouch()
-      } else if (name === 'closeAllDialogs') {
-        if (!globalStore.tocIsPinned) {
-          hideToc()
-        }
-      } else if (name === 'triggerTocIsVisible') {
-        toggleTocIsVisible()
       }
     }
   )
@@ -88,7 +81,6 @@ watch(() => globalStore.isPresentationMode, (value, prevValue) => {
 const state = reactive({
   position: {},
   isHiddenOnTouch: false,
-  jumpToIsVisible: false,
   isScrolled: false
 })
 
@@ -156,7 +148,6 @@ const leftControlsIsVisible = computed(() => {
 })
 const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
-  if (globalStore.tocIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
   // const isTouchDevice = globalStore.isTouchDevice
   // if (!isTouchDevice) { return true }
@@ -174,15 +165,6 @@ const isPresentationMode = computed(() => globalStore.isPresentationMode)
 const togglePresentationMode = () => {
   const value = !isPresentationMode.value
   globalStore.isPresentationMode = value
-}
-
-// jumpTo
-
-const hideToc = () => {
-  state.jumpToIsVisible = false
-}
-const toggleTocIsVisible = () => {
-  state.jumpToIsVisible = !state.jumpToIsVisible
 }
 
 // minimap
@@ -287,27 +269,18 @@ const updatePositionInVisualViewport = () => {
       @click="togglePresentationMode"
       @touchend.stop :class="{'hidden': state.isHiddenOnTouch}"
     )
-      button.small-button(
+      button.small-button.presentation-mode-button(
         :class="{'active': isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}"
         title="Focus/Presentation Mode (P)"
       )
         img.icon.presentation(src="@/assets/presentation.svg")
-    //- jumpTo minimap
-    .segmented-buttons
-      button.small-button(
-        @click.stop="toggleTocIsVisible"
-        @touchend.stop
-        :class="{'hidden': state.isHiddenOnTouch, 'active': state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-        title="Toggle TOC (C)"
-      )
-        img.icon.toc(src="@/assets/toc.svg")
-      button.small-button(
-        @click.stop="toggleMinimap"
+      //- minimap
+    .button-wrap.footer-button-wrap(@click.stop="toggleMinimap")
+      button.small-button.minimap-button(
         :class="{'hidden': state.isHiddenOnTouch, 'active': minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
         title="Toggle Minimap (M)"
       )
         img.icon.minimap(src="@/assets/minimap.svg")
-    Toc(:visible="state.jumpToIsVisible")
 </template>
 
 <style lang="stylus">
@@ -365,16 +338,12 @@ const updatePositionInVisualViewport = () => {
     padding-right 0
     translate 0px 3px
     display inline-block
-    > button
-      font-size 1rem
+    .presentation-mode-button
       padding-left 6px
       padding-right 6px
 
   .footer-button-wrap + .footer-button-wrap
     margin-left 4px
-
-  .icon.toc
-    vertical-align 1px
 
   .embed-label
     left 8px
@@ -399,20 +368,6 @@ footer
     dialog
       top initial
       bottom calc(100% - 8px)
-    // > section
-    //   display flex
-    //   &:last-child
-    //     margin-top 6px
-    //   > .button-wrap
-    //     pointer-events all
-    //     margin-left 6px
-    //     display inline-block
-    //     &:first-child
-    //       margin-left 0
-
-  .segmented-buttons
-    .down-arrow
-      padding 0
 
   button
     .icon.down-arrow

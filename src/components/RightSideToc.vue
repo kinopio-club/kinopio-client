@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -12,9 +13,29 @@ const globalStore = useGlobalStore()
 const boxStore = useBoxStore()
 const listStore = useListStore()
 const lineStore = useLineStore()
+const userStore = useUserStore()
+
+let unsubscribes
+
+onMounted(() => {
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'triggerTocLabelsIsVisible') {
+        toggleTocLabelsIsVisible()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
+})
 
 const state = reactive({
-  hoverItemId: ''
+  hoverItemId: '',
+  tocLabelsIsVisible: false
 })
 
 const allItems = computed(() => {
@@ -49,14 +70,22 @@ const classes = (item) => {
   }
   return classes
 }
+const focusItem = (item) => {
+  globalStore.updateFocusOnItemId(item.id)
+}
+
+// toc labels
+
 const updateHoverItem = (itemId) => {
   state.hoverItemId = itemId
 }
-const isHoverItem = (item) => {
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
+const shouldShowLabel = (item) => {
+  if (state.tocLabelsIsVisible) { return true }
   return state.hoverItemId === item.id
 }
-const focusItem = (item) => {
-  globalStore.updateFocusOnItemId(item.id)
+const toggleTocLabelsIsVisible = () => {
+  state.tocLabelsIsVisible = !state.tocLabelsIsVisible
 }
 </script>
 
@@ -72,11 +101,20 @@ nav.right-side-toc
         :class="classes(item)"
         :style="{background: item.color}"
       )
-        .row(v-show="isHoverItem(item)")
-          img.icon.line-icon(src="@/assets/line.svg" v-if="item.itemType === 'line'" :class="colorClasses(item)")
-          img.icon.box-icon(src="@/assets/box.svg" v-if="item.itemType === 'box'" :class="colorClasses(item)")
-          img.icon.list-icon(src="@/assets/list.svg" v-if="item.itemType === 'list'" :class="colorClasses(item)")
+        .row(v-show="shouldShowLabel(item)")
+          //- img.icon.line-icon(src="@/assets/line.svg" v-if="item.itemType === 'line'" :class="colorClasses(item)")
+          //- img.icon.box-icon(src="@/assets/box.svg" v-if="item.itemType === 'box'" :class="colorClasses(item)")
+          //- img.icon.list-icon(src="@/assets/list.svg" v-if="item.itemType === 'list'" :class="colorClasses(item)")
           span.name {{item.name}}
+
+  button.small-button.toc-button(
+    v-if="allItems.length"
+    @click.stop="toggleTocLabelsIsVisible"
+    @touchend.stop
+    :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
+    title="Toggle TOC Labels (C)"
+  )
+    img.icon.toc(src="@/assets/toc.svg")
 </template>
 
 <style lang="stylus">
@@ -88,19 +126,31 @@ nav.right-side-toc
   display flex
   flex-direction column
   align-content flex-end
-  .badge
-    cursor pointer
-    transition 0.2s all
-    width fit-content
-    height 18px
-    margin-left auto
-    &.line-item
-      border-radius 100px
-    .row
-      display flex
-      align-items center
-      span.name
-        margin-top -2px
+
+  .badge-wrap
+    .badge
+      cursor pointer
+      width fit-content
+      height 18px
+      margin-left auto
+      // max-width 200px
+      // ellipse truncate
+      &.line-item
+        border-radius 100px
+      .row
+        display flex
+        align-items center
+        span.name
+          margin-top -2px
+          padding 0 2px
   .badge-wrap + .badge-wrap
     padding-top 4px
+
+  .toc-button
+    width 19px
+    margin-left auto
+    margin-right 4px
+    margin-top 4px
+    .icon.toc
+      transform translateY(-1px)
 </style>

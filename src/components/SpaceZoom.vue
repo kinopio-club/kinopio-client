@@ -103,4 +103,5 @@ const removeAnimations = () => {
 .space-zoom
   display block
   width 100px
+  margin-top -2px
 </style>
