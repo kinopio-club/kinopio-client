@@ -56,6 +56,7 @@ import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
+import RightSideToc from '@/components/RightSideToc.vue'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -1180,6 +1181,7 @@ const shouldPrevent = computed(() => {
     SonarPing
   //- page ui, dialogs
   Header
+  RightSideToc
   Footer
   TagDetails
   UserDetails
