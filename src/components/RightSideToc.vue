@@ -68,6 +68,9 @@ const classes = (item) => {
   if (item.itemType === 'line') {
     classes.push('line-item')
   }
+  if (item.id === state.hoverItemId) {
+    classes.push('button-badge')
+  }
   return classes
 }
 const focusItem = (item) => {
@@ -97,7 +100,7 @@ nav.right-side-toc
       @mouseover="updateHoverItem(item.id)"
       @mouseleave="updateHoverItem('')"
     )
-      .badge.button-badge.info(
+      .badge.info(
         :class="classes(item)"
         :style="{background: item.color}"
       )
@@ -130,13 +133,16 @@ nav.right-side-toc
   .badge-wrap
     .badge
       cursor pointer
-      width fit-content
-      height 18px
       margin-left auto
+      width fit-content
+      min-width 12px
+      height fit-content
+      min-height 12px
+      max-height 18px
       // max-width 200px
       // ellipse truncate
-      &.line-item
-        border-radius 100px
+      // &.line-item
+      //   border-radius 100px
       .row
         display flex
         align-items center
