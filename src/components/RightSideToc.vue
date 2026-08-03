@@ -59,17 +59,23 @@ const allItems = computed(() => {
   return items
 })
 
+const isLine = (item) => {
+  return item.itemType === 'line'
+}
 const colorClasses = (item) => {
   const colorClass = utils.colorClasses({ backgroundColor: item.color })
   return [colorClass]
 }
 const classes = (item) => {
   const classes = colorClasses(item)
-  if (item.itemType === 'line') {
+  if (isLine(item)) {
     classes.push('line-item')
   }
   if (item.id === state.hoverItemId) {
     classes.push('button-badge')
+  }
+  if (shouldShowLabel(item)) {
+    classes.push('should-show-label')
   }
   return classes
 }
@@ -104,11 +110,9 @@ nav.right-side-toc
         :class="classes(item)"
         :style="{background: item.color}"
       )
-        .row(v-show="shouldShowLabel(item)")
-          //- img.icon.line-icon(src="@/assets/line.svg" v-if="item.itemType === 'line'" :class="colorClasses(item)")
-          //- img.icon.box-icon(src="@/assets/box.svg" v-if="item.itemType === 'box'" :class="colorClasses(item)")
-          //- img.icon.list-icon(src="@/assets/list.svg" v-if="item.itemType === 'list'" :class="colorClasses(item)")
+        .row(v-if="shouldShowLabel(item)")
           span.name {{item.name}}
+        .line-marker(v-if="isLine(item)" :style="{background: item.color}")
 
   button.small-button.toc-button(
     v-if="allItems.length"
@@ -140,23 +144,35 @@ nav.right-side-toc
       height fit-content
       min-height 12px
       max-height 18px
-      // max-width 200px
-      // ellipse truncate
+      margin-right 8px
+      // border-radius var(--small-entity-radius)
       // &.line-item
-      //   border-radius 100px
+      //   border-radius var(--entity-radius)
       .row
         display flex
         align-items center
         span.name
           margin-top -2px
           padding 0 2px
+      .line-marker
+        height 1px
+        width 10px
+        position absolute
+        right -10px
+        top 5px
+      &.button-badge,
+      &.should-show-label
+        // border-radius var(--entity-radius)
+        .line-marker
+          top 8px
+
   .badge-wrap + .badge-wrap
     padding-top 4px
 
   .toc-button
     width 19px
     margin-left auto
-    margin-right 4px
+    margin-right 6px
     margin-top 4px
     .icon.toc
       transform translateY(-1px)
