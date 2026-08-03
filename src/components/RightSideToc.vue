@@ -125,7 +125,8 @@ nav.right-side-toc
   position fixed
   right 0
   left initial
-  top 40%
+  top 50%
+  transform translateY(-50%)
   display flex
   flex-direction column
   align-content flex-end
