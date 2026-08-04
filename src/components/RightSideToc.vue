@@ -62,6 +62,9 @@ const allItems = computed(() => {
 const isLine = (item) => {
   return item.itemType === 'line'
 }
+const isBox = (item) => {
+  return item.itemType === 'box'
+}
 const colorClasses = (item) => {
   const colorClass = utils.colorClasses({ backgroundColor: item.color })
   return [colorClass]
@@ -70,6 +73,9 @@ const classes = (item) => {
   const classes = colorClasses(item)
   if (isLine(item)) {
     classes.push('line-item')
+  }
+  if (isBox(item)) {
+    classes.push('box-item')
   }
   if (item.id === state.hoverItemId) {
     classes.push('button-badge')
@@ -145,9 +151,8 @@ nav.right-side-toc
       min-height 12px
       max-height 18px
       margin-right 8px
-      // border-radius var(--small-entity-radius)
-      // &.line-item
-      //   border-radius var(--entity-radius)
+      &.box-item
+        border-radius var(--small-entity-radius)
       .row
         display flex
         align-items center
@@ -162,7 +167,7 @@ nav.right-side-toc
         top 5px
       &.button-badge,
       &.should-show-label
-        // border-radius var(--entity-radius)
+        border-radius var(--entity-radius)
         .line-marker
           top 8px
 
