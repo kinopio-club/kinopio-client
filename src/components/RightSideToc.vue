@@ -67,7 +67,8 @@ const isBox = (item) => {
 }
 const colorClasses = (item) => {
   const colorClass = utils.colorClasses({ backgroundColor: item.color })
-  return [colorClass]
+  const classes = [colorClass]
+  return classes
 }
 const classes = (item) => {
   const classes = colorClasses(item)
@@ -102,35 +103,76 @@ const shouldShowLabel = (item) => {
 const toggleTocLabelsIsVisible = () => {
   state.tocLabelsIsVisible = !state.tocLabelsIsVisible
 }
+
+// collapsed
+
+const shouldDisplayCollapsed = computed(() => {
+  const distanceBetweenItems = 4
+  const itemHeight = 18 + distanceBetweenItems
+  const tocHeight = (allItems.value.length + 1) * itemHeight
+  let header = document.querySelector('header')
+  if (!header) { return }
+  let footer = document.querySelector('.footer-wrap')
+  header = header.getBoundingClientRect()
+  footer = footer.getBoundingClientRect()
+  let minimapHeight = 0
+  if (userStore.shouldShowMinimap) {
+    let minimap = document.querySelector('#space-minimap')
+    minimap = minimap.getBoundingClientRect()
+    minimapHeight = minimap.height
+  }
+  const availableHeight = globalStore.viewportHeight - header.height - footer.height - minimapHeight
+  return tocHeight > availableHeight
+})
+const triggerTocIsVisible = () => {}
 </script>
 
 <template lang="pug">
 nav.right-side-toc
-  template(v-for="item in allItems" :key="item.id")
-    .badge-wrap(
-      @click="focusItem(item)"
-      @mouseover="updateHoverItem(item.id)"
-      @mouseleave="updateHoverItem('')"
-    )
-      .badge.info(
-        :class="classes(item)"
-        :style="{background: item.color}"
+  //- collapsed
+  template(v-if="shouldDisplayCollapsed")
+    .button-wrap.toc-button-wrap
+      button.small-button.toc-button(
+        v-if="allItems.length"
+        @click.stop="triggerTocIsVisible"
+        @touchend.stop
+        :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
+        title="Toggle TOC Labels (C)"
       )
-        .row(v-if="shouldShowLabel(item)")
-          span.name {{item.name}}
-        .line-marker(v-if="isLine(item)" :style="{background: item.color}")
+        img.icon.toc(src="@/assets/toc.svg")
+        .badge.info.label-badge.label-badge {{allItems.length}}
 
-  button.small-button.toc-button(
-    v-if="allItems.length"
-    @click.stop="toggleTocLabelsIsVisible"
-    @touchend.stop
-    :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-    title="Toggle TOC Labels (C)"
-  )
-    img.icon.toc(src="@/assets/toc.svg")
+  //- full height list
+  template(v-else)
+    template(v-for="item in allItems" :key="item.id")
+      .badge-wrap(
+        @click="focusItem(item)"
+        @mouseover="updateHoverItem(item.id)"
+        @mouseleave="updateHoverItem('')"
+      )
+        .badge.toc-item-badge(
+          :class="classes(item)"
+          :style="{background: item.color}"
+        )
+          .row(v-if="shouldShowLabel(item)")
+            span.name {{item.name}}
+          .line-marker(v-if="isLine(item)" :style="{background: item.color}")
+    //- toggle toc labels
+    .button-wrap.toc-button-wrap
+      button.small-button.toc-button(
+        v-if="allItems.length"
+        @click.stop="toggleTocLabelsIsVisible"
+        @touchend.stop
+        :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
+        title="Toggle TOC Labels (C)"
+      )
+        img.icon.toc(src="@/assets/toc.svg")
 </template>
 
 <style lang="stylus">
+:root
+  --badge-distance-right 12px
+
 .right-side-toc
   position fixed
   right 0
@@ -141,16 +183,26 @@ nav.right-side-toc
   flex-direction column
   align-content flex-end
 
+  // collapsed
+  .label-badge
+    font-size 12px
+    height: fit-content;
+    min-height: inherit;
+    bottom -12px
+    margin 0
+    left -3px
+
+  // full height list
   .badge-wrap
-    .badge
+    .toc-item-badge
       cursor pointer
       margin-left auto
-      width fit-content
+      width max-content
       min-width 12px
       height fit-content
       min-height 12px
       max-height 18px
-      margin-right 8px
+      margin-right var(--badge-distance-right)
       &.box-item
         border-radius var(--small-entity-radius)
       .row
@@ -161,23 +213,24 @@ nav.right-side-toc
           padding 0 2px
       .line-marker
         height 1px
-        width 10px
+        width 12px
         position absolute
-        right -10px
+        right calc(var(--badge-distance-right) * -1)
         top 5px
       &.button-badge,
       &.should-show-label
-        border-radius var(--entity-radius)
         .line-marker
           top 8px
 
   .badge-wrap + .badge-wrap
     padding-top 4px
 
-  .toc-button
-    width 19px
+  .toc-button-wrap
+    width max-content
     margin-left auto
-    margin-right 6px
+  .toc-button
+    min-width 19px
+    margin-right 8px
     margin-top 4px
     .icon.toc
       transform translateY(-1px)
