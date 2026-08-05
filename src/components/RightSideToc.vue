@@ -90,20 +90,6 @@ const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
 }
 
-// toc labels
-
-const updateHoverItem = (itemId) => {
-  state.hoverItemId = itemId
-}
-const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
-const shouldShowLabel = (item) => {
-  if (state.tocLabelsIsVisible) { return true }
-  return state.hoverItemId === item.id
-}
-const toggleTocLabelsIsVisible = () => {
-  state.tocLabelsIsVisible = !state.tocLabelsIsVisible
-}
-
 // collapsed
 
 const shouldDisplayCollapsed = computed(() => {
@@ -124,7 +110,27 @@ const shouldDisplayCollapsed = computed(() => {
   const availableHeight = globalStore.viewportHeight - header.height - footer.height - minimapHeight
   return tocHeight > availableHeight
 })
-const triggerTocIsVisible = () => {}
+const triggerTocIsVisible = () => {
+  globalStore.triggerTocIsVisible()
+}
+
+// toc labels
+
+const updateHoverItem = (itemId) => {
+  state.hoverItemId = itemId
+}
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
+const shouldShowLabel = (item) => {
+  if (state.tocLabelsIsVisible) { return true }
+  return state.hoverItemId === item.id
+}
+const toggleTocLabelsIsVisible = () => {
+  if (shouldDisplayCollapsed.value) {
+    triggerTocIsVisible()
+  } else {
+    state.tocLabelsIsVisible = !state.tocLabelsIsVisible
+  }
+}
 </script>
 
 <template lang="pug">

@@ -10,6 +10,7 @@ import SpaceZoom from '@/components/SpaceZoom.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import NewCardColorButton from '@/components/NewCardColorButton.vue'
+import Toc from '@/components/dialogs/Toc.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -51,6 +52,12 @@ onMounted(() => {
         updatePosition()
       } else if (name === 'triggerHideTouchInterface') {
         hideOnTouch()
+      } else if (name === 'closeAllDialogs') {
+        if (!globalStore.tocIsPinned) {
+          hideToc()
+        }
+      } else if (name === 'triggerTocIsVisible') {
+        toggleTocIsVisible()
       }
     }
   )
@@ -81,6 +88,7 @@ watch(() => globalStore.isPresentationMode, (value, prevValue) => {
 const state = reactive({
   position: {},
   isHiddenOnTouch: false,
+  tocIsVisible: false,
   isScrolled: false
 })
 
@@ -148,6 +156,7 @@ const leftControlsIsVisible = computed(() => {
 })
 const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
+  if (globalStore.tocIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
   // const isTouchDevice = globalStore.isTouchDevice
   // if (!isTouchDevice) { return true }
@@ -165,6 +174,15 @@ const isPresentationMode = computed(() => globalStore.isPresentationMode)
 const togglePresentationMode = () => {
   const value = !isPresentationMode.value
   globalStore.isPresentationMode = value
+}
+
+// jumpTo
+
+const hideToc = () => {
+  state.tocIsVisible = false
+}
+const toggleTocIsVisible = () => {
+  state.tocIsVisible = !state.tocIsVisible
 }
 
 // minimap
@@ -269,18 +287,19 @@ const updatePositionInVisualViewport = () => {
       @click="togglePresentationMode"
       @touchend.stop :class="{'hidden': state.isHiddenOnTouch}"
     )
-      button.small-button.presentation-mode-button(
+      button.small-button(
         :class="{'active': isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}"
         title="Focus/Presentation Mode (P)"
       )
         img.icon.presentation(src="@/assets/presentation.svg")
-      //- minimap
+    //- minimap
     .button-wrap.footer-button-wrap(@click.stop="toggleMinimap")
       button.small-button.minimap-button(
         :class="{'hidden': state.isHiddenOnTouch, 'active': minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
         title="Toggle Minimap (M)"
       )
         img.icon.minimap(src="@/assets/minimap.svg")
+    Toc(:visible="state.tocIsVisible")
 </template>
 
 <style lang="stylus">
