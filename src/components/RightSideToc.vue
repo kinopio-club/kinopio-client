@@ -40,6 +40,10 @@ const state = reactive({
   tocLabelsIsVisible: false
 })
 
+const isVisible = computed(() => {
+  return !utils.isMobile()
+})
+
 const allItems = computed(() => {
   let lines = utils.clone(lineStore.getAllLines)
   let boxes = utils.clone(boxStore.getAllBoxes)
@@ -137,7 +141,7 @@ const toggleTocLabelsIsVisible = () => {
 </script>
 
 <template lang="pug">
-nav.right-side-toc
+nav.right-side-toc(v-if="isVisible")
   //- collapsed
   template(v-if="shouldDisplayCollapsed")
     .button-wrap.toc-button-wrap
