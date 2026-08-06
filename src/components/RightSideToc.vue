@@ -22,6 +22,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerTocLabelsIsVisible') {
         toggleTocLabelsIsVisible()
+      } else if (name === 'closeAllDialogs') {
+        state.tocLabelsIsVisible = false
       }
     }
   )
@@ -88,6 +90,7 @@ const classes = (item) => {
 }
 const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
+  state.tocLabelsIsVisible = true
 }
 
 // collapsed
@@ -163,16 +166,6 @@ nav.right-side-toc
           .row(v-if="shouldShowLabel(item)")
             span.name {{item.name}}
           .line-marker(v-if="isLine(item)" :style="{background: item.color}")
-    //- toggle toc labels
-    .button-wrap.toc-button-wrap
-      button.small-button.toc-button(
-        v-if="allItems.length"
-        @click.stop="toggleTocLabelsIsVisible"
-        @touchend.stop
-        :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-        title="Toggle TOC Labels (C)"
-      )
-        img.icon.toc(src="@/assets/toc.svg")
 </template>
 
 <style lang="stylus">
@@ -180,6 +173,7 @@ nav.right-side-toc
   --badge-distance-right 12px
 
 .right-side-toc
+  pointer-events none
   position fixed
   right 0
   left initial
@@ -200,7 +194,11 @@ nav.right-side-toc
 
   // full height list
   .badge-wrap
+    pointer-events all
+    width fit-content
+    margin-left auto
     .toc-item-badge
+      pointer-events all
       cursor pointer
       margin-left auto
       width max-content
@@ -217,6 +215,10 @@ nav.right-side-toc
         span.name
           margin-top -2px
           padding 0 2px
+          max-width 200px
+          white-space nowrap
+          overflow hidden
+          text-overflow ellipsis
       .line-marker
         height 1px
         width 12px
@@ -232,6 +234,7 @@ nav.right-side-toc
     padding-top 4px
 
   .toc-button-wrap
+    pointer-events all
     width max-content
     margin-left auto
   .toc-button
