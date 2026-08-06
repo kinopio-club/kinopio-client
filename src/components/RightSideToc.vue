@@ -208,7 +208,7 @@ nav.right-side-toc
       max-height 18px
       margin-right var(--badge-distance-right)
       &.box-item
-        border-radius var(--small-entity-radius)
+        border-radius 2px
       .row
         display flex
         align-items center
