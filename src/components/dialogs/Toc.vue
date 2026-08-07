@@ -94,6 +94,9 @@ dialog.toc
   top initial
   left initial
   text-align left
+  transition bottom 0.1s ease-out
+  &.is-pinned
+    bottom 12px
   .right-pin
     transform rotate(180deg)
   section.toc-section
