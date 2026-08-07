@@ -65,9 +65,11 @@ const checkIfShouldStartPanning = (event) => {
   }
 }
 const checkIfShouldStartMomentum = () => {
-  if (panningDelta) {
+  const isPanning = Boolean(startPosition)
+  if (isPanning && panningDelta) {
     startMomentum()
   }
+  panningDelta = null
   shouldCancelPanningTimer = true
 }
 const cancelMomentum = (event) => {
