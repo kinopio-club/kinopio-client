@@ -44,6 +44,8 @@ const isVisible = computed(() => {
   return !utils.isMobile()
 })
 
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
+
 const allItems = computed(() => {
   let lines = utils.clone(lineStore.getAllLines)
   let boxes = utils.clone(boxStore.getAllBoxes)
@@ -84,11 +86,9 @@ const classes = (item) => {
   if (isBox(item)) {
     classes.push('box-item')
   }
-  if (item.id === state.hoverItemId) {
-    classes.push('button-badge')
-  }
   if (shouldShowLabel(item)) {
     classes.push('should-show-label')
+    classes.push('button-badge')
   }
   return classes
 }
@@ -96,10 +96,7 @@ const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
   state.tocLabelsIsVisible = true
 }
-
-// collapsed
-
-const shouldDisplayCollapsed = computed(() => {
+const shouldDisplayList = computed(() => {
   const distanceBetweenItems = 4
   const itemHeight = 18 + distanceBetweenItems
   const tocHeight = (allItems.value.length + 1) * itemHeight
@@ -115,7 +112,7 @@ const shouldDisplayCollapsed = computed(() => {
     minimapHeight = minimap.height
   }
   const availableHeight = globalStore.viewportHeight - header.height - footer.height - minimapHeight
-  return tocHeight > availableHeight
+  return tocHeight < availableHeight
 })
 const triggerTocIsVisible = () => {
   globalStore.triggerTocIsVisible()
@@ -126,24 +123,41 @@ const triggerTocIsVisible = () => {
 const updateHoverItem = (itemId) => {
   state.hoverItemId = itemId
 }
-const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const shouldShowLabel = (item) => {
   if (state.tocLabelsIsVisible) { return true }
   return state.hoverItemId === item.id
 }
 const toggleTocLabelsIsVisible = () => {
-  if (shouldDisplayCollapsed.value) {
-    triggerTocIsVisible()
-  } else {
+  if (shouldDisplayList.value) {
     state.tocLabelsIsVisible = !state.tocLabelsIsVisible
+  } else {
+    triggerTocIsVisible()
   }
+}
+const toggleShowLabels = (value) => {
+  state.tocLabelsIsVisible = value
 }
 </script>
 
 <template lang="pug">
 nav.right-side-toc(v-if="isVisible")
-  //- collapsed
-  template(v-if="shouldDisplayCollapsed")
+  //- full height list
+  .toc-list(
+    v-if="shouldDisplayList"
+    @mouseover="toggleShowLabels(true)"
+    @mouseleave="toggleShowLabels(false)"
+  )
+    template(v-for="item in allItems" :key="item.id")
+      .badge-wrap(@click="focusItem(item)")
+        .badge.toc-item-badge(
+          :class="classes(item)"
+          :style="{background: item.color}"
+        )
+          span.name(v-show="shouldShowLabel(item)") {{item.name}}
+          .line-marker(v-if="isLine(item)" :style="{background: item.color}")
+  //- short height list
+  //- when toc list is taller than available viewport space, replace list with button
+  .toc-short(v-else)
     .button-wrap.toc-button-wrap
       button.small-button.toc-button(
         v-if="allItems.length"
@@ -154,22 +168,6 @@ nav.right-side-toc(v-if="isVisible")
       )
         img.icon.toc(src="@/assets/toc.svg")
         .badge.info.label-badge.label-badge {{allItems.length}}
-
-  //- full height list
-  template(v-else)
-    template(v-for="item in allItems" :key="item.id")
-      .badge-wrap(
-        @click="focusItem(item)"
-        @mouseover="updateHoverItem(item.id)"
-        @mouseleave="updateHoverItem('')"
-      )
-        .badge.toc-item-badge(
-          :class="classes(item)"
-          :style="{background: item.color}"
-        )
-          .row(v-if="shouldShowLabel(item)")
-            span.name {{item.name}}
-          .line-marker(v-if="isLine(item)" :style="{background: item.color}")
 </template>
 
 <style lang="stylus">
@@ -181,70 +179,73 @@ nav.right-side-toc(v-if="isVisible")
   position fixed
   right 0
   left initial
-  top 50%
-  transform translateY(-50%)
+  top 100px
   display flex
   flex-direction column
   align-content flex-end
 
-  // collapsed
-  .label-badge
-    font-size 12px
-    height: fit-content;
-    min-height: inherit;
-    bottom -12px
-    margin 0
-    left -3px
-
   // full height list
-  .badge-wrap
+  .toc-list
     pointer-events all
+    padding-top 20px
+    padding-bottom 20px
+    padding-left 20px
+    display block
     width fit-content
     margin-left auto
-    .toc-item-badge
+    .badge-wrap
       pointer-events all
-      cursor pointer
+      width fit-content
       margin-left auto
-      width max-content
-      min-width 12px
-      height fit-content
-      min-height 12px
-      max-height 18px
-      margin-right var(--badge-distance-right)
-      &.box-item
-        border-radius 2px
-      .row
-        display flex
-        align-items center
+      .toc-item-badge
+        pointer-events all
+        cursor pointer
+        margin-left auto
+        width max-content
+        min-width 12px
+        height fit-content
+        min-height 12px
+        max-height 18px
+        margin-right var(--badge-distance-right)
+        &.box-item
+          border-radius 2px
         span.name
-          margin-top -2px
-          padding 0 2px
           max-width 200px
           white-space nowrap
           overflow hidden
           text-overflow ellipsis
-      .line-marker
-        height 1px
-        width 12px
-        position absolute
-        right calc(var(--badge-distance-right) * -1)
-        top 5px
-      &.button-badge,
-      &.should-show-label
+          display block
+          transform translateY(-2px)
         .line-marker
-          top 8px
+          height 1px
+          width 12px
+          position absolute
+          right calc(var(--badge-distance-right) * -1)
+          top 5px
+        &.button-badge,
+        &.should-show-label
+          .line-marker
+            top 8px
+    .badge-wrap + .badge-wrap
+      padding-top 4px
 
-  .badge-wrap + .badge-wrap
-    padding-top 4px
-
-  .toc-button-wrap
-    pointer-events all
-    width max-content
-    margin-left auto
-  .toc-button
-    min-width 19px
-    margin-right 8px
-    margin-top 4px
-    .icon.toc
-      transform translateY(-1px)
+  // short height list
+  .toc-short
+    .label-badge
+      font-size 12px
+      height: fit-content;
+      min-height: inherit;
+      bottom -12px
+      margin 0
+      left -3px
+    .toc-button-wrap
+      pointer-events all
+      width max-content
+      margin-left auto
+    .toc-button
+      min-width 19px
+      margin-right 8px
+      margin-top 4px
+      .icon.toc
+        transform translateY(-1px)
 </style>
