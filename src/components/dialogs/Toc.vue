@@ -8,7 +8,6 @@ import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 
 import ItemList from '@/components/ItemList.vue'
-import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -24,7 +23,6 @@ const detailsElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   updateDialogHeight()
-  updateSize()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
@@ -40,7 +38,6 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    updateSize()
   }
 })
 
@@ -49,14 +46,6 @@ const updateDialogHeight = async () => {
   await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeightFromHeader(element)
-}
-const updateSize = async () => {
-  const maxHeight = 150
-  await nextTick()
-  const element = rowElement.value
-  if (!element) { return }
-  const rect = element.getBoundingClientRect()
-  state.size = Math.min(rect.width, maxHeight)
 }
 
 // pin dialog
@@ -93,10 +82,7 @@ dialog.narrow.toc.is-pinnable#toc(
       .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
-  section
-    .row
-      MinimapCanvas(:visible="Boolean(state.size)" :size="state.size" :parentIsDialog="true")
-  section.results-section
+  section.results-section.results-section-border-top
     ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem" :shouldSortByY="true")
 </template>
 
@@ -108,10 +94,11 @@ dialog.toc
   top initial
   left initial
   text-align left
+  transition bottom 0.1s ease-out
+  &.is-pinned
+    bottom 12px
   .right-pin
     transform rotate(180deg)
   section.toc-section
     user-select none
-  section.results-section
-    max-height 50dvh
 </style>
