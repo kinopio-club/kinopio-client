@@ -1245,51 +1245,90 @@ export const useGlobalStore = defineStore('global', {
       this.itemSnapAlignGuides.y = nearestY
       this.itemSnapAlignGuides.x = nearestX
     },
-    moveItemsUpdateSnapAlignDisplayPosition (items) {
-      const globalStore = useGlobalStore()
-      if (!globalStore.shouldSnapAlign) { return items }
-      const { x, y } = globalStore.itemSnapAlignGuides
+    // the position the currently dragging item will have after this move,
+    // so that snap align offsets can be shared by all dragging items
+    getSnapAlignDraggingItemPosition ({ items, itemType, delta }) {
+      const draggingItem = this.getCurrentDraggingItem
+      if (!draggingItem) { return }
+      const movedItem = items.find(item => item.id === draggingItem.id)
+      if (movedItem) { return movedItem }
+      // dragging item is another item type, items are moved in order: card, box, list
+      const order = ['card', 'box', 'list']
+      const isAlreadyMoved = order.indexOf(this.getInteractingWithItemType) < order.indexOf(itemType)
+      let itemDelta = delta
+      if (isAlreadyMoved || !delta) {
+        itemDelta = { x: 0, y: 0 }
+      }
+      return {
+        x: Math.max(0, Math.round(draggingItem.x + itemDelta.x)),
+        y: Math.max(0, Math.round(draggingItem.y + itemDelta.y)),
+        width: draggingItem.width || draggingItem.resizeWidth,
+        height: draggingItem.height || draggingItem.resizeHeight
+      }
+    },
+    // how far the currently dragging item needs to move to snap to the align guides
+    getSnapAlignOffset ({ items, itemType, delta }) {
+      const offset = { x: null, y: null }
+      const { x, y } = this.itemSnapAlignGuides
+      if (!x && !y) { return offset }
+      const item = this.getSnapAlignDraggingItemPosition({ items, itemType, delta })
+      if (!item) { return offset }
+      const width = item.width || item.resizeWidth
+      const height = item.height || item.resizeHeight
+      // x target snap align
+      if (x) {
+        const { itemSide, guideAt } = x
+        let xDisplay
+        if (itemSide === 'left') {
+          xDisplay = guideAt
+        } else if (itemSide === 'center') {
+          xDisplay = guideAt - (width / 2)
+        } else if (itemSide === 'right') {
+          xDisplay = guideAt - width
+        }
+        const shouldSnap = Math.abs(xDisplay - item.x) < consts.itemSnapAlignThreshold
+        if (shouldSnap) {
+          offset.x = Math.round(xDisplay) - item.x
+        }
+      }
+      // y target snap align
+      if (y) {
+        const { itemSide, guideAt } = y
+        let yDisplay
+        if (itemSide === 'top') {
+          yDisplay = guideAt
+        } else if (itemSide === 'center') {
+          yDisplay = guideAt - (height / 2)
+        } else if (itemSide === 'bottom') {
+          yDisplay = guideAt - height
+        }
+        const shouldSnap = Math.abs(yDisplay - item.y) < consts.itemSnapAlignThreshold
+        if (shouldSnap) {
+          offset.y = Math.round(yDisplay) - item.y
+        }
+      }
+      return offset
+    },
+    // all dragging items share the same snap align offset, so that their
+    // relative positions are locked while the dragging item is snapped
+    moveItemsUpdateSnapAlignDisplayPosition (items, { itemType, delta } = {}) {
+      if (!this.shouldSnapAlign) { return items }
+      const offset = this.getSnapAlignOffset({ items, itemType, delta })
       items = items.map(item => {
-        const width = item.width || item.resizeWidth
-        const height = item.height || item.resizeHeight
         // x target snap align
-        if (x) {
-          const { targetSide, itemSide, snapTo, guideAt, distance } = x
-          let xDisplay
-          if (itemSide === 'left') {
-            xDisplay = guideAt
-          } else if (itemSide === 'center') {
-            xDisplay = guideAt - (width / 2)
-          } else if (itemSide === 'right') {
-            xDisplay = guideAt - width
-          }
-          const shouldSnap = Math.abs(xDisplay - item.x) < consts.itemSnapAlignThreshold
-          if (shouldSnap) {
-            item.xDisplay = Math.round(xDisplay)
-          } else {
-            item.xDisplay = null
-          }
-          item.shouldSnapAlignToXDisplay = shouldSnap
+        const shouldSnapX = offset.x !== null
+        item.xDisplay = null
+        if (shouldSnapX) {
+          item.xDisplay = Math.max(0, item.x + offset.x)
         }
+        item.shouldSnapAlignToXDisplay = shouldSnapX
         // y target snap align
-        if (y) {
-          const { targetSide, itemSide, snapTo, guideAt, distance } = y
-          let yDisplay
-          if (itemSide === 'top') {
-            yDisplay = guideAt
-          } else if (itemSide === 'center') {
-            yDisplay = guideAt - (height / 2)
-          } else if (itemSide === 'bottom') {
-            yDisplay = guideAt - height
-          }
-          const shouldSnap = Math.abs(yDisplay - item.y) < consts.itemSnapAlignThreshold
-          if (shouldSnap) {
-            item.yDisplay = Math.round(yDisplay)
-          } else {
-            item.yDisplay = null
-          }
-          item.shouldSnapAlignToYDisplay = shouldSnap
+        const shouldSnapY = offset.y !== null
+        item.yDisplay = null
+        if (shouldSnapY) {
+          item.yDisplay = Math.max(0, item.y + offset.y)
         }
+        item.shouldSnapAlignToYDisplay = shouldSnapY
         return item
       })
       return items

@@ -341,7 +341,7 @@ export const useListStore = defineStore('lists', {
           height: list.height
         }
       })
-      lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists)
+      lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists, { itemType: 'list', delta })
       this.updateLists(lists)
       this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true

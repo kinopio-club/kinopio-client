@@ -337,7 +337,7 @@ export const useBoxStore = defineStore('boxes', {
         updates.push(update)
         this.updatePageSize(update)
       })
-      updates = globalStore.moveItemsUpdateSnapAlignDisplayPosition(updates)
+      updates = globalStore.moveItemsUpdateSnapAlignDisplayPosition(updates, { itemType: 'box', delta })
       this.updateBoxes(updates)
       globalStore.boxesWereDragged = true
       const itemIds = updates.map(update => update.id)
