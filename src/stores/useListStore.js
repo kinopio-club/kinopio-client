@@ -88,6 +88,16 @@ export const useListStore = defineStore('lists', {
     getList (id) {
       return this.byId[id]
     },
+    getListsSelectableInViewport () {
+      const elements = document.querySelectorAll('.list')
+      let lists = []
+      elements.forEach(list => {
+        if (list.dataset.isVisibleInViewport === 'false') { return }
+        lists.push(list)
+      })
+      lists = lists.map(list => this.getList(list.dataset.listId))
+      return lists.filter(list => Boolean(list))
+    },
 
     // subscribe triggers
 

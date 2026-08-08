@@ -1142,7 +1142,7 @@ export const useGlobalStore = defineStore('global', {
       const listStore = useListStore()
       const cards = cardStore.getCardsSelectableInViewport()
       const boxes = boxStore.getBoxesSelectableInViewport()
-      const lists = listStore.getAllLists
+      const lists = listStore.getListsSelectableInViewport()
       return cards.concat(boxes, lists)
     },
     nearestSnapAlignGuide (checks) {
