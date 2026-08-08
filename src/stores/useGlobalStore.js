@@ -1140,14 +1140,10 @@ export const useGlobalStore = defineStore('global', {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const listStore = useListStore()
-      const itemType = this.getInteractingWithItemType
-      if (itemType === 'card') {
-        return cardStore.getCardsSelectableInViewport()
-      } else if (itemType === 'box') {
-        return boxStore.getBoxesSelectableInViewport()
-      } else if (itemType === 'list') {
-        return listStore.getAllLists
-      }
+      const cards = cardStore.getCardsSelectableInViewport()
+      const boxes = boxStore.getBoxesSelectableInViewport()
+      const lists = listStore.getAllLists
+      return cards.concat(boxes, lists)
     },
     nearestSnapAlignGuide (checks) {
       const snapThreshold = consts.itemSnapAlignThreshold
