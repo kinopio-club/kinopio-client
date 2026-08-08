@@ -130,10 +130,9 @@ const updatePositionClamped = () => {
   const rect = element.getBoundingClientRect()
   const { height, width } = rect
   const margin = 16
-  const viewportWidth = globalStore.viewportWidth + window.scrollX
-  const viewportHeight = globalStore.viewportHeight + window.scrollY
-  const maxX = viewportWidth - width - margin
-  const maxY = viewportHeight - height - margin
+  const zoom = spaceZoomDecimal.value || 1
+  const maxX = (window.scrollX + globalStore.viewportWidth - width - margin) / zoom
+  const maxY = (window.scrollY + globalStore.viewportHeight - height - margin) / zoom
   if (x < 0) {
     x = 0
   } else if (x > maxX) {
