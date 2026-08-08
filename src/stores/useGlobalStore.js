@@ -1184,12 +1184,14 @@ export const useGlobalStore = defineStore('global', {
       let nearestX = null // { targetSide, snapTo, guideAt, distance }
       let nearestY = null
       // item sides
+      const itemWidth = item.width || item.resizeWidth
+      const itemHeight = item.height || item.resizeHeight
       const itemTop = item.y
-      const itemCenterY = item.y + item.height / 2
-      const itemBottom = item.y + item.height
+      const itemCenterY = item.y + itemHeight / 2
+      const itemBottom = item.y + itemHeight
       const itemLeft = item.x
-      const itemCenterX = item.x + item.width / 2
-      const itemRight = item.x + item.width
+      const itemCenterX = item.x + itemWidth / 2
+      const itemRight = item.x + itemWidth
       // only compare nearest items
       let viewportItems = this.getSnapAlignItems()
       viewportItems = viewportItems.filter(target => {
@@ -1201,23 +1203,25 @@ export const useGlobalStore = defineStore('global', {
       // get nearest
       nearestItems.forEach(target => {
         if (target.id === item.id) { return }
+        const targetWidth = target.width || target.resizeWidth
+        const targetHeight = target.height || target.resizeHeight
         const targetTop = target.y
-        const targetCenterY = target.y + target.height / 2
-        const targetBottom = target.y + target.height
+        const targetCenterY = target.y + targetHeight / 2
+        const targetBottom = target.y + targetHeight
         const targetLeft = target.x
-        const targetCenterX = target.x + target.width / 2
-        const targetRight = target.x + target.width
+        const targetCenterX = target.x + targetWidth / 2
+        const targetRight = target.x + targetWidth
         // y sides
         let yChecks = [
           { targetSide: 'top', itemSide: 'top', itemEdge: itemTop, targetEdge: targetTop, snapTo: targetTop },
-          { targetSide: 'top', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetTop, snapTo: targetTop - item.height / 2 },
-          { targetSide: 'top', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetTop, snapTo: targetTop - item.height },
+          { targetSide: 'top', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetTop, snapTo: targetTop - itemHeight / 2 },
+          { targetSide: 'top', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetTop, snapTo: targetTop - itemHeight },
           { targetSide: 'center', itemSide: 'top', itemEdge: itemTop, targetEdge: targetCenterY, snapTo: targetCenterY },
-          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetCenterY, snapTo: targetCenterY - item.height / 2 },
-          { targetSide: 'center', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetCenterY, snapTo: targetCenterY - item.height },
+          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetCenterY, snapTo: targetCenterY - itemHeight / 2 },
+          { targetSide: 'center', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetCenterY, snapTo: targetCenterY - itemHeight },
           { targetSide: 'bottom', itemSide: 'top', itemEdge: itemTop, targetEdge: targetBottom, snapTo: targetBottom },
-          { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - item.height / 2 },
-          { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - item.height }
+          { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - itemHeight / 2 },
+          { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - itemHeight }
         ]
         yChecks = this.normalizeSnapAlignChecks(yChecks)
         const nearestYCandidate = this.nearestSnapAlignGuide(yChecks)
@@ -1227,14 +1231,14 @@ export const useGlobalStore = defineStore('global', {
         // x sides
         let xChecks = [
           { targetSide: 'left', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetLeft, snapTo: targetLeft },
-          { targetSide: 'left', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetLeft, snapTo: targetLeft - item.width / 2 },
-          { targetSide: 'left', itemSide: 'right', itemEdge: itemRight, targetEdge: targetLeft, snapTo: targetLeft - item.width },
+          { targetSide: 'left', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetLeft, snapTo: targetLeft - itemWidth / 2 },
+          { targetSide: 'left', itemSide: 'right', itemEdge: itemRight, targetEdge: targetLeft, snapTo: targetLeft - itemWidth },
           { targetSide: 'center', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetCenterX, snapTo: targetCenterX },
-          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetCenterX, snapTo: targetCenterX - item.width / 2 },
-          { targetSide: 'center', itemSide: 'right', itemEdge: itemRight, targetEdge: targetCenterX, snapTo: targetCenterX - item.width },
+          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetCenterX, snapTo: targetCenterX - itemWidth / 2 },
+          { targetSide: 'center', itemSide: 'right', itemEdge: itemRight, targetEdge: targetCenterX, snapTo: targetCenterX - itemWidth },
           { targetSide: 'right', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetRight, snapTo: targetRight },
-          { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - item.width / 2 },
-          { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - item.width }
+          { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - itemWidth / 2 },
+          { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - itemWidth }
         ]
         xChecks = this.normalizeSnapAlignChecks(xChecks)
         const nearestXCandidate = this.nearestSnapAlignGuide(xChecks)

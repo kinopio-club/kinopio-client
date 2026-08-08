@@ -350,6 +350,7 @@ export const useBoxStore = defineStore('boxes', {
         })
         this.updateBoxSnapGuides({ items: updates, cursor })
       }
+      globalStore.updateItemSnapAlignGuides()
     },
     updateBoxInfoDimensions (update) {
       const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(update.id)

@@ -338,6 +338,7 @@ export const useListStore = defineStore('lists', {
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
         boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
       }
+      globalStore.updateItemSnapAlignGuides()
       // lists = lists.map(list => this.getList(list.id))
       // boxStore.updateListSnapGuides({ items: lists, isLists: true, cursor: endCursor })
     },
