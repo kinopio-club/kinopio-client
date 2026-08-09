@@ -425,9 +425,6 @@ const cardWrapStyle = computed(() => {
     zIndex: z,
     pointerEvents
   }
-  if (props.card.isLocked) {
-    delete styles.zIndex
-  }
   if (!globalStore.currentUserIsDraggingCard) {
     styles.transform = `translate(${stickyState.stickyTranslateX}, ${stickyState.stickyTranslateY})`
     if (stickyState.isAnimationStickingStart || stickyState.isAnimationStickingEnd) {
