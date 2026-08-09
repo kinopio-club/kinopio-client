@@ -235,7 +235,7 @@ const toggleIsLocked = () => {
   items.value.filter(item => !item.listId).forEach(item => {
     const updates = { isLocked: value }
     if (value) {
-      updates.z = 1
+      updates.z = 0
     }
     updateBox(item, updates)
   })
