@@ -553,12 +553,20 @@ export const useUserStore = defineStore('user', {
       if (shouldUpdate) {
         this.cardsCreatedCount = count
         cache.updateUser({ cardsCreatedCount: count, cardsCreatedCountRaw: count })
+        this.checkIfShouldNotifyCardsCreatedIsOverLimit()
       }
       // update raw vanity count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } })
       // update count
       if (!shouldUpdate) { return }
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
+    },
+    checkIfShouldNotifyCardsCreatedIsOverLimit () {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      if (!globalStore.notifyCardsCreatedIsOverLimit) { return }
+      if (spaceStore.getShouldPreventAddCard) { return }
+      globalStore.updateNotifyCardsCreatedIsOverLimit(false)
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }
