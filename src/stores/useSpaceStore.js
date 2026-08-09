@@ -524,7 +524,8 @@ export const useSpaceStore = defineStore('space', {
       isLoadingRemoteSpace = false
       space = utils.migrateConnectionTypes(space)
       if (!globalStore.isEmbedMode) {
-        globalStore.spaceZoomPercent = 100
+        globalStore.spaceZoomPercent = consts.spaceZoom.default
+        globalStore.spaceZoomOffset = { x: 0, y: 0 }
       }
       globalStore.isAddPage = false
       const cachedSpace = await cache.space(space.id) || space
@@ -728,6 +729,7 @@ export const useSpaceStore = defineStore('space', {
       const themeStore = useThemeStore()
       const user = userStore.getUserAllState
       globalStore.triggerSpaceZoomReset()
+      window.scrollTo(0, 0)
       let space = utils.clone(newSpace)
       space = utils.resetSpaceMeta({ space, user })
       space.name = name || utils.newSpaceName()

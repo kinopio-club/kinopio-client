@@ -162,7 +162,7 @@ const handleShortcutsOnKeyUp = (event) => {
     globalStore.triggerSpaceDetailsInfoIsVisible()
   // c
   } else if (keyC && (isSpaceScope || isTocDialogScope)) {
-    globalStore.triggerTocIsVisible()
+    globalStore.triggerTocLabelsIsVisible()
   // m
   } else if (keyM && isSpaceScope) {
     const value = !userStore.shouldShowMinimap
@@ -320,7 +320,6 @@ const handleShortcutsOnKeyDown = (event) => {
     browserZoomLevel = Math.max(0, browserZoomLevel - 1)
     if (shouldNativeZoom) { return }
     event.preventDefault()
-    globalStore.triggerCenterZoomOrigin()
     globalStore.zoomSpace({ shouldZoomOut: true, speed: 10 })
   // Zoom In
   } else if (isMeta && key === '=') {
@@ -330,7 +329,6 @@ const handleShortcutsOnKeyDown = (event) => {
       return
     }
     event.preventDefault()
-    globalStore.triggerCenterZoomOrigin()
     globalStore.zoomSpace({ shouldZoomIn: true, speed: 10 })
     // Toggle Zoom Out
   } else if (keyZ && isSpaceScope) {

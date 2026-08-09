@@ -88,7 +88,7 @@ watch(() => globalStore.isPresentationMode, (value, prevValue) => {
 const state = reactive({
   position: {},
   isHiddenOnTouch: false,
-  jumpToIsVisible: false,
+  tocIsVisible: false,
   isScrolled: false
 })
 
@@ -179,10 +179,10 @@ const togglePresentationMode = () => {
 // jumpTo
 
 const hideToc = () => {
-  state.jumpToIsVisible = false
+  state.tocIsVisible = false
 }
 const toggleTocIsVisible = () => {
-  state.jumpToIsVisible = !state.jumpToIsVisible
+  state.tocIsVisible = !state.tocIsVisible
 }
 
 // minimap
@@ -292,22 +292,14 @@ const updatePositionInVisualViewport = () => {
         title="Focus/Presentation Mode (P)"
       )
         img.icon.presentation(src="@/assets/presentation.svg")
-    //- jumpTo minimap
-    .segmented-buttons
-      button.small-button(
-        @click.stop="toggleTocIsVisible"
-        @touchend.stop
-        :class="{'hidden': state.isHiddenOnTouch, 'active': state.jumpToIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-        title="Toggle TOC (C)"
-      )
-        img.icon.toc(src="@/assets/toc.svg")
-      button.small-button(
-        @click.stop="toggleMinimap"
+    //- minimap
+    .button-wrap.footer-button-wrap(@click.stop="toggleMinimap")
+      button.small-button.minimap-button(
         :class="{'hidden': state.isHiddenOnTouch, 'active': minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
         title="Toggle Minimap (M)"
       )
         img.icon.minimap(src="@/assets/minimap.svg")
-    Toc(:visible="state.jumpToIsVisible")
+    Toc(:visible="state.tocIsVisible")
 </template>
 
 <style lang="stylus">
@@ -365,16 +357,12 @@ const updatePositionInVisualViewport = () => {
     padding-right 0
     translate 0px 3px
     display inline-block
-    > button
-      font-size 1rem
+    .presentation-mode-button
       padding-left 6px
       padding-right 6px
 
   .footer-button-wrap + .footer-button-wrap
     margin-left 4px
-
-  .icon.toc
-    vertical-align 1px
 
   .embed-label
     left 8px
@@ -399,20 +387,6 @@ footer
     dialog
       top initial
       bottom calc(100% - 8px)
-    // > section
-    //   display flex
-    //   &:last-child
-    //     margin-top 6px
-    //   > .button-wrap
-    //     pointer-events all
-    //     margin-left 6px
-    //     display inline-block
-    //     &:first-child
-    //       margin-left 0
-
-  .segmented-buttons
-    .down-arrow
-      padding 0
 
   button
     .icon.down-arrow

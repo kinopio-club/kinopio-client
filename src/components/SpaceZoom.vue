@@ -5,7 +5,6 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 
 import Slider from '@/components/Slider.vue'
 import consts from '@/consts.js'
-import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 
@@ -16,10 +15,7 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'triggerSpaceZoomReset') {
-        updateSpaceZoomFromTrigger(max.value)
-        window.scrollTo(0, 0)
-      } else if (name === 'triggerCenterZoomOrigin') {
-        centerZoomOrigin()
+        resetSpaceZoom()
       } else if (name === 'triggerSpaceZoomOutMax') {
         zoomOutOrInMax()
       }
@@ -39,8 +35,9 @@ const state = reactive({
   animateJiggleLeft: false
 })
 
-const max = computed(() => consts.spaceZoom.max) // 100
+const max = computed(() => consts.spaceZoom.max) // 180
 const min = computed(() => consts.spaceZoom.min) // 20
+const defaultValue = computed(() => consts.spaceZoom.default) // 100
 const spaceZoomPercent = computed(() => globalStore.spaceZoomPercent)
 const minKeyboardShortcut = computed(() => 'Z')
 
@@ -54,46 +51,29 @@ const closeAllDialogs = () => {
 
 // zoom
 
-const updateSpaceZoomFromTrigger = (percent) => {
-  if (percent > max.value) {
-    state.animateJiggleRight = true
-  } else if (percent < min.value) {
-    state.animateJiggleLeft = true
-  }
-  percent = Math.max(percent, min.value)
-  percent = Math.min(percent, max.value)
-  globalStore.spaceZoomPercent = percent
-}
-const updateSpaceZoomPercent = (percent) => {
-  percent = percent / 100
-  percent = Math.round(min.value + (max.value - min.value) * percent)
-  globalStore.spaceZoomPercent = percent
-}
-const centerZoomOrigin = () => {
-  const scroll = { x: window.scrollX, y: window.scrollY }
-  const origin = {
-    x: scroll.x + (globalStore.viewportWidth / 6),
-    y: scroll.y + (globalStore.viewportHeight / 6)
-  }
-  globalStore.updateZoomOrigin(origin)
+const resetSpaceZoom = async () => {
+  await globalStore.zoomSpaceTo({ percent: defaultValue.value })
+  globalStore.spaceZoomOffset = { x: 0, y: 0 }
 }
 const zoomOutOrInMax = () => {
-  centerZoomOrigin()
-  if (globalStore.spaceZoomPercent === min.value) {
-    globalStore.spaceZoomPercent = max.value
-  } else {
-    globalStore.spaceZoomPercent = min.value
+  const isMin = globalStore.spaceZoomPercent === min.value
+  const isMax = globalStore.spaceZoomPercent === max.value
+  const isMiddle = !isMin && !isMax
+  if (isMiddle) {
+    globalStore.zoomSpaceTo({ percent: min.value })
+  } else if (isMin) {
+    globalStore.zoomSpaceTo({ percent: max.value })
+  } else if (isMax) {
+    globalStore.zoomSpaceTo({ percent: defaultValue.value })
   }
 }
 
 // slider
 
 const updateSpaceZoom = (percent) => {
-  centerZoomOrigin()
-  updateSpaceZoomPercent(percent)
-}
-const resetZoom = () => {
-  globalStore.zoomOrigin = { x: 0, y: 0 }
+  percent = percent / 100
+  percent = Math.round(min.value + (max.value - min.value) * percent)
+  globalStore.zoomSpaceTo({ percent })
 }
 const removeAnimations = () => {
   state.animateJiggleRight = false
@@ -106,15 +86,16 @@ const removeAnimations = () => {
 .space-zoom(v-if="!isMobileOrTouch")
   Slider(
     @updatePlayhead="updateSpaceZoom"
-    @resetPlayhead="resetZoom"
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"
+    :defaultValue="defaultValue"
     :animateJiggleRight="state.animateJiggleRight"
     :animateJiggleLeft="state.animateJiggleLeft"
     @removeAnimations="removeAnimations"
     @pointerdown="closeAllDialogs"
     :minKeyboardShortcut="minKeyboardShortcut"
+    :verticalTickMiddle="27"
   )
 </template>
 
@@ -122,4 +103,5 @@ const removeAnimations = () => {
 .space-zoom
   display block
   width 100px
+  margin-top -2px
 </style>

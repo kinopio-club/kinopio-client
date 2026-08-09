@@ -194,6 +194,11 @@ const closeDialogsAndEmit = () => {
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
+const handleEnterKey = (event) => {
+  if (utils.isCompositionKeyboardEvent(event)) { return }
+  event.preventDefault()
+  closeAllDialogs()
+}
 
 // group
 
@@ -266,7 +271,7 @@ const removeSpaceGroup = (group) => {
         rows="1"
         placeholder="name"
         v-model="spaceName"
-        @keydown.enter.stop.prevent="closeAllDialogs"
+        @keydown.enter.stop="handleEnterKey"
         @click.stop="closeDialogsAndEmit"
       )
       .textarea-loader(v-if="isLoadingSpace")

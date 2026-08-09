@@ -22,6 +22,8 @@ import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vu
 
 import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
+import { colord, extend } from 'colord'
+import mixPlugin from 'colord/plugins/mix'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -128,10 +130,9 @@ const updatePositionClamped = () => {
   const rect = element.getBoundingClientRect()
   const { height, width } = rect
   const margin = 16
-  const viewportWidth = globalStore.viewportWidth + window.scrollX
-  const viewportHeight = globalStore.viewportHeight + window.scrollY
-  const maxX = viewportWidth - width - margin
-  const maxY = viewportHeight - height - margin
+  const zoom = spaceZoomDecimal.value || 1
+  const maxX = (window.scrollX + globalStore.viewportWidth - width - margin) / zoom
+  const maxY = (window.scrollY + globalStore.viewportHeight - height - margin) / zoom
   if (x < 0) {
     x = 0
   } else if (x > maxX) {
@@ -225,6 +226,15 @@ const itemsIsConnectedTogether = computed(() => {
   })
   return isConnected
 })
+const backgroundColor = computed(() => {
+  let color = userColor.value
+  if (isThemeDarkAndUserColorLight.value) {
+    color = colord(color).mix('rgba(0,0,0,0.3)').toHex() // dark tinted
+  } else {
+    color = colord(color).alpha(0.9).toRgbString()
+  }
+  return color
+})
 const styles = computed(() => {
   const position = globalStore.multipleSelectedActionsPosition
   let zoom = spaceCounterZoomDecimal.value
@@ -232,7 +242,7 @@ const styles = computed(() => {
     zoom = 1 / utils.visualViewport().scale
   }
   return {
-    backgroundColor: userColor.value,
+    backgroundColor: backgroundColor.value,
     left: position.x + 'px',
     top: position.y + 'px',
     transform: `scale(${zoom})`
@@ -589,7 +599,6 @@ dialog.narrow.multiple-selected-actions(
   @pointerup.stop="toggleDraggingDialog(false)"
 )
   .drag-area
-  .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
     button.small-button.inline-button
       img.icon.cancel(src="@/assets/add.svg")
@@ -615,7 +624,7 @@ dialog.narrow.multiple-selected-actions(
       :visible="cardsIsSelected && canEditAll.all"
       :cards="cards"
       @closeDialogs="closeDialogs"
-      :backgroundColor="userColor"
+      :backgroundColor="backgroundColor"
       :labelIsVisible="true"
     )
     //- box options
@@ -624,7 +633,7 @@ dialog.narrow.multiple-selected-actions(
       :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected"
       :boxes="boxes"
       @closeDialogs="closeDialogs"
-      :backgroundColor="userColor"
+      :backgroundColor="backgroundColor"
       :collapseExpandIsVisible="boxCollapseExpandIsVisible"
       @scrollIntoView="scrollIntoView"
     )
@@ -634,7 +643,7 @@ dialog.narrow.multiple-selected-actions(
       :connections="editableConnections"
       @closeDialogs="closeDialogs"
       :canEditAll="canEditAll"
-      :backgroundColor="userColor"
+      :backgroundColor="backgroundColor"
       :label="moreLineOptionsLabel"
       :collapseExpandIsVisible="connectionCollapseExpandIsVisible"
       @scrollIntoView="scrollIntoView"
@@ -644,7 +653,7 @@ dialog.narrow.multiple-selected-actions(
       :visible="(shouldShowMultipleSelectedListActions || onlyListsIsSelected) && listsIsSelected"
       :lists="lists"
       @closeDialogs="closeDialogs"
-      :backgroundColor="userColor"
+      :backgroundColor="backgroundColor"
       label="LIST"
       :collapseExpandIsVisible="listCollapseExpandIsVisible"
       @scrollIntoView="scrollIntoView"

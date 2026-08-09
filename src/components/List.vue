@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useListStore } from '@/stores/useListStore'
@@ -36,7 +36,13 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
+let observer
+
+const listElement = ref(null)
+
 onMounted(() => {
+  initViewportObserver()
+
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
@@ -48,7 +54,11 @@ onMounted(() => {
     globalActionUnsubscribe()
   }
 })
+onUpdated(() => {
+  initViewportObserver()
+})
 onBeforeUnmount(() => {
+  removeViewportObserver()
   unsubscribes()
 })
 
@@ -60,12 +70,45 @@ const state = reactive({
   isDraggingCardOverList: false,
   isLocking: false,
   lockingPercent: 0,
-  lockingAlpha: 0
-  // isVisibleInViewport: false,
+  lockingAlpha: 0,
+  isVisibleInViewport: false
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const userColor = computed(() => userStore.color)
+
+// is visible in viewport, perf, should render
+
+const initViewportObserver = async () => {
+  removeViewportObserver()
+  await nextTick()
+  try {
+    const callback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          state.isVisibleInViewport = true
+        } else {
+          state.isVisibleInViewport = false
+        }
+      })
+    }
+    const target = listElement.value
+    if (!target) { return }
+    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer.observe(target)
+  } catch (error) {
+    console.error('🚒 listElement initViewportObserver', error)
+  }
+}
+const removeViewportObserver = () => {
+  const target = listElement.value
+  if (!observer) { return }
+  observer.unobserve(target)
+}
+const shouldRender = computed(() => {
+  if (globalStore.disableViewportOptimizations) { return true }
+  return state.isVisibleInViewport
+})
 
 // cards
 
@@ -580,6 +623,8 @@ const clearFocus = () => {
   :data-width="props.list.resizeWidth"
   :data-height="props.list.height"
   :data-is-collapsed="props.list.isCollapsed"
+  :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :data-should-render="shouldRender"
   :style="listStyles"
   :class="listClasses"
   ref="listElement"
@@ -587,7 +632,7 @@ const clearFocus = () => {
   Frames(v-if="props.list.isCollapsed" :item="props.list")
   teleport(to="#list-backgrounds")
     .list-background(
-      v-if="!props.list.isCollapsed"
+      v-if="!props.list.isCollapsed && shouldRender"
       :data-list-id="props.list.id"
       :style="listBackgroundStyles"
       :class="listClasses"
@@ -618,7 +663,9 @@ const clearFocus = () => {
         )
 
   .list-info(
+    v-if="shouldRender"
     :data-list-id="props.list.id"
+    :data-is-visible-in-viewport="state.isVisibleInViewport"
     :class="infoClasses"
     :style="infoStyles"
     tabindex="0"

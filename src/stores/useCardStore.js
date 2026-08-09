@@ -854,7 +854,7 @@ export const useCardStore = defineStore('cards', {
         }
       })
 
-      cards = globalStore.moveItemsUpdateSnapAlignDisplayPosition(cards)
+      cards = globalStore.moveItemsUpdateSnapAlignDisplayPosition(cards, { itemType: 'card', delta })
       this.updatePageSize(cards[0])
       this.updateCards(cards)
       globalStore.cardsWereDragged = true

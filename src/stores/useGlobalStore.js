@@ -59,9 +59,9 @@ export const useGlobalStore = defineStore('global', {
     spaceComponentIsMounted: false,
 
     // zoom and scroll
-    spaceZoomPercent: 100,
+    spaceZoomPercent: consts.spaceZoom.default,
+    spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
     pinchCounterZoomDecimal: 1,
-    zoomOrigin: { x: 0, y: 0 },
     isPinchZooming: false,
     isTouchScrolling: false,
 
@@ -357,9 +357,8 @@ export const useGlobalStore = defineStore('global', {
     },
     getZoomTransform () {
       const zoom = this.getSpaceZoomDecimal
-      const origin = this.zoomOrigin
-      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      return transform
+      const offset = this.spaceZoomOffset
+      return `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`
     },
     getIsInteractingWithItem () {
       return (
@@ -493,7 +492,7 @@ export const useGlobalStore = defineStore('global', {
       }
     },
     updateSpaceBorderRadiusStyles (styles) {
-      const isZoomed = this.spaceZoomPercent !== 100
+      const isZoomed = this.spaceZoomPercent !== consts.spaceZoom.default
       const isMobile = consts.isSecureAppContext || utils.isMobile()
       const radius = parseInt(utils.cssVariable('entity-radius')) * 3
       if (isZoomed) {
@@ -573,11 +572,11 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateUrlPreviewComplete (cardId) {},
     triggerRemovedIsVisible () {},
     triggerNoteIsVisible () {},
+    triggerTocLabelsIsVisible () {},
     triggerTocIsVisible () {},
     triggerClearAllSpaceFilters () {},
     triggerScrollUserDetailsIntoView () {},
     triggerUpdateLockedItemButtonPositionCardId (cardId) {},
-    triggerCenterZoomOrigin () {},
     triggerRemoveCardFromCardList (card) {},
     triggerUpdateTheme () {},
     triggerUserIsLoaded () {},
@@ -1141,14 +1140,10 @@ export const useGlobalStore = defineStore('global', {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
       const listStore = useListStore()
-      const itemType = this.getInteractingWithItemType
-      if (itemType === 'card') {
-        return cardStore.getCardsSelectableInViewport()
-      } else if (itemType === 'box') {
-        return boxStore.getBoxesSelectableInViewport()
-      } else if (itemType === 'list') {
-        return listStore.getAllLists
-      }
+      const cards = cardStore.getCardsSelectableInViewport()
+      const boxes = boxStore.getBoxesSelectableInViewport()
+      const lists = listStore.getListsSelectableInViewport()
+      return cards.concat(boxes, lists)
     },
     nearestSnapAlignGuide (checks) {
       const snapThreshold = consts.itemSnapAlignThreshold
@@ -1185,12 +1180,14 @@ export const useGlobalStore = defineStore('global', {
       let nearestX = null // { targetSide, snapTo, guideAt, distance }
       let nearestY = null
       // item sides
+      const itemWidth = item.width || item.resizeWidth
+      const itemHeight = item.height || item.resizeHeight
       const itemTop = item.y
-      const itemCenterY = item.y + item.height / 2
-      const itemBottom = item.y + item.height
+      const itemCenterY = item.y + itemHeight / 2
+      const itemBottom = item.y + itemHeight
       const itemLeft = item.x
-      const itemCenterX = item.x + item.width / 2
-      const itemRight = item.x + item.width
+      const itemCenterX = item.x + itemWidth / 2
+      const itemRight = item.x + itemWidth
       // only compare nearest items
       let viewportItems = this.getSnapAlignItems()
       viewportItems = viewportItems.filter(target => {
@@ -1202,23 +1199,25 @@ export const useGlobalStore = defineStore('global', {
       // get nearest
       nearestItems.forEach(target => {
         if (target.id === item.id) { return }
+        const targetWidth = target.width || target.resizeWidth
+        const targetHeight = target.height || target.resizeHeight
         const targetTop = target.y
-        const targetCenterY = target.y + target.height / 2
-        const targetBottom = target.y + target.height
+        const targetCenterY = target.y + targetHeight / 2
+        const targetBottom = target.y + targetHeight
         const targetLeft = target.x
-        const targetCenterX = target.x + target.width / 2
-        const targetRight = target.x + target.width
+        const targetCenterX = target.x + targetWidth / 2
+        const targetRight = target.x + targetWidth
         // y sides
         let yChecks = [
           { targetSide: 'top', itemSide: 'top', itemEdge: itemTop, targetEdge: targetTop, snapTo: targetTop },
-          { targetSide: 'top', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetTop, snapTo: targetTop - item.height / 2 },
-          { targetSide: 'top', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetTop, snapTo: targetTop - item.height },
+          { targetSide: 'top', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetTop, snapTo: targetTop - itemHeight / 2 },
+          { targetSide: 'top', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetTop, snapTo: targetTop - itemHeight },
           { targetSide: 'center', itemSide: 'top', itemEdge: itemTop, targetEdge: targetCenterY, snapTo: targetCenterY },
-          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetCenterY, snapTo: targetCenterY - item.height / 2 },
-          { targetSide: 'center', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetCenterY, snapTo: targetCenterY - item.height },
+          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetCenterY, snapTo: targetCenterY - itemHeight / 2 },
+          { targetSide: 'center', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetCenterY, snapTo: targetCenterY - itemHeight },
           { targetSide: 'bottom', itemSide: 'top', itemEdge: itemTop, targetEdge: targetBottom, snapTo: targetBottom },
-          { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - item.height / 2 },
-          { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - item.height }
+          { targetSide: 'bottom', itemSide: 'center', itemEdge: itemCenterY, targetEdge: targetBottom, snapTo: targetBottom - itemHeight / 2 },
+          { targetSide: 'bottom', itemSide: 'bottom', itemEdge: itemBottom, targetEdge: targetBottom, snapTo: targetBottom - itemHeight }
         ]
         yChecks = this.normalizeSnapAlignChecks(yChecks)
         const nearestYCandidate = this.nearestSnapAlignGuide(yChecks)
@@ -1228,14 +1227,14 @@ export const useGlobalStore = defineStore('global', {
         // x sides
         let xChecks = [
           { targetSide: 'left', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetLeft, snapTo: targetLeft },
-          { targetSide: 'left', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetLeft, snapTo: targetLeft - item.width / 2 },
-          { targetSide: 'left', itemSide: 'right', itemEdge: itemRight, targetEdge: targetLeft, snapTo: targetLeft - item.width },
+          { targetSide: 'left', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetLeft, snapTo: targetLeft - itemWidth / 2 },
+          { targetSide: 'left', itemSide: 'right', itemEdge: itemRight, targetEdge: targetLeft, snapTo: targetLeft - itemWidth },
           { targetSide: 'center', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetCenterX, snapTo: targetCenterX },
-          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetCenterX, snapTo: targetCenterX - item.width / 2 },
-          { targetSide: 'center', itemSide: 'right', itemEdge: itemRight, targetEdge: targetCenterX, snapTo: targetCenterX - item.width },
+          { targetSide: 'center', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetCenterX, snapTo: targetCenterX - itemWidth / 2 },
+          { targetSide: 'center', itemSide: 'right', itemEdge: itemRight, targetEdge: targetCenterX, snapTo: targetCenterX - itemWidth },
           { targetSide: 'right', itemSide: 'left', itemEdge: itemLeft, targetEdge: targetRight, snapTo: targetRight },
-          { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - item.width / 2 },
-          { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - item.width }
+          { targetSide: 'right', itemSide: 'center', itemEdge: itemCenterX, targetEdge: targetRight, snapTo: targetRight - itemWidth / 2 },
+          { targetSide: 'right', itemSide: 'right', itemEdge: itemRight, targetEdge: targetRight, snapTo: targetRight - itemWidth }
         ]
         xChecks = this.normalizeSnapAlignChecks(xChecks)
         const nearestXCandidate = this.nearestSnapAlignGuide(xChecks)
@@ -1246,51 +1245,90 @@ export const useGlobalStore = defineStore('global', {
       this.itemSnapAlignGuides.y = nearestY
       this.itemSnapAlignGuides.x = nearestX
     },
-    moveItemsUpdateSnapAlignDisplayPosition (items) {
-      const globalStore = useGlobalStore()
-      if (!globalStore.shouldSnapAlign) { return items }
-      const { x, y } = globalStore.itemSnapAlignGuides
+    // the position the currently dragging item will have after this move,
+    // so that snap align offsets can be shared by all dragging items
+    getSnapAlignDraggingItemPosition ({ items, itemType, delta }) {
+      const draggingItem = this.getCurrentDraggingItem
+      if (!draggingItem) { return }
+      const movedItem = items.find(item => item.id === draggingItem.id)
+      if (movedItem) { return movedItem }
+      // dragging item is another item type, items are moved in order: card, box, list
+      const order = ['card', 'box', 'list']
+      const isAlreadyMoved = order.indexOf(this.getInteractingWithItemType) < order.indexOf(itemType)
+      let itemDelta = delta
+      if (isAlreadyMoved || !delta) {
+        itemDelta = { x: 0, y: 0 }
+      }
+      return {
+        x: Math.max(0, Math.round(draggingItem.x + itemDelta.x)),
+        y: Math.max(0, Math.round(draggingItem.y + itemDelta.y)),
+        width: draggingItem.width || draggingItem.resizeWidth,
+        height: draggingItem.height || draggingItem.resizeHeight
+      }
+    },
+    // how far the currently dragging item needs to move to snap to the align guides
+    getSnapAlignOffset ({ items, itemType, delta }) {
+      const offset = { x: null, y: null }
+      const { x, y } = this.itemSnapAlignGuides
+      if (!x && !y) { return offset }
+      const item = this.getSnapAlignDraggingItemPosition({ items, itemType, delta })
+      if (!item) { return offset }
+      const width = item.width || item.resizeWidth
+      const height = item.height || item.resizeHeight
+      // x target snap align
+      if (x) {
+        const { itemSide, guideAt } = x
+        let xDisplay
+        if (itemSide === 'left') {
+          xDisplay = guideAt
+        } else if (itemSide === 'center') {
+          xDisplay = guideAt - (width / 2)
+        } else if (itemSide === 'right') {
+          xDisplay = guideAt - width
+        }
+        const shouldSnap = Math.abs(xDisplay - item.x) < consts.itemSnapAlignThreshold
+        if (shouldSnap) {
+          offset.x = Math.round(xDisplay) - item.x
+        }
+      }
+      // y target snap align
+      if (y) {
+        const { itemSide, guideAt } = y
+        let yDisplay
+        if (itemSide === 'top') {
+          yDisplay = guideAt
+        } else if (itemSide === 'center') {
+          yDisplay = guideAt - (height / 2)
+        } else if (itemSide === 'bottom') {
+          yDisplay = guideAt - height
+        }
+        const shouldSnap = Math.abs(yDisplay - item.y) < consts.itemSnapAlignThreshold
+        if (shouldSnap) {
+          offset.y = Math.round(yDisplay) - item.y
+        }
+      }
+      return offset
+    },
+    // all dragging items share the same snap align offset, so that their
+    // relative positions are locked while the dragging item is snapped
+    moveItemsUpdateSnapAlignDisplayPosition (items, { itemType, delta } = {}) {
+      if (!this.shouldSnapAlign) { return items }
+      const offset = this.getSnapAlignOffset({ items, itemType, delta })
       items = items.map(item => {
-        const width = item.width || item.resizeWidth
-        const height = item.height || item.resizeHeight
         // x target snap align
-        if (x) {
-          const { targetSide, itemSide, snapTo, guideAt, distance } = x
-          let xDisplay
-          if (itemSide === 'left') {
-            xDisplay = guideAt
-          } else if (itemSide === 'center') {
-            xDisplay = guideAt - (width / 2)
-          } else if (itemSide === 'right') {
-            xDisplay = guideAt - width
-          }
-          const shouldSnap = Math.abs(xDisplay - item.x) < consts.itemSnapAlignThreshold
-          if (shouldSnap) {
-            item.xDisplay = Math.round(xDisplay)
-          } else {
-            item.xDisplay = null
-          }
-          item.shouldSnapAlignToXDisplay = shouldSnap
+        const shouldSnapX = offset.x !== null
+        item.xDisplay = null
+        if (shouldSnapX) {
+          item.xDisplay = Math.max(0, item.x + offset.x)
         }
+        item.shouldSnapAlignToXDisplay = shouldSnapX
         // y target snap align
-        if (y) {
-          const { targetSide, itemSide, snapTo, guideAt, distance } = y
-          let yDisplay
-          if (itemSide === 'top') {
-            yDisplay = guideAt
-          } else if (itemSide === 'center') {
-            yDisplay = guideAt - (height / 2)
-          } else if (itemSide === 'bottom') {
-            yDisplay = guideAt - height
-          }
-          const shouldSnap = Math.abs(yDisplay - item.y) < consts.itemSnapAlignThreshold
-          if (shouldSnap) {
-            item.yDisplay = Math.round(yDisplay)
-          } else {
-            item.yDisplay = null
-          }
-          item.shouldSnapAlignToYDisplay = shouldSnap
+        const shouldSnapY = offset.y !== null
+        item.yDisplay = null
+        if (shouldSnapY) {
+          item.yDisplay = Math.max(0, item.y + offset.y)
         }
+        item.shouldSnapAlignToYDisplay = shouldSnapY
         return item
       })
       return items
@@ -2197,30 +2235,62 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    updateZoomOrigin (origin) {
-      utils.typeCheck({ value: origin, type: 'object' })
-      const prevOrigin = this.zoomOrigin
-      const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || (prevOrigin.x === 0 && prevOrigin.y === 0)
-      if (zoomOriginIsZero) {
-        this.zoomOrigin = origin
-      } else {
-        origin = utils.pointBetweenTwoPoints(prevOrigin, origin)
-        this.zoomOrigin = origin
+    async zoomSpaceTo ({ percent, origin }) {
+      percent = Math.max(percent, consts.spaceZoom.min)
+      percent = Math.min(percent, consts.spaceZoom.max)
+      const prevZoom = this.getSpaceZoomDecimal
+      const zoom = percent / 100
+      if (zoom === prevZoom) { return }
+      const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
+      origin = origin || viewportCenter
+      const offset = this.spaceZoomOffset
+      // space point currently under the origin
+      const point = {
+        x: (window.scrollX + origin.x - offset.x) / prevZoom,
+        y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
+      // the scroll that keeps point under the origin
+      // when it would be negative, grow the outside space offset instead, so the space shifts away from the top left
+      // when it is positive, shrink the offset back down first
+      const newOffset = { x: offset.x, y: offset.y }
+      const scroll = {
+        x: (point.x * zoom) + offset.x - origin.x,
+        y: (point.y * zoom) + offset.y - origin.y
+      }
+      const axes = ['x', 'y']
+      axes.forEach(axis => {
+        if (scroll[axis] < 0) {
+          newOffset[axis] = offset[axis] - scroll[axis]
+          scroll[axis] = 0
+        } else {
+          const delta = Math.min(offset[axis], scroll[axis])
+          newOffset[axis] = offset[axis] - delta
+          scroll[axis] = scroll[axis] - delta
+        }
+      })
+      // at >100% there should be no outside space margin
+      if (percent >= consts.spaceZoom.default) {
+        axes.forEach(axis => {
+          scroll[axis] = Math.max(scroll[axis] - newOffset[axis], 0)
+          newOffset[axis] = 0
+        })
+      }
+      this.spaceZoomPercent = percent
+      this.spaceZoomOffset = newOffset
+      // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
+      await nextTick()
+      window.scrollTo(scroll.x, scroll.y)
     },
-    zoomSpace ({ shouldZoomIn, shouldZoomOut, speed }) {
-      let percent
-      const currentPercent = this.spaceZoomPercent
+    zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
+      let percent = this.spaceZoomPercent
       if (shouldZoomIn) {
-        percent = currentPercent + speed
+        percent = percent + speed
       } else if (shouldZoomOut) {
-        percent = currentPercent - speed
+        percent = percent - speed
       } else {
         return
       }
-      percent = Math.max(percent, consts.spaceZoom.min)
-      percent = Math.min(percent, consts.spaceZoom.max)
-      this.spaceZoomPercent = percent
+      return this.zoomSpaceTo({ percent, origin })
     },
 
     // toolbar mode

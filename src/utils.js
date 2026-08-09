@@ -28,6 +28,18 @@ dayjs.extend(isToday)
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
+let isComposionEvent = false
+let compositionEventEndTime = 0
+if (typeof window !== 'undefined') {
+  window.addEventListener('compositionstart', () => {
+    isComposionEvent = true
+  })
+  window.addEventListener('compositionend', (event) => {
+    isComposionEvent = false
+    compositionEventEndTime = event.timeStamp
+  })
+}
+
 const uuidLength = 21
 const randomRGBA = (alpha) => {
   const hex = randomColor({ hue: 'random', luminosity: 'random' })
@@ -207,29 +219,19 @@ export default {
   },
   cursorPositionInSpace (event, position) {
     position = position || this.cursorPositionInPage(event)
-    // #space
+    if (!position) { return }
     const space = document.getElementById('space')
     if (!space) { return }
     const spaceRect = space.getBoundingClientRect()
-    position = {
-      x: position.x - spaceRect.x,
-      y: position.y - spaceRect.y
+    const client = {
+      x: position.x - window.scrollX,
+      y: position.y - window.scrollY
     }
-    // #app
-    const app = document.getElementById('app')
-    const appRect = app.getBoundingClientRect()
-    position = {
-      x: position.x + appRect.x,
-      y: position.y + appRect.y
+    const zoom = this.spaceZoomDecimal() || 1
+    return {
+      x: Math.round((client.x - spaceRect.x) / zoom),
+      y: Math.round((client.y - spaceRect.y) / zoom)
     }
-    // console.log('app',position, appRect)
-    // zoom
-    const zoom = this.spaceCounterZoomDecimal() || 1
-    position = {
-      x: Math.round(position.x * zoom),
-      y: Math.round(position.y * zoom)
-    }
-    return position
   },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
@@ -251,19 +253,10 @@ export default {
   outsideSpaceOffset () {
     const space = document.getElementById('space')
     if (!space) { return }
-    const zoom = this.spaceCounterZoomDecimal() || 1
-    let spaceRect = space.getBoundingClientRect()
-    spaceRect = {
-      x: Math.round(spaceRect.x * zoom),
-      y: Math.round(spaceRect.y * zoom),
-      width: Math.round(spaceRect.width),
-      height: Math.round(spaceRect.height)
-    }
-    const app = document.getElementById('app')
-    const appRect = app.getBoundingClientRect()
+    const spaceRect = space.getBoundingClientRect()
     return {
-      x: Math.round(spaceRect.x - appRect.x),
-      y: Math.round(spaceRect.y - appRect.y)
+      x: Math.round(spaceRect.x + window.scrollX),
+      y: Math.round(spaceRect.y + window.scrollY)
     }
   },
   updatePositionWithSpaceOffset (position) {
@@ -576,6 +569,18 @@ export default {
     if (event.touches) {
       return event.touches.length > 1
     }
+  },
+  // non-latin (IME) input for japanese kanji
+  isCompositionKeyboardEvent (event) {
+    if (isComposionEvent) { return true }
+    if (event.isComposing) { return true }
+    // older chromium and android fallback
+    if (event.keyCode === 229) { return true }
+    // safari fallback
+    if (compositionEventEndTime && event.timeStamp) {
+      return Math.abs(event.timeStamp - compositionEventEndTime) < 100
+    }
+    return false
   },
   focusTextarea (element) {
     if (!element) { return }
@@ -1517,11 +1522,13 @@ export default {
   },
   coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {
     let zoom = this.spaceCounterZoomDecimal() || 1
+    let spaceOffset = this.outsideSpaceOffset() || { x: 0, y: 0 }
     if (shouldIgnoreZoom) {
       zoom = 1
+      spaceOffset = { x: 0, y: 0 }
     }
-    x = (x + window.scrollX) * zoom
-    y = (y + window.scrollY) * zoom
+    x = (x + window.scrollX - spaceOffset.x) * zoom
+    y = (y + window.scrollY - spaceOffset.y) * zoom
     return { x, y }
   },
   curveControlPointFromPath (path) {

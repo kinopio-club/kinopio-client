@@ -320,16 +320,16 @@ const focusLine = (line) => {
     @touchend="endLineInfoInteractionTouch"
   )
   //- select all below
-  .button-wrap
+  .button-wrap.select-all-below-button-wrap
     button.small-button.translucent-button(v-if="userIsSpaceMember" @click.stop="selectAllBelow")
       img.icon(src="@/assets/brush-y.svg")
   //- jump to
-  .button-wrap.jump-to-button-wrap
-    .segmented-buttons
-      button.small-button.translucent-button(@click.left="focusLine(prevLine)" :disabled="!prevLine" title="Jump to Previous Line")
-        img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
-      button.small-button.translucent-button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
-        img.icon.down-arrow(src="@/assets/down-arrow.svg")
+  //- .button-wrap.jump-to-button-wrap
+  //-   .segmented-buttons
+  //-     button.small-button.translucent-button(@click.left="focusLine(prevLine)" :disabled="!prevLine" title="Jump to Previous Line")
+  //-       img.icon.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
+  //-     button.small-button.translucent-button(@click.left="focusLine(nextLine)" :disabled="!nextLine" title="Jump to Next Line")
+  //-       img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
   //- name
   span.name(:class="colorClasses") {{props.line.name}}
@@ -366,11 +366,13 @@ const focusLine = (line) => {
       color var(--primary-on-light-background)
     &.is-background-dark
       color var(--primary-on-dark-background)
-  .jump-to-button-wrap
+  .select-all-below-button-wrap
     margin-right 6px
-    .up-arrow
-      transform rotate(180deg)
-    .down-arrow
-      padding 0
-      vertical-align 2px
+  // .jump-to-button-wrap
+  //   margin-right 6px
+  //   .up-arrow
+  //     transform rotate(180deg)
+  //   .down-arrow
+  //     padding 0
+  //     vertical-align 2px
 </style>

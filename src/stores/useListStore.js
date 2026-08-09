@@ -88,6 +88,16 @@ export const useListStore = defineStore('lists', {
     getList (id) {
       return this.byId[id]
     },
+    getListsSelectableInViewport () {
+      const elements = document.querySelectorAll('.list')
+      let lists = []
+      elements.forEach(list => {
+        if (list.dataset.isVisibleInViewport === 'false') { return }
+        lists.push(list)
+      })
+      lists = lists.map(list => this.getList(list.dataset.listId))
+      return lists.filter(list => Boolean(list))
+    },
 
     // subscribe triggers
 
@@ -331,13 +341,14 @@ export const useListStore = defineStore('lists', {
           height: list.height
         }
       })
-      lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists)
+      lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists, { itemType: 'list', delta })
       this.updateLists(lists)
       this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
         boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
       }
+      globalStore.updateItemSnapAlignGuides()
       // lists = lists.map(list => this.getList(list.id))
       // boxStore.updateListSnapGuides({ items: lists, isLists: true, cursor: endCursor })
     },

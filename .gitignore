@@ -21,8 +21,9 @@ yarn-error.log*
 *.sln
 *.sw?
 
-# Local Netlify folder
+# Local Services folder
 .netlify
+.claude
 
 # Local HTTPS certs (mkcert)
 /.cert

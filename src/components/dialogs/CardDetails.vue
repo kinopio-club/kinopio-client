@@ -50,7 +50,6 @@ const apiStore = useApiStore()
 
 let prevCardId, prevCardName
 let previousTags = []
-let compositionEventEndTime = 0
 
 const openingPreDuration = 5 // ms
 const openingDuration = 400 // ms
@@ -236,7 +235,15 @@ const styles = computed(() => {
   const transform = `scale(${zoom})`
   const offset = 8
   const left = `${card.value.x + offset}px`
-  const top = `${card.value.y + offset}px`
+  let top
+  // conditional top pos
+  if (userStore.cardDetailsIsBelowCard) {
+    const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
+    top = card.value.y + card.value.height - offset
+  } else {
+    top = card.value.y + offset
+  }
+  top = top + 'px'
   return { transform, left, top, width }
 })
 const updateDialogHeight = async () => {
@@ -341,11 +348,6 @@ const broadcastShowCardDetails = () => {
 
 // card
 
-const updateCompositionEventEndTime = (event) => {
-  // for non-latin input
-  // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
-  compositionEventEndTime = event.timeStamp
-}
 const removeCard = () => {
   if (!canEditCard.value) { return }
   cardStore.removeCards([cardId.value])
@@ -1267,12 +1269,12 @@ const addListCard = () => {
 
 // 🎹 enter
 const handleEnterKey = (event) => {
-  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  if (utils.isCompositionKeyboardEvent(event)) { return }
+  event.preventDefault()
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible || state.atMention.pickerIsVisible
   console.info('🎹 enter', {
     shouldPreventNextEnterKey: globalStore.shouldPreventNextEnterKey,
-    pickersIsVisible,
-    isCompositionEvent
+    pickersIsVisible
   })
   if (globalStore.shouldPreventNextEnterKey) {
     globalStore.shouldPreventNextEnterKey = false
@@ -1283,8 +1285,6 @@ const handleEnterKey = (event) => {
     hidePickers()
   } else if (state.insertedLineBreak) {
     state.insertedLineBreak = false
-  // eslint-disable-next-line no-empty
-  } else if (isCompositionEvent) {
   } else if (card.value.listId) {
     addListCard()
   } else {
@@ -1613,9 +1613,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         rows="1"
         placeholder="Type here, or paste a URL"
         v-model="name"
-        @keydown.prevent.enter.exact
 
-        @compositionend="updateCompositionEventEndTime"
         @keydown.enter.exact="handleEnterKey"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
@@ -1820,6 +1818,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 <style lang="stylus">
 .card-details
   transform-origin top left
+  transition top 0.1s
   z-index var(--max-z)
   > section
     background-color var(--secondary-background)

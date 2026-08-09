@@ -100,9 +100,15 @@ const normalizedBox = computed(() => {
   box.height = box.resizeHeight
   box.color = box.color || randomColor({ luminosity: 'dark' })
   box.fill = box.fill || 'filled'
-  box.x = box.xDisplay || box.x
-  box.y = box.yDisplay || box.y
   return box
+})
+// snap align display position, does not modify the box's real x, y
+const displayPosition = computed(() => {
+  const box = props.box
+  return {
+    x: box.xDisplay || box.x,
+    y: box.yDisplay || box.y
+  }
 })
 const normalizedName = computed(() => {
   // name without checkbox text
@@ -171,7 +177,8 @@ const fillColor = computed(() => {
   return value
 })
 const boxStyles = computed(() => {
-  const { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
+  const { z, resizeWidth, resizeHeight, background } = normalizedBox.value
+  const { x, y } = displayPosition.value
   const width = resizeWidth
   const height = resizeHeight
   const styles = {
@@ -191,7 +198,8 @@ const boxStyles = computed(() => {
   return styles
 })
 const infoStyles = computed(() => {
-  const { x, y, resizeWidth } = normalizedBox.value
+  const { resizeWidth } = normalizedBox.value
+  const { x, y } = displayPosition.value
   // x, y
   const styles = {
     left: x + 'px',
@@ -685,8 +693,8 @@ const clearFocus = () => {
 .box(
   :key="box.id"
   :data-box-id="box.id"
-  :data-x="normalizedBox.x"
-  :data-y="normalizedBox.y"
+  :data-x="displayPosition.x"
+  :data-y="displayPosition.y"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
   :data-info-width="normalizedBox.infoWidth"

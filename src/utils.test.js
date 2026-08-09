@@ -188,3 +188,41 @@ describe('queryString', () => {
     expect(result).toBe('foo=bar')
   })
 })
+
+describe('isCompositionKeyboardEvent', () => {
+  const enterKeydown = (options = {}) => {
+    return new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, ...options })
+  }
+  const composition = (type) => {
+    window.dispatchEvent(new CompositionEvent(type, { data: '日本' }))
+  }
+
+  it('ignores a normal enter keypress', () => {
+    composition('compositionstart')
+    composition('compositionend')
+    const event = enterKeydown()
+    // simulate time passing since the last composition
+    Object.defineProperty(event, 'timeStamp', { value: 999999 })
+    expect(utils.isCompositionKeyboardEvent(event)).toBe(false)
+  })
+
+  it('detects the enter that confirms IME input in chromium and firefox', () => {
+    // keydown fires while still composing
+    composition('compositionstart')
+    expect(utils.isCompositionKeyboardEvent(enterKeydown({ isComposing: true }))).toBe(true)
+    composition('compositionend')
+  })
+
+  it('detects composition keydowns that report keyCode 229', () => {
+    const event = new KeyboardEvent('keydown', { keyCode: 229 })
+    Object.defineProperty(event, 'timeStamp', { value: 999999 })
+    expect(utils.isCompositionKeyboardEvent(event)).toBe(true)
+  })
+
+  it('detects the enter that confirms IME input in safari, where compositionend fires first', () => {
+    composition('compositionstart')
+    composition('compositionend')
+    // safari keydown has isComposing false, but arrives in the same tick
+    expect(utils.isCompositionKeyboardEvent(enterKeydown())).toBe(true)
+  })
+})

@@ -82,7 +82,8 @@ export const useUserStore = defineStore('user', {
     prevSettingsSection: null,
     disabledKeyboardShortcuts: ['newSpace'],
     cardDetailsResizeWidth: null,
-    shouldShowMinimap: false,
+    cardDetailsIsBelowCard: false,
+    shouldShowMinimap: true,
     affiliatePromoCode: null,
 
     // billing
@@ -323,6 +324,9 @@ export const useUserStore = defineStore('user', {
       console.info('🌸 Create new user')
       this.themeIsSystem = true
       this.appleAppAccountToken = self.crypto.randomUUID()
+      if (utils.isMobile()) {
+        this.shouldShowMinimap = false
+      }
       const allState = { ...this.$state }
       cache.saveUser(allState)
     },
