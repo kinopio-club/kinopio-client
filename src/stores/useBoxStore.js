@@ -192,7 +192,12 @@ export const useBoxStore = defineStore('boxes', {
     async createBox (box, isResizing) {
       const globalStore = useGlobalStore()
       const apiStore = useApiStore()
+      const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
+      if (spaceStore.getShouldPreventAddCard) {
+        globalStore.updateNotifyCardsCreatedIsOverLimit(true)
+        return
+      }
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       this.triggerCreateBox(box)
