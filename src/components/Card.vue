@@ -412,10 +412,12 @@ const isSnappingToItem = computed(() => {
 const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
-  if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value || isHovering.value) {
+  if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
     z = consts.maxItemZ
   } else if (isLocked.value) {
     pointerEvents = 'none'
+  } else if (isHovering.value) {
+    z = consts.maxItemZ
   }
   let styles = {
     left: `${x.value}px`,
