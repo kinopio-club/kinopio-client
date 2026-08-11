@@ -543,18 +543,30 @@ export const useUserStore = defineStore('user', {
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => this.getUserIsCurrentUser({ id: card.userId }))
       let delta = cards.length
+      if (!delta) { return }
       if (shouldDecrement) {
         delta = -delta
       }
       const count = this.cardsCreatedCount + delta
-      // update raw vanity count
+      const shouldUpdate = !this.getShouldPreventCardsCreatedCountUpdate
       this.cardsCreatedCountRaw = count
+      if (shouldUpdate) {
+        this.cardsCreatedCount = count
+        cache.updateUser({ cardsCreatedCount: count, cardsCreatedCountRaw: count })
+        this.checkIfShouldNotifyCardsCreatedIsOverLimit()
+      }
+      // update raw vanity count
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } })
       // update count
-      if (this.getShouldPreventCardsCreatedCountUpdate) { return }
-      this.cardsCreatedCount = count
+      if (!shouldUpdate) { return }
       await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } })
-      cache.updateUser({ cardsCreatedCount: count, cardsCreatedCountRaw: count })
+    },
+    checkIfShouldNotifyCardsCreatedIsOverLimit () {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      if (!globalStore.notifyCardsCreatedIsOverLimit) { return }
+      if (spaceStore.getShouldPreventAddCard) { return }
+      globalStore.updateNotifyCardsCreatedIsOverLimit(false)
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }

@@ -233,7 +233,11 @@ const lockedIsDisabled = computed(() => items.value.every(item => item.listId))
 const toggleIsLocked = () => {
   const value = !isLocked.value
   items.value.filter(item => !item.listId).forEach(item => {
-    updateBox(item, { isLocked: value })
+    const updates = { isLocked: value }
+    if (value) {
+      updates.z = 0
+    }
+    updateBox(item, updates)
   })
 }
 

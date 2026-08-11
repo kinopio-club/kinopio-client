@@ -463,7 +463,11 @@ const setLoadingSignUpOrIn = (value) => {
   state.loadingSignUpOrIn = value
 }
 const updateUpgradeUserIsVisible = (value) => {
-  state.upgradeUserIsVisible = value
+  if (userStore.getUserIsSignedIn) {
+    state.upgradeUserIsVisible = value
+  } else {
+    state.signUpOrInIsVisible = true
+  }
 }
 const updateDateAndTimeSettingsIsVisible = (value) => {
   state.dateAndTimeSettingsIsVisible = value

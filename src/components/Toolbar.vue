@@ -97,18 +97,6 @@ nav#toolbar.toolbar(v-if="visible")
   DrawingToolbar(:visible="toolbarIsDrawing")
   .toolbar-items
     .segmented-buttons
-      //- Line
-      .button-wrap(
-          aria-label="Add Line Divider (-)"
-          @mouseenter="startTooltipTimer('line')"
-          @mouseleave="cancelTooltip"
-        )
-        button(
-          @click="addLine"
-          :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
-        )
-          img.icon.line-icon(src="@/assets/line.svg")
-        ToolbarTooltip(:visible="state.tooltipIsVisible.line" tool="line")
       //- Box
       .button-wrap(
         @mouseenter="startTooltipTimer('box')"
@@ -138,6 +126,19 @@ nav#toolbar.toolbar(v-if="visible")
         .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsList")
           span Draw List (L)
         ToolbarTooltip(:visible="state.tooltipIsVisible.list" tool="list")
+
+      //- Line
+      .button-wrap(
+          aria-label="Add Line Divider (-)"
+          @mouseenter="startTooltipTimer('line')"
+          @mouseleave="cancelTooltip"
+        )
+        button(
+          @click="addLine"
+          :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
+        )
+          img.icon.line-icon(src="@/assets/line.svg")
+        ToolbarTooltip(:visible="state.tooltipIsVisible.line" tool="line")
 
       //- Drawing
       .button-wrap(
