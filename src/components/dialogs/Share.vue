@@ -257,10 +257,6 @@ dialog.share
   dialog.user-details
     left initial
     right calc(100% - 20px)
-  dialog.import-export,
-  dialog.embed
-    top initial
-    bottom 25px
   .share-private
     margin-top 10px
   .button-tip-badge

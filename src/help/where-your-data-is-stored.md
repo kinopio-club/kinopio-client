@@ -1,6 +1,6 @@
 ---
 title: Where Your Data is Stored?
-description: "Your user and spaces data lives entirely on your own computer, in your browser localStorage. Because it is not sent to a server, you can't share your spaces or access your spaces from another device."
+description: "Your user and spaces data lives entirely on your own computer, in your browser's local indexeddb storage. Because it is not sent to a server, you can't share your spaces or access your spaces from another device."
 category: About Kinopio
 ---
 
@@ -8,11 +8,11 @@ category: About Kinopio
 
 ## Without an Account
 
-Your user and spaces data lives entirely on your own computer, in your browser localStorage. Because it is not sent to a server, you can't share your spaces or access your spaces from another device. 
+Your user and spaces data lives entirely on your own computer, in your browser's local indexeddb storage. Because it is not on a server, you can't share your spaces or access your spaces from another device until you sign up.
 
-🚒 If you clear your browser's cache and delete your cookies you will be removing your kinopio data. 
+> ⚠️ If you clear your browser's cache you will be removing your kinopio data.
 
-To keep your data safe, share and collaborate, and edit your spaces from all your devices sign up for an account at any time.
+To keep your data safe, enable sharing and collaboration, and edit your spaces from all your devices sign up for an account at any time.
 
 ## With an Account
 

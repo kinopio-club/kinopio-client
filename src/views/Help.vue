@@ -226,6 +226,14 @@ const updateFilterOnSearchFocus = (event) => {
     updateFilter(value)
   }
 }
+
+const categoryPermalink = (category) => {
+  return '/help/#' + utils.normalizeString(category.name)
+}
+const categoryId = (category) => {
+  return utils.normalizeString(category.name)
+}
+
 </script>
 
 <template lang="pug">
@@ -250,16 +258,17 @@ const updateFilterOnSearchFocus = (event) => {
           @onFocus="updateFilterOnSearchFocus"
         )
 
-      section
-        template(v-if="currentSlugIsRoot && !state.filter")
-          p Kinopio is a spatial canvas to collect and connect your thoughts, ideas, and plans – by yourself or collaboratively.
-          AboutHowTo
+      template(v-if="currentSlugIsRoot && !state.filter")
+        section
+            p Kinopio is a spatial canvas to collect and connect your thoughts, ideas, and plans – by yourself or collaboratively.
+        AboutHowTo
 
+      section
         nav(v-if="currentSlugIsRoot || state.filter")
           template(v-for="category in categories")
             section.category(v-if="categoryIsVisible(category)" :key="category.name")
               //- category name
-              p.category-name
+              p.category-name(:id="categoryId(category)")
                 span.badge.category-circle(:class="category.slug")
                 span {{category.name}}
               //- pages
@@ -268,14 +277,13 @@ const updateFilterOnSearchFocus = (event) => {
                   router-link(:to="`/help/${page.slug}`")
                     .badge.button-badge(:class="badgeClasses(page)")
                       span {{ page.title }}
-
+        //- post
         article
-          //- post
           template(v-if="pageContent")
-            p.category-name
-              router-link(to="/help")
-                span.badge.category-circle(:class="currentCategory.slug")
-                span {{currentCategory?.name}}
+            a.category-name(:href="categoryPermalink(currentCategory)")
+              p
+                  span.badge.category-circle(:class="currentCategory.slug")
+                  span {{currentCategory?.name}}
             .markdown-body-wrap(:style="markdownBodyStyles")
               component(:is="pageContent")
           //- 404
@@ -297,6 +305,8 @@ const updateFilterOnSearchFocus = (event) => {
 <style lang="stylus">
 
 main.help-page-wrap
+  // .page-wrap
+  //   max-width 900px
   h1 + a
     display block
     width fit-content
@@ -350,16 +360,17 @@ main.help-page-wrap
     // max-width 715px
     margin-top 2rem
     margin-bottom 2rem
-    h2
-      display none
+    // h2
+    //   display none
 
   article
     .markdown-body-wrap
+      margin-top 1rem
       padding 2rem
       padding-bottom 30px
       border-radius var(--page-entity-radius)
     .markdown-body
-      line-height 1.35
+      line-height 1.4
       h1
         margin-top 0
         font-size 28px
@@ -372,35 +383,42 @@ main.help-page-wrap
       img,
       video
         border-radius var(--page-entity-radius)
-        // max-width 100%
-        margin-top 10px
+        // max-width 715px
+        margin-top 1rem
+        margin-bottom 1rem
         &.large
           max-width 100%
+        &.medium
+          max-width 70%
         &.small
           max-width 300px
       code
         background-color var(--secondary-background)
         vertical-align 0
         margin 0
-      ul
+      ul,
+      ol
         max-width 500px
         padding-left 15px
       li
-        line-height 1.35
+        line-height 1.4
       li + li
         margin-top 0.5rem
       blockquote
         margin-left 0
         border-left 1px solid var(--primary-border)
         padding-left 8px
-    .category-name
-      a
-        text-decoration none
-        &:hover
-          span
-            text-decoration underline
+
+    a.category-name
+      cursor pointer
+      // color var(--primary)
+      text-decoration none
+      span
+        color var(--primary)
+        // text-decoration none
+      &:hover
         span
-          color var(--primary)
+          text-decoration underline
 
   .badge
     color var(--primary-on-light-background)

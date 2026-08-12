@@ -44,12 +44,13 @@ section.social-proof
 
     .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
       .row.horizontal
-        p.marquee(v-pause-animation) {{ academic }}
-      .row.horizontal
         p.marquee.row-2(v-pause-animation) {{ business }}
+      .row.horizontal
+        p.marquee(v-pause-animation) {{ academic }}
+
     .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
-      p {{ academic }}
       p {{ business }}
+      p {{ academic }}
 
     p Kinopio has also been featured in{{' '}}
       a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge

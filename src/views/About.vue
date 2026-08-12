@@ -93,17 +93,17 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
+      AboutCollaborate
+
+      AboutSocialProof
+
       AboutHowTo
 
       AboutMoreFeatures
 
       AboutExamples
 
-      AboutCollaborate
-
       AboutFAQ
-
-      AboutSocialProof
 
       section
         //- cta

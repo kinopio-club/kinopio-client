@@ -10,18 +10,13 @@ category: Importing and Exporting
 
 You can import the JSON of exported spaces you've saved to your computer with `Share → Import → [JSON] Select File`
 
-<img src="@/assets/pages/help/posts/import-space.png" alt="import-space">
+<img src="@/assets/pages/help/posts/import-export/import.webp" alt="import-space" class="small">
 
 ## Importing an Are.na Channel
 
 Import [are.na](http://are.na) channels to make collaborative mood boards
 
-<img src="@/assets/pages/help/posts/arena-space.png" class="large"/>
-
 `Share → Import → Are.na Channel`
-
-<img src="@/assets/pages/help/posts/import-arena.png" class="small"/>
-
 
 If this is your first time using this feature, you'll be redirected to an Are.na authentication page. Afterwards you'll be redirected back to Kinopio and are able to input a channel URL to import (eg `https://www.are.na/kinopio/kinopio-moods`).
 

@@ -1,7 +1,7 @@
 ---
 title: Notifications
 description: By default, whenever a collaborator (or anyone in your open spaces) adds a card you will receive a notification about it.
-category: Collaboration
+category: Navigating
 ---
 
 # Notifications

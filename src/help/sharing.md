@@ -20,14 +20,14 @@ Change space privacy, share space URLs, and invite collaborators from `Share` in
 
 Space privacy can be either `open`, `closed`, or `private` (default)
 
-<img src="@/assets/pages/help/posts/sharing-spaces/2.webp" class="">
+<img src="@/assets/pages/help/posts/sharing-spaces/2.webp" class="medium">
 
 Depending on the space's privacy setting, and whether the space is in a group, you'll have different options to share a space for editing or to read-only.
 
 <img src="@/assets/pages/help/posts/sharing-spaces/3.webp" class="small">
 
 
-### Carsd Links
+### Card Links
 
 You can also reference specific cards via `Card → Share`. This URL will open the space, scroll to the card, and highlight it.
 
@@ -43,7 +43,26 @@ When collaborating with others you'll see their cursors, paint strokes, and othe
   <source src="@/assets/pages/help/posts/sharing-spaces/collab.mp4">
 </video>
 
+Invite Collaborators to give them edit access to the contents of your space. Inviting is especially useful for working together on `Private` spaces, but you can do it with any privacy setting.
 
-## Pro-Tips
+You should think of collaborators as people you fully trust because they'll be able to edit and remove almost everything in a space.
 
-- You can also use [groups](/posts/groups) to share access to multiple spaces with the same group of people.
+> If collaborating with people you don't know or fully trust, consider changing your space privacy to `Open` and sharing the read-only URL instead. That way others will only be able to add  and edit the cards that they've created.
+
+### How to Invite
+
+Send someone a collaborator invite by copying the URL found in `Spaces → Invite …`
+
+<img src="@/assets/pages/help/posts/sharing-spaces/invite.webp" alt="invite-collaborators" class="small">
+
+#### Collaborators can
+
+- Create, move, remove and edit all cards and connections
+- Invite other collaborators
+- Remove other collaborators
+
+#### But collaborators cannot
+
+- Remove the space
+- Rename the space
+- Remove the creator of the space from it
