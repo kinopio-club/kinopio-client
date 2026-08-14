@@ -164,12 +164,11 @@ const badgeClasses = (page) => {
   classes.push(category.slug)
   return classes
 }
-const markdownBodyStyles = computed(() => {
+const pageBackgroundStyles = computed(() => {
+  if (!currentCategory.value) { return }
   let color = currentCategory.value.color
   if (isThemeDark.value) {
     color = colord(color).darken(0.6).toRgbString()
-  } else {
-    color = colord(color).alpha(0.3).toRgbString()
   }
   return {
     backgroundColor: color
@@ -239,7 +238,7 @@ const categoryId = (category) => {
 <template lang="pug">
 .page(:class="{ 'is-dark-theme': isThemeDark }")
   Header(:isDocumentPage="true")
-  main.page.help-page-wrap(@click="closeAllDialogs")
+  main.page.help-page-wrap(@click="closeAllDialogs" :style="pageBackgroundStyles")
     .page-wrap
       section.intro
         Wordmark
@@ -279,13 +278,13 @@ const categoryId = (category) => {
                       span {{ page.title }}
         //- post
         article
-          template(v-if="pageContent")
+          p(v-if="pageContent")
             a.category-name(:href="categoryPermalink(currentCategory)")
-              p
-                  span.badge.category-circle(:class="currentCategory.slug")
+              .badge.secondary
+                  //- span.badge.category-circle(:class="currentCategory.slug")
+                  img.icon.left-arrow(src="@/assets/down-arrow.svg")
                   span {{currentCategory?.name}}
-            .markdown-body-wrap(:style="markdownBodyStyles")
-              component(:is="pageContent")
+            component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
             h1 404 – Page not found
@@ -305,6 +304,7 @@ const categoryId = (category) => {
 <style lang="stylus">
 
 main.help-page-wrap
+  min-height 100dvh
   // .page-wrap
   //   max-width 900px
   h1 + a
@@ -364,12 +364,8 @@ main.help-page-wrap
     //   display none
 
   article
-    .markdown-body-wrap
-      margin-top 1rem
-      padding 2rem
-      padding-bottom 30px
-      border-radius var(--page-entity-radius)
     .markdown-body
+      margin-top 1rem
       line-height 1.4
       h1
         margin-top 0
@@ -380,7 +376,7 @@ main.help-page-wrap
         font-size 16px
       p
         max-width 520px
-      img,
+      img:not(.icon),
       video
         border-radius var(--page-entity-radius)
         // max-width 715px

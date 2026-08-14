@@ -1,5 +1,5 @@
 ---
-title: Apps
+title: Apps and Browser Extensions
 description: Download desktop and mobile apps for macOS, Windows, Linux, iOS, and Android
 category: Basics
 ---
@@ -17,8 +17,9 @@ Or add the site to your Android phone homescreen by following the instructions i
 <img src="@/assets/pages/help/posts/apps/dialog.webp" class="small"/>
 
 
+# Browser Extensions
 
-The desktop app makes Kinopio easier to open and create spaces without having to first open a web browser.
+You'll also find it handy to download the "add to inbox" browser extensions for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/add-to-kinopio), [Chromium](https://chrome.google.com/webstore/detail/kinopio/hodmmkfpchpgmaemlicohlkiigpejakn), and [Safari](https://apps.apple.com/app/add-to-kinopio/id1614926102).
 
 ## Pro-Tips
 
