@@ -164,16 +164,6 @@ const badgeClasses = (page) => {
   classes.push(category.slug)
   return classes
 }
-const pageBackgroundStyles = computed(() => {
-  if (!currentCategory.value) { return }
-  let color = currentCategory.value.color
-  if (isThemeDark.value) {
-    color = colord(color).darken(0.6).toRgbString()
-  }
-  return {
-    backgroundColor: color
-  }
-})
 
 // filter
 
@@ -226,19 +216,12 @@ const updateFilterOnSearchFocus = (event) => {
   }
 }
 
-const categoryPermalink = (category) => {
-  return '/help/#' + utils.normalizeString(category.name)
-}
-const categoryId = (category) => {
-  return utils.normalizeString(category.name)
-}
-
 </script>
 
 <template lang="pug">
 .page(:class="{ 'is-dark-theme': isThemeDark }")
   Header(:isDocumentPage="true")
-  main.page.help-page-wrap(@click="closeAllDialogs" :style="pageBackgroundStyles")
+  main.page.help-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
         Wordmark
@@ -263,11 +246,11 @@ const categoryId = (category) => {
         AboutHowTo
 
       section
-        nav(v-if="currentSlugIsRoot || state.filter")
+        nav#nav(v-if="currentSlugIsRoot || state.filter")
           template(v-for="category in categories")
             section.category(v-if="categoryIsVisible(category)" :key="category.name")
               //- category name
-              p.category-name(:id="categoryId(category)")
+              p.category-name
                 span.badge.category-circle(:class="category.slug")
                 span {{category.name}}
               //- pages
@@ -279,11 +262,17 @@ const categoryId = (category) => {
         //- post
         article
           p(v-if="pageContent")
-            a.category-name(:href="categoryPermalink(currentCategory)")
-              .badge.secondary
-                  //- span.badge.category-circle(:class="currentCategory.slug")
+            a.category-name(href="/help/#nav")
+              .badge.secondary.button-badge
                   img.icon.left-arrow(src="@/assets/down-arrow.svg")
-                  span {{currentCategory?.name}}
+                  span All Topics
+            nav
+              ul
+                li(v-for="page in pagesFilteredByCategory(currentCategory)" :key="page.slug" @click.stop="clearFilter")
+                  router-link(:to="`/help/${page.slug}`")
+                    .badge.button-badge(:class="badgeClasses(page)")
+                      span {{ page.title }}
+            //- post md
             component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
@@ -369,9 +358,9 @@ main.help-page-wrap
       line-height 1.4
       h1
         margin-top 0
-        font-size 28px
+        font-size 21px
       h2
-        font-size 20px
+        font-size 18px
       h3
         font-size 16px
       p
@@ -406,15 +395,7 @@ main.help-page-wrap
         padding-left 8px
 
     a.category-name
-      cursor pointer
-      // color var(--primary)
       text-decoration none
-      span
-        color var(--primary)
-        // text-decoration none
-      &:hover
-        span
-          text-decoration underline
 
   .badge
     color var(--primary-on-light-background)

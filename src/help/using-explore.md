@@ -12,14 +12,14 @@ Explore is a list of cool spaces made and explicitly shared by other people (lik
 
 To add or remove your own cool space to Explore, toggle `Spaces → Add to Explore`.
 
-<img src="@/assets/pages/help/posts/add-to-explore.png" alt="show-in-explore">
+<img src="@/assets/pages/help/posts/explore/add-to-explore.webp" alt="show-in-explore" class="medium">
 
 
 ## Live
 
 Live Spaces shows public spaces that are currently being edited. It's a fun way to discover new spaces and community creators.
 
-<img src="@/assets/pages/help/posts/live-spaces.png" class=""/>
+<img src="@/assets/pages/help/posts/explore/live-spaces.webp" class="small"/>
 
 Space appear in Live when both:
 
