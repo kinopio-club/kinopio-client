@@ -377,6 +377,8 @@ main.help-page-wrap
           max-width 70%
         &.small
           max-width 300px
+        &.no-border
+          border-radius 0
       code
         background-color var(--secondary-background)
         vertical-align 0

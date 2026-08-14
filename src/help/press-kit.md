@@ -6,40 +6,56 @@ category: Press
 
 # Press Kit
 
-[Download kinopio-assets.zip (17mb)](@/assets/pages/help/posts/press-kit/kinopio-assets.zip)
+[Download kinopio-assets.zip (17mb)](@/assets/pages/help/posts/press-kit/kinopio-assets-2.zip)
 
 <img src="@/assets/pages/help/posts/press-kit/logo-base.png" class="no-shadow"/>
-<br><br>
+
+## Vector Logos
+
+Feel free to change the colors of these to work with your web design, but try not to change the actual curves.
+
+<p>
+<img src="@/assets/pages/help/posts/press-kit/wordmark.svg" class="no-shadow"/>
+</p>
+<p>
+<img src="@/assets/pages/help/posts/press-kit/badge.svg" class="no-shadow"/>
+</p>
+<p>
+<img src="@/assets/pages/help/posts/press-kit/logo-filled.svg" class="no-shadow"/>
+</p>
+<p>
+<img src="@/assets/pages/help/posts/press-kit/logo-outline.svg" class="no-shadow"/>
+</p>
+
+[Jordanne Chan](https://kinopio.club/jordannada-zKM1frpMTBwI5Gar8FnKQ) has also made some awesome pixel fan art versions of the logo you might want to use
+
+<img src="https://cdn.kinopio.club/YBFY2AYE3LQIrEJ5g8iJk/kinopio-bounce-blink3-64.gif" class="small no-border">
+<img src="https://cdn.kinopio.club/epi5T3el9nVid8QuE5bmN/kinopio2c-64.gif" class="small no-border">
+<img src="https://cdn.kinopio.club/Gig4XdeTAvl8iVODHMB9V/kinopio88x31b.gif" class="small no-border">
+
+
+## Examples In Use
+
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/press-kit/example-space.mp4">
+  <source src="@/assets/pages/help/posts/press-kit/collaboration.mp4">
 </video>
-<br><br>
+
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/press-kit/screenrec2.mp4">
+  <source src="@/assets/pages/help/posts/press-kit/mindmap.mp4">
 </video>
-<br><br>
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/press-kit/real-time-collaboration.mp4">
+  <source src="@/assets/pages/help/posts/press-kit/moodboard.mp4">
 </video>
-<br><br>
+
 
 <video autoplay loop muted playsinline class="large">
-  <source src="https://files.kinopio.club/animated-background.mp4">
+  <source src="@/assets/pages/help/posts/press-kit/notes.mp4">
 </video>
-<br><br>
 
-<video autoplay loop muted playsinline class="large">
-  <source src="https://files.kinopio.club/collaborative-tags.mp4">
-</video>
-<br><br>
 
-<video autoplay loop muted playsinline class="large">
-  <source src="https://files.kinopio.club/free-plants-in-brooklyn.mp4">
-</video>
-<br><br>
 
 ## Description
 
@@ -66,6 +82,7 @@ In 2019, I quit my job to create a different kind of productivity tool. Instead 
 - Shareable public spaces
 - Invite collaborators to private spaces
 - keyboard shortcuts for power users
+- Lists, @mentions, and due dates enable advanced kanban project management workflows
 
 ## See also
 
