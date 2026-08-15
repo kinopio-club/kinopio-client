@@ -28,6 +28,6 @@ Other uses for comments:
 
 ## Pro-Tips
 
-- Completely hide comments through the [Filters](/posts/filters) menu inside `Search`.
-- Also just like adding other cards, comments you add to a space with collaborators will send them a [notification](/posts/notifications).
+- Completely hide comments through the [Filters](/help/filters) menu inside `Search`.
+- Also just like adding other cards, comments you add to a space with collaborators will send them a [notification](/help/notifications).
 - Comments also work great with tags, checkboxes, and frames. So you can use a use a checkbox to mark resolved cards, and form associations with content using connections and tags.

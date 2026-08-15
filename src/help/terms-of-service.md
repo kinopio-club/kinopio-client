@@ -32,7 +32,7 @@ If you violate of any of the terms, we may terminate your account. That’s a br
 ## Account Terms
 
 1. You are responsible for maintaining the security of your account and password. The Company cannot and will not be liable for any loss or damage from your failure to comply with this security obligation.
-2. You may not use the Services for any purpose outlined in our [Use Restrictions policy](/posts/use-restrictions-policy/).
+2. You may not use the Services for any purpose outlined in our [Use Restrictions policy](/help/use-restrictions-policy/).
 3. You are responsible for all content posted and activity that occurs under your account. That includes content posted by others who either: (a) have access to your login credentials; or (b) have their own logins under your account.
 4. You must be a human. Accounts registered by “bots” or other automated methods are not permitted.
 
@@ -61,7 +61,7 @@ If you violate of any of the terms, we may terminate your account. That’s a br
 
 1. You are solely responsible for properly deleting your account. Our service provides a simple no-questions-asked `Remove All Your Data` button. An email request to cancel your account is not automatically considered deletion. If you need help deleting your account, email [hi@kinopio.club](mailto:hi@kinopio.club).
 2. Upon deletion, your data is immediately and permanently deleted from the main database. Within 30 days, all content will be permanently deleted from and logs. Within 60 days, all content will be permanently deleted from our backups. We cannot recover this information once it has been permanently deleted.
-3. We have the right to suspend or terminate your account and refuse any and all current or future use of our Services for any reason at any time. Suspension means you and any other users on your account will not be able to access the account or any content in the account. Termination will furthermore result in the deletion of your account or your access to your account, and the forfeiture and relinquishment of all content in your account. We also reserve the right to refuse the use of the Services to anyone for any reason at any time. We have this clause because statistically speaking, out of the hundreds of thousands of accounts on our Services, there is at least one doing something nefarious. There are some things we staunchly stand against and this clause is how we exercise that stance. For more details, see our [Use Restrictions policy](/posts/use-restrictions-policy/).
+3. We have the right to suspend or terminate your account and refuse any and all current or future use of our Services for any reason at any time. Suspension means you and any other users on your account will not be able to access the account or any content in the account. Termination will furthermore result in the deletion of your account or your access to your account, and the forfeiture and relinquishment of all content in your account. We also reserve the right to refuse the use of the Services to anyone for any reason at any time. We have this clause because statistically speaking, out of the hundreds of thousands of accounts on our Services, there is at least one doing something nefarious. There are some things we staunchly stand against and this clause is how we exercise that stance. For more details, see our [Use Restrictions policy](/help/use-restrictions-policy/).
 4. Verbal, physical, written or other abuse (including threats of abuse or retribution) of Company employee or officer will result in immediate account termination.
 
 <a name="uptimeSecurityAndPrivacy"></a>
@@ -123,6 +123,6 @@ This document was originally adapted from [Basecamp's](https://basecamp.com/abou
 [Track changes for this page](https://github.com/kinopio-club/kinopio-help/blob/master/posts/terms-of-service.md)
 
 All Policies
-- [Privacy Policy](/posts/privacy-policy/)
-- [Terms of Service](/posts/terms-of-service/)
-- [Use Restrictions Policy](/posts/use-restrictions-policy/)
+- [Privacy Policy](/help/privacy-policy/)
+- [Terms of Service](/help/terms-of-service/)
+- [Use Restrictions Policy](/help/use-restrictions-policy/)

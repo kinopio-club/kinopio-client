@@ -22,9 +22,9 @@ footer.sitemap
       a(href="https://github.com/kinopio-club") Github
     .column
       p ﾉ乙(､ﾝ､)_
-      a(href="/help/posts/terms-of-service/") Terms
-      a(href="/help/posts/privacy-policy/") Privacy
-      //- a(href="/help/posts/security/") Security
+      a(href="/help/terms-of-service/") Terms
+      a(href="/help/privacy-policy/") Privacy
+      //- a(href="/help/security/") Security
 </template>
 
 <style lang="stylus">

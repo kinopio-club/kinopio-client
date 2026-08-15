@@ -28,28 +28,28 @@ const data = {
   line: {
     title: 'Add Line Divider',
     keyboardShortcut: '–',
-    helpUrl: 'https://kinopio.club/help/posts/lines/',
+    helpUrl: 'https://kinopio.club/help/lines/',
     description: 'Add a horizontal dividing line between pages, sections, or slides.',
     videoUrl: 'https://files.kinopio.club/tooltips/tooltip-line.gif'
   },
   box: {
     title: 'Draw Box',
     keyboardShortcut: 'B',
-    helpUrl: 'https://kinopio.club/help/posts/boxes/',
+    helpUrl: 'https://kinopio.club/help/boxes/',
     description: 'Drag to create a box to define regions and group everything inside.',
     videoUrl: 'https://files.kinopio.club/tooltips/tooltip-box.gif'
   },
   list: {
     title: 'Draw List',
     keyboardShortcut: 'L',
-    helpUrl: 'https://kinopio.club/help/posts/lists/',
+    helpUrl: 'https://kinopio.club/help/lists/',
     description: 'Drag to create a list to vertically group and sort cards.',
     videoUrl: 'https://files.kinopio.club/tooltips/tooltip-list.gif'
   },
   drawing: {
     title: 'Drawing',
     keyboardShortcut: 'D',
-    helpUrl: 'https://kinopio.club/help/posts/drawing/',
+    helpUrl: 'https://kinopio.club/help/drawing/',
     description: 'Draw freehand strokes. You can change color, stroke size, and toggle eraser mode.',
     videoUrl: 'https://files.kinopio.club/tooltips/tooltip-drawing.gif'
   }

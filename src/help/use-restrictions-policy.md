@@ -46,6 +46,6 @@ Depending on the violation, the following may happen:
 [Track changes for this page](https://github.com/kinopio-club/kinopio-help/blob/master/posts/use-restrictions-policy.md)
 
 All Policies
-- [Privacy Policy](/posts/privacy-policy/)
-- [Terms of Service](/posts/terms-of-service/)
-- [Use Restrictions Policy](/posts/use-restrictions-policy/)
+- [Privacy Policy](/help/privacy-policy/)
+- [Terms of Service](/help/terms-of-service/)
+- [Use Restrictions Policy](/help/use-restrictions-policy/)

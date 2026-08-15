@@ -22,4 +22,4 @@ You can safely clear your browser cache and cookies without losing any data.
 
 ## See also
 
-- [Privacy Policy](/posts/privacy-policy/)
+- [Privacy Policy](/help/privacy-policy/)

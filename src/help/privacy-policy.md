@@ -11,7 +11,7 @@ category: Policies
 <img src="https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78/witch.png" class="no-shadow" style="width: 150px"/>
 
 - Kinopio won’t show you ads of any kind, or sell your data.
-- Children, and anyone else, will be able to use Kinopio anonymously. Without an account, none of your data will be transmitted to Kinopio servers. (👀 [How Your Data is Stored](/posts/how-your-data-is-stored/))
+- Children, and anyone else, will be able to use Kinopio anonymously. Without an account, none of your data will be transmitted to Kinopio servers. (👀 [How Your Data is Stored](/help/how-your-data-is-stored/))
 - To enable you to share spaces and collaborate, you will need to create an account. Your user data and spaces will then be hosted on Railway.
 - User uploads are stored in Linode Object Storage. and server logs for debugging are saved by Railway. Server logs redact personal information (like card names), and are deleted after 30 days.
 - To enable billing for paid plans, only the user information needed to process payments will be shared with Stripe.
@@ -25,6 +25,6 @@ category: Policies
 [Track changes for this page](https://github.com/kinopio-club/kinopio-help/blob/master/posts/privacy-policy.md)
 
 All Policies
-- [Privacy Policy](/posts/privacy-policy/)
-- [Terms of Service](/posts/terms-of-service/)
-- [Use Restrictions Policy](/posts/use-restrictions-policy/)
+- [Privacy Policy](/help/privacy-policy/)
+- [Terms of Service](/help/terms-of-service/)
+- [Use Restrictions Policy](/help/use-restrictions-policy/)
