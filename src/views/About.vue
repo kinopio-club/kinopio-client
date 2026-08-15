@@ -124,7 +124,7 @@ AboutJsonLd
           a(href="https://pketh.org/how-kinopio-is-made.html")
             span How Kinopio is Made
           span . I hope you enjoy using Kinopio and find it invaluable,
-        img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
+        img.icon.signature(width="70" height="36" src="https://updates.kinopio.club/pages/about/signature.png" alt="signature")
         .row
           a(href="mailto:hi@kinopio.club") hi@kinopio.club
       FooterSitemap

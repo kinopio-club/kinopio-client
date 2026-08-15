@@ -30,12 +30,12 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
             span API Docs{{' '}}
   section
     .row
-      a(href="https://help.kinopio.club/posts/privacy-policy")
+      a(href="https://kinopio.club/help/privacy-policy")
         button
           span Privacy Policy{{' '}}
           //- img.icon.visit(src="@/assets/visit.svg")
     .row
-      a(href="https://help.kinopio.club/posts/terms-of-service/")
+      a(href="https://kinopio.club/help/terms-of-service/")
         button
           span Terms of Service{{' '}}
           //- img.icon.visit(src="@/assets/visit.svg")

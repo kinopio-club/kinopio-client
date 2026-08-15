@@ -758,7 +758,7 @@ export const useSpaceStore = defineStore('space', {
             id: '2',
             x: 151,
             y: 328,
-            name: 'Connect them together\n[Help and Tutorials](https://help.kinopio.club)',
+            name: 'Connect them together\n[Help and Tutorials](https://kinopio.club/help)',
             z: 3,
             width: 193,
             height: 69

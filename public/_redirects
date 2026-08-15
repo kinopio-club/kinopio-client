@@ -14,7 +14,6 @@
 /blog/*           https://kinopio-blog.netlify.app/:splat   200
 # legacy /help site routes (temporary)
 
-/help/*           https://kinopio-help.netlify.app/:splat   200
 /forum            https://forum.kinopio.club
 /discord          https://discord.gg/h2sR45Nby8   301
 /survey           https://tally.so/r/w2RjDL   301

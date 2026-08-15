@@ -418,7 +418,7 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
   //- Privacy Policy
   section(v-if="state.signUpVisible")
     .button-wrap
-      a(href="https://help.kinopio.club/posts/privacy-policy")
+      a(href="https://kinopio.club/help/privacy-policy")
         button
           span Privacy Policy and TOS{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
