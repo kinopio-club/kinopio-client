@@ -2,6 +2,7 @@
 title: Lists
 description: Lists let you vertically group and easily reorder cards.
 category: Basics
+image: https://updates.kinopio.club/pages/help/posts/lists/lists.webp
 ---
 
 # Lists

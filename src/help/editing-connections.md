@@ -2,6 +2,7 @@
 title: Connections
 description: Connection colors and labels
 category: Advanced Use
+video: https://updates.kinopio.club/pages/help/posts/editing-connections/labels.mp4
 ---
 
 # Connections

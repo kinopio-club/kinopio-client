@@ -130,30 +130,54 @@ const categoryByPage = (page) => {
   return categories.find(category => page.category === category.name)
 }
 
+const imageType = (url) => {
+  const extension = url.split('.').pop().toLowerCase()
+  if (extension === 'webp') { return 'image/webp' }
+  if (extension === 'jpg' || extension === 'jpeg') { return 'image/jpeg' }
+  if (extension === 'gif') { return 'image/gif' }
+  return 'image/png'
+}
+
 useHead(() => {
   let title = 'Kinopio Help'
   let description = 'Guides and documentation for using Kinopio'
   let path = '/help'
+  let image = 'https://files.kinopio.club/og-image.png'
   if (pageMeta.value) {
     title = `${pageMeta.value.title} – Kinopio Help`
     description = pageMeta.value.description
     path = `/help/${pageMeta.value.slug}`
+    image = pageMeta.value.image || image
   }
   if (consts.isDevelopment()) {
     title = `[DEV] ${title}`
   }
   const url = `https://kinopio.club${path}`
+  const video = pageMeta.value?.video
+  const videoMeta = []
+  if (video) {
+    videoMeta.push(
+      { property: 'og:video', content: video },
+      { property: 'og:video:secure_url', content: video },
+      { property: 'og:video:type', content: 'video/mp4' }
+    )
+  }
+  // override site defaults in index.html
   return {
     title,
     meta: [
       { name: 'description', content: description },
-      // og and twitter tags override the site defaults in index.html
       { property: 'og:title', content: title },
       { property: 'og:description', content: description },
       { property: 'og:url', content: url },
-      { property: 'og:type', content: pageMeta.value ? 'article' : 'website' },
+      // scrapers only activate the player when og:type is a video type
+      { property: 'og:type', content: video ? 'video.other' : (pageMeta.value ? 'article' : 'website') },
+      { property: 'og:image', content: image },
+      { property: 'og:image:type', content: imageType(image) },
+      { name: 'twitter:image', content: image },
       { name: 'twitter:title', content: title },
-      { name: 'twitter:description', content: description }
+      { name: 'twitter:description', content: description },
+      ...videoMeta
     ],
     link: [{ rel: 'canonical', href: url }]
   }

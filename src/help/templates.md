@@ -2,6 +2,7 @@
 title: Using Templates and Creating Your Own
 description: Make your own spaces into easy to duplicate personal templates
 category: Community
+image: https://files.kinopio.club/templates-dialog.png
 ---
 
 # Using Templates and Creating Your Own

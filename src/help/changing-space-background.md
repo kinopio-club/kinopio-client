@@ -2,6 +2,7 @@
 title: Space Background Image and Color
 description: You can change the background for your current space by clicking the thumbnail next to your space name.
 category: Basics
+image: https://updates.kinopio.club/pages/help/posts/change-space-background/tint.webp
 ---
 
 # Space Background Image and Color

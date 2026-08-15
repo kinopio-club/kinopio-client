@@ -2,6 +2,7 @@
 title: Apps and Browser Extensions
 description: Download desktop and mobile apps for macOS, Windows, Linux, iOS, and Android. As well as Browser Extensions.
 category: Basics
+image: https://updates.kinopio.club/pages/help/app-icon-mac.png
 ---
 
 # Desktop and Mobile Apps

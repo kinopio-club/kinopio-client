@@ -2,6 +2,7 @@
 title: Linking Spaces Together
 description: Use space links to connect your spaces together and weave your own web, or dashboard, of knowledge.
 category: Advanced Use
+video: https://files.kinopio.club/backlinks.mp4
 ---
 
 # Linking Spaces Together

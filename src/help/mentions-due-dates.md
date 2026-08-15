@@ -2,6 +2,7 @@
 title: "@User Mentions and Due Dates"
 description: Type `@` in a card to assign users and due dates to cards
 category: Advanced Use
+image: https://updates.kinopio.club/pages/help/posts/mentions/sidebar-at.webp
 ---
 
 # @User Mentions and Due Dates

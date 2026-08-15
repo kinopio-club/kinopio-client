@@ -2,6 +2,7 @@
 title: Privacy Policy
 description: "Friends don't spy on friends."
 category: Policies
+image: https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78/witch.png
 ---
 
 # Privacy Policy

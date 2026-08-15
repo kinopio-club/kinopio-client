@@ -2,6 +2,7 @@
 title: Boxes
 description: Boxes help you group cards, add structure, and guide collaborators around your spaces
 category: Basics
+video: https://updates.kinopio.club/pages/help/posts/boxes/demo.mp4
 ---
 
 # Boxes

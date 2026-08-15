@@ -2,6 +2,7 @@
 title: Notifications
 description: By default, whenever a collaborator (or anyone in your open spaces) adds a card you will receive a notification about it.
 category: Navigating
+image: https://files.kinopio.club/notifications-dialog.png
 ---
 
 # Notifications
