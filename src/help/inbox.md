@@ -14,7 +14,7 @@ Use an Inbox space to collect thoughts, todos, and ideas that don't have a place
 
 ## Add Ideas and URLs from Anywhere
 
-Add anything to your inbox on the go with the Kinopio [browser extensions](http://localhost:8081/posts/extensions/), or through the system share sheet if you have the [iOS app](https://apps.apple.com/us/app/kinopio/id6448743101) installed
+Add anything to your inbox on the go with the Kinopio [browser extensions](/help/apps), or through the system share sheet if you have the [iOS app](https://apps.apple.com/us/app/kinopio/id6448743101) installed
 
 ## Moving Inbox Cards to Your Other Spaces
 

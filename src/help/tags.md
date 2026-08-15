@@ -8,7 +8,7 @@ category: Advanced Use
 
 Add `[[tags]]` to your cards to make them stand out and connect ideas across spaces.
 
-To add a tag into a card you can either type `[[` and start typing your tag, then `tab` or `enter` to complete it. You can also add tags to a card or a paint selection through the [Style](/help/styling-cards/) menu.
+To add a tag into a card you can either type `[[` and start typing your tag, then `tab` or `enter` to complete it. You can also add tags to a card or a paint selection through the [Style](/help/card-styling) menu.
 
 <video class="large" autoplay loop muted playsinline>
   <source src="https://files.kinopio.club/card-tags.mp4">

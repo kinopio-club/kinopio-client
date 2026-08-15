@@ -6,7 +6,7 @@ category: Press
 
 # Press Kit
 
-[Download kinopio-assets.zip (17mb)](@/assets/pages/help/posts/press-kit/kinopio-assets-2.zip)
+[Download kinopio-assets.zip (17mb)](https://updates.kinopio.club/pages/help/posts/press-kit/kinopio-assets-2.zip)
 
 <img src="https://updates.kinopio.club/pages/help/posts/press-kit/logo-base.png" class="no-shadow"/>
 
@@ -62,8 +62,6 @@ Feel free to change the colors of these to work with your web design, but try no
 [Kinopio](http://kinopio.club) is the spatial thinking tool for building new ideas and solving hard problems.
 
 By making it easy to get your thoughts out and form connections organically, Kinopio works the way your mind works.
-
-[Uses of Kinopio](/help/uses-of-kinopio/)
 
 ## History
 
