@@ -17,7 +17,7 @@ Or add the site to your Android phone homescreen by following the instructions i
 
 <img src="https://updates.kinopio.club/pages/help/posts/apps/dialog.webp" class="small"/>
 
-# Browser Extensions
+## Browser Extensions
 
 For quickly recording thoughts, inspirations, and urls to your [Inbox](/help/inbox/) while you're out making waves on the world wide web.
 
@@ -29,7 +29,7 @@ Download for:
 
 <img src="https://us-east-1.linodeobjects.com/kinopio-uploads/IWdfvX-mofsE8vS3b2gF2/firefox-extension.webp" class="large">
 
-# SMS, Telegram, Zapier and more Integrations
+## SMS, Telegram, Zapier and more Integrations
 
 Kinopio is also supported by [phonetonote](https://phonetonote.com/), which lets you add cards to your inbox via SMS, Telegram, Zapier, Email, Alfred, and more. API keys saved to phonetonote are encrypted and your messages are never stored there.
 

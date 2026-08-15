@@ -52,7 +52,7 @@ If the current space is in a group, the `Share` menu will also display the `Copy
 
 <img src="https://updates.kinopio.club/pages/help/posts/groups/share2.webp" class=""/>
 
-# Group User Permissions
+## Group User Permissions
 
 Group users can have the role of `member` or `admin`.
 

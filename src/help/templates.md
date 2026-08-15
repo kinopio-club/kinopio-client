@@ -11,7 +11,7 @@ image: https://files.kinopio.club/templates-dialog.png
 
 <img src="https://files.kinopio.club/templates-dialog.png" alt="templates">
 
-# Creating and Using Personal Templates
+## Creating and Using Personal Templates
 
 Make your own spaces into easy to duplicate personal templates. Such as,
 

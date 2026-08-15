@@ -17,7 +17,7 @@ The minimap will display while panning mode is active – when either the space-
   <source src="https://updates.kinopio.club/pages/help/posts/minimap/minimap-pan.mp4">
 </video>
 
-# Table of Contents
+## Table of Contents
 
 Hover over the visual Table Of Contents on the right side of the page for an easier and funner way to jump to your Boxes, Lists, and Line dividers. (The TOC is not available on mobile due to screen size restrictions).
 

@@ -13,7 +13,7 @@ Add lines from the toolbar (or with 'L') to mark pages, sections, slides, and ot
   <source src="https://cdn.kinopio.club/dj8FWgYmGoBn72MhRhNKe/Kinopio-1.mp4">
 </video>
 
-# Line 'Jump to' Buttons
+## Line 'Jump to' Buttons
 
 Click the down and up arrow buttons on a line to jump between line sections
 
