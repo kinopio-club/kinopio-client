@@ -154,7 +154,7 @@ const resetPassword = async (event) => {
   if (state.loading.resetPassword || state.resetSuccess) { return }
   const email = event.target[0].value.toLowerCase()
   state.loading.resetPassword = true
-  const response = await apiStore.resetPassword(email)
+  const response = await apiStore.sendResetPasswordEmail(email)
   state.loading.resetPassword = false
   if (response.status === 404) {
     state.error.resetUserEmailNotFound = true

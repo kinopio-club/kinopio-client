@@ -86,11 +86,17 @@ const updatePassword = async (event) => {
   if (!isPasswordTooShort(password)) { return }
   if (!isPasswordsMatch(password, confirmPassword)) { return }
   state.loading.updatePassword = true
-  const apiKey = globalStore.updatePasswordApiKey || userStore.apiKey
-  const response = await apiStore.updatePassword({ password, apiKey })
+  const passwordResetToken = globalStore.passwordResetToken
+  let response
+  if (passwordResetToken) {
+    response = await apiStore.resetPassword({ password, passwordResetToken })
+  } else {
+    response = await apiStore.updatePassword({ password, apiKey: userStore.apiKey })
+  }
   const result = await response.json()
   if (isSuccess(response)) {
     state.success = true
+    globalStore.passwordResetToken = ''
   } else {
     await handleErrors(result)
   }
@@ -112,10 +118,11 @@ section
       .badge.danger Too many attempts, try again in 10 minutes
     .row(v-if="state.error.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-    button(type="submit" :class="{active : state.loading.updatePassword}")
-      span Update Password
-      Loader(:visible="state.loading.updatePassword")
-    div.row(v-if="state.success")
+    .row
+      button(type="submit" :class="{active : state.loading.updatePassword}")
+        span Update Password
+        Loader(:visible="state.loading.updatePassword")
+    .row(v-if="state.success")
       .badge.success Your password has been changed. You can now use it to Sign In
 </template>
 
