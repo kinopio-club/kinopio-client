@@ -22,13 +22,13 @@ There are two ways you can create a list:
 
 Use the Lists toolbar icon (L) then click and drag to draw an empty list:
 
-<video autoplay loop muted playsinline class="">
+<video autoplay loop muted playsinline class="medium">
   <source src="https://updates.kinopio.club/pages/help/posts/lists/toolbar.mp4">
 </video>
 
 Paint select multiple cards and click the List icon:
 
-<video autoplay loop muted playsinline class="">
+<video autoplay loop muted playsinline class="medium">
   <source src="https://updates.kinopio.club/pages/help/posts/lists/multiselect.mp4">
 </video>
 
@@ -37,7 +37,7 @@ Paint select multiple cards and click the List icon:
 
 You can hide/show the contents of lists by expanding them with the arrow button. Collapsed lists can be dragged around and expanded again wherever you’d like. 
 
-<video autoplay loop muted playsinline class="">
+<video autoplay loop muted playsinline class="medium">
   <source src="https://updates.kinopio.club/pages/help/posts/lists/collapse.mp4">
 </video>
 
@@ -45,6 +45,6 @@ You can hide/show the contents of lists by expanding them with the arrow button.
 
 If one or more cards in the list are todo cards then a progress meter will appear on the card. As you check off todos, the meter and the todos remaining count will update.
 
-<video autoplay loop muted playsinline class="">
+<video autoplay loop muted playsinline class="small">
   <source src="https://updates.kinopio.club/pages/help/posts/lists/tasks3.mp4">
 </video>

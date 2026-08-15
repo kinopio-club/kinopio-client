@@ -12,12 +12,45 @@
 # path redirects
 
 /blog/*           https://kinopio-blog.netlify.app/:splat   200
-# legacy /help site routes (temporary)
 
-/forum            https://forum.kinopio.club
+/forum           https://forum.kinopio.club
 /discord          https://discord.gg/h2sR45Nby8   301
 /survey           https://tally.so/r/w2RjDL   301
 /changelog        https://kinopio.club/changelog-6lsytK8ZfOtMl2oqG05Rj   301
 /roadmap          https://kinopio.club/-roadmap-3CBHtivu7X7nTzrcaTFQV   301
+
+# legacy /help/posts/* urls from the old help site, preserved for seo.
+/help/posts/adding-images-to-cards             /help/card-images               301
+/help/posts/adding-images-to-cards/            /help/card-images               301
+/help/posts/styling-cards                      /help/card-styling              301
+/help/posts/styling-cards/                     /help/card-styling              301
+/help/posts/selecting-and-bulk-actions         /help/select-and-bulk-actions   301
+/help/posts/selecting-and-bulk-actions/        /help/select-and-bulk-actions   301
+/help/posts/mentions                           /help/mentions-due-dates        301
+/help/posts/mentions/                          /help/mentions-due-dates        301
+/help/posts/how-your-data-is-stored            /help/where-your-data-is-stored 301
+/help/posts/how-your-data-is-stored/           /help/where-your-data-is-stored 301
+/help/posts/sharing-spaces                     /help/sharing                   301
+/help/posts/sharing-spaces/                    /help/sharing                   301
+/help/posts/inviting-collaborators-to-a-space  /help/sharing                   301
+/help/posts/inviting-collaborators-to-a-space/ /help/sharing                   301
+/help/posts/managing-collaborators             /help/sharing                   301
+/help/posts/managing-collaborators/            /help/sharing                   301
+/help/posts/extensions                         /help/apps                      301
+/help/posts/extensions/                        /help/apps                      301
+/help/posts/affiliate-program                  /help/affiliates                301
+/help/posts/affiliate-program/                 /help/affiliates                301
+/help/posts/BackLinks                          /help/backlinks                 301
+/help/posts/BackLinks/                         /help/backlinks                 301
+/help/posts/backlinks                          /help/backlinks                 301
+/help/posts/backlinks/                         /help/backlinks                 301
+/help/posts/Searching                          /help/searching                 301
+/help/posts/Searching/                         /help/searching                 301
+/help/posts/searching                          /help/searching                 301
+/help/posts/searching/                         /help/searching                 301
+/help/posts/creating-cards-and-connections     /help/card-styling              301
+/help/posts/creating-cards-and-connections/    /help/card-styling              301
+/help/posts/*     /help/:splat   301
+/help/posts       /help          301
 
 /*                /app.html   200

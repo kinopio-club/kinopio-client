@@ -10,7 +10,7 @@ You can move or edit multiple cards and connections at once by dragging from an 
 
 On mobile, you'll need to press and hold on an empty area and then drag to paint.
 
-<video class="large" autoplay loop muted playsinline>
+<video class="medium" autoplay loop muted playsinline>
   <source src="https://updates.kinopio.club/pages/help/posts/selecting-and-bulk-actions/demo.mp4">
 </video>
 
@@ -28,7 +28,7 @@ Hold shift to Box Select. Box selecting can be helpful when you want to make a b
 
 Painting over items also lets you take bulk actions on them, including moving them to another space.
 
-<img src="https://updates.kinopio.club/pages/help/posts/selecting-and-bulk-actions/select-move.webp" alt="move-cards">
+<img src="https://updates.kinopio.club/pages/help/posts/selecting-and-bulk-actions/select-move.webp" alt="move-cards" class="medium">
 
 
 ## Select All, Below, To the Right

@@ -12,7 +12,7 @@ Differentiate thoughts from plans with checkbox cards,
 - With the checkbox button on a card
 - Or by painting to select multiple cards
 
-<video autoplay loop muted playsinline>
+<video autoplay loop muted playsinline class="medium">
   <source src="https://updates.kinopio.club/pages/help/posts/checkbox-cards/demo.mp4">
 </video>
 
@@ -20,14 +20,14 @@ Differentiate thoughts from plans with checkbox cards,
 
 Filtering by todos to fades out regular and completed todos cards
 
-<img src="https://updates.kinopio.club/pages/help/posts/checkbox-cards/filter.webp" class="large"/>
+<img src="https://updates.kinopio.club/pages/help/posts/checkbox-cards/filter.webp" class="medium"/>
 
 When your brain is in "Todo Mode" you can now open the Sidebar to see a simple list of all your [] checkbox boxes and cards.
 
 Helpful for getting things done after planning out a project, or for checking off groceries.
 
 
-<video autoplay loop muted playsinline class="large">
+<video autoplay loop muted playsinline class="medium">
   <source src="https://updates.kinopio.club/pages/help/posts/checkbox-cards/sidebar.mp4">
 </video>
 

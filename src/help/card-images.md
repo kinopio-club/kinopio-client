@@ -33,13 +33,13 @@ Some websites obscure their image URLs to not include the file extension `https:
 
 To view the image fullsize, click to open the card, and then click again on the image preview
 
-<img src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/card-details.webp" alt="image-card">
+<img src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/card-details.webp" alt="image-card" class="small">
 
 ## Gifs
 
 Animated gifs and short silent mp4s work the same way.
 
-<video class="" autoplay loop muted playsinline>
+<video class="small" autoplay loop muted playsinline>
   <source src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/animated.mp4">
 </video>
 
@@ -47,7 +47,7 @@ Animated gifs and short silent mp4s work the same way.
 
 Paste in Youtube, Spotify, and other media site URLs to create interactive embeds.
 
-<video class="" autoplay loop muted playsinline>
+<video class="small" autoplay loop muted playsinline>
   <source src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/youtube.mp4">
 </video>
 
@@ -56,7 +56,7 @@ Paste in Youtube, Spotify, and other media site URLs to create interactive embed
 
 Enclose code snippets between triple backticks. You can also change the syntax highlighting for different programming languages.
 
-<img src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/code.webp">
+<img src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/code.webp" class="medium">
 
 
 ## More Pro-Tips
