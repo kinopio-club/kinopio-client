@@ -142,10 +142,20 @@ useHead(() => {
   if (consts.isDevelopment()) {
     title = `[DEV] ${title}`
   }
+  const url = `https://kinopio.club${path}`
   return {
     title,
-    meta: [{ name: 'description', content: description }],
-    link: [{ rel: 'canonical', href: `https://kinopio.club${path}` }]
+    meta: [
+      { name: 'description', content: description },
+      // og and twitter tags override the site defaults in index.html
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:url', content: url },
+      { property: 'og:type', content: pageMeta.value ? 'article' : 'website' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description }
+    ],
+    link: [{ rel: 'canonical', href: url }]
   }
 })
 
