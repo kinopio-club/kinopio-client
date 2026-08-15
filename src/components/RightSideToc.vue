@@ -106,8 +106,8 @@ const shouldDisplayList = computed(() => {
   header = header.getBoundingClientRect()
   footer = footer.getBoundingClientRect()
   let minimapHeight = 0
-  if (userStore.shouldShowMinimap) {
-    let minimap = document.querySelector('#space-minimap')
+  let minimap = document.querySelector('#space-minimap')
+  if (userStore.shouldShowMinimap && minimap) {
     minimap = minimap.getBoundingClientRect()
     minimapHeight = minimap.height
   }
