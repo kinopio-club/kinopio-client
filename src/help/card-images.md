@@ -14,7 +14,7 @@ Card Images, Files, Video, Audio, Embeds, Code
 You can copy and paste, or drag and drop, your own images and files onto spaces or cards. You can also use the file picker with `images → upload` (Handy on mobile).
 
 <video class="large" autoplay loop muted playsinline>
-  <source src="@/assets/pages/help/posts/adding-images-to-cards/upload.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/upload.mp4">
 </video>
 
 Uploads use the server, so you'll need to be signed in to use them.
@@ -33,14 +33,14 @@ Some websites obscure their image URLs to not include the file extension `https:
 
 To view the image fullsize, click to open the card, and then click again on the image preview
 
-<img src="@/assets/pages/help/posts/adding-images-to-cards/card-details.webp" alt="image-card">
+<img src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/card-details.webp" alt="image-card">
 
 ## Gifs
 
 Animated gifs and short silent mp4s work the same way.
 
 <video class="" autoplay loop muted playsinline>
-  <source src="@/assets/pages/help/posts/adding-images-to-cards/animated.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/animated.mp4">
 </video>
 
 ## Embeds
@@ -48,7 +48,7 @@ Animated gifs and short silent mp4s work the same way.
 Paste in Youtube, Spotify, and other media site URLs to create interactive embeds.
 
 <video class="" autoplay loop muted playsinline>
-  <source src="@/assets/pages/help/posts/adding-images-to-cards/youtube.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/youtube.mp4">
 </video>
 
 
@@ -56,7 +56,7 @@ Paste in Youtube, Spotify, and other media site URLs to create interactive embed
 
 Enclose code snippets between triple backticks. You can also change the syntax highlighting for different programming languages.
 
-<img src="@/assets/pages/help/posts/adding-images-to-cards/code.webp">
+<img src="https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/code.webp">
 
 
 ## More Pro-Tips

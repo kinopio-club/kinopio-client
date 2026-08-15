@@ -13,5 +13,5 @@ Helpful for creating smaller backgrounds inside spaces, and for defining places 
 Unlock cards by clicking the `Lock button` on the card.
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/locking/1.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/locking/1.mp4">
 </video>

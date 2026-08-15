@@ -6,7 +6,7 @@ category: Basics
 
 # Desktop and Mobile Apps
 
-<img src="@/assets/pages/help/app-icon-mac.png" class="no-shadow" style="width: 100px"/>
+<img src="https://updates.kinopio.club/pages/help/app-icon-mac.png" class="no-shadow" style="width: 100px"/>
 
 [Download desktop apps](https://dl.todesktop.com/201223j48l03cxi) for macOS, Windows, or Linux
 
@@ -14,7 +14,7 @@ category: Basics
 
 Or add the site to your Android phone homescreen by following the instructions in `About → Apps and Extensions`
 
-<img src="@/assets/pages/help/posts/apps/dialog.webp" class="small"/>
+<img src="https://updates.kinopio.club/pages/help/posts/apps/dialog.webp" class="small"/>
 
 
 # Browser Extensions
@@ -25,4 +25,4 @@ You'll also find it handy to download the "add to inbox" browser extensions for 
 
 The desktop app supports tabs and page refreshing like a web browser. Unlike a web browser, you can *really* shrink the window to help keep your tasks visible while you work.
 
-<img src="@/assets/pages/help/posts/apps/app-small.webp" class=""/>
+<img src="https://updates.kinopio.club/pages/help/posts/apps/app-small.webp" class=""/>

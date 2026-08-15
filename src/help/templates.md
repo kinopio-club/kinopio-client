@@ -6,7 +6,7 @@ category: Community
 
 # Using Templates and Creating Your Own
 
-<span>Get started with templates by clicking the <img src="@/assets/templates.svg" class="icon templates"> template button in the top left.</span>
+<span>Get started with templates by clicking the <img src="https://updates.kinopio.club/templates.svg" class="icon templates"> template button in the top left.</span>
 
 <img src="https://files.kinopio.club/templates-dialog.png" alt="templates">
 

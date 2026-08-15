@@ -10,4 +10,4 @@ Use app-specific API Keys to let other apps authenticate, read, and write to you
 
 You can create App API Keys in `User Settings → General → API` to use with cool third-party community tools and integrations
 
-<img src="@/assets/pages/help/posts/third-party-apps/api.webp" class="small" />
+<img src="https://updates.kinopio.club/pages/help/posts/third-party-apps/api.webp" class="small" />

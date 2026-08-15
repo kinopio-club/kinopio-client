@@ -9,7 +9,7 @@ category: Basics
 ## Personalize your spaces and set the mood
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/change-space-background/demo.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/change-space-background/demo.mp4">
 </video>
 
 
@@ -21,7 +21,7 @@ You can change the background for your current space by clicking the thumbnail n
 
 Highlight backgrounds with tint colors, personalize the default wallpaper or dye any background image
 
-<img src="@/assets/pages/help/posts/change-space-background/tint.webp" class='small'/>
+<img src="https://updates.kinopio.club/pages/help/posts/change-space-background/tint.webp" class='small'/>
 
 ## Set Defaults
 
@@ -30,7 +30,7 @@ Prefer grids over squiggles? Or a different background color? You can change you
 1. Set up a space background image and tint color that you'd like to use
 2. Make it the default for new spaces in `User → Settings → General → Theme Settings`
 
-<img src="@/assets/pages/help/posts/change-space-background/settings.webp" class="small" />
+<img src="https://updates.kinopio.club/pages/help/posts/change-space-background/settings.webp" class="small" />
 
 ## Pro Tips
 

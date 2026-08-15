@@ -13,7 +13,7 @@ For each space you get your own personal notepad in the sidebar that only you ca
 `Sidebar → Note`
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/private-space-notes/big.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/private-space-notes/big.mp4">
 </video>
 
 **PROTIP**: if the sidebar is pinned, connect selected items into the note to copy them.

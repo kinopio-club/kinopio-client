@@ -12,7 +12,7 @@ Being an affiliate is a win/win. You'll get a personalized referral URL (`kinopi
 
 For more details and how to sign up see the [Affiliate Program space](https://kinopio.club/kinopio-affiliate-program-YNmS6C3fofN3R9mYgO1Bu)
 
-<img src="@/assets/pages/help/posts/affiliate/1.webp" alt="So you're interested in
+<img src="https://updates.kinopio.club/pages/help/posts/affiliate/1.webp" alt="So you're interested in
 becoming a Kinopio
 Affiliate?" class="small">
 ## Affiliate Dashboard

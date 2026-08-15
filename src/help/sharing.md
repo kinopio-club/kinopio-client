@@ -14,24 +14,24 @@ If you haven't signed up yet, then only you can see what you make regardless of 
 
 Change space privacy, share space URLs, and invite collaborators from `Share` in the top left.
 
-<img src="@/assets/pages/help/posts/sharing-spaces/1.webp" class="small">
+<img src="https://updates.kinopio.club/pages/help/posts/sharing-spaces/1.webp" class="small">
 
 ### Privacy
 
 Space privacy can be either `open`, `closed`, or `private` (default)
 
-<img src="@/assets/pages/help/posts/sharing-spaces/2.webp" class="medium">
+<img src="https://updates.kinopio.club/pages/help/posts/sharing-spaces/2.webp" class="medium">
 
 Depending on the space's privacy setting, and whether the space is in a group, you'll have different options to share a space for editing or to read-only.
 
-<img src="@/assets/pages/help/posts/sharing-spaces/3.webp" class="small">
+<img src="https://updates.kinopio.club/pages/help/posts/sharing-spaces/3.webp" class="small">
 
 
 ### Card Links
 
 You can also reference specific cards via `Card → Share`. This URL will open the space, scroll to the card, and highlight it.
 
-<img src="@/assets/pages/help/posts/sharing-spaces/card.webp" class="small">
+<img src="https://updates.kinopio.club/pages/help/posts/sharing-spaces/card.webp" class="small">
 
 ## Collaborating
 
@@ -40,7 +40,7 @@ You can collaborate with others by sending them an invite link, or by adding the
 When collaborating with others you'll see their cursors, paint strokes, and other actions in real time. Here's an [example](https://x.com/sfpc/status/1597727116556390404) by the School For Poetic Computation (SFPC).
 
 <video class="large" autoplay loop muted playsinline>
-  <source src="@/assets/pages/help/posts/sharing-spaces/collab.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/sharing-spaces/collab.mp4">
 </video>
 
 Invite Collaborators to give them edit access to the contents of your space. Inviting is especially useful for working together on `Private` spaces, but you can do it with any privacy setting.
@@ -53,7 +53,7 @@ You should think of collaborators as people you fully trust because they'll be a
 
 Send someone a collaborator invite by copying the URL found in `Spaces → Invite …`
 
-<img src="@/assets/pages/help/posts/sharing-spaces/invite.webp" alt="invite-collaborators" class="small">
+<img src="https://updates.kinopio.club/pages/help/posts/sharing-spaces/invite.webp" alt="invite-collaborators" class="small">
 
 #### Collaborators can
 

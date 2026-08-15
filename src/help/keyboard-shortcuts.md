@@ -25,4 +25,4 @@ This allows you to quickly make structures like
 
 You can find a complete list of keyboard shortcuts in `About → Keyboard Shortcuts`. Or quick access them by pressing `?` while not focused on anything else.
 
-<img src="@/assets/pages/help/posts/keyboard-shortcuts/list2.webp" class="small"/>
+<img src="https://updates.kinopio.club/pages/help/posts/keyboard-shortcuts/list2.webp" class="small"/>

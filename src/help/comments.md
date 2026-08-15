@@ -11,14 +11,14 @@ Comment cards are smaller than normal cards and a bit transparent, letting you g
 You can turn cards into comments via either `Card → More Options → Comment`, or by typing `((`.
 
 <video autoplay loop muted playsinline class="large">
-  <source src="@/assets/pages/help/posts/comments/demo.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/comments/demo.mp4">
 </video>
 
 
 <!-- If you have a space that you want to share with your team, but want to ensure that they only leave comments on, you can get a comment-only invite link through `Share → Invite Collaborators → Comment`.
 
 
-<img src="@/assets/pages/help/posts/comments/invite.webp" alt="invite">
+<img src="https://updates.kinopio.club/pages/help/posts/comments/invite.webp" alt="invite">
  -->
 
 Other uses for comments:

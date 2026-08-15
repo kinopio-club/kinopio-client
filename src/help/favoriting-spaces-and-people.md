@@ -12,18 +12,18 @@ You can bookmark spaces or people to return to later by favoriting them.
 
 Toggle the `Favorite` button at the bottom of the screen. You can also favorite your own spaces to quickly.
 
-<img src="@/assets/pages/help/posts/favorite-space.png" alt="favorite-space">
+<img src="https://updates.kinopio.club/pages/help/posts/favorite-space.png" alt="favorite-space">
 
 ## Favorite a Person
 
 In a space with someone interesting, click their avatar in the header. Then, toggle the `Favorite` button.
 
-<img src="@/assets/pages/help/posts/favorite-user.png" alt="favorite-user">
+<img src="https://updates.kinopio.club/pages/help/posts/favorite-user.png" alt="favorite-user">
 
 ## Your Favorites
 
 Spaces and People you've favorited can be retrieved from `Spaces → Favorites → Spaces/People`
 
 <video autoplay loop muted playsinline>
-  <source src="@/assets/pages/help/posts/favorites.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/favorites.mp4">
 </video>

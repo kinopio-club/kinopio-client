@@ -8,7 +8,7 @@ category: Basics
 
 Lists let you vertically group and easily reorder cards.
 
-<img src="@/assets/pages/help/posts/lists/lists.webp" class="large"/>
+<img src="https://updates.kinopio.club/pages/help/posts/lists/lists.webp" class="large"/>
 
 They allow you to add more rigid structures like Kanban-style project management and task tracking in the same spaces that you used to figure out the plan. Kinopio spaces with Lists allow you to keep contributors aligned not only with “what we need to do”, but also with “why we’re doing this”.
 
@@ -23,13 +23,13 @@ There are two ways you can create a list:
 Use the Lists toolbar icon (L) then click and drag to draw an empty list:
 
 <video autoplay loop muted playsinline class="">
-  <source src="@/assets/pages/help/posts/lists/toolbar.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/lists/toolbar.mp4">
 </video>
 
 Paint select multiple cards and click the List icon:
 
 <video autoplay loop muted playsinline class="">
-  <source src="@/assets/pages/help/posts/lists/multiselect.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/lists/multiselect.mp4">
 </video>
 
 
@@ -38,7 +38,7 @@ Paint select multiple cards and click the List icon:
 You can hide/show the contents of lists by expanding them with the arrow button. Collapsed lists can be dragged around and expanded again wherever you’d like. 
 
 <video autoplay loop muted playsinline class="">
-  <source src="@/assets/pages/help/posts/lists/collapse.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/lists/collapse.mp4">
 </video>
 
 ## Task Lists
@@ -46,5 +46,5 @@ You can hide/show the contents of lists by expanding them with the arrow button.
 If one or more cards in the list are todo cards then a progress meter will appear on the card. As you check off todos, the meter and the todos remaining count will update.
 
 <video autoplay loop muted playsinline class="">
-  <source src="@/assets/pages/help/posts/lists/tasks3.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/lists/tasks3.mp4">
 </video>

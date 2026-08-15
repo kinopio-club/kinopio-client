@@ -10,7 +10,7 @@ category: Importing and Exporting
 
 You can import the JSON of exported spaces you've saved to your computer with `Share → Import → [JSON] Select File`
 
-<img src="@/assets/pages/help/posts/import-export/import.webp" alt="import-space" class="small">
+<img src="https://updates.kinopio.club/pages/help/posts/import-export/import.webp" alt="import-space" class="small">
 
 ## Importing an Are.na Channel
 

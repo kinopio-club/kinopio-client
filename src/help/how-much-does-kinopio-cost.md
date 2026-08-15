@@ -20,7 +20,7 @@ I want the pricing to feel simple, straightforward, and obvious.
 
 👯‍♀️ For easier collaboration, if you're editing a space that was created by an upgraded user, your card count won't increase. You can check whether your card limit will change by clicking your user icon while in a space.
 
-<img src="@/assets/pages/help/posts/card-count-exempted.png" class="small" />
+<img src="https://updates.kinopio.club/pages/help/posts/card-count-exempted.png" class="small" />
 
 ## Why a Subscription?
 

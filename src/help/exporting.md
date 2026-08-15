@@ -10,7 +10,7 @@ category: Importing and Exporting
 
 You can export your space in a plain text, JSON and PDF formats via `Share → Export`
 
-<img src="@/assets/pages/help/posts/import-export/export.webp" class="small" />
+<img src="https://updates.kinopio.club/pages/help/posts/import-export/export.webp" class="small" />
 
 ## Export Selected Cards
 

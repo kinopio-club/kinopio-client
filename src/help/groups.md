@@ -8,7 +8,7 @@ category: Advanced Use
 
 Group related spaces together and share them with multiple people at once. Each Group member can see and edit all of the spaces in a Group.
 
-<img src="@/assets/pages/help/posts/groups/groups.webp" class=""/>
+<img src="https://updates.kinopio.club/pages/help/posts/groups/groups.webp" class=""/>
 
 Groups are helpful if you want to share and collaborate often with the same people on whiteboards, brainstorms, meeting notes, and diagrams.
 
@@ -24,14 +24,14 @@ There are two ways to create new Groups:
 - Through `Spaces → Groups → + New`,
 - Or via `Yourself → My Groups → + New`. You'll be able to change the color and name of the Group at any time.
 
-<img src="@/assets/pages/help/posts/groups/new.webp" class=""/>
+<img src="https://updates.kinopio.club/pages/help/posts/groups/new.webp" class=""/>
 
 
 ## Adding Spaces to Groups
 
 From your Spaces list, you can see your personal spaces as well as spaces added to your Groups. To add your own space to the Group, open your space, click the Group button, and then select a Group.
 
-<img src="@/assets/pages/help/posts/groups/added.webp" class=""/>
+<img src="https://updates.kinopio.club/pages/help/posts/groups/added.webp" class=""/>
 
 Each space can only belong to a single Group. Spaces can be added to Groups by any member of that group.
 
@@ -43,19 +43,19 @@ If you see a Group space in your spaces list then you can edit it. Once you add 
 
 Adding people to your Group is very similar to inviting them to a space. From `Yourself → My Groups`, click on the name of a Group, and click `Copy Group Invite URL`.
 
-<img src="@/assets/pages/help/posts/groups/invite.webp" class="small"/>
+<img src="https://updates.kinopio.club/pages/help/posts/groups/invite.webp" class="small"/>
 
 Anyone you share the invite code with will be added to your Group. If they don't yet have a Kinopio account, they'll be added once they sign up.
 
 If the current space is in a group, the `Share` menu will also display the `Copy Invite to Group URL` button
 
-<img src="@/assets/pages/help/posts/groups/share2.webp" class=""/>
+<img src="https://updates.kinopio.club/pages/help/posts/groups/share2.webp" class=""/>
 
 # Group User Permissions
 
 Group users can have the role of `member` or `admin`.
 
-<img src="@/assets/pages/help/posts/groups/members.webp" class=""/>
+<img src="https://updates.kinopio.club/pages/help/posts/groups/members.webp" class=""/>
 
 **Members** can add their spaces to the Group, edit Group spaces, and invite other people to the Group.
 
