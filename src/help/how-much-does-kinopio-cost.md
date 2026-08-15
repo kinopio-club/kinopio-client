@@ -32,4 +32,4 @@ Based on popular demand, you also have the option to pay once. I've tried to pri
 
 ## Discount for Students and Those With Financial Need
 
-I want everyone to be able to use Kinopio. If you're a student, or you can't afford the subscription because of where you live, or any other personal circumstances, please [email me](mailto:hi@kinopio.club) for a 50% discount off subscription plans.
+I want everyone to be able to use Kinopio. If you're a student, or you can't afford the subscription because of where you live, or any other personal circumstances, please [email me](mailto:hi@kinopio.club) for a discount off subscription and lifetime plans.
