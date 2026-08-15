@@ -423,6 +423,8 @@ main.help-page-wrap
         padding-left 15px
       li
         line-height 1.4
+        p
+          margin-bottom 0.5rem
       li + li
         margin-top 0.5rem
       blockquote
