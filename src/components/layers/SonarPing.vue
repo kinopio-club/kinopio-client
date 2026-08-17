@@ -46,7 +46,8 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-watch(() => globalStore.spaceZoomPercent, (value, prevValue) => {
+watch(() => globalStore.spaceZoomPercent, async (value, prevValue) => {
+  await nextTick()
   updateScroll()
 })
 
@@ -73,7 +74,6 @@ const styles = computed(() => {
 // init and draw
 
 const shouldPreventPing = (ping) => {
-  console.log(ping)
   let user
   // check remote user
   if (ping.isFromBroadcast) {
@@ -119,10 +119,8 @@ const createRipples = (ping) => {
 }
 const updateRippleOrigin = ({ x, y }) => {
   const zoom = spaceZoomDecimal.value
-  x = x - state.scroll.x
-  y = y - state.scroll.y
-  x = x * zoom
-  y = y * zoom
+  x = (x * zoom) - state.scroll.x
+  y = (y * zoom) - state.scroll.y
   // left side
   if (x < 0) {
     x = 0
