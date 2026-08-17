@@ -13,7 +13,7 @@ image: https://updates.kinopio.club/pages/help/posts/press-kit/logo-base.png
 
 ## Vector Logos
 
-Feel free to change the colors of these to work with your web design, but try not to change the actual curves.
+Feel free to change the colors of these to work with your design, but try not to change the actual curves.
 
 <p>
 <img src="https://updates.kinopio.club/pages/help/posts/press-kit/wordmark.svg" class="no-shadow"/>
