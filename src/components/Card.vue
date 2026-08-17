@@ -413,11 +413,9 @@ const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
   if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
-    z = consts.maxItemZ
+    z = consts.maxItemZ // if hover, max z set in css
   } else if (isLocked.value) {
     pointerEvents = 'none'
-  } else if (isHovering.value) {
-    z = consts.maxItemZ
   }
   let styles = {
     left: `${x.value}px`,
@@ -690,9 +688,10 @@ const connectorIsVisible = computed(() => {
 const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
   const isPresentationMode = globalStore.isPresentationMode
+  if (!isPresentationMode) { return }
   const isNotHovering = !isHovering.value
   const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
-  return isPresentationMode && isNotHovering && isNotConnected
+  return isNotHovering && isNotConnected
 })
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
@@ -2132,6 +2131,9 @@ const toggleVideoIsPaused = () => {
   --card-width 200px // consts.normalCardWrapWidth
   pointer-events all
   position absolute
+  // hovered card max z
+  &:not([data-is-locked="true"]):hover
+    z-index 998999 !important // same as consts.maxItemZ
   max-width var(--card-width)
   -webkit-touch-callout none
   transition opacity 0.2s // same as consts.itemSnapGuideWaitingDuration ms
