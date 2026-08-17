@@ -258,9 +258,7 @@ const updateFilterOnSearchFocus = (event) => {
   main.page.help-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark
-        router-link(to="/help")
-          h2.page-title Help Topics
+        Wordmark(h2="HELP TOPICS")
 
       section.search
         ResultsFilter(
@@ -334,11 +332,6 @@ main.help-page-wrap
     display block
     width fit-content
     text-decoration none
-  h2.page-title
-    width fit-content
-    color var(--primary)
-    &:hover
-      text-decoration underline
 
   section.intro
     margin-bottom 1rem
@@ -392,7 +385,7 @@ main.help-page-wrap
       line-height 1.4
       h1
         margin-top 0
-        font-size 21px
+        font-size 22px
       h2
         font-size 18px
       h3

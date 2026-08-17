@@ -70,8 +70,8 @@ AboutJsonLd
   main.page(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark
-        p Spatial Thinking for Mindmaps, Moodboards, Whiteboards, Research, and Notes.
+        Wordmark(:isH1="true" h2="SPATIAL THINKING")
+        p For Mindmaps, Moodboards, Whiteboards, Research, and Notes.
         video(
           autoplay
           loop

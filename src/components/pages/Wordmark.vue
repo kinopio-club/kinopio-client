@@ -1,33 +1,40 @@
 <script setup>
-// const props = defineProps({
-//   visible: Boolean
-// })
+const props = defineProps({
+  h2: String
+})
 </script>
 
 <template lang="pug">
-h1.wordmark KINOPIO
+.row.wordmark
+    h1 KINOPIO
+    h2(v-if="props.h2") {{ props.h2 }}
 </template>
 
-<style lang="stylus">
-:root
-  --wordmark-font baustrabe, var(--sans-serif-font)
-@font-face
-  font-family 'baustrabe'
-  src url("/fonts/baustrabe/Baustraßev0.8-Bold.woff2") format("woff2")
-  font-weight bold
-  font-style normal
-  font-display swap
-@font-face
-  font-family 'baustrabe'
-  src url("/fonts/baustrabe/Baustraßev0.8-BoldOblique.woff2") format("woff2")
-  font-weight bold
-  font-style italic
-  font-display swap
-
-h1.wordmark
-  font-family var(--wordmark-font)
-  font-size 55px
-  margin-block initial
+<style lang="stylus" scoped>
+.wordmark
+  display flex
+  word-wrap no-wrap
   margin-bottom 1rem
-  font-style italic
+  align-items flex-start
+  h1
+    font-family var(--header-font-9)
+    font-size 54px
+    margin-block initial
+    font-style italic
+  h2
+    font-family var(--header-font-5)
+    font-size 20px
+    width 50px
+    margin 0
+    margin-left 1.5rem
+    line-height 20px
+    transform translateY(11px)
+  @media(max-width 500px)
+    h1
+      font-size 40px
+    h2
+      font-size 16px
+      line-height 16px
+      transform translateY(7px)
+      margin-left 1.4rem
 </style>
