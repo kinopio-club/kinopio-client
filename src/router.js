@@ -54,6 +54,14 @@ const router = {
         next()
       }
     }, {
+      path: '/help/:page?',
+      name: 'help',
+      component: () => import('./views/Help.vue'),
+      beforeEnter: (to, from, next) => {
+        resetStoresForStaticPage()
+        next()
+      }
+    }, {
       path: '/from/:promoCode',
       redirect: to => ({
         path: '/',
@@ -93,9 +101,13 @@ const router = {
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
         const globalStore = useGlobalStore()
-        const apiKey = to.query.apiKey
+        const passwordResetToken = to.query.passwordResetToken
+        const apiKey = to.query.apiKey // legacy
         if (apiKey) {
-          globalStore.updatePasswordApiKey = apiKey
+          globalStore.addNotification({ message: 'Reset password link is expired. Request a new one.', type: 'danger' })
+        }
+        if (passwordResetToken) {
+          globalStore.passwordResetToken = passwordResetToken
           globalStore.passwordResetIsVisible = true
         }
         history.replaceState({}, document.title, window.location.origin)

@@ -167,7 +167,7 @@ dialog.user-api-info(
     .row.title-row
       span API
       .button-wrap
-        a(href="https://help.kinopio.club/api")
+        a(href="https://kinopio.club/api")
           button.small-button
             span API Docs{{' '}}
             img.icon.visit(src="@/assets/visit.svg")

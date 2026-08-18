@@ -73,12 +73,12 @@ section.faq
         a(href="/api") public API
         span {{' '}} so that you can build your own custom integrations and tooling.
       p And if you'd like, you can{{' '}}
-        a(href="/help/posts/delete-your-account/") delete your account
+        a(href="/help/delete-your-account/") delete your account
         span {{' '}}at any time.
       //- p For more information,{{' '}}
-      //-   a(href="/help/posts/security") Trust & Security (GDPR, CPRA)
+      //-   a(href="/help/security") Trust & Security (GDPR, CPRA)
       //-   span ,{{' '}}
-      //-   a(href="/help/posts/privacy-policy/") Privacy Policy
+      //-   a(href="/help/privacy-policy/") Privacy Policy
       //-   span .
 </template>
 

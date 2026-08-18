@@ -8,7 +8,7 @@ import { useThemeStore } from '@/stores/useThemeStore'
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
-import { colord, extend } from 'colord'
+import { colord } from 'colord'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()

@@ -7,7 +7,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 section.about-groups
   p Group spaces together to organize them, and share them with your team, friends, or organization.
   p
-    a(href="https://help.kinopio.club/posts/groups" target="_blank")
+    a(href="https://kinopio.club/help/groups" target="_blank")
       button
         span More Info{{' '}}
         img.icon.visit(src="@/assets/visit.svg")

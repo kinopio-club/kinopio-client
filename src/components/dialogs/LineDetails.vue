@@ -12,7 +12,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import utils from '@/utils.js'
 
-import { colord, extend } from 'colord'
+import { colord } from 'colord'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()

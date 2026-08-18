@@ -11,6 +11,7 @@ import consts from '@/consts.js'
 import Header from '@/components/pages/Header.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import Wordmark from '@/components/pages/Wordmark.vue'
 
 import dayjs from 'dayjs'
 
@@ -100,7 +101,7 @@ const totalCommissionsPaid = computed(() => total(commissionsPaid.value))
   main.page(@click="closeAllDialogs")
     .page-wrap
       section
-        h1 Affiliate Dashboard
+        Wordmark(h2="AFFILIATE DASHBOARD")
         .errors
           .badge.danger(v-if="state.error.currentUserIsNotSignedIn")
             span To access this page you must be signed in

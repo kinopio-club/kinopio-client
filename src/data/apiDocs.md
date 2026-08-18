@@ -207,7 +207,7 @@ Name | Type | Description
 <code class="spaces">isFavorite</code>          | `Boolean` | Whether the space is favorited by the current user
 <code class="spaces">isRemoved</code>           | `Boolean` | Whether the space has been soft-removed. (can then be restored or permanently removed)
 <code class="spaces">isRestrictedByModerator</code> | `Boolean` | Whether the space has been marked as restricted. Restricted spaces are not shown in Explore, Live, or in the Everyone feed. This value cannot be patched, it is set manually by a moderator only when necessary.
-<code class="spaces">isTemplate</code>          | `Boolean` | Whether the space is a <a href="https://kinopio.club/help/posts/templates/">personal template</a>
+<code class="spaces">isTemplate</code>          | `Boolean` | Whether the space is a <a href="https://kinopio.club/help/templates/">personal template</a>
 <code class="spaces">lines</code>                | `Array`   | A list of the Line dividers in the space
 <code class="spaces">lists</code>                | `Object`   | A list of the <a href="#lists" class="badge button-badge lists">Lists</a> in the space
 <code class="spaces">moonPhase</code>           | `String`  | Name of the moonPhase icon representing when the space was created. Possible values are `new-moon`, `waxing-crescent`, `waxing-quarter`, `waxing-gibbous`, `full-moon`, `waning-gibbous`, `waning-quarter`, `waning-crescent`

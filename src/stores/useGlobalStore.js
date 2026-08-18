@@ -77,7 +77,7 @@ export const useGlobalStore = defineStore('global', {
     previousResultItem: {},
 
     // update password
-    updatePasswordApiKey: '',
+    passwordResetToken: '',
     passwordResetIsVisible: false,
 
     // services

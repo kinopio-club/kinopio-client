@@ -22,9 +22,9 @@ footer.sitemap
       a(href="https://github.com/kinopio-club") Github
     .column
       p ﾉ乙(､ﾝ､)_
-      a(href="/help/posts/terms-of-service/") Terms
-      a(href="/help/posts/privacy-policy/") Privacy
-      //- a(href="/help/posts/security/") Security
+      a(href="/help/terms-of-service/") Terms
+      a(href="/help/privacy-policy/") Privacy
+      //- a(href="/help/security/") Security
 </template>
 
 <style lang="stylus">
@@ -33,7 +33,7 @@ footer.sitemap
   background #223c2f
   border-radius var(--page-entity-radius)
   max-width 100%
-  margin 2rem 12px
+  margin var(--page-section-padding)
   width max-content
   p
     margin-top 0

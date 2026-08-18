@@ -9,16 +9,67 @@
 
 /sitemap.xml      /sitemap.xml   200
 
-# Blog and Help Rewrites
+# path redirects
 
-/help/*           https://kinopio-help.netlify.app/:splat   200
 /blog/*           https://kinopio-blog.netlify.app/:splat   200
 
-/api              https://help.kinopio.club/api
-/forum            https://forum.kinopio.club
+/forum           https://forum.kinopio.club
 /discord          https://discord.gg/h2sR45Nby8   301
 /survey           https://tally.so/r/w2RjDL   301
 /changelog        https://kinopio.club/changelog-6lsytK8ZfOtMl2oqG05Rj   301
 /roadmap          https://kinopio.club/-roadmap-3CBHtivu7X7nTzrcaTFQV   301
+
+# redirect legacy urls from the old help site for seo.
+/help/posts/adding-images-to-cards             /help/card-images               301
+/help/posts/adding-images-to-cards/            /help/card-images               301
+/help/posts/styling-cards                      /help/card-styling              301
+/help/posts/styling-cards/                     /help/card-styling              301
+/help/posts/selecting-and-bulk-actions         /help/select-and-bulk-actions   301
+/help/posts/selecting-and-bulk-actions/        /help/select-and-bulk-actions   301
+/help/posts/mentions                           /help/mentions-due-dates        301
+/help/posts/mentions/                          /help/mentions-due-dates        301
+/help/posts/how-your-data-is-stored            /help/where-your-data-is-stored 301
+/help/posts/how-your-data-is-stored/           /help/where-your-data-is-stored 301
+/help/posts/sharing-spaces                     /help/sharing                   301
+/help/posts/sharing-spaces/                    /help/sharing                   301
+/help/posts/inviting-collaborators-to-a-space  /help/sharing                   301
+/help/posts/inviting-collaborators-to-a-space/ /help/sharing                   301
+/help/posts/managing-collaborators             /help/sharing                   301
+/help/posts/managing-collaborators/            /help/sharing                   301
+/help/posts/extensions                         /help/apps                      301
+/help/posts/extensions/                        /help/apps                      301
+/help/posts/affiliate-program                  /help/affiliates                301
+/help/posts/affiliate-program/                 /help/affiliates                301
+/help/posts/BackLinks                          /help/backlinks                 301
+/help/posts/BackLinks/                         /help/backlinks                 301
+/help/posts/backlinks                          /help/backlinks                 301
+/help/posts/backlinks/                         /help/backlinks                 301
+/help/posts/Searching                          /help/searching                 301
+/help/posts/Searching/                         /help/searching                 301
+/help/posts/searching                          /help/searching                 301
+/help/posts/searching/                         /help/searching                 301
+/help/posts/creating-cards-and-connections     /help/card-styling              301
+/help/posts/creating-cards-and-connections/    /help/card-styling              301
+/help/posts/*     /help/:splat   301
+/help/posts       /help          301
+/help/guides/diary-hobbies       /blog/posts/diary-hobbies/      301
+/help/guides/diary-hobbies/      /blog/posts/diary-hobbies/      301
+/help/guides/life-tasks          /blog/posts/life-tasks/         301
+/help/guides/life-tasks/         /blog/posts/life-tasks/         301
+/help/guides/personal-homepage   /blog/posts/personal-homepage/  301
+/help/guides/personal-homepage/  /blog/posts/personal-homepage/  301
+/help/guides/plan-routine        /blog/posts/plan-routine/       301
+/help/guides/plan-routine/       /blog/posts/plan-routine/       301
+/help/guides/present-research    /blog/posts/present-research/   301
+/help/guides/present-research/   /blog/posts/present-research/   301
+/help/guides/track-media         /blog/posts/track-media/        301
+/help/guides/track-media/        /blog/posts/track-media/        301
+/help/guides                     /blog/                          301
+/help/guides/                    /blog/                          301
+/help/            /help    301
+/help/api         /api     301
+/help/api/        /api     301
+/help/about       /about   301
+/help/about/      /about   301
 
 /*                /app.html   200

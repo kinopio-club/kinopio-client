@@ -28,7 +28,9 @@ onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     async ({ name, args }) => {
       if (name === 'closeAllDialogs') {
+        const origin = args[0]
         const element = resultsFilterElement.value
+        if (origin === 'page') { return }
         if (!element) { return }
         if (props.filterIsPersistent) { return }
         if (props.parentIsPinned) { return }
@@ -73,7 +75,8 @@ const props = defineProps({
   parentIsPinned: Boolean,
   showCreateNewSpaceFromSearch: Boolean,
   isInitialValueFromSpaceListFilterInfo: Boolean,
-  searchByAliases: Boolean
+  searchByAliases: Boolean,
+  shouldNotAutofocus: Boolean
 })
 
 const state = reactive({
@@ -144,6 +147,7 @@ const filterItems = computed({
 })
 const autoFocus = async () => {
   if (globalStore.isTouchDevice) { return }
+  if (props.shouldNotAutofocus) { return }
   await nextTick()
   focusFilterInput()
 }
@@ -198,8 +202,8 @@ const clearFilter = (shouldClearFilterInfo) => {
 
 // event handlers
 
-const focus = () => {
-  emit('onFocus')
+const focus = (event) => {
+  emit('onFocus', event)
   resetPinchCounterZoomDecimal()
 }
 const resetPinchCounterZoomDecimal = () => {

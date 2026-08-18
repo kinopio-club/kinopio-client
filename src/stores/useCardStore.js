@@ -462,6 +462,7 @@ export const useCardStore = defineStore('cards', {
       card.maxWidth = Math.round(card.maxWidth) || userStore.cardSettingsCardWrapWidth
       card.spaceId = spaceStore.id // currentSpaceId
       card.isComment = isComment
+      card.isCreatedThroughPublicApi = false
       card.shouldShowOtherSpacePreviewImage = true
       card.atUserMentions = atUserMentions || []
       card.atDateMentions = atDateMentions || []

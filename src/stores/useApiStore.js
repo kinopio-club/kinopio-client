@@ -365,15 +365,20 @@ export const useApiStore = defineStore('api', {
       const options = await this.requestOptions({ body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/sign-in`, options)
     },
-    async resetPassword (email) {
+    async sendResetPasswordEmail (email) {
       const body = { email }
       const options = await this.requestOptions({ body, method: 'POST' })
-      return fetch(`${consts.apiHost()}/user/reset-password`, options)
+      return fetch(`${consts.apiHost()}/user/send-reset-password-email`, options)
     },
     async updatePassword ({ password, apiKey }) {
       const body = { password, apiKey }
       const options = await this.requestOptions({ body, method: 'PATCH', apiKey })
       return fetch(`${consts.apiHost()}/user/update-password`, options)
+    },
+    async resetPassword ({ password, passwordResetToken }) {
+      const body = { password, passwordResetToken }
+      const options = await this.requestOptions({ body, method: 'PATCH' })
+      return fetch(`${consts.apiHost()}/user/reset-password`, options)
     },
     async updateEmail (email) {
       const body = { email }

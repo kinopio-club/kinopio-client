@@ -13,8 +13,6 @@ import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
-import { colord, extend } from 'colord'
-import namesPlugin from 'colord/plugins/names'
 
 dayjs.extend(isToday)
 

@@ -19,6 +19,7 @@ import isToday from 'dayjs/plugin/isToday'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
 
+extend([namesPlugin])
 dayjs.extend(isToday)
 
 const cardStore = useCardStore()

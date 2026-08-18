@@ -10,7 +10,7 @@ const isSafari = computed(() => utils.isSafari() || utils.isIPhone())
 
 <template lang="pug">
 section.how-to
-  h2 How to Turn Information into Knowledge
+  h2 How To
   .how-to-wrap
     .row
       .side.left
@@ -30,22 +30,6 @@ section.how-to
           source(v-else src="https://updates.kinopio.club/pages/about/how-to/1.webm")
     .row
       .side.left
-        h3 Boxes and Lists to Organize
-        p Use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
-
-      .side.right
-        video(
-          autoplay
-          loop
-          muted
-          playsinline
-          aria-label="Showing moving boxes, adding cards to list, and rearranging"
-          poster="https://updates.kinopio.club/pages/about/how-to/2.webp"
-        )
-          source(v-if="isSafari" src="https://updates.kinopio.club/pages/about/how-to/2.mp4")
-          source(v-else src="https://updates.kinopio.club/pages/about/how-to/2.webm")
-    .row
-      .side.left
         h3 Paint Select to Edit Multiple
         p Drag from an empty area to paint over items you want to move or edit them together. First-class bulk edits are one of Kinopio's most powerful features.
 
@@ -60,6 +44,22 @@ section.how-to
         )
           source(v-if="isSafari" src="https://updates.kinopio.club/pages/about/how-to/3.mp4")
           source(v-else src="https://updates.kinopio.club/pages/about/how-to/3.webm")
+    .row
+      .side.left
+        h3 Boxes and Lists to Organize
+        p Use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
+
+      .side.right
+        video(
+          autoplay
+          loop
+          muted
+          playsinline
+          aria-label="Showing moving boxes, adding cards to list, and rearranging"
+          poster="https://updates.kinopio.club/pages/about/how-to/2.webp"
+        )
+          source(v-if="isSafari" src="https://updates.kinopio.club/pages/about/how-to/2.mp4")
+          source(v-else src="https://updates.kinopio.club/pages/about/how-to/2.webm")
 </template>
 
 <style lang="stylus">

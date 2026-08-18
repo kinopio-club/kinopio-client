@@ -70,8 +70,8 @@ AboutJsonLd
   main.page(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark
-        p Spatial Thinking for Mindmaps, Moodboards, Whiteboards, Research, and Notes.
+        Wordmark(:isH1="true" h2="SPATIAL THINKING")
+        p For Mindmaps, Moodboards, Whiteboards, Research, and Notes.
         video(
           autoplay
           loop
@@ -93,17 +93,17 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
+      AboutCollaborate
+
+      AboutSocialProof
+
       AboutHowTo
 
       AboutMoreFeatures
 
       AboutExamples
 
-      AboutCollaborate
-
       AboutFAQ
-
-      AboutSocialProof
 
       section
         //- cta
@@ -124,7 +124,7 @@ AboutJsonLd
           a(href="https://pketh.org/how-kinopio-is-made.html")
             span How Kinopio is Made
           span . I hope you enjoy using Kinopio and find it invaluable,
-        img.icon.signature(width="70" height="36" src="https://help.kinopio.club/assets/about/signature.png" alt="signature")
+        img.icon.signature(width="70" height="36" src="https://updates.kinopio.club/pages/about/signature.png" alt="signature")
         .row
           a(href="mailto:hi@kinopio.club") hi@kinopio.club
       FooterSitemap
