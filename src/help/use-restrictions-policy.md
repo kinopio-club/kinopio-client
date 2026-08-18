@@ -43,7 +43,7 @@ Depending on the violation, the following may happen:
 
 (This document was originally adapted from [Basecamp's](https://basecamp.com/about/policies/abuse) Use Restrictions Policy.)
 
-[Track changes for this page](https://github.com/kinopio-club/kinopio-help/blob/master/posts/use-restrictions-policy.md)
+[Track changes for this page](https://github.com/kinopio-club/kinopio-client/commits/main/src/help/use-restriction-policy.md)
 
 All Policies
 - [Privacy Policy](/help/privacy-policy/)

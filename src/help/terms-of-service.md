@@ -120,7 +120,7 @@ In other words: choosing to use our Services does mean you are making a bet on u
 
 This document was originally adapted from [Basecamp's](https://basecamp.com/about/policies/terms) Terms of Service.
 
-[Track changes for this page](https://github.com/kinopio-club/kinopio-help/blob/master/posts/terms-of-service.md)
+[Track changes for this page](https://github.com/kinopio-club/kinopio-client/commits/main/src/help/terms-of-service.md)
 
 All Policies
 - [Privacy Policy](/help/privacy-policy/)

@@ -23,7 +23,7 @@ image: https://us-east-1.linodeobjects.com/kinopio-uploads/M3Y0aaFCNIHsIMXvz1f78
 
 ---
 
-[Track changes for this page](https://github.com/kinopio-club/kinopio-help/blob/master/posts/privacy-policy.md)
+[Track changes for this page](https://github.com/kinopio-club/kinopio-client/commits/main/src/help/privacy-policy.md)
 
 All Policies
 - [Privacy Policy](/help/privacy-policy/)
