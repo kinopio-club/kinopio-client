@@ -834,11 +834,11 @@ const handlePasteEvent = async (event) => {
     globalStore.closeAllDialogs()
     const cardIds = items.cards.map(card => card.id)
     const boxIds = items.boxes.map(box => box.id)
+    const itemIds = cardIds.concat(boxIds)
     globalStore.addMultipleToMultipleCardsSelected(cardIds)
     globalStore.addMultipleToMultipleBoxesSelected(boxIds)
     await nextTick()
-    const connectionIds = items.connections.map(connection => connection.map)
-    connectionStore.updateConnectionPathsByItemIds(connectionIds)
+    connectionStore.updateConnectionPathsByItemIds(itemIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
