@@ -56,7 +56,7 @@ const styles = computed(() => {
 </script>
 
 <template lang="pug">
-#space-background-tint(v-if="visible" :style="styles")
+#space-background-tint(v-if="visible && backgroundTint" :style="styles")
 </template>
 
 <style lang="stylus">
