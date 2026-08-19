@@ -106,10 +106,10 @@ const checkIsSpaceScope = (event) => {
   const isMain = tagName === 'MAIN'
   const nodeList = event.target.classList
   const classes = [...nodeList]
-  const isFocusedCard = classes.includes('card')
+  const isFocusedItem = classes.includes('card') || classes.includes('box-info') || classes.includes('list-info')
   const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
   const isChromeFix = classes.includes('label') || tagName === 'SPAN'
-  return isBody || isMain || isFocusedCard || isSpaceNameButton || isChromeFix
+  return isBody || isMain || isFocusedItem || isSpaceNameButton || isChromeFix
 }
 const checkIsCardScope = (event) => {
   const isFromCardName = event.target.closest('dialog.card-details')

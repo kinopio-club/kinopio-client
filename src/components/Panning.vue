@@ -122,6 +122,7 @@ const updatePanningPosition = (event) => {
 }
 const panningFrame = () => {
   // scroll frame
+  if (!panningDelta) { return }
   if (shouldPanNextFrame) {
     window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
     updatecurrentScrollByDelta(panningDelta)
