@@ -247,11 +247,12 @@ const imgproxyUrl = (imageUrl, width, height) => {
   }
   const containerBreakpoints = [400, 600, 800, 1200, 3000]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
-  const maxDimensions = Math.max(width, height)
+  const maxDimensions = Math.max(width || 0, height || 0)
   let url = utils.imgproxyUrl(imageUrl)
   for (const breakpoint of containerBreakpoints) {
     if (maxDimensions <= breakpoint) {
       url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
+      break
     }
   }
   return url

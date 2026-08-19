@@ -2,25 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
 
 const globalStore = useGlobalStore()
-const cardStore = useCardStore()
 
 const state = reactive({
-  imageUrls: [],
   spaceLoaded: false
 })
 
-const updateImageUrls = () => {
-  const cards = cardStore.getAllCards
-  let urls = cards.map(card => card.urlPreviewImage)
-  urls = urls.filter(url => Boolean(url))
-  state.imageUrls = urls
-}
-
 watch(() => globalStore.isLoadingSpace, (value) => {
-  updateImageUrls()
   if (state.spaceLoaded) { return }
   if (!value) {
     console.log('💐 preload assets')
@@ -31,9 +20,6 @@ watch(() => globalStore.isLoadingSpace, (value) => {
 
 <template lang="pug">
 .preload
-  template(v-for="url in state.imageUrls")
-    img.hidden(:src="url")
-
   .icons.hidden(v-if="state.spaceLoaded")
     //- logo
     img.icon(src="@/assets/logos/logo-hover.png")
