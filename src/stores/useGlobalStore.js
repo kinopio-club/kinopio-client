@@ -611,6 +611,7 @@ export const useGlobalStore = defineStore('global', {
     triggerAddBox (event) {},
     triggerAddList (event) {},
     triggerClearTaskFilters () {},
+    triggerToggleGroupSpaceFilter (group) {},
     // select all below
     triggerSelectAllItemsBelowCursor (position) {},
     triggerSelectAllItemsAboveCursor (position) {},

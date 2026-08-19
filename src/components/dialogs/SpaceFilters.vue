@@ -28,6 +28,9 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'triggerClearAllSpaceFilters') {
         clearAllFilters()
+      } else if (name === 'triggerToggleGroupSpaceFilter') {
+        const group = args[0]
+        filterByGroup(null, group)
       }
     }
   )

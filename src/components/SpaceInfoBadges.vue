@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, watch } from 'vue'
 
+import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 
+const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
@@ -21,6 +23,9 @@ const isTemplate = computed(() => spaceStore.isTemplate)
 const isHidden = computed(() => {
   return isSpaceMember.value && !showInExplore.value && !isTemplate.value && !props.spaceGroup
 })
+const toggleGroupSpaceFilter = (group) => {
+  globalStore.triggerToggleGroupSpaceFilter(group)
+}
 </script>
 
 <template lang="pug">
@@ -38,7 +43,13 @@ const isHidden = computed(() => {
     img.icon.templates(src="@/assets/templates.svg")
     span Template
 
-  GroupLabel(v-if="props.spaceGroup" :group="props.spaceGroup" :showName="true")
+  GroupLabel(
+    v-if="props.spaceGroup"
+    :group="props.spaceGroup"
+    :showName="true"
+    :isButton="isSpaceMember"
+    @selectGroup="toggleGroupSpaceFilter"
+  )
 </template>
 
 <style lang="stylus">
