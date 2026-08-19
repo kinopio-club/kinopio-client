@@ -352,6 +352,16 @@ export const useGlobalStore = defineStore('global', {
     getSpaceCounterZoomDecimal () {
       return 1 / this.getSpaceZoomDecimal
     },
+    getViewportObserverRootMargin () {
+      // while pinching, render only what is actually on screen. zooming out fits exponentially
+      // more of the space on screen, so a pre-render margin here renders most of the space
+      // mid gesture and runs ios safari out of memory
+      if (this.isPinchZooming) { return '0%' }
+      // otherwise shrink the margin as the space zooms out, for the same reason
+      const zoom = Math.min(this.getSpaceZoomDecimal, 1)
+      const margin = Math.round(consts.viewportObserverMaxRootMargin * zoom)
+      return `${margin}%`
+    },
     getIsTouchDevice () {
       return this.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
@@ -541,6 +551,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateRemoteDropGuideLine () {},
     triggerUpdateStopRemoteUserDropGuideLine (updates) {},
     triggerUpdateHeaderAndFooterPosition () {},
+    triggerUpdateViewportObservers () {},
     triggerHideTouchInterface () {},
     triggerUpgradeUserIsVisible () {},
     triggerDateAndTimeSettingsIsVisible () {},

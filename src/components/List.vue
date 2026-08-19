@@ -47,6 +47,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'clearDraggingItems') {
         state.isDraggingCardOverList = false
+      } else if (name === 'triggerUpdateViewportObservers') {
+        initViewportObserver()
       }
     }
   )
@@ -94,16 +96,16 @@ const initViewportObserver = async () => {
     }
     const target = listElement.value
     if (!target) { return }
-    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 listElement initViewportObserver', error)
   }
 }
 const removeViewportObserver = () => {
-  const target = listElement.value
   if (!observer) { return }
-  observer.unobserve(target)
+  observer.disconnect()
+  observer = null
 }
 const shouldRender = computed(() => {
   if (globalStore.disableViewportOptimizations) { return true }

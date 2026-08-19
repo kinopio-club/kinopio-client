@@ -53,6 +53,8 @@ onMounted(() => {
     ({ name, args }) => {
       if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
         updateRemoteConnections()
+      } else if (name === 'triggerUpdateViewportObservers') {
+        initViewportObserver()
       }
     }
   )
@@ -156,16 +158,16 @@ const initViewportObserver = async () => {
     }
     const target = boxElement.value
     if (!target) { return }
-    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 boxElement initViewportObserver', error)
   }
 }
 const removeViewportObserver = () => {
-  const target = boxElement.value
   if (!observer) { return }
-  observer.unobserve(target)
+  observer.disconnect()
+  observer = null
 }
 
 // styles
