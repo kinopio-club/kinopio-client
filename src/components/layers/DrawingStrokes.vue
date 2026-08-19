@@ -109,6 +109,7 @@ const eraserMask = computed(() => {
   if (!hasEraserPaths) { return null }
   return 'url(#eraserMask)'
 })
+const strokesAreVisible = computed(() => Boolean(state.paths.length))
 
 // clear
 const clearDrawing = () => {
@@ -213,8 +214,11 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
 const updateDrawingDataUrl = async () => {
   await nextTick()
   const element = document.querySelector('svg.drawing-strokes')
-  const svgString = new XMLSerializer().serializeToString(element)
-  const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
+  let dataUrl = '' // no strokes
+  if (element) {
+    const svgString = new XMLSerializer().serializeToString(element)
+    dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
+  }
   globalStore.drawingDataUrl = dataUrl
   broadcastStore.update({
     action: 'triggerUpdateDrawingDataUrl'
@@ -249,14 +253,15 @@ const erasePath = (id) => {
   broadcastRemoveStroke({ id })
 }
 const erase = (event) => {
-  const point = utils.cursorPositionInSpace(event)
   const svg = document.querySelector('svg.drawing-strokes')
+  if (!svg) { return }
+  const point = utils.cursorPositionInSpace(event)
   const svgPoint = svg.createSVGPoint()
   svgPoint.x = point.x
   svgPoint.y = point.y
   state.paths.forEach(path => {
     const element = document.querySelector(`.drawing-strokes path[data-id="${path.id}"]`)
-    const data = element.dataset
+    if (!element) { return }
     if (element.isPointInStroke(svgPoint)) {
       erasePath(path.id)
     }
@@ -396,6 +401,7 @@ const updatePageSizes = () => {
 
 <template lang="pug">
 svg.drawing-strokes(
+  v-if="strokesAreVisible"
   :width="pageWidth"
   :height="pageHeight"
 )
@@ -438,7 +444,7 @@ svg.drawing-strokes(
         )
 
 //- duplicate ^ into Space.vue
-teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted")
+teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted && strokesAreVisible")
   svg.drawing-strokes(
     :width="pageWidth"
     :height="pageHeight"
