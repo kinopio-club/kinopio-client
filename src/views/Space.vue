@@ -334,17 +334,16 @@ const styles = computed(() => {
     transform: globalStore.getZoomTransform
   }
 })
-// item viewport observers use a zoom aware rootMargin, which can only be set when the observer is created.
-// rebuild them once zooming settles instead of on every wheel or pinch tick
+
+// update item intersection observer margin during zoom
+
 const updateViewportObservers = debounce(() => {
-  if (globalStore.isPinchZooming) { return } // already rebuilt at pinch start, restored on pinch end
+  if (globalStore.isPinchZooming) { return }
   globalStore.triggerUpdateViewportObservers()
 }, 300, { maxWait: 1000 })
 watch(() => globalStore.spaceZoomPercent, () => {
   updateViewportObservers()
 })
-// rebuild right away when a pinch starts, so the margin is already collapsed before the space
-// zooms out. debouncing this instead would let the whole space render during the gesture
 watch(() => globalStore.isPinchZooming, (value) => {
   if (value) {
     updateViewportObservers.cancel()

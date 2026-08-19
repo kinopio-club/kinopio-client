@@ -353,13 +353,11 @@ export const useGlobalStore = defineStore('global', {
       return 1 / this.getSpaceZoomDecimal
     },
     getViewportObserverRootMargin () {
-      // while pinching, render only what is actually on screen. zooming out fits exponentially
-      // more of the space on screen, so a pre-render margin here renders most of the space
-      // mid gesture and runs ios safari out of memory
+      // while pinching, render only what is actually on screen
       if (this.isPinchZooming) { return '0%' }
-      // otherwise shrink the margin as the space zooms out, for the same reason
+      // otherwise shrink the intersection observer margin as the space zooms out
       const zoom = Math.min(this.getSpaceZoomDecimal, 1)
-      const margin = Math.round(consts.viewportObserverMaxRootMargin * zoom)
+      const margin = Math.round(consts.viewportObserverMaxRootMarginPercent * zoom)
       return `${margin}%`
     },
     getIsTouchDevice () {

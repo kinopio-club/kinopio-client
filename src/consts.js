@@ -8,7 +8,7 @@ export default {
     min: 20,
     default: 100
   },
-  viewportObserverMaxRootMargin: 50, // percent, shrinks as the space zooms out
+  viewportObserverMaxRootMarginPercent: 50,
   spaceBetweenCards: 12,
   cardCharacterLimit: 4000,
   defaultCardWidth: 58,
