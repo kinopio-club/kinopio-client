@@ -12,6 +12,7 @@ const videoElement = ref(null)
 const imageElement = ref(null)
 
 let unsubscribes
+let pausedCanvas
 
 onMounted(() => {
   state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
@@ -42,6 +43,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('focus', updateIsPlaying)
   window.removeEventListener('blur', updateIsPlaying)
   document.removeEventListener('visibilitychange', updateIsPlaying)
+  pausedCanvas?.remove()
+  pausedCanvas = null
   unsubscribes()
 })
 
@@ -190,12 +193,12 @@ const pauseGif = () => {
   if (!imageIsGif.value) { return }
   if (canvasElement()) { return } // already paused
   const image = imageElement.value
+  if (!image) { return }
   const width = image.width
   const height = image.height
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  canvas.getContext('2d').drawImage(image, 0, 0, width, height)
+  if (!width || !height) { return } // not laid out yet
+  const canvas = pausedCanvas || document.createElement('canvas')
+  pausedCanvas = canvas
   let attr
   let i = 0
   for (i = 0; i < image.attributes.length; i++) {
@@ -204,6 +207,14 @@ const pauseGif = () => {
       canvas.setAttribute(attr.name, attr.value)
     }
   }
+  const imageWasResized = canvas.width !== width || canvas.height !== height
+  if (imageWasResized) {
+    canvas.width = width
+    canvas.height = height
+  }
+  const context = canvas.getContext('2d')
+  context.clearRect(0, 0, width, height)
+  context.drawImage(image, 0, 0, width, height)
   canvas.style.position = 'absolute'
   canvas.classList.add('pause')
   image.parentNode.insertBefore(canvas, image)
