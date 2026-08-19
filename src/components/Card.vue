@@ -113,6 +113,8 @@ onMounted(async () => {
         cancelLocking()
       } else if (name === 'triggerIsSnappingToList') {
         state.isSnappingToList = true
+      } else if (name === 'triggerUpdateViewportObservers') {
+        initViewportObserver()
       }
     }
   )
@@ -1599,6 +1601,7 @@ const userDetailsIsUser = computed(() => {
 // is visible in viewport, perf, should render
 
 const initViewportObserver = async () => {
+  removeViewportObserver()
   await nextTick()
   try {
     const callback = (entries, observer) => {
@@ -1612,16 +1615,16 @@ const initViewportObserver = async () => {
       })
     }
     const target = cardElement.value
-    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 card initViewportObserver', error)
   }
 }
 const removeViewportObserver = () => {
-  const target = cardElement.value
   if (!observer) { return }
-  observer.unobserve(target)
+  observer.disconnect()
+  observer = null
 }
 const shouldRender = computed(() => {
   const shouldExplitlyRender = globalStore.shouldExplicitlyRenderCardIds[props.card.id]

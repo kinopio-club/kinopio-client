@@ -352,6 +352,14 @@ export const useGlobalStore = defineStore('global', {
     getSpaceCounterZoomDecimal () {
       return 1 / this.getSpaceZoomDecimal
     },
+    getViewportObserverRootMargin () {
+      // while pinching, render only what is actually on screen
+      if (this.isPinchZooming) { return '0%' }
+      // otherwise shrink the intersection observer margin as the space zooms out
+      const zoom = Math.min(this.getSpaceZoomDecimal, 1)
+      const margin = Math.round(consts.viewportObserverMaxRootMarginPercent * zoom)
+      return `${margin}%`
+    },
     getIsTouchDevice () {
       return this.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
@@ -541,6 +549,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateRemoteDropGuideLine () {},
     triggerUpdateStopRemoteUserDropGuideLine (updates) {},
     triggerUpdateHeaderAndFooterPosition () {},
+    triggerUpdateViewportObservers () {},
     triggerHideTouchInterface () {},
     triggerUpgradeUserIsVisible () {},
     triggerDateAndTimeSettingsIsVisible () {},

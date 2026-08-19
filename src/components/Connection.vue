@@ -45,6 +45,8 @@ onMounted(() => {
         showConnectionDetails(event, isFromStore)
       } else if (name === 'closeAllDialogs') {
         updatePathWhileDragging(null)
+      } else if (name === 'triggerUpdateViewportObservers') {
+        initViewportObserver()
       }
     }
   )
@@ -466,6 +468,7 @@ const checkIsMultiTouch = (event) => {
 
 const initViewportObserver = async () => {
   if (globalStore.disableViewportOptimizations) { return }
+  removeViewportObserver()
   await nextTick()
   try {
     const callback = (entries, observer) => {
@@ -479,16 +482,16 @@ const initViewportObserver = async () => {
     }
     const target = observerTarget.value
     if (!target) { return }
-    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 connection initViewportObserver', error)
   }
 }
 const removeViewportObserver = () => {
-  const target = observerTarget.value
   if (!observer) { return }
-  observer.unobserve(target)
+  observer.disconnect()
+  observer = null
 }
 </script>
 

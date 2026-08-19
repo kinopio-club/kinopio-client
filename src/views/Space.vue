@@ -223,6 +223,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(hourlyTasks)
+  updateViewportObservers.cancel()
   unsubscribes()
 })
 
@@ -331,6 +332,24 @@ const styles = computed(() => {
     width: `${pageWidth.value}px`,
     height: `${pageHeight.value}px`,
     transform: globalStore.getZoomTransform
+  }
+})
+
+// update item intersection observer margin during zoom
+
+const updateViewportObservers = debounce(() => {
+  if (globalStore.isPinchZooming) { return }
+  globalStore.triggerUpdateViewportObservers()
+}, 300, { maxWait: 1000 })
+watch(() => globalStore.spaceZoomPercent, () => {
+  updateViewportObservers()
+})
+watch(() => globalStore.isPinchZooming, (value) => {
+  if (value) {
+    updateViewportObservers.cancel()
+    globalStore.triggerUpdateViewportObservers()
+  } else {
+    updateViewportObservers()
   }
 })
 
