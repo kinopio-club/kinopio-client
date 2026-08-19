@@ -245,7 +245,7 @@ const imgproxyUrl = (imageUrl, width, height) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
-  const containerBreakpoints = [400, 600, 800, 1200, 3000]
+  const containerBreakpoints = [100, 200, 400, 600, 800, 1200, 3000]
   const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
   const maxDimensions = Math.max(width || 0, height || 0)
   let url = utils.imgproxyUrl(imageUrl)
