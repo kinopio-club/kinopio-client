@@ -1143,14 +1143,20 @@ export default {
   },
   clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    if (!cardWrapElement) { return }
+    // these only exist while the card is rendered in the viewport
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = cardWrapElement.querySelector('.card-content-wrap')
     const cardMediaElement = cardWrapElement.querySelector('.media-card')
     cardWrapElement.style.width = null
     cardWrapElement.style.height = null
-    cardElement.style.width = null
-    contentWrapElement.style.width = null
-    contentWrapElement.style.height = null
+    if (cardElement) {
+      cardElement.style.width = null
+    }
+    if (contentWrapElement) {
+      contentWrapElement.style.width = null
+      contentWrapElement.style.height = null
+    }
     if (cardMediaElement) {
       cardMediaElement.style.width = null
     }

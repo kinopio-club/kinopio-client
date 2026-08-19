@@ -460,7 +460,7 @@ const handleContextMenuEvents = (event) => {
 }
 
 const scrollIntoView = (card) => {
-  const element = document.querySelector(`.card-wrap [data-card-id="${card.id}"]`)
+  const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
   globalStore.scrollElementIntoView({ element })
 }
 
@@ -475,9 +475,9 @@ const addCard = async (options) => {
   const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   const parentCardId = globalStore.parentCardId
-  let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+  let parentCard = document.querySelector(`.card-wrap[data-card-id="${parentCardId}"]`)
   const childCardId = globalStore.childCardId
-  let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+  let childCard = document.querySelector(`.card-wrap[data-card-id="${childCardId}"]`)
   const childCardData = cardStore.getCard(childCardId)
   const shouldOutdentChildToParent = childCard && !childCardData
   const spaceBetweenCards = consts.spaceBetweenCards
@@ -532,8 +532,8 @@ const addChildCard = async (options) => {
 
   const parentCardId = globalStore.parentCardId
   const childCardId = globalStore.childCardId
-  const parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-  const childCardElement = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+  const parentCardElement = document.querySelector(`.card-wrap[data-card-id="${parentCardId}"]`)
+  const childCardElement = document.querySelector(`.card-wrap[data-card-id="${childCardId}"]`)
   let baseCardElement, baseCardId
   if (childCardElement) {
     baseCardElement = childCardElement
@@ -593,7 +593,7 @@ const addConnection = (baseCardId, position) => {
   } else {
     baseCardId = globalStore.parentCardId
   }
-  const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
+  const baseCard = document.querySelector(`.card-wrap[data-card-id="${baseCardId}"]`)
   if (!baseCard) { return }
   const controlPoint = userStore.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)

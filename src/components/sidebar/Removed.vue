@@ -179,7 +179,7 @@ const deleteAllCards = () => {
   state.removedCards = []
 }
 const scrollIntoView = (card) => {
-  const element = document.querySelector(`.card-wrap [data-card-id="${card.id}"]`)
+  const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
   globalStore.scrollElementIntoView({ element })
 }
 

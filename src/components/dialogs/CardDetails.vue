@@ -178,7 +178,7 @@ const closeCardAndFocus = (event) => {
     return
   }
   globalStore.closeAllDialogs()
-  document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
+  document.querySelector(`.card[data-card-id="${prevCardId}"]`)?.focus()
 }
 const closeDialogs = (shouldSkipGlobalDialogs) => {
   globalStore.triggerCloseChildDialogs()
@@ -1211,7 +1211,7 @@ const addSplitCards = async (newCards) => {
   // wait for cards to be added to dom
   setTimeout(() => {
     for (const newCard of newCards) {
-      const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
+      const element = document.querySelector(`.card-wrap[data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * globalStore.getSpaceCounterZoomDecimal) + spaceBetweenCards
       cardStore.updateCard(newCard)

@@ -441,6 +441,12 @@ const cardWrapStyle = computed(() => {
     styles.transition = 'all 0.2s ease-out'
   }
   styles = updateStylesWithWidth(styles)
+  if (!shouldRender.value) {
+    const width = resizeWidth.value || props.card.width || consts.emptyCard().width
+    styles.width = `${width}px`
+    styles.maxWidth = `${width}px`
+    styles.height = `${props.card.height || consts.emptyCard().height}px`
+  }
   return styles
 })
 const cardStyle = computed(() => {
@@ -1909,7 +1915,7 @@ const toggleVideoIsPaused = () => {
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}" @animationend="clearFocus")
   .card(
-    v-show="shouldRender"
+    v-if="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
