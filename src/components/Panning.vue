@@ -60,8 +60,8 @@ onBeforeUnmount(() => {
 const checkIfShouldStartPanning = (event) => {
   if (globalStore.currentUserIsPanning) {
     event.preventDefault()
-    updatePanningPosition(event)
     initPanning(event)
+    updatePanningPosition(event)
   }
 }
 const checkIfShouldStartMomentum = () => {
@@ -69,6 +69,8 @@ const checkIfShouldStartMomentum = () => {
   if (isPanning && panningDelta) {
     startMomentum()
   }
+  // clear the pending pan frame alongside its delta, momentum continues from velocity
+  shouldPanNextFrame = false
   panningDelta = null
   shouldCancelPanningTimer = true
 }
@@ -122,10 +124,15 @@ const updatePanningPosition = (event) => {
 }
 const panningFrame = () => {
   // scroll frame
-  if (shouldPanNextFrame) {
+  if (shouldPanNextFrame && panningDelta) {
     window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
     updatecurrentScrollByDelta(panningDelta)
     shouldPanNextFrame = false
+  } else if (velocity) {
+    // no cursor movement this frame, decay velocity so that pausing
+    // before releasing doesn't fling on momentum from an older movement
+    velocity.x *= momentumDeceleration
+    velocity.y *= momentumDeceleration
   }
   panningTimer = window.requestAnimationFrame(panningFrame)
   // cancel
@@ -139,6 +146,7 @@ const panningFrame = () => {
 // momentum scrolling, post-panning
 
 const startMomentum = () => {
+  window.cancelAnimationFrame(momentumTimer)
   const momentumFrame = () => {
     // cancel
     const velocityIsLow = Math.abs(velocity.x) < momentumThreshold && Math.abs(velocity.y) < momentumThreshold
