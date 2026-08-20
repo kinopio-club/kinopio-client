@@ -1,11 +1,12 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { reactive, computed, watch, ref, nextTick } from 'vue'
 
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 import last from 'lodash-es/last'
@@ -16,24 +17,9 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
 
-let unsubscribes
-
-onMounted(() => {
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'triggerUpdateCurrentConnectorColor') {
-        updateCurrentConnectorColor()
-      } else if (name === 'triggerClearCurrentConnectorColor') {
-        clearCurrentConnectorColor()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
-})
-onBeforeUnmount(() => {
-  unsubscribes()
+useStoreAction(globalStore, {
+  triggerUpdateCurrentConnectorColor: () => updateCurrentConnectorColor(),
+  triggerClearCurrentConnectorColor: () => clearCurrentConnectorColor()
 })
 
 const emit = defineEmits(['shouldRenderParent'])

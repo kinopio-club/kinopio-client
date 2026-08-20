@@ -8,6 +8,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 
@@ -19,7 +20,6 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
 
-let unsubscribes
 let animationTimer, isMultiTouch, startCursor, currentCursor
 let observer
 
@@ -30,41 +30,29 @@ const observerTarget = ref(null)
 onMounted(() => {
   initViewportObserver()
   inferConnectionPath()
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'clearMultipleSelected') {
-        const selectedIds = globalStore.multipleConnectionsSelectedIds
-        const selected = selectedIds.includes(props.connection.id) || globalStore.connectionDetailsIsVisibleForConnectionId === props.connection.id
-        if (!selected) {
-          cancelAnimation()
-        }
-      } else if (name === 'triggerConnectionDetailsIsVisible') {
-        const { id, event } = args[0]
-        if (id !== props.connection.id) { return }
-        const isFromStore = true
-        showConnectionDetails(event, isFromStore)
-      } else if (name === 'closeAllDialogs') {
-        updatePathWhileDragging(null)
-      } else if (name === 'triggerUpdateViewportObservers') {
-        initViewportObserver()
-      }
-    }
-  )
-  const cardActionUnsubscribe = cardStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'moveCards') {
-        cancelAnimation()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-    cardActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribes()
+})
+useStoreAction(globalStore, {
+  clearMultipleSelected: () => {
+    const selectedIds = globalStore.multipleConnectionsSelectedIds
+    const selected = selectedIds.includes(props.connection.id) || globalStore.connectionDetailsIsVisibleForConnectionId === props.connection.id
+    if (!selected) {
+      cancelAnimation()
+    }
+  },
+  triggerConnectionDetailsIsVisible: (options) => {
+    const { id, event } = options
+    if (id !== props.connection.id) { return }
+    const isFromStore = true
+    showConnectionDetails(event, isFromStore)
+  },
+  closeAllDialogs: () => updatePathWhileDragging(null),
+  triggerUpdateViewportObservers: () => initViewportObserver()
+})
+useStoreAction(cardStore, {
+  moveCards: () => cancelAnimation()
 })
 
 const props = defineProps({

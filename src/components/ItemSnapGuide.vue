@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useBoxStore } from '@/stores/useBoxStore'
@@ -7,6 +7,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -18,26 +19,13 @@ const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribes
-
 let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
 onMounted(() => {
   updateRect()
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'clearDraggingItems') {
-        cancelWaitingAnimationFrame()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
-onBeforeUnmount(() => {
-  unsubscribes()
+useStoreAction(globalStore, {
+  clearDraggingItems: () => cancelWaitingAnimationFrame()
 })
 
 const props = defineProps({
