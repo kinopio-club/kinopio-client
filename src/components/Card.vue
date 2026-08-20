@@ -15,6 +15,7 @@ import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 import { useStickyCard } from '@/composables/useStickyCard.js'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -76,8 +77,6 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
 let observer
 
-let unsubscribes
-
 onMounted(async () => {
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
   const shouldFocus = globalStore.loadSpaceFocusOnItemId === props.card.id
@@ -88,43 +87,32 @@ onMounted(async () => {
   updateUrls()
   checkIfShouldUpdateIframeUrl()
   initViewportObserver()
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
-        updateRemoteConnections()
-      } else if (name === 'triggerScrollItemIntoView') {
-        if (args[0] === props.card.id) {
-          const element = cardElement.value
-          globalStore.scrollElementIntoView({ element, positionIsCenter: true })
-        }
-      } else if (name === 'triggerUploadComplete') {
-        const { cardId, url } = args[0] // cardId, spaceId, url, fileName
-        if (cardId !== props.card.id) { return }
-        addCompletedUpload(args[0])
-      } else if (name === 'triggerUpdateUrlPreview') {
-        if (args[0] === props.card.id) {
-          updateMediaUrls()
-          updateUrlPreview()
-        }
-      } else if (name === 'triggerUpdateTheme') {
-        updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-      } else if (name === 'triggerCancelLocking') {
-        cancelLocking()
-      } else if (name === 'triggerIsSnappingToList') {
-        state.isSnappingToList = true
-      } else if (name === 'triggerUpdateViewportObservers') {
-        initViewportObserver()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribes()
+})
+useStoreAction(globalStore, {
+  updateRemoteCurrentConnection: () => updateRemoteConnections(),
+  removeRemoteCurrentConnection: () => updateRemoteConnections(),
+  triggerScrollItemIntoView: (cardId) => {
+    if (cardId !== props.card.id) { return }
+    const element = cardElement.value
+    globalStore.scrollElementIntoView({ element, positionIsCenter: true })
+  },
+  triggerUploadComplete: (updates) => {
+    const { cardId } = updates // cardId, spaceId, url, fileName
+    if (cardId !== props.card.id) { return }
+    addCompletedUpload(updates)
+  },
+  triggerUpdateUrlPreview: (cardId) => {
+    if (cardId !== props.card.id) { return }
+    updateMediaUrls()
+    updateUrlPreview()
+  },
+  triggerUpdateTheme: () => updateDefaultBackgroundColor(utils.cssVariable('secondary-background')),
+  triggerCancelLocking: () => cancelLocking(),
+  triggerIsSnappingToList: () => { state.isSnappingToList = true },
+  triggerUpdateViewportObservers: () => initViewportObserver()
 })
 
 const props = defineProps({

@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -25,8 +26,6 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
-
-let unsubscribes
 
 const borderWidth = 2
 
@@ -48,26 +47,17 @@ const boxElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'updateRemoteCurrentConnection' || name === 'removeRemoteCurrentConnection') {
-        updateRemoteConnections()
-      } else if (name === 'triggerUpdateViewportObservers') {
-        initViewportObserver()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onUpdated(() => {
   initViewportObserver()
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribes()
+})
+useStoreAction(globalStore, {
+  updateRemoteCurrentConnection: () => updateRemoteConnections(),
+  removeRemoteCurrentConnection: () => updateRemoteConnections(),
+  triggerUpdateViewportObservers: () => initViewportObserver()
 })
 
 const props = defineProps({

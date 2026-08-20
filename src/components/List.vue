@@ -8,6 +8,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import Frames from '@/components/Frames.vue'
 import utils from '@/utils.js'
@@ -23,8 +24,6 @@ const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
-
-let unsubscribes
 
 // locking
 // long press to touch drag
@@ -42,26 +41,16 @@ const listElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    ({ name, args }) => {
-      if (name === 'clearDraggingItems') {
-        state.isDraggingCardOverList = false
-      } else if (name === 'triggerUpdateViewportObservers') {
-        initViewportObserver()
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
-  }
 })
 onUpdated(() => {
   initViewportObserver()
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
-  unsubscribes()
+})
+useStoreAction(globalStore, {
+  clearDraggingItems: () => { state.isDraggingCardOverList = false },
+  triggerUpdateViewportObservers: () => initViewportObserver()
 })
 
 const props = defineProps({

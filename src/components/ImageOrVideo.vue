@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -11,7 +12,6 @@ const globalStore = useGlobalStore()
 const videoElement = ref(null)
 const imageElement = ref(null)
 
-let unsubscribes
 let pausedCanvas
 
 onMounted(() => {
@@ -21,20 +21,13 @@ onMounted(() => {
   window.addEventListener('focus', updateIsPlaying)
   window.addEventListener('blur', updateIsPlaying)
   document.addEventListener('visibilitychange', updateIsPlaying)
-
-  const globalActionUnsubscribe = globalStore.$onAction(
-    async ({ name, args }) => {
-      if (name === 'triggerUploadComplete') {
-        const { url, fileName } = args[0]
-        if (props.video.includes(fileName)) {
-          await nextTick()
-          videoElement.value.load()
-        }
-      }
-    }
-  )
-  unsubscribes = () => {
-    globalActionUnsubscribe()
+})
+useStoreAction(globalStore, {
+  triggerUploadComplete: async (updates) => {
+    const { fileName } = updates
+    if (!props.video.includes(fileName)) { return }
+    await nextTick()
+    videoElement.value.load()
   }
 })
 onBeforeUnmount(() => {
@@ -45,7 +38,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', updateIsPlaying)
   pausedCanvas?.remove()
   pausedCanvas = null
-  unsubscribes()
 })
 
 const emit = defineEmits(['loadSuccess'])
