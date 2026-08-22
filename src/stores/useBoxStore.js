@@ -194,7 +194,7 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      if (spaceStore.getShouldPreventAddCard) {
+      if (spaceStore.getShouldPreventAddFreeCard) {
         globalStore.updateNotifyCardsCreatedIsOverLimit(true)
         return
       }

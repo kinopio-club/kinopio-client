@@ -803,8 +803,9 @@ const handlePasteEvent = async (event) => {
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
   // check card limits
-  if (spaceStore.getShouldPreventAddCard) {
+  if (spaceStore.getShouldPreventAddFreeCard) {
     globalStore.updateNotifyCardsCreatedIsOverLimit(true)
+    globalStore.addNotificationWithPosition({ message: 'Upgrade to Add', position, type: 'danger', layer: 'app', icon: 'cancel' })
     return
   }
   // check read only

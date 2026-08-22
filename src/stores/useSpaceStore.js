@@ -88,7 +88,7 @@ export const useSpaceStore = defineStore('space', {
       const creatorUser = this.getSpaceCreator
       return userStore.getUserIsCurrentUser(creatorUser)
     },
-    getShouldPreventAddCard () {
+    getShouldPreventAddFreeCard () {
       const userStore = useUserStore()
       const cardsCreatedIsOverLimit = userStore.getUserCardsCreatedIsOverLimit
       return cardsCreatedIsOverLimit && !this.getSpaceCreatorIsUpgraded

@@ -565,7 +565,7 @@ export const useUserStore = defineStore('user', {
       const globalStore = useGlobalStore()
       const spaceStore = useSpaceStore()
       if (!globalStore.notifyCardsCreatedIsOverLimit) { return }
-      if (spaceStore.getShouldPreventAddCard) { return }
+      if (spaceStore.getShouldPreventAddFreeCard) { return }
       globalStore.updateNotifyCardsCreatedIsOverLimit(false)
     },
     getUserCardsCreatedWillBeOverLimit (count) {
@@ -633,6 +633,14 @@ export const useUserStore = defineStore('user', {
         globalStore.addNotificationWithPosition({ message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' })
       } else {
         globalStore.addNotificationWithPosition({ message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+      }
+    },
+    notifyUpgrade (position) {
+      const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
+      const cannotAdd = spaceStore.getShouldPreventAddFreeCard
+      if (cannotAdd) {
+        globalStore.addNotificationWithPosition({ message: 'Upgrade to Add', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     },
 

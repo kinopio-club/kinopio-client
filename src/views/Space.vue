@@ -371,6 +371,7 @@ const addCard = (event) => {
     y: position.y
   }
   userStore.notifyReadOnly(position)
+  userStore.notifyUpgrade(position)
   if (spaceIsReadOnly.value) { return }
   const newCard = { position, isParentCard }
   cardStore.createCard(newCard)
@@ -459,7 +460,8 @@ const addBox = (event) => {
     return
   }
   userStore.notifyReadOnly(position)
-  const shouldPrevent = !userStore.getUserCanEditSpace
+  userStore.notifyUpgrade(position)
+  const shouldPrevent = !userStore.getUserCanEditSpace || spaceStore.getShouldPreventAddFreeCard
   if (shouldPrevent) {
     globalStore.updateCurrentUserToolbar('card')
     return
@@ -546,7 +548,8 @@ const addList = (event) => {
     return
   }
   userStore.notifyReadOnly(position)
-  const shouldPrevent = !userStore.getUserCanEditSpace
+  userStore.notifyUpgrade(position)
+  const shouldPrevent = !userStore.getUserCanEditSpace || spaceStore.getShouldPreventAddFreeCard
   if (shouldPrevent) {
     globalStore.updateCurrentUserToolbar('card')
     return

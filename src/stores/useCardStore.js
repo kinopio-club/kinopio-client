@@ -486,7 +486,7 @@ export const useCardStore = defineStore('cards', {
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const userNotificationStore = useUserNotificationStore()
-      if (spaceStore.getShouldPreventAddCard) {
+      if (spaceStore.getShouldPreventAddFreeCard) {
         globalStore.updateNotifyCardsCreatedIsOverLimit(true)
         return
       }

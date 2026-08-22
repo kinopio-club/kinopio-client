@@ -542,6 +542,7 @@ export const useGlobalStore = defineStore('global', {
     triggerArenaAuthenticationError () {},
     triggerKeyboardShortcutsIsVisible () {},
     triggerReadOnlyJiggle () {},
+    triggerUpgradeJiggle () {},
     triggerUpdatePaintSelectCanvasPositionOffset () {},
     triggerPaintFramePosition (event) {},
     triggerAddRemotePaintingCircle () {},
@@ -1764,6 +1765,7 @@ export const useGlobalStore = defineStore('global', {
       this.notifyCardsCreatedIsOverLimit = value
       if (value === true) {
         this.notifyCardsCreatedIsNearLimit = false
+        this.triggerUpgradeJiggle()
       }
     },
     updateNotifyIsJoiningGroup (value) {

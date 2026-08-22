@@ -29,7 +29,7 @@ let unsubscribes
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
-const cardsOverLimitElement = ref(null)
+const upgradeElement = ref(null)
 const readOnlyElement = ref(null)
 const templateElement = ref(null)
 
@@ -47,8 +47,8 @@ onMounted(() => {
         update()
       } else if (name === 'triggerReadOnlyJiggle') {
         addReadOnlyJiggle()
-      } else if (name === 'notifyCardsCreatedIsOverLimit') {
-        toggleNotifyCardsCreatedIsOverLimit(true)
+      } else if (name === 'triggerUpgradeJiggle') {
+        addUpgradeJiggle()
       } else if (name === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
         checkIfShouldNotifySpaceOutOfSync()
       } else if (name === 'triggerNotifyCouldNotSave') {
@@ -84,7 +84,7 @@ watch(() => globalStore.currentUserIsPaintSelecting, (value, prevValue) => {
 
 const state = reactive({
   readOnlyJiggle: false,
-  notifyCardsCreatedIsOverLimitJiggle: false,
+  upgradeJiggle: false,
   notifyCouldNotSave: false
 })
 
@@ -242,9 +242,6 @@ const changeSpaceToChangelog = () => {
 
 // toggle notifications
 
-const toggleNotifyCardsCreatedIsOverLimit = (value) => {
-  state.notifyCardsCreatedIsOverLimitJiggle = true
-}
 const removeNotifyThanks = () => {
   globalStore.notifyThanksForDonating = false
   globalStore.notifyThanksForUpgrading = false
@@ -306,9 +303,6 @@ const resetNotifyCardsCreatedIsNearLimit = () => {
 const resetNotifyMoveOrCopyToSpace = () => {
   globalStore.notifyMoveOrCopyToSpace = false
 }
-const resetNotifyCardsCreatedIsOverLimitJiggle = () => {
-  state.notifyCardsCreatedIsOverLimitJiggle = false
-}
 const triggerUpgradeUserIsVisible = () => {
   closeAllDialogs()
   globalStore.triggerUpgradeUserIsVisible()
@@ -335,7 +329,7 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
 const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
 const snapAlignIsVisible = computed(() => globalStore.shouldSnapAlign && !dragToResizeIsVisible.value)
 
-// read-only jiggle
+// jiggle
 
 const addReadOnlyJiggle = () => {
   const element = readOnlyElement.value || templateElement.value
@@ -346,6 +340,17 @@ const addReadOnlyJiggle = () => {
 const removeReadOnlyJiggle = () => {
   state.readOnlyJiggle = false
 }
+
+const addUpgradeJiggle = () => {
+  const element = upgradeElement.value
+  if (!element) { return }
+  state.upgradeJiggle = true
+  element.addEventListener('animationend', removeUpgradeJiggle, false)
+}
+const removeUpgradeJiggle = () => {
+  state.upgradeJiggle = false
+}
+
 </script>
 
 <template lang="pug">
@@ -439,7 +444,7 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
-  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimitElement" :class="{'notification-jiggle': state.notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
+  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="upgradeElement" :class="{'notification-jiggle': state.upgradeJiggle}" @animationend="removeUpgradeJiggle")
     p To add more cards, you'll need to upgrade
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
