@@ -149,6 +149,10 @@ onMounted(async () => {
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('visibilitychange', handleTouchEnd)
+  // pause connection directions while the window or tab is inactive
+  window.addEventListener('focus', updateConnectionDirectionsIsPaused)
+  window.addEventListener('blur', updateConnectionDirectionsIsPaused)
+  document.addEventListener('visibilitychange', updateConnectionDirectionsIsPaused)
   // update viewport size
   window.addEventListener('touchend', updateViewportSizes)
   window.addEventListener('gesturecancel', updateViewportSizes)
@@ -216,6 +220,9 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', handleTouchEnd)
   window.removeEventListener('visibilitychange', handleTouchEnd)
+  window.removeEventListener('focus', updateConnectionDirectionsIsPaused)
+  window.removeEventListener('blur', updateConnectionDirectionsIsPaused)
+  document.removeEventListener('visibilitychange', updateConnectionDirectionsIsPaused)
   window.removeEventListener('beforeunload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('touchend', updateViewportSizes)
@@ -961,6 +968,9 @@ const isDevelpmentBadgeVisible = computed(() => {
   if (globalStore.isPresentationMode) { return }
   return consts.isDevelopment()
 })
+const updateConnectionDirectionsIsPaused = () => {
+  spaceStore.checkIfShouldPauseConnectionDirections()
+}
 const handleTouchEnd = (event) => {
   globalStore.isPinchZooming = false
   globalStore.isTouchScrolling = false

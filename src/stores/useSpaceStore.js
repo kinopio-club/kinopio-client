@@ -1315,7 +1315,9 @@ export const useSpaceStore = defineStore('space', {
       const prefersReducedMotion = consts.userPrefersReducedMotion()
       const userSetting = userStore.shouldPauseConnectionDirections
       const isInteracting = globalStore.getIsInteractingWithItem
-      const shouldPause = prefersReducedMotion || userSetting || isInteracting
+      // pause while the window or tab is inactive to reduce idle cpu and gpu use
+      const windowIsActive = !document.hidden && document.hasFocus()
+      const shouldPause = !windowIsActive || prefersReducedMotion || userSetting || isInteracting
       if (shouldPause) {
         this.pauseConnectionDirections()
       } else {
