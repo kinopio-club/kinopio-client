@@ -145,6 +145,7 @@ const buttonStyles = computed(() => {
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
   if (globalStore.currentUserIsDraggingList) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdPath || globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (!utils.arrayHasItems(connectedConnections.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
     connectedToAnotherItemBeingDraggedColor.value ||
@@ -267,6 +268,7 @@ const startConnecting = (event) => {
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
   if (globalStore.currentUserIsDrawingConnection) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdPath || globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   updateCurrentConnectionColor()
 }
 const handleMouseLeaveConnector = () => {

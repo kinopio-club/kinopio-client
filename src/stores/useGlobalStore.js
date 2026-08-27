@@ -100,6 +100,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box, drawing, line, list
     currentUserIsDraggingConnectionIdLabel: '',
+    currentUserIsDraggingConnectionIdPath: '',
     clipboardData: {}, // for copy paste kinopio items
     shouldCancelNextMouseUpInteraction: false,
     currentUserIsDrawing: false,
@@ -570,6 +571,7 @@ export const useGlobalStore = defineStore('global', {
     triggerShowPreviousSearchCard () {},
     triggerMoreFiltersIsNotVisible () {},
     triggerConnectionDetailsIsVisible (options) {},
+    triggerUpdateConnectionPathWhileDragging (updates) {},
     triggerClearCurrentConnectorColor () {},
     triggerUpdateCurrentConnectorColor () {},
     triggerUpdateWindowHistory (options) {},

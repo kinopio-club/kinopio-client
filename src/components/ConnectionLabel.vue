@@ -8,6 +8,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import utils from '@/utils.js'
 
@@ -48,6 +49,14 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopDragging)
   window.removeEventListener('pointermove', drag)
+})
+useStoreAction(globalStore, {
+  triggerUpdateConnectionPathWhileDragging: (updates) => {
+    if (!props.connection.labelIsVisible) { return }
+    const update = updates.find(update => update.id === id.value)
+    if (!update) { return }
+    state.connectionRect = utils.labelRectFromConnectionPath(update.path)
+  }
 })
 
 const props = defineProps({
@@ -104,6 +113,7 @@ const id = computed(() => props.connection.id)
 const connectionDetailsIsVisible = computed(() => globalStore.connectionDetailsIsVisibleForConnectionId === id.value)
 const toggleConnectionDetails = (event) => {
   if (isMultiTouch) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdPath) { return }
   const isVisible = globalStore.connectionDetailsIsVisibleForConnectionId === id.value
   if (isVisible || wasDragged) {
     wasDragged = false
@@ -180,10 +190,9 @@ const updateConnectionRect = () => {
   const element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   let rect
   if (element) {
-    rect = utils.rectFromConnectionPath(element.getAttribute('d'))
+    rect = utils.labelRectFromConnectionPath(element.getAttribute('d'))
   } else {
-    // compute position from path if element isn't rendered yet
-    rect = utils.rectFromConnectionPath(path.value)
+    rect = utils.labelRectFromConnectionPath(path.value)
   }
   state.connectionRect = rect
 }

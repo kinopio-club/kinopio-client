@@ -1585,28 +1585,61 @@ export default {
     }
     return this.integerCoords(coords)
   },
+  curveAxisBounds (controlPoint, end) {
+    const values = [0, end] // [ start, end ]
+    const denominator = end - (2 * controlPoint)
+    if (denominator !== 0) {
+      // position (0-1) along the curve where it turns back on this axis
+      const position = -controlPoint / denominator
+      // a curve that turns back between its end points is wider than they are
+      if (position > 0 && position < 1) {
+        // the curve at position, whose (1-position)² * start term is 0 because start is 0
+        const controlPointAmount = 2 * (1 - position) * position * controlPoint
+        const endAmount = position * position * end
+        values.push(controlPointAmount + endAmount)
+      }
+    }
+    return {
+      min: Math.round(Math.min(...values)),
+      max: Math.round(Math.max(...values))
+    }
+  },
   rectFromConnectionPath (path) {
     const pathStart = this.startCoordsFromConnectionPath(path)
-    const pathEndRelative = this.endCoordsFromConnectionPath(path)
     if (!pathStart) { return {} }
-    const rect = {
-      x: pathStart.x,
-      y: pathStart.y,
-      width: pathEndRelative.x,
-      height: pathEndRelative.y
+    const pathEndRelative = this.endCoordsFromConnectionPath(path)
+    const controlPoint = this.curveControlPointFromPath(path)
+    // the smallest rect containing the curve
+    const x = this.curveAxisBounds(controlPoint.x, pathEndRelative.x)
+    const y = this.curveAxisBounds(controlPoint.y, pathEndRelative.y)
+    return {
+      x: pathStart.x + x.min,
+      y: pathStart.y + y.min,
+      width: x.max - x.min,
+      height: y.max - y.min
     }
-    if (pathEndRelative.x < 0) {
-      rect.x = pathStart.x + pathEndRelative.x
-      rect.width = Math.abs(pathEndRelative.x)
+  },
+  labelRectFromConnectionPath (path) {
+    const pathStart = this.startCoordsFromConnectionPath(path)
+    if (!pathStart) { return {} }
+    const pathEndRelative = this.endCoordsFromConnectionPath(path)
+    const controlPoint = this.curveControlPointFromPath(path)
+    // the middle of a quadratic curve, relative to the path start
+    const middle = {
+      x: (0.5 * controlPoint.x) + (0.25 * pathEndRelative.x),
+      y: (0.5 * controlPoint.y) + (0.25 * pathEndRelative.y)
     }
-    if (pathEndRelative.y < 0) {
-      rect.y = pathStart.y + pathEndRelative.y
-      rect.height = Math.abs(pathEndRelative.y)
+    // wide enough for both end points to be inside the rect
+    const width = 2 * Math.max(Math.abs(middle.x), Math.abs(pathEndRelative.x - middle.x))
+    const height = 2 * Math.max(Math.abs(middle.y), Math.abs(pathEndRelative.y - middle.y))
+    // a rect centered on the middle of a connection curve,
+    // so that a label positioned at 0.5,0.5 sits on the curve
+    return {
+      x: Math.round(pathStart.x + middle.x - (width / 2)),
+      y: Math.round(pathStart.y + middle.y - (height / 2)),
+      width: Math.round(width),
+      height: Math.round(height)
     }
-    const controlPointMax = this.curveControlPointFromPath(path)
-    rect.width = rect.width + controlPointMax.x
-    rect.height = rect.height + controlPointMax.y
-    return rect
   },
   rectFromDrawingStrokePath (path) {
     const coords = path.d.match(/[-\d.]+/g).map(Number)

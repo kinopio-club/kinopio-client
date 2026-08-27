@@ -21,6 +21,7 @@ const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
+let dragConnectionIds, dragUpdates
 let observer
 
 const connectionElement = ref(null)
@@ -33,6 +34,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
+  stopDraggingConnection()
 })
 useStoreAction(globalStore, {
   clearMultipleSelected: () => {
@@ -49,7 +51,13 @@ useStoreAction(globalStore, {
     showConnectionDetails(event, isFromStore)
   },
   closeAllDialogs: () => updatePathWhileDragging(null),
-  triggerUpdateViewportObservers: () => initViewportObserver()
+  triggerUpdateViewportObservers: () => initViewportObserver(),
+  triggerUpdateConnectionPathWhileDragging: (updates) => {
+    const update = updates.find(update => update.id === props.connection.id)
+    if (!update) { return }
+    updatePathWhileDragging(update.path)
+    updateElementPath(update.path)
+  }
 })
 useStoreAction(cardStore, {
   moveCards: () => cancelAnimation()
@@ -68,6 +76,7 @@ const state = reactive({
 })
 watch(() => props.connection.path, (value, prevValue) => {
   state.pathWhileSelected = value
+  updatePathWhileDragging(null)
 })
 
 const visible = computed(() => {
@@ -338,6 +347,7 @@ const updateElementPath = (path) => {
 }
 // line jiggling animation
 const animationFrame = () => {
+  if (isDraggingCurrentOrSelectedPath.value) { return }
   if (state.frameCount === 0) {
     state.pathWhileSelected = props.connection.path
   }
@@ -385,12 +395,11 @@ const relativePath = computed(() => {
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
   const controlPoint = utils.curveControlPointFromPath(path)
-  const origin = { x: 0, y: 0 }
-  if (pathEndRelative.x < 0) {
-    origin.x = Math.abs(pathEndRelative.x)
-  }
-  if (pathEndRelative.y < 0) {
-    origin.y = Math.abs(pathEndRelative.y)
+  // the path start, relative to the svg element the dot animates inside of
+  const rect = utils.rectFromConnectionPath(path)
+  const origin = {
+    x: pathStart.x - rect.x,
+    y: pathStart.y - rect.y
   }
   const relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
   return relativePath
@@ -407,12 +416,94 @@ const focusOnDialog = async (event) => {
   document.querySelector('dialog.connection-details button').focus()
 }
 
-// dragging WIP
+// dragging
 
+const isDraggingCurrentPath = computed(() => globalStore.currentUserIsDraggingConnectionIdPath === props.connection.id)
+const isDraggingCurrentOrSelectedPath = computed(() => {
+  const draggingId = globalStore.currentUserIsDraggingConnectionIdPath
+  if (!draggingId) { return }
+  if (isDraggingCurrentPath.value) { return true }
+  const selectedIds = globalStore.multipleConnectionsSelectedIds
+  return selectedIds.includes(draggingId) && selectedIds.includes(props.connection.id)
+})
+const connectionIdsToUpdate = () => {
+  const selectedIds = globalStore.multipleConnectionsSelectedIds
+  if (selectedIds.includes(props.connection.id)) { return selectedIds }
+  return [props.connection.id]
+}
+const updatesWithControlPoint = (ids, controlPoint) => {
+  const updates = ids.map(id => {
+    const connection = connectionStore.getConnection(id)
+    if (!connection?.path) { return }
+    const start = utils.startCoordsFromConnectionPath(connection.path)
+    const end = utils.endCoordsFromConnectionPath(connection.path)
+    if (!start || !end) { return }
+    const path = `m${start.x},${start.y} ${controlPoint} ${end.x},${end.y}`
+    return { id, path, controlPoint }
+  })
+  return updates.filter(update => Boolean(update))
+}
 const startDraggingConnection = (event) => {
   checkIsMultiTouch(event)
   globalStore.shouldHideConnectionOutline = true
   startCursor = utils.cursorPositionInViewport(event)
+  if (event.touches) { return }
+  if (!canEditSpace.value) { return }
+  globalStore.currentUserIsDraggingConnectionIdPath = props.connection.id
+  // showConnectionDetails clears the selection on the first click of a double click
+  const isFirstClick = event.detail <= 1
+  if (isFirstClick) {
+    dragConnectionIds = connectionIdsToUpdate()
+  }
+  dragUpdates = undefined
+  globalStore.closeAllDialogs()
+  globalStore.preventMultipleSelectedActionsIsVisible = true
+  window.addEventListener('pointermove', dragConnection)
+  window.addEventListener('mouseup', stopDraggingConnection)
+}
+// bend paths by moving their curve control point to the cursor
+const dragConnection = (event) => {
+  if (!isDraggingCurrentPath.value) { return }
+  const path = props.connection.path
+  const cursor = utils.cursorPositionInSpace(event)
+  if (!path || !cursor) { return }
+  const start = utils.startCoordsFromConnectionPath(path)
+  const end = utils.endCoordsFromConnectionPath(path)
+  if (!start || !end) { return }
+  // a curve only bends half way to its control point,
+  // so the cursor offset is doubled to put the curve itself under the cursor
+  const x = Math.round(2 * (cursor.x - start.x) - (end.x / 2))
+  const y = Math.round(2 * (cursor.y - start.y) - (end.y / 2))
+  const controlPoint = `q${x},${y}`
+  dragUpdates = updatesWithControlPoint(dragConnectionIds, controlPoint)
+  globalStore.triggerUpdateConnectionPathWhileDragging(dragUpdates)
+}
+const stopDraggingConnection = () => {
+  window.removeEventListener('pointermove', dragConnection)
+  window.removeEventListener('mouseup', stopDraggingConnection)
+  if (!isDraggingCurrentPath.value) { return }
+  globalStore.currentUserIsDraggingConnectionIdPath = ''
+  if (!dragUpdates) { return } // cursor didn't move
+  connectionStore.updateConnections(dragUpdates)
+  dragUpdates = undefined
+}
+// double click restores the default curve
+const clearControlPoint = () => {
+  if (!canEditSpace.value) { return }
+  const controlPoint = userStore.defaultConnectionControlPoint
+  const ids = dragConnectionIds || connectionIdsToUpdate()
+  const updates = ids.map(id => {
+    const connection = connectionStore.getConnection(id)
+    if (!connection) { return }
+    const path = connectionStore.getConnectionPathBetweenItems({
+      startItemId: connection.startItemId,
+      endItemId: connection.endItemId,
+      controlPoint
+    })
+    if (!path) { return }
+    return { id, path, controlPoint }
+  })
+  connectionStore.updateConnections(updates.filter(update => Boolean(update)))
 }
 
 // interaction handlers
@@ -424,7 +515,8 @@ const isActive = computed(() => {
     isRemoteSelected.value ||
     isCurrentItemConnection.value ||
     isConnectedToMultipleCardsSelected.value ||
-    isDraggingCurrentConnectionLabel.value
+    isDraggingCurrentConnectionLabel.value ||
+    isDraggingCurrentOrSelectedPath.value
 })
 watch(() => isActive.value, (value, prevValue) => {
   if (value) { return }
@@ -527,6 +619,7 @@ svg.connection(
     @mousedown.left="startDraggingConnection"
     @touchstart="startDraggingConnection"
     @mouseup.left="showConnectionDetails"
+    @dblclick="clearControlPoint"
     @touchend.stop="showConnectionDetails"
     @keyup.stop.backspace="removeConnection"
     @keyup.stop.enter="showConnectionDetailsOnKeyup"

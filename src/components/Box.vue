@@ -418,6 +418,7 @@ const endBoxInfoInteraction = (event) => {
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
+  if (globalStore.currentUserIsDraggingConnectionIdPath || globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.getIsResizingItem) { return }
   if (!canEditBox.value) { globalStore.triggerReadOnlyJiggle() }
