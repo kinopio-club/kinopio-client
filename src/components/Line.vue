@@ -174,7 +174,7 @@ const startLineInfoInteraction = async (event) => {
 
 const endLineInfoInteraction = (event) => {
   if (isMultiTouch) { return }
-  if (globalStore.currentUserIsDraggingConnectionIdPath || globalStore.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.getIsInteractingWithConnection) { return }
   globalStore.clearMultipleSelected()
   broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteLinesDragging' })
   // touch button fix

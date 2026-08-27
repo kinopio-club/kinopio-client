@@ -379,6 +379,9 @@ export const useGlobalStore = defineStore('global', {
         this.currentUserIsDraggingMultipleSelectedActionsDialog
       )
     },
+    getIsInteractingWithConnection () {
+      return this.currentUserIsDraggingConnectionIdPath || this.currentUserIsDraggingConnectionIdLabel
+    },
     getInteractingWithItemType () {
       if (this.currentUserIsDraggingCard) {
         return 'card'
