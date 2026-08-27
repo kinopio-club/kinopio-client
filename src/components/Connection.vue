@@ -431,13 +431,19 @@ const connectionIdsToUpdate = () => {
   if (selectedIds.includes(props.connection.id)) { return selectedIds }
   return [props.connection.id]
 }
-const updatesWithControlPoint = (ids, controlPoint) => {
+// each connection is bent towards the cursor from its own start point
+const updatesFromCursor = (ids, cursor) => {
   const updates = ids.map(id => {
     const connection = connectionStore.getConnection(id)
     if (!connection?.path) { return }
     const start = utils.startCoordsFromConnectionPath(connection.path)
     const end = utils.endCoordsFromConnectionPath(connection.path)
     if (!start || !end) { return }
+    // a curve only bends half way to its control point,
+    // so the cursor offset is doubled to put the curve itself under the cursor
+    const x = Math.round(2 * (cursor.x - start.x) - (end.x / 2))
+    const y = Math.round(2 * (cursor.y - start.y) - (end.y / 2))
+    const controlPoint = `q${x},${y}`
     const path = `m${start.x},${start.y} ${controlPoint} ${end.x},${end.y}`
     return { id, path, controlPoint }
   })
@@ -464,18 +470,9 @@ const startDraggingConnection = (event) => {
 // bend paths by moving their curve control point to the cursor
 const dragConnection = (event) => {
   if (!isDraggingCurrentPath.value) { return }
-  const path = props.connection.path
   const cursor = utils.cursorPositionInSpace(event)
-  if (!path || !cursor) { return }
-  const start = utils.startCoordsFromConnectionPath(path)
-  const end = utils.endCoordsFromConnectionPath(path)
-  if (!start || !end) { return }
-  // a curve only bends half way to its control point,
-  // so the cursor offset is doubled to put the curve itself under the cursor
-  const x = Math.round(2 * (cursor.x - start.x) - (end.x / 2))
-  const y = Math.round(2 * (cursor.y - start.y) - (end.y / 2))
-  const controlPoint = `q${x},${y}`
-  dragUpdates = updatesWithControlPoint(dragConnectionIds, controlPoint)
+  if (!cursor) { return }
+  dragUpdates = updatesFromCursor(dragConnectionIds, cursor)
   globalStore.triggerUpdateConnectionPathWhileDragging(dragUpdates)
 }
 const stopDraggingConnection = () => {
