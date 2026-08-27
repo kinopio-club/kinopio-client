@@ -170,6 +170,7 @@ const endListInfoInteraction = (event) => {
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
+  if (globalStore.getIsInteractingWithConnection) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.getIsResizingItem) { return }
   const isButton = event.target.closest('button') || event.target.closest('.inline-button-wrap')

@@ -1452,7 +1452,7 @@ const showCardDetails = (event) => {
   if (globalStore.cardDetailsIsVisibleForCardId) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPaintSelecting) { return }
-  if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
+  if (globalStore.getIsInteractingWithConnection) { return }
   if (isMultiTouch) { return }
   if (globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning) { return }
   if (globalStore.currentUserIsResizingBox || globalStore.currentUserIsDraggingBox) { return }
