@@ -660,10 +660,12 @@ svg.connection
     pointer-events all
     cursor pointer
     touch-action manipulation
+    outline none
     &:hover,
     &.hover,
     &.active,
     &:focus
+      outline none
       stroke-width 7
     &.hide-connection-outline
       outline none
