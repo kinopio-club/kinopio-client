@@ -16,6 +16,11 @@ To add or remove your own cool space to Explore, toggle `Spaces → Add to Explo
 
 <img src="https://updates.kinopio.club/pages/help/posts/explore/add-to-explore.webp" alt="show-in-explore" class="medium">
 
+You can view community spaces in Explore either via the button in the footer when viewing a space. Or through the [full Explore page](https://kinopio.club/explore). 
+
+<img src="https://updates.kinopio.club/pages/help/posts/explore/explore-dialog.webp" alt="explore dialog in footer" class="medium">
+
+From here you'll also be able to view spaces recently updated by people you're Following. As well as an uncurated feed of the latest created public spaces. 
 
 ## Live
 
