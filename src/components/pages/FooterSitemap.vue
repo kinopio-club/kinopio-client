@@ -17,9 +17,9 @@ footer.sitemap
       a(href="/help") Help
     .column
       p COMMUNITY
-      a(href="/explore") Explore
       a(href="/api") API Docs
       a(href="/discord") Discord
+      a(href="/explore") Explore
       a(href="https://github.com/kinopio-club") Github
     .column
       p ﾉ乙(､ﾝ､)_
