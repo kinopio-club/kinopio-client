@@ -49,6 +49,60 @@ const faqSchema = {
     }
   ]
 }
+const pricingUrl = 'https://kinopio.club/help/how-much-does-kinopio-cost'
+// keep in sync with src/help/how-much-does-kinopio-cost.md and public/llms.txt
+const offers = [
+  {
+    '@type': 'Offer',
+    name: 'Free',
+    price: '0',
+    priceCurrency: 'USD',
+    availability: 'https://schema.org/InStock',
+    url: pricingUrl,
+    description: 'Every feature, up to 100 cards and 5mb uploads. No account required.'
+  },
+  {
+    '@type': 'Offer',
+    name: 'Monthly',
+    price: '8',
+    priceCurrency: 'USD',
+    availability: 'https://schema.org/InStock',
+    url: pricingUrl,
+    description: 'Unlimited cards and uploads, billed monthly.',
+    priceSpecification: {
+      '@type': 'UnitPriceSpecification',
+      price: '8',
+      priceCurrency: 'USD',
+      billingDuration: 1,
+      unitCode: 'MON'
+    }
+  },
+  {
+    '@type': 'Offer',
+    name: 'Yearly',
+    price: '80',
+    priceCurrency: 'USD',
+    availability: 'https://schema.org/InStock',
+    url: pricingUrl,
+    description: 'Unlimited cards and uploads, billed yearly.',
+    priceSpecification: {
+      '@type': 'UnitPriceSpecification',
+      price: '80',
+      priceCurrency: 'USD',
+      billingDuration: 1,
+      unitCode: 'ANN'
+    }
+  },
+  {
+    '@type': 'Offer',
+    name: 'Lifetime',
+    price: '250',
+    priceCurrency: 'USD',
+    availability: 'https://schema.org/InStock',
+    url: pricingUrl,
+    description: 'Unlimited cards and uploads, paid once.'
+  }
+]
 const softwareSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -57,12 +111,7 @@ const softwareSchema = {
   applicationCategory: 'ProductivityApplication',
   operatingSystem: 'Web browser',
   url: 'https://kinopio.club',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-    description: 'Free for 100 cards'
-  }
+  offers
 }
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -114,13 +163,7 @@ const productSchema = {
   brand: {
     '@id': 'https://kinopio.club/#organization'
   },
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-    description: 'Free for 100 cards',
-    availability: 'https://schema.org/InStock'
-  }
+  offers
 }
 
 useHead({
