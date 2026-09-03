@@ -12,6 +12,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 
@@ -79,6 +80,15 @@ const closeDialogs = () => {
 const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()
+}
+
+// donate
+
+const userIsUpgraded = computed(() => userStore.isUpgraded)
+const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const triggerDonateIsVisible = () => {
+  globalStore.closeAllDialogs()
+  globalStore.triggerDonateIsVisible()
 }
 
 // user
@@ -191,8 +201,8 @@ const removeCollaboratorFromSpace = () => {
         button(@click.stop="toggleGroupsIsVisible")
           img.icon.group(src="@/assets/group.svg")
           span My Groups
-      .button-wrap
-        button
+      .button-wrap(v-if="userIsUpgraded && !isSecureAppContextIOS")
+        button(@click.left.stop="triggerDonateIsVisible")
           .badge.donate-badge.badge-in-button
           span Donate
   //- leave space
