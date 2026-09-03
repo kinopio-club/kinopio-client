@@ -6,20 +6,18 @@ import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
 
-const isDevelopment = process.env.NODE_ENV === 'development'
-const exploreSpaces = async () => {
-  try {
-    if (isDevelopment) { return }
-    const apiHost = 'https://api.kinopio.club'
-    const response = await fetch(`${apiHost}/space/explore-spaces`)
-    const data = await response.json()
-    if (!data) { return }
-    const paths = data.map(space => space.url)
-    return paths.map(path => `/${path}`)
-  } catch (error) {
-    console.error('🚒 exploreSpaceUrls', error)
-  }
-}
+const sitemapSpaces = [
+  // example spaces, also linked from llms.txt
+  '/project-issue-tracker-p56fqtZUlNtFJ6td-uovI',
+  '/weekly-planner-tZgYERhi-QFX2LmlVNOAb',
+  '/time-tracking--ou2kHxO40-rDFZymIn1A',
+  '/business-plan-286llONI_DEmGoIa1sCtj',
+  '/personal-dashboard-I4x2de1LCW2P25d_21Tsy',
+  '/moodboard-GgDOqKvEEzTA93EYmAZrn',
+  // kinopio spaces
+  '/changelog-6lsytK8ZfOtMl2oqG05Rj',
+  '/-roadmap-3CBHtivu7X7nTzrcaTFQV'
+]
 
 const createCache = (name, pattern) => {
   const yearTime = 60 * 60 * 24 * 365 // 365 days
@@ -114,17 +112,9 @@ export default defineConfig(async ({ command, mode }) => {
   const routes = [
     '/about',
     '/api',
-    '/blog',
-    '/changelog',
-    '/discord',
-    '/forum',
-    '/roadmap'
+    '/blog'
   ].concat(helpRoutes)
-  // TODO
-  // pascal sitemap rec: get all public spaces with content, mark each as user generated
-  // update once a day (maybe not at the build stage, but in netlify functions)
-  const exploreSpaceRoutes = await exploreSpaces() || []
-  const dynamicRoutes = routes.concat(exploreSpaceRoutes)
+  const dynamicRoutes = routes.concat(sitemapSpaces)
   // dev https certs (optional, local only)
   const certKeyPath = './.cert/key.pem'
   const certPath = './.cert/cert.pem'
