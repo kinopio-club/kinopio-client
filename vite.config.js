@@ -217,7 +217,7 @@ export default defineConfig(async ({ command, mode }) => {
         hostname: 'https://kinopio.club',
         dynamicRoutes,
         readable: true,
-        externalSitemaps: ['https://kinopio.club/blog/sitemap.xml']
+        generateRobotsTxt: false
       })
     ],
     preview: {

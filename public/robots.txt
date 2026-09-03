@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kinopio.club/sitemap.xml
+Sitemap: https://kinopio.club/blog/sitemap.xml
+
+# LLM-readable site overview: https://kinopio.club/llms.txt
