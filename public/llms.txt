@@ -1,4 +1,4 @@
-# Kinopio, Thinking Canvas
+# Kinopio, Spatial Thinking
 
 > Kinopio is a spatial thinking canvas for connecting thoughts, ideas,
 > and plans using cards, connection lines, boxes, and lists. Free for

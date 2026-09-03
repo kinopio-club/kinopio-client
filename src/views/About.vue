@@ -43,7 +43,7 @@ onMounted(() => {
   if (consts.isDevelopment()) {
     document.title = '[DEV] Kinopio'
   } else {
-    document.title = 'Kinopio'
+    document.title = 'Kinopio – Spatial Thinking'
   }
 })
 
