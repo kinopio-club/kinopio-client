@@ -51,13 +51,6 @@ export default async ({ context, title, description, previewImage, jsonLD, bodyC
           transform: element => element.setAttribute('content', description)
         }
       ])
-      // routes without body content fall back to the description
-      if (!bodyContent) {
-        transformations.push({
-          selector: 'noscript',
-          transform: element => { element.innerText = description }
-        })
-      }
     }
     // image
     if (previewImage) {
@@ -87,19 +80,12 @@ export default async ({ context, title, description, previewImage, jsonLD, bodyC
         transform: element => element.setInnerContent(jsonLD)
       })
     }
-    // static body content for crawlers
-    // noscript is for crawlers that don't run js (llms), hidden <main> is for crawlers that do (googlebot)
+    // simplified body content for crawlers
     if (bodyContent) {
-      transformations = transformations.concat([
-        {
-          selector: 'noscript',
-          transform: element => element.setInnerContent(bodyContent, { html: true })
-        },
-        {
-          selector: 'body',
-          transform: element => element.prepend(`<main id="static-space" hidden>${bodyContent}</main>`, { html: true })
-        }
-      ])
+      transformations.push({
+        selector: 'body',
+        transform: element => element.prepend(`<main id="static-space" hidden>${bodyContent}</main>`, { html: true })
+      })
     }
     // canonical
     if (canonicalUrl) {

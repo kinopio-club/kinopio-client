@@ -70,7 +70,7 @@ const escapeHtml = (string) => {
 }
 
 // simplified body content for crawlers
-// rendered inside <noscript> so search engines see card text without executing js
+// rendered inside <body> so search engines see card text without executing js
 
 const sortByDistanceFromOrigin = (items) => {
   items = items.map(item => {
