@@ -284,7 +284,6 @@ export const useGlobalStore = defineStore('global', {
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     shouldResetDimensionsOnLoad: false,
-    shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
     // loading broadcast
     isConnectingToBroadcast: false,
