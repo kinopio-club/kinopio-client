@@ -40,7 +40,6 @@ onMounted(() => {
 })
 
 // community spaces
-// the dialog renders from these globalStore lists, same as DiscoveryButtons.vue
 
 const updateCommunitySpaces = async () => {
   try {
@@ -144,8 +143,6 @@ const updateSystemTheme = () => {
 main.page
   .explore-section
     dialog.explore
-      // the dialog is normally positioned inside a toolbar popup. on this page it
-      // is the page content, so let it sit in the flow at full width
       position static
       max-width 100%
 </style>
