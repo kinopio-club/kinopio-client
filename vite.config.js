@@ -112,7 +112,8 @@ export default defineConfig(async ({ command, mode }) => {
   const routes = [
     '/about',
     '/api',
-    '/blog'
+    '/blog',
+    '/explore'
   ].concat(helpRoutes)
   const dynamicRoutes = routes.concat(sitemapSpaces)
   // dev https certs (optional, local only)
@@ -130,7 +131,7 @@ export default defineConfig(async ({ command, mode }) => {
     ssgOptions: {
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
-        return ['/', '/about', '/api'].concat(helpRoutes)
+        return ['/', '/about', '/api', '/explore'].concat(helpRoutes)
       }
     },
     test: {
@@ -187,7 +188,7 @@ export default defineConfig(async ({ command, mode }) => {
             /^\/api(?:\/.*)?$/,
             /^\/blog(?:\/.*)?$/,
             /^\/forum(?:\/.*)?$/,
-            /^\/blog(?:\/.*)?$/
+            /^\/explore(?:\/.*)?$/
           ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
           // help pages and their media are online-only, keep them out of the app precache

@@ -35,7 +35,8 @@ const props = defineProps({
   unreadExploreSpacesCount: Number,
   unreadFollowingSpacesCount: Number,
   unreadEveryoneSpacesCount: Number,
-  errorIsLoading: Boolean
+  errorIsLoading: Boolean,
+  parentIsPage: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   globalStore.clearNotificationsWithPosition()
@@ -125,8 +126,8 @@ const updateCurrentSection = (value) => {
 const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
 const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
 const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
-const followingSpaces = computed(() => globalStore.followingSpaces)
-const everyoneSpaces = computed(() => globalStore.everyoneSpaces)
+const followingSpaces = computed(() => globalStore.followingSpaces || [])
+const everyoneSpaces = computed(() => globalStore.everyoneSpaces || [])
 const currentSpaces = computed(() => {
   let spaces
   if (currentSectionIsExplore.value) {
@@ -207,7 +208,14 @@ const toggleTipsIsVisible = () => {
 </script>
 
 <template lang="pug">
-dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.left.stop='closeDialogs')
+dialog.explore.wide(
+  v-if="visible"
+  :open="visible"
+  ref="dialogElement"
+  :style="{'max-height': state.dialogHeight + 'px'}"
+  :class="{'parent-is-page': props.parentIsPage}"
+  @click.left.stop='closeDialogs'
+)
   section.title-section(v-if="visible" :open="visible")
     .row.title-row
       .segmented-buttons
@@ -221,7 +229,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           span Everyone
           .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
-      button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+      button.small-button.extra-options-button(v-if="!props.parentIsPage" @click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
         span ?
     OfflineBadge
     //- .row(v-if="props.loading")
@@ -241,6 +249,12 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         p You can share your own spaces in Explore, or ask others to share theirs.
         AskToAddToExplore
         AddToExplore
+        .button-wrap
+          router-link(to="/explore")
+            button
+              span Explore Page{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+
       template(v-if="currentSectionIsFollowing")
         p Following lists recently updated public spaces created by people you Follow.
       template(v-if="currentSectionIsEveryone")
@@ -279,6 +293,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :previewImageIsWide="true"
       :showCollaborators="true"
       :hideFilter="currentSectionIsExplore"
+      :previewImageIsFullSize="props.parentIsPage"
     )
 </template>
 
@@ -290,6 +305,8 @@ dialog.explore
   position absolute
   &.wide
     width 320px
+  &.parent-is-page
+    width 100%
   .loader
     margin-right 5px
     vertical-align -2px

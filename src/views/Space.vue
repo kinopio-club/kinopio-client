@@ -119,7 +119,6 @@ const init = async () => {
   await spaceStore.initializeSpace()
   // broadcastStore.connect()
   await groupStore.initializeGroups()
-  checkIfShouldShowExploreOnLoad()
   historyStore.init()
   changelogStore.init()
   userStore.checkIfShouldApplyAffiliatePromo()
@@ -257,13 +256,6 @@ const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
 const isResizingList = computed(() => globalStore.currentUserIsResizingList)
 const isDraggingDialog = computed(() => globalStore.currentUserIsDraggingMultipleSelectedActionsDialog)
-const checkIfShouldShowExploreOnLoad = () => {
-  const shouldShow = globalStore.shouldShowExploreOnLoad
-  if (shouldShow) {
-    globalStore.triggerExploreIsVisible()
-  }
-  globalStore.shouldShowExploreOnLoad = false
-}
 
 // page size
 

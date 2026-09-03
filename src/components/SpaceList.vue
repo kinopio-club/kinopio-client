@@ -108,6 +108,7 @@ const props = defineProps({
   search: String,
   parentDialog: String,
   previewImageIsWide: Boolean,
+  previewImageIsFullSize: Boolean,
   hidePreviewImage: Boolean,
   hideTemplatesIcon: Boolean,
   showSpaceGroups: Boolean,
@@ -401,7 +402,11 @@ const group = (groupId) => {
 
 const previewImage = (space) => {
   if (!space.previewThumbnailImage) { return }
-  return space.previewThumbnailImage + `?date=${globalStore.sessionDate}`
+  let image = space.previewThumbnailImage
+  if (props.previewImageIsFullSize) {
+    image = space.previewImage
+  }
+  return image + `?date=${globalStore.sessionDate}`
 }
 </script>
 
@@ -470,7 +475,7 @@ span.space-list-wrap
 
             //- preview image
             template(v-if="!props.hidePreviewImage")
-              .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide}")
+              .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide, 'full-size': props.previewImageIsFullSize}")
                 img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
@@ -603,6 +608,12 @@ span.space-list-wrap
       &.wide
         width 40px
         height 30px
+        .preview-thumbnail-image
+          width 100%
+          height 100%
+      &.full-size
+        width 80px
+        height 65px
         .preview-thumbnail-image
           width 100%
           height 100%

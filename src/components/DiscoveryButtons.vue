@@ -21,6 +21,7 @@ let unsubscribes
 const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
+  updateCommunitySpaces()
   const hasCommunitySpaces = exploreSpaces.value.length || followingSpaces.value.length || everyoneSpaces.value.length
   if (hasCommunitySpaces) {
     state.isLoadingSpaces = false
@@ -68,12 +69,6 @@ const state = reactive({
 watch(() => state.exploreIsVisible, (value, prevValue) => {
   if (!value) {
     clearUnreadSpacesCounts()
-  }
-})
-
-watch(() => globalStore.isSpacePage, async (value, prevValue) => {
-  if (value) {
-    globalStore.followingSpaces = await apiStore.getFollowingUsersSpaces()
   }
 })
 
@@ -138,6 +133,8 @@ const toggleExploreIsVisible = () => {
   state.exploreIsVisible = !isVisible
 }
 const updateCommunitySpaces = async () => {
+  const hasCommunitySpaces = exploreSpaces.value.length || followingSpaces.value.length || everyoneSpaces.value.length
+  if (hasCommunitySpaces) { return }
   try {
     state.isLoadingSpaces = true
     const [explore, following, everyone] = await Promise.all([
@@ -253,5 +250,7 @@ const liveSpacesCount = computed(() => {
             border-top-right-radius var(--entity-radius)
             border-bottom-right-radius var(--entity-radius)
             border-right 1px solid var(--primary-border)
+  dialog.explore
+    left 42px
 
 </style>

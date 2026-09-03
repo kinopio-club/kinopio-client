@@ -126,12 +126,7 @@ const router = {
       }
     }, {
       path: '/explore',
-      component: () => import('./views/Space.vue'),
-      beforeEnter: (to, from, next) => {
-        const globalStore = useGlobalStore()
-        globalStore.shouldShowExploreOnLoad = true
-        next()
-      }
+      component: () => import('./views/Explore.vue')
     }, {
       path: '/new',
       component: () => import('./views/Space.vue'),
