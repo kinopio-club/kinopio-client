@@ -2,6 +2,7 @@
 title: Dark Mode
 description: "Whether you're a night owl or into the mysterious and cool, dark mode is here for you."
 category: Basics
+updated: 2026-09-03
 video: https://updates.kinopio.club/pages/help/posts/dark-mode/demo.mp4
 ---
 

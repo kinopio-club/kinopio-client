@@ -138,6 +138,95 @@ const imageType = (url) => {
   return 'image/png'
 }
 
+// JSON-LD Structured Data
+// https://json-ld.org/
+// help pages are excluded from the page-meta edge function (see netlify.toml), so
+// their structured data is generated here, from the markdown frontmatter that
+// vite.config.js already parses into virtual:help-pages
+
+// same @id as the Organization in AboutJsonLd.vue, so both resolve to one entity
+const organization = {
+  '@type': 'Organization',
+  '@id': 'https://kinopio.club/#organization',
+  name: 'Kinopio',
+  url: 'https://kinopio.club'
+}
+const breadcrumbSchema = (page, url) => {
+  const itemListElement = [
+    { '@type': 'ListItem', position: 1, name: 'Kinopio', item: 'https://kinopio.club' },
+    { '@type': 'ListItem', position: 2, name: 'Help', item: 'https://kinopio.club/help' }
+  ]
+  if (page) {
+    itemListElement.push({ '@type': 'ListItem', position: 3, name: page.title, item: url })
+  }
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement
+  }
+}
+const videoSchema = (page, description, image) => {
+  if (!page.video) { return }
+  return {
+    '@type': 'VideoObject',
+    name: page.title,
+    description,
+    contentUrl: page.video,
+    // no per-video thumbnails exist yet, so this falls back to the site og image.
+    // google requires thumbnailUrl, and a poster frontmatter field would improve it
+    thumbnailUrl: image,
+    uploadDate: page.updated
+  }
+}
+const pageSchema = (page, url, description, image) => {
+  // a single help page
+  if (page) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: page.title,
+      description,
+      url,
+      image,
+      articleSection: page.category,
+      dateModified: page.updated,
+      inLanguage: 'en',
+      isPartOf: {
+        '@type': 'WebPage',
+        name: 'Kinopio Help',
+        url: 'https://kinopio.club/help'
+      },
+      video: videoSchema(page, description, image),
+      publisher: organization
+    }
+  }
+  // the help index, which lists every page
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Kinopio Help',
+    description,
+    url,
+    // the index is as fresh as its most recently updated page. iso dates sort
+    // lexicographically, so max() needs no parsing
+    dateModified: helpPages.map(helpPage => helpPage.updated).filter(date => date).sort().pop(),
+    inLanguage: 'en',
+    publisher: organization,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: helpPages.length,
+      itemListElement: sortBy(helpPages, ['title']).map((helpPage, index) => {
+        return {
+          '@type': 'ListItem',
+          position: index + 1,
+          name: helpPage.title,
+          url: `https://kinopio.club/help/${helpPage.slug}`
+        }
+      })
+    }
+  }
+}
+
 useHead(() => {
   let title = 'Kinopio Help'
   let description = 'Guides and documentation for using Kinopio'
@@ -179,7 +268,11 @@ useHead(() => {
       { name: 'twitter:description', content: description },
       ...videoMeta
     ],
-    link: [{ rel: 'canonical', href: url }]
+    link: [{ rel: 'canonical', href: url }],
+    script: [
+      { type: 'application/ld+json', innerHTML: JSON.stringify(pageSchema(pageMeta.value, url, description, image)) },
+      { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbSchema(pageMeta.value, url)) }
+    ]
   }
 })
 

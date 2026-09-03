@@ -2,6 +2,7 @@
 title: Favoriting and Following Spaces and People
 description: You can bookmark spaces or people to return to later by favoriting them.
 category: Community
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/favorite-space.png
 ---
 

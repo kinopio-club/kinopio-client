@@ -2,6 +2,7 @@
 title: Paint Select and Bulk Actions
 description: You can move or edit multiple items at once by dragging from an empty area to paint over them. Being able to move and edit many cards together is one of Kinopio's most powerful features.
 category: Basics
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/selecting-and-bulk-actions/select-move.webp
 ---
 

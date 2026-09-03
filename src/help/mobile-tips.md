@@ -2,6 +2,7 @@
 title: Mobile Tips
 description: On a touch device, dragging your finger along the screen scrolls the page, and two-finger pinching zooms in and out, just like it does on a normal website.
 category: Basics
+updated: 2026-09-03
 video: https://files.kinopio.club/mobile-press-hold-paint.mp4
 ---
 

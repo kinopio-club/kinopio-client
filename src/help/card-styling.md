@@ -2,6 +2,7 @@
 title: Card Styling
 description: Cards colors, formatting, frames, resizing, header fonts, tags, frames, colors, and more.
 category: Basics
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/styling-cards/card-details.webp
 ---
 

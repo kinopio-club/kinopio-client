@@ -2,6 +2,7 @@
 title: Card Images
 description: Adding images, files, video, audio, embeds, and codeblocks to cards
 category: Basics
+updated: 2026-09-03
 
 image: https://updates.kinopio.club/pages/help/posts/adding-images-to-cards/card-details.webp
 ---

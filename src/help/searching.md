@@ -2,6 +2,7 @@
 title: Searching
 description: To quickly access spaces you can type to filter them by name
 category: Navigating
+updated: 2026-09-03
 video: https://updates.kinopio.club/pages/help/posts/searching/spaces.mp4
 ---
 

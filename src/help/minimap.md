@@ -2,6 +2,7 @@
 title: Minimap and Table of Contents
 description: Get a birds eye view perspective and jump around big spaces with the minimap. There are two ways to use the minimap, while panning and from the footer buttons.
 category: Navigating
+updated: 2026-09-03
 video: https://updates.kinopio.club/pages/help/posts/minimap/minimap-pan.mp4
 ---
 

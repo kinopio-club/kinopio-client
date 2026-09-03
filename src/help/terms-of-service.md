@@ -2,6 +2,7 @@
 title: Terms of Service
 description: I endeavor to treat everyone fairly, ethically, and honestly. But for the possible but unlikely bad actor, this boring legal document exists.
 category: Policies
+updated: 2026-09-03
 ---
 
 # Terms of Service

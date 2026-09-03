@@ -2,6 +2,7 @@
 title: Refund Policy
 description: "Kinopio is created by me, Pirijan, and I don't want your money unless you're happily using it."
 category: Policies
+updated: 2026-09-03
 ---
 
 # Refund Policy

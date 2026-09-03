@@ -2,6 +2,7 @@
 title: Locking Cards
 description: Prevent cards from being accidentally moved, edited, or deleted by locking them.
 category: Advanced Use
+updated: 2026-09-03
 video: https://updates.kinopio.club/pages/help/posts/locking/1.mp4
 ---
 

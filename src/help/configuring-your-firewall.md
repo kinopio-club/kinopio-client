@@ -2,6 +2,7 @@
 title: Configuring your Firewall for Kinopio
 description: Configure your firewall to allow Kinopio as a trusted source
 category: Troubleshooting
+updated: 2026-09-03
 ---
 
 # Configuring your Firewall for Kinopio

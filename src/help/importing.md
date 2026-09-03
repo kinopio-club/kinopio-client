@@ -2,6 +2,7 @@
 title: Importing
 description: "You can import the JSON of exported spaces you've saved to your computer with Share → Import → [JSON] Select File"
 category: Importing and Exporting
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/import-export/import.webp
 ---
 

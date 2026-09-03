@@ -2,6 +2,7 @@
 title: Checkbox/Todo Cards
 description: Differentiate thoughts from plans with checkbox cards
 category: Basics
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/checkbox-cards/filter.webp
 ---
 

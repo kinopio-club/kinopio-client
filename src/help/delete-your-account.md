@@ -2,6 +2,7 @@
 title: Delete Your Account
 description: You can permanently delete your account – including all the spaces in it. You can do this by going to You → Settings → Remove All Your Data.
 category: User Settings
+updated: 2026-09-03
 ---
 
 # Delete Your Account

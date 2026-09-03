@@ -2,6 +2,7 @@
 title: Sharing, Collaborating, and Privacy
 description: Share and invite other people to your spaces
 category: Basics
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/sharing-spaces/1.webp
 ---
 

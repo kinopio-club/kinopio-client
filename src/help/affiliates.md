@@ -2,6 +2,7 @@
 title: Affiliate Program
 description: "If you're a genuine user and fan of Kinopio, and you happen to an established (or semi-established) Youtube or TikTok creator, or you write for a publication, you may be eligible to join the Kinopio Affiliate Program."
 category: Community
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/affiliate/1.webp
 ---
 

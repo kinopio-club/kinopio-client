@@ -2,6 +2,7 @@
 title: Links in Cards
 description: Add URLs to cards to create link buttons, link previews, and space links
 category: Advanced Use
+updated: 2026-09-03
 video: https://updates.kinopio.club/pages/help/posts/add-url-to-card.mp4
 ---
 

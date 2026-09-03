@@ -2,6 +2,7 @@
 title: Reset Your Password
 description: "If you've lost your password, you can set a new password."
 category: User Settings
+updated: 2026-09-03
 ---
 
 # Reset Your Password

@@ -2,6 +2,7 @@
 title: Reporting Bugs
 description: Security and bug bounties
 category: Policies
+updated: 2026-09-03
 ---
 
 # Reporting Bugs

@@ -2,6 +2,7 @@
 title: Press Kit
 description: Kinopio logos, screenshots, and brand assets for press
 category: Press
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/press-kit/logo-base.png
 ---
 

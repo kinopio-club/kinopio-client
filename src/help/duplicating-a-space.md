@@ -2,6 +2,7 @@
 title: Duplicating Spaces
 description: You can duplicate a space by exporting, through Share → Export → Duplicate this Space
 category: Advanced Use
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/duplicating-a-space/export.webp
 ---
 

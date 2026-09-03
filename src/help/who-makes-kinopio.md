@@ -2,6 +2,7 @@
 title: Who Makes Kinopio?
 description: The people and story behind Kinopio
 category: About Kinopio
+updated: 2026-09-03
 ---
 
 # Who Makes Kinopio?

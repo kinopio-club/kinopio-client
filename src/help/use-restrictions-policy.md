@@ -2,6 +2,7 @@
 title: Use Restrictions Policy
 description: Kinopio helps people understand themselves and be understood by sharing thoughts and ideas. But an expressive tool is also one that can be used maliciously.
 category: Policies
+updated: 2026-09-03
 ---
 
 # Use Restrictions Policy

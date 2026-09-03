@@ -2,6 +2,7 @@
 title: Discover Community Spaces with Explore and Live
 description: Explore is a list of cool spaces made and explicitly shared by other people (like you) with the Kinopio community.
 category: Community
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/explore/add-to-explore.webp
 ---
 

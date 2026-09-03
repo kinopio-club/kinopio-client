@@ -2,6 +2,7 @@
 title: Offline Support
 description: Kinopio was designed to save even without a reliable connection.
 category: About Kinopio
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/offline-dialog.png
 ---
 

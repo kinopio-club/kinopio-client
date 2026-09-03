@@ -2,6 +2,7 @@
 title: Backlinked Tags
 description: "Add [[tags]] to your cards to make them stand out and connect ideas across spaces."
 category: Advanced Use
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/tag-details.png
 ---
 

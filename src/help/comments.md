@@ -2,6 +2,7 @@
 title: Comments
 description: Comment cards are smaller than normal cards and a bit transparent, letting you give feedback without feeling like you’re ‘intruding’ on the original space. Hover over cards to read them.
 category: Advanced Use
+updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/comments/invite.webp
 ---
 
