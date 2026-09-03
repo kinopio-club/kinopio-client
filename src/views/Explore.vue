@@ -14,7 +14,7 @@ import Header from '@/components/pages/Header.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
 import Footer from '@/components/pages/Footer.vue'
-import ExploreDialog from '@/components/dialogs/Explore.vue'
+import Explore from '@/components/dialogs/Explore.vue'
 import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
@@ -67,7 +67,7 @@ const closeAllDialogs = () => {
 // meta
 // deliberately not AboutJsonLd, which hardcodes the canonical to the home page
 
-const description = 'Browse public spaces shared by the Kinopio community. Mindmaps, moodboards, planners, notes, and more.'
+const description = 'Explore cool spaces shared by the Kinopio community. Mindmaps, moodboards, planners, notes, and more.'
 
 useHead(() => {
   let title = 'Explore Spaces – Kinopio'
@@ -121,17 +121,19 @@ const updateSystemTheme = () => {
   main.page(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(h2="EXPLORE" :isH1="true")
-        p Public spaces shared by the Kinopio community.
-
+        Wordmark(h2="EXPLORE COMMUNITY" :isH1="true")
+        p Explore cool spaces shared by the Kinopio community. You can add your own spaces to Explore, or ask others to share theirs.{{' '}}
+          a(href="/help#")
+            button.small-button.tips-button ?
       section.explore-section
-        ExploreDialog(
+        Explore(
           :visible="true"
           :loading="state.isLoadingSpaces"
           :unreadExploreSpacesCount="0"
           :unreadFollowingSpacesCount="0"
           :unreadEveryoneSpacesCount="0"
           :errorIsLoading="state.errorIsLoading"
+          :parentIsPage="true"
         )
 
       FooterSitemap
