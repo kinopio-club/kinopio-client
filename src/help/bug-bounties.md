@@ -4,6 +4,8 @@ description: Security and bug bounties
 category: Policies
 ---
 
+# Reporting Bugs
+
 <img src="https://cdn.kinopio.club/PFUTEPJQGiAfY0Sp1CU4U/original-0ee24c4ce25cf520a1c6b3120906891c.jpg" class="medium"/>
 
 Because Kinopio is an extremely small, [non-VC funded organic business](https://pketh.org/organic-software.html) right now that is still finding sustainability, so the bug bounties payouts to white hat reporters I can offer at this time are relatively limited.

@@ -139,7 +139,7 @@ AboutJsonLd
     .page-wrap
       section.intro
         Wordmark
-        h2.page-title API Docs
+        h1.page-title API Docs
         ul.api-toc
           li(v-for="item in items")
             a(:href="item.link")

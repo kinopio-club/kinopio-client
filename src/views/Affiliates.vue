@@ -101,7 +101,7 @@ const totalCommissionsPaid = computed(() => total(commissionsPaid.value))
   main.page(@click="closeAllDialogs")
     .page-wrap
       section
-        Wordmark(h2="AFFILIATE DASHBOARD")
+        Wordmark(h2="AFFILIATE DASHBOARD" :isH1="true")
         .errors
           .badge.danger(v-if="state.error.currentUserIsNotSignedIn")
             span To access this page you must be signed in

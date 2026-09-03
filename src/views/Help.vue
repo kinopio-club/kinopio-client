@@ -258,7 +258,7 @@ const updateFilterOnSearchFocus = (event) => {
   main.page.help-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(h2="HELP TOPICS")
+        Wordmark(h2="HELP TOPICS" :isH1="currentSlugIsRoot")
 
       section.search
         ResultsFilter(
