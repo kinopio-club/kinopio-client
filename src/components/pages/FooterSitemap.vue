@@ -17,6 +17,7 @@ footer.sitemap
       a(href="/help") Help
     .column
       p COMMUNITY
+      a(href="/explore") Explore
       a(href="/api") API Docs
       a(href="/discord") Discord
       a(href="https://github.com/kinopio-club") Github
@@ -49,6 +50,7 @@ footer.sitemap
     flex-direction row
     justify-content flex-start
     gap 40px
+    margin-bottom 0
 
   .column
     display flex
