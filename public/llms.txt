@@ -7,12 +7,15 @@
 Note: not to be confused with Kinopio, the Japanese name for Toad in
 Nintendo's Super Mario series. This site is the note-taking app.
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## Pricing
 [full pricing](https://kinopio.club/help/how-much-does-kinopio-cost):
-free up to 100 cards with no account. Paid plan $X/month or $Y/year for
-unlimited cards. Lifetime plan $200. Community-funded, no VC, no ads.
+free up to 100 cards and 5mb uploads, no account needed. $8/month,
+$80/year, or $250/life (USD) for unlimited cards and uploads. The iOS
+app price is higher to cover Apple’s fees, so upgrading on the website
+costs less. Discounts for students and financial need on request.
+Community-funded, no VC, no ads.
 
 ## Major features
 
