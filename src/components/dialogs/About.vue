@@ -162,7 +162,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
         a(href="/changelog")
           button(@click.left.stop.prevent="changeSpaceToChangelog" :class="{ active: currentSpaceIsChangelog }")
             span Changelog
-            img.updated.icon(src="@/assets/updated.gif")
+            img.updated.icon(src="@/assets/updated.gif" alt="updated")
 
             //- v-if="changelogIsUpdated"
     //- .row
