@@ -36,8 +36,8 @@ const spacePublicMeta = async (spaceId) => {
     const space = await normalizeResponse(response)
     return space
   } catch (error) {
-    console.warn('🚑 spacePublicMeta', error)
-    throw { error }
+    console.warn('🚑 spacePublicMeta', spaceId, error)
+    throw error
   }
 }
 
@@ -179,7 +179,19 @@ export default async (request, context) => {
       console.info('👻 edge function skipped', url.href)
       return
     }
-    const space = await spacePublicMeta(spaceId)
+    let space
+    try {
+      space = await spacePublicMeta(spaceId)
+    } catch (error) {
+      if (error?.status !== 404) { throw error }
+      console.error('🚑 space not found', url.href)
+      return rewriteIndexHtml({
+        context,
+        status: 404,
+        title: 'Space Not Found – Kinopio',
+        description: 'This space could not be found. It may have been deleted, or made private by the person who created it.'
+      })
+    }
     const { description, previewImage } = space
     return rewriteIndexHtml({
       context,

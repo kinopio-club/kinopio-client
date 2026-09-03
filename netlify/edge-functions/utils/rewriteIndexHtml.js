@@ -1,6 +1,7 @@
 import { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts' // html-rewriter will cause the build to fail if cloudflare is down
 
 const cacheExpiry = 3600 // 3600s = 1 hour
+const notFoundCacheExpiry = 60 // 60s
 
 const imageType = (previewImage) => {
   // https://cdn.kinopio.club/image.jpg → jpg
@@ -8,7 +9,7 @@ const imageType = (previewImage) => {
   return `image/${extension}`
 }
 
-export default async ({ context, title, description, previewImage, jsonLD, bodyContent, canonicalUrl }) => {
+export default async ({ context, title, description, previewImage, jsonLD, bodyContent, canonicalUrl, status }) => {
   console.log('🔮 rewriteIndexHtml', canonicalUrl)
   try {
     const response = await context.next()
@@ -24,7 +25,11 @@ export default async ({ context, title, description, previewImage, jsonLD, bodyC
       return response
     }
     // set meta
-    response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
+    let expiry = cacheExpiry
+    if (status === 404) {
+      expiry = notFoundCacheExpiry
+    }
+    response.headers.set('Cache-Control', `public, durable, s-maxage=${expiry}`)
     let transformations = []
     // title
     if (title) {
@@ -97,7 +102,9 @@ export default async ({ context, title, description, previewImage, jsonLD, bodyC
     const rewriter = transformations.reduce((rewriter, { selector, transform }) => {
       return rewriter.on(selector, { element: transform })
     }, new HTMLRewriter())
-    return rewriter.transform(response)
+    const transformed = rewriter.transform(response)
+    if (!status) { return transformed }
+    return new Response(transformed.body, { status, headers: transformed.headers })
   } catch (error) {
     console.error('🚒 rewriteIndexHtml', error)
     return await context.next()
