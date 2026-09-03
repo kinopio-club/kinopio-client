@@ -31,7 +31,7 @@ export default async ({ context, title, description, previewImage, jsonLD, bodyC
       transformations = transformations.concat([
         {
           selector: 'title',
-          transform: element => { element.innerText = title }
+          transform: element => element.setInnerContent(title)
         },
         {
           selector: 'meta[property="og:title"]',
