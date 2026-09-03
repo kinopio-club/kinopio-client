@@ -249,6 +249,12 @@ dialog.explore.wide(
         p You can share your own spaces in Explore, or ask others to share theirs.
         AskToAddToExplore
         AddToExplore
+        .button-wrap
+          router-link(to="/explore")
+            button
+              span Explore Page{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
+
       template(v-if="currentSectionIsFollowing")
         p Following lists recently updated public spaces created by people you Follow.
       template(v-if="currentSectionIsEveryone")
