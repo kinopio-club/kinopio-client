@@ -153,7 +153,7 @@ section.for-work
         loop
         muted
         playsinline
-        aria-label="xyz"
+        aria-label="multiple people collaborating on the same space in Kinopio. Cards are moved, added to lists, and moved into boxes."
         ref="videoElement"
         poster="https://updates.kinopio.club/pages/about/at-work/1.webp"
       )
