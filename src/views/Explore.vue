@@ -70,7 +70,7 @@ const closeAllDialogs = () => {
 const description = 'Explore cool spaces shared by the Kinopio community. Mindmaps, moodboards, planners, notes, and more.'
 
 useHead(() => {
-  let title = 'Explore Spaces – Kinopio'
+  let title = 'Explore Community Spaces – Kinopio'
   if (consts.isDevelopment()) {
     title = `[DEV] ${title}`
   }

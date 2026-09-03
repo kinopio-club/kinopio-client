@@ -287,6 +287,7 @@ dialog.explore.wide(
       :previewImageIsWide="true"
       :showCollaborators="true"
       :hideFilter="currentSectionIsExplore"
+      :previewImageIsFullSize="props.parentIsPage"
     )
 </template>
 
