@@ -61,12 +61,12 @@ const state = reactive({
 
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const changeSpace = (space) => {
-  closeDialogs()
-  spaceStore.changeSpace(space)
+  if (props.parentIsPage) {
+    window.location.href = '/' + space.id
+  } else {
+    spaceStore.changeSpace(space)
+  }
   state.readSpaceIds.push(space.id)
-}
-const closeDialogs = () => {
-  // state.exploreRssFeedsIsVisible = false
 }
 const refreshBrowser = () => {
   window.location.reload()
@@ -214,7 +214,6 @@ dialog.explore.wide(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
   :class="{'parent-is-page': props.parentIsPage}"
-  @click.left.stop='closeDialogs'
 )
   section.title-section(v-if="visible" :open="visible")
     .row.title-row
