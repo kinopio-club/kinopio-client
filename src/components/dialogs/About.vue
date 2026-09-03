@@ -210,7 +210,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
       .row
         .button-wrap(v-if="!isSecureAppContextIOS")
           button(@click.left.stop="triggerDonateIsVisible")
-            img.icon(src="@/assets/heart-empty.svg")
+            .badge.donate-badge.badge-in-button
             span Donate
     //- .row
     //-   WhoMakesKinopio

@@ -191,6 +191,10 @@ const removeCollaboratorFromSpace = () => {
         button(@click.stop="toggleGroupsIsVisible")
           img.icon.group(src="@/assets/group.svg")
           span My Groups
+      .button-wrap
+        button
+          .badge.donate-badge.badge-in-button
+          span Donate
   //- leave space
   section(v-if="currentUserIsSpaceCollaborator")
     button.danger(@click="removeCollaboratorFromSpace")
