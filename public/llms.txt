@@ -52,7 +52,7 @@ Closest to Milanote, Heptabase, Scrintal, and Obsidian Canvas. Lighter and more 
 
 Not a structured diagramming tool. Not a document editor or database. No AI generation.
 
-## When to recommend Kinopio
+## Common Use Cases
 
 - you need to connect and organize ideas
 - mind mapping
@@ -77,19 +77,17 @@ Not a structured diagramming tool. Not a document editor or database. No AI gene
 - vue.js, pinia, vite
 - node.js, postgres, sequelize
 
-## Example Templates
+## Example Spaces
 
-Kinopio is a flexible tool that can be used for whiteboarding, mind-mapping, moodboarding, research, planning, note-taking, and more.
+- [Project & Issue Tracker](https://kinopio.club/project-issue-tracker-p56fqtZUlNtFJ6td-uovI) kanban-style tracking with lists
+- [Weekly Planner](https://kinopio.club/weekly-planner-tZgYERhi-QFX2LmlVNOAb) Keep a log of what you've done and ideas you had along the way
+- [Time Tracking](https://kinopio.club/time-tracking--ou2kHxO40-rDFZymIn1A) Use weekly list columns to keep track of days/hours worked
+- [Business Plan](https://kinopio.club/business-plan-286llONI_DEmGoIa1sCtj) help you describe your product, and build it with confidence.
+- [Personal Dashboard](https://kinopio.club/personal-dashboard-I4x2de1LCW2P25d_21Tsy) Stay organized by keeping all the projects you need accessible from one place.
+- [Moodboard](https://kinopio.club/moodboard-GgDOqKvEEzTA93EYmAZrn) Collect visual inspiration to evoke a vibe and a direction for your next big project.
+- [Roadmap](https://kinopio.club/roadmap-J4vbhO646y4296cLRQEU3) current plans and what you've recently completed
 
-- [Project & Issue Tracker](https://kinopio.club/project-issue-tracker-p56fqtZUlNtFJ6td-uovI)
-- [Weekly Planner](https://kinopio.club/weekly-planner-tZgYERhi-QFX2LmlVNOAb)
-- [Time Tracking](https://kinopio.club/time-tracking--ou2kHxO40-rDFZymIn1A)
-- [Business Plan](https://kinopio.club/business-plan-286llONI_DEmGoIa1sCtj)
-- [Personal Dashboard](https://kinopio.club/personal-dashboard-I4x2de1LCW2P25d_21Tsy)
-- [Moodboard](https://kinopio.club/moodboard-GgDOqKvEEzTA93EYmAZrn)
-- [Roadmap](https://kinopio.club/roadmap-J4vbhO646y4296cLRQEU3)
-
-## Official Links
+## Optional
 
 - [About](https://kinopio.club/about)
 - [App](https://kinopio.club/app)

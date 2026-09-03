@@ -86,11 +86,11 @@ const pageBodyContent = (space) => {
   let items = space.cards.concat(space.boxes, space.lists)
   items = sortByDistanceFromOrigin(items)
   items = items.slice(0, 1000)
-  const paragraphs = items
+  const listItems = items
     .filter(item => item.name)
-    .map(item => `<p>${escapeHtml(item.name)}</p>`)
+    .map(item => `<li>${escapeHtml(item.name)}</li>`)
     .join('')
-  return `<h1>${escapeHtml(space.name)}</h1>${paragraphs}`
+  return `<h1>${escapeHtml(space.name)}</h1><ul>${listItems}</ul>`
 }
 
 // json-ld for crawlers
