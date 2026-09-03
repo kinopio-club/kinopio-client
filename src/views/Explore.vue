@@ -20,11 +20,15 @@ import consts from '@/consts.js'
 const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const apiStore = useApiStore()
-const userStore = useUserStore()
 
-window.globalStore = useGlobalStore()
-if (consts.isDevelopment()) {
-  window.userStore = useUserStore()
+// window is undefined while vite-ssg prerenders. an unguarded access here throws
+// during the render, and vite-ssg then writes the spa shell for this route without
+// failing the build — so the page silently stops being prerendered
+if (!consts.isStaticPrerenderingPage) {
+  window.globalStore = useGlobalStore()
+  if (consts.isDevelopment()) {
+    window.userStore = useUserStore()
+  }
 }
 
 const state = reactive({
