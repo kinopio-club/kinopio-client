@@ -65,6 +65,56 @@ Not a structured diagramming tool. Not a document editor or database. No AI gene
 - [Changelog](https://kinopio.club/changelog): ongoing release notes
 - [About](https://kinopio.club/about): product overview and FAQ
 
+## Help
+
+Guides for every feature, one page each.
+
+- [Apps and Browser Extensions](https://kinopio.club/help/apps): Download desktop and mobile apps for macOS, Windows, Linux, iOS, and Android. As well as Browser Extensions.
+- [Boxes](https://kinopio.club/help/boxes): Boxes help you group cards, add structure, and guide collaborators around your spaces
+- [Card Images](https://kinopio.club/help/card-images): Adding images, files, video, audio, embeds, and codeblocks to cards
+- [Card Styling](https://kinopio.club/help/card-styling): Cards colors, formatting, frames, resizing, header fonts, tags, frames, colors, and more.
+- [Checkbox/Todo Cards](https://kinopio.club/help/checkbox-cards): Differentiate thoughts from plans with checkbox cards
+- [Dark Mode](https://kinopio.club/help/dark-mode): Whether you're a night owl or into the mysterious and cool, dark mode is here for you.
+- [Drawing](https://kinopio.club/help/drawing): Freehand some highlights, doodles, diagrams, and add a unique personal touch to your spaces. You can access the drawing tools through the left side toolbar. You can change color, stroke size, and toggle eraser mode.
+- [Line Dividers](https://kinopio.club/help/lines): Add lines from the toolbar (or with 'L') to mark pages, sections, slides, and other large variable height areas that can be cumbersome to manage with boxes alone. Jump between lines, and make room in busy spaces with the 'Select All Below' button.
+- [Lists](https://kinopio.club/help/lists): Lists let you vertically group and easily reorder cards.
+- [Mobile Tips](https://kinopio.club/help/mobile-tips): On a touch device, dragging your finger along the screen scrolls the page, and two-finger pinching zooms in and out, just like it does on a normal website.
+- [Paint Select and Bulk Actions](https://kinopio.club/help/select-and-bulk-actions): You can move or edit multiple items at once by dragging from an empty area to paint over them. Being able to move and edit many cards together is one of Kinopio's most powerful features.
+- [Sharing, Collaborating, and Privacy](https://kinopio.club/help/sharing): Share and invite other people to your spaces
+- [Space Background Image and Color](https://kinopio.club/help/changing-space-background): You can change the background for your current space by clicking the thumbnail next to your space name.
+- [Filters](https://kinopio.club/help/filters): Filtering lets you focus on specific groups of cards that matter most to you right now. Use the Filter button to highlight cards that have a specified connection type or frame, and fade everything else out
+- [Keyboard Shortcuts](https://kinopio.club/help/keyboard-shortcuts): Work faster in Kinopio with keyboard shortcuts for making card trees, copying and pasting cards, and more
+- [Minimap and Table of Contents](https://kinopio.club/help/minimap): Get a birds eye view perspective and jump around big spaces with the minimap. There are two ways to use the minimap, while panning and from the footer buttons.
+- [Notifications](https://kinopio.club/help/notifications): By default, whenever a collaborator (or anyone in your open spaces) adds a card you will receive a notification about it.
+- [Searching](https://kinopio.club/help/searching): To quickly access spaces you can type to filter them by name
+- [@User Mentions and Due Dates](https://kinopio.club/help/mentions-due-dates): Type `@` in a card to assign users and due dates to cards
+- [Backlinked Tags](https://kinopio.club/help/tags): Add [[tags]] to your cards to make them stand out and connect ideas across spaces.
+- [Comments](https://kinopio.club/help/comments): Comment cards are smaller than normal cards and a bit transparent, letting you give feedback without feeling like you’re ‘intruding’ on the original space. Hover over cards to read them.
+- [Connections](https://kinopio.club/help/editing-connections): Connection colors and labels
+- [Duplicating Spaces](https://kinopio.club/help/duplicating-a-space): You can duplicate a space by exporting, through Share → Export → Duplicate this Space
+- [Groups](https://kinopio.club/help/groups): Group related spaces together and share them with multiple people at once. Each Group member can see and edit all of the spaces in a Group.
+- [Inbox](https://kinopio.club/help/inbox): Use an Inbox space to collect thoughts, todos, and ideas that don't have a place to go yet. Your Inbox will appear above all your other spaces and favourites so it's always close at hand
+- [Linking Spaces Together](https://kinopio.club/help/backlinks): Use space links to connect your spaces together and weave your own web, or dashboard, of knowledge.
+- [Links in Cards](https://kinopio.club/help/links-in-cards): Add URLs to cards to create link buttons, link previews, and space links
+- [Locking Cards](https://kinopio.club/help/locking): Prevent cards from being accidentally moved, edited, or deleted by locking them.
+- [Private Space Notes](https://kinopio.club/help/private-space-notes): Have you ever felt the need for a handy place to work on some longer-form text associated with a space, or little private place draft a note before sharing it in a card?
+- [Restoring Removed Cards and Spaces](https://kinopio.club/help/restoring-removed-cards-and-spaces): If you've accidentally removed a card or space, you can restore it back through Sidebar → Removed
+- [Exporting Spaces as text, PDFs, or JSON](https://kinopio.club/help/exporting): You can export your space in a plain text, JSON and PDF formats via Share → Export
+- [Importing](https://kinopio.club/help/importing): You can import the JSON of exported spaces you've saved to your computer with Share → Import → [JSON] Select File
+- [Third-Party Apps and Integrations](https://kinopio.club/help/third-party-apps): Use app-specific API Keys to let other apps authenticate, read, and write to your Kinopio data, without compromising the safety of your account. Unlike your normal user API Key, these keys can be scoped and deleted to revoke access.
+- [Delete Your Account](https://kinopio.club/help/delete-your-account): You can permanently delete your account – including all the spaces in it. You can do this by going to You → Settings → Remove All Your Data.
+- [Reset Your Password](https://kinopio.club/help/reset-your-password): If you've lost your password, you can set a new password.
+- [Configuring your Firewall for Kinopio](https://kinopio.club/help/configuring-your-firewall): Configure your firewall to allow Kinopio as a trusted source
+- [Affiliate Program](https://kinopio.club/help/affiliates): If you're a genuine user and fan of Kinopio, and you happen to an established (or semi-established) Youtube or TikTok creator, or you write for a publication, you may be eligible to join the Kinopio Affiliate Program.
+- [Discover Community Spaces with Explore and Live](https://kinopio.club/help/using-explore): Explore is a list of cool spaces made and explicitly shared by other people (like you) with the Kinopio community.
+- [Favoriting and Following Spaces and People](https://kinopio.club/help/favoriting-spaces-and-people): You can bookmark spaces or people to return to later by favoriting them.
+- [Using Templates and Creating Your Own](https://kinopio.club/help/templates): Make your own spaces into easy to duplicate personal templates
+- [Offline Support](https://kinopio.club/help/offline-support): Kinopio was designed to save even without a reliable connection.
+- [Pricing](https://kinopio.club/help/how-much-does-kinopio-cost): All features of Kinopio are free to use and collaborate with, up to a limit of 100 cards and an upload file size limit of 5mb.
+- [Where Your Data is Stored?](https://kinopio.club/help/where-your-data-is-stored): Your user and spaces data lives entirely on your own computer, in your browser's local indexeddb storage. Because it is not sent to a server, you can't share your spaces or access your spaces from another device.
+- [Who Makes Kinopio?](https://kinopio.club/help/who-makes-kinopio): The people and story behind Kinopio
+- [Press Kit](https://kinopio.club/help/press-kit): Kinopio logos, screenshots, and brand assets for press
+
 ## Tone and values
 
 - warm and personal
@@ -98,3 +148,10 @@ Not a structured diagramming tool. Not a document editor or database. No AI gene
 - [Roadmap](https://kinopio.club/roadmap)
 - [Forum](https://kinopio.club/forum)
 - [Discord](https://kinopio.club/discord)
+- [Encryption](https://kinopio.club/help/encryption): Kinopio uses current best practices for securing your information, including encrypting data in-flight, salting/hashing user passwords, and not recording sensitive or private information in logs.
+- [Privacy Policy](https://kinopio.club/help/privacy-policy): Friends don't spy on friends.
+- [Refund Policy](https://kinopio.club/help/refund-policy): Kinopio is created by me, Pirijan, and I don't want your money unless you're happily using it.
+- [Reporting Bugs](https://kinopio.club/help/bug-bounties): Security and bug bounties
+- [Security Bug Reporting](https://kinopio.club/help/security-bug-reporting): Security reports and bug bounties
+- [Terms of Service](https://kinopio.club/help/terms-of-service): I endeavor to treat everyone fairly, ethically, and honestly. But for the possible but unlikely bad actor, this boring legal document exists.
+- [Use Restrictions Policy](https://kinopio.club/help/use-restrictions-policy): Kinopio helps people understand themselves and be understood by sharing thoughts and ideas. But an expressive tool is also one that can be used maliciously.
