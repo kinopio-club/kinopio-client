@@ -37,9 +37,10 @@ const state = reactive({
 })
 
 onMounted(() => {
-  if (consts.isStaticPrerenderingPage) { return }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
-  themeStore.restoreTheme()
+  if (!consts.isStaticPrerenderingPage) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
+    themeStore.restoreTheme()
+  }
   updateCommunitySpaces()
 })
 
