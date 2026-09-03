@@ -70,7 +70,7 @@ const escapeHtml = (string) => {
 }
 
 // simplified body content for crawlers
-// rendered inside <body> so search engines see card text without executing js
+// rendered inside <noscript> so search engines see card text without executing js
 
 const sortByDistanceFromOrigin = (items) => {
   items = items.map(item => {
@@ -86,10 +86,11 @@ const pageBodyContent = (space) => {
   let items = space.cards.concat(space.boxes, space.lists)
   items = sortByDistanceFromOrigin(items)
   items = items.slice(0, 1000)
-  const listItems = items
-    .map(item => `<li>${escapeHtml(item.name)}</li>`)
+  const paragraphs = items
+    .filter(item => item.name)
+    .map(item => `<p>${escapeHtml(item.name)}</p>`)
     .join('')
-  return `<main id="static-space" hidden><h1>${escapeHtml(space.name)}</h1><ul>${listItems}</ul></main>`
+  return `<h1>${escapeHtml(space.name)}</h1>${paragraphs}`
 }
 
 // json-ld for crawlers
