@@ -74,7 +74,7 @@ const updateDialogHeight = async () => {
 // spaces
 
 const currentSpaceIsChangelog = computed(() => spaceStore.id === consts.changelogSpaceId())
-const currentSpaceIsAffiliate = computed(() => spaceStore.id === consts.affiliateSpaceId())
+// const currentSpaceIsAffiliate = computed(() => spaceStore.id === consts.affiliateSpaceId())
 const currentSpaceIsRoadmap = computed(() => spaceStore.id === consts.roadmapSpaceId())
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
@@ -85,10 +85,10 @@ const changeSpaceToChangelog = () => {
   }
   spaceStore.changeSpace(space)
 }
-const changeSpaceToAffiliate = () => {
-  const space = { id: consts.affiliateSpaceId() }
-  spaceStore.changeSpace(space)
-}
+// const changeSpaceToAffiliate = () => {
+//   const space = { id: consts.affiliateSpaceId() }
+//   spaceStore.changeSpace(space)
+// }
 const changeSpaceToRoadmap = () => {
   const space = { id: consts.roadmapSpaceId() }
   spaceStore.changeSpace(space)
@@ -215,29 +215,36 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
     //- .row
     //-   WhoMakesKinopio
   section
-    .row
-      .button-wrap
-        a(href="https://kinopio.club/friends-of-kinopio-affiliate-program-YNmS6C3fofN3R9mYgO1Bu")
-          button(@click.left.stop.prevent="changeSpaceToAffiliate" :class="{ active: currentSpaceIsAffiliate }")
-            span Affiliate Program
-            img.new.icon(src="@/assets/new.gif")
-    .row
-      .button-wrap
-        a(href="https://kinopio.club/discord" target="_blank")
-          button
-            span Discord{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://kinopio.club/forum" target="_blank")
-          button
-            span Forum{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
+    //- .row
+    //-   .button-wrap
+        //- a(href="https://kinopio.club/friends-of-kinopio-affiliate-program-YNmS6C3fofN3R9mYgO1Bu")
+        //-   button(@click.left.stop.prevent="changeSpaceToAffiliate" :class="{ active: currentSpaceIsAffiliate }")
+        //-     span Affiliate Program
+        //-     img.new.icon(src="@/assets/new.gif")
     .row
       .button-wrap
         a(href="https://kinopio.club/blog" target="_blank")
           button
             span Blog{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
+            //- img.icon.visit(src="@/assets/visit.svg")
+
+      .button-wrap
+        a(href="https://kinopio.club/discord" target="_blank")
+          button
+            span Discord{{' '}}
+            //- img.icon.visit(src="@/assets/visit.svg")
+      .button-wrap
+        a(href="https://kinopio.club/forum" target="_blank")
+          button
+            span Forum{{' '}}
+            //- img.icon.visit(src="@/assets/visit.svg")
+
+    .row
+      .button-wrap
+        router-link(to="/explore")
+          button
+            img.icon.sunglasses(src="@/assets/sunglasses.svg")
+            span Explore
 
 </template>
 
