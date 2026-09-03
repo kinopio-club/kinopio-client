@@ -53,6 +53,7 @@ onMounted(() => {
         checkIfShouldNotifySpaceOutOfSync()
       } else if (name === 'triggerNotifyCouldNotSave') {
         if (!globalStore.isSpacePage) { return }
+        if (userStore.getUserIsSignedIn) { return }
         state.notifyCouldNotSave = true
       }
     }
