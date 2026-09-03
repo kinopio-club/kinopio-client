@@ -50,9 +50,9 @@ const updateCommunitySpaces = async () => {
       apiStore.getFollowingUsersSpaces(),
       apiStore.getEveryoneSpaces()
     ])
-    globalStore.exploreSpaces = explore
-    globalStore.followingSpaces = following
-    globalStore.everyoneSpaces = everyone
+    globalStore.exploreSpaces = explore || []
+    globalStore.followingSpaces = following || []
+    globalStore.everyoneSpaces = everyone || []
   } catch (error) {
     console.error('🚑 updateCommunitySpaces', error)
     state.errorIsLoading = true
@@ -123,7 +123,7 @@ const updateSystemTheme = () => {
       section.intro
         Wordmark(h2="EXPLORE COMMUNITY" :isH1="true")
         p Explore cool spaces shared by the Kinopio community. You can add your own spaces to Explore, or ask others to share theirs.{{' '}}
-          a(href="/help#")
+          a(href="/help/using-explore")
             button.small-button.tips-button ?
       section.explore-section
         Explore(

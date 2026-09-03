@@ -125,8 +125,8 @@ const updateCurrentSection = (value) => {
 const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
 const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
 const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
-const followingSpaces = computed(() => globalStore.followingSpaces)
-const everyoneSpaces = computed(() => globalStore.everyoneSpaces)
+const followingSpaces = computed(() => globalStore.followingSpaces || [])
+const everyoneSpaces = computed(() => globalStore.everyoneSpaces || [])
 const currentSpaces = computed(() => {
   let spaces
   if (currentSectionIsExplore.value) {
