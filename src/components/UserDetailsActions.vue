@@ -195,12 +195,13 @@ const removeCollaboratorFromSpace = () => {
 .user-details-actions(@click.stop="closeDialogs")
   //- Current User
   section(v-if="isCurrentUser")
-    //- groups
     .row
+      //- groups
       .button-wrap
         button(@click.stop="toggleGroupsIsVisible")
           img.icon.group(src="@/assets/group.svg")
           span My Groups
+      //- donate
       .button-wrap(v-if="userIsUpgraded && !isSecureAppContextIOS")
         button(@click.left.stop="triggerDonateIsVisible")
           .badge.donate-badge.badge-in-button
