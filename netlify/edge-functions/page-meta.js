@@ -146,7 +146,8 @@ export default async (request, context) => {
       return rewriteIndexHtml({
         context,
         title: staticRoute.title,
-        description: staticRoute.description
+        description: staticRoute.description,
+        canonicalUrl: siteHost + url.pathname
       })
     }
     // group invite url
