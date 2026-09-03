@@ -133,6 +133,8 @@ const toggleExploreIsVisible = () => {
   state.exploreIsVisible = !isVisible
 }
 const updateCommunitySpaces = async () => {
+  const hasCommunitySpaces = exploreSpaces.value.length || followingSpaces.value.length || everyoneSpaces.value.length
+  if (hasCommunitySpaces) { return }
   try {
     state.isLoadingSpaces = true
     const [explore, following, everyone] = await Promise.all([
