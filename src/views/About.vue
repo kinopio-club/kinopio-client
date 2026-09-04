@@ -14,6 +14,7 @@ import AboutExamples from '@/components/pages/about/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/pages/about/AboutMoreFeatures.vue'
 import AboutCollaborate from '@/components/pages/about/AboutCollaborate.vue'
 import AboutFAQ from '@/components/pages/about/AboutFAQ.vue'
+import AboutCreator from '@/components/pages/about/AboutCreator.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
 import Footer from '@/components/pages/Footer.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -93,9 +94,11 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
+      AboutSocialProof
+
       AboutCollaborate
 
-      AboutSocialProof
+      //- AboutCustomerLove
 
       AboutHowTo
 
@@ -111,22 +114,8 @@ AboutJsonLd
           router-link(to="/app")
             button.success Open Kinopio
 
-      section.about-me
-        p Hi I'm{{' '}}
-          a(href="https://pketh.org/about") Piri
-          span , a designer, engineer, and tool-maker. I started Kinopio in 2018 to help people{{' '}}
-          a(href="https://pketh.org/dream-of-being-understood.html") understand each other
-          span , and themselves.
-        p Previously, I was the co-creator and designer of {{' '}}
-          a(href="https://pketh.org/the-first-four-years-of-glitch.html") Glitch
-          span .
-        p If you're curious, I wrote{{' '}}
-          a(href="https://pketh.org/how-kinopio-is-made.html")
-            span How Kinopio is Made
-          span . I hope you enjoy using Kinopio and find it invaluable,
-        img.icon.signature(width="70" height="36" src="https://updates.kinopio.club/pages/about/signature.png" alt="signature")
-        .row
-          a(href="mailto:hi@kinopio.club") hi@kinopio.club
+      AboutCreator
+
       FooterSitemap
   Footer
 .notifications-wrap
