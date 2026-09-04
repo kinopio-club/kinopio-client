@@ -34,7 +34,7 @@ const vPauseAnimation = {
 }
 defineExpose({ vPauseAnimation })
 
-const academic = computed(() => 'Used by students, teachers, and researchers, at ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ● School for Poetic Computation  ● UCLA ● NYC ● Princeton')
+const academic = computed(() => 'Used by students, teachers, and researchers, at ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ● School for Poetic Computation ● UCLA ● NYU ● Princeton')
 const business = computed(() => 'And by designers, engineers, and PMs, at ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands ● Orange Telecom ● Planned Parenthood ● Kakao ● Digital Futures Lab')
 </script>
 
@@ -51,6 +51,11 @@ section.social-proof
     .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
       p {{ business }}
       p {{ academic }}
+
+    //- TODO add more case studies
+    //- p.row.blog-post-row
+    //-   a.blog-post.badge.button-badge(href="https://kinopio.club/blog/posts/trove-brands/")
+    //-    span How Trove Brands Makes Projects More Visible
 
     p Kinopio has also been featured in{{' '}}
       a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
@@ -101,6 +106,16 @@ section.social-proof
   .static-row
     p
       line-height 1.5
+  // .blog-post-row
+  //   cursor auto
+  //   .blog-post
+  //     display inline-block
+  //     width fit-content
+  //     max-width 190px
+  //     background-color var(--info-background)
+  //     text-decoration none
+  //     color var(--primary)
+
 @keyframes marquee
   0%
     transform translate(0px)
