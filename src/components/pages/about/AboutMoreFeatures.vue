@@ -45,7 +45,7 @@ section.more-features
     .row.horizontal
       p.marquee.row-3(v-pause-animation) ● Quick Capture Browser Extensions  ● Personal Templates ● Snap Align ● Other secret features may be available… (don’t tell anyone)
   .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
-    p Also Featuring ● ```Code Blocks``` ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● ```Code Blocks``` ● Works Offline ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Freehand Drawing ● Group Workspaces ● Quick Capture Browser Extensions ● Trackable Todos ● Personal Templates ● Snap Align ● Other secret features may be available… (don’t tell anyone)
+    p Also Featuring ● ```Code Blocks``` ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● Works Offline ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Freehand Drawing ● Group Workspaces ● Quick Capture Browser Extensions ● Trackable Todos ● Personal Templates ● Snap Align
   p
     img.updated.icon(src="@/assets/updated.gif" alt="updated" width="44" height="12")
     a(href="/changelog") Changelog
