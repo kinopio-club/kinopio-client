@@ -1850,6 +1850,19 @@ export default {
     }
     return userId
   },
+  removeOrphanedConnections (items, currentSpaceItemIds = []) {
+    const { cards = [], boxes = [], lists = [], connections = [] } = items
+    const itemIds = new Set([
+      ...cards.map(card => card.id),
+      ...boxes.map(box => box.id),
+      ...lists.map(list => list.id),
+      ...currentSpaceItemIds
+    ])
+    items.connections = connections.filter(connection => {
+      return itemIds.has(connection.startItemId) && itemIds.has(connection.endItemId)
+    })
+    return items
+  },
   async uniqueSpaceItems (items, nullItemUsers) {
     const itemIdDeltas = []
     const user = await cache.user()

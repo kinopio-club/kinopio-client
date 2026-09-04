@@ -164,6 +164,7 @@ const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   newItems = await spaceStore.getNewItems(items, selectedSpaceId)
+  newItems = utils.removeOrphanedConnections(newItems)
   // update cache
   const space = await cache.space(selectedSpaceId).cards
   const spaceIsCached = Boolean(space)
