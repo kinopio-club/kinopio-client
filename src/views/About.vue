@@ -13,6 +13,7 @@ import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
 import AboutExamples from '@/components/pages/about/AboutExamples.vue'
 import AboutMoreFeatures from '@/components/pages/about/AboutMoreFeatures.vue'
 import AboutCollaborate from '@/components/pages/about/AboutCollaborate.vue'
+import AboutCustomers from '@/components/pages/about/AboutCustomers.vue'
 import AboutFAQ from '@/components/pages/about/AboutFAQ.vue'
 import AboutCreator from '@/components/pages/about/AboutCreator.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
@@ -98,7 +99,7 @@ AboutJsonLd
 
       AboutCollaborate
 
-      //- AboutCustomerLove
+      AboutCustomers
 
       AboutHowTo
 
