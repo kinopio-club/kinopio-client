@@ -73,7 +73,7 @@ AboutJsonLd
     .page-wrap
       section.intro
         Wordmark(:isH1="true" h2="SPATIAL THINKING")
-        p For Mindmaps, Moodboards, Whiteboards, Research, and Notes.
+        p Create mindmaps, moodboards, and whiteboards to think through your hardest problems.
         video(
           autoplay
           loop
@@ -88,12 +88,16 @@ AboutJsonLd
         p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
-        p Free for 100 cards. No sign up required.
 
-        //- cta
-        .button-wrap
-          router-link(to="/app")
-            button.success Open Kinopio
+        section.subsection.cta
+          .badge.secondary
+            .button-wrap
+              router-link(to="/app")
+                button.success Open Kinopio
+            span Free for 100 cards. No sign up required.
+
+      //- ??about makers labels
+      //- est 2018, hand made, etc
 
       AboutSocialProof
 
@@ -126,4 +130,8 @@ AboutJsonLd
 
 <style lang="stylus">
 // page.styl
+section.cta
+  width fit-content
+  .button-wrap
+    margin-right 6px
 </style>
