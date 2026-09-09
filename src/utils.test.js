@@ -226,3 +226,30 @@ describe('isCompositionKeyboardEvent', () => {
     expect(utils.isCompositionKeyboardEvent(enterKeydown())).toBe(true)
   })
 })
+
+describe('colorIsDark', () => {
+  it('detects dark and light hex colors', () => {
+    expect(utils.colorIsDark('#000000')).toBe(true)
+    expect(utils.colorIsDark('#ffffff')).toBe(false)
+  })
+
+  it('detects dark and light css color names', () => {
+    expect(utils.colorIsDark('navy')).toBe(true)
+    expect(utils.colorIsDark('azure')).toBe(false)
+    expect(utils.colorIsDark('rebeccapurple')).toBe(true)
+  })
+
+  it('handles uppercase css color names', () => {
+    expect(utils.colorIsDark('AZURE')).toBe(false)
+  })
+
+  it('ignores empty and transparent colors', () => {
+    expect(utils.colorIsDark()).toBeUndefined()
+    expect(utils.colorIsDark('transparent')).toBeUndefined()
+  })
+
+  it('uses brightnessThreshold when provided', () => {
+    expect(utils.colorIsDark('gray')).toBe(false)
+    expect(utils.colorIsDark('gray', 0.8)).toBe(true)
+  })
+})
