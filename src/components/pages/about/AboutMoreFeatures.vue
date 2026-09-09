@@ -48,7 +48,7 @@ section.more-features
     p Also Featuring ● ```Code Blocks``` ● Comments ● Card Frames ● Backlinked [[Tags]] ● Link Between /Spaces ● Works Offline ● Dark Mode ● Add Images, Websites, Pdfs ● Import and Export ● Save as PDF ● Public API ● Freehand Drawing ● Group Workspaces ● Quick Capture Browser Extensions ● Trackable Todos ● Personal Templates ● Snap Align
   p
     img.updated.icon(src="@/assets/updated.gif" alt="updated" width="44" height="12")
-    a(href="/changelog") Changelog
+    a(href="/changelog") The Changelog
     span {{' '}}Is updated all the time with new features
     span .
 </template>

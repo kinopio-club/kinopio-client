@@ -18,7 +18,7 @@ section.subsection.cta
 <style lang="stylus">
 section.subsection.cta
   width fit-content
-  // background-image url('@/assets/pages/about/cta-background.mp4')
+  // background-image url('@/assets/pages/about/cta-background.webp')
   // baackground-repeat repeat
   // background-size cover
   // background-position center
