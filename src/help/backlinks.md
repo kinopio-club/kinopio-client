@@ -1,7 +1,7 @@
 ---
-title: Linking Spaces Together
+title: Backlinked Spaces
 description: Use space links to connect your spaces together and weave your own web, or dashboard, of knowledge.
-category: Advanced Use
+category: Advanced
 updated: 2026-09-03
 video: https://files.kinopio.club/backlinks.mp4
 ---

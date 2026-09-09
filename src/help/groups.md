@@ -1,7 +1,7 @@
 ---
-title: Groups
+title: Group Workspaces
 description: Group related spaces together and share them with multiple people at once. Each Group member can see and edit all of the spaces in a Group.
-category: Advanced Use
+category: Advanced
 updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/groups/groups.webp
 ---

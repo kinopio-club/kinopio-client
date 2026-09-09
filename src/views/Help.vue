@@ -12,6 +12,7 @@ import FooterSitemap from '@/components/pages/FooterSitemap.vue'
 import Footer from '@/components/pages/Footer.vue'
 import helpPages from 'virtual:help-pages' // pages [{ slug, title, description, category }, {…}] from vite build
 import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
+import HelpNav from '@/components/pages/help/HelpNav.vue'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
@@ -126,9 +127,6 @@ const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
 const currentPage = computed(() => helpPages.find(page => page.slug === currentSlug.value))
 const currentCategory = computed(() => categories.find(category => category.name === currentPage.value?.category))
-const categoryByPage = (page) => {
-  return categories.find(category => page.category === category.name)
-}
 
 const imageType = (url) => {
   const extension = url.split('.').pop().toLowerCase()
@@ -282,15 +280,6 @@ const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const updateSystemTheme = () => {
   themeStore.updateSystemTheme()
 }
-const badgeClasses = (page) => {
-  const classes = []
-  if (currentSlug.value === page.slug) {
-    classes.push('active')
-  }
-  const category = categoryByPage(page)
-  classes.push(category.slug)
-  return classes
-}
 
 // filter
 
@@ -315,11 +304,6 @@ const pagesFiltered = computed(() => {
   }
   return items
 })
-const pagesFilteredByCategory = (category) => {
-  let pages = pagesFiltered.value.filter(page => page.category === category.name)
-  pages = sortBy(pages, ['title'])
-  return pages
-}
 const clearFilter = () => {
   state.filter = ''
 }
@@ -328,13 +312,6 @@ const updateFilter = (filter) => {
 }
 const updateFilteredPages = (pages) => {
   state.filteredPages = pages
-}
-const categoryIsVisible = (category) => {
-  if (state.filter) {
-    return Boolean(pagesFilteredByCategory(category).length)
-  } else {
-    return currentSlugIsRoot.value
-  }
 }
 const updateFilterOnSearchFocus = (event) => {
   const value = event.target.value
@@ -371,19 +348,13 @@ const updateFilterOnSearchFocus = (event) => {
         AboutHowTo
 
       section
-        nav#nav(v-if="currentSlugIsRoot || state.filter")
-          template(v-for="category in categories")
-            section.category(v-if="categoryIsVisible(category)" :key="category.name")
-              //- category name
-              p.category-name
-                span.badge.category-circle(:class="category.slug")
-                span {{category.name}}
-              //- pages
-              ul
-                li(v-for="page in pagesFilteredByCategory(category)" :key="page.slug" @click.stop="clearFilter")
-                  router-link(:to="`/help/${page.slug}`")
-                    .badge.button-badge(:class="badgeClasses(page)")
-                      span {{ page.title }}
+        HelpNav#nav(
+          v-if="currentSlugIsRoot || state.filter"
+          :categories="categories"
+          :pages="pagesFiltered"
+          :showCategoryNames="true"
+          @clearFilter="clearFilter"
+        )
         //- post
         article
           p(v-if="pageContent")
@@ -391,12 +362,11 @@ const updateFilterOnSearchFocus = (event) => {
               .badge.secondary.button-badge
                   img.icon.left-arrow(src="@/assets/down-arrow.svg")
                   span All Topics
-            nav
-              ul
-                li(v-for="page in pagesFilteredByCategory(currentCategory)" :key="page.slug" @click.stop="clearFilter")
-                  router-link(:to="`/help/${page.slug}`")
-                    .badge.button-badge(:class="badgeClasses(page)")
-                      span {{ page.title }}
+            HelpNav(
+              :categories="[currentCategory]"
+              :pages="pagesFiltered"
+              @clearFilter="clearFilter"
+            )
             //- post md
             component(:is="pageContent")
           //- 404

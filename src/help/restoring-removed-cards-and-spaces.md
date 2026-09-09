@@ -1,7 +1,7 @@
 ---
 title: Restoring Removed Cards and Spaces
 description: "If you've accidentally removed a card or space, you can restore it back through Sidebar → Removed"
-category: Advanced Use
+category: Advanced
 updated: 2026-09-03
 image: https://updates.kinopio.club/pages/help/posts/removed-dialog.png
 ---
