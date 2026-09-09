@@ -14,7 +14,7 @@ Because Kinopio is an extremely small, [non-VC funded organic business](https://
 The vast majority of reports I receive (>95%) are the result of automated LLM scans from non-users so the effort floor appears to be dramatically lower than it used to be. In rare cases, these still may result in a novel and useful report which may be awarded as follows:
 
 - $20 Critical, high-urgency, unique report.
-- $0 Non-critical, low-urgency, usually these are more like nice-to-have feature suggestions.
+- $0 Non-critical, low-urgency, usually these are more like nice-to-have feature suggestions and non-security related bug reports.
 - $0 As designed, or an already known and considered issue. If I'm busy with feedback from users or messages from customers, I may not have the time to reply to these reports (apologies in advance).
 
 Please keep in mind that which level a report falls into is judged solely at my discretion, but I'll try and keep things as transparent as possible.
