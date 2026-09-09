@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import AboutJsonLd from '@/components/pages/about/AboutJsonLd.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
 import Header from '@/components/pages/Header.vue'
+import AboutCTA from '@/components/pages/about/AboutCTA.vue'
 import AboutSocialProof from '@/components/pages/about/AboutSocialProof.vue'
 import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
 import AboutExamples from '@/components/pages/about/AboutExamples.vue'
@@ -89,15 +90,11 @@ AboutJsonLd
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
 
-        section.subsection.cta
-          .badge.secondary
-            .button-wrap
-              router-link(to="/app")
-                button.success Open Kinopio
-            span Free for 100 cards. No sign up required.
+        AboutCTA
 
       //- ??about makers labels
       //- est 2018, hand made, etc
+      //- or simple badges
 
       AboutSocialProof
 
@@ -114,7 +111,6 @@ AboutJsonLd
       AboutFAQ
 
       section
-        //- cta
         .button-wrap
           router-link(to="/app")
             button.success Open Kinopio
@@ -130,8 +126,4 @@ AboutJsonLd
 
 <style lang="stylus">
 // page.styl
-section.cta
-  width fit-content
-  .button-wrap
-    margin-right 6px
 </style>
