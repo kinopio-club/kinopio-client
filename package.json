@@ -16,7 +16,7 @@
     "@aguezz/qs-parse": "^2.0.0",
     "@nozbe/microfuzz": "^1.0.0",
     "adaptive-quadratic-curve": "^1.0.2",
-    "colord": "^2.9.3",
+    "colord": "^2.9.4",
     "dayjs": "^1.9.1",
     "fractional-indexing": "^3.2.0",
     "idb-keyval": "^6.2.1",
