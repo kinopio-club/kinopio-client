@@ -15,7 +15,6 @@ import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
 import HelpNav from '@/components/pages/help/HelpNav.vue'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import consts from '@/consts.js'
-import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
 import { colord, extend } from 'colord'
@@ -26,59 +25,11 @@ const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const route = useRoute()
 
-const categoryDetails = {
-  basics: {
-    index: 0,
-    color: 'khaki'
-  },
-  'advanced-use': {
-    index: 1,
-    color: '#b9a8ff'
-  },
-  navigating: {
-    index: 2,
-    color: 'pink'
-  },
-  collaboration: {
-    index: 3,
-    color: 'violet'
-  },
-  'importing-and-exporting': {
-    index: 4,
-    color: 'lightskyblue'
-  },
-  community: {
-    index: 5,
-    color: 'burlywood'
-  },
-  'user-settings': {
-    index: 6,
-    color: '#deb1ff'
-  },
-  policies: {
-    index: 7,
-    color: 'salmon'
-  },
-  'about-kinopio': {
-    index: 8,
-    color: 'mediumaquamarine'
-  },
-  press: {
-    index: 9,
-    color: '#c4c4c4'
-  },
-  troubleshooting: {
-    index: 10,
-    color: '#a4dfdc'
-  }
-}
 onMounted(() => {
   if (!consts.isStaticPrerenderingPage) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
     themeStore.restoreTheme()
   }
-  // css category colors
-  Object.keys(categoryDetails).forEach(key => utils.setCssVariable(key, categoryDetails[key].color))
 })
 
 const state = reactive({
@@ -98,25 +49,6 @@ const asyncPageComponent = (slug) => {
   return asyncPageComponents[slug]
 }
 
-const normalizeNewCategory = (name) => {
-  const slug = utils.normalizeString(name)
-  const color = categoryDetails[slug].color
-  const index = categoryDetails[slug].index
-  return { name, slug, color, index }
-}
-let categories = helpPages.reduce((list, page) => {
-  const category = list.find(item => item.name === page.category)
-  if (category) {
-    category.pages.push(page)
-  } else {
-    const newCategory = normalizeNewCategory(page.category)
-    newCategory.pages = [page]
-    list.push(newCategory)
-  }
-  return list
-}, [])
-categories = sortBy(categories, ['index'])
-
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs('page')
 }
@@ -125,8 +57,6 @@ const currentSlug = computed(() => route.params.page)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
 const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
-const currentPage = computed(() => helpPages.find(page => page.slug === currentSlug.value))
-const currentCategory = computed(() => categories.find(category => category.name === currentPage.value?.category))
 
 const imageType = (url) => {
   const extension = url.split('.').pop().toLowerCase()
@@ -350,7 +280,6 @@ const updateFilterOnSearchFocus = (event) => {
       section
         HelpNav#nav(
           v-if="currentSlugIsRoot || state.filter"
-          :categories="categories"
           :pages="pagesFiltered"
           :showCategoryNames="true"
           @clearFilter="clearFilter"
@@ -363,8 +292,8 @@ const updateFilterOnSearchFocus = (event) => {
                   img.icon.left-arrow(src="@/assets/down-arrow.svg")
                   span All Topics
             HelpNav(
-              :categories="[currentCategory]"
               :pages="pagesFiltered"
+              :currentCategoryOnly="true"
               @clearFilter="clearFilter"
             )
             //- post md
@@ -404,36 +333,6 @@ main.help-page-wrap
   section.search
     margin-bottom 0
     max-width 350px
-
-  .category-name
-    display flex
-    align-items center
-    margin-right 0
-    margin-bottom 10px
-
-  nav
-    margin-bottom 2rem
-    section.category + section.category
-      margin-top 1rem
-    ul
-      padding 0
-      margin 0
-      display flex
-      flex-wrap wrap
-      gap 10px 4px
-    li
-      list-style none
-      margin 0
-    a
-      text-decoration none
-
-  .category-circle
-    width 10px
-    height 10px
-    min-width initial
-    min-height initial
-    border-radius 100px
-    display inline-block
 
   section.how-to
     // max-width 715px
@@ -489,31 +388,11 @@ main.help-page-wrap
         padding-left 8px
 
     a.category-name
+      display flex
+      align-items center
+      margin-right 0
+      margin-bottom 10px
       text-decoration none
-
-  .badge
-    color var(--primary-on-light-background)
-    &.basics
-      background-color var(--basics)
-    &.navigating
-      background-color var(--navigating)
-    &.advanced-use
-      background-color  var(--advanced-use)
-    &.collaboration
-      background-color  var(--collaboration)
-    &.importing-and-exporting
-      background-color  var(--importing-and-exporting)
-    &.about-kinopio
-      background-color  var(--about-kinopio)
-    &.community
-      background-color  var(--community)
-    &.user-settings
-      background-color  var(--user-settings)
-    &.troubleshooting
-      background-color  var(--troubleshooting)
-    &.policies
-      background-color  var(--policies)
-    &.press
-      background-color  var(--press)
-
+      .badge
+        color var(--primary-on-light-background)
 </style>

@@ -106,6 +106,8 @@ AboutJsonLd
 
       AboutMoreFeatures
 
+      //- render HepNav here only for categories Basics, Advanced
+
       AboutTestimonials
 
       AboutFAQ
