@@ -55,6 +55,7 @@ const childDialogIsVisible = computed(() => {
   return state.whatsNewIsVisible || state.appsAndExtensionsIsVisible || state.helpIsVisible
 })
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
+const changelogIsUpdated = computed(() => changelogStore.getisRecentlyUpdated)
 const refreshBrowser = () => {
   window.location.reload()
 }
@@ -159,12 +160,17 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
             span 💐 Roadmap
     .row
       .button-wrap
+        a(href="/blog")
+          button
+            span Blog
+            //- img.new.icon(src="@/assets/new.gif" alt="new")
+            //- v-if blogisupdated
+      .button-wrap
         a(href="/changelog")
           button(@click.left.stop.prevent="changeSpaceToChangelog" :class="{ active: currentSpaceIsChangelog }")
             span Changelog
-            img.updated.icon(src="@/assets/updated.gif" alt="updated")
+            img.updated.icon(src="@/assets/updated.gif" alt="updated" v-if="changelogIsUpdated")
 
-            //- v-if="changelogIsUpdated"
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
@@ -223,21 +229,13 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialog
         //-     img.new.icon(src="@/assets/new.gif")
     .row
       .button-wrap
-        a(href="https://kinopio.club/blog" target="_blank")
-          button
-            span Blog{{' '}}
-            //- img.icon.visit(src="@/assets/visit.svg")
-
-      .button-wrap
         a(href="https://kinopio.club/discord" target="_blank")
           button
             span Discord{{' '}}
-            //- img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         a(href="https://kinopio.club/forum" target="_blank")
           button
             span Forum{{' '}}
-            //- img.icon.visit(src="@/assets/visit.svg")
 
     .row
       .button-wrap
@@ -253,10 +251,11 @@ dialog.about
   top calc(100% - 6px) !important
   &.overflow
     overflow auto
-  .updated.icon,
-  .new.icon
-    margin 0
-    margin-left 3px
+  .icon.updated,
+  .icon.new
+    position absolute
+    bottom -6px
+    right 4px
   .keyboard-shortcut
     padding 0 4px !important
   .about-video
