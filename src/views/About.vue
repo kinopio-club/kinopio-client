@@ -90,7 +90,7 @@ AboutJsonLd
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
 
-        AboutCTA
+      AboutCTA
 
       //- ??about makers labels
       //- est 2018, hand made, etc
@@ -117,10 +117,11 @@ AboutJsonLd
 
       AboutFAQ
 
-      section
-        .button-wrap
-          router-link(to="/app")
-            button.success Open Kinopio
+      AboutCTA
+      //- section
+      //-   .button-wrap
+      //-     router-link(to="/app")
+      //-       button.success Open Kinopio
 
       AboutCreator
 
