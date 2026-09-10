@@ -1,5 +1,5 @@
 ---
-title: Backlinked Spaces
+title: Backlinking Between Spaces
 description: Use space links to connect your spaces together and weave your own web, or dashboard, of knowledge.
 category: Advanced
 updated: 2026-09-03

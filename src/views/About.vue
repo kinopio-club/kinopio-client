@@ -12,11 +12,11 @@ import AboutCTA from '@/components/pages/about/AboutCTA.vue'
 import AboutSocialProof from '@/components/pages/about/AboutSocialProof.vue'
 import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
 import AboutExamples from '@/components/pages/about/AboutExamples.vue'
-import AboutMoreFeatures from '@/components/pages/about/AboutMoreFeatures.vue'
 import AboutCollaborate from '@/components/pages/about/AboutCollaborate.vue'
 import AboutTestimonials from '@/components/pages/about/AboutTestimonials.vue'
 import AboutFAQ from '@/components/pages/about/AboutFAQ.vue'
 import AboutCreator from '@/components/pages/about/AboutCreator.vue'
+import HelpNav from '@/components/pages/help/HelpNav.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
 import Footer from '@/components/pages/Footer.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -104,11 +104,16 @@ AboutJsonLd
 
       AboutCollaborate
 
-      AboutMoreFeatures
-
-      //- render HepNav here only for categories Basics, Advanced
-
-      AboutTestimonials
+      section.more-features
+        h2 More Features for Productivity and Creativity
+        HelpNav(:categorySlugs="['basics', 'advanced', 'importing-and-exporting']" :showCategoryNames="true")
+        p
+          .button-wrap
+            a(href="/help")
+              button Help Topics
+          .button-wrap
+            a(href="/changelog")
+              button Changelog
 
       AboutFAQ
 
@@ -119,6 +124,8 @@ AboutJsonLd
 
       AboutCreator
 
+      AboutTestimonials
+
       FooterSitemap
   Footer
 .notifications-wrap
@@ -128,4 +135,8 @@ AboutJsonLd
 
 <style lang="stylus">
 // page.styl
+
+section.more-features
+  nav.help-nav
+    margin-bottom 1.5rem
 </style>

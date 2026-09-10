@@ -10,7 +10,8 @@ import sortBy from 'lodash-es/sortBy'
 const emit = defineEmits(['clearFilter'])
 
 const props = defineProps({
-  pages: Array, // help pages to list, already filtered by search
+  pages: Array, // help pages to list, already filtered by search. defaults to every page
+  categorySlugs: Array, // limit the nav to these categories, eg ['basics', 'advanced']
   showCategoryNames: Boolean,
   currentCategoryOnly: Boolean // for the nav shown inside an article
 })
@@ -91,11 +92,15 @@ const visibleCategories = computed(() => {
   if (props.currentCategoryOnly) {
     return [currentCategory.value].filter(category => category)
   }
+  if (props.categorySlugs) {
+    return categories.filter(category => props.categorySlugs.includes(category.slug))
+  }
   return categories
 })
 
+const navPages = computed(() => props.pages || helpPages)
 const pagesByCategory = (category) => {
-  const pages = props.pages.filter(page => page.category === category.name)
+  const pages = navPages.value.filter(page => page.category === category.name)
   return sortBy(pages, ['title'])
 }
 const categoryByPage = (page) => {
