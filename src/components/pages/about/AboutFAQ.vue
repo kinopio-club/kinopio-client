@@ -80,6 +80,27 @@ section.faq
       //-   span ,{{' '}}
       //-   a(href="/help/privacy-policy/") Privacy Policy
       //-   span .
+
+  details
+    summary Will Kinopio still be around years from now?
+    section.subsection
+      p
+        span Kinopio started in 2019 and my answer to this question is the same as it was
+        a(href="https://pketh.org/kinopio-plans.html") back then
+        span .
+      //- p
+      //-   span You're about to put years of your life into Kinopio so my answer to this question is the same as it was back in 2019.
+      p
+        span Kinopio consists of two codebases, the
+        span.badge.info client
+        span app that runs in your browser, and the
+        span.badge.info server
+        span app which enables sharing and collaboration. The client app is like a cockroach, it’s tiny, free to host,
+        a(href="https://github.com/kinopio-club/kinopio-client") the code is public
+        span , and doesn’t depend on a connection to the server app. The server is also pint-sized and cheap to run indefinetely. But even if the server dies you can continue to use Kinopio as you do now – with all your data intact.
+      p
+        a(href="https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k") Kinopio Architecture and Costs
+
 </template>
 
 <style lang="stylus">

@@ -2,7 +2,7 @@
 
 > Kinopio is a spatial thinking canvas for connecting thoughts, ideas,
 > and plans using cards, connection lines, boxes, and lists. Free for
-> 100 cards, no sign up required. Made by Piri, creator of Glitch.com, since 2018.
+> 100 cards, no sign up required. Made by Piri, creator of Glitch.com, since 2019.
 
 Note: not to be confused with Kinopio, the Japanese name for Toad in
 Nintendo's Super Mario series. This site is the note-taking app.
