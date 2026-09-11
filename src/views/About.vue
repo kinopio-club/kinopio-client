@@ -126,7 +126,7 @@ AboutJsonLd
           span . I hope you enjoy using Kinopio and find it invaluable,
         img.icon.signature(width="70" height="36" src="https://updates.kinopio.club/pages/about/signature.png" alt="signature")
         .row
-          a(href="mailto:hi@kinopio.club") hi@kinopio.club
+          a(href="mailto:hi@kinopio.club") piri@kinopio.club
       FooterSitemap
   Footer
 .notifications-wrap
