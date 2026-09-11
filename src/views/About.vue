@@ -86,7 +86,7 @@ AboutJsonLd
         p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
-        p Free for 100 cards. No sign up required. No ads or AI features.
+        p Free for 100 cards. No sign up required. No ads or AI crap.
 
         //- cta
         .button-wrap
