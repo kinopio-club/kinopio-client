@@ -1,5 +1,5 @@
 ---
-title: Drawing
+title: Freehand Drawing
 description: Freehand some highlights, doodles, diagrams, and add a unique personal touch to your spaces. You can access the drawing tools through the left side toolbar. You can change color, stroke size, and toggle eraser mode.
 category: Basics
 updated: 2026-09-03
