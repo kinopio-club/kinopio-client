@@ -21,8 +21,9 @@ const props = defineProps({
 
 // user
 
+const color = computed(() => props.user?.color || utils.cssVariable('secondary-background'))
 const userHasName = computed(() => Boolean(props.user?.name))
-const colorIsDark = computed(() => utils.colorIsDark(props.user?.color))
+const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const userName = computed(() => {
   let name = props.user?.name
   if (props.truncateNameToLength) {
@@ -75,7 +76,7 @@ span.user-label-inline-wrap(:title="title")
     v-if="props.user"
     :key="props.user.id"
     :data-id="props.user.id"
-    :style="{ background: props.user.color }"
+    :style="{ background: color }"
     :class="{ 'button-badge': props.isClickable }"
     @mouseup="toggleUserDetailsIsVisible"
     @touchend="toggleUserDetailsIsVisible"

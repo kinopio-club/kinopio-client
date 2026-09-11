@@ -4,20 +4,23 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 <template lang="pug">
 section.cta
-  section.subsection.cta
-    video(autoplay loop muted playsinline)
-      source(src="@/assets/pages/about/cta-background.mp4")
+  //- section.subsection.cta
+  //-   video(autoplay loop muted playsinline)
+  //-     source(src="@/assets/pages/about/cta-background.mp4")
 
     .badge.secondary
-      .button-wrap
-        router-link(to="/app")
-          button.success Open Kinopio
-      span Free for 100 cards. No sign up required.
+  .button-wrap
+    router-link(to="/app")
+      button.success Open Kinopio
+    span Free for 100 cards. No sign up required.
 </template>
 
 <style lang="stylus">
 section.cta
   margin-top -1rem
+  .button-wrap
+    margin-right 6px
+
   // margin-bottom 1rem !important
   section.subsection
     width fit-content
@@ -30,8 +33,6 @@ section.cta
     position relative
     .badge
       margin 0
-    .button-wrap
-      margin-right 6px
     video
       position absolute
       left 0

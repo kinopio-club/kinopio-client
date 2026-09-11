@@ -90,38 +90,41 @@ AboutJsonLd
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
 
-      AboutCTA
+        p Free for 100 cards. No sign up required.
+        .button-wrap
+          router-link(to="/app")
+            button.success Open Kinopio
 
       //- ??about makers labels
       //- est 2018, hand made, etc
       //- or simple badges
 
-      AboutSocialProof
-
       AboutHowTo
+
+      AboutSocialProof
 
       AboutExamples
 
       AboutCollaborate
 
       section.more-features
-        h2 More Features for Productivity and Creativity
-        HelpNav(:categorySlugs="['basics', 'advanced', 'importing-and-exporting']" :showCategoryNames="true")
-        p
-          .button-wrap
-            a(href="/help")
-              button Help Topics
-          .button-wrap
-            a(href="/changelog")
-              button Changelog
+        h2 Features for Creativity and Productivity
+        HelpNav(:categorySlugs="['basics', 'advanced', 'importing-and-exporting']" :showCategoryNames="false")
+        //- p
+        //-   .button-wrap
+        //-     a(href="/help")
+        //-       button Help Topics
+        //-   .button-wrap
+        //-     a(href="/changelog")
+        //-       button Changelog
 
       AboutFAQ
 
-      AboutCTA
-      //- section
-      //-   .button-wrap
-      //-     router-link(to="/app")
-      //-       button.success Open Kinopio
+      //- AboutCTA
+      section
+        .button-wrap
+          router-link(to="/app")
+            button.success Open Kinopio
 
       AboutCreator
 

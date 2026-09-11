@@ -40,33 +40,33 @@ const business = computed(() => 'And by designers, engineers, and PMs, at ● Di
 
 <template lang="pug">
 section.social-proof
-  //- section.subsection
+  section.subsection
 
-  .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
-    .row.horizontal
-      p.marquee.row-2(v-pause-animation) {{ business }}
-    .row.horizontal
-      p.marquee(v-pause-animation) {{ academic }}
+    .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
+      .row.horizontal
+        p.marquee.row-2(v-pause-animation) {{ business }}
+      .row.horizontal
+        p.marquee(v-pause-animation) {{ academic }}
 
-  .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
-    p {{ business }}
-    p {{ academic }}
+    .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
+      p {{ business }}
+      p {{ academic }}
 
-  //- TODO add more case studies
-  //- p.row.blog-post-row
-  //-   a.blog-post.badge.button-badge(href="https://kinopio.club/blog/posts/trove-brands/")
-  //-    span How Trove Brands Makes Projects More Visible
+    //- TODO add more case studies
+    //- p.row.blog-post-row
+    //-   a.blog-post.badge.button-badge(href="https://kinopio.club/blog/posts/trove-brands/")
+    //-    span How Trove Brands Makes Projects More Visible
 
-  p Kinopio has also been featured in{{' '}}
-    a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
-    span ,{{' '}}
-    a(href="https://appstacks.club/kinopio") App Stacks
-    span , and was the{{' '}}
-    a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
-    span .
-  //- p But it's the{{' '}}
-  //-   a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love from customers
-  //-   span {{' '}}that means the most to me.
+    p Kinopio has also been featured in{{' '}}
+      a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
+      span ,{{' '}}
+      a(href="https://appstacks.club/kinopio") App Stacks
+      span , and was the{{' '}}
+      a(href="https://www.producthunt.com/products/kinopio") ProductHunt #1 Product of the Day
+      span .
+    p But it's the{{' '}}
+      a(href="https://kinopio.club/love-wall-4Ry3Xwo8Giy7Jeul-s2TY") love from customers
+      span {{' '}}that means the most to me.
 </template>
 
 <style lang="stylus">
