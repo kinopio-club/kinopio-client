@@ -13,7 +13,8 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import isToday from 'dayjs/plugin/isToday'
-import { colord } from 'colord'
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
@@ -25,6 +26,7 @@ import randomColor from 'randomcolor'
 import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
 dayjs.extend(isToday)
+extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
@@ -1850,6 +1852,19 @@ export default {
     }
     return userId
   },
+  removeOrphanedConnections (items, currentSpaceItemIds = []) {
+    const { cards = [], boxes = [], lists = [], connections = [] } = items
+    const itemIds = new Set([
+      ...cards.map(card => card.id),
+      ...boxes.map(box => box.id),
+      ...lists.map(list => list.id),
+      ...currentSpaceItemIds
+    ])
+    items.connections = connections.filter(connection => {
+      return itemIds.has(connection.startItemId) && itemIds.has(connection.endItemId)
+    })
+    return items
+  },
   async uniqueSpaceItems (items, nullItemUsers) {
     const itemIdDeltas = []
     const user = await cache.user()
@@ -2430,7 +2445,7 @@ export default {
   urlIsFile (url) {
     if (!url) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xls|\.xlsx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac|\.pla|\.json)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xls|\.xlsx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac\.pla\.json)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
