@@ -17,3 +17,13 @@ describe('multiple selected connection actions', () => {
     expect(line).toContain('multipleListsSelectedIds')
   })
 })
+
+describe('surround with box', () => {
+  it('shows the surround action for lists as well as cards and boxes', () => {
+    expect(source).toContain('.row(v-if="cardBoxOrListIsSelected")')
+    const surround = source.split('Surround with Box')[1].split('Merge/Split')[0]
+    expect(surround).toContain('listsIsSelected')
+    expect(surround).toContain('boxesIsSelected')
+    expect(surround).toContain('cardsIsSelected')
+  })
+})

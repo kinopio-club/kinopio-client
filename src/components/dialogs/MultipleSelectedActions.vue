@@ -605,15 +605,15 @@ dialog.narrow.multiple-selected-actions(
   section(v-if="ItemIsSelected")
 
     //- Edit Cards
-    .row(v-if="cardOrBoxIsSelected")
+    .row(v-if="cardBoxOrListIsSelected")
       //- [·]
-      ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
+      ItemDetailsCheckboxButton(v-if="cardOrBoxIsSelected" :boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
       .segmented-buttons
         //- Connect
         button(v-if="multipleItemsIsSelected" title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
           img.connect.icon(src="@/assets/connect.svg")
         //- Surround with Box
-        button(v-if="cardsIsSelected" title="Surround with Box (B)" @click.left.prevent="containItemsInNewBox" @keydown.stop.enter="containItemsInNewBox" :disabled="!canEditAll.all")
+        button(v-if="cardsIsSelected || boxesIsSelected || listsIsSelected" title="Surround with Box (B)" @click.left.prevent="containItemsInNewBox" @keydown.stop.enter="containItemsInNewBox" :disabled="!canEditAll.all")
           //- itemsisselected
           img.icon.box-icon(src="@/assets/box.svg")
         //- List

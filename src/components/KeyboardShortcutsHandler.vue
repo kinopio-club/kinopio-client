@@ -208,8 +208,8 @@ const handleShortcutsOnKeyUp = (event) => {
   // b
   } else if (keyB && isSpaceScope) {
     if (!canEditSpace) { return }
-    // Surround Selected Cards with Box
-    if (globalStore.multipleCardsSelectedIds.length) {
+    // Surround selected cards, boxes, or lists with a box
+    if (globalStore.multipleCardsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length || globalStore.multipleListsSelectedIds.length) {
       globalStore.triggerSelectedCardsContainInBox()
     // Toolbar Box Mode
     } else {
