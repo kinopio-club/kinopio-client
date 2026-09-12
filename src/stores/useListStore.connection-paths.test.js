@@ -13,3 +13,14 @@ describe('list connection path refresh', () => {
     expect(block).toContain('updates.map(update => update.id)')
   })
 })
+
+describe('list page size', () => {
+  it('grows the page while a list is moved or resized, like boxes', () => {
+    const source = readFileSync(join(dir, 'useListStore.js'), 'utf8')
+    const move = source.split('moveLists ({ endCursor, prevCursor, delta, lists })')[1].split('// position')[0]
+    const resize = source.split('async resizeLists (ids, delta)')[1].split('async clearResizeLists')[0]
+    expect(source).toContain('updatePageSize (list)')
+    expect(move).toContain('this.updatePageSize(list)')
+    expect(resize).toContain('this.updatePageSize({')
+  })
+})

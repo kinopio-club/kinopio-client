@@ -346,6 +346,7 @@ export const useListStore = defineStore('lists', {
       })
       lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists, { itemType: 'list', delta })
       this.updateLists(lists)
+      lists.forEach(list => this.updatePageSize(list))
       this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
@@ -358,6 +359,17 @@ export const useListStore = defineStore('lists', {
 
     // position
 
+    updatePageSize (list) {
+      const globalStore = useGlobalStore()
+      const listY = list.y + (list.height || 0)
+      if (listY >= globalStore.pageHeight) {
+        globalStore.pageHeight = listY
+      }
+      const listX = list.x + (list.resizeWidth || list.width || 0)
+      if (listX >= globalStore.pageWidth) {
+        globalStore.pageWidth = listX
+      }
+    },
     clearAllListsZ () {
       const lists = this.getAllLists
       const updates = lists.map(list => {
@@ -459,6 +471,16 @@ export const useListStore = defineStore('lists', {
         width = Math.max(width, consts.minListWidth)
         const list = { id, resizeWidth: width }
         this.updateList(list)
+        const existing = this.getList(id)
+        if (existing) {
+          this.updatePageSize({
+            id,
+            x: existing.x,
+            y: existing.y,
+            resizeWidth: width,
+            height: existing.height
+          })
+        }
         this.resizeListChildCards(list, width)
       }
     },
