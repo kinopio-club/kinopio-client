@@ -16,4 +16,10 @@ describe('move selected items to another space', () => {
     expect(moveBlock).toContain('removeLists(items.lists)')
     expect(source).toContain('listStore.removeLists')
   })
+
+  it('includes list names when copying a selection to the clipboard or note', () => {
+    const textBlock = source.split('const text = computed')[1].split('// labels')[0]
+    expect(textBlock).toContain('selected.lists')
+    expect(textBlock).toContain('selected.boxes')
+  })
 })

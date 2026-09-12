@@ -75,7 +75,7 @@ const endPoint = computed(() => positionInSpace(globalStore.currentUserBoxSelect
 const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const shouldPreventBoxSelecting = computed(() => {
   if (globalStore.getToolbarIsDrawing) { return true }
-  const isDraggingItem = globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox
+  const isDraggingItem = globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList
   return isDraggingItem
 })
 const currentUserStyles = computed(() => {

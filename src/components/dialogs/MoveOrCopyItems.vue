@@ -103,9 +103,10 @@ const sortedByY = (items) => {
   return items
 }
 const text = computed(() => {
-  let cards = selectedItems.value.cards
-  cards = sortedByY(cards)
-  return utils.nameStringFromItems(cards)
+  const selected = selectedItems.value
+  let items = selected.cards.concat(selected.boxes, selected.lists, selected.lines)
+  items = sortedByY(items)
+  return utils.nameStringFromItems(items)
 })
 
 // labels
