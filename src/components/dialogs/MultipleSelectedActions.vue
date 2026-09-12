@@ -168,7 +168,7 @@ const canEditAll = computed(() => {
   const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
-  const lines = userStore.getUserIsSpaceMember
+  const lines = !multipleLinesSelectedIds.value.length || userStore.getUserIsSpaceMember
   const lists = multipleListsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.lists
   const all = cards && connections && boxes && lines && lists
   return { cards, connections, boxes, lines, lists, all }

@@ -38,5 +38,6 @@ describe('open-space list editability', () => {
     expect(source).toContain('const editableLists = computed')
     const editable = source.split('const selectedItemsIsEditableByCurrentUser')[1].split('const numberOfSelectedItemsCreatedByCurrentUser')[0]
     expect(editable).toContain('editableLists.value.length === lists.value.length')
+    expect(canEdit).toContain('!multipleLinesSelectedIds.value.length || userStore.getUserIsSpaceMember')
   })
 })
