@@ -587,6 +587,7 @@ export const useHistoryStore = defineStore('history', {
             await nextTick()
             list = listStore.getList(list.id)
             listStore.updateListDimensions(list)
+            connectionStore.updateConnectionPathByItemId(list.id)
             break
           case 'listCreated':
             list = item.new
@@ -594,7 +595,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'listRemoved':
             list = item.new
-            listStore.createList(list)
+            listStore.createList({ list })
             break
         }
       }
@@ -704,10 +705,11 @@ export const useHistoryStore = defineStore('history', {
             await nextTick()
             list = listStore.getList(list.id)
             listStore.updateListDimensions(list)
+            connectionStore.updateConnectionPathByItemId(list.id)
             break
           case 'listCreated':
             list = item.new
-            listStore.createList(list.id)
+            listStore.createList({ list })
             break
           case 'listRemoved':
             list = item.new
