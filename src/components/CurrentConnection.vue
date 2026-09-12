@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -17,6 +18,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
@@ -72,7 +74,14 @@ const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConne
 const drawCurrentConnection = (event) => {
   const end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startItemId)
-  start = utils.cursorPositionInSpace(null, start)
+  if (start) {
+    start = utils.cursorPositionInSpace(null, start)
+  } else {
+    const item = spaceStore.getSpaceItemById(props.startItemId)
+    if (item) {
+      start = utils.estimatedItemConnectorPosition(item)
+    }
+  }
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   const endItemId = checkCurrentConnectionSuccess(event)
@@ -97,6 +106,7 @@ const checkCurrentConnectionSuccess = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
   const boxElement = utils.boxElementFromConnectorPosition(position.x, position.y)
+  const listElement = utils.listElementFromConnectorPosition(position.x, position.y)
   const updates = { userId: userStore.id }
   let isCurrentConnectionConnected
   if (cardElement) {
@@ -105,8 +115,11 @@ const checkCurrentConnectionSuccess = (event) => {
   if (boxElement) {
     isCurrentConnectionConnected = props.startItemId !== boxElement.dataset.boxId
   }
+  if (listElement) {
+    isCurrentConnectionConnected = props.startItemId !== listElement.dataset.listId
+  }
   // not connected
-  if (!cardElement && !boxElement) {
+  if (!cardElement && !boxElement && !listElement) {
     globalStore.currentConnectionSuccess = {}
     updates.endItemId = null
   // connected to card
@@ -127,6 +140,15 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     globalStore.currentConnectionSuccess = box
     updates.endItemId = box.id
+  // connected to list (header / list-info; cards inside a list still win above)
+  } else if (isCurrentConnectionConnected && listElement) {
+    const list = listStore.getList(listElement.dataset.listId)
+    if (!list) {
+      globalStore.currentConnectionSuccess = {}
+      return
+    }
+    globalStore.currentConnectionSuccess = list
+    updates.endItemId = list.id
   } else {
     globalStore.currentConnectionSuccess = {}
   }

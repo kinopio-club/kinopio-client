@@ -318,3 +318,33 @@ describe('removeOrphanedConnections', () => {
     expect(prepared.connections.map(connection => connection.id)).toEqual(['keep'])
   })
 })
+
+describe('itemElement', () => {
+  it('falls back to a list element when the id is not a card or box', () => {
+    const orig = document.querySelector.bind(document)
+    document.querySelector = (sel) => {
+      if (String(sel).includes('data-list-id="list-1"')) {
+        return { dataset: { listId: 'list-1' } }
+      }
+      return null
+    }
+    try {
+      expect(utils.itemElement('list-1').dataset.listId).toBe('list-1')
+    } finally {
+      document.querySelector = orig
+    }
+  })
+})
+
+describe('listElementFromConnectorPosition', () => {
+  it('returns the list-info under the cursor', () => {
+    const listInfo = { classList: ['list-info'], dataset: { listId: 'list-1' } }
+    const orig = document.elementsFromPoint
+    document.elementsFromPoint = () => [listInfo]
+    try {
+      expect(utils.listElementFromConnectorPosition(10, 10)).toBe(listInfo)
+    } finally {
+      document.elementsFromPoint = orig
+    }
+  })
+})
