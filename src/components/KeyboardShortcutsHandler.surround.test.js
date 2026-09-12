@@ -17,3 +17,14 @@ describe('B surrounds mixed selections', () => {
     expect(block).toContain('triggerSelectedCardsContainInBox')
   })
 })
+
+describe('delete selected lists', () => {
+  it('lets open-space editors remove lists they created, like boxes', () => {
+    const helper = source.split('const canEditList = (list) =>')[1].split('const remove = () =>')[0]
+    expect(helper).toContain('getUserCanEditSpace')
+    expect(helper).toContain('getItemIsCreatedByUser(list)')
+    const remove = source.split('lists.forEach(list =>')[1].split('clearAllSelectedCards')[0]
+    expect(remove).toContain('canEditList(list)')
+    expect(remove).not.toContain('getUserIsSpaceMember')
+  })
+})

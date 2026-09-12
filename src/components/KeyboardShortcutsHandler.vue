@@ -648,6 +648,15 @@ const canEditConnectionById = (connectionId) => {
   return false
 }
 
+const canEditList = (list) => {
+  const isSpaceMember = userStore.getUserIsSpaceMember
+  const canEditSpace = userStore.getUserCanEditSpace
+  const isCreatedByUser = userStore.getItemIsCreatedByUser(list) || !list.userId
+  if (isSpaceMember) { return true }
+  if (canEditSpace && isCreatedByUser) { return true }
+  return false
+}
+
 const remove = () => {
   const selectedConnectionIds = globalStore.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
@@ -677,8 +686,7 @@ const remove = () => {
     }
   })
   lists.forEach(list => {
-    const canEditLists = userStore.getUserIsSpaceMember
-    if (canEditLists) {
+    if (canEditList(list)) {
       listStore.removeList(list.id)
     }
   })
