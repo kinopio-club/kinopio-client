@@ -494,7 +494,7 @@ const updateIsCollapsed = async (value) => {
     await cardStore.updateCardsDimensions(cardIds)
     await cardStore.updateCardPositionsInList(props.list)
   }
-  connectionStore.updateConnectionPathsByItemIds(cardIds)
+  connectionStore.updateConnectionPathsByItemIds(cardIds.concat([props.list.id]))
 }
 const addCard = async (event, shouldAppend) => {
   if (globalStore.preventDraggedListFromShowingDetails) { return }

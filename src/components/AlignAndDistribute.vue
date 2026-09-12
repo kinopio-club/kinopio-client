@@ -281,7 +281,10 @@ const updateCardDimensions = async () => {
 }
 const updateConnectionPaths = async () => {
   await updateCardDimensions()
-  const alignableItemIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  const alignableItemIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds
+  )
   connectionStore.updateConnectionPathsByItemIds(alignableItemIds)
 }
 

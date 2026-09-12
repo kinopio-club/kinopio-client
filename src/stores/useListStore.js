@@ -238,12 +238,15 @@ export const useListStore = defineStore('lists', {
     // update
 
     updateListsState (updates) {
+      const connectionStore = useConnectionStore()
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
           ...update
         }
       })
+      const ids = updates.map(update => update.id)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
     async updateLists (updates) {
       const apiStore = useApiStore()
