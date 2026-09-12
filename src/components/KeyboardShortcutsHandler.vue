@@ -839,7 +839,7 @@ const handlePasteEvent = async (event) => {
     const cardIds = items.cards.map(card => card.id)
     const boxIds = items.boxes.map(box => box.id)
     const listIds = items.lists.map(list => list.id)
-    const itemIds = cardIds.concat(boxIds)
+    const itemIds = cardIds.concat(boxIds, listIds)
     globalStore.addMultipleToMultipleCardsSelected(cardIds)
     globalStore.addMultipleToMultipleBoxesSelected(boxIds)
     globalStore.addMultipleToMultipleListsSelected(listIds)

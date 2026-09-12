@@ -24,4 +24,12 @@ describe('paste kinopio items', () => {
     expect(pasteBlock).toContain('addMultipleToMultipleBoxesSelected')
     expect(pasteBlock).toContain('addMultipleToMultipleListsSelected')
   })
+
+  it('updates connection paths using pasted list ids too', () => {
+    const pasteBlock = source.split('} else if (itemsData) {')[1].split('// add plain text cards')[0]
+    const idsLine = pasteBlock.split('\n').find(line => line.includes('cardIds.concat'))
+    expect(idsLine).toBeDefined()
+    expect(idsLine).toContain('listIds')
+    expect(pasteBlock).toContain('updateConnectionPathsByItemIds(itemIds)')
+  })
 })
