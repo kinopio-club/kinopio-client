@@ -40,4 +40,15 @@ describe('open-space list editability', () => {
     expect(editable).toContain('editableLists.value.length === lists.value.length')
     expect(canEdit).toContain('!multipleLinesSelectedIds.value.length || userStore.getUserIsSpaceMember')
   })
+
+  it('lets open-space editors change lists they created from the list actions row', () => {
+    const listActions = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../subsections/ListActions.vue'),
+      'utf8'
+    )
+    const block = listActions.split('const canEditAll = computed')[1].split('// utils')[0]
+    expect(block).toContain('getUserIsSpaceMember')
+    expect(block).toContain('getItemIsCreatedByUser(list)')
+    expect(block).not.toContain('return userStore.getUserIsSpaceMember')
+  })
 })
