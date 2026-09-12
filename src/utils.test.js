@@ -226,3 +226,45 @@ describe('isCompositionKeyboardEvent', () => {
     expect(utils.isCompositionKeyboardEvent(enterKeydown())).toBe(true)
   })
 })
+
+describe('removeOrphanedConnections', () => {
+  it('keeps connections whose endpoints were both pasted', () => {
+    const items = {
+      cards: [{ id: 'a' }, { id: 'b' }],
+      boxes: [],
+      lists: [],
+      connections: [
+        { id: 'keep', startItemId: 'a', endItemId: 'b' }
+      ]
+    }
+    const result = utils.removeOrphanedConnections(items)
+    expect(result.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
+
+  it('drops connections whose endpoints were not pasted and are not in the destination space', () => {
+    const items = {
+      cards: [{ id: 'a' }, { id: 'b' }],
+      boxes: [],
+      lists: [],
+      connections: [
+        { id: 'keep', startItemId: 'a', endItemId: 'b' },
+        { id: 'drop', startItemId: 'a', endItemId: 'missing' }
+      ]
+    }
+    const result = utils.removeOrphanedConnections(items)
+    expect(result.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
+
+  it('keeps a connection to an item already in the destination space', () => {
+    const items = {
+      cards: [{ id: 'a' }],
+      boxes: [],
+      lists: [],
+      connections: [
+        { id: 'to-existing', startItemId: 'a', endItemId: 'already-there' }
+      ]
+    }
+    const result = utils.removeOrphanedConnections(items, ['already-there'])
+    expect(result.connections.map(connection => connection.id)).toEqual(['to-existing'])
+  })
+})

@@ -829,9 +829,10 @@ const handlePasteEvent = async (event) => {
   } else if (itemsData) {
     items = utils.updateSpaceItemsAddPosition(itemsData, position)
     items = await spaceStore.getNewItems(items)
-    await spaceStore.createSpaceItems(items)
+    // drop orphans before persist
     const currentSpaceItemIds = cardStore.allIds.concat(boxStore.allIds, listStore.allIds)
     items = utils.removeOrphanedConnections(items, currentSpaceItemIds)
+    await spaceStore.createSpaceItems(items)
     // select new items
     await nextTick()
     globalStore.closeAllDialogs()
