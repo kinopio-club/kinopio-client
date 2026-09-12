@@ -24,3 +24,15 @@ describe('list page size', () => {
     expect(resize).toContain('this.updatePageSize({')
   })
 })
+
+describe('open-space list create and remove', () => {
+  it('allows signed-in open-space editors to create and remove lists, like boxes', () => {
+    const source = readFileSync(join(dir, 'useListStore.js'), 'utf8')
+    const create = source.split('async createList ({ list = {}, isResizing })')[1].split('// snap')[0]
+    const remove = source.split('async removeLists (ids = [])')[1].split('async removeList (id)')[0]
+    expect(create).toContain('getUserCanEditSpace')
+    expect(create).not.toContain('getUserIsSpaceMember')
+    expect(remove).toContain('getUserCanEditSpace')
+    expect(remove).not.toContain('getUserIsSpaceMember')
+  })
+})

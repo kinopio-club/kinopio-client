@@ -169,7 +169,7 @@ export const useListStore = defineStore('lists', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
-      if (!userStore.getUserIsSpaceMember) { return }
+      if (!userStore.getUserCanEditSpace) { return }
       list = this.normalizeNewList(list)
       this.addListToState(list)
       this.triggerCreateList(list)
@@ -527,7 +527,7 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      const canEditSpace = userStore.getUserIsSpaceMember
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       // update cards
       cardStore.removeCardsFromListsByLists(ids)

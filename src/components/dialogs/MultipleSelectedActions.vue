@@ -169,7 +169,7 @@ const canEditAll = computed(() => {
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
   const lines = userStore.getUserIsSpaceMember
-  const lists = userStore.getUserIsSpaceMember
+  const lists = multipleListsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.lists
   const all = cards && connections && boxes && lines && lists
   return { cards, connections, boxes, lines, lists, all }
 })
@@ -187,7 +187,8 @@ const selectedItemsIsEditableByCurrentUser = computed(() => {
   const isCards = editableCards.value.length === cards.value.length
   const isConnections = editableConnections.value.length === connections.value.length
   const isBoxes = editableBoxes.value.length === boxes.value.length
-  if (isCards && isConnections && isBoxes) {
+  const isLists = editableLists.value.length === lists.value.length
+  if (isCards && isConnections && isBoxes && isLists) {
     return true
   } else {
     return false
@@ -206,10 +207,15 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
     if (!box) { return }
     userStore.getUserIsBoxCreator(box)
   })
+  const listsCreatedByCurrentUser = lists.value?.filter(list => {
+    if (!list) { return }
+    return userStore.getItemIsCreatedByUser(list) || !list.userId
+  })
   return {
     connections: connectionsCreatedByCurrentUser.length,
     cards: cardsCreatedByCurrentUser.length,
-    boxes: boxesCreatedByCurrentUser.length
+    boxes: boxesCreatedByCurrentUser.length,
+    lists: listsCreatedByCurrentUser.length
   }
 })
 const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value, multipleListsSelectedIds.value))
@@ -387,6 +393,15 @@ const lists = computed(() => {
   lists = lists.filter(list => Boolean(list))
   // prevLists = lists
   return lists
+})
+const editableLists = computed(() => {
+  if (isSpaceMember.value) {
+    return lists.value
+  } else {
+    return lists.value.filter(list => {
+      return userStore.getItemIsCreatedByUser(list) || !list.userId
+    })
+  }
 })
 const cardsIsInListTogether = computed(() => {
   if (!cards.value.length) { return }

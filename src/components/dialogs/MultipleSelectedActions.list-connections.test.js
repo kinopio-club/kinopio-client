@@ -27,3 +27,16 @@ describe('surround with box', () => {
     expect(surround).toContain('cardsIsSelected')
   })
 })
+
+describe('open-space list editability', () => {
+  it('treats lists as created-by items when deciding if a selection is editable', () => {
+    const created = source.split('const numberOfSelectedItemsCreatedByCurrentUser')[1].split('const multipleItemsSelectedIds')[0]
+    expect(created).toContain('listsCreatedByCurrentUser')
+    expect(created).toContain('lists: listsCreatedByCurrentUser.length')
+    const canEdit = source.split('const canEditAll = computed')[1].split('const alignableItemsIsSelected')[0]
+    expect(canEdit).toContain('numberOfSelectedItemsCreatedByCurrentUser.value.lists')
+    expect(source).toContain('const editableLists = computed')
+    const editable = source.split('const selectedItemsIsEditableByCurrentUser')[1].split('const numberOfSelectedItemsCreatedByCurrentUser')[0]
+    expect(editable).toContain('editableLists.value.length === lists.value.length')
+  })
+})
