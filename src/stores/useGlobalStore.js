@@ -1042,11 +1042,15 @@ export const useGlobalStore = defineStore('global', {
       })
       const zItemTypes = ['cards', 'boxes', 'lists']
       zItemTypes.forEach(itemType => {
-        newItems[itemType].map(item => {
+        newItems[itemType].forEach(item => {
           item.z += 1
-          item.listId = null // prevent new cards from returning to list
-          return item
         })
+      })
+      const duplicatedListIds = new Set(newItems.lists.map(list => list.id))
+      newItems.cards.forEach(card => {
+        if (!duplicatedListIds.has(card.listId)) {
+          card.listId = null // prevent new cards from returning to a list that was not duplicated
+        }
       })
       newItems.connections.forEach(connection => connectionStore.createConnection(connection))
       newItems.lists.forEach(list => listStore.createList({ list }))

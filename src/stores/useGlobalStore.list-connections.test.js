@@ -18,3 +18,12 @@ describe('duplicate-drag connections', () => {
     expect(source).toContain('currentUserIsHoveringOverListId')
   })
 })
+
+describe('duplicate-drag list membership', () => {
+  it('keeps remapped listId when the list was duplicated, and clears it otherwise', () => {
+    const block = source.split('const zItemTypes')[1].split('newItems.connections.forEach')[0]
+    expect(block).toContain('duplicatedListIds.has(card.listId)')
+    expect(block).toContain('card.listId = null')
+    expect(block).not.toContain('item.listId = null')
+  })
+})
