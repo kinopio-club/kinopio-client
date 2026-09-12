@@ -27,3 +27,14 @@ describe('duplicate-drag list membership', () => {
     expect(block).not.toContain('item.listId = null')
   })
 })
+
+describe('restore selection after changing space', () => {
+  it('reloads list ids along with cards, boxes, and connections', () => {
+    const load = source.split('multipleSelectedItemsToLoad (items)')[1].split('restoreMultipleSelectedItemsToLoad')[0]
+    const restore = source.split('restoreMultipleSelectedItemsToLoad ()')[1].split('async clearAllSelected')[0]
+    expect(load).toContain('multipleListsSelectedIdsToLoad')
+    expect(load).toContain('items.lists')
+    expect(restore).toContain('multipleListsSelectedIds = this.multipleListsSelectedIdsToLoad')
+    expect(restore).toContain('this.multipleListsSelectedIdsToLoad = []')
+  })
+})
