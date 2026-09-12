@@ -181,6 +181,7 @@ const startListInfoInteraction = async (event) => {
   globalStore.selectListsFromMultipleSelectedItems()
 }
 const endListInfoInteraction = (event) => {
+  if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
@@ -206,6 +207,8 @@ const endListInfoInteraction = (event) => {
   globalStore.updateListDetailsIsVisibleForListId(props.list.id)
   globalStore.clearAllInteractingWithAndSelected()
   event.stopPropagation() // prevent stopInteractions() from closing listDetails
+  globalStore.currentUserIsDraggingList = false
+  globalStore.listsWereDragged = false
 }
 
 // Remote

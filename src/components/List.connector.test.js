@@ -37,4 +37,11 @@ describe('list connector button', () => {
     const block = source.split('const startListInfoInteraction')[1].split('const endListInfoInteraction')[0]
     expect(block).toContain('selectListsFromMultipleSelectedItems')
   })
+
+  it('does not open list details while completing a connection onto the list', () => {
+    const block = source.split('const endListInfoInteraction')[1].split('// Remote')[0]
+    expect(block).toContain('if (isConnectingTo.value) { return }')
+    expect(block).toContain('currentUserIsDraggingList = false')
+    expect(block).toContain('listsWereDragged = false')
+  })
 })
