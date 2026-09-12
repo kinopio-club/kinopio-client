@@ -1025,6 +1025,7 @@ const stopInteractions = async (event) => {
   globalStore.preventDraggedCardFromShowingDetails = false
   globalStore.preventDraggedBoxFromShowingDetails = false
   globalStore.preventDraggedListFromShowingDetails = false
+  globalStore.preventDraggedLineFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()

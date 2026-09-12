@@ -18,3 +18,13 @@ describe('lists dragged to the page edge', () => {
     expect(block).toContain('cardStore.updateCardPositionsInList')
   })
 })
+
+describe('stop dragging details flags', () => {
+  it('clears the line flag with the card, box, and list flags', () => {
+    const block = source.split('globalStore.shouldAddCard = false')[1].split('stopResizingCards')[0]
+    expect(block).toContain('preventDraggedCardFromShowingDetails = false')
+    expect(block).toContain('preventDraggedBoxFromShowingDetails = false')
+    expect(block).toContain('preventDraggedListFromShowingDetails = false')
+    expect(block).toContain('preventDraggedLineFromShowingDetails = false')
+  })
+})
