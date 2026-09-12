@@ -52,3 +52,16 @@ describe('open-space list editability', () => {
     expect(block).not.toContain('return userStore.getUserIsSpaceMember')
   })
 })
+
+describe('list details dialog', () => {
+  it('lets open-space creators edit list name and color, like boxes', () => {
+    const details = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), 'ListDetails.vue'),
+      'utf8'
+    )
+    const block = details.split('const canEditSpace = computed')[1].split('const currentList')[0]
+    expect(block).toContain('getUserCanEditSpace')
+    expect(block).toContain('getItemIsCreatedByUser(list)')
+    expect(block).not.toContain('return userStore.getUserIsSpaceMember')
+  })
+})
