@@ -24,4 +24,11 @@ describe('current connection list drop target', () => {
     expect(block).toContain('listStore.getList')
     expect(block.indexOf('cardElement')).toBeLessThan(block.indexOf('listElementFromConnectorPosition'))
   })
+
+  it('disables pointer events on the drawing overlay while a list is dragged', () => {
+    const block = source.split('const connectionStyles')[1].split('const connectionPathStyles')[0]
+    expect(block).toContain('currentUserIsDraggingCard')
+    expect(block).toContain('currentUserIsDraggingBox')
+    expect(block).toContain('currentUserIsDraggingList')
+  })
 })

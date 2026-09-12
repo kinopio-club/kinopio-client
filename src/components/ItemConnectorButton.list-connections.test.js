@@ -40,4 +40,11 @@ describe('connector button multi-select', () => {
     expect(glow).not.toContain('currentUserIsDraggingList')
     expect(glow).toContain('connectedToAnotherItemBeingDraggedColor')
   })
+
+  it('skips connector background while a list is dragged, matching cards and boxes', () => {
+    const block = source.split('const connectorButtonBackground')[1].split('const buttonStyles')[0]
+    expect(block).toContain('currentUserIsDraggingCard')
+    expect(block).toContain('currentUserIsDraggingBox')
+    expect(block).toContain('currentUserIsDraggingList')
+  })
 })

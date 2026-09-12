@@ -228,7 +228,7 @@ const connectionStyles = computed(() => {
     width: rect.width + 'px',
     height: rect.height + 'px'
   }
-  if (globalStore.currentUserIsDraggingCard) {
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) {
     styles.pointerEvents = 'none'
   }
   return styles

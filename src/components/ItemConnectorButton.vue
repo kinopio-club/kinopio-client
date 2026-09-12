@@ -138,7 +138,7 @@ const isImageCard = computed(() => {
   return isImage
 })
 const connectorButtonBackground = computed(() => {
-  if (globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
   if (props.backgroundIsTransparent) { return }
   if (state.currentConnectorColor) { return state.currentConnectorColor }
