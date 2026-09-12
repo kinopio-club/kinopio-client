@@ -33,3 +33,12 @@ describe('paste kinopio items', () => {
     expect(pasteBlock).toContain('updateConnectionPathsByItemIds(itemIds)')
   })
 })
+
+describe('select lists with cards in the selection band', () => {
+  it('keeps only actual list ids from selected cards', () => {
+    const block = source.split('const cardListIdsToSelect')[1].split('const selectAllItemsBelowCursor')[0]
+    expect(block).toContain('.filter(Boolean)')
+    expect(block).toContain('card.listId')
+    expect(block).not.toContain('cards.filter(card => card.listId)')
+  })
+})

@@ -858,10 +858,7 @@ const handlePasteEvent = async (event) => {
 // Select Items Relative to cursor
 
 const cardListIdsToSelect = (cards) => {
-  let cardListIds = cards.filter(card => card.listId)
-  cardListIds = cards.map(card => card.listId)
-  cardListIds = uniq(cardListIds)
-  return cardListIds
+  return uniq(cards.map(card => card.listId).filter(Boolean))
 }
 const selectAllItemsBelowCursor = (position) => {
   let zoom
