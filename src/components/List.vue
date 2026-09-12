@@ -11,9 +11,11 @@ import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
 
 import Frames from '@/components/Frames.vue'
+import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import ProgressCircle from '@/components/ProgressCircle.vue'
+import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 
@@ -50,7 +52,9 @@ onBeforeUnmount(() => {
 })
 useStoreAction(globalStore, {
   clearDraggingItems: () => { state.isDraggingCardOverList = false },
-  triggerUpdateViewportObservers: () => initViewportObserver()
+  triggerUpdateViewportObservers: () => initViewportObserver(),
+  updateRemoteCurrentConnection: () => updateRemoteConnections(),
+  removeRemoteCurrentConnection: () => updateRemoteConnections()
 })
 
 const props = defineProps({
@@ -62,7 +66,9 @@ const state = reactive({
   isLocking: false,
   lockingPercent: 0,
   lockingAlpha: 0,
-  isVisibleInViewport: false
+  isVisibleInViewport: false,
+  isRemoteConnecting: false,
+  remoteConnectionColor: ''
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
@@ -597,6 +603,54 @@ const placeholderStylesMap = computed(() => {
   return styles
 })
 
+// connections
+
+const isConnectingTo = computed(() => {
+  const connectingToId = globalStore.currentConnectionSuccess.id
+  const isConnecting = connectingToId === props.list.id
+  if (isConnecting) {
+    postMessage.sendHaptics({ name: 'softImpact' })
+  }
+  return isConnecting
+})
+const isConnectingFrom = computed(() => {
+  return globalStore.currentConnectionStartItemIds.includes(props.list.id)
+})
+const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.list.id))
+const connectorIsVisible = computed(() => {
+  const isMember = userStore.getUserIsSpaceMember
+  let isVisible
+  if (state.isRemoteConnecting) {
+    isVisible = true
+  } else if (isMember || canEditSpace.value || connectedConnections.value.length) {
+    isVisible = true
+  }
+  return isVisible
+})
+const connectorIsHiddenByOpacity = computed(() => {
+  if (utils.isMobile()) { return }
+  const isPresentationMode = globalStore.isPresentationMode
+  const isNotHovering = !state.isHover
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
+  return isPresentationMode && isNotHovering && isNotConnected
+})
+const currentListDetailsIsVisible = computed(() => {
+  return globalStore.listDetailsIsVisibleForListId === props.list.id
+})
+const updateRemoteConnections = () => {
+  const connection = globalStore.remoteCurrentConnections.find(remoteConnection => {
+    const isConnectedToStart = remoteConnection.startItemId === props.list.id
+    const isConnectedToEnd = remoteConnection.endItemId === props.list.id
+    return isConnectedToStart || isConnectedToEnd
+  })
+  if (connection) {
+    state.isRemoteConnecting = true
+    state.remoteConnectionColor = connection.color
+  } else {
+    state.isRemoteConnecting = false
+  }
+}
+
 // focus
 
 const isFocusing = computed(() => props.list.id === globalStore.focusOnItemId)
@@ -683,6 +737,19 @@ const clearFocus = () => {
         ProgressCircle(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length" :title="todoListCardsCompletedPercent" :backgroundColor="color" :count="todoListCardsRemainingCount")
         span.name(:title="props.list.name") {{ props.list.name }}
       .right-side.button-wrap
+        ItemConnectorButton(
+          :visible="connectorIsVisible"
+          :isHiddenByOpacity="connectorIsHiddenByOpacity"
+          :list="props.list"
+          :isConnectingTo="isConnectingTo"
+          :isConnectingFrom="isConnectingFrom"
+          :isVisibleInViewport="state.isVisibleInViewport"
+          :isRemoteConnecting="state.isRemoteConnecting"
+          :remoteConnectionColor="state.remoteConnectionColor"
+          :currentBackgroundColor="color"
+          :backgroundIsTransparent="true"
+          :parentDetailsIsVisible="currentListDetailsIsVisible"
+        )
         //- add card
         .inline-button-wrap(title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
           button.small-button.inline-button

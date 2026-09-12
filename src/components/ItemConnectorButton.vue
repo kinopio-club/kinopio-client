@@ -29,9 +29,12 @@ const props = defineProps({
   isHiddenByOpacity: Boolean,
   card: Object,
   box: Object,
+  list: Object,
   isConnectingTo: Boolean,
   isConnectingFrom: Boolean,
   isVisibleInViewport: Boolean,
+  isRemoteConnecting: Boolean,
+  remoteConnectionColor: String,
   defaultBackgroundColor: String,
   currentBackgroundColor: String,
   parentDetailsIsVisible: Boolean,
@@ -42,7 +45,7 @@ const state = reactive({
   currentConnectorColor: ''
 })
 
-const item = computed(() => props.card || props.box)
+const item = computed(() => props.card || props.box || props.list)
 const itemIsSelected = computed(() => {
   const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(
     globalStore.multipleBoxesSelectedIds,
@@ -266,6 +269,7 @@ const startConnecting = (event) => {
   globalStore.closeAllDialogs()
   globalStore.preventDraggedCardFromShowingDetails = true
   globalStore.preventDraggedBoxFromShowingDetails = true
+  globalStore.preventDraggedListFromShowingDetails = true
   if (!globalStore.currentUserIsDrawingConnection) {
     createCurrentConnection(event)
   }

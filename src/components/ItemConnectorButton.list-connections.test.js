@@ -15,4 +15,11 @@ describe('connector button multi-select', () => {
     expect(block).toContain('multipleBoxesSelectedIds')
     expect(block).toContain('multipleListsSelectedIds')
   })
+
+  it('treats a list prop as the connectable item', () => {
+    expect(source).toContain('list: Object')
+    const itemLine = source.split('const item = computed')[1].split('\n')[0]
+    expect(itemLine).toContain('props.list')
+    expect(source).toContain('preventDraggedListFromShowingDetails')
+  })
 })
