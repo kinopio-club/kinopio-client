@@ -21,4 +21,19 @@ describe('connection list endpoints', () => {
     expect(block).toContain('multipleBoxesSelectedIds')
     expect(block).toContain('multipleListsSelectedIds')
   })
+
+  it('highlights a connection when the hovered endpoint is a list', () => {
+    const block = source.split('const isHoveredOverConnectedItem')[1].split('const isCurrentItemConnection')[0]
+    expect(block).toContain('currentUserIsHoveringOverCardId')
+    expect(block).toContain('currentUserIsHoveringOverBoxId')
+    expect(block).toContain('currentUserIsHoveringOverListId')
+    expect(block).toContain('currentUserIsHoveringOverConnectorItemId')
+  })
+
+  it('disables pointer events and animation while a list is being dragged', () => {
+    const styles = source.split('const connectionStyles')[1].split('const connectionPathStyles')[0]
+    expect(styles).toContain('currentUserIsDraggingList')
+    const animate = source.split('const shouldAnimate')[1].split('watch(() => shouldAnimate')[0]
+    expect(animate).toContain('currentUserIsDraggingList')
+  })
 })

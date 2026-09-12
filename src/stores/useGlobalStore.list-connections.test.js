@@ -13,4 +13,8 @@ describe('duplicate-drag connections', () => {
     const block = source.split('const connectableItemIds')[1].split('// current dragging item index')[0]
     expect(block).toContain('cards.concat(boxes, lists)')
   })
+
+  it('tracks hovering over a list like cards and boxes', () => {
+    expect(source).toContain('currentUserIsHoveringOverListId')
+  })
 })

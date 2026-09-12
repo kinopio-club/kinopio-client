@@ -154,6 +154,11 @@ const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingList) { return }
   if (isPaintSelecting.value) { return }
   state.isHover = value
+  if (value) {
+    globalStore.currentUserIsHoveringOverListId = props.list.id
+  } else {
+    globalStore.currentUserIsHoveringOverListId = ''
+  }
 }
 const startListInfoInteraction = async (event) => {
   let listId = props.list.id

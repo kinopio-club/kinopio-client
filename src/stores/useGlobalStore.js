@@ -93,6 +93,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
     currentUserIsHoveringOverBoxId: '',
+    currentUserIsHoveringOverListId: '',
     currentUserIsHoveringOverCheckboxCardId: '',
     currentUserIsHoveringOverConnectorItemId: '',
     currentUserIsHoveringOverButtonCardId: '',

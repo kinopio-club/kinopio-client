@@ -22,4 +22,16 @@ describe('connector button multi-select', () => {
     expect(itemLine).toContain('props.list')
     expect(source).toContain('preventDraggedListFromShowingDetails')
   })
+
+  it('colors the connector when a connected list is hovered, selected, dragged, or opened', () => {
+    const hover = source.split('const currentUserIsHoveringOverConnectedItemColor')[1].split('const currentUserIsMultipleSelectedItemColor')[0]
+    expect(hover).toContain('currentUserIsHoveringOverListId')
+    const selected = source.split('const currentUserIsMultipleSelectedItemColor')[1].split('const currentUserIsCreatingConnectionColor')[0]
+    expect(selected).toContain('multipleListsSelectedIds')
+    const dragged = source.split('const connectedToAnotherItemBeingDraggedColor')[1].split('const connectedToConnectionDetailsIsVisibleColor')[0]
+    expect(dragged).toContain('currentUserIsDraggingList')
+    expect(dragged).toContain('currentDraggingListId')
+    const details = source.split('const connectedToAnotherItemDetailsVisibleColor')[1].split('const connectedToAnotherItemBeingDraggedColor')[0]
+    expect(details).toContain('listDetailsIsVisibleForListId')
+  })
 })

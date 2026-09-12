@@ -174,7 +174,7 @@ const connectionColor = (connection) => {
 // another item that is connected to this one is being edited
 const connectedToAnotherItemDetailsVisibleColor = computed(() => {
   if (props.parentDetailsIsVisible) { return }
-  const anotherItemId = globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId
+  const anotherItemId = globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId || globalStore.listDetailsIsVisibleForListId
   if (!anotherItemId) { return }
   const connection = connectionFromAnotherItemConnectedToCurrentItem(anotherItemId)
   return connectionColor(connection)
@@ -183,8 +183,9 @@ const connectedToAnotherItemDetailsVisibleColor = computed(() => {
 const connectedToAnotherItemBeingDraggedColor = computed(() => {
   const isDraggingCard = globalStore.currentUserIsDraggingCard
   const isDraggingBox = globalStore.currentUserIsDraggingBox
-  if (!isDraggingCard && !isDraggingBox) { return }
-  const itemId = globalStore.currentDraggingCardId || globalStore.currentDraggingBoxId
+  const isDraggingList = globalStore.currentUserIsDraggingList
+  if (!isDraggingCard && !isDraggingBox && !isDraggingList) { return }
+  const itemId = globalStore.currentDraggingCardId || globalStore.currentDraggingBoxId || globalStore.currentDraggingListId
   const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   const color = connectionColor(connection)
   if (color) {
@@ -226,13 +227,13 @@ const currentUserIsMultipleSelectedConnectionColor = computed(() => {
 })
 // this item, or another item connected to this item, is being hovered over
 const currentUserIsHoveringOverConnectedItemColor = computed(() => {
-  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId
+  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId || globalStore.currentUserIsHoveringOverListId
   const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   return connectionColor(connection)
 })
 // the color of this item, or another item connected to this item, that is paint selected
 const currentUserIsMultipleSelectedItemColor = computed(() => {
-  const itemIds = globalStore.multipleCardsSelectedIds
+  const itemIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds, globalStore.multipleListsSelectedIds)
   const connection = connectionsFromMultipleItemsConnectedToCurrentItem(itemIds)
   return connectionColor(connection)
 })

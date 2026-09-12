@@ -104,7 +104,7 @@ const connectionStyles = computed(() => {
     width: rect.width + 'px',
     height: rect.height + 'px'
   }
-  if (globalStore.currentUserIsDraggingCard) {
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) {
     styles.pointerEvents = 'none'
   }
   return styles
@@ -152,7 +152,7 @@ const isConnectedToMultipleCardsSelected = computed(() => {
   return itemIds.includes(props.connection.startItemId) || itemIds.includes(props.connection.endItemId)
 })
 const isHoveredOverConnectedItem = computed(() => {
-  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId
+  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId || globalStore.currentUserIsHoveringOverListId || globalStore.currentUserIsHoveringOverConnectorItemId
   if (!itemId) { return }
   return (itemId === props.connection.startItemId || itemId === props.connection.endItemId)
 })
@@ -379,7 +379,7 @@ const cancelAnimation = () => {
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
-  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) { return }
   return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
 })
 watch(() => shouldAnimate.value, (value, prevValue) => {

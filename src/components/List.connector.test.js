@@ -14,4 +14,9 @@ describe('list connector button', () => {
     expect(source).toContain(':list="props.list"')
     expect(source).toContain('currentConnectionStartItemIds.includes(props.list.id)')
   })
+
+  it('records hover so list-to-list connections can highlight', () => {
+    const block = source.split('const updateIsHover')[1].split('const startListInfoInteraction')[0]
+    expect(block).toContain('currentUserIsHoveringOverListId')
+  })
 })
