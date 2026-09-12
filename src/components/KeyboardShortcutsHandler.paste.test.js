@@ -17,4 +17,11 @@ describe('paste kinopio items', () => {
     expect(createAt).toBeGreaterThan(-1)
     expect(filterAt).toBeLessThan(createAt)
   })
+
+  it('selects pasted lists as well as cards and boxes', () => {
+    const pasteBlock = source.split('} else if (itemsData) {')[1].split('// add plain text cards')[0]
+    expect(pasteBlock).toContain('addMultipleToMultipleCardsSelected')
+    expect(pasteBlock).toContain('addMultipleToMultipleBoxesSelected')
+    expect(pasteBlock).toContain('addMultipleToMultipleListsSelected')
+  })
 })

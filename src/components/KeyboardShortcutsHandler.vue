@@ -838,9 +838,11 @@ const handlePasteEvent = async (event) => {
     globalStore.closeAllDialogs()
     const cardIds = items.cards.map(card => card.id)
     const boxIds = items.boxes.map(box => box.id)
+    const listIds = items.lists.map(list => list.id)
     const itemIds = cardIds.concat(boxIds)
     globalStore.addMultipleToMultipleCardsSelected(cardIds)
     globalStore.addMultipleToMultipleBoxesSelected(boxIds)
+    globalStore.addMultipleToMultipleListsSelected(listIds)
     await nextTick()
     connectionStore.updateConnectionPathsByItemIds(itemIds)
   // add plain text cards
