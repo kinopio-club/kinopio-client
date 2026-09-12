@@ -1017,7 +1017,7 @@ export const useGlobalStore = defineStore('global', {
       boxIds = boxIds.filter(id => Boolean(id))
       const boxes = boxIds.map(id => boxStore.getBox(id))
       // connections
-      const connectableItemIds = cards.concat(boxes).map(item => item.id)
+      const connectableItemIds = cards.concat(boxes, lists).map(item => item.id)
       const connections = connectionStore.getConnectionsByItemIds(connectableItemIds)
       // current dragging item index
       let draggingItemIds

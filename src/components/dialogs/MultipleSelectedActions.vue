@@ -212,7 +212,7 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
     boxes: boxesCreatedByCurrentUser.length
   }
 })
-const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value))
+const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value, multipleListsSelectedIds.value))
 const multipleItemsIsSelected = computed(() => {
   return multipleItemsSelectedIds.value.length > 1
 })
