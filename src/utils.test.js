@@ -292,4 +292,29 @@ describe('removeOrphanedConnections', () => {
     }, [])
     expect(prepared.connections.map(connection => connection.id)).toEqual(['keep'])
   })
+
+  it('after uniqueSpaceItems remaps, list ids become connection endpoints', () => {
+    const deltas = [
+      { prevId: 'list-a', newId: 'list-a2' },
+      { prevId: 'list-b', newId: 'list-b2' }
+    ]
+    const remapped = [
+      { id: 'keep', startItemId: 'list-a', endItemId: 'list-b' },
+      { id: 'drop', startItemId: 'list-a', endItemId: 'uncopied' }
+    ].map(connection => ({
+      ...connection,
+      startItemId: utils.updateAllIds(connection, 'startItemId', deltas),
+      endItemId: utils.updateAllIds(connection, 'endItemId', deltas)
+    }))
+    expect(remapped[0].startItemId).toBe('list-a2')
+    expect(remapped[0].endItemId).toBe('list-b2')
+    expect(remapped[1].endItemId).toBe('uncopied')
+    const prepared = utils.removeOrphanedConnections({
+      cards: [],
+      boxes: [],
+      lists: [{ id: 'list-a2' }, { id: 'list-b2' }],
+      connections: remapped
+    }, [])
+    expect(prepared.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
 })
