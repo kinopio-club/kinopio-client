@@ -178,6 +178,7 @@ const startListInfoInteraction = async (event) => {
     globalStore.currentDraggingListId = listId
   }
   listStore.incrementListZ(listId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const endListInfoInteraction = (event) => {
   const isMeta = event.metaKey || event.ctrlKey

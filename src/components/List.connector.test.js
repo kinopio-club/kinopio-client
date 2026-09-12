@@ -32,4 +32,9 @@ describe('list connector button', () => {
     expect(block).toContain('currentUserIsDraggingDuplicateItem')
     expect(block).toContain('if (isMeta) { return }')
   })
+
+  it('pulls in lists of already-selected cards when a list drag starts, like cards and boxes', () => {
+    const block = source.split('const startListInfoInteraction')[1].split('const endListInfoInteraction')[0]
+    expect(block).toContain('selectListsFromMultipleSelectedItems')
+  })
 })

@@ -28,6 +28,7 @@ describe('connector button multi-select', () => {
     expect(hover).toContain('currentUserIsHoveringOverListId')
     const selected = source.split('const currentUserIsMultipleSelectedItemColor')[1].split('const currentUserIsCreatingConnectionColor')[0]
     expect(selected).toContain('multipleListsSelectedIds')
+    expect(selected).toContain('[globalStore.currentDraggingListId]')
     const dragged = source.split('const connectedToAnotherItemBeingDraggedColor')[1].split('const connectedToConnectionDetailsIsVisibleColor')[0]
     expect(dragged).toContain('currentUserIsDraggingList')
     expect(dragged).toContain('currentDraggingListId')

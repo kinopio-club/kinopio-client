@@ -49,7 +49,8 @@ const item = computed(() => props.card || props.box || props.list)
 const itemIsSelected = computed(() => {
   const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(
     globalStore.multipleBoxesSelectedIds,
-    globalStore.multipleListsSelectedIds
+    globalStore.multipleListsSelectedIds,
+    [globalStore.currentDraggingListId]
   )
   return multipleItemsSelectedIds.includes(item.value.id)
 })
@@ -232,7 +233,11 @@ const currentUserIsHoveringOverConnectedItemColor = computed(() => {
 })
 // the color of this item, or another item connected to this item, that is paint selected
 const currentUserIsMultipleSelectedItemColor = computed(() => {
-  const itemIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds, globalStore.multipleListsSelectedIds)
+  const itemIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds,
+    [globalStore.currentDraggingListId]
+  )
   const connection = connectionsFromMultipleItemsConnectedToCurrentItem(itemIds)
   return connectionColor(connection)
 })
