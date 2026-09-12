@@ -44,7 +44,10 @@ const state = reactive({
 
 const item = computed(() => props.card || props.box)
 const itemIsSelected = computed(() => {
-  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds
+  )
   return multipleItemsSelectedIds.includes(item.value.id)
 })
 
@@ -99,7 +102,10 @@ const hasConnections = computed(() => {
 })
 const createCurrentConnection = (event) => {
   const cursor = utils.cursorPositionInViewport(event)
-  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds
+  )
   let itemIds = [item.value.id]
   if (multipleItemsSelectedIds.length) {
     itemIds = multipleItemsSelectedIds
