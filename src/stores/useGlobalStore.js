@@ -93,6 +93,7 @@ export const useGlobalStore = defineStore('global', {
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
     currentUserIsHoveringOverBoxId: '',
+    currentUserIsHoveringOverListId: '',
     currentUserIsHoveringOverCheckboxCardId: '',
     currentUserIsHoveringOverConnectorItemId: '',
     currentUserIsHoveringOverButtonCardId: '',
@@ -233,6 +234,7 @@ export const useGlobalStore = defineStore('global', {
     multipleCardsSelectedIdsToLoad: [],
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
+    multipleListsSelectedIdsToLoad: [],
     currentUserIsDraggingMultipleSelectedActionsDialog: false,
 
     // connections
@@ -1017,7 +1019,7 @@ export const useGlobalStore = defineStore('global', {
       boxIds = boxIds.filter(id => Boolean(id))
       const boxes = boxIds.map(id => boxStore.getBox(id))
       // connections
-      const connectableItemIds = cards.concat(boxes).map(item => item.id)
+      const connectableItemIds = cards.concat(boxes, lists).map(item => item.id)
       const connections = connectionStore.getConnectionsByItemIds(connectableItemIds)
       // current dragging item index
       let draggingItemIds
@@ -1041,11 +1043,15 @@ export const useGlobalStore = defineStore('global', {
       })
       const zItemTypes = ['cards', 'boxes', 'lists']
       zItemTypes.forEach(itemType => {
-        newItems[itemType].map(item => {
+        newItems[itemType].forEach(item => {
           item.z += 1
-          item.listId = null // prevent new cards from returning to list
-          return item
         })
+      })
+      const duplicatedListIds = new Set(newItems.lists.map(list => list.id))
+      newItems.cards.forEach(card => {
+        if (!duplicatedListIds.has(card.listId)) {
+          card.listId = null // prevent new cards from returning to a list that was not duplicated
+        }
       })
       newItems.connections.forEach(connection => connectionStore.createConnection(connection))
       newItems.lists.forEach(list => listStore.createList({ list }))
@@ -1406,14 +1412,17 @@ export const useGlobalStore = defineStore('global', {
       this.multipleCardsSelectedIdsToLoad = items.cards.map(card => card.id)
       this.multipleConnectionsSelectedIdsToLoad = items.connections.map(connection => connection.id)
       this.multipleBoxesSelectedIdsToLoad = items.boxes.map(box => box.id)
+      this.multipleListsSelectedIdsToLoad = (items.lists || []).map(list => list.id)
     },
     restoreMultipleSelectedItemsToLoad () {
       this.multipleCardsSelectedIds = this.multipleCardsSelectedIdsToLoad
       this.multipleConnectionsSelectedIds = this.multipleConnectionsSelectedIdsToLoad
       this.multipleBoxesSelectedIds = this.multipleBoxesSelectedIdsToLoad
+      this.multipleListsSelectedIds = this.multipleListsSelectedIdsToLoad
       this.multipleCardsSelectedIdsToLoad = []
       this.multipleConnectionsSelectedIdsToLoad = []
       this.multipleBoxesSelectedIdsToLoad = []
+      this.multipleListsSelectedIdsToLoad = []
     },
     async clearAllSelected () {
       this.clearDraggingItems()

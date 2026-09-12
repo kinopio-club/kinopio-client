@@ -208,8 +208,8 @@ const handleShortcutsOnKeyUp = (event) => {
   // b
   } else if (keyB && isSpaceScope) {
     if (!canEditSpace) { return }
-    // Surround Selected Cards with Box
-    if (globalStore.multipleCardsSelectedIds.length) {
+    // Surround selected cards, boxes, or lists with a box
+    if (globalStore.multipleCardsSelectedIds.length || globalStore.multipleBoxesSelectedIds.length || globalStore.multipleListsSelectedIds.length) {
       globalStore.triggerSelectedCardsContainInBox()
     // Toolbar Box Mode
     } else {
@@ -648,6 +648,15 @@ const canEditConnectionById = (connectionId) => {
   return false
 }
 
+const canEditList = (list) => {
+  const isSpaceMember = userStore.getUserIsSpaceMember
+  const canEditSpace = userStore.getUserCanEditSpace
+  const isCreatedByUser = userStore.getItemIsCreatedByUser(list) || !list.userId
+  if (isSpaceMember) { return true }
+  if (canEditSpace && isCreatedByUser) { return true }
+  return false
+}
+
 const remove = () => {
   const selectedConnectionIds = globalStore.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
@@ -677,8 +686,7 @@ const remove = () => {
     }
   })
   lists.forEach(list => {
-    const canEditLists = userStore.getUserIsSpaceMember
-    if (canEditLists) {
+    if (canEditList(list)) {
       listStore.removeList(list.id)
     }
   })
@@ -829,17 +837,20 @@ const handlePasteEvent = async (event) => {
   } else if (itemsData) {
     items = utils.updateSpaceItemsAddPosition(itemsData, position)
     items = await spaceStore.getNewItems(items)
-    await spaceStore.createSpaceItems(items)
+    // drop orphans before persist
     const currentSpaceItemIds = cardStore.allIds.concat(boxStore.allIds, listStore.allIds)
     items = utils.removeOrphanedConnections(items, currentSpaceItemIds)
+    await spaceStore.createSpaceItems(items)
     // select new items
     await nextTick()
     globalStore.closeAllDialogs()
     const cardIds = items.cards.map(card => card.id)
     const boxIds = items.boxes.map(box => box.id)
-    const itemIds = cardIds.concat(boxIds)
+    const listIds = items.lists.map(list => list.id)
+    const itemIds = cardIds.concat(boxIds, listIds)
     globalStore.addMultipleToMultipleCardsSelected(cardIds)
     globalStore.addMultipleToMultipleBoxesSelected(boxIds)
+    globalStore.addMultipleToMultipleListsSelected(listIds)
     await nextTick()
     connectionStore.updateConnectionPathsByItemIds(itemIds)
   // add plain text cards
@@ -855,10 +866,7 @@ const handlePasteEvent = async (event) => {
 // Select Items Relative to cursor
 
 const cardListIdsToSelect = (cards) => {
-  let cardListIds = cards.filter(card => card.listId)
-  cardListIds = cards.map(card => card.listId)
-  cardListIds = uniq(cardListIds)
-  return cardListIds
+  return uniq(cards.map(card => card.listId).filter(Boolean))
 }
 const selectAllItemsBelowCursor = (position) => {
   let zoom

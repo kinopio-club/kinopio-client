@@ -226,3 +226,125 @@ describe('isCompositionKeyboardEvent', () => {
     expect(utils.isCompositionKeyboardEvent(enterKeydown())).toBe(true)
   })
 })
+
+describe('removeOrphanedConnections', () => {
+  it('keeps connections whose endpoints were both pasted', () => {
+    const items = {
+      cards: [{ id: 'a' }, { id: 'b' }],
+      boxes: [],
+      lists: [],
+      connections: [
+        { id: 'keep', startItemId: 'a', endItemId: 'b' }
+      ]
+    }
+    const result = utils.removeOrphanedConnections(items)
+    expect(result.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
+
+  it('drops connections whose endpoints were not pasted and are not in the destination space', () => {
+    const items = {
+      cards: [{ id: 'a' }, { id: 'b' }],
+      boxes: [],
+      lists: [],
+      connections: [
+        { id: 'keep', startItemId: 'a', endItemId: 'b' },
+        { id: 'drop', startItemId: 'a', endItemId: 'missing' }
+      ]
+    }
+    const result = utils.removeOrphanedConnections(items)
+    expect(result.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
+
+  it('keeps a connection to an item already in the destination space', () => {
+    const items = {
+      cards: [{ id: 'a' }],
+      boxes: [],
+      lists: [],
+      connections: [
+        { id: 'to-existing', startItemId: 'a', endItemId: 'already-there' }
+      ]
+    }
+    const result = utils.removeOrphanedConnections(items, ['already-there'])
+    expect(result.connections.map(connection => connection.id)).toEqual(['to-existing'])
+  })
+
+  it('after uniqueSpaceItems remaps, drops connections whose other end was not copied', () => {
+    const deltas = [
+      { prevId: 'card-a', newId: 'card-a2' },
+      { prevId: 'card-b', newId: 'card-b2' }
+    ]
+    const remapped = [
+      { id: 'keep', startItemId: 'card-a', endItemId: 'card-b' },
+      { id: 'drop', startItemId: 'card-a', endItemId: 'uncopied' }
+    ].map(connection => ({
+      ...connection,
+      startItemId: utils.updateAllIds(connection, 'startItemId', deltas),
+      endItemId: utils.updateAllIds(connection, 'endItemId', deltas)
+    }))
+    expect(remapped[0].startItemId).toBe('card-a2')
+    expect(remapped[0].endItemId).toBe('card-b2')
+    expect(remapped[1].endItemId).toBe('uncopied')
+    const prepared = utils.removeOrphanedConnections({
+      cards: [{ id: 'card-a2' }, { id: 'card-b2' }],
+      boxes: [],
+      lists: [],
+      connections: remapped
+    }, [])
+    expect(prepared.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
+
+  it('after uniqueSpaceItems remaps, list ids become connection endpoints', () => {
+    const deltas = [
+      { prevId: 'list-a', newId: 'list-a2' },
+      { prevId: 'list-b', newId: 'list-b2' }
+    ]
+    const remapped = [
+      { id: 'keep', startItemId: 'list-a', endItemId: 'list-b' },
+      { id: 'drop', startItemId: 'list-a', endItemId: 'uncopied' }
+    ].map(connection => ({
+      ...connection,
+      startItemId: utils.updateAllIds(connection, 'startItemId', deltas),
+      endItemId: utils.updateAllIds(connection, 'endItemId', deltas)
+    }))
+    expect(remapped[0].startItemId).toBe('list-a2')
+    expect(remapped[0].endItemId).toBe('list-b2')
+    expect(remapped[1].endItemId).toBe('uncopied')
+    const prepared = utils.removeOrphanedConnections({
+      cards: [],
+      boxes: [],
+      lists: [{ id: 'list-a2' }, { id: 'list-b2' }],
+      connections: remapped
+    }, [])
+    expect(prepared.connections.map(connection => connection.id)).toEqual(['keep'])
+  })
+})
+
+describe('itemElement', () => {
+  it('falls back to a list element when the id is not a card or box', () => {
+    const orig = document.querySelector.bind(document)
+    document.querySelector = (sel) => {
+      if (String(sel).includes('data-list-id="list-1"')) {
+        return { dataset: { listId: 'list-1' } }
+      }
+      return null
+    }
+    try {
+      expect(utils.itemElement('list-1').dataset.listId).toBe('list-1')
+    } finally {
+      document.querySelector = orig
+    }
+  })
+})
+
+describe('listElementFromConnectorPosition', () => {
+  it('returns the list-info under the cursor', () => {
+    const listInfo = { classList: ['list-info'], dataset: { listId: 'list-1' } }
+    const orig = document.elementsFromPoint
+    document.elementsFromPoint = () => [listInfo]
+    try {
+      expect(utils.listElementFromConnectorPosition(10, 10)).toBe(listInfo)
+    } finally {
+      document.elementsFromPoint = orig
+    }
+  })
+})

@@ -1,0 +1,44 @@
+import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const source = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), 'KeyboardShortcutsHandler.vue'),
+  'utf8'
+)
+
+describe('paste kinopio items', () => {
+  it('drops orphaned connections before createSpaceItems persists them', () => {
+    const pasteBlock = source.split('} else if (itemsData) {')[1].split('// add plain text cards')[0]
+    const filterAt = pasteBlock.indexOf('utils.removeOrphanedConnections')
+    const createAt = pasteBlock.indexOf('spaceStore.createSpaceItems')
+    expect(filterAt).toBeGreaterThan(-1)
+    expect(createAt).toBeGreaterThan(-1)
+    expect(filterAt).toBeLessThan(createAt)
+  })
+
+  it('selects pasted lists as well as cards and boxes', () => {
+    const pasteBlock = source.split('} else if (itemsData) {')[1].split('// add plain text cards')[0]
+    expect(pasteBlock).toContain('addMultipleToMultipleCardsSelected')
+    expect(pasteBlock).toContain('addMultipleToMultipleBoxesSelected')
+    expect(pasteBlock).toContain('addMultipleToMultipleListsSelected')
+  })
+
+  it('updates connection paths using pasted list ids too', () => {
+    const pasteBlock = source.split('} else if (itemsData) {')[1].split('// add plain text cards')[0]
+    const idsLine = pasteBlock.split('\n').find(line => line.includes('cardIds.concat'))
+    expect(idsLine).toBeDefined()
+    expect(idsLine).toContain('listIds')
+    expect(pasteBlock).toContain('updateConnectionPathsByItemIds(itemIds)')
+  })
+})
+
+describe('select lists with cards in the selection band', () => {
+  it('keeps only actual list ids from selected cards', () => {
+    const block = source.split('const cardListIdsToSelect')[1].split('const selectAllItemsBelowCursor')[0]
+    expect(block).toContain('.filter(Boolean)')
+    expect(block).toContain('card.listId')
+    expect(block).not.toContain('cards.filter(card => card.listId)')
+  })
+})

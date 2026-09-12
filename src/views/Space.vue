@@ -497,7 +497,7 @@ const stopResizingBoxes = () => {
 }
 const checkIfShouldSnapToBox = (event) => {
   if (globalStore.preventItemSnapping) { return }
-  if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
+  if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged && !globalStore.listsWereDragged) { return }
   if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
@@ -648,12 +648,12 @@ const showListDetails = async (event) => {
   globalStore.updateListDetailsIsVisibleForListId(listId)
 }
 const checkIfShouldUpdateCardPositionsInEdgeLists = () => {
-  let listIds = uniq(globalStore.multipleListIdsWereDraggedToEdge)
-  listIds = listIds.forEach(id => {
+  const listIds = uniq(globalStore.multipleListIdsWereDraggedToEdge)
+  listIds.forEach(id => {
     const list = listStore.getList(id)
     cardStore.updateCardPositionsInList(list)
   })
-  globalStore.multipleListsWereDraggedToEdge = []
+  globalStore.multipleListIdsWereDraggedToEdge = []
 }
 
 // drag items
@@ -706,7 +706,12 @@ const dragLists = (event) => {
       userId: userStore.id
     }
     broadcastStore.update({ updates, action: 'addToRemoteListsDragging' })
-    listStore.selectItemsInSelectedLists()
+    const isMetaKey = event.metaKey || event.ctrlKey // drag only list
+    const preventSelectItemsInside = isMetaKey || globalStore.currentUserIsDraggingDuplicateItem
+    if (!preventSelectItemsInside) {
+      listStore.selectItemsInSelectedLists()
+      globalStore.multipleListsSelectedIds.push(globalStore.currentDraggingListId)
+    }
   }
   dragItems()
 }
@@ -1016,6 +1021,7 @@ const stopInteractions = async (event) => {
   }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
+  unselectCardsInDraggedList()
   showMultipleSelectedActions(event)
   showBoxDetails(event)
   showListDetails(event)
@@ -1025,6 +1031,7 @@ const stopInteractions = async (event) => {
   globalStore.preventDraggedCardFromShowingDetails = false
   globalStore.preventDraggedBoxFromShowingDetails = false
   globalStore.preventDraggedListFromShowingDetails = false
+  globalStore.preventDraggedLineFromShowingDetails = false
   stopResizingCards()
   stopTiltingCards()
   stopResizingBoxes()

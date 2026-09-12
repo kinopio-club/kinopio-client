@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -18,6 +19,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -101,9 +103,10 @@ const sortedByY = (items) => {
   return items
 }
 const text = computed(() => {
-  let cards = selectedItems.value.cards
-  cards = sortedByY(cards)
-  return utils.nameStringFromItems(cards)
+  const selected = selectedItems.value
+  let items = selected.cards.concat(selected.boxes, selected.lists, selected.lines)
+  items = sortedByY(items)
+  return utils.nameStringFromItems(items)
 })
 
 // labels
@@ -204,6 +207,7 @@ const moveOrCopyToSpace = async () => {
   if (props.actionIsMove) {
     removeCards(items.cards)
     removeBoxes(items.boxes)
+    removeLists(items.lists)
     items.isRemoved = true
   }
   userStore.updateUserCardsCreatedCount(items.cards)
@@ -217,6 +221,10 @@ const removeCards = (cards) => {
 const removeBoxes = (boxes) => {
   const ids = boxes.map(box => box.id)
   boxStore.removeBoxes(ids)
+}
+const removeLists = (lists) => {
+  const ids = lists.map(list => list.id)
+  listStore.removeLists(ids)
 }
 
 // should upgrade user

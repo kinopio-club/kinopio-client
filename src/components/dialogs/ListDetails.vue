@@ -31,7 +31,13 @@ const state = reactive({
 
 let prevList
 
-const canEditSpace = computed(() => userStore.getUserIsSpaceMember)
+const canEditSpace = computed(() => {
+  if (userStore.getUserIsSpaceMember) { return true }
+  const list = currentList.value
+  if (!list?.id) { return false }
+  if (!userStore.getUserCanEditSpace) { return false }
+  return userStore.getItemIsCreatedByUser(list) || !list.userId
+})
 
 const currentList = computed(() => {
   return listStore.getList(globalStore.listDetailsIsVisibleForListId) || {}

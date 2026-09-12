@@ -2,9 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
-import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
-import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
@@ -13,9 +11,7 @@ import { useStoreAction } from '@/composables/useStoreAction.js'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
-const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
-const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
@@ -124,8 +120,8 @@ const toggleConnectionDetails = (event) => {
 }
 const items = computed(() => {
   const { startItemId, endItemId } = props.connection
-  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
-  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
+  const startItem = spaceStore.getSpaceItemById(startItemId)
+  const endItem = spaceStore.getSpaceItemById(endItemId)
   return { startItem, endItem }
 })
 
@@ -148,12 +144,11 @@ const isConnectionFilteredByColor = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = globalStore.filteredFrameIds
-  const { startItemId, endItemId } = props.connection
-  const startCard = cardStore.byId[startItemId]
-  const endCard = cardStore.byId[endItemId]
-  const startCardInFilter = frameIds.includes(startCard?.frameId)
-  const endCardInFilter = frameIds.includes(endCard?.frameId)
-  return startCardInFilter || endCardInFilter
+  const startItem = items.value.startItem
+  const endItem = items.value.endItem
+  const startItemInFilter = frameIds.includes(startItem?.frameId)
+  const endItemInFilter = frameIds.includes(endItem?.frameId)
+  return startItemInFilter || endItemInFilter
 })
 const isFiltered = computed(() => {
   if (filtersIsActive.value) {

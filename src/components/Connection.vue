@@ -4,7 +4,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
-import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -15,7 +14,6 @@ import utils from '@/utils.js'
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
-const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
@@ -106,7 +104,7 @@ const connectionStyles = computed(() => {
     width: rect.width + 'px',
     height: rect.height + 'px'
   }
-  if (globalStore.currentUserIsDraggingCard) {
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) {
     styles.pointerEvents = 'none'
   }
   return styles
@@ -136,8 +134,8 @@ const connectionPathClasses = computed(() => {
 
 const items = computed(() => {
   const { startItemId, endItemId } = props.connection
-  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
-  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
+  const startItem = spaceStore.getSpaceItemById(startItemId)
+  const endItem = spaceStore.getSpaceItemById(endItemId)
   return { startItem, endItem }
 })
 const isConnectedToCommentCard = computed(() => {
@@ -146,14 +144,16 @@ const isConnectedToCommentCard = computed(() => {
   return startItem.isComment || endItem.isComment
 })
 const isConnectedToMultipleCardsSelected = computed(() => {
-  const cardIds = globalStore.multipleCardsSelectedIds
-  if (!cardIds.length) { return }
-  return cardIds.find(cardId => {
-    return (cardId === props.connection.startItemId || cardId === props.connection.endItemId)
-  })
+  const itemIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds,
+    [globalStore.currentDraggingListId]
+  )
+  if (!itemIds.length) { return }
+  return itemIds.includes(props.connection.startItemId) || itemIds.includes(props.connection.endItemId)
 })
 const isHoveredOverConnectedItem = computed(() => {
-  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId
+  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId || globalStore.currentUserIsHoveringOverListId || globalStore.currentUserIsHoveringOverConnectorItemId
   if (!itemId) { return }
   return (itemId === props.connection.startItemId || itemId === props.connection.endItemId)
 })
@@ -380,7 +380,7 @@ const cancelAnimation = () => {
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
-  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) { return }
   return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
 })
 watch(() => shouldAnimate.value, (value, prevValue) => {

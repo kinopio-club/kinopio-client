@@ -979,12 +979,13 @@ export default {
     }
   },
 
-  // items (cards or boxes)
+  // items (cards, boxes, or lists)
 
   itemElement (itemId) {
     const card = this.cardElementFromId(itemId)
     const box = this.boxElementFromId(itemId)
-    return card || box
+    const list = this.listElementFromId(itemId)
+    return card || box || list
   },
   itemElementDimensions (item) {
     if (!item) { return }
@@ -1251,6 +1252,19 @@ export default {
 
   // lists
 
+  listElementFromConnectorPosition (x, y) {
+    const elements = document.elementsFromPoint(x, y)
+    let listFromConnector
+    const listElement = elements.find(element => {
+      const classes = Array.from(element.classList)
+      if (classes.includes('connector')) {
+        listFromConnector = element.closest('.list')
+        return listFromConnector
+      }
+      return classes.includes('list-info')
+    })
+    return listFromConnector || listElement
+  },
   listElementFromId (listId) {
     return document.querySelector(`.list[data-list-id="${listId}"]`)
   },

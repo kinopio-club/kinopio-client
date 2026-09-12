@@ -309,9 +309,10 @@ const toggleIsComment = async () => {
 const countersIsVisible = computed(() => {
   return props.cards.every(card => card.counterIsVisible)
 })
-const toggleCounterIsVisible = () => {
+const toggleCounterIsVisible = async () => {
   const counterIsVisible = !countersIsVisible.value
-  props.cards.forEach(card => {
+  const listIds = []
+  for (const card of props.cards) {
     cardStore.updateCard({
       id: card.id,
       counterIsVisible,
@@ -319,9 +320,12 @@ const toggleCounterIsVisible = () => {
     })
     // update list card positions below
     if (card.listId) {
-      const list = listStore.getList(card.listStore)
-      cardStore.updateCardDimensions(card.id)
+      await cardStore.updateCardDimensions(card.id)
+      listIds.push(card.listId)
     }
+  }
+  uniq(listIds).forEach(listId => {
+    cardStore.updateCardPositionsInList(listStore.getList(listId))
   })
 }
 

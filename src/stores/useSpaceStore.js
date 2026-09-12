@@ -150,7 +150,10 @@ export const useSpaceStore = defineStore('space', {
       })
       // connection
       let connections = connectionStore.getAllConnections.filter(connection => {
-        const selectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+        const selectedIds = globalStore.multipleCardsSelectedIds.concat(
+          globalStore.multipleBoxesSelectedIds,
+          globalStore.multipleListsSelectedIds
+        )
         const isStartCardMatch = selectedIds.includes(connection.startItemId)
         const isEndCardMatch = selectedIds.includes(connection.endItemId)
         return isStartCardMatch && isEndCardMatch

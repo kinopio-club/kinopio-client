@@ -169,7 +169,7 @@ export const useListStore = defineStore('lists', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const broadcastStore = useBroadcastStore()
-      if (!userStore.getUserIsSpaceMember) { return }
+      if (!userStore.getUserCanEditSpace) { return }
       list = this.normalizeNewList(list)
       this.addListToState(list)
       this.triggerCreateList(list)
@@ -238,12 +238,15 @@ export const useListStore = defineStore('lists', {
     // update
 
     updateListsState (updates) {
+      const connectionStore = useConnectionStore()
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
           ...update
         }
       })
+      const ids = updates.map(update => update.id)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
     async updateLists (updates) {
       const apiStore = useApiStore()
@@ -343,6 +346,7 @@ export const useListStore = defineStore('lists', {
       })
       lists = globalStore.moveItemsUpdateSnapAlignDisplayPosition(lists, { itemType: 'list', delta })
       this.updateLists(lists)
+      lists.forEach(list => this.updatePageSize(list))
       this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
@@ -355,6 +359,17 @@ export const useListStore = defineStore('lists', {
 
     // position
 
+    updatePageSize (list) {
+      const globalStore = useGlobalStore()
+      const listY = list.y + (list.height || 0)
+      if (listY >= globalStore.pageHeight) {
+        globalStore.pageHeight = listY
+      }
+      const listX = list.x + (list.resizeWidth || list.width || 0)
+      if (listX >= globalStore.pageWidth) {
+        globalStore.pageWidth = listX
+      }
+    },
     clearAllListsZ () {
       const lists = this.getAllLists
       const updates = lists.map(list => {
@@ -456,6 +471,16 @@ export const useListStore = defineStore('lists', {
         width = Math.max(width, consts.minListWidth)
         const list = { id, resizeWidth: width }
         this.updateList(list)
+        const existing = this.getList(id)
+        if (existing) {
+          this.updatePageSize({
+            id,
+            x: existing.x,
+            y: existing.y,
+            resizeWidth: width,
+            height: existing.height
+          })
+        }
         this.resizeListChildCards(list, width)
       }
     },
@@ -502,7 +527,7 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
-      const canEditSpace = userStore.getUserIsSpaceMember
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       // update cards
       cardStore.removeCardsFromListsByLists(ids)

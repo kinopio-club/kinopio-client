@@ -29,9 +29,12 @@ const props = defineProps({
   isHiddenByOpacity: Boolean,
   card: Object,
   box: Object,
+  list: Object,
   isConnectingTo: Boolean,
   isConnectingFrom: Boolean,
   isVisibleInViewport: Boolean,
+  isRemoteConnecting: Boolean,
+  remoteConnectionColor: String,
   defaultBackgroundColor: String,
   currentBackgroundColor: String,
   parentDetailsIsVisible: Boolean,
@@ -42,9 +45,13 @@ const state = reactive({
   currentConnectorColor: ''
 })
 
-const item = computed(() => props.card || props.box)
+const item = computed(() => props.card || props.box || props.list)
 const itemIsSelected = computed(() => {
-  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds,
+    [globalStore.currentDraggingListId]
+  )
   return multipleItemsSelectedIds.includes(item.value.id)
 })
 
@@ -99,7 +106,10 @@ const hasConnections = computed(() => {
 })
 const createCurrentConnection = (event) => {
   const cursor = utils.cursorPositionInViewport(event)
-  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(globalStore.multipleBoxesSelectedIds)
+  const multipleItemsSelectedIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds
+  )
   let itemIds = [item.value.id]
   if (multipleItemsSelectedIds.length) {
     itemIds = multipleItemsSelectedIds
@@ -129,7 +139,7 @@ const isImageCard = computed(() => {
   return isImage
 })
 const connectorButtonBackground = computed(() => {
-  if (globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentUserIsDraggingCard || globalStore.currentUserIsDraggingBox || globalStore.currentUserIsDraggingList) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
   if (props.backgroundIsTransparent) { return }
   if (state.currentConnectorColor) { return state.currentConnectorColor }
@@ -144,7 +154,6 @@ const buttonStyles = computed(() => {
 })
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
-  if (globalStore.currentUserIsDraggingList) { return }
   if (globalStore.getIsInteractingWithConnection) { return }
   if (!utils.arrayHasItems(connectedConnections.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
@@ -165,7 +174,7 @@ const connectionColor = (connection) => {
 // another item that is connected to this one is being edited
 const connectedToAnotherItemDetailsVisibleColor = computed(() => {
   if (props.parentDetailsIsVisible) { return }
-  const anotherItemId = globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId
+  const anotherItemId = globalStore.cardDetailsIsVisibleForCardId || globalStore.boxDetailsIsVisibleForBoxId || globalStore.listDetailsIsVisibleForListId
   if (!anotherItemId) { return }
   const connection = connectionFromAnotherItemConnectedToCurrentItem(anotherItemId)
   return connectionColor(connection)
@@ -174,8 +183,9 @@ const connectedToAnotherItemDetailsVisibleColor = computed(() => {
 const connectedToAnotherItemBeingDraggedColor = computed(() => {
   const isDraggingCard = globalStore.currentUserIsDraggingCard
   const isDraggingBox = globalStore.currentUserIsDraggingBox
-  if (!isDraggingCard && !isDraggingBox) { return }
-  const itemId = globalStore.currentDraggingCardId || globalStore.currentDraggingBoxId
+  const isDraggingList = globalStore.currentUserIsDraggingList
+  if (!isDraggingCard && !isDraggingBox && !isDraggingList) { return }
+  const itemId = globalStore.currentDraggingCardId || globalStore.currentDraggingBoxId || globalStore.currentDraggingListId
   const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   const color = connectionColor(connection)
   if (color) {
@@ -217,13 +227,17 @@ const currentUserIsMultipleSelectedConnectionColor = computed(() => {
 })
 // this item, or another item connected to this item, is being hovered over
 const currentUserIsHoveringOverConnectedItemColor = computed(() => {
-  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId
+  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId || globalStore.currentUserIsHoveringOverListId
   const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   return connectionColor(connection)
 })
 // the color of this item, or another item connected to this item, that is paint selected
 const currentUserIsMultipleSelectedItemColor = computed(() => {
-  const itemIds = globalStore.multipleCardsSelectedIds
+  const itemIds = globalStore.multipleCardsSelectedIds.concat(
+    globalStore.multipleBoxesSelectedIds,
+    globalStore.multipleListsSelectedIds,
+    [globalStore.currentDraggingListId]
+  )
   const connection = connectionsFromMultipleItemsConnectedToCurrentItem(itemIds)
   return connectionColor(connection)
 })
@@ -260,6 +274,7 @@ const startConnecting = (event) => {
   globalStore.closeAllDialogs()
   globalStore.preventDraggedCardFromShowingDetails = true
   globalStore.preventDraggedBoxFromShowingDetails = true
+  globalStore.preventDraggedListFromShowingDetails = true
   if (!globalStore.currentUserIsDrawingConnection) {
     createCurrentConnection(event)
   }

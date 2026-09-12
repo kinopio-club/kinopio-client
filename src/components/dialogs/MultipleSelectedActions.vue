@@ -168,8 +168,8 @@ const canEditAll = computed(() => {
   const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
   const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
   const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
-  const lines = userStore.getUserIsSpaceMember
-  const lists = userStore.getUserIsSpaceMember
+  const lines = !multipleLinesSelectedIds.value.length || userStore.getUserIsSpaceMember
+  const lists = multipleListsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.lists
   const all = cards && connections && boxes && lines && lists
   return { cards, connections, boxes, lines, lists, all }
 })
@@ -187,7 +187,8 @@ const selectedItemsIsEditableByCurrentUser = computed(() => {
   const isCards = editableCards.value.length === cards.value.length
   const isConnections = editableConnections.value.length === connections.value.length
   const isBoxes = editableBoxes.value.length === boxes.value.length
-  if (isCards && isConnections && isBoxes) {
+  const isLists = editableLists.value.length === lists.value.length
+  if (isCards && isConnections && isBoxes && isLists) {
     return true
   } else {
     return false
@@ -206,13 +207,18 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
     if (!box) { return }
     userStore.getUserIsBoxCreator(box)
   })
+  const listsCreatedByCurrentUser = lists.value?.filter(list => {
+    if (!list) { return }
+    return userStore.getItemIsCreatedByUser(list) || !list.userId
+  })
   return {
     connections: connectionsCreatedByCurrentUser.length,
     cards: cardsCreatedByCurrentUser.length,
-    boxes: boxesCreatedByCurrentUser.length
+    boxes: boxesCreatedByCurrentUser.length,
+    lists: listsCreatedByCurrentUser.length
   }
 })
-const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value))
+const multipleItemsSelectedIds = computed(() => multipleCardsSelectedIds.value.concat(multipleBoxesSelectedIds.value, multipleListsSelectedIds.value))
 const multipleItemsIsSelected = computed(() => {
   return multipleItemsSelectedIds.value.length > 1
 })
@@ -387,6 +393,15 @@ const lists = computed(() => {
   lists = lists.filter(list => Boolean(list))
   // prevLists = lists
   return lists
+})
+const editableLists = computed(() => {
+  if (isSpaceMember.value) {
+    return lists.value
+  } else {
+    return lists.value.filter(list => {
+      return userStore.getItemIsCreatedByUser(list) || !list.userId
+    })
+  }
 })
 const cardsIsInListTogether = computed(() => {
   if (!cards.value.length) { return }
@@ -605,15 +620,15 @@ dialog.narrow.multiple-selected-actions(
   section(v-if="ItemIsSelected")
 
     //- Edit Cards
-    .row(v-if="cardOrBoxIsSelected")
+    .row(v-if="cardBoxOrListIsSelected")
       //- [·]
-      ItemDetailsCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
+      ItemDetailsCheckboxButton(v-if="cardOrBoxIsSelected" :boxes="boxes" :cards="cards" :isDisabled="!canEditAll.all")
       .segmented-buttons
         //- Connect
         button(v-if="multipleItemsIsSelected" title="Connect/Disconnect Cards" :class="{active: itemsIsConnectedTogether}" @click.left.prevent="toggleConnectItems" @keydown.stop.enter="toggleConnectItems" :disabled="!canEditAll.all")
           img.connect.icon(src="@/assets/connect.svg")
         //- Surround with Box
-        button(v-if="cardsIsSelected" title="Surround with Box (B)" @click.left.prevent="containItemsInNewBox" @keydown.stop.enter="containItemsInNewBox" :disabled="!canEditAll.all")
+        button(v-if="cardsIsSelected || boxesIsSelected || listsIsSelected" title="Surround with Box (B)" @click.left.prevent="containItemsInNewBox" @keydown.stop.enter="containItemsInNewBox" :disabled="!canEditAll.all")
           //- itemsisselected
           img.icon.box-icon(src="@/assets/box.svg")
         //- List
