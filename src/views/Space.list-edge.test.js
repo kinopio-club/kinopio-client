@@ -28,3 +28,13 @@ describe('stop dragging details flags', () => {
     expect(block).toContain('preventDraggedLineFromShowingDetails = false')
   })
 })
+
+describe('dragging a list', () => {
+  it('selects the dragged list like a dragged box, so its connections stay active', () => {
+    const boxBlock = source.split('const dragBoxes')[1].split('const dragLists')[0]
+    const listBlock = source.split('const dragLists')[1].split('// footer')[0]
+    expect(boxBlock).toContain('multipleBoxesSelectedIds.push(globalStore.currentDraggingBoxId)')
+    expect(listBlock).toContain('selectItemsInSelectedLists')
+    expect(listBlock).toContain('multipleListsSelectedIds.push(globalStore.currentDraggingListId)')
+  })
+})

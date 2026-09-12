@@ -20,6 +20,7 @@ describe('connection list endpoints', () => {
     expect(block).toContain('multipleCardsSelectedIds')
     expect(block).toContain('multipleBoxesSelectedIds')
     expect(block).toContain('multipleListsSelectedIds')
+    expect(block).toContain('[globalStore.currentDraggingListId]')
   })
 
   it('highlights a connection when the hovered endpoint is a list', () => {

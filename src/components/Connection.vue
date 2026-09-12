@@ -146,7 +146,8 @@ const isConnectedToCommentCard = computed(() => {
 const isConnectedToMultipleCardsSelected = computed(() => {
   const itemIds = globalStore.multipleCardsSelectedIds.concat(
     globalStore.multipleBoxesSelectedIds,
-    globalStore.multipleListsSelectedIds
+    globalStore.multipleListsSelectedIds,
+    [globalStore.currentDraggingListId]
   )
   if (!itemIds.length) { return }
   return itemIds.includes(props.connection.startItemId) || itemIds.includes(props.connection.endItemId)

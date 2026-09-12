@@ -707,6 +707,7 @@ const dragLists = (event) => {
     }
     broadcastStore.update({ updates, action: 'addToRemoteListsDragging' })
     listStore.selectItemsInSelectedLists()
+    globalStore.multipleListsSelectedIds.push(globalStore.currentDraggingListId)
   }
   dragItems()
 }
