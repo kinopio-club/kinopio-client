@@ -497,7 +497,7 @@ const stopResizingBoxes = () => {
 }
 const checkIfShouldSnapToBox = (event) => {
   if (globalStore.preventItemSnapping) { return }
-  if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
+  if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged && !globalStore.listsWereDragged) { return }
   if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
@@ -1021,6 +1021,7 @@ const stopInteractions = async (event) => {
   }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
+  unselectCardsInDraggedList()
   showMultipleSelectedActions(event)
   showBoxDetails(event)
   showListDetails(event)

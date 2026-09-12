@@ -29,6 +29,21 @@ describe('stop dragging details flags', () => {
   })
 })
 
+describe('stop dragging a list', () => {
+  it('unselects cards inside a dragged list the same way a dragged box does', () => {
+    const stop = source.split('const stopInteractions')[1].split('// online')[0]
+    expect(stop).toContain('unselectCardsInDraggedBox()')
+    expect(stop).toContain('unselectCardsInDraggedList()')
+  })
+
+  it('lets a dragged list expand a box on drop, like cards and boxes', () => {
+    const block = source.split('const checkIfShouldSnapToBox')[1].split('const unselectCardsInDraggedBox')[0]
+    expect(block).toContain('listsWereDragged')
+    expect(block).toContain('cardsWereDragged')
+    expect(block).toContain('boxesWereDragged')
+  })
+})
+
 describe('dragging a list', () => {
   it('selects the dragged list like a dragged box, so its connections stay active', () => {
     const boxBlock = source.split('const dragBoxes')[1].split('const dragLists')[0]
