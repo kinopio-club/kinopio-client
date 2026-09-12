@@ -706,8 +706,12 @@ const dragLists = (event) => {
       userId: userStore.id
     }
     broadcastStore.update({ updates, action: 'addToRemoteListsDragging' })
-    listStore.selectItemsInSelectedLists()
-    globalStore.multipleListsSelectedIds.push(globalStore.currentDraggingListId)
+    const isMetaKey = event.metaKey || event.ctrlKey // drag only list
+    const preventSelectItemsInside = isMetaKey || globalStore.currentUserIsDraggingDuplicateItem
+    if (!preventSelectItemsInside) {
+      listStore.selectItemsInSelectedLists()
+      globalStore.multipleListsSelectedIds.push(globalStore.currentDraggingListId)
+    }
   }
   dragItems()
 }

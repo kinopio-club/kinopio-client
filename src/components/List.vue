@@ -162,6 +162,9 @@ const updateIsHover = (value) => {
 }
 const startListInfoInteraction = async (event) => {
   let listId = props.list.id
+  if (event.target.closest('.connector')) {
+    return
+  }
   if (!currentListIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
@@ -177,7 +180,7 @@ const startListInfoInteraction = async (event) => {
   listStore.incrementListZ(listId)
 }
 const endListInfoInteraction = (event) => {
-  // const isMeta = event.metaKey || event.ctrlKey
+  const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
@@ -189,17 +192,16 @@ const endListInfoInteraction = (event) => {
   if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteListsDragging' })
   globalStore.closeAllDialogs()
-  // if (isMeta) {
-  //   globalStore.updateMultipleListsSelectedIds([props.list.id])
-  //   listStore.selectItemsInSelectedLists()
-  //   globalStore.updateMultipleListsSelectedIds([])
-  //   globalStore.currentUserIsDraggingList = false
-  //   globalStore.shouldCancelNextMouseUpInteraction = true
-  // } else {
-  globalStore.clearMultipleSelected()
-  // }
+  if (isMeta) {
+    globalStore.updateMultipleListsSelectedIds([])
+    globalStore.currentUserIsDraggingList = false
+    globalStore.shouldCancelNextMouseUpInteraction = true
+  } else {
+    globalStore.clearMultipleSelected()
+  }
   if (globalStore.preventDraggedListFromShowingDetails) { return }
-  // if (isMeta) { return }
+  if (globalStore.currentUserIsDraggingDuplicateItem) { return }
+  if (isMeta) { return }
   globalStore.updateListDetailsIsVisibleForListId(props.list.id)
   globalStore.clearAllInteractingWithAndSelected()
   event.stopPropagation() // prevent stopInteractions() from closing listDetails

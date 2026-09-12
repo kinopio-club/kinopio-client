@@ -36,5 +36,8 @@ describe('dragging a list', () => {
     expect(boxBlock).toContain('multipleBoxesSelectedIds.push(globalStore.currentDraggingBoxId)')
     expect(listBlock).toContain('selectItemsInSelectedLists')
     expect(listBlock).toContain('multipleListsSelectedIds.push(globalStore.currentDraggingListId)')
+    expect(listBlock).toContain('event.metaKey || event.ctrlKey')
+    expect(listBlock).toContain('preventSelectItemsInside')
+    expect(listBlock).toContain('currentUserIsDraggingDuplicateItem')
   })
 })

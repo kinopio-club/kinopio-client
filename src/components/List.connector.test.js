@@ -19,4 +19,17 @@ describe('list connector button', () => {
     const block = source.split('const updateIsHover')[1].split('const startListInfoInteraction')[0]
     expect(block).toContain('currentUserIsHoveringOverListId')
   })
+
+  it('does not start a list drag when the connector is clicked', () => {
+    const block = source.split('const startListInfoInteraction')[1].split('const endListInfoInteraction')[0]
+    expect(block).toContain("event.target.closest('.connector')")
+  })
+
+  it('cmd-drag skips list details like boxes, instead of opening them', () => {
+    const block = source.split('const endListInfoInteraction')[1].split('// Remote')[0]
+    expect(block).toContain('event.metaKey || event.ctrlKey')
+    expect(block).toContain('shouldCancelNextMouseUpInteraction = true')
+    expect(block).toContain('currentUserIsDraggingDuplicateItem')
+    expect(block).toContain('if (isMeta) { return }')
+  })
 })
