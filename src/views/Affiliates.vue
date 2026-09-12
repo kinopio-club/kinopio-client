@@ -107,8 +107,7 @@ const totalCommissionsPaid = computed(() => total(commissionsPaid.value))
             span To access this page you must be signed in
           .badge.danger(v-if="state.error.currentUserIsNotAffiliate")
             span To access this page you must be a member of the Kinopio affiliate program.{{' '}}
-            //- TODO update help page link
-            a(href="/help/affiliate-program") (More Info)
+            a(href="/help/affiliates") (More Info)
           .badge.danger(v-if="state.error.unknownServerError")
             span (シ_ _)シ Something went wrong, Please try again or contact support
 
