@@ -153,7 +153,6 @@ const buttonStyles = computed(() => {
 })
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
-  if (globalStore.currentUserIsDraggingList) { return }
   if (globalStore.getIsInteractingWithConnection) { return }
   if (!utils.arrayHasItems(connectedConnections.value) && !globalStore.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||

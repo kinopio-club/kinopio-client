@@ -34,4 +34,10 @@ describe('connector button multi-select', () => {
     const details = source.split('const connectedToAnotherItemDetailsVisibleColor')[1].split('const connectedToAnotherItemBeingDraggedColor')[0]
     expect(details).toContain('listDetailsIsVisibleForListId')
   })
+
+  it('keeps connector glow available while a connected list is dragged', () => {
+    const glow = source.split('const connectorGlowStyle')[1].split('const connectionColor')[0]
+    expect(glow).not.toContain('currentUserIsDraggingList')
+    expect(glow).toContain('connectedToAnotherItemBeingDraggedColor')
+  })
 })
