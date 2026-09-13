@@ -256,7 +256,7 @@ const badgeClasses = (post) => {
   main.page.blog-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(h2="BLOG" :isH1="currentSlugIsRoot")
+        Wordmark(h2="BLOG UPDATES" :isH1="currentSlugIsRoot")
 
       //- index
       template(v-if="currentSlugIsRoot")
