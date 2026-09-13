@@ -97,6 +97,37 @@ To update it, create the space and export its json. Replace the contents of`hell
 
 [Instructions here](https://kinopio.club/how-to-update-changelog-oi4jZTSI_eAEvov9XbjJM)
 
+## How to Update Help
+
+files in
+static site add md = new post, ordered by category and name
+
+## How to Update Blog
+
+Blog posts are markdown files in `src/blog`. Adding one publishes it: `src/blog/my-post.md` becomes `/blog/my-post`, and gets prerendered to its own static html file so robots and link unfurlers see the full post.
+
+Frontmatter:
+
+```yaml
+---
+title: 'My Post'
+metaDate: 'Sep 7, 2026'   # shown on the page
+date: 2026-09-07          # sorts the index and both feeds, and sets the rss pubDate
+category: 'New Stuff'     # New Stuff, Bulletin, Guides, or In Use – one per post
+color: '#f0dba8'          # index card background
+image: 'https://…'        # index card thumbnail and og:image
+description: One or two sentences, used for the index card, meta description, and feed summary
+---
+```
+
+Guide posts add `userName`, `userColor`, `userUrl`, `spaceName`, `spaceUrl`, and `spaceEmbedUrl`. Any post with a `spaceEmbedUrl` renders the author credit and a live space embed above its content.
+
+Post media lives on `updates.kinopio.club/pages/blog/`, with the originals kept in `src/assets/pages/blog` – add files there, then sync that directory to the cdn. Reference them by their full cdn url, the same way help posts do.
+
+Post bodies may contain raw html, but it is compiled as a vue template, so tags must be balanced – an unclosed `<p>` fails the build rather than being silently corrected.
+
+`/blog/feed.xml` and `/blog/feed.json` are generated at build time from the same markdown, by `blogFeedsPlugin` in `vite.config.js`.
+
 ## HTTPS Signing
 
 > You shouldn't need to run this or update the cert until 2025, but just in case

@@ -8,5 +8,5 @@
 [[edge_functions]]
   path = "/*"
   function = "page-meta"
-  excludedPath = ["/", "/assets/*", "/*.js", "/*.css", "/*.txt", "/*.xml", "/*.png", "/*.ico", "/*.jpeg", "/*.jpg", "/*.webmanifest", "/help", "/help/*"]
+  excludedPath = ["/", "/assets/*", "/*.js", "/*.css", "/*.txt", "/*.xml", "/*.png", "/*.ico", "/*.jpeg", "/*.jpg", "/*.webmanifest", "/help", "/help/*", "/blog", "/blog/*"]
   cache = "manual"

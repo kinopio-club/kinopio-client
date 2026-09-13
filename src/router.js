@@ -62,6 +62,14 @@ const router = {
         next()
       }
     }, {
+      path: '/blog/:post?',
+      name: 'blog',
+      component: () => import('./views/Blog.vue'),
+      beforeEnter: (to, from, next) => {
+        resetStoresForStaticPage()
+        next()
+      }
+    }, {
       path: '/from/:promoCode',
       redirect: to => ({
         path: '/',
