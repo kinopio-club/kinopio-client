@@ -289,11 +289,12 @@ export const useGroupStore = defineStore('groups', {
 
     async addSpaceToGroup (group) {
       const spaceStore = useSpaceStore()
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userNotificationStore = useUserNotificationStore()
       const user = userStore
-      const body = { groupId: group.id, addedToGroupByUserId: user.id }
-      await spaceStore.updateSpace(body)
+      const body = { groupId: group.id, addedToGroupByUserId: user.id, spaceId: spaceStore.id }
+      await apiStore.addToQueue({ name: 'addSpaceToGroup', body })
       await userNotificationStore.addSpaceToGroup(body)
     },
     async removeSpaceFromGroup () {

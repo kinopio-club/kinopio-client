@@ -214,11 +214,11 @@ const toggleSpaceGroup = async (group) => {
   if (shouldRemoveSpaceGroup) {
     await removeSpaceGroup(group)
   } else {
-    await updateSpaceGroup(group)
+    await addSpaceToGroup(group)
   }
   updateLocalSpaces()
 }
-const updateSpaceGroup = (group) => {
+const addSpaceToGroup = (group) => {
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isSpaceCreator) {
     groupStore.addSpaceToGroup(group)
