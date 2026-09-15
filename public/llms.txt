@@ -154,7 +154,7 @@ Guides for every feature, one page each.
 - [Encryption](https://kinopio.club/help/encryption): Kinopio uses current best practices for securing your information, including encrypting data in-flight, salting/hashing user passwords, and not recording sensitive or private information in logs.
 - [Privacy Policy](https://kinopio.club/help/privacy-policy): Friends don't spy on friends.
 - [Refund Policy](https://kinopio.club/help/refund-policy): Kinopio is created by me, Pirijan, and I don't want your money unless you're happily using it.
-- [Reporting Bugs](https://kinopio.club/help/bug-bounties): Security and bug bounties
+- [Reporting Bugs](https://kinopio.club/help/security-bug-reporting): Security and bug bounties
 - [Security Bug Reporting](https://kinopio.club/help/security-bug-reporting): Security reports and bug bounties
 - [Terms of Service](https://kinopio.club/help/terms-of-service): I endeavor to treat everyone fairly, ethically, and honestly. But for the possible but unlikely bad actor, this boring legal document exists.
 - [Use Restrictions Policy](https://kinopio.club/help/use-restrictions-policy): Kinopio helps people understand themselves and be understood by sharing thoughts and ideas. But an expressive tool is also one that can be used maliciously.
