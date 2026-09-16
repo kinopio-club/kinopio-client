@@ -26,8 +26,8 @@ section.about-me
         span . I hope you enjoy using Kinopio and find it invaluable,
       p
         img.icon.signature(width="70" height="36" src="https://updates.kinopio.club/pages/about/signature.png" alt="signature")
-        .row
-          a(href="mailto:piri@kinopio.club") piri@kinopio.club
+        br
+        a(href="mailto:piri@kinopio.club") piri@kinopio.club
 </template>
 
 <style lang="stylus">
@@ -57,4 +57,6 @@ section.about-me
     &.dark
       --color1 #bd1f14
       --color2 #1f44bf
+  p:last-child
+    margin-bottom 10px
 </style>
