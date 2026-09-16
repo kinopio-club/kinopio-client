@@ -1,6 +1,5 @@
 ---
 title: 'Positional Zoom'
-metaDate: 'Jan 2, 2022'
 date: 2023-01-02
 category: New Stuff
 video: 'https://updates.kinopio.club/positional-zoom-thumbnail.mp4'

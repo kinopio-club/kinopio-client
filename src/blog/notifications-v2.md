@@ -1,6 +1,5 @@
 ---
 title: 'Notifications v2'
-metaDate: 'Mar 31, 2023'
 date: 2023-03-31
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/notifications-v2.png'

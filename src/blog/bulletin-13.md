@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 13'
-metaDate: 'July 25, 2021'
 date: 2021-07-25
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/9DNJnz13mv9CWvFg1tQFi/seal-1.jpg'

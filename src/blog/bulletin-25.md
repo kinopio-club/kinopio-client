@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 25'
-metaDate: 'Oct 25, 2022'
 date: 2022-10-25
 category: Bulletin
 image: 'https://updates.kinopio.club/barn.jpeg'

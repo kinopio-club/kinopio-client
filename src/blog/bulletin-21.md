@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 21'
-metaDate: 'Mar 21, 2022'
 date: 2022-03-21
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/vdxDMFzwAOuQJHmnpExFL/giphy480p.gif'

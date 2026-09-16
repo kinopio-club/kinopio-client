@@ -1,6 +1,5 @@
 ---
 title: 'Box Snapping'
-metaDate: 'Jan 11, 2022'
 date: 2023-01-11
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/box-snapping-thumb2.jpeg'

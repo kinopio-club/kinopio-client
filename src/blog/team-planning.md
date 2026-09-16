@@ -5,7 +5,6 @@ image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/WvzfgyzBKtiSRl9EHY14
 category: Guides
 
 date: 2022-11-01
-metaDate: 'Nov 1, 2022'
 
 userName: Ben Tsai
 userShortName: Ben

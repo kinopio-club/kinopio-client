@@ -1,6 +1,5 @@
 ---
 title: 'Following and Everyone Feeds'
-metaDate: 'Apr 21, 2024'
 date: 2024-04-21
 category: New Stuff
 image: 'https://updates.kinopio.club/following-thumb.webp'

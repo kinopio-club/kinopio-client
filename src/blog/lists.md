@@ -1,6 +1,5 @@
 ---
 title: 'Lists'
-metaDate: 'Apr 1, 2026'
 date: 2026-04-01
 category: New Stuff
 video: 'https://updates.kinopio.club/pages/blog/posts/lists/multiselect.mp4'

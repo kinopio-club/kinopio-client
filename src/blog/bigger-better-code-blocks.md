@@ -1,6 +1,5 @@
 ---
 title: 'Bigger, Better Code Blocks'
-metaDate: 'Oct 23, 2023'
 date: 2023-10-23
 category: New Stuff
 image: 'https://updates.kinopio.club/bigger-better-code-blocks-thumb.png'

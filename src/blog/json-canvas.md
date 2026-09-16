@@ -1,6 +1,5 @@
 ---
 title: 'Import/Export JSON Canvas'
-metaDate: 'Mar 14, 2024'
 date: 2024-03-14
 category: New Stuff
 description: Import and Export spaces in the open JSON Canvas format

@@ -5,7 +5,6 @@ image: 'https://d2w9rnfcy7mm78.cloudfront.net/2283407/original_4de889bf96797652a
 category: Guides
 
 date: 2022-10-25
-metaDate: 'Oct 25, 2022'
 
 userName: Ana Luisa Figueiredo
 userShortName: Ana Luisa

@@ -1,6 +1,5 @@
 ---
 title: 'The Journey to Bending Connections'
-metaDate: 'Aug 31, 2026'
 date: 2026-08-31
 category: New Stuff
 

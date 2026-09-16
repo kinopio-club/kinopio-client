@@ -1,6 +1,5 @@
 ---
 title: 'Connections to Comments'
-metaDate: 'Feb 13, 2023'
 date: 2023-02-13
 category: New Stuff
 image: 'https://updates.kinopio.club/transparent-connections-to-comments-small.png'

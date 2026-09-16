@@ -1,6 +1,5 @@
 ---
 title: 'Card Text Editor'
-metaDate: 'July 25, 2023'
 date: 2023-07-10
 category: New Stuff
 video: 'https://updates.kinopio.club/card-text-editor-thumb-small.mp4'

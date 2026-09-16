@@ -1,6 +1,5 @@
 ---
 title: 'Pen Pals Frame'
-metaDate: 'Jan 20, 2022'
 date: 2023-01-20
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/pen-pals-thumb.png'

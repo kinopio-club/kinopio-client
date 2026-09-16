@@ -5,7 +5,6 @@ image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/4beIktLVjg8NZOAAS1c2
 category: Guides
 
 date: 2022-10-25
-metaDate: 'Oct 25, 2022'
 
 userName: Arthur Guillot - Le Goff
 userShortName: Arthur

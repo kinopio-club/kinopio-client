@@ -5,7 +5,6 @@ image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/je8YRuTxdRCot6P3kdEE
 category: Guides
 
 date: 2022-10-25
-metaDate: 'Oct 25, 2022'
 
 
 userName: Pirijan, Kinopio Creator

@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 15'
-metaDate: 'Sept 13, 2021'
 date: 2021-09-13
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/5OsaAaMs7h5HC86xlplCX/front6.jpeg'

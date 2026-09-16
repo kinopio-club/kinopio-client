@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 18'
-metaDate: 'Nov 22, 2021'
 date: 2021-11-22
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/vtS6BrXjmh2WhOHt7NEdF/image.gif'

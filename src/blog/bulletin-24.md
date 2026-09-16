@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 24'
-metaDate: 'Sep 13, 2022'
 date: 2022-09-13
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/fCEgH6uF6g6cYnuZ9PdIs/wildbackberry-01.jpg'

@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 4'
-metaDate: 'Mar 10, 2021'
 date: 2021-03-10
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/u0A08VqqmK6CXPbGdbenX/original-db4687974297da479bfefa315ad6bdb0.png'

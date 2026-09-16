@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 7'
-metaDate: 'Apr 22, 2021'
 date: 2021-04-22
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/zglDAenUej4FCGvUw06Qe/cat.jpeg'

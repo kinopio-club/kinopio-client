@@ -1,6 +1,5 @@
 ---
 title: Welcome Friends
-metaDate: 'July 12, 2022'
 date: 2022-07-12
 category: New Stuff
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/zmcFSvLiYP8rCm9JqwOMK/garden-800px-1.jpg'

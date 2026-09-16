@@ -1,7 +1,6 @@
 ---
 title: Diary your Hobbies
 date: 2022-10-25
-metaDate: 'Oct 25, 2022'
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/lZpAVICJnOqNJ0H_4hNs7/maxresdefault.jpg'
 category: Guides
 

@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 19'
-metaDate: 'Jan 3, 2022'
 date: 2022-01-03
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/2YcIM5YPHUSJMCu6eUNdN/original-cba025fb0f0b2ee272ec280c0ff0c301.gif'

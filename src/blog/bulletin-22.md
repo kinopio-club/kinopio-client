@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 22'
-metaDate: 'Apr 25, 2022'
 date: 2022-04-25
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/ZGjGNNlFicYqW70fPNba9/FA60D326-B00F-493C-B971-401E136D7114.jpeg'

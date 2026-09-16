@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 26'
-metaDate: 'Nov 14, 2022'
 date: 2022-11-14
 category: Bulletin
 image: 'https://updates.kinopio.club/cup.gif'

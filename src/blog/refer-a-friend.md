@@ -1,6 +1,5 @@
 ---
 title: 'Refer a Friend'
-metaDate: 'Feb 20, 2023'
 date: 2023-02-20
 category: New Stuff
 image: 'https://updates.kinopio.club/refer-thumb.png'

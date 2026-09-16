@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 30'
-metaDate: 'May 22, 2023'
 date: 2023-05-22
 category: Bulletin
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/birds-eye-street.png'

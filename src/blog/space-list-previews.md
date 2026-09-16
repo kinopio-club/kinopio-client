@@ -1,6 +1,5 @@
 ---
 title: 'Space List Previews'
-metaDate: 'Feb 17, 2024'
 date: 2024-02-17
 category: New Stuff
 image: 'https://updates.kinopio.club/space-list-previews-thumb.webp'

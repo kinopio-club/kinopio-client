@@ -1,6 +1,5 @@
 ---
 title: 'Paint-Select Card and Line Options'
-metaDate: 'Apr 13, 2024'
 date: 2024-04-13
 category: New Stuff
 image: 'https://updates.kinopio.club/paint-select-card-and-line-options-thumb.webp'

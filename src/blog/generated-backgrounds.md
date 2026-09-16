@@ -1,6 +1,5 @@
 ---
 title: 'Generated Backgrounds'
-metaDate: 'Nov 10, 2023'
 date: 2023-11-10
 category: New Stuff
 image: 'https://updates.kinopio.club/generated-background-thumb.jpeg'

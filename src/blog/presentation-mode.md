@@ -1,6 +1,5 @@
 ---
 title: 'Presentation Mode'
-metaDate: 'Jan 3, 2022'
 date: 2023-01-03
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/presentation-mode-thumbnail.png'

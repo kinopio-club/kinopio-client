@@ -1,6 +1,5 @@
 ---
 title: 'New Templates'
-metaDate: 'Apr 4, 2026'
 date: 2026-04-04
 category: New Stuff
 image: 'https://updates.kinopio.club/pages/blog/posts/new-templates/1.webp'

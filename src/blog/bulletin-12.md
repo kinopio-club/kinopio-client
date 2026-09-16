@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 12'
-metaDate: 'July 5, 2021'
 date: 2021-07-05
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/WWSJm2I9K3W-ed5I2M9ZY/SunsetBlvdTopDown-1024x1024.jpg'

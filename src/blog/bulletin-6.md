@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 6'
-metaDate: 'Apr 9, 2021'
 date: 2021-04-09
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/D9us9Cx7bGPQZ4Nsm5RSz/engaged.jpeg'

@@ -1,6 +1,5 @@
 ---
 title: 'Magic Paint Select'
-metaDate: 'Apr 10, 2023'
 date: 2023-04-10
 category: New Stuff
 video: 'https://updates.kinopio.club/magic-paint-select-small.mp4'

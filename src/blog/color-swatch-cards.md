@@ -1,6 +1,5 @@
 ---
 title: 'Color Swatch Cards'
-metaDate: 'Jan 4, 2022'
 date: 2023-01-04
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/color-swatch-cards-2.png'

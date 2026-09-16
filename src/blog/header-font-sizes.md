@@ -1,6 +1,5 @@
 ---
 title: 'Header Font Sizes'
-metaDate: 'Jun 12, 2024'
 date: 2024-06-12
 category: New Stuff
 

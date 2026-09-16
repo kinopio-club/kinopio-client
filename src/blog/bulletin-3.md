@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 3'
-metaDate: 'Feb 24, 2021'
 date: 2021-02-24
 category: Bulletin
 image: 'https://kinopio-email.us-east-1.linodeobjects.com/anime-tea.gif'

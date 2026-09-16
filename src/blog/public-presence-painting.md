@@ -1,6 +1,5 @@
 ---
 title: 'Public Presence and Painting'
-metaDate: 'Jun 23, 2023'
 date: 2023-06-23
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/public-presence-painting.jpeg'

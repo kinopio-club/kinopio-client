@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 20'
-metaDate: 'Feb 9, 2022'
 date: 2022-02-09
 category: Bulletin
 image: 'https://pketh.org/images/2021/palms.jpeg'

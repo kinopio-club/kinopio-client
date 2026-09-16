@@ -1,6 +1,5 @@
 ---
 title: 'About Page'
-metaDate: 'Oct 14, 2025'
 date: 2025-10-14
 category: New Stuff
 

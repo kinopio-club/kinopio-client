@@ -1,6 +1,5 @@
 ---
 title: 'Dark Mode'
-metaDate: 'Jan 24, 2022'
 date: 2023-01-24
 category: New Stuff
 image: 'https://updates.kinopio.club/dark-mode-thumb-small.png'

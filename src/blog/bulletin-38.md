@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 38, Busytown'
-metaDate: 'May 06, 2026'
 date: 2026-04-06
 category: Bulletin
 image: 'https://kinopio-email.us-east-1.linodeobjects.com/39/view.webp'

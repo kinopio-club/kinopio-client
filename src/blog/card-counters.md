@@ -1,6 +1,5 @@
 ---
 title: 'Card Counters'
-metaDate: 'Jun 12, 2023'
 date: 2023-06-12
 category: New Stuff
 video: 'https://kinopio-blog.us-east-1.linodeobjects.com/card-counter-thumbnail.mp4'

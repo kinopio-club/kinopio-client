@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 16'
-metaDate: 'Oct 4, 2021'
 date: 2021-10-04
 category: Bulletin
 image: 'https://updates.kinopio.club/markdown-headings.gif'

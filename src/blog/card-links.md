@@ -1,6 +1,5 @@
 ---
 title: 'Card Links'
-metaDate: 'May 16, 2023'
 date: 2023-05-16
 category: New Stuff
 image: 'https://updates.kinopio.club/pretty-invites.png'

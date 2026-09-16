@@ -1,6 +1,5 @@
 ---
 title: 'Improved Connection Highlighting'
-metaDate: 'Sept 18, 2023'
 date: 2023-09-18
 category: New Stuff
 video: 'https://kinopio-updates.us-east-1.linodeobjects.com/connection-highlighting-thumb.mp4'

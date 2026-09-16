@@ -1,6 +1,5 @@
 ---
 title: 'Linked Space Previews'
-metaDate: 'Dec 5, 2023'
 date: 2023-12-05
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/linked-space-preview-thumbnail.webp'

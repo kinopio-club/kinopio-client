@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 1'
-metaDate: 'Jan 21, 2021'
 date: 2021-01-21
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/jEcZxfrM6eLwb32Wi9Nv3/painting.jpg'

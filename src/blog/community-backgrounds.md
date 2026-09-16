@@ -1,6 +1,5 @@
 ---
 title: 'Community Backgrounds'
-metaDate: 'May 16, 2023'
 date: 2023-05-16
 category: New Stuff
 video: 'https://updates.kinopio.club/community-backgrounds.mp4'

@@ -1,6 +1,5 @@
 ---
 title: 'Inbox Cards List'
-metaDate: 'Jan 6, 2022'
 date: 2023-01-06
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/inbox-cards-list-thumbnail-2.png'

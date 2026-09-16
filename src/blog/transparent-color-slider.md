@@ -1,6 +1,5 @@
 ---
 title: 'Transparent Color Slider'
-metaDate: 'Mar 9, 2023'
 date: 2023-03-09
 category: New Stuff
 video: 'https://updates.kinopio.club/transparent-color-slider.mp4'

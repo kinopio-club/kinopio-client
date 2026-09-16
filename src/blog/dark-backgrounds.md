@@ -1,6 +1,5 @@
 ---
 title: 'Dark Backgrounds'
-metaDate: 'July 3, 2023'
 date: 2023-07-03
 category: New Stuff
 video: 'https://kinopio-blog.us-east-1.linodeobjects.com/dark-backgrounds-thumbnail.mp4'

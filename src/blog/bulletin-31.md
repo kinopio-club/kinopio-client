@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 31'
-metaDate: 'Jun 28, 2023'
 date: 2023-06-31
 category: Bulletin
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/dog-pixel.jpg'

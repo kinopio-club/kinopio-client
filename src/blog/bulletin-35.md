@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 35'
-metaDate: 'Sep 4, 2024'
 date: 2024-09-04
 category: Bulletin
 image: 'https://cdn.kinopio.club/PLbO__574kK9BLmSgdizP/IMG-0267.webp'

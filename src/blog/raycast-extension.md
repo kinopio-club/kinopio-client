@@ -1,6 +1,5 @@
 ---
 title: 'Raycast Extension'
-metaDate: 'Jan 18, 2022'
 date: 2023-01-18
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/kinopio-inbox-1.png'

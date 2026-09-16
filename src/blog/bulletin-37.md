@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 37, Year-End Investor Report'
-metaDate: 'Dec 23, 2025'
 date: 2025-12-24
 category: Bulletin
 image: 'https://cdn.kinopio.club/8OP3YCyga-tcL0jxuaRbF/GuM-ixjXkAAwcVL.jpg'

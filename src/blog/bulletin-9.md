@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 9'
-metaDate: 'May 20, 2021'
 date: 2021-05-20
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/yTIvU8ey_0XfEXhLSwFxu/image.jpeg'

@@ -1,6 +1,5 @@
 ---
 title: 'Embed Any Site'
-metaDate: 'Jun 22, 2023'
 date: 2023-06-22
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/embed-any-site-thumbnail.png'

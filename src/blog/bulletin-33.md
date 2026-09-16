@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 33'
-metaDate: 'Nov 15, 2023'
 date: 2023-11-15
 category: Bulletin
 image: 'https://updates.kinopio.club/wizard-walk.jpeg'

@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 29'
-metaDate: 'Apr 1, 2023'
 date: 2023-04-01
 category: Bulletin
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/shoes-fabric.jpg'

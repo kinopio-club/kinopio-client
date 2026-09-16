@@ -1,6 +1,5 @@
 ---
 title: 'Server Issues and Performance Upgrades'
-metaDate: 'Apr 4, 2024'
 date: 2024-04-04
 category: New Stuff
 video: 'https://kinopio-blog.us-east-1.linodeobjects.com/anime-tape-reels.mp4'

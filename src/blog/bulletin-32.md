@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 32'
-metaDate: 'Sept 20, 2023'
 date: 2023-09-20
 category: Bulletin
 image: 'https://updates.kinopio.club/ambassador-space-thumb.png?a=1'

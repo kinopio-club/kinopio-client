@@ -1,6 +1,5 @@
 ---
 title: 'Card Dragging Performance Up'
-metaDate: 'Nov 22, 2023'
 date: 2023-11-22
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/please-wait.webp'

@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 11'
-metaDate: 'June 23, 2021'
 date: 2021-06-23
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/YmdB_Q4WgAIh6jGPukT6l/desk.jpeg'

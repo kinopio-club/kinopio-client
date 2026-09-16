@@ -1,6 +1,5 @@
 ---
 title: 'Tilt Cards'
-metaDate: 'Feb 23, 2024'
 date: 2024-02-23
 category: New Stuff
 image: 'https://updates.kinopio.club/tilt-cards-thumbnail.webp'

@@ -1,6 +1,5 @@
 ---
 title: 'Z-Toggle Zoom Out'
-metaDate: 'Jan 7, 2022'
 date: 2023-01-07
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/z-toggle-zoom-out-thumbnail.png'

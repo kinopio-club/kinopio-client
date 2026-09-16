@@ -1,6 +1,5 @@
 ---
 title: 'Offline Support'
-metaDate: 'Jan 23, 2024'
 date: 2024-01-23
 category: Bulletin
 image: 'https://pketh.org/images/2024/offline/ss1.png'

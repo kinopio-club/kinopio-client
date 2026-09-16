@@ -1,6 +1,5 @@
 ---
 title: 'Collaborator Pings'
-metaDate: 'Jun 18, 2024'
 date: 2024-06-18
 category: New Stuff
 video: 'https://updates.kinopio.club/pages/blog/posts/collaborator-pings/sonar-ping-thumb.mp4'

@@ -1,6 +1,5 @@
 ---
 title: 'Performance Up ~33%'
-metaDate: 'Mar 20, 2024'
 date: 2024-03-20
 category: New Stuff
 description: The latest Kinopio release brings ~33% faster interaction performance

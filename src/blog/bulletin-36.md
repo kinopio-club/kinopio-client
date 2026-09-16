@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 36'
-metaDate: 'Jan 17, 2025'
 date: 2025-01-17
 category: Bulletin
 image: 'https://cdn.kinopio.club/IuL2ghJrWJvhxK21mm1GC/original-2465ebc8353ff261a28a0127d7aa25e4.jpg'

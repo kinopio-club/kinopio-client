@@ -1,6 +1,5 @@
 ---
 title: 'Journal Date Images'
-metaDate: 'Apr 30, 2024'
 date: 2024-04-30
 category: New Stuff
 image: 'https://updates.kinopio.club/journal-date-images-thumbnail.webp'

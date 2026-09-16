@@ -1,6 +1,5 @@
 ---
 title: 'Making the Kinopio Source Code Public'
-metaDate: 'June 26, 2024'
 date: 2024-06-27
 category: New Stuff
 image: 'https://pketh.org/images/2024/oss/disk2.webp'

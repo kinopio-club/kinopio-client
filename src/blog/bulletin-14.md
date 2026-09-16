@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 14'
-metaDate: 'Aug 9, 2021'
 date: 2021-08-09
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/PFUTEPJQGiAfY0Sp1CU4U/original-0ee24c4ce25cf520a1c6b3120906891c.jpg'

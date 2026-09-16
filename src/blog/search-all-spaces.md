@@ -1,6 +1,5 @@
 ---
 title: 'Search All Spaces'
-metaDate: 'Mar 6, 2023'
 date: 2023-03-06
 category: New Stuff
 image: 'https://updates.kinopio.club/search-all-spaces-small.png'

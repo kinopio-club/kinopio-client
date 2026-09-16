@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 5'
-metaDate: 'Mar 25, 2021'
 date: 2021-03-25
 category: Bulletin
 image: https://us-east-1.linodeobjects.com/kinopio-uploads/CMSxgF8Nj3IZdR-EZP_VN/original-7b157da1176c9fb697d5cfd3ebabe427.jpg

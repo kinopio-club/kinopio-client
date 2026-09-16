@@ -1,6 +1,5 @@
 ---
 title: 'April Bug Fixes and Enhancements'
-metaDate: 'Apr 26, 2024'
 date: 2024-04-26
 category: New Stuff
 image: 'https://updates.kinopio.club/bug-fixes-april.webp'

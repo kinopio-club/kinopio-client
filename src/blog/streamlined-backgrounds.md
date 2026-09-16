@@ -1,6 +1,5 @@
 ---
 title: 'Streamlined Backgrounds'
-metaDate: 'Jan 29, 2022'
 date: 2023-01-29
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/streamlined-backgrounds-thumbnail.png'

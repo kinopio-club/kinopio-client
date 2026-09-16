@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 34'
-metaDate: 'Dec 30, 2023'
 date: 2023-12-30
 category: Bulletin
 image: 'https://updates.kinopio.club/33-1.webp'

@@ -1,6 +1,5 @@
 ---
 title: 'Draggable Labels'
-metaDate: 'Dec 1, 2023'
 date: 2023-12-01
 category: New Stuff
 image: 'https://updates.kinopio.club/drag-labels-thumbnail1.webp'

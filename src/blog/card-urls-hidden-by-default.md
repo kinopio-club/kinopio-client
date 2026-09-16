@@ -1,6 +1,5 @@
 ---
 title: 'Card URLs Hidden by Default'
-metaDate: 'Mar 17, 2023'
 date: 2023-03-17
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/card-urls-hidden-by-default.png'

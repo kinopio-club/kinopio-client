@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 27'
-metaDate: 'Jan 30, 2023'
 date: 2023-01-30
 category: Bulletin
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/original_4fb0dd85fd78d811605f59798d48eda5.jpg'

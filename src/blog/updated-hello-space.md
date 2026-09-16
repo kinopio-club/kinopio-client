@@ -1,6 +1,5 @@
 ---
 title: 'Updated Hello Space'
-metaDate: 'Apr 20, 2023'
 date: 2023-04-20
 category: Bulletin
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/hello-thumb6.webp'

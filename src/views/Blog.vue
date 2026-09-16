@@ -292,7 +292,7 @@ const badgeClasses = (post) => {
                 h2 {{ post.title }}
                 p(v-if="post.description") {{ post.description }}
                 p.post-meta.post-tag(v-if="post.category") {{ post.category }}
-                p.post-meta {{ post.metaDate }}
+                p.post-meta {{ utils.shortAbsoluteDate(post.date) }}
 
       //- post
       section(v-else)
@@ -306,7 +306,7 @@ const badgeClasses = (post) => {
             img.icon.updated(src="@/assets/updated.gif" alt="updated")
             p.post-meta-row
               span.badge.button-badge(v-if="currentPost.category" :class="badgeClasses(currentPost)") {{ currentPost.category }}
-              time.post-meta(:datetime="currentPost.date") {{ currentPost.metaDate }}
+              time.post-meta(:datetime="currentPost.date") {{ utils.shortAbsoluteDate(currentPost.date) }}
             hr
             //- guides credit the space's owner and embed it live
             template(v-if="currentPostIsGuide")

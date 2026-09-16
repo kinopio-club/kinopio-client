@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 17'
-metaDate: 'Oct 26, 2021'
 date: 2021-10-26
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/zBAxRD0Nf9a3Kq5EKUv_d/image.gif'

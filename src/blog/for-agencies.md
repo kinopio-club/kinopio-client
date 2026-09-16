@@ -1,6 +1,5 @@
 ---
 title: 'Case Study: Kinopio for Agencies'
-metaDate: 'Dec 10, 2025'
 date: 2025-12-10
 category: New Stuff
 image: 'https://updates.kinopio.club/pages/blog/posts/for-agencies/img4.jpg'

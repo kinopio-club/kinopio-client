@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 23'
-metaDate: 'July 11, 2022'
 date: 2022-07-11
 category: Bulletin
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/AM4GZUD6cgssQMLYHhE4m/image.jpeg'

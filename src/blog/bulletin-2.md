@@ -1,6 +1,5 @@
 ---
 title: 'Bulletin № 2'
-metaDate: 'Feb 10, 2021'
 date: 2021-02-10
 category: Bulletin
 image: 'https://kinopio-email.us-east-1.linodeobjects.com/winter-suburb-view.jpg'

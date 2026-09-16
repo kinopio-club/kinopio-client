@@ -1,6 +1,5 @@
 ---
 title: 'Compact Space Users List'
-metaDate: 'July 8, 2024'
 date: 2024-07-08
 category: New Stuff
 image: 'https://updates.kinopio.club/pages/blog/posts/compact-space-users/compact-space-users-list-thumb.webp'

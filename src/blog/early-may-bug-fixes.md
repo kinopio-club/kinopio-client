@@ -1,6 +1,5 @@
 ---
 title: 'Early May Bug Fixes and Enhancements'
-metaDate: 'May 14, 2024'
 date: 2024-05-14
 category: New Stuff
 image: 'https://updates.kinopio.club/pages/blog/posts/early-may-bug-fixes/ig-url-preview-card.webp'

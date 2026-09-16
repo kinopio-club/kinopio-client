@@ -1,6 +1,5 @@
 ---
 title: 'Journal Prompt of the Day'
-metaDate: 'Jun 9, 2023'
 date: 2023-06-09
 category: New Stuff
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/journal-prompt-of-the-day.png'

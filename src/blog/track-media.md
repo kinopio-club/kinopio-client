@@ -5,7 +5,6 @@ image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/NsD0a-_W9Fm0efAiN0Wq
 category: Guides
 
 date: 2022-10-25
-metaDate: 'Oct 25, 2022'
 
 userName: Kevin aka humdrum
 userShortName: humdrum

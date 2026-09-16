@@ -1,6 +1,5 @@
 ---
 title: 'Read-Only Invites'
-metaDate: 'Oct 12, 2023'
 date: 2023-10-12
 category: New Stuff
 image: 'https://updates.kinopio.club/share-invite-read-only-crop2.png?a=1'
