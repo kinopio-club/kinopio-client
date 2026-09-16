@@ -1,7 +1,7 @@
 ---
 title: Private Space Notes
 description: Have you ever felt the need for a handy place to work on some longer-form text associated with a space, or little private place draft a note before sharing it in a card?
-category: Advanced Use
+category: Advanced
 updated: 2026-09-03
 video: https://updates.kinopio.club/pages/help/posts/private-space-notes/big.mp4
 ---

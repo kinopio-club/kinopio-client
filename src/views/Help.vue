@@ -30,7 +30,7 @@ const categoryDetails = {
     index: 0,
     color: 'khaki'
   },
-  'advanced-use': {
+  advanced: {
     index: 1,
     color: '#b9a8ff'
   },
@@ -527,8 +527,8 @@ main.help-page-wrap
       background-color var(--basics)
     &.navigating
       background-color var(--navigating)
-    &.advanced-use
-      background-color  var(--advanced-use)
+    &.advanced
+      background-color  var(--advanced)
     &.collaboration
       background-color  var(--collaboration)
     &.importing-and-exporting
