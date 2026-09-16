@@ -832,7 +832,6 @@ const handlePasteEvent = async (event) => {
     const currentSpaceItemIds = cardStore.allIds.concat(boxStore.allIds, listStore.allIds)
     items = utils.removeOrphanedConnections(items, currentSpaceItemIds)
     await spaceStore.createSpaceItems(items)
-    const currentSpaceItemIds = cardStore.allIds.concat(boxStore.allIds, listStore.allIds)
     items = utils.removeOrphanedConnections(items, currentSpaceItemIds)
     // select new items
     await nextTick()
