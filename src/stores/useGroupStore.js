@@ -34,9 +34,15 @@ export const useGroupStore = defineStore('groups', {
       const user = group.users.find(user => user.id === userStore.id)
       return Boolean(user)
     },
+    // TEMP
     getCurrentSpaceGroup () {
       const spaceStore = useSpaceStore()
       return this.groups[spaceStore.groupId]
+    },
+    getCurrentSpaceGroups () {
+      const spaceStore = useSpaceStore()
+      const groups = spaceStore.groups || []
+      return groups.map(group => this.groups[group.id] || group)
     },
     getCurrentUserGroups () {
       const userStore = useUserStore()
@@ -110,10 +116,10 @@ export const useGroupStore = defineStore('groups', {
     async initializeGroups () {
       let groups = await cache.groups()
       groups = utils.denormalizeItems(groups)
-      this.restoreGroup(groups)
+      this.restoreGroups(groups)
       // remote groups restored in restoreRemoteUser
     },
-    restoreGroup (groups) {
+    restoreGroups (groups) {
       this.ids = []
       this.groups = {}
       const groupIds = []
@@ -128,21 +134,22 @@ export const useGroupStore = defineStore('groups', {
 
     // load
 
-    async loadGroup (space) {
+    async loadGroups (space) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const apiStore = useApiStore()
-      spaceStore.updateGroupMeta(space)
-      let group = space.group
-      if (!group) { return }
-      this.update(group)
-      const groupUser = this.getGroupUser({ userId: userStore.id })
-      if (!groupUser) { return }
-      try {
-        group = await apiStore.getGroup(group.id)
+      const groups = space.groups
+      if (!utils.arrayHasItems(groups)) { return }
+      for (const group of groups) {
         this.update(group)
-      } catch (error) {
-        console.error('🚒 loadGroup', error, group)
+        const groupUser = this.getGroupUser({ userId: userStore.id, groupId: group.id })
+        if (!groupUser) { continue }
+        try {
+          const remoteGroup = await apiStore.getGroup(group.id)
+          this.update(remoteGroup)
+        } catch (error) {
+          console.error('🚒 loadGroup', error, group)
+        }
       }
     },
 
@@ -219,7 +226,7 @@ export const useGroupStore = defineStore('groups', {
         globalStore.isLoadingGroups = true
         const groups = await apiStore.getUserGroups()
         if (groups) {
-          this.restoreGroup(groups)
+          this.restoreGroups(groups)
         }
       } catch (error) {
         console.error('🚒 updateWithRemote', error)
@@ -296,10 +303,19 @@ export const useGroupStore = defineStore('groups', {
       const body = { groupId: group.id, addedToGroupByUserId: user.id, spaceId: spaceStore.id }
       await apiStore.addToQueue({ name: 'addSpaceToGroup', body })
       await userNotificationStore.addSpaceToGroup(body)
+      let groups = spaceStore.groups
+      groups = groups.concat(group)
+      groups = uniqBy(groups, 'id')
+      spaceStore.updateGroupsLocal(groups)
     },
-    async removeSpaceFromGroup () {
+    async removeSpaceFromGroup (group) {
       const spaceStore = useSpaceStore()
-      await spaceStore.updateSpace({ groupId: null, addedToGroupByUserId: null })
+      const apiStore = useApiStore()
+      const body = { spaceId: spaceStore.id, groupId: group.id }
+      await apiStore.addToQueue({ name: 'removeSpaceFromGroup', body })
+      let groups = spaceStore.groups.filter(spaceGroup => spaceGroup.id !== group.id)
+      groups = uniqBy(groups, 'id')
+      spaceStore.updateGroupsLocal(groups)
     },
 
     // remove

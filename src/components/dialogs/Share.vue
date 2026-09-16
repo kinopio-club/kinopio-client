@@ -166,7 +166,7 @@ const removeSpaceGroup = (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup()
+    groupStore.removeSpaceFromGroup(group)
   } else {
     globalStore.addNotification({
       message: 'Only space creator, or group admin, can remove from group',

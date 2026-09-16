@@ -234,7 +234,7 @@ const removeSpaceGroup = (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup()
+    groupStore.removeSpaceFromGroup(group)
     updateLocalSpaces()
   } else {
     globalStore.addNotification({

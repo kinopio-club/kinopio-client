@@ -1792,7 +1792,7 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      groupId: null,
+      groups: [],
       note: ''
     }
   },
@@ -1803,7 +1803,6 @@ export default {
       'users',
       'collaborators',
       'collaboratorKey',
-      'groupId',
       'readOnlyKey'
     ]
     spacePrivateKeys.forEach(key => delete space[key])
@@ -1825,8 +1824,7 @@ export default {
     space.isTemplate = false
     space.previewImage = null
     space.previewThumbnailImage = null
-    space.groupId = null
-    space.group = null
+    space.groups = []
     space.createdAt = new Date()
     space.editedAt = new Date().toISOString()
     space.collaboratorKey = nanoid()
@@ -2069,6 +2067,7 @@ export default {
       }
       return card
     })
+    // space.groups = space.groups || []
     space = this.migrateConnectionTypes(space)
     return space
   },
