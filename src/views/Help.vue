@@ -408,9 +408,9 @@ const updateFilterOnSearchFocus = (event) => {
               muted
               playsinline
               aria-label="404 image"
-              poster="@/assets/pages/help/404-poster.webp"
+              poster="https://updates.kinopio.club/pages/help/404-poster.webp"
             )
-              source(src="@/assets/pages/help/404.webm")
+              source(src="https://updates.kinopio.club/pages/help/404.webm")
       FooterSitemap
   Footer
 </template>

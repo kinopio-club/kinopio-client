@@ -65,7 +65,7 @@ export default defineConfig(async ({ command, mode }) => {
     '/about',
     '/api',
     '/explore'
-  ].concat(helpRoutes).concat(blogRoutes)
+  ].concat(helpRoutes, blogRoutes)
   const dynamicRoutes = routes.concat(sitemapSpaces)
   // dev https certs (optional, local only)
   const certKeyPath = './.cert/key.pem'
@@ -184,18 +184,8 @@ export default defineConfig(async ({ command, mode }) => {
       // skip non-important build warnings
       rollupOptions: {
         output: {
-          // emit help post media and content chunks into help/ so the service
-          // worker globIgnores above can exclude them from the app precache
-          assetFileNames (assetInfo) {
-            const original = assetInfo.originalFileNames?.[0] || ''
-            if (original.includes('assets/pages/help/')) {
-              return 'help/assets/[name]-[hash][extname]'
-            }
-            if (original.includes('assets/pages/blog/')) {
-              return 'blog/assets/[name]-[hash][extname]'
-            }
-            return 'assets/[name]-[hash][extname]'
-          },
+          // emit help page and blog post chunks into help/ and blog/ so the
+          // service worker globIgnores above can exclude them from the app precache
           chunkFileNames (chunkInfo) {
             if (chunkInfo.facadeModuleId?.includes('/src/help/')) {
               return 'help/assets/[name]-[hash].js'
