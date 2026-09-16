@@ -262,7 +262,7 @@ const badgeClasses = (post) => {
       template(v-if="currentSlugIsRoot")
         section#hello
           p
-            img.icon.new(src="@/assets/pages/blog/new.gif" alt="new")
+            img.icon.new(src="@/assets/new.gif" alt="new")
             span in Kinopio, the thinking tool for building new ideas and solving hard problems. All posts are completely hand-written with zero AI.
           .row
             .button-wrap
@@ -303,7 +303,7 @@ const badgeClasses = (post) => {
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
                 span All Posts
             h1 {{ currentPost.title }}
-            img.icon.updated(src="@/assets/pages/blog/updated.gif" alt="updated")
+            img.icon.updated(src="@/assets/updated.gif" alt="updated")
             p.post-meta-row
               span.badge.button-badge(v-if="currentPost.category" :class="badgeClasses(currentPost)") {{ currentPost.category }}
               time.post-meta(:datetime="currentPost.date") {{ currentPost.metaDate }}
