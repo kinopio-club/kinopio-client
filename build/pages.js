@@ -146,21 +146,35 @@ const jsonFeed = (posts) => {
     }))
   }, null, 2)
 }
+const feeds = {
+  '/blog/feed.xml': { contentType: 'application/rss+xml', render: rssFeed },
+  '/blog/feed.json': { contentType: 'application/json', render: jsonFeed }
+}
 export const blogFeedsPlugin = () => {
   let isSSRBuild = false
   return {
     name: 'blog-feeds',
-    apply: 'build',
     enforce: 'post',
     configResolved (config) {
       isSSRBuild = Boolean(config.build.ssr)
+    },
+    // the feeds are build output, so dev would otherwise fall through to the spa
+    // and serve index.html at these urls. render them on the fly instead
+    configureServer (server) {
+      server.middlewares.use((req, res, next) => {
+        const feed = feeds[req.url.split('?')[0]]
+        if (!feed) { return next() }
+        res.setHeader('Content-Type', feed.contentType)
+        res.end(feed.render(blogPosts()))
+      })
     },
     generateBundle () {
       // vite-ssg builds twice, only the client build writes to dist
       if (isSSRBuild) { return }
       const posts = blogPosts()
-      this.emitFile({ type: 'asset', fileName: 'blog/feed.xml', source: rssFeed(posts) })
-      this.emitFile({ type: 'asset', fileName: 'blog/feed.json', source: jsonFeed(posts) })
+      Object.keys(feeds).forEach(url => {
+        this.emitFile({ type: 'asset', fileName: url.slice(1), source: feeds[url].render(posts) })
+      })
       console.log(`✓ Created blog feeds for ${posts.length} posts`)
     }
   }
