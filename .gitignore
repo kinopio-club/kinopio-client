@@ -20,7 +20,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
-/src/assets/pages/blog
+/src/assets/pages/
 
 # Local Services folder
 .netlify
