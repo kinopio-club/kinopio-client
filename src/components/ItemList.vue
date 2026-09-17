@@ -120,10 +120,7 @@ const selectSpace = () => {
 // space
 
 const isCurrentSpace = computed(() => props.space.id === spaceStore.id)
-const group = (groupId) => {
-  if (!groupId) { return }
-  return groupStore.getGroup(groupId)
-}
+const spaceGroups = computed(() => groupStore.getSpaceGroups(props.space))
 const previewImage = (space) => {
   if (!space.previewThumbnailImage) { return }
   return space.previewThumbnailImage + `?date=${globalStore.sessionDate}`
@@ -163,9 +160,9 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- preview image
     .preview-thumbnail-image-wrap(v-if="previewImage(props.space)")
       img.preview-thumbnail-image(:src="previewImage(props.space)" loading="lazy")
-    //- group
-    template(v-if="group(space.groupId)")
-      GroupLabel(:group="group(space.groupId)")
+    //- groups
+    template(v-for="group in spaceGroups" :key="group.id")
+      GroupLabel(:group="group")
     .badge.secondary {{ space.name }}
 
     //- complete all

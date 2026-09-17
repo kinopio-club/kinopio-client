@@ -240,6 +240,18 @@ export const useApiStore = defineStore('api', {
       }
     }, 500),
 
+    // spaces whose group membership has been changed locally but not yet
+    // confirmed by the server, so remote group values for them are stale
+    // getSpaceIdsWithPendingGroupChanges () {
+    //   const globalStore = useGlobalStore()
+    //   const operations = ['addSpaceToGroup', 'removeSpaceFromGroup']
+    //   const pending = sessionQueue.concat(globalStore.sendingQueue || [])
+    //   return pending
+    //     .filter(item => operations.includes(item.name))
+    //     .map(item => item.body?.spaceId)
+    //     .filter(spaceId => Boolean(spaceId))
+    // },
+
     async addToQueue ({ name, body, spaceId, allowNonMember }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()

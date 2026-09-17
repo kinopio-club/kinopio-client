@@ -14,6 +14,22 @@ import cache from '@/cache.js'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 
+// spaces can be in multiple groups
+const spaceGroups = (groupStore, space) => {
+  const spaceStore = useSpaceStore()
+  space = space || { groups: spaceStore.groups }
+  const groups = utils.spaceGroups(space)
+  return groups.map(group => groupStore.groups[group.id] || group)
+}
+// the first group the user is in, of the groups the space is in
+const spaceGroupUser = (groupStore, { userId, space }) => {
+  const groups = spaceGroups(groupStore, space)
+  for (const group of groups) {
+    const groupUser = group.users?.find(user => user.id === userId)
+    if (groupUser) { return groupUser }
+  }
+}
+
 export const useGroupStore = defineStore('groups', {
   state: () => ({
     ids: [],
@@ -27,22 +43,16 @@ export const useGroupStore = defineStore('groups', {
     },
     getIsCurrentSpaceGroupUser () {
       const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const groupId = spaceStore.groupId
-      const group = this.groups[groupId]
-      if (!group) { return }
-      const user = group.users.find(user => user.id === userStore.id)
+      const user = spaceGroupUser(this, { userId: userStore.id })
       return Boolean(user)
     },
-    // TEMP
-    getCurrentSpaceGroup () {
-      const spaceStore = useSpaceStore()
-      return this.groups[spaceStore.groupId]
-    },
     getCurrentSpaceGroups () {
-      const spaceStore = useSpaceStore()
-      const groups = spaceStore.groups || []
-      return groups.map(group => this.groups[group.id] || group)
+      return spaceGroups(this)
+    },
+    getCurrentSpaceGroupUsers () {
+      const groups = this.getCurrentSpaceGroups
+      const users = groups.flatMap(group => group.users || [])
+      return uniqBy(users, 'id')
     },
     getCurrentUserGroups () {
       const userStore = useUserStore()
@@ -58,12 +68,9 @@ export const useGroupStore = defineStore('groups', {
       return groupUserGroups
     },
     getGroupUsersWhoAddedCards () {
-      const spaceStore = useSpaceStore()
       const cardStore = useCardStore()
-      const groupId = spaceStore.groupId
-      const group = this.getGroup(groupId)
-      if (!group) { return [] }
-      const groupUserIds = group.users.map(user => user.id)
+      const groupUsers = this.getCurrentSpaceGroupUsers
+      if (!groupUsers.length) { return [] }
       const cards = cardStore.getAllCards
       if (!cards) { return }
       let userIds = []
@@ -75,7 +82,7 @@ export const useGroupStore = defineStore('groups', {
       userIds = uniq(userIds)
       userIds = userIds.filter(id => Boolean(id))
       userIds.forEach(id => {
-        const user = group.users.find(user => user.id === id)
+        const user = groupUsers.find(user => user.id === id)
         if (!user) { return }
         users.push(user)
       })
@@ -87,28 +94,32 @@ export const useGroupStore = defineStore('groups', {
     getGroup (id) {
       return this.groups[id]
     },
+    getSpaceGroups (space) {
+      return spaceGroups(this, space)
+    },
+    getSpaceGroupUser ({ userId, space }) {
+      return spaceGroupUser(this, { userId, space })
+    },
     getGroupUser ({ userId, space, groupId }) {
-      const spaceStore = useSpaceStore()
-      let group
-      if (groupId) {
-        group = this.getGroup(groupId)
-      } else {
-        const currentSpace = spaceStore.getSpaceAllState
-        space = space || currentSpace
-        group = this.getCurrentSpaceGroup
+      if (!groupId) {
+        return this.getSpaceGroupUser({ userId, space })
       }
+      const group = this.getGroup(groupId)
       if (!group) { return }
-      return group.users.find(user => user.id === userId)
+      return group.users?.find(user => user.id === userId)
     },
     getGroupUserIsAdmin ({ userId, space, groupId }) {
-      let groupUser
       if (groupId) {
-        const group = this.getGroup(groupId)
-        groupUser = group.users.find(user => user.id === userId)
-      } else {
-        groupUser = this.getGroupUser({ userId, space })
+        const groupUser = this.getGroupUser({ userId, groupId })
+        return groupUser?.role === 'admin'
       }
-      return groupUser?.role === 'admin'
+      // admin of any of the space's groups
+      const groups = spaceGroups(this, space)
+      const isAdmin = groups.find(group => {
+        const groupUser = group.users?.find(user => user.id === userId)
+        return groupUser?.role === 'admin'
+      })
+      return Boolean(isAdmin)
     },
 
     // init
@@ -138,7 +149,7 @@ export const useGroupStore = defineStore('groups', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const apiStore = useApiStore()
-      const groups = space.groups
+      const groups = utils.spaceGroups(space)
       if (!utils.arrayHasItems(groups)) { return }
       for (const group of groups) {
         this.update(group)
@@ -299,23 +310,25 @@ export const useGroupStore = defineStore('groups', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const userNotificationStore = useUserNotificationStore()
-      const user = userStore
-      const body = { groupId: group.id, addedToGroupByUserId: user.id, spaceId: spaceStore.id }
-      await apiStore.addToQueue({ name: 'addSpaceToGroup', body })
-      await userNotificationStore.addSpaceToGroup(body)
-      let groups = spaceStore.groups
+      const body = { groupId: group.id, addedToGroupByUserId: userStore.id, spaceId: spaceStore.id }
+      let groups = this.getCurrentSpaceGroups
       groups = groups.concat(group)
       groups = uniqBy(groups, 'id')
-      spaceStore.updateGroupsLocal(groups)
+      await spaceStore.updateGroupsLocal(groups)
+
+      await apiStore.addToQueue({ name: 'addSpaceToGroup', body })
+      await userNotificationStore.addSpaceToGroup(body)
     },
     async removeSpaceFromGroup (group) {
       const spaceStore = useSpaceStore()
       const apiStore = useApiStore()
       const body = { spaceId: spaceStore.id, groupId: group.id }
-      await apiStore.addToQueue({ name: 'removeSpaceFromGroup', body })
-      let groups = spaceStore.groups.filter(spaceGroup => spaceGroup.id !== group.id)
+      let groups = this.getCurrentSpaceGroups.filter(spaceGroup => spaceGroup.id !== group.id)
       groups = uniqBy(groups, 'id')
-      spaceStore.updateGroupsLocal(groups)
+      await spaceStore.updateGroupsLocal(groups)
+
+      console.log('removeSpaceGroup', groups)
+      await apiStore.addToQueue({ name: 'removeSpaceFromGroup', body })
     },
 
     // remove

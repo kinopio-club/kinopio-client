@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
+const emit = defineEmits(['closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
 
 const props = defineProps({
   shouldHidePin: Boolean,
@@ -99,7 +99,7 @@ const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 // current space
 
 const updateLocalSpaces = () => {
-  emit('updateLocalSpaces')
+  globalStore.triggerSpaceDetailsUpdateLocalSpaces()
 }
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
@@ -210,7 +210,7 @@ const currentUserIsGroupAdmin = (group) => {
   })
 }
 const toggleSpaceGroup = async (group) => {
-  const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
+  const shouldRemoveSpaceGroup = spaceGroups.value.find(spaceGroup => spaceGroup.id === group.id)
   if (shouldRemoveSpaceGroup) {
     await removeSpaceGroup(group)
   } else {
@@ -218,11 +218,10 @@ const toggleSpaceGroup = async (group) => {
   }
   updateLocalSpaces()
 }
-const addSpaceToGroup = (group) => {
+const addSpaceToGroup = async (group) => {
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isSpaceCreator) {
-    groupStore.addSpaceToGroup(group)
-    updateLocalSpaces()
+    await groupStore.addSpaceToGroup(group)
   } else {
     globalStore.addNotification({
       message: 'Only space creator can assign to group',
@@ -230,12 +229,11 @@ const addSpaceToGroup = (group) => {
     })
   }
 }
-const removeSpaceGroup = (group) => {
+const removeSpaceGroup = async (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup(group)
-    updateLocalSpaces()
+    await groupStore.removeSpaceFromGroup(group)
   } else {
     globalStore.addNotification({
       message: 'Only space creator, or group admin, can remove from group',

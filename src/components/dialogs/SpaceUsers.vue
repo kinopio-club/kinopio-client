@@ -48,7 +48,7 @@ const updateDialogHeight = async () => {
 
 const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spaceIsOpen = computed(() => spaceStore.getSpaceIsOpen)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
 
 // users
 
@@ -104,10 +104,11 @@ dialog.narrow.space-users(
       @selectUser="toggleUserDetails"
       :showCollaboratorActions="currentUserCanEditSpace"
     )
-  section(v-if="spaceGroup")
+  section(v-if="spaceGroups.length")
     .row
       p
-        GroupLabel(:group="spaceGroup")
+        template(v-for="spaceGroup in spaceGroups" :key="spaceGroup.id")
+          GroupLabel(:group="spaceGroup")
         span Group Members
   section.title-section(v-if="contributors.length")
     p Non-member contributors

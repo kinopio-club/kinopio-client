@@ -1715,6 +1715,11 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
+  // spaces can be in multiple groups
+  spaceGroups (space) {
+    if (!this.arrayHasItems(space?.groups)) { return [] }
+    return space.groups.filter(group => Boolean(group?.id))
+  },
 
   // sync
 

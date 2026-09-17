@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import privacy from '@/data/privacy.js'
@@ -12,6 +13,7 @@ import utils from '@/utils.js'
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -36,7 +38,7 @@ const updateDialogHeight = async () => {
 }
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentSpaceIsInGroup = computed(() => spaceStore.groupId)
+const currentSpaceIsInGroup = computed(() => Boolean(groupStore.getCurrentSpaceGroups.length))
 const triggerSignUpOrInIsVisible = () => {
   globalStore.closeAllDialogs()
   globalStore.triggerSignUpOrInIsVisible()

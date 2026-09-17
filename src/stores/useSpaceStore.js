@@ -114,9 +114,7 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceGroupUsers () {
       const groupStore = useGroupStore()
-
-      const group = groupStore.getCurrentSpaceGroup
-      return group?.users || []
+      return groupStore.getCurrentSpaceGroupUsers
     },
 
     getSpaceAndGroupMembers () {
@@ -1020,9 +1018,7 @@ export const useSpaceStore = defineStore('space', {
     },
     async updateGroupsLocal (groups) {
       this.groups = groups
-      const space = this.getSpaceAllState
-      await cache.saveSpace(space)
-      console.log('🗺️🗺️🗺️🗺️🗺️', space.groups, groups)
+      await cache.saveSpace(this.getSpaceAllState)
     },
     async updateSpaceEditedAt () {
       const userStore = useUserStore()

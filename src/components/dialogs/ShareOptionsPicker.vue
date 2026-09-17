@@ -23,7 +23,11 @@ const emit = defineEmits(['closeDialogs', 'select'])
 const props = defineProps({
   visible: Boolean,
   inviteType: String,
-  group: Object,
+  groups: {
+    type: Array,
+    default: () => []
+  },
+  groupId: String,
   randomUser: Object
 })
 
@@ -45,21 +49,26 @@ const updateDialogHeight = async () => {
 }
 
 const spaceIsPublic = computed(() => spaceStore.getSpaceIsPublic)
+// a space can be in multiple groups, so each one gets its own invite option
 const inviteStates = computed(() => {
-  let value = invite.privateSpaceStates()
+  let states = invite.privateSpaceStates()
   if (spaceIsPublic.value) {
-    value = invite.publicSpaceStates()
+    states = invite.publicSpaceStates()
   }
-  if (!props.group) {
-    value = value.filter(item => item.type !== 'group')
-  }
-  return value
+  return states.flatMap(inviteState => {
+    if (inviteState.type !== 'group') { return [inviteState] }
+    return props.groups.map(group => ({ ...inviteState, group }))
+  })
 })
 const isActive = (inviteState) => {
-  return inviteState.type === props.inviteType
+  if (inviteState.type !== props.inviteType) { return }
+  if (inviteState.type === 'group') {
+    return inviteState.group.id === props.groupId
+  }
+  return true
 }
 const select = (inviteState) => {
-  emit('select', inviteState.type)
+  emit('select', { type: inviteState.type, groupId: inviteState.group?.id })
   emit('closeDialogs')
 }
 </script>
@@ -68,9 +77,9 @@ const select = (inviteState) => {
 dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
     ul.results-list
-      template(v-for="(inviteState in inviteStates")
+      template(v-for="inviteState in inviteStates" :key="inviteState.type + (inviteState.group?.id || '')")
         li(:class="{ active: isActive(inviteState) }" @click.left="select(inviteState)")
-          InviteLabel(:inviteType="inviteState.type" :group="props.group" :randomUser="randomUser")
+          InviteLabel(:inviteType="inviteState.type" :group="inviteState.group" :randomUser="randomUser")
           .row.description(v-if="inviteState.description")
             span {{ inviteState.description }}
   //- tips

@@ -75,10 +75,8 @@ const state = reactive({
 
 const init = async () => {
   closeDialogs()
-  if (!state.spaces.length) {
-    updateLocalSpaces()
-    updateHeights()
-  }
+  await updateLocalSpaces()
+  updateHeights()
   await updateWithRemoteSpaces()
   updateHeights()
   spaceStore.updateSpacePreviewImage()
@@ -170,9 +168,9 @@ const filteredSpaces = computed(() => {
       return !isHidden
     })
   }
-  // filter by user
+  // filter by group
   if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
-    spaces = spaces.filter(space => space.groupId === dialogSpaceFilterByGroup.value.id)
+    spaces = spaces.filter(space => spaceIsInGroup(space, dialogSpaceFilterByGroup.value.id))
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
@@ -214,23 +212,34 @@ const toggleSpaceFiltersIsVisible = () => {
 
 // sort by groups
 
+const spaceIsInGroup = (space, groupId) => {
+  const groups = utils.spaceGroups(space)
+  return Boolean(groups.find(group => group.id === groupId))
+}
 const spaceGroupsByAlphabetical = (spaces) => {
-  const groups = groupStore.getAllGroups
-  const spaceGroups = []
+  const allGroups = groupStore.getAllGroups
+  let spaceGroups = []
   spaces.forEach(space => {
-    if (!space.groupId) { return }
-    const isPrevGroup = spaceGroups.find(spaceGroup => spaceGroup.id === space.groupId)
-    if (isPrevGroup) { return }
-    const group = groups.find(group => group.id === space.groupId)
-    spaceGroups.push(group)
+    utils.spaceGroups(space).forEach(spaceGroup => {
+      const group = allGroups.find(group => group.id === spaceGroup.id) || spaceGroup
+      spaceGroups.push(group)
+    })
   })
+  spaceGroups = uniqBy(spaceGroups, 'id')
   return utils.sortByAlphabetical(spaceGroups, 'name')
 }
+// spaces in multiple groups are listed under their first group only
 const sortByGroups = (spaces, groups) => {
-  const spacesWithGroups = groups.flatMap(group =>
-    spaces.filter(space => space.groupId === group.id)
-  )
-  const spacesWithoutGroups = spaces.filter(space => !space.groupId)
+  const sortedSpaceIds = []
+  const spacesWithGroups = groups.flatMap(group => {
+    const groupSpaces = spaces.filter(space => {
+      if (sortedSpaceIds.includes(space.id)) { return }
+      return spaceIsInGroup(space, group.id)
+    })
+    groupSpaces.forEach(space => sortedSpaceIds.push(space.id))
+    return groupSpaces
+  })
+  const spacesWithoutGroups = spaces.filter(space => !sortedSpaceIds.includes(space.id))
   return [...spacesWithGroups, ...spacesWithoutGroups]
 }
 
@@ -322,6 +331,15 @@ const removeSpaceFromSpaces = (spaceId) => {
 const updateLocalSpaces = async () => {
   if (!props.visible) { return }
   let cacheSpaces = await cache.getAllSpaces()
+  const currentSpace = spaceStore.getSpaceAllState // use current space state to sidestep cache race conditions
+  cacheSpaces = cacheSpaces.map(space => {
+    const isCurrentSpace = currentSpace.id === space.id
+    if (isCurrentSpace) {
+      return currentSpace
+    } else {
+      return space
+    }
+  })
   cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, userStore.getUserAllState)
   state.spaces = cacheSpaces
 }
@@ -359,7 +377,7 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
       if (isCached) {
         cacheSpaceIds = cacheSpaceIds.filter(id => id !== remoteSpace.id)
         const updates = {}
-        const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
+        const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groups', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
         metaKeys.forEach(key => {
           updates[key] = remoteSpace[key]
         })
@@ -382,7 +400,7 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
 <template lang="pug">
 dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible" @click.left="closeDialogs" ref="dialogElement" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned, 'back-button-is-visible': backButtonIsVisible}")
   section
-    SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @removeSpaceId="removeSpaceFromSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
+    SpaceDetailsInfo(@removeSpaceId="removeSpaceFromSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
     .row.title-row
       div

@@ -12,7 +12,10 @@ const emit = defineEmits(['selectGroup'])
 
 const props = defineProps({
   groups: Array,
-  selectedGroups: Array,
+  selectedGroups: {
+    type: Array,
+    default: () => []
+  },
   groupDetailsIsVisibleForGroupId: String
 })
 const state = reactive({
@@ -26,7 +29,7 @@ const selectGroup = (event, group) => {
 const groupIsSelected = (group) => {
   if (!group) { return }
   if (!props.selectedGroups.length) { return }
-  return props.selectedGroups.find(selectedGroup => selectedGroup.id === group.id)
+  return Boolean(props.selectedGroups.find(selectedGroup => selectedGroup.id === group.id))
 }
 const groupDetailsIsVisible = (group) => {
   return group.id === props.groupDetailsIsVisibleForGroupId

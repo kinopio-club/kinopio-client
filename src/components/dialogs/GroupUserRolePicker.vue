@@ -19,7 +19,8 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
-  user: Object
+  user: Object,
+  group: Object
 })
 const state = reactive({
   dialogHeight: null,
@@ -53,8 +54,6 @@ const updateIsPositionBottom = async () => {
   state.isPositionBottom = dialogIsBelowViewport
 }
 
-const currentSpaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-
 const roles = computed(() => {
   return groupUserRoles.states()
 })
@@ -73,7 +72,8 @@ const roleIsMember = (role) => {
 const checkIsRemovingSoleAdminError = (role) => {
   if (props.user.role === 'member') { return }
   if (role.name === 'admin') { return }
-  const groupAdmins = currentSpaceGroup.value.users.filter(user => user.role === 'admin')
+  const groupUsers = props.group?.users || []
+  const groupAdmins = groupUsers.filter(user => user.role === 'admin')
   if (groupAdmins.length > 1) { return }
   state.error.isRemovingSoleAdmin = true
   return true
@@ -82,9 +82,10 @@ const updateRole = (role) => {
   if (checkIsRemovingSoleAdminError(role)) {
     return
   }
+  if (!props.group) { return }
   const update = {
     userId: props.user.id,
-    groupId: currentSpaceGroup.value.id,
+    groupId: props.group.id,
     role: role.name
   }
   groupStore.updateUserRole(update)
