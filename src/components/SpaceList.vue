@@ -391,13 +391,6 @@ const selectItemFromFilter = () => {
   selectSpace(null, space)
 }
 
-// group
-
-const group = (groupId) => {
-  if (!groupId) { return }
-  return groupStore.getGroup(groupId)
-}
-
 // preview image
 
 const previewImage = (space) => {
@@ -477,9 +470,10 @@ span.space-list-wrap
             template(v-if="!props.hidePreviewImage")
               .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide, 'full-size': props.previewImageIsFullSize}")
                 img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
-            //- group
-            template(v-if="group(space.groupId) && props.showSpaceGroups")
-              GroupLabel(:group="group(space.groupId)")
+            //- groups
+            template(v-if="space.groups?.length && props.showSpaceGroups")
+              template(v-for="group in space.groups")
+                GroupLabel(:group="group")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
             //- today
