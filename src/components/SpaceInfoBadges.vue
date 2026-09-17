@@ -12,7 +12,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const props = defineProps({
-  spaceGroup: Object,
+  spaceGroups: Array,
   visible: Boolean
 })
 
@@ -21,7 +21,7 @@ const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
 const showInExplore = computed(() => spaceStore.showInExplore)
 const isTemplate = computed(() => spaceStore.isTemplate)
 const isHidden = computed(() => {
-  return isSpaceMember.value && !showInExplore.value && !isTemplate.value && !props.spaceGroup
+  return isSpaceMember.value && !showInExplore.value && !isTemplate.value && !props.spaceGroups.length
 })
 const toggleGroupSpaceFilter = (group) => {
   globalStore.triggerToggleGroupSpaceFilter(group)
@@ -43,13 +43,13 @@ const toggleGroupSpaceFilter = (group) => {
     img.icon.templates(src="@/assets/templates.svg")
     span Template
 
-  GroupLabel(
-    v-if="props.spaceGroup"
-    :group="props.spaceGroup"
-    :showName="true"
-    :isButton="isSpaceMember"
-    @selectGroup="toggleGroupSpaceFilter"
-  )
+  template(v-for="group in spaceGroups")
+    GroupLabel(
+      :group="group"
+      :showName="true"
+      :isButton="isSpaceMember"
+      @selectGroup="toggleGroupSpaceFilter"
+    )
 </template>
 
 <style lang="stylus">

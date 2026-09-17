@@ -22,7 +22,7 @@ const emit = defineEmits(['selectGroup', 'closeDialogs'])
 const props = defineProps({
   visible: Boolean,
   groups: Array,
-  selectedGroup: Object
+  selectedGroups: Array
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -91,7 +91,7 @@ dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="clos
       AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   //- groups list
   section.results-section.results-section-border-top(v-if="props.groups.length")
-    GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
+    GroupList(:groups="props.groups" :selectedGroups="props.selectedGroups" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
 </template>

@@ -202,7 +202,7 @@ const handleEnterKey = (event) => {
 // group
 
 const userGroups = computed(() => groupStore.getCurrentUserGroups)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
 const currentUserIsGroupAdmin = (group) => {
   return groupStore.getGroupUserIsAdmin({
     userId: userStore.id,
@@ -292,14 +292,14 @@ template(v-if="isSpaceMember")
         .button-wrap
           .segmented-buttons
             //- Group
-            button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+            button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroups.length}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
               img.icon.group(src="@/assets/group.svg")
             //- Template
             button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
               img.icon.templates(src="@/assets/templates.svg")
             //- Favorite
             FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-          AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+          AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroups="spaceGroups" @closeDialogs="closeDialogs")
       template(v-else)
         //- Favorite
         FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -323,7 +323,7 @@ SpaceOptions(
   @removeSpaceId="removeSpaceId"
 )
 
-SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
+SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroups="spaceGroups")
 ItemDetailsDebug(:item="currentSpace")
 </template>
 

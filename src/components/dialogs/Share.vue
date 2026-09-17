@@ -205,7 +205,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           GroupLabel(v-if="spaceGroup" :group="spaceGroup" :showName="true")
           template(v-else)
             span Add to Group
-        AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+        AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroups="spaceGroups" @closeDialogs="closeDialogs")
 
       //- Invite
       ShareOptions(@closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible" @selectGroup="selectGroup")
