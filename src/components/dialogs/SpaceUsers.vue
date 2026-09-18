@@ -107,9 +107,9 @@ dialog.narrow.space-users(
   section(v-if="spaceGroups.length")
     .row
       p
+        span Group Members{{' '}}
         template(v-for="spaceGroup in spaceGroups" :key="spaceGroup.id")
-          GroupLabel(:group="spaceGroup")
-        span Group Members
+          GroupLabel(:group="spaceGroup" :showName="true")
   section.title-section(v-if="contributors.length")
     p Non-member contributors
   section.results-section(v-if="contributors.length")
