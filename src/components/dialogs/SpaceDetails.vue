@@ -331,15 +331,6 @@ const removeSpaceFromSpaces = (spaceId) => {
 const updateLocalSpaces = async () => {
   if (!props.visible) { return }
   let cacheSpaces = await cache.getAllSpaces()
-  const currentSpace = spaceStore.getSpaceAllState // use current space state to sidestep cache race conditions
-  cacheSpaces = cacheSpaces.map(space => {
-    const isCurrentSpace = currentSpace.id === space.id
-    if (isCurrentSpace) {
-      return currentSpace
-    } else {
-      return space
-    }
-  })
   cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, userStore.getUserAllState)
   state.spaces = cacheSpaces
 }

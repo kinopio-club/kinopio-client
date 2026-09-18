@@ -1018,7 +1018,7 @@ export const useSpaceStore = defineStore('space', {
     },
     async updateGroupsLocal (groups) {
       this.groups = groups
-      await cache.saveSpace(this.getSpaceAllState)
+      await cache.updateSpace('groups', groups, this.id)
     },
     async updateSpaceEditedAt () {
       const userStore = useUserStore()
