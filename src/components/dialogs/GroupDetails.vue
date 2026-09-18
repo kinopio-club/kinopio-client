@@ -173,28 +173,16 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
         GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible" :isBackgroundColor="true")
       template(v-else)
         p {{props.group.emoji}} {{props.group.name}}
-    //- invite
     .row
+      //- remove
+      button.danger(v-if="currentUserIsGroupAdmin" @click="toggleRemoveGroupConfirmationIsVisible" :class="{active: state.removeGroupConfirmationIsVisible}")
+        img.icon(src="@/assets/remove.svg")
+      //- invite
       button(@click.left="copyInviteUrl")
         img.icon.copy(src="@/assets/copy.svg")
         span Copy Group Invite Link
-    ItemDetailsDebug(:item="props.group")
-
-  UserList(
-    :users="groupUsers"
-    :selectedUsers="[selectedUser]"
-    @selectUser="toggleUserDetails"
-    :isClickable="true"
-    :showGroupUserActions="true"
-    :group="props.group"
-    @childDialogIsVisible="updateChildDialogIsVisible"
-  )
-  section(v-if="currentUserIsGroupAdmin")
-    .row(v-if="!state.removeGroupConfirmationIsVisible")
-      button.danger.small-button(@click="toggleRemoveGroupConfirmationIsVisible")
-        img.icon(src="@/assets/remove.svg")
-        span Remove Group
-    template(v-if="state.removeGroupConfirmationIsVisible")
+    //- remove confirmation
+    section.subsection(v-if="state.removeGroupConfirmationIsVisible")
       p
         span.badge.danger Permanently delete group?
       p
@@ -206,9 +194,23 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
         button.danger(@click.left="deleteGroupPermanent")
           img.icon(src="@/assets/remove.svg")
           span Delete Group
-          Loader(:visible="state.loading.deleteGroupPermanent")
-    .row(v-if="state.unknownServerError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      p(v-if="state.loading.deleteGroupPermanent")
+        Loader(:visible="true")
+      .row(v-if="state.unknownServerError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    //- debug
+    ItemDetailsDebug(:item="props.group")
+  //- members
+  section.results-section.results-section-border-top
+    UserList(
+      :users="groupUsers"
+      :selectedUsers="[selectedUser]"
+      @selectUser="toggleUserDetails"
+      :isClickable="true"
+      :showGroupUserActions="true"
+      :group="props.group"
+      @childDialogIsVisible="updateChildDialogIsVisible"
+    )
 </template>
 
 <style lang="stylus">
@@ -220,7 +222,4 @@ dialog.group-details
     margin-bottom 0
   .search-wrap
     padding-top 6px
-  .user-list,
-  .user-list + section
-    border-top 1px solid var(--primary-border)
 </style>
