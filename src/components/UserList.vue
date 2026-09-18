@@ -347,7 +347,6 @@ const removeGroupUser = async (event, user) => {
 
         //- group user actions
         .row.actions-row(v-if="props.showGroupUserActions && isOptionsIsVisibleForUser(user)")
-          GroupLabel(v-if="groupUser(user)" :group="userGroup(user)")
           //- role
           .button-wrap
             button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin(user)")
