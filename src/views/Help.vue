@@ -386,7 +386,7 @@ const updateFilterOnSearchFocus = (event) => {
                       span {{ page.title }}
         //- post
         article
-          p(v-if="pageContent")
+          div(v-if="pageContent")
             a.category-name(href="/help/#nav")
               .badge.secondary.button-badge
                   img.icon.left-arrow(src="@/assets/down-arrow.svg")
