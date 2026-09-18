@@ -475,7 +475,7 @@ span.space-list-wrap
               .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide, 'full-size': props.previewImageIsFullSize}")
                 img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
             //- groups
-            template(v-if="props.showSpaceGroups")
+            .group-labels(v-if="props.showSpaceGroups")
               template(v-for="group in spaceGroups(space)" :key="group.id")
                 GroupLabel(:group="group")
             //- template category
@@ -506,6 +506,15 @@ span.space-list-wrap
   position relative
 
   .space-list
+    .group-labels
+      display flex
+      flex-wrap wrap
+      flex-shrink 0
+      max-width 98px
+      margin-right 6px
+      gap 2px
+      .group-badge
+        margin 0
     .inline-badge
       margin-left 0
       flex none
