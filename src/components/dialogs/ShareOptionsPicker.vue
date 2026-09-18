@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import InviteLabel from '@/components/InviteLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import invite from '@/data/invite.js'
 
@@ -74,14 +75,17 @@ const select = (inviteState) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.share-options-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
     ul.results-list
       template(v-for="inviteState in inviteStates" :key="inviteState.type + (inviteState.group?.id || '')")
         li(:class="{ active: isActive(inviteState) }" @click.left="select(inviteState)")
           InviteLabel(:inviteType="inviteState.type" :group="inviteState.group" :randomUser="randomUser")
           .row.description(v-if="inviteState.description")
-            span {{ inviteState.description }}
+            span(v-if="inviteState.type === 'group'")
+              GroupLabel(:group="inviteState.group" :showName="true")
+              span {{ inviteState.description }}
+            span(v-else) {{ inviteState.description }}
   //- tips
   section
     p
@@ -89,7 +93,7 @@ dialog.narrow.invite-picker(v-if="props.visible" :open="props.visible" @click.le
 </template>
 
 <style lang="stylus">
-dialog.invite-picker
+dialog.share-options-picker
   overflow auto
   .results-section
     padding-top 4px
