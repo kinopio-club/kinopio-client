@@ -11,7 +11,6 @@ import User from '@/components/User.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import InviteToGroup from '@/components/InviteToGroup.vue'
 import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 
@@ -87,6 +86,23 @@ const updateGroup = (update) => {
   groupStore.updateGroup(update)
 }
 
+// invite
+
+const copyInviteUrl = async (event) => {
+  globalStore.clearNotificationsWithPosition()
+  const inviteUrl = groupStore.getGroupInviteUrl(props.group)
+  console.log(inviteUrl, props.group)
+  const position = utils.cursorPositionInPage(event)
+  console.info('🍇 group invite url', inviteUrl)
+  try {
+    await navigator.clipboard.writeText(inviteUrl)
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyInviteUrl', error, inviteUrl)
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+
 // select user
 
 const groupUsers = computed(() => {
@@ -151,13 +167,18 @@ const deleteGroupPermanent = async () => {
 dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   //- group info
   section(:style="{backgroundColor: props.group.color}")
+    //- info
     .row
       template(v-if="currentUserIsGroupAdmin")
         GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible" :isBackgroundColor="true")
       template(v-else)
         p {{props.group.emoji}} {{props.group.name}}
+    //- invite
+    .row
+      button(@click.left="copyInviteUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Group Invite Link
     ItemDetailsDebug(:item="props.group")
-  InviteToGroup(:visible="isGroupUser" :group="props.group" @closeDialogs="closeDialogs")
 
   UserList(
     :users="groupUsers"
