@@ -729,11 +729,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 //-   //- (v-if="currentSpaceIsTemplate")
                 //-   img.icon.templates(src="@/assets/templates.svg")
 
-                //- groups
-                template(v-if="spaceGroups.length")
-                  .label-badge.group-label-badge(v-for="spaceGroup in spaceGroups")
-                    GroupLabel(:group="spaceGroup")
-
                 //- read only badge
                 .label-badge(v-if="!userCanEditSpace" title="You can only read this space")
                   span(:class="{'invisible': state.readOnlyJiggle}")
@@ -752,6 +747,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 .label-badge.danger(v-if="currentSpaceIsRemoved" title="Space is removed")
                   span
                     img.icon.remove(src="@/assets/remove.svg")
+                //- groups
+                template(v-if="spaceGroups.length")
+                  .label-badge.group-label-badge(v-for="spaceGroup in spaceGroups")
+                    GroupLabel(:group="spaceGroup")
 
               //- space status loader
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
