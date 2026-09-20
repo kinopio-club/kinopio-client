@@ -92,7 +92,7 @@ dialog.narrow.space-users(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section.title-section
-    p Users Who Can Edit This Space
+    p Space Users
     p.badge.success(v-if="spaceIsOpen")
       img.icon.open(src="@/assets/open.svg")
       span Space privacy is Open, so anyone can leave comments
@@ -107,7 +107,7 @@ dialog.narrow.space-users(
   section(v-if="spaceGroups.length")
     .row
       p
-        span Group Members{{' '}}
+        //- span Group Members in{{' '}}
         template(v-for="spaceGroup in spaceGroups" :key="spaceGroup.id")
           GroupLabel(:group="spaceGroup" :showName="true")
   section.title-section(v-if="contributors.length")
