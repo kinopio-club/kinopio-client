@@ -66,7 +66,9 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  unsubscribes()
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const emit = defineEmits(['selectUser', 'childDialogIsVisible', 'closeDialog', 'focusNextList'])

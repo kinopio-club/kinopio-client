@@ -201,7 +201,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   template(v-if="spaceIsRemote")
     section
       //- Group Picker
-      .row.button-wrap.group-button(v-if="isSpaceMember")
+      .row.button-wrap(v-if="isSpaceMember")
         button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
           img.icon.group(src="@/assets/group.svg")
           template(v-if="spaceGroups.length")
@@ -257,6 +257,16 @@ dialog.share
       background-color var(--danger-background)
   .description
     margin-top 3px
+  .group-button
+    display flex
+    flex-wrap wrap
+    gap 4px
+    align-items center
+    .group-badge,
+    .group-label
+    > span
+      margin 0
+
   dialog.user-details
     left initial
     right calc(100% - 20px)

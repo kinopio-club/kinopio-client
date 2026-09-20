@@ -101,6 +101,7 @@ const backButtonIsVisible = computed(() => {
 const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
   globalStore.triggerCloseChildDialogs()
+  globalStore.triggerCloseGroupDetailsDialog()
 }
 const showTemplatesDialog = () => {
   globalStore.closeAllDialogs()
