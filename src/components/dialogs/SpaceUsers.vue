@@ -10,6 +10,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import utils from '@/utils.js'
 import UserList from '@/components/UserList.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
+import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -20,12 +21,26 @@ const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs' || name === 'triggerCloseGroupDetailsDialog') {
+        closeDialogs()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const props = defineProps({
@@ -33,7 +48,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  currentGroupId: ''
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -51,7 +67,6 @@ const updateDialogHeight = async () => {
 
 const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spaceIsOpen = computed(() => spaceStore.getSpaceIsOpen)
-const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
 
 // users
 
@@ -83,7 +98,23 @@ const showUserDetails = (event, user) => {
 const closeDialogs = () => {
   globalStore.userDetailsIsVisible = false
   state.groupIsVisible = false
+  state.currentGroupId = ''
 }
+
+// groups
+
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
+const toggleGroupDetails = (group) => {
+  if (state.currentGroupId === group.id) {
+    state.currentGroupId = ''
+  } else {
+    state.currentGroupId = group.id
+  }
+}
+const groupDetailsIsVisible = (group) => {
+  return group.id === state.currentGroupId
+}
+
 </script>
 
 <template lang="pug">
@@ -110,8 +141,15 @@ dialog.narrow.space-users(
   //- groups
   section(v-if="spaceGroups.length")
     .row.group-row
-      template(v-for="spaceGroup in spaceGroups" :key="spaceGroup.id")
-        GroupLabel(:group="spaceGroup" :showName="true")
+      .button-wrap(v-for="group in spaceGroups" :key="group.id" @click.stop)
+        GroupLabel(
+          :group="group"
+          :showName="true"
+          :isButton="true"
+          :isActive="groupDetailsIsVisible(group)"
+          @selectGroup="toggleGroupDetails"
+        )
+        GroupDetails(:visible="groupDetailsIsVisible(group)" :group="group")
 
   section.title-section(v-if="contributors.length")
     p
@@ -137,7 +175,9 @@ dialog.space-users
   .group-row
     flex-wrap wrap
     gap 4px
-    > .group-label
-      > .badge
-        margin 0
+    > .button-wrap
+      margin 0
+      > .group-label
+        > .badge
+          margin 0
 </style>
