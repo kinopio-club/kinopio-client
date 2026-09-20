@@ -10,6 +10,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import utils from '@/utils.js'
 import UserList from '@/components/UserList.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
+import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -20,9 +21,26 @@ const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+  const globalActionUnsubscribe = globalStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'closeAllDialogs' || name === 'triggerCloseGroupDetailsDialog') {
+        closeDialogs()
+      }
+    }
+  )
+  unsubscribes = () => {
+    globalActionUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const props = defineProps({
@@ -30,7 +48,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  currentGroupId: ''
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -48,7 +67,6 @@ const updateDialogHeight = async () => {
 
 const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spaceIsOpen = computed(() => spaceStore.getSpaceIsOpen)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
 // users
 
@@ -80,7 +98,23 @@ const showUserDetails = (event, user) => {
 const closeDialogs = () => {
   globalStore.userDetailsIsVisible = false
   state.groupIsVisible = false
+  state.currentGroupId = ''
 }
+
+// groups
+
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
+const toggleGroupDetails = (group) => {
+  if (state.currentGroupId === group.id) {
+    state.currentGroupId = ''
+  } else {
+    state.currentGroupId = group.id
+  }
+}
+const groupDetailsIsVisible = (group) => {
+  return group.id === state.currentGroupId
+}
+
 </script>
 
 <template lang="pug">
@@ -92,9 +126,9 @@ dialog.narrow.space-users(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section.title-section
-    p Users Who Can Edit This Space
+    p Space Users
     p.badge.success(v-if="spaceIsOpen")
-      img.icon.open(src="@/assets/open.svg")
+      img.icon.open(src="@/assets/comment.svg")
       span Space privacy is Open, so anyone can leave comments
   //- users
   section.results-section(v-if="users.length")
@@ -104,13 +138,23 @@ dialog.narrow.space-users(
       @selectUser="toggleUserDetails"
       :showCollaboratorActions="currentUserCanEditSpace"
     )
-  section(v-if="spaceGroup")
-    .row
-      p
-        GroupLabel(:group="spaceGroup")
-        span Group Members
+  //- groups
+  section(v-if="spaceGroups.length")
+    .row.group-row
+      .button-wrap(v-for="group in spaceGroups" :key="group.id" @click.stop)
+        GroupLabel(
+          :group="group"
+          :showName="true"
+          :isButton="true"
+          :isActive="groupDetailsIsVisible(group)"
+          @selectGroup="toggleGroupDetails"
+        )
+        GroupDetails(:visible="groupDetailsIsVisible(group)" :group="group")
+
   section.title-section(v-if="contributors.length")
-    p Non-member contributors
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span Outside contributors
   section.results-section(v-if="contributors.length")
     UserList(
       :users="contributors"
@@ -128,4 +172,12 @@ dialog.space-users
   .results-section
     border-top 1px solid var(--primary-border)
     padding-top 4px
+  .group-row
+    flex-wrap wrap
+    gap 4px
+    > .button-wrap
+      margin 0
+      > .group-label
+        > .badge
+          margin 0
 </style>

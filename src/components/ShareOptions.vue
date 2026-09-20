@@ -50,7 +50,8 @@ const state = reactive({
   shareOptionsPickerIsVisible: false,
   QRCodeIsVisible: false,
   isShareInPresentationMode: false,
-  inviteType: 'edit' // 'group', 'edit', 'read'
+  inviteType: 'edit', // 'group', 'edit', 'read'
+  inviteGroupId: '' // which group, when inviteType is 'group'
 })
 
 const spaceName = computed(() => spaceStore.name)
@@ -107,16 +108,18 @@ const inviteTypeIsGroup = computed(() => state.inviteType === 'group')
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsRead = computed(() => state.inviteType === 'read')
 const updateDefaultInviteType = () => {
+  state.inviteGroupId = spaceGroups.value[0]?.id || ''
   if (spaceIsReadOnly.value) {
     state.inviteType = 'read'
-  } else if (spaceGroup.value) {
+  } else if (spaceGroups.value.length) {
     state.inviteType = 'group'
   } else {
     state.inviteType = 'edit'
   }
 }
-const updateInviteType = (type) => {
+const updateInviteType = ({ type, groupId }) => {
   state.inviteType = type
+  state.inviteGroupId = groupId || ''
 }
 
 // urls
@@ -140,7 +143,7 @@ const inviteUrl = computed(() => {
   let url
   // group
   if (inviteTypeIsGroup.value) {
-    url = groupStore.getGroupInviteUrl(spaceGroup.value)
+    url = groupStore.getGroupInviteUrl(inviteGroup.value)
     console.info('🍇 group invite url', url)
   // edit
   } else if (inviteTypeIsEdit.value) {
@@ -154,8 +157,13 @@ const inviteUrl = computed(() => {
 
 // group
 
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
-watch(() => spaceGroup.value, (value, prevValue) => {
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
+const spaceGroupIds = computed(() => spaceGroups.value.map(group => group.id).join(','))
+const inviteGroup = computed(() => {
+  const groups = spaceGroups.value
+  return groups.find(group => group.id === state.inviteGroupId) || groups[0]
+})
+watch(() => spaceGroupIds.value, (value, prevValue) => {
   updateDefaultInviteType()
 })
 
@@ -210,9 +218,9 @@ const copySpaceUrl = async (event) => {
   //- invite picker
   .button-wrap.invite-button(v-if="!spaceIsReadOnly")
     button.title-row-flex(@click.stop="toggleShareOptionsPickerIsVisible" :class="{ active: state.shareOptionsPickerIsVisible }")
-      InviteLabel(:inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser")
+      InviteLabel(:inviteType="state.inviteType" :group="inviteGroup" :randomUser="randomUser")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
-    ShareOptionsPicker(:visible="state.shareOptionsPickerIsVisible" :inviteType="state.inviteType" :group="spaceGroup" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
+    ShareOptionsPicker(:visible="state.shareOptionsPickerIsVisible" :inviteType="state.inviteType" :groups="spaceGroups" :groupId="inviteGroup?.id" :randomUser="randomUser" @select="updateInviteType" @closeDialogs="closeDialogs")
 
   //- copy url (public space)
   section.subsection(v-if="spaceIsPublic && inviteTypeIsRead")

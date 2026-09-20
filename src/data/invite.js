@@ -5,7 +5,7 @@ export default {
       {
         type: 'group',
         friendlyName: 'Invite to Group',
-        description: 'Group members can edit all group spaces.'
+        description: 'members can edit all group spaces.' // prepend group name
       },
       {
         type: 'edit',
@@ -24,7 +24,7 @@ export default {
       {
         type: 'group',
         friendlyName: 'Invite to Group',
-        description: 'Group members can edit all group spaces.'
+        description: 'members can edit all group spaces.' // prepend group name
       },
       {
         type: 'edit',

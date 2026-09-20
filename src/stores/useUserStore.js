@@ -376,7 +376,7 @@ export const useUserStore = defineStore('user', {
           this.tags = newTags
         }
         if (groups) {
-          groupStore.restoreGroup(groups)
+          groupStore.restoreGroups(groups)
         }
         globalStore.isLoadingFavorites = false
       } catch (error) {
