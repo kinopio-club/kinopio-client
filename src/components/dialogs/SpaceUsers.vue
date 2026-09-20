@@ -128,7 +128,7 @@ dialog.narrow.space-users(
   section.title-section
     p Space Users
     p.badge.success(v-if="spaceIsOpen")
-      img.icon.open(src="@/assets/open.svg")
+      img.icon.open(src="@/assets/comment.svg")
       span Space privacy is Open, so anyone can leave comments
   //- users
   section.results-section(v-if="users.length")
