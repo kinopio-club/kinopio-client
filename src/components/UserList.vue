@@ -66,7 +66,9 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
-  unsubscribes()
+  if (unsubscribes) {
+    unsubscribes()
+  }
 })
 
 const emit = defineEmits(['selectUser', 'childDialogIsVisible', 'closeDialog', 'focusNextList'])
@@ -223,24 +225,30 @@ const userIsSpaceCreator = (user) => {
 
 // group
 
-const group = computed(() => {
-  return props.group || groupStore.getCurrentSpaceGroup
-})
+// a space can be in multiple groups, so each user is shown in their own group
+const userGroup = (user) => {
+  if (props.group) { return props.group }
+  const groups = groupStore.getCurrentSpaceGroups
+  return groups.find(group => group.users?.find(groupUser => groupUser.id === user.id))
+}
 const groupUser = (user) => {
-  if (!group.value) { return }
-  const groupId = group.value.id
-  return groupStore.getGroupUser({ userId: user.id, groupId })
+  const group = userGroup(user)
+  if (!group) { return }
+  return groupStore.getGroupUser({ userId: user.id, groupId: group.id })
 }
 const groupUserRole = (user) => {
-  const role = groupUser(user).role
+  const role = groupUser(user)?.role
+  if (!role) { return }
   return utils.capitalizeFirstLetter(role)
 }
-const currentUserIsGroupAdmin = computed(() => {
+const currentUserIsGroupAdmin = (user) => {
+  const group = userGroup(user)
+  if (!group) { return false }
   return groupStore.getGroupUserIsAdmin({
     userId: userStore.id,
-    groupId: group.value.id
+    groupId: group.id
   })
-})
+}
 
 // group user role picker
 
@@ -271,7 +279,7 @@ const isErrorRemoveGroupUser = (user) => {
 }
 const shouldPreventRemoveGroupUser = (user) => {
   let shouldPrevent
-  const groupUsers = props.group.users
+  const groupUsers = userGroup(user)?.users || []
   const groupAdmins = groupUsers.filter(user => user.role === 'admin')
   if (user.role === 'admin') {
     shouldPrevent = groupAdmins.length <= 1
@@ -293,7 +301,7 @@ const removeGroupUser = async (event, user) => {
   try {
     state.loading.removeGroupUserId = user.id
     const options = {
-      groupId: group.value.id,
+      groupId: userGroup(user).id,
       userId: user.id
     }
     const response = await apiStore.removeGroupUser(options)
@@ -329,7 +337,7 @@ const removeGroupUser = async (event, user) => {
 
         //- collaborator actions
         .row.actions-row(v-if="props.showCollaboratorActions && isOptionsIsVisibleForUser(user)")
-          GroupLabel(v-if="groupUser(user)" :group="group")
+          GroupLabel(v-if="groupUser(user)" :group="userGroup(user)")
           //- space creator
           template(v-if="userIsSpaceCreator(user)")
             span.badge.secondary Space Creator
@@ -341,14 +349,13 @@ const removeGroupUser = async (event, user) => {
 
         //- group user actions
         .row.actions-row(v-if="props.showGroupUserActions && isOptionsIsVisibleForUser(user)")
-          GroupLabel(v-if="groupUser(user)" :group="group")
           //- role
           .button-wrap
-            button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin")
+            button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin(user)")
               span {{ groupUserRole(user) }}
-            GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
+            GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user" :group="userGroup(user)")
           //- remove user
-          .button-wrap(v-if="currentUserIsGroupAdmin || isCurrentUser(user)")
+          .button-wrap(v-if="currentUserIsGroupAdmin(user) || isCurrentUser(user)")
             button.small-button.danger(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
               img.icon.cancel(src="@/assets/add.svg")
               span(v-if="isCurrentUser(user)") Leave

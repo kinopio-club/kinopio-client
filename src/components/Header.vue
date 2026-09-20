@@ -224,7 +224,7 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return Boolean(globalStore.isLoadingSpace || globalStore.isJoiningSpace || globalStore.isConnectingToBroadcast || globalStore.isLoadingOtherItems || globalStore.sendingQueue.length)
@@ -609,8 +609,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .logo-image
         span {{currentSpaceName}}
       .label-badge-row.row
-        .label-badge.group-label-badge(v-if="spaceGroup")
-          GroupLabel(:group="spaceGroup")
+        template(v-if="spaceGroups.length")
+          .label-badge.group-label-badge(v-for="spaceGroup in spaceGroups")
+            GroupLabel(:group="spaceGroup")
         .label-badge
           span(:class="{'invisible': state.readOnlyJiggle}")
             span Read Only
@@ -728,8 +729,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 //-   //- (v-if="currentSpaceIsTemplate")
                 //-   img.icon.templates(src="@/assets/templates.svg")
 
-                .label-badge.group-label-badge(v-if="spaceGroup")
-                  GroupLabel(:group="spaceGroup")
+                //- groups
+                template(v-if="spaceGroups.length")
+                  .label-badge.group-label-badge(v-for="spaceGroup in spaceGroups")
+                    GroupLabel(:group="spaceGroup")
 
                 //- read only badge
                 .label-badge(v-if="!userCanEditSpace" title="You can only read this space")

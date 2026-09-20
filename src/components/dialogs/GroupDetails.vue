@@ -11,7 +11,6 @@ import User from '@/components/User.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import InviteToGroup from '@/components/InviteToGroup.vue'
 import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 
@@ -26,6 +25,9 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
 })
 
 const props = defineProps({
@@ -66,6 +68,9 @@ const updateChildDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
 }
 const currentUser = computed(() => userStore.getUserAllState)
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: props.group.color })
+})
 
 // group
 
@@ -85,6 +90,23 @@ const currentUserIsGroupAdmin = computed(() => {
 const updateGroup = (update) => {
   update.id = props.group.id
   groupStore.updateGroup(update)
+}
+
+// invite
+
+const copyInviteUrl = async (event) => {
+  globalStore.clearNotificationsWithPosition()
+  const inviteUrl = groupStore.getGroupInviteUrl(props.group)
+  console.log(inviteUrl, props.group)
+  const position = utils.cursorPositionInPage(event)
+  console.info('🍇 group invite url', inviteUrl)
+  try {
+    await navigator.clipboard.writeText(inviteUrl)
+    globalStore.addNotificationWithPosition({ message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyInviteUrl', error, inviteUrl)
+    globalStore.addNotificationWithPosition({ message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
 }
 
 // select user
@@ -151,29 +173,22 @@ const deleteGroupPermanent = async () => {
 dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   //- group info
   section(:style="{backgroundColor: props.group.color}")
+    //- info
     .row
       template(v-if="currentUserIsGroupAdmin")
         GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible" :isBackgroundColor="true")
       template(v-else)
-        p {{props.group.emoji}} {{props.group.name}}
-    ItemDetailsDebug(:item="props.group")
-  InviteToGroup(:visible="isGroupUser" :group="props.group" @closeDialogs="closeDialogs")
-
-  UserList(
-    :users="groupUsers"
-    :selectedUsers="[selectedUser]"
-    @selectUser="toggleUserDetails"
-    :isClickable="true"
-    :showGroupUserActions="true"
-    :group="props.group"
-    @childDialogIsVisible="updateChildDialogIsVisible"
-  )
-  section(v-if="currentUserIsGroupAdmin")
-    .row(v-if="!state.removeGroupConfirmationIsVisible")
-      button.danger.small-button(@click="toggleRemoveGroupConfirmationIsVisible")
+        p(:class="colorClasses") {{props.group.emoji}} {{props.group.name}}
+    .row(v-if="isGroupUser")
+      //- remove
+      button.danger(v-if="currentUserIsGroupAdmin" @click="toggleRemoveGroupConfirmationIsVisible" :class="{active: state.removeGroupConfirmationIsVisible}")
         img.icon(src="@/assets/remove.svg")
-        span Remove Group
-    template(v-if="state.removeGroupConfirmationIsVisible")
+      //- invite
+      button(@click.left="copyInviteUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Group Invite Link
+    //- remove confirmation
+    section.subsection(v-if="state.removeGroupConfirmationIsVisible")
       p
         span.badge.danger Permanently delete group?
       p
@@ -185,9 +200,23 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
         button.danger(@click.left="deleteGroupPermanent")
           img.icon(src="@/assets/remove.svg")
           span Delete Group
-          Loader(:visible="state.loading.deleteGroupPermanent")
-    .row(v-if="state.unknownServerError")
-      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      p(v-if="state.loading.deleteGroupPermanent")
+        Loader(:visible="true")
+      .row(v-if="state.unknownServerError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    //- debug
+    ItemDetailsDebug(:item="props.group")
+  //- members
+  section.results-section.results-section-border-top
+    UserList(
+      :users="groupUsers"
+      :selectedUsers="[selectedUser]"
+      @selectUser="toggleUserDetails"
+      :isClickable="true"
+      :showGroupUserActions="true"
+      :group="props.group"
+      @childDialogIsVisible="updateChildDialogIsVisible"
+    )
 </template>
 
 <style lang="stylus">
@@ -195,11 +224,10 @@ dialog.group-details
   overflow auto
   &.child-dialog-is-visible
     overflow initial
+    > .results-section
+      overflow initial
   input.name
     margin-bottom 0
   .search-wrap
     padding-top 6px
-  .user-list,
-  .user-list + section
-    border-top 1px solid var(--primary-border)
 </style>

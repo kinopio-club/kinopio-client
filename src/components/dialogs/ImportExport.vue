@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import Import from '@/components/Import.vue'
 import Export from '@/components/Export.vue'
@@ -11,6 +11,9 @@ const emit = defineEmits(['updateSpaces'])
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
 })
 
 const props = defineProps({

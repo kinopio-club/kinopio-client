@@ -99,8 +99,12 @@ const toggleGroupDetailsIsVisible = (event, group) => {
     state.groupDetailsIsVisibleForGroupId = group.id
   }
 }
-const selectedGroup = computed(() => {
-  return { id: state.groupDetailsIsVisibleForGroupId }
+const selectedGroups = computed(() => {
+  const groupId = state.groupDetailsIsVisibleForGroupId
+  if (!groupId) { return [] }
+  const group = groupStore.getGroup(groupId)
+  if (!group) { return [] }
+  return [group]
 })
 </script>
 
@@ -120,7 +124,7 @@ dialog.narrow.user-groups(v-if="visible" :open="visible" @click.left.stop="close
 
   //- groups
   section.results-section.results-section-border-top(v-if="isGroups")
-    GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
+    GroupList(:groups="groups" :selectedGroups="selectedGroups" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
   //- groups info
   AboutGroups(v-else)
 </template>

@@ -114,9 +114,9 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceGroupUsers () {
       const groupStore = useGroupStore()
-      const group = groupStore.getCurrentSpaceGroup
-      return group?.users || []
+      return groupStore.getCurrentSpaceGroupUsers
     },
+
     getSpaceAndGroupMembers () {
       let users = this.getSpaceMembers
       users = users.concat(this.getSpaceGroupUsers)
@@ -284,6 +284,7 @@ export const useSpaceStore = defineStore('space', {
       if (member) {
         return member
       }
+
       // in group
       const groupUser = groupStore.getGroupUser({ userId })
       return groupUser
@@ -547,7 +548,7 @@ export const useSpaceStore = defineStore('space', {
           return
         }
         globalStore.triggerUpdateWindowTitle()
-        groupStore.loadGroup(remoteSpace)
+        groupStore.loadGroups(remoteSpace)
         this.updateSpacePreviewImage()
         // space
         await this.restoreSpaceRemote(remoteSpace)
@@ -1015,9 +1016,9 @@ export const useSpaceStore = defineStore('space', {
       await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
     },
-    updateGroupMeta (space) {
-      this.groupId = space.groupId
-      this.addedToGroupByUserId = space.addedToGroupByUserId
+    async updateGroupsLocal (groups) {
+      this.groups = groups
+      await cache.updateSpace('groups', groups, this.id)
     },
     async updateSpaceEditedAt () {
       const userStore = useUserStore()

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
@@ -17,6 +17,9 @@ const placeholder = 'Search Languages'
 onMounted(() => {
   updateDialogHeight()
   window.addEventListener('resize', updateDialogHeight)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
 })
 
 const state = reactive({
