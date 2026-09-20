@@ -83,7 +83,7 @@ const groupDetailsIsVisible = (group) => {
     GroupLabel(
       :group="group"
       :showName="true"
-      :isButton="isSpaceMember"
+      :isButton="true"
       :isActive="groupDetailsIsVisible(group)"
       @selectGroup="toggleGroupDetails"
     )

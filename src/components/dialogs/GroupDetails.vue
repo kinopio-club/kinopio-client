@@ -68,6 +68,9 @@ const updateChildDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
 }
 const currentUser = computed(() => userStore.getUserAllState)
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: props.group.color })
+})
 
 // group
 
@@ -175,8 +178,8 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
       template(v-if="currentUserIsGroupAdmin")
         GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible" :isBackgroundColor="true")
       template(v-else)
-        p {{props.group.emoji}} {{props.group.name}}
-    .row
+        p(:class="colorClasses") {{props.group.emoji}} {{props.group.name}}
+    .row(v-if="isGroupUser")
       //- remove
       button.danger(v-if="currentUserIsGroupAdmin" @click="toggleRemoveGroupConfirmationIsVisible" :class="{active: state.removeGroupConfirmationIsVisible}")
         img.icon(src="@/assets/remove.svg")

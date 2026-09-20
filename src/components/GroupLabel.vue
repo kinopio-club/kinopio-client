@@ -56,6 +56,7 @@ span.group-label(v-if="isVisible" :title="props.group.name" :data-group-id="prop
 <style lang="stylus">
 .group-label
   flex-shrink 0
+  cursor pointer
   .group-badge
     padding 0 8px
     border-radius var(--entity-radius)
