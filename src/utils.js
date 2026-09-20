@@ -2072,7 +2072,6 @@ export default {
       }
       return card
     })
-    // space.groups = space.groups || []
     space = this.migrateConnectionTypes(space)
     return space
   },
