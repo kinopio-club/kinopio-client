@@ -16,6 +16,9 @@ const dialogElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+})
 
 const props = defineProps({
   visible: Boolean,
