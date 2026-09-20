@@ -224,6 +224,8 @@ dialog.group-details
   overflow auto
   &.child-dialog-is-visible
     overflow initial
+    > .results-section
+      overflow initial
   input.name
     margin-bottom 0
   .search-wrap

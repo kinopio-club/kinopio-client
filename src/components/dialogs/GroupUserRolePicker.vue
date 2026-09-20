@@ -13,20 +13,12 @@ const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
-onMounted(() => {
-  window.addEventListener('resize', updateDialogHeight)
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateDialogHeight)
-})
-
 const props = defineProps({
   visible: Boolean,
   user: Object,
   group: Object
 })
 const state = reactive({
-  dialogHeight: null,
   isPositionBottom: false,
   error: {
     isRemovingSoleAdmin: false
@@ -37,17 +29,10 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     state.error.isRemovingSoleAdmin = false
     state.isPositionBottom = false
-    updateDialogHeight()
     updateIsPositionBottom()
   }
 })
 
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  const element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
-}
 const updateIsPositionBottom = async () => {
   const threshold = 50
   await nextTick()
@@ -97,18 +82,18 @@ const updateRole = (role) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.group-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'position-bottom': state.isPositionBottom}")
-  section
+dialog.narrow.group-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :class="{'position-bottom': state.isPositionBottom}")
+  section.title-section
     .row
       User(:user="props.user" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="true")
       span {{ props.user.email }}
   section(v-if="state.error.isRemovingSoleAdmin")
     .badge.danger Group must have at least one admin
-  section.results-section
+  section.results-section.results-section-border-top
     ul.results-list
       template(v-for="(role in roles")
         li(:class="{ active: roleIsActive(role) }" @click.left="updateRole(role)")
-          .badge(:class="role.color")
+          .badge.secondary
             span {{roleName(role)}}
           .description {{ role.description }}
 </template>
@@ -116,11 +101,11 @@ dialog.narrow.group-user-role-picker(v-if="visible" :open="visible" @click.left.
 <style lang="stylus">
 dialog.group-user-role-picker
   overflow auto
-  padding-top 4px
-  min-height 154px
   &.position-bottom
     top initial
     bottom 10px
   .user
     margin-right 4px
+    .anon-avatar
+      top 6px !important
 </style>
