@@ -4,24 +4,22 @@ import { reactive, computed, onMounted, watch } from 'vue'
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-
-const props = defineProps({
-  spaceGroups: Array,
-  visible: Boolean
-})
+const groupStore = useGroupStore()
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
 const showInExplore = computed(() => spaceStore.showInExplore)
 const isTemplate = computed(() => spaceStore.isTemplate)
-const isHidden = computed(() => {
-  return isSpaceMember.value && !showInExplore.value && !isTemplate.value && !props.spaceGroups.length
+const isVisible = computed(() => {
+  return !isSpaceMember.value || showInExplore.value || isTemplate.value || spaceGroups.value.length
 })
 const toggleGroupSpaceFilter = (group) => {
   globalStore.triggerToggleGroupSpaceFilter(group)
@@ -29,7 +27,7 @@ const toggleGroupSpaceFilter = (group) => {
 </script>
 
 <template lang="pug">
-.row.align-items-top.space-info-badges(v-if="visible && !isHidden")
+.row.align-items-top.space-info-badges(v-if="isVisible")
   template(v-if="!isSpaceMember")
     .badge.info(v-if="!spacePrivacyIsOpen")
       span Read Only

@@ -321,7 +321,7 @@ SpaceOptions(
   @removeSpaceId="removeSpaceId"
 )
 
-SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroups="spaceGroups")
+SpaceInfoBadges
 ItemDetailsDebug(:item="currentSpace")
 </template>
 
