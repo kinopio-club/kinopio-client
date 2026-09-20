@@ -107,14 +107,16 @@ dialog.narrow.space-users(
       @selectUser="toggleUserDetails"
       :showCollaboratorActions="currentUserCanEditSpace"
     )
+  //- groups
   section(v-if="spaceGroups.length")
-    .row
-      p
-        //- span Group Members in{{' '}}
-        template(v-for="spaceGroup in spaceGroups" :key="spaceGroup.id")
-          GroupLabel(:group="spaceGroup" :showName="true")
+    .row.group-row
+      template(v-for="spaceGroup in spaceGroups" :key="spaceGroup.id")
+        GroupLabel(:group="spaceGroup" :showName="true")
+
   section.title-section(v-if="contributors.length")
-    p Non-member contributors
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span Outside contributors
   section.results-section(v-if="contributors.length")
     UserList(
       :users="contributors"
@@ -132,4 +134,10 @@ dialog.space-users
   .results-section
     border-top 1px solid var(--primary-border)
     padding-top 4px
+  .group-row
+    flex-wrap wrap
+    gap 4px
+    > .group-label
+      > .badge
+        margin 0
 </style>
