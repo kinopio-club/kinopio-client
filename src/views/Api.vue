@@ -138,8 +138,8 @@ AboutJsonLd
   main.page.api-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark
-        h1.page-title API Docs
+        Wordmark(h2="API DOCS")
+      section
         ul.api-toc
           li(v-for="item in items")
             a(:href="item.link")
@@ -157,6 +157,8 @@ AboutJsonLd
 main.api-page-wrap
   .page-wrap
     max-width 900px
+  section.intro
+    margin-bottom 1rem
   hr
     margin-top 2rem
     margin-bottom 1rem

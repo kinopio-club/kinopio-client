@@ -24,19 +24,19 @@ const defaultImage = 'https://files.kinopio.club/og-image.png'
 const categoryDetails = {
   'new-stuff': {
     index: 0,
-    color: 'khaki'
+    color: 'rgb(185, 167, 255)'
   },
   bulletin: {
     index: 1,
-    color: '#f0dba8'
+    color: 'pink'
   },
   guides: {
     index: 2,
-    color: 'mediumaquamarine'
+    color: 'violet'
   },
   'in-use': {
     index: 3,
-    color: '#b9a8ff'
+    color: 'salmon'
   }
 }
 
@@ -45,7 +45,7 @@ onMounted(() => {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
     themeStore.restoreTheme()
   }
-  // css category colors
+  // set css vars
   Object.keys(categoryDetails).forEach(key => utils.setCssVariable(key, categoryDetails[key].color))
 })
 
@@ -262,25 +262,24 @@ const badgeClasses = (post) => {
       template(v-if="currentSlugIsRoot")
         section#hello
           p
-            img.icon.new(src="@/assets/new.gif" alt="new")
-            span in Kinopio, the thinking tool for building new ideas and solving hard problems. All posts are completely hand-written with zero AI.
+            span What's new in Kinopio, a spatial canvas to collect and connect your thoughts, ideas, and plans. All posts are completely hand-written.{{' '}}
+            a(href="/blog/feed.json")
+              span (rss)
           .row
             .button-wrap
-              a(href="/blog/feed.json")
-                button RSS
-            .button-wrap
-              a(href="https://twitter.com/KinopioClub")
-                button Follow @KinopioClub
-          .row
-            blockquote Subscribe to bulletin emails by signing up for&nbsp;
-              a(href="https://kinopio.club") Kinopio
+              a(href="/changelog")
+                button Changelog
 
         section.categories
           nav
-            ul
-              li(v-for="category in categories" :key="category.slug" @click.stop="toggleCategory(category.slug)")
-                .badge.button-badge(:class="[category.slug, { active: state.category === category.slug }]")
-                  span {{ category.name }}
+            .row
+              .badge.button-badge(
+                v-for="category in categories"
+                :key="category.slug"
+                @click.stop="toggleCategory(category.slug)"
+                :class="[category.slug, { active: state.category === category.slug }]"
+              )
+                span {{ category.name }}
 
         section#index.index
           ul
@@ -339,7 +338,12 @@ const badgeClasses = (post) => {
 
 <style lang="stylus">
 
-// main.blog-page-wrap
+main.blog-page-wrap
+  section.intro
+    margin-bottom 1rem
+  nav
+    .row
+      display flex
 //   min-height 100dvh
 
 //   section.intro
@@ -499,15 +503,15 @@ const badgeClasses = (post) => {
 //         border-left 1px solid var(--primary-border)
 //         padding-left 8px
 
-//   .badge
-//     color var(--primary-on-light-background)
-//     &.new-stuff
-//       background-color var(--new-stuff)
-//     &.bulletin
-//       background-color var(--bulletin)
-//     &.guides
-//       background-color var(--guides)
-//     &.in-use
-//       background-color var(--in-use)
+  .badge
+    color var(--primary-on-light-background)
+    &.new-stuff
+      background-color var(--new-stuff)
+    &.bulletin
+      background-color var(--bulletin)
+    &.guides
+      background-color var(--guides)
+    &.in-use
+      background-color var(--in-use)
 
 </style>
