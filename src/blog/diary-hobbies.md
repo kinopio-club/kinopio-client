@@ -2,7 +2,7 @@
 title: Diary your Hobbies
 date: 2022-10-25
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/lZpAVICJnOqNJ0H_4hNs7/maxresdefault.jpg'
-category: Guides
+category: In Use
 
 userName: Hailey Mah
 userShortName: Hailey

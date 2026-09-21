@@ -2,7 +2,7 @@
 title: Make a Personal Homepage
 image: 'https://d2w9rnfcy7mm78.cloudfront.net/2283407/original_4de889bf96797652afaa51437353d3b9.gif'
 
-category: Guides
+category: In Use
 
 date: 2022-10-25
 

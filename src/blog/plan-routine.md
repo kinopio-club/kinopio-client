@@ -2,7 +2,7 @@
 title: Journal Your Routine
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/w8u3i1DkndBjZK_zTrcMx/original-ec2a9485be78ff188621d5f74b4596e5.gif'
 
-category: Guides
+category: In Use
 
 date: 2022-10-25
 

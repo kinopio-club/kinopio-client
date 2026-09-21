@@ -2,7 +2,7 @@
 title: Track your Media
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/NsD0a-_W9Fm0efAiN0Wqe/original-d275ff849851d43d1236ce36b6e21944.gif'
 
-category: Guides
+category: In Use
 
 date: 2022-10-25
 

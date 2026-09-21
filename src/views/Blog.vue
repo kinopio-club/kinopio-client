@@ -30,14 +30,14 @@ const categoryDetails = {
     index: 1,
     color: 'pink'
   },
-  guides: {
+  'in-use': {
     index: 2,
     color: 'violet'
-  },
-  'in-use': {
-    index: 3,
-    color: 'salmon'
   }
+  // 'in-use': {
+  //   index: 3,
+  //   color: 'salmon'
+  // }
 }
 
 onMounted(() => {
@@ -70,7 +70,7 @@ const currentSlugIsRoot = computed(() => !currentSlug.value)
 const postContent = computed(() => asyncPostComponent(currentSlug.value))
 const currentPost = computed(() => blogPosts.find(post => post.slug === currentSlug.value))
 // guides embed the space they describe, and credit whoever made it
-const currentPostIsGuide = computed(() => Boolean(currentPost.value?.spaceEmbedUrl))
+// const currentPostIsGuide = computed(() => Boolean(currentPost.value?.spaceEmbedUrl))
 
 const categories = Object.keys(categoryDetails)
   .map(slug => {
@@ -269,7 +269,7 @@ const badgeClasses = (post) => {
             .button-wrap
               a(href="/changelog")
                 button Changelog
-
+        //- categories filter
         section.categories
           nav
             .row
@@ -280,22 +280,36 @@ const badgeClasses = (post) => {
                 :class="[category.slug, { active: state.category === category.slug }]"
               )
                 span {{ category.name }}
-
-        section#index.index
+        //- posts list
+        section.posts
           ul
             li(v-for="post in postsFiltered" :key="post.slug")
-              router-link.post-wrap(:to="`/blog/${post.slug}`")
-                img(v-if="post.image" :src="post.image" :alt="post.title")
+              //- router-link.post-wrap(:to="`/blog/${post.slug}`")
+              //- .row
+              router-link(:to="`/blog/${post.slug}`")
+                img(v-if="post.image" :src="post.image")
                 video(v-else-if="post.video" autoplay loop muted playsinline)
                   source(:src="post.video")
-                h2 {{ post.title }}
-                p(v-if="post.description") {{ post.description }}
-                p.post-meta.post-tag(v-if="post.category") {{ post.category }}
-                p.post-meta {{ utils.shortAbsoluteDate(post.date) }}
+              div
+                router-link(:to="`/blog/${post.slug}`")
+                  .row
+                    //- span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)")
+                    h2 {{ post.title }}
+                .post-meta-row
+                  span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)") {{ post.category }}
+                  span.post-date {{ utils.shortAbsoluteDate(post.date) }}
+
+              //- p(v-if="post.description") {{ post.description }}
+              //- .row
+              //-   p.post-meta.post-tag(v-if="post.category") {{ post.category }}
+              //-   p.post-meta {{ utils.shortAbsoluteDate(post.date) }}
+
+      //- ----------------- seperate into BlogPost??
 
       //- post
       section(v-else)
-        article(:class="{ guides: currentPostIsGuide }")
+        article.post
+          //- (:class="{ guides: currentPostIsGuide }")
           template(v-if="postContent")
             router-link.category-name(to="/blog")
               .badge.secondary.button-badge
@@ -304,34 +318,47 @@ const badgeClasses = (post) => {
             h1 {{ currentPost.title }}
             img.icon.updated(src="@/assets/updated.gif" alt="updated")
             p.post-meta-row
-              span.badge.button-badge(v-if="currentPost.category" :class="badgeClasses(currentPost)") {{ currentPost.category }}
+              span.badge(v-if="currentPost.category" :class="badgeClasses(currentPost)") {{ currentPost.category }}
               time.post-meta(:datetime="currentPost.date") {{ utils.shortAbsoluteDate(currentPost.date) }}
-            hr
+
+            //- hr
             //- guides credit the space's owner and embed it live
-            template(v-if="currentPostIsGuide")
-              aside.info
-                section.title
-                  p
-                    span.user(:style="{ backgroundColor: currentPost.userColor }")
-                    a(v-if="currentPost.userUrl" :href="currentPost.userUrl")
-                      span {{ currentPost.userName }}
-                    span(v-else) {{ currentPost.userName }}
-                section
-                  a(:href="currentPost.spaceUrl")
-                    p {{ currentPost.spaceName }}
-              .kinopio-embed
-                .embed-title
-                  span {{ currentPost.userShortName || currentPost.userName }}'s space
-                  .badge Live Embed
-                iframe(:src="currentPost.spaceEmbedUrl" :title="currentPost.spaceName" loading="lazy")
+            //- template(v-if="currentPostIsGuide")
+            //-   aside.info
+            //-     section.title
+            //-       p
+            //-         span.user(:style="{ backgroundColor: currentPost.userColor }")
+            //-         a(v-if="currentPost.userUrl" :href="currentPost.userUrl")
+            //-           span {{ currentPost.userName }}
+            //-         span(v-else) {{ currentPost.userName }}
+            //-     section
+            //-       a(:href="currentPost.spaceUrl")
+            //-         p {{ currentPost.spaceName }}
+            //-   .kinopio-embed
+            //-     .embed-title
+            //-       span {{ currentPost.userShortName || currentPost.userName }}'s space
+            //-       .badge Live Embed
+            //-     iframe(:src="currentPost.spaceEmbedUrl" :title="currentPost.spaceName" loading="lazy")
+
             //- post md
             component(:is="postContent")
+
           //- 404
           template(v-else)
             h1 404 – Post not found
             router-link.category-name(to="/blog")
               .badge.button-badge
                 span All Posts
+            video(
+              autoplay
+              loop
+              muted
+              playsinline
+              aria-label="404 image"
+              poster="https://updates.kinopio.club/pages/help/404-poster.webp"
+            )
+              source(src="https://updates.kinopio.club/pages/help/404.webm")
+
       FooterSitemap
   Footer
 </template>
@@ -341,167 +368,50 @@ const badgeClasses = (post) => {
 main.blog-page-wrap
   section.intro
     margin-bottom 1rem
-  nav
-    .row
-      display flex
-//   min-height 100dvh
+  .row
+    display flex
+  .posts
+    // .row
+    //   align-items center
+    ul
+      list-style-type none
+      padding 0
+      li
+        display flex
+        // flex-direction column
+        margin-bottom 2rem
+        // .row
+        //   &:first
+        //     background pink
+        img,
+        video
+          background teal
+          border-radius var(--entity-radius)
+          width 100px
+          height 60px
+          margin-right 10px
 
-//   section.intro
-//     margin-bottom 1rem
-//     h2
-//       margin-bottom 0
-
-//   section#hello
-//     .row + .row
-//       margin-top 10px
-//     blockquote
-//       margin-left 0
-//       border-left 1px solid var(--primary-border)
-//       padding-left 8px
-//     img.new
-//       vertical-align -3px
-//       margin-right 4px
-
-//   section.categories
-//     nav
-//       ul
-//         padding 0
-//         margin 0
-//         display flex
-//         flex-wrap wrap
-//         gap 4px
-//       li
-//         list-style none
-//         margin 0
-//         cursor pointer
-
-//   section#index
-//     ul
-//       width 100%
-//       display flex
-//       flex-wrap wrap
-//       gap 1rem
-//       padding 0
-//       margin 0
-//     li
-//       list-style none
-//       margin 0
-//       max-width 30%
-//       flex 1 1 220px
-//       @media(max-width 574px)
-//         max-width 100%
-//     .post-wrap
-//       display block
-//       padding 12px
-//       border-radius var(--entity-radius)
-//       min-width 100px
-//       height 100%
-//       text-decoration none
-//       box-shadow var(--badge-shadow)
-//       color var(--primary-on-light-background)
-//       img,
-//       video
-//         border-radius var(--entity-radius)
-//         max-width 100%
-//       h2
-//         margin-top 1rem
-//         margin-bottom 2px
-//         font-size 18px
-//       p
-//         margin-top 0
-//       &:hover,
-//       &:focus
-//         box-shadow var(--hover-shadow)
-//       &:active
-//         box-shadow var(--button-active-inset-shadow)
-
-//   .post-meta
-//     font-size 12px
-//     opacity 0.6
-//     margin 0
-//   .post-meta-row
-//     display flex
-//     align-items center
-//     gap 8px
-//   .category-name
-//     display block
-//     width fit-content
-//     text-decoration none
-//     margin-bottom 1rem
-
-//   img.icon.updated
-//     width 50px
-//     margin-bottom -10px
-
-//   aside.info
-//     border 1px solid var(--primary-border)
-//     border-radius var(--entity-radius)
-//     padding 8px
-//     margin-bottom 1rem
-//     section + section
-//       margin-top 4px
-//     p
-//       margin 0
-//     .user
-//       display inline-block
-//       width 12px
-//       height 12px
-//       border-radius 100px
-//       vertical-align -1px
-//       margin-right 4px
-
-//   .kinopio-embed
-//     margin-bottom 1rem
-//     .embed-title
-//       display flex
-//       align-items center
-//       gap 6px
-//       margin-bottom 4px
-//     iframe
-//       width 100%
-//       height 400px
-//       border 1px solid var(--primary-border)
-//       border-radius var(--entity-radius)
-
-//   article
-//     .markdown-body
-//       margin-top 1rem
-//       line-height 1.4
-//       h1
-//         margin-top 0
-//         font-size 22px
-//       h2
-//         font-size 18px
-//       h3
-//         font-size 16px
-//       p
-//         max-width 520px
-//       img:not(.icon),
-//       video
-//         border-radius var(--page-entity-radius)
-//         max-width 100%
-//         margin-top 1rem
-//         margin-bottom 1rem
-//         &.no-border
-//           border-radius 0
-//       code
-//         background-color var(--secondary-background)
-//         vertical-align 0
-//         margin 0
-//       ul,
-//       ol
-//         max-width 500px
-//         padding-left 15px
-//       li
-//         line-height 1.4
-//         p
-//           margin-bottom 0.5rem
-//       li + li
-//         margin-top 0.5rem
-//       blockquote
-//         margin-left 0
-//         border-left 1px solid var(--primary-border)
-//         padding-left 8px
+        h2
+          margin-top 0
+          // margin 0
+          // margin-bottom 10px
+          color var(--primary)
+          // font-family var(--header-font-4)
+          font-size 21px
+          // font-size 18px
+          // font-weight normal
+        a
+          text-decoration none
+        // .post-badge
+        .post-date
+          // color var(--secondary-hover-background)
+          opacity 0.5
+          font-size 14px
+        .post-badge
+          min-width initial
+          min-height initial
+          width 10px
+          height 10px
 
   .badge
     color var(--primary-on-light-background)

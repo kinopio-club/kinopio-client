@@ -2,7 +2,7 @@
 title: Plan With Your Team
 image: 'https://us-east-1.linodeobjects.com/kinopio-uploads/WvzfgyzBKtiSRl9EHY14T/1431564206268.png'
 
-category: Guides
+category: In Use
 
 date: 2022-11-01
 
