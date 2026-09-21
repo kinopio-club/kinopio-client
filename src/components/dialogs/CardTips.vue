@@ -125,6 +125,11 @@ dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible
           p
             span Link to Other Spaces
           span.badge.keyboard-shortcut /
+      article
+        .row
+          p
+            span Assign User or Due Date
+          span.badge.keyboard-shortcut @
 
     article
       .row
