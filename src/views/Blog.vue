@@ -286,18 +286,19 @@ const badgeClasses = (post) => {
             li(v-for="post in postsFiltered" :key="post.slug")
               //- router-link.post-wrap(:to="`/blog/${post.slug}`")
               //- .row
+              //- router-link(:to="`/blog/${post.slug}`")
+              //-   img(v-if="post.image" :src="post.image")
+              //-   video(v-else-if="post.video" autoplay loop muted playsinline)
+              //-     source(:src="post.video")
+              //- div
               router-link(:to="`/blog/${post.slug}`")
-                img(v-if="post.image" :src="post.image")
-                video(v-else-if="post.video" autoplay loop muted playsinline)
-                  source(:src="post.video")
-              div
-                router-link(:to="`/blog/${post.slug}`")
-                  .row
-                    //- span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)")
-                    h2 {{ post.title }}
-                .post-meta-row
-                  span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)") {{ post.category }}
+                .row.post-meta-row
+                  span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)")
+                  //- {{ post.category }}
                   span.post-date {{ utils.shortAbsoluteDate(post.date) }}
+                .row
+                  //- span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)")
+                  h2 {{ post.title }}
 
               //- p(v-if="post.description") {{ post.description }}
               //- .row
@@ -371,47 +372,64 @@ main.blog-page-wrap
   .row
     display flex
   .posts
-    // .row
-    //   align-items center
+    .row
+      align-items center
     ul
       list-style-type none
       padding 0
       li
-        display flex
-        // flex-direction column
-        margin-bottom 2rem
+        // flex-direction row
+        // padding-bottom 1rem
+        border-bottom 1px solid var(--secondary-border)
+        // margin 0
+        margin-bottom 1rem
+        a
+          padding-bottom 1rem
+          text-decoration none
+          color var(--primary)
+          display flex
+          &:hover
+            h2
+              text-decoration underline
+
+        .post-meta-row
+          min-width 150px
+          @media(max-width 500px)
+            min-width 130px
         // .row
         //   &:first
         //     background pink
-        img,
-        video
-          background teal
-          border-radius var(--entity-radius)
-          width 100px
-          height 60px
-          margin-right 10px
+        // img,
+        // video
+        //   background teal
+        //   border-radius var(--entity-radius)
+        //   width 100px
+        //   height 60px
+        //   margin-right 10px
+        // .post-meta-row
 
         h2
-          margin-top 0
+          // margin-top 0
           // margin 0
           // margin-bottom 10px
           color var(--primary)
-          // font-family var(--header-font-4)
-          font-size 21px
+
+          font-family var(--header-font-4)
+          // font-size 21px
           // font-size 18px
-          // font-weight normal
-        a
-          text-decoration none
+          font-weight normal
+
         // .post-badge
         .post-date
-          // color var(--secondary-hover-background)
-          opacity 0.5
-          font-size 14px
+          color var(--primary)
+          opacity 0.6
+          // font-size 14px
         .post-badge
           min-width initial
           min-height initial
           width 10px
           height 10px
+          display inline-block
 
   .badge
     color var(--primary-on-light-background)
