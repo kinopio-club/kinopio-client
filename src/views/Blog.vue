@@ -214,8 +214,7 @@ useHead(() => {
       { property: 'og:title', content: title },
       { property: 'og:description', content: description },
       { property: 'og:url', content: url },
-      // scrapers only activate the player when og:type is a video type
-      { property: 'og:type', content: video ? 'video.other' : (currentPost.value ? 'article' : 'website') },
+      { property: 'og:type', content: video ? 'video.other' : (currentPost.value ? 'article' : 'website') }, // if video
       { property: 'og:image', content: image },
       { property: 'og:image:type', content: imageType(image) },
       { name: 'twitter:image', content: image },
@@ -422,7 +421,7 @@ main.blog-page-wrap
         // .post-badge
         .post-date
           color var(--primary)
-          opacity 0.6
+          opacity 0.5
           // font-size 14px
         .post-badge
           min-width initial
