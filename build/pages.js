@@ -80,7 +80,7 @@ export const blogPostsPlugin = () => mdPagesPlugin({
 
 const blogMeta = {
   title: 'Kinopio Blog',
-  subtitle: "What's new in Kinopio, the thinking tool for building new ideas and solving hard problems",
+  subtitle: 'How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Completely hand-written.',
   url: 'https://kinopio.club/blog',
   language: 'en',
   author: { name: 'Pirijan', url: 'https://pketh.org' }
