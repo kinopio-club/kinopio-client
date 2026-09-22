@@ -101,6 +101,19 @@ section.faq
       p
         a(href="https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k") Kinopio Architecture and Costs
 
+  details
+    summary Can I ask questions and get human support?
+    section.subsection
+      p
+        span I understand why other companies use AI chatbots to save money on support, but as a user they suck. If you have a problem or question in Kinopio, you can
+        a(href="mailto:support@kinopio.club") email support
+        span , ask the community on
+        a(href="https://kinopio.club/discord") Discord
+        span , or post on the
+        a(href="https://kinopio.club/forum") forum
+        span .
+      p
+        a(href="https://pketh.org/support-community.html") How I Do Support and Community
 </template>
 
 <style lang="stylus">
