@@ -15,13 +15,14 @@
 # path redirects
 
 
-/forum           https://forum.kinopio.club
+/forum            https://forum.kinopio.club
 /discord          https://discord.gg/h2sR45Nby8   301
 /survey           https://tally.so/r/w2RjDL   301
 /changelog        https://kinopio.club/changelog-6lsytK8ZfOtMl2oqG05Rj   301
 /roadmap          https://kinopio.club/-roadmap-3CBHtivu7X7nTzrcaTFQV   301
 
-# redirect legacy urls from the old help site for seo.
+# legacy help site
+
 /help/posts/adding-images-to-cards             /help/card-images               301
 /help/posts/adding-images-to-cards/            /help/card-images               301
 /help/posts/styling-cards                      /help/card-styling              301
@@ -74,8 +75,8 @@
 /help/about       /about   301
 /help/about/      /about   301
 
-# blog moved into this repo: /blog/posts/:slug/ -> /blog/:slug
-# numbered bulletins were renamed, so they redirect before the splat below
+# legacy blog site
+
 /blog/posts/1                 /blog/bulletin-1   301
 /blog/posts/1/                /blog/bulletin-1   301
 /blog/posts/2                 /blog/bulletin-2   301
@@ -152,7 +153,7 @@
 /blog/posts/37/               /blog/bulletin-37   301
 /blog/posts/38                /blog/bulletin-38   301
 /blog/posts/38/               /blog/bulletin-38   301
-/blog/posts/*     /blog/:splat   301
-/blog/posts       /blog          301
+/blog/posts/*                 /blog/:splat   301
+/blog/posts                   /blog          301
 
 /*                /app.html   200
