@@ -26,13 +26,13 @@ const categoryDetails = {
     index: 0,
     color: 'rgb(185, 167, 255)'
   },
-  bulletin: {
-    index: 1,
-    color: 'pink'
-  },
   'in-use': {
-    index: 2,
+    index: 1,
     color: 'violet'
+  },
+  bulletin: {
+    index: 2,
+    color: 'pink'
   }
 }
 
