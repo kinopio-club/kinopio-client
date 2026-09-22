@@ -82,7 +82,7 @@ export default defineConfig(async ({ command, mode }) => {
     ssgOptions: {
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
-        return ['/', '/about', '/api', '/explore'].concat(helpRoutes).concat(blogRoutes)
+        return ['/', '/about', '/api', '/explore'].concat(helpRoutes, blogRoutes)
       }
     },
     test: {
