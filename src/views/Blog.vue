@@ -5,6 +5,7 @@ import { useHead } from '@unhead/vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useChangelogStore } from '@/stores/useChangelogStore'
 
 import Header from '@/components/pages/Header.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
@@ -16,6 +17,7 @@ import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
+const changelogStore = useChangelogStore()
 const route = useRoute()
 
 const siteDescription = 'How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Completely hand-written.'
@@ -65,6 +67,7 @@ const currentSlug = computed(() => route.params.post)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
 const postContent = computed(() => asyncPostComponent(currentSlug.value))
 const currentPost = computed(() => blogPosts.find(post => post.slug === currentSlug.value))
+const changelogIsUpdated = computed(() => changelogStore.getisRecentlyUpdated)
 
 const categories = Object.keys(categoryDetails)
   .map(slug => {
@@ -262,6 +265,7 @@ const badgeClasses = (post) => {
             .button-wrap
               a(href="/changelog")
                 button Changelog
+              img.updated.icon(src="@/assets/updated.gif" alt="updated" v-if="changelogIsUpdated")
             .button-wrap
               a(href="/roadmap")
                 button Roadmap
@@ -340,6 +344,11 @@ main.blog-page-wrap
       background-color var(--bulletin)
     &.in-use
       background-color var(--in-use)
+  .icon.updated,
+  .icon.new
+    position absolute
+    bottom -6px
+    right 4px
 
   .posts
     .row
