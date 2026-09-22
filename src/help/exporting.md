@@ -1,5 +1,5 @@
 ---
-title: Exporting Spaces as text, PDFs, or JSON
+title: Export PDFs, CANVAS, or JSON
 description: You can export your space in a plain text, JSON and PDF formats via Share → Export
 category: Importing and Exporting
 updated: 2026-09-03

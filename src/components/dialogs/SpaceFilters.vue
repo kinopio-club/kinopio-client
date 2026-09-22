@@ -170,6 +170,11 @@ const updateGroupFilter = (value) => {
   value = utils.clone(value)
   userStore.updateUser({ dialogSpaceFilterByGroup: value })
 }
+const selectedGroups = computed(() => {
+  const group = dialogSpaceFilterByGroup.value
+  if (!utils.objectHasKeys(group)) { return [] }
+  return [group]
+})
 
 // collaborators
 
@@ -238,7 +243,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         span Templates
   //- groups
   section.results-section.groups(v-if="isGroups")
-    GroupList(:groups="groups" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")
+    GroupList(:groups="groups" :selectedGroups="selectedGroups" @selectGroup="filterByGroup")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
     UserList(:users="spaceUsers" :selectedUsers="[dialogSpaceFilterByUser]" @selectUser="filterByUser" :filterPlaceholder="userListPlaceholder")

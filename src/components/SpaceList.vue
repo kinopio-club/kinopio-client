@@ -391,12 +391,9 @@ const selectItemFromFilter = () => {
   selectSpace(null, space)
 }
 
-// group
+// groups
 
-const group = (groupId) => {
-  if (!groupId) { return }
-  return groupStore.getGroup(groupId)
-}
+const spaceGroups = (space) => groupStore.getSpaceGroups(space)
 
 // preview image
 
@@ -477,9 +474,10 @@ span.space-list-wrap
             template(v-if="!props.hidePreviewImage")
               .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide, 'full-size': props.previewImageIsFullSize}")
                 img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
-            //- group
-            template(v-if="group(space.groupId) && props.showSpaceGroups")
-              GroupLabel(:group="group(space.groupId)")
+            //- groups
+            .group-labels(v-if="props.showSpaceGroups")
+              template(v-for="group in spaceGroups(space)" :key="group.id")
+                GroupLabel(:group="group")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
             //- today
@@ -508,6 +506,15 @@ span.space-list-wrap
   position relative
 
   .space-list
+    .group-labels
+      display flex
+      flex-wrap wrap
+      flex-shrink 0
+      max-width 98px
+      margin-right 6px
+      gap 2px
+      .group-badge
+        margin 0
     .inline-badge
       margin-left 0
       flex none

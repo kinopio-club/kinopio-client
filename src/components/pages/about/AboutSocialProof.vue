@@ -34,7 +34,7 @@ const vPauseAnimation = {
 }
 defineExpose({ vPauseAnimation })
 
-const academic = computed(() => 'Used by students, teachers, and researchers, at ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ● School for Poetic Computation ● UCLA ● NYU ● Princeton')
+const academic = computed(() => 'Used by students, teachers, and researchers, at ● NYU ● The New School (Parsons) ● Yale ● MIT ● Stanford ● Berkeley ● Columbia ● School for Poetic Computation ● UCLA ● Princeton')
 const business = computed(() => 'And by designers, engineers, and PMs, at ● Discord ● Brilliant ● Cisco ● Wikimedia ● Atlassian ● Spotify ● Moving Brands ● Orange Telecom ● Planned Parenthood ● Kakao ● Digital Futures Lab')
 </script>
 

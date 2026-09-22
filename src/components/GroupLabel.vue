@@ -10,7 +10,8 @@ const userStore = useUserStore()
 const props = defineProps({
   group: Object,
   showName: Boolean,
-  isButton: Boolean
+  isButton: Boolean,
+  isActive: Boolean
 })
 
 const emit = defineEmits(['selectGroup'])
@@ -21,7 +22,10 @@ const shortName = computed(() => {
   name = utils.normalizeString(name)
   return name.charAt(0).toUpperCase()
 })
-const isActive = computed(() => userStore.dialogSpaceFilterByGroup?.id === props.group.id)
+const isActive = computed(() => {
+  if (props.isActive) { return true }
+  return userStore.dialogSpaceFilterByGroup?.id === props.group.id
+})
 const classes = computed(() => {
   const value = utils.colorClasses({ backgroundColor: props.group.color })
   if (props.isButton) {
@@ -29,6 +33,9 @@ const classes = computed(() => {
   }
   if (isActive.value) {
     value.push('active')
+  }
+  if (props.showName) {
+    value.push('show-name')
   }
   return value
 })
@@ -49,13 +56,17 @@ span.group-label(v-if="isVisible" :title="props.group.name" :data-group-id="prop
 <style lang="stylus">
 .group-label
   flex-shrink 0
+  cursor pointer
   .group-badge
     padding 0 8px
     border-radius var(--entity-radius)
     min-width initial
     min-height initial
-    display inline
+    display inline-block
     word-break keep-all
+    &.show-name
+      padding-top 2px
+      height 22px
     &.is-background-light
       span
         color var(--primary-on-light-background)

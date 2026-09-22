@@ -13,7 +13,8 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import isToday from 'dayjs/plugin/isToday'
-import { colord } from 'colord'
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
 import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
@@ -25,6 +26,7 @@ import randomColor from 'randomcolor'
 import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
 dayjs.extend(isToday)
+extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
@@ -1713,6 +1715,11 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
+  // spaces can be in multiple groups
+  spaceGroups (space) {
+    if (!this.arrayHasItems(space?.groups)) { return [] }
+    return space.groups.filter(group => Boolean(group?.id))
+  },
 
   // sync
 
@@ -1790,7 +1797,7 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      groupId: null,
+      groups: [],
       note: ''
     }
   },
@@ -1801,7 +1808,6 @@ export default {
       'users',
       'collaborators',
       'collaboratorKey',
-      'groupId',
       'readOnlyKey'
     ]
     spacePrivateKeys.forEach(key => delete space[key])
@@ -1823,8 +1829,7 @@ export default {
     space.isTemplate = false
     space.previewImage = null
     space.previewThumbnailImage = null
-    space.groupId = null
-    space.group = null
+    space.groups = []
     space.createdAt = new Date()
     space.editedAt = new Date().toISOString()
     space.collaboratorKey = nanoid()

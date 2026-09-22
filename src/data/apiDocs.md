@@ -225,9 +225,7 @@ Name | Type | Description
 <code class="spaces">users</code>               | `Array`   | The user who created/owns the space (a space will always have only one user)
 <code class="spaces">showInExplore</code>       | `Boolean` | Whether the space is shown in explore
 <code class="spaces">tags</code>                | `Array`   | A list of <a href="#tags" class="badge button-badge tags">Tags</a>
-<code class="spaces">group</code>                | `Object`   | Information on the group that a space belongs to (if any), including public metadata on the other group `users`
-<code class="spaces">groupId</code>              | `String` | The group id that the space belongs to. A space can only belong to one group.
-<code class="spaces">addedTogroupByUserId</code> | `String` | The user who added the space to the group
+<code class="spaces">groups</code>              | `Array`   | A list of groups that the space belongs to (if any). Each group includes `addedTogroupByUserId` and `users` for group user public metadata
 <code class="spaces">updatedAt</code>           | `String`  | The date when any changes in the space were made including a member visiting it
 <code class="spaces">visits</code>              | `Integer` | The number of times the space has been loaded by a person
 <code class="spaces">readOnlyKey</code>         | `String`  | Similar to `collaboratorKey` but only allows users and non-signed-in users to read a private space

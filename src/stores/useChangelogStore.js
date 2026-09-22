@@ -6,6 +6,8 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 
+import dayjs from 'dayjs'
+
 let checkChangelogIntervalTimer
 
 export const useChangelogStore = defineStore('changelog', {
@@ -13,7 +15,13 @@ export const useChangelogStore = defineStore('changelog', {
     isUpdated: false,
     updates: []
   }),
-
+  getters: {
+    getisRecentlyUpdated () {
+      if (!this.updates) { return }
+      const date = this.updates[0]?.updatedAt
+      return dayjs().diff(dayjs(date), 'day') <= 5
+    }
+  },
   actions: {
     async init () {
       await this.update()
