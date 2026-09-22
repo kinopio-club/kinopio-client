@@ -18,7 +18,7 @@ const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const route = useRoute()
 
-const siteDescription = "What's new in Kinopio, the thinking tool for building new ideas and solving hard problems"
+const siteDescription = 'How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Completely hand-written.'
 const defaultImage = 'https://files.kinopio.club/og-image.png'
 
 const categoryDetails = {
@@ -65,8 +65,6 @@ const currentSlug = computed(() => route.params.post)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
 const postContent = computed(() => asyncPostComponent(currentSlug.value))
 const currentPost = computed(() => blogPosts.find(post => post.slug === currentSlug.value))
-// guides embed the space they describe, and credit whoever made it
-// const currentPostIsGuide = computed(() => Boolean(currentPost.value?.spaceEmbedUrl))
 
 const categories = Object.keys(categoryDetails)
   .map(slug => {
@@ -257,7 +255,7 @@ const badgeClasses = (post) => {
       template(v-if="currentSlugIsRoot")
         section#hello
           p
-            span How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Completely hand-written.{{' '}}
+            span {{siteDescription}}{{' '}}
             a(href="/blog/feed.json")
               span (rss)
           .row
@@ -279,32 +277,16 @@ const badgeClasses = (post) => {
                 :class="[category.slug, { active: state.category === category.slug }]"
               )
                 span {{ category.name }}
-        //- posts list
+        //- posts
         section.posts
           ul
             li(v-for="post in postsFiltered" :key="post.slug")
-              //- router-link.post-wrap(:to="`/blog/${post.slug}`")
-              //- .row
-              //- router-link(:to="`/blog/${post.slug}`")
-              //-   img(v-if="post.image" :src="post.image")
-              //-   video(v-else-if="post.video" autoplay loop muted playsinline)
-              //-     source(:src="post.video")
-              //- div
               router-link(:to="`/blog/${post.slug}`")
                 .row.post-meta-row
                   span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)")
-                  //- {{ post.category }}
                   span.post-date {{ utils.shortAbsoluteDate(post.date) }}
                 .row
-                  //- span.badge.post-badge(v-if="post.category" :class="badgeClasses(post)")
                   h2 {{ post.title }}
-
-              //- p(v-if="post.description") {{ post.description }}
-              //- .row
-              //-   p.post-meta.post-tag(v-if="post.category") {{ post.category }}
-              //-   p.post-meta {{ utils.shortAbsoluteDate(post.date) }}
-
-      //- ----------------- seperate into BlogPost??
 
       //- post
       section(v-else)
@@ -324,9 +306,11 @@ const badgeClasses = (post) => {
           //- 404
           template(v-else)
             h1 404 – Post not found
-            router-link(to="/blog")
-              .badge.button-badge.all-posts-badge
-                span All Posts
+            .row
+              router-link(to="/blog")
+                .badge.secondary.button-badge.all-posts-badge
+                  img.icon.left-arrow(src="@/assets/down-arrow.svg")
+                  span All Posts
             video(
               autoplay
               loop
@@ -354,8 +338,6 @@ main.blog-page-wrap
       background-color var(--how-its-made)
     &.bulletin
       background-color var(--bulletin)
-    &.guides
-      background-color var(--guides)
     &.in-use
       background-color var(--in-use)
 
@@ -380,13 +362,6 @@ main.blog-page-wrap
           min-width 150px
           @media(max-width 500px)
             min-width 130px
-        // img,
-        // video
-        //   background teal
-        //   border-radius var(--entity-radius)
-        //   width 100px
-        //   height 60px
-        //   margin-right 10px
         h2
           color var(--primary)
           font-family var(--header-font-4)
@@ -429,9 +404,6 @@ main.blog-page-wrap
         margin-top 1.4rem
       h2
         font-size 20px
-      // > img
-      //   margin-bottom 1rem
-      //   border-radius var(--page-entity-radius)
       p
         margin 1rem 0
         max-width 440px
@@ -440,17 +412,9 @@ main.blog-page-wrap
         &:has(img),
         &:has(video)
           max-width 100%
-      // a:not(.badge)
-      //   color var(--text-link)
-      //   &:hover
-      //     text-decoration none
       video,
       img
         border-radius var(--page-entity-radius)
-        // width 100%
-
-      //   max-width 100%
-      //   height auto
       blockquote
         margin 0
         p
