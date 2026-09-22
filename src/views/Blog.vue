@@ -23,17 +23,14 @@ const defaultImage = 'https://files.kinopio.club/og-image.png'
 
 const categoryDetails = {
   'how-its-made': {
-    // name: "How It's Made"
     index: 0,
     color: 'rgb(185, 167, 255)'
   },
   bulletin: {
-    // name: 'Bulletin',
     index: 1,
     color: 'pink'
   },
   'in-use': {
-    // name: 'In Use'
     index: 2,
     color: 'violet'
   }
@@ -267,6 +264,10 @@ const badgeClasses = (post) => {
             .button-wrap
               a(href="/changelog")
                 button Changelog
+            .button-wrap
+              a(href="/roadmap")
+                button Roadmap
+
         //- categories filter
         section.categories
           nav
