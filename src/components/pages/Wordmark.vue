@@ -10,7 +10,7 @@ const props = defineProps({
   h1.name(v-if="props.isH1") KINOPIO
   .name(v-else) KINOPIO
 
-  h2(v-if="props.h2") {{ props.h2 }}
+  h2(v-if="props.h2") {{ props.h2.toUpperCase() }}
 </template>
 
 <style lang="stylus" scoped>

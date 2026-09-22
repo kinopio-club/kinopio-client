@@ -66,7 +66,7 @@ AboutJsonLd
   main.page(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(:h2="PAGE TITLE")
+        Wordmark(:h2="page title")
 
         p [page contents]
 

@@ -125,7 +125,7 @@ const updateSystemTheme = () => {
   main.page(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(h2="EXPLORE COMMUNITY" :isH1="true")
+        Wordmark(h2="explore community" :isH1="true")
         p Explore cool spaces shared by the Kinopio community. You can add your own spaces to Explore, or ask others to share theirs.{{' '}}
           a(href="/help/using-explore")
             button.small-button.tips-button ?

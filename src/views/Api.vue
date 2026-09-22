@@ -138,7 +138,7 @@ AboutJsonLd
   main.page.api-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(h2="API DOCS")
+        Wordmark(h2="api docs")
       section
         ul.api-toc
           li(v-for="item in items")
