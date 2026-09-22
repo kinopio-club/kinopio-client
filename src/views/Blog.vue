@@ -262,6 +262,7 @@ const badgeClasses = (post) => {
         section#hello
           p
             span What's new in Kinopio, a spatial canvas to collect and connect your thoughts, ideas, and plans. All posts are completely hand-written.{{' '}}
+            //- TODO copy : behind the scenes of how new features are made and designed, guides for how to use it, and the occassional progress bulletin
             a(href="/blog/feed.json")
               span (rss)
           .row
@@ -309,45 +310,23 @@ const badgeClasses = (post) => {
       //- post
       section(v-else)
         article.post
-          //- (:class="{ guides: currentPostIsGuide }")
           template(v-if="postContent")
-            router-link.category-name(to="/blog")
-              .badge.secondary.button-badge
+            router-link(to="/blog")
+              .badge.secondary.button-badge.all-posts-badge
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
                 span All Posts
             h1 {{ currentPost.title }}
-            img.icon.updated(src="@/assets/updated.gif" alt="updated")
-            p.post-meta-row
+            .row.post-meta-row
               span.badge(v-if="currentPost.category" :class="badgeClasses(currentPost)") {{ currentPost.category }}
-              time.post-meta(:datetime="currentPost.date") {{ utils.shortAbsoluteDate(currentPost.date) }}
-
-            //- hr
-            //- guides credit the space's owner and embed it live
-            //- template(v-if="currentPostIsGuide")
-            //-   aside.info
-            //-     section.title
-            //-       p
-            //-         span.user(:style="{ backgroundColor: currentPost.userColor }")
-            //-         a(v-if="currentPost.userUrl" :href="currentPost.userUrl")
-            //-           span {{ currentPost.userName }}
-            //-         span(v-else) {{ currentPost.userName }}
-            //-     section
-            //-       a(:href="currentPost.spaceUrl")
-            //-         p {{ currentPost.spaceName }}
-            //-   .kinopio-embed
-            //-     .embed-title
-            //-       span {{ currentPost.userShortName || currentPost.userName }}'s space
-            //-       .badge Live Embed
-            //-     iframe(:src="currentPost.spaceEmbedUrl" :title="currentPost.spaceName" loading="lazy")
-
+              time.post-date(:datetime="currentPost.date") {{ utils.shortAbsoluteDate(currentPost.date) }}
             //- post md
             component(:is="postContent")
 
           //- 404
           template(v-else)
             h1 404 – Post not found
-            router-link.category-name(to="/blog")
-              .badge.button-badge
+            router-link(to="/blog")
+              .badge.button-badge.all-posts-badge
                 span All Posts
             video(
               autoplay
@@ -370,66 +349,6 @@ main.blog-page-wrap
     margin-bottom 1rem
   .row
     display flex
-  .posts
-    .row
-      align-items center
-    ul
-      list-style-type none
-      padding 0
-      li
-        // flex-direction row
-        // padding-bottom 1rem
-        border-bottom 1px solid var(--secondary-border)
-        // margin 0
-        margin-bottom 1rem
-        a
-          padding-bottom 1rem
-          text-decoration none
-          color var(--primary)
-          display flex
-          &:hover
-            h2
-              text-decoration underline
-
-        .post-meta-row
-          min-width 150px
-          @media(max-width 500px)
-            min-width 130px
-        // .row
-        //   &:first
-        //     background pink
-        // img,
-        // video
-        //   background teal
-        //   border-radius var(--entity-radius)
-        //   width 100px
-        //   height 60px
-        //   margin-right 10px
-        // .post-meta-row
-
-        h2
-          // margin-top 0
-          // margin 0
-          // margin-bottom 10px
-          color var(--primary)
-
-          font-family var(--header-font-4)
-          // font-size 21px
-          // font-size 18px
-          font-weight normal
-
-        // .post-badge
-        .post-date
-          color var(--primary)
-          opacity 0.5
-          // font-size 14px
-        .post-badge
-          min-width initial
-          min-height initial
-          width 10px
-          height 10px
-          display inline-block
-
   .badge
     color var(--primary-on-light-background)
     &.new-stuff
@@ -441,4 +360,108 @@ main.blog-page-wrap
     &.in-use
       background-color var(--in-use)
 
+  .posts
+    .row
+      align-items center
+    ul
+      list-style-type none
+      padding 0
+      li
+        border-bottom 1px solid var(--secondary-border)
+        margin-bottom .5rem
+        a
+          padding-bottom .5rem
+          text-decoration none
+          color var(--primary)
+          display flex
+          &:hover
+            h2
+              text-decoration underline
+        .post-meta-row
+          min-width 150px
+          @media(max-width 500px)
+            min-width 130px
+        // img,
+        // video
+        //   background teal
+        //   border-radius var(--entity-radius)
+        //   width 100px
+        //   height 60px
+        //   margin-right 10px
+        h2
+          color var(--primary)
+          font-family var(--header-font-4)
+          font-weight normal
+        .post-badge
+          min-width initial
+          min-height initial
+          width 10px
+          height 10px
+          display inline-block
+
+  .post-date
+    color var(--primary)
+    opacity 0.5
+
+  article.post
+    border-bottom 1px solid var(--primary-border)
+    padding-bottom 2rem
+    margin-bottom 4rem
+    .row
+      align-items center
+    h1,
+    h2,
+    h3
+      font-family var(--header-font-4)
+      font-weight normal
+    h1
+      font-size 24px
+    .all-posts-badge
+      display inline-block
+      margin-bottom 1rem
+    .post-meta-row
+      margin-bottom 2rem
+    .markdown-body
+      h1,
+      h2,
+      h3
+        font-weight bold
+        max-width 400px
+        margin-top 1.4rem
+      h2
+        font-size 20px
+      // > img
+      //   margin-bottom 1rem
+      //   border-radius var(--page-entity-radius)
+      p
+        margin 1rem 0
+        max-width 440px
+        &:last-child
+          margin-bottom 0
+        &:has(img),
+        &:has(video)
+          max-width 100%
+      // a:not(.badge)
+      //   color var(--text-link)
+      //   &:hover
+      //     text-decoration none
+      video,
+      img
+        border-radius var(--page-entity-radius)
+        // width 100%
+
+      //   max-width 100%
+      //   height auto
+      blockquote
+        margin 0
+        p
+          background var(--info-background)
+          padding 12px
+          border-radius var(--entity-radius)
+      ul
+        padding-left 2rem
+        li
+          max-width 410px
+        li + li
+          margin-top 1rem
 </style>
