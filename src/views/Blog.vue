@@ -261,8 +261,7 @@ const badgeClasses = (post) => {
       template(v-if="currentSlugIsRoot")
         section#hello
           p
-            span What's new in Kinopio, a spatial canvas to collect and connect your thoughts, ideas, and plans. All posts are completely hand-written.{{' '}}
-            //- TODO copy : behind the scenes of how new features are made and designed, guides for how to use it, and the occassional progress bulletin
+            span Behind the scenes of how new features are designed and built, and guides for using Kinopio in the real world. Also, the occasional progress bulletin. Completely hand-written.{{' '}}
             a(href="/blog/feed.json")
               span (rss)
           .row
