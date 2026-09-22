@@ -1,7 +1,7 @@
 ---
 title: 'Journal Date Images'
 date: 2024-04-30
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/journal-date-images-thumbnail.webp'
 description: New journal spaces now start with date images generated each day for you
 ---

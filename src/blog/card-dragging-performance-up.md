@@ -1,7 +1,7 @@
 ---
 title: 'Card Dragging Performance Up'
 date: 2023-11-22
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/please-wait.webp'
 description: Significantly improved smoothness of card dragging
 ---

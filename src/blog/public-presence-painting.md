@@ -1,7 +1,7 @@
 ---
 title: 'Public Presence and Painting'
 date: 2023-06-23
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/public-presence-painting.jpeg'
 description: When viewing a public space, your cursor position and paint strokes are broadcasted to everyone else viewing that space
 ---

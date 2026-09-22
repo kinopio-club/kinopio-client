@@ -1,7 +1,7 @@
 ---
 title: 'Embed Any Site'
 date: 2023-06-22
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/embed-any-site-thumbnail.png'
 description: Bring more of the web into your spaces by pasting in songs, albums, and document links
 ---

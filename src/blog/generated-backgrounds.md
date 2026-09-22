@@ -1,7 +1,7 @@
 ---
 title: 'Generated Backgrounds'
 date: 2023-11-10
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/generated-background-thumb.jpeg'
 description: Generated backgrounds make finding the right vibe a lot easier
 ---

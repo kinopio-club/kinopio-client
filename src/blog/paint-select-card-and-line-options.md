@@ -1,7 +1,7 @@
 ---
 title: 'Paint-Select Card and Line Options'
 date: 2024-04-13
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/paint-select-card-and-line-options-thumb.webp'
 description: Little quality of life updates for bulk actions on cards and connections
 ---

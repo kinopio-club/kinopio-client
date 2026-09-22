@@ -1,7 +1,7 @@
 ---
 title: 'Collaborator Pings'
 date: 2024-06-18
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/pages/blog/posts/collaborator-pings/sonar-ping-thumb.mp4'
 description: Right-click to ping your position to everyone else in a space
 ---

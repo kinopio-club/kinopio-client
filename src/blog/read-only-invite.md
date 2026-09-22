@@ -1,7 +1,7 @@
 ---
 title: 'Read-Only Invites'
 date: 2023-10-12
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/share-invite-read-only-crop2.png?a=1'
 description: Invite someone to view a private space – but not edit it
 ---

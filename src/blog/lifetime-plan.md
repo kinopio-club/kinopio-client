@@ -1,7 +1,7 @@
 ---
 title: 'Lifetime Plan'
 date: 2023-10-31
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/sweet.jpeg'
 description: Purchase a liftetime plan for $200
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'Pen Pals Frame'
 date: 2023-01-20
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/pen-pals-thumb.png'
 description: The perfect frame for your missives and manifestos
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'Tilt Cards'
 date: 2024-02-23
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/tilt-cards-thumbnail.webp'
 description: Angle cards for fun and emphasis by dragging their bottom-left corners
 ---

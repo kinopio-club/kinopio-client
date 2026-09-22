@@ -1,7 +1,7 @@
 ---
 title: 'Following and Everyone Feeds'
 date: 2024-04-21
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/following-thumb.webp'
 description: Explore has a new design with Following and Everyone
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'About Page'
 date: 2025-10-14
-category: New Stuff
+category: How It's Made
 
 description: New visitors to kinopio (and search engine robots) will see a new static About Kinopio page when visiting the site.
 

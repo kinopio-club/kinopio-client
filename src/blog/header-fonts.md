@@ -1,7 +1,7 @@
 ---
 title: 'Header Fonts'
 date: 2024-05-20
-category: New Stuff
+category: How It's Made
 
 image: 'https://updates.kinopio.club/pages/blog/posts/header-fonts/thumb.webp'
 description: Change card or box h1/h2 fonts

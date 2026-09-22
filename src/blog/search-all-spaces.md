@@ -1,7 +1,7 @@
 ---
 title: 'Search All Spaces'
 date: 2023-03-06
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/search-all-spaces-small.png'
 description: Forgot which space you put an idea in? Search all spaces for your cards
 ---

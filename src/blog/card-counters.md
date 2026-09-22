@@ -1,7 +1,7 @@
 ---
 title: 'Card Counters'
 date: 2023-06-12
-category: New Stuff
+category: How It's Made
 video: 'https://kinopio-blog.us-east-1.linodeobjects.com/card-counter-thumbnail.mp4'
 description: Add a numerical count to your cards for voting on ideas, to assign meanings like priority, or just to count things
 ---

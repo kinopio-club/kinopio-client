@@ -1,7 +1,7 @@
 ---
 title: 'The Journey to Bending Connections'
 date: 2026-08-31
-category: New Stuff
+category: How It's Made
 
 description: For a couple months now, on and off, I’ve been working on ways to solve the problem of connection lines always appearing as lines between top-right item connectors.
 

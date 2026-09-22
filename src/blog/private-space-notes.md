@@ -1,7 +1,7 @@
 ---
 title: 'Private Space Notes'
 date: 2026-04-03
-category: New Stuff
+category: How It's Made
 
 video: 'https://updates.kinopio.club/pages/blog/posts/private-space-notes/small.mp4'
 

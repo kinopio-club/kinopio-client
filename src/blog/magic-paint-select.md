@@ -1,7 +1,7 @@
 ---
 title: 'Magic Paint Select'
 date: 2023-04-10
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/magic-paint-select-small.mp4'
 description: Painting to select cards, boxes, and connections is faster and more responsive
 ---

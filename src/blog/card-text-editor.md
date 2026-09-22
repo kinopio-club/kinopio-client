@@ -1,7 +1,7 @@
 ---
 title: 'Card Text Editor'
 date: 2023-07-10
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/card-text-editor-thumb-small.mp4'
 description: Open the sidebar to edit cards like text blocks
 ---

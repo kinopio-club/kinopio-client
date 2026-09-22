@@ -1,7 +1,7 @@
 ---
 title: 'Z-Toggle Zoom Out'
 date: 2023-01-07
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/z-toggle-zoom-out-thumbnail.png'
 description: Press Z to instantly zoom all the way out or in. A little feature that gives you big perspective
 ---

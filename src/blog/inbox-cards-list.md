@@ -1,7 +1,7 @@
 ---
 title: 'Inbox Cards List'
 date: 2023-01-06
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/inbox-cards-list-thumbnail-2.png'
 description: The inbox is great for quickly capturing ideas – now it's just as easy to get those cards out of your inbox and into your current space
 ---

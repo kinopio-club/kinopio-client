@@ -1,7 +1,7 @@
 ---
 title: 'Making the Kinopio Source Code Public'
 date: 2024-06-27
-category: New Stuff
+category: How It's Made
 image: 'https://pketh.org/images/2024/oss/disk2.webp'
 description: The kinopio client application code is now open source
 ---

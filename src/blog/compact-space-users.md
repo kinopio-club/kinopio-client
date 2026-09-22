@@ -1,7 +1,7 @@
 ---
 title: 'Compact Space Users List'
 date: 2024-07-08
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/pages/blog/posts/compact-space-users/compact-space-users-list-thumb.webp'
 description: When a space has too many spectators or collaborators to display comfortably, they'll nest inside a button
 ---

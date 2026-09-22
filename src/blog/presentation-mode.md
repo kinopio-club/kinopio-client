@@ -1,7 +1,7 @@
 ---
 title: 'Presentation Mode'
 date: 2023-01-03
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/presentation-mode-thumbnail.png'
 description: Share → Present to hide the Kinopio UI and put the focus solely on your content
 ---

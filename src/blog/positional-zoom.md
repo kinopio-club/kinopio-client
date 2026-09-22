@@ -1,7 +1,7 @@
 ---
 title: 'Positional Zoom'
 date: 2023-01-02
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/positional-zoom-thumbnail.mp4'
 description: Drag the zoom slider or hold cmd/ctrl while scrolling to zoom out for perspective on large spaces
 ---

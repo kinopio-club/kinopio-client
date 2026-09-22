@@ -1,7 +1,7 @@
 ---
 title: 'New Templates'
 date: 2026-04-04
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/pages/blog/posts/new-templates/1.webp'
 
 description: The built-in templates were totally revamped.

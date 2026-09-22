@@ -1,7 +1,7 @@
 ---
 title: 'Early May Bug Fixes and Enhancements'
 date: 2024-05-14
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/pages/blog/posts/early-may-bug-fixes/ig-url-preview-card.webp'
 ---
 

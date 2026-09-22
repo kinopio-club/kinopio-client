@@ -1,7 +1,7 @@
 ---
 title: 'Refer a Friend'
 date: 2023-02-20
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/refer-thumb.png'
 description: When you find something sweet, it's even sweeter when you share it with a friend
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'Space List Previews'
 date: 2024-02-17
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/space-list-previews-thumb.webp'
 description: Preview images next to each of your spaces, and community spaces
 ---

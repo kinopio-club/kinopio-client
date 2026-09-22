@@ -1,7 +1,7 @@
 ---
 title: 'Box Snapping'
 date: 2023-01-11
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/box-snapping-thumb2.jpeg'
 description: Drag boxes close to each other to snap them together
 ---

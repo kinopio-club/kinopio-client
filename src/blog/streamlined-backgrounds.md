@@ -1,7 +1,7 @@
 ---
 title: 'Streamlined Backgrounds'
 date: 2023-01-29
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/streamlined-backgrounds-thumbnail.png'
 description: The UI for changing space backgrounds has been streamlined to be more direct and intuitive to use
 ---

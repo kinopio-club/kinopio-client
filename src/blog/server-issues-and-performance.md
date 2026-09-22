@@ -1,7 +1,7 @@
 ---
 title: 'Server Issues and Performance Upgrades'
 date: 2024-04-04
-category: New Stuff
+category: How It's Made
 video: 'https://kinopio-blog.us-east-1.linodeobjects.com/anime-tape-reels.mp4'
 description: Overhauled the server and database to make them substantially faster and more reliable
 ---

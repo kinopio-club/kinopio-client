@@ -1,7 +1,7 @@
 ---
 title: 'Journal Prompt of the Day'
 date: 2023-06-09
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/journal-prompt-of-the-day.png'
 description: Inspiration and introspective prompts generated each day for your new journal spaces
 ---

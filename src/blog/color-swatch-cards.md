@@ -1,7 +1,7 @@
 ---
 title: 'Color Swatch Cards'
 date: 2023-01-04
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/color-swatch-cards-2.png'
 description: If a card is named as a color – like `pink` or `#5e978b` – then it'll become that color
 ---

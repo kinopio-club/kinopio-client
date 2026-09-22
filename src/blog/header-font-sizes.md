@@ -1,7 +1,7 @@
 ---
 title: 'Header Font Sizes'
 date: 2024-06-12
-category: New Stuff
+category: How It's Made
 
 video: 'https://updates.kinopio.club/pages/blog/posts/header-font-sizes/header-font-sizes-compressed.mp4'
 description: Make titles and headlines stand out – or Really stand out

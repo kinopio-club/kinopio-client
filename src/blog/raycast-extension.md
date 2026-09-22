@@ -1,7 +1,7 @@
 ---
 title: 'Raycast Extension'
 date: 2023-01-18
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/kinopio-inbox-1.png'
 description: Quickly capture ideas to your inbox with the Kinopio extension for Raycast
 ---

@@ -111,10 +111,8 @@ Frontmatter:
 ```yaml
 ---
 title: 'My Post'
-metaDate: 'Sep 7, 2026'   # shown on the page
 date: 2026-09-07          # sorts the index and both feeds, and sets the rss pubDate
-category: 'New Stuff'     # New Stuff, Bulletin, Guides, or In Use – one per post
-color: '#f0dba8'          # index card background
+category: 'In Use'        # How It's Made, Bulletin, or In Use – one per post
 image: 'https://…'        # index card thumbnail and og:image
 description: One or two sentences, used for the index card, meta description, and feed summary
 ---

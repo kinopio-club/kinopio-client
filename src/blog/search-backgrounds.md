@@ -1,7 +1,7 @@
 ---
 title: 'Search Backgrounds'
 date: 2023-02-24
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/search-backgrounds-thumb.jpeg'
 description: Find the perfect background for the tone of your space
 ---

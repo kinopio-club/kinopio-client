@@ -1,7 +1,7 @@
 ---
 title: 'Community Backgrounds'
 date: 2023-05-16
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/community-backgrounds.mp4'
 description: Now every card has it's own URL that you can share with other people directly
 ---

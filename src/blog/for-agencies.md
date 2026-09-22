@@ -1,7 +1,7 @@
 ---
 title: 'Case Study: Kinopio for Agencies'
 date: 2025-12-10
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/pages/blog/posts/for-agencies/img4.jpg'
 description: It totally made my day when I received this email from an SEO agency in London.
 ---

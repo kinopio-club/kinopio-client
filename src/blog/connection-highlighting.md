@@ -1,7 +1,7 @@
 ---
 title: 'Improved Connection Highlighting'
 date: 2023-09-18
-category: New Stuff
+category: How It's Made
 video: 'https://kinopio-updates.us-east-1.linodeobjects.com/connection-highlighting-thumb.mp4'
 description: Visually untangle busy spaces
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'Card Links'
 date: 2023-05-16
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/pretty-invites.png'
 description: Now every card has it's own URL that you can share with other people directly
 ---

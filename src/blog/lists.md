@@ -1,7 +1,7 @@
 ---
 title: 'Lists'
 date: 2026-04-01
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/pages/blog/posts/lists/multiselect.mp4'
 description: Lists let you vertically group and easily reorder cards.
 

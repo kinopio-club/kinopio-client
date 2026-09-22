@@ -1,7 +1,7 @@
 ---
 title: 'Import/Export JSON Canvas'
 date: 2024-03-14
-category: New Stuff
+category: How It's Made
 description: Import and Export spaces in the open JSON Canvas format
 image: 'https://updates.kinopio.club/import-json-canvas.webp'
 ---

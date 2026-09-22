@@ -1,7 +1,7 @@
 ---
 title: 'Dark Mode'
 date: 2023-01-24
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/dark-mode-thumb-small.png'
 description: Whether you're a night owl or into the mysterious and cool, dark mode is here for you
 ---

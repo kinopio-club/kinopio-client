@@ -1,7 +1,7 @@
 ---
 title: 'April Bug Fixes and Enhancements'
 date: 2024-04-26
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/bug-fixes-april.webp'
 description: All the bug fixes and little improvements from the last two weeks
 ---

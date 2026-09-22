@@ -1,7 +1,7 @@
 ---
 title: 'Connections to Comments'
 date: 2023-02-13
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/transparent-connections-to-comments-small.png'
 description: Connection lines appear transparent when connected to a comment card
 ---

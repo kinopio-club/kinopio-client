@@ -22,22 +22,21 @@ const siteDescription = "What's new in Kinopio, the thinking tool for building n
 const defaultImage = 'https://files.kinopio.club/og-image.png'
 
 const categoryDetails = {
-  'new-stuff': {
+  'how-its-made': {
+    // name: "How It's Made"
     index: 0,
     color: 'rgb(185, 167, 255)'
   },
   bulletin: {
+    // name: 'Bulletin',
     index: 1,
     color: 'pink'
   },
   'in-use': {
+    // name: 'In Use'
     index: 2,
     color: 'violet'
   }
-  // 'in-use': {
-  //   index: 3,
-  //   color: 'salmon'
-  // }
 }
 
 onMounted(() => {
@@ -261,7 +260,7 @@ const badgeClasses = (post) => {
       template(v-if="currentSlugIsRoot")
         section#hello
           p
-            span Behind the scenes of how new features are designed and built, and guides for using Kinopio in the real world. Also, the occasional progress bulletin. Completely hand-written.{{' '}}
+            span How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Completely hand-written.{{' '}}
             a(href="/blog/feed.json")
               span (rss)
           .row
@@ -350,8 +349,8 @@ main.blog-page-wrap
     display flex
   .badge
     color var(--primary-on-light-background)
-    &.new-stuff
-      background-color var(--new-stuff)
+    &.how-its-made
+      background-color var(--how-its-made)
     &.bulletin
       background-color var(--bulletin)
     &.guides

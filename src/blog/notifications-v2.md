@@ -1,7 +1,7 @@
 ---
 title: 'Notifications v2'
 date: 2023-03-31
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/notifications-v2.png'
 description: Redesigned notifications will let you know when someone likes your spaces and follows you
 ---

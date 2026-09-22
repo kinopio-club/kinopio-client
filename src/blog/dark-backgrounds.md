@@ -1,7 +1,7 @@
 ---
 title: 'Dark Backgrounds'
 date: 2023-07-03
-category: New Stuff
+category: How It's Made
 video: 'https://kinopio-blog.us-east-1.linodeobjects.com/dark-backgrounds-thumbnail.mp4'
 description: When dark mode is enabled, grid backgrounds will display new dark versions
 ---

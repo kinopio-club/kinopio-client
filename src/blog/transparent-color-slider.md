@@ -1,7 +1,7 @@
 ---
 title: 'Transparent Color Slider'
 date: 2023-03-09
-category: New Stuff
+category: How It's Made
 video: 'https://updates.kinopio.club/transparent-color-slider.mp4'
 description: More creative controls to get your cards looking *just* right
 ---

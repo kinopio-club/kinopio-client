@@ -1,7 +1,7 @@
 ---
 title: 'Bigger, Better Code Blocks'
 date: 2023-10-23
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/bigger-better-code-blocks-thumb.png'
 description: Save code snippets and give them context
 ---

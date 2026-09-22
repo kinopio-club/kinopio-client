@@ -1,7 +1,7 @@
 ---
 title: 'Draggable Labels'
 date: 2023-12-01
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/drag-labels-thumbnail1.webp'
 description: Reposition connection labels to get them just right
 ---

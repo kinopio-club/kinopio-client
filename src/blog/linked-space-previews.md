@@ -1,7 +1,7 @@
 ---
 title: 'Linked Space Previews'
 date: 2023-12-05
-category: New Stuff
+category: How It's Made
 image: 'https://kinopio-blog.us-east-1.linodeobjects.com/linked-space-preview-thumbnail.webp'
 description: Reposition connection labels to get them just right
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'iOS App'
 date: 2023-08-31
-category: New Stuff
+category: How It's Made
 image: 'https://updates.kinopio.club/ios-app-thumb.jpeg'
 description: Kinopio for iOS is here
 ---
