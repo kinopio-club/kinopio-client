@@ -351,7 +351,7 @@ const updateFilterOnSearchFocus = (event) => {
   main.page.help-page-wrap(@click="closeAllDialogs")
     .page-wrap
       section.intro
-        Wordmark(h2="HELP TOPICS" :isH1="currentSlugIsRoot")
+        Wordmark(h2="help topics" :isH1="currentSlugIsRoot")
 
       section.search
         ResultsFilter(
@@ -386,7 +386,7 @@ const updateFilterOnSearchFocus = (event) => {
                       span {{ page.title }}
         //- post
         article
-          p(v-if="pageContent")
+          div(v-if="pageContent")
             a.category-name(href="/help/#nav")
               .badge.secondary.button-badge
                   img.icon.left-arrow(src="@/assets/down-arrow.svg")
@@ -408,9 +408,9 @@ const updateFilterOnSearchFocus = (event) => {
               muted
               playsinline
               aria-label="404 image"
-              poster="@/assets/pages/help/404-poster.webp"
+              poster="https://updates.kinopio.club/pages/help/404-poster.webp"
             )
-              source(src="@/assets/pages/help/404.webm")
+              source(src="https://updates.kinopio.club/pages/help/404.webm")
       FooterSitemap
   Footer
 </template>

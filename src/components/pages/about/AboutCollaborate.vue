@@ -143,7 +143,7 @@ section.for-work
     //-   span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
     //- p Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
     p Capture and connect ideas together, build them up into plans, kanban lists, and tasks assigned to team-mates.
-    p When projects are planned and tracked in Kinopio, teams stay aligned and meetings get shorter (or cut altogether).
+    p When projects are planned and tracked in Kinopio, teams stay aligned, projects get done faster, and meetings get shorter (or cut altogether).
     figure
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
         button.small-button(title="Pause or Play Video")

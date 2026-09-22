@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
+import { helpPages, blogPosts, helpPagesPlugin, blogPostsPlugin, blogFeedsPlugin } from './build/pages.js'
 
 const sitemapSpaces = [
   // example spaces, also linked from llms.txt
@@ -37,56 +38,6 @@ const createCache = (name, pattern) => {
   }
 }
 
-// Help pages, prerendered from src/help/*.md
-// Frontmatter (title, description, category) is parsed here at build time and
-// served to Help.vue as the 'virtual:help-pages' module, so post metadata can be
-// listed without statically importing the md files (which would merge their
-// lazy-loaded chunks into the Help chunk)
-
-const helpDir = './src/help'
-const parseFrontmatter = (markdown) => {
-  const match = markdown.match(/^---\n([\s\S]*?)\n---/)
-  if (!match) { return {} }
-  const data = {}
-  match[1].split('\n').forEach(line => {
-    const separatorIndex = line.indexOf(':')
-    if (separatorIndex === -1) { return }
-    const key = line.slice(0, separatorIndex).trim()
-    const value = line.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, '')
-    data[key] = value
-  })
-  return data
-}
-const helpPages = () => {
-  return fs.readdirSync(helpDir)
-    .filter(file => file.endsWith('.md') && file !== 'index.md')
-    .map(file => {
-      const markdown = fs.readFileSync(path.join(helpDir, file), 'utf8')
-      const slug = file.replace('.md', '')
-      return { slug, ...parseFrontmatter(markdown) }
-    })
-}
-const helpPagesPlugin = () => {
-  const virtualId = 'virtual:help-pages'
-  const resolvedVirtualId = '\0' + virtualId
-  return {
-    name: 'help-pages',
-    resolveId (id) {
-      if (id === virtualId) { return resolvedVirtualId }
-    },
-    load (id) {
-      if (id !== resolvedVirtualId) { return }
-      return `export default ${JSON.stringify(helpPages())}`
-    },
-    // reload when frontmatter changes during dev
-    handleHotUpdate ({ file, server }) {
-      if (!file.includes('/src/help/')) { return }
-      const module = server.moduleGraph.getModuleById(resolvedVirtualId)
-      if (module) { server.moduleGraph.invalidateModule(module) }
-    }
-  }
-}
-
 // Custom plugin to create SPA version of app.html
 const createSPAPlugin = () => {
   return {
@@ -108,13 +59,13 @@ const createSPAPlugin = () => {
 
 export default defineConfig(async ({ command, mode }) => {
   const helpRoutes = ['/help'].concat(helpPages().map(page => `/help/${page.slug}`))
+  const blogRoutes = ['/blog'].concat(blogPosts().map(post => `/blog/${post.slug}`))
   // sitemap routes
   const routes = [
     '/about',
     '/api',
-    '/blog',
     '/explore'
-  ].concat(helpRoutes)
+  ].concat(helpRoutes, blogRoutes)
   const dynamicRoutes = routes.concat(sitemapSpaces)
   // dev https certs (optional, local only)
   const certKeyPath = './.cert/key.pem'
@@ -131,7 +82,7 @@ export default defineConfig(async ({ command, mode }) => {
     ssgOptions: {
       entry: 'src/main.js',
       includedRoutes (paths, routes) {
-        return ['/', '/about', '/api', '/explore'].concat(helpRoutes)
+        return ['/', '/about', '/api', '/explore'].concat(helpRoutes, blogRoutes)
       }
     },
     test: {
@@ -160,6 +111,10 @@ export default defineConfig(async ({ command, mode }) => {
       }),
       // help page metadata for Help.vue
       helpPagesPlugin(),
+      // blog post metadata for Blog.vue
+      blogPostsPlugin(),
+      // /blog/feed.xml and /blog/feed.json
+      blogFeedsPlugin(),
       // Create SPA version of app.html
       createSPAPlugin(),
       // offline support
@@ -192,7 +147,7 @@ export default defineConfig(async ({ command, mode }) => {
           ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
           // help pages and their media are online-only, keep them out of the app precache
-          globIgnores: ['help.html', 'help/**'],
+          globIgnores: ['help.html', 'help/**', 'blog.html', 'blog/**'],
           runtimeCaching: [
             createCache('cdn-cache', /^https:\/\/cdn\.kinopio\.club\/(?!.*?\.mp(3|4)\b).*$/i), // match all except mp3/mp4
             createCache('img-cache', /^https:\/\/img\.kinopio\.club\/.*/i),
@@ -229,18 +184,14 @@ export default defineConfig(async ({ command, mode }) => {
       // skip non-important build warnings
       rollupOptions: {
         output: {
-          // emit help post media and content chunks into help/ so the service
-          // worker globIgnores above can exclude them from the app precache
-          assetFileNames (assetInfo) {
-            const original = assetInfo.originalFileNames?.[0] || ''
-            if (original.includes('assets/pages/help/')) {
-              return 'help/assets/[name]-[hash][extname]'
-            }
-            return 'assets/[name]-[hash][extname]'
-          },
+          // emit help page and blog post chunks into help/ and blog/ so the
+          // service worker globIgnores above can exclude them from the app precache
           chunkFileNames (chunkInfo) {
             if (chunkInfo.facadeModuleId?.includes('/src/help/')) {
               return 'help/assets/[name]-[hash].js'
+            }
+            if (chunkInfo.facadeModuleId?.includes('/src/blog/')) {
+              return 'blog/assets/[name]-[hash].js'
             }
             return 'assets/[name]-[hash].js'
           }

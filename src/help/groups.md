@@ -35,7 +35,7 @@ From your Spaces list, you can see your personal spaces as well as spaces added 
 
 <img src="https://updates.kinopio.club/pages/help/posts/groups/added.webp" class=""/>
 
-Each space can only belong to a single Group. Spaces can be added to Groups by any member of that group.
+Spaces can belong to multiple Groups. Spaces can be added to Groups by any member of that group.
 
 ## Editing Group Spaces
 

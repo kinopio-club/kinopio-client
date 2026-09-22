@@ -97,6 +97,16 @@ To update it, create the space and export its json. Replace the contents of`hell
 
 [Instructions here](https://kinopio.club/how-to-update-changelog-oi4jZTSI_eAEvov9XbjJM)
 
+## How to Update Blog
+
+Blog posts are markdown files in `src/blog`. Adding one publishes it: `src/blog/my-post.md` becomes `/blog/my-post`, and gets prerendered to its own static html file so robots and link unfurlers see the full post.
+
+Post media lives on the `kinopio-updates` linode s3 bucket, referenced with cdn urls (e.g. `https://updates.kinopio.club/pages/blog/...`
+
+## How to Update Help
+
+Just like the blog, help posts are statically compiled markdown files in `src/help`
+
 ## HTTPS Signing
 
 > You shouldn't need to run this or update the cert until 2025, but just in case
