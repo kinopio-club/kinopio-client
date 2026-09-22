@@ -25,7 +25,7 @@ const props = defineProps({
   isSmallButton: Boolean
 })
 
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const spaceIsInGroup = computed(() => Boolean(groupStore.getCurrentSpaceGroups.length))
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const isInvitedButCannotEditSpace = computed(() => globalStore.currentUserIsInvitedButCannotEditCurrentSpace)
 
@@ -39,7 +39,7 @@ const privacyState = computed(() => {
 })
 const description = computed(() => {
   let description = privacyState.value.description
-  if (spaceGroup.value) {
+  if (spaceIsInGroup.value) {
     description = privacyState.value.descriptionGroup
   }
   return utils.capitalizeFirstLetter(description)

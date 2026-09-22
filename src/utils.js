@@ -1715,6 +1715,11 @@ export default {
     const date = dayjs(new Date())
     return date.format(consts.nameDateFormat)
   },
+  // spaces can be in multiple groups
+  spaceGroups (space) {
+    if (!this.arrayHasItems(space?.groups)) { return [] }
+    return space.groups.filter(group => Boolean(group?.id))
+  },
 
   // sync
 
@@ -1792,7 +1797,7 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      groupId: null,
+      groups: [],
       note: ''
     }
   },
@@ -1803,7 +1808,6 @@ export default {
       'users',
       'collaborators',
       'collaboratorKey',
-      'groupId',
       'readOnlyKey'
     ]
     spacePrivateKeys.forEach(key => delete space[key])
@@ -1825,8 +1829,7 @@ export default {
     space.isTemplate = false
     space.previewImage = null
     space.previewThumbnailImage = null
-    space.groupId = null
-    space.group = null
+    space.groups = []
     space.createdAt = new Date()
     space.editedAt = new Date().toISOString()
     space.collaboratorKey = nanoid()

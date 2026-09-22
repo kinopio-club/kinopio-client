@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
   unsubscribes()
 })
 
-const emit = defineEmits(['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
+const emit = defineEmits(['closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
 
 const props = defineProps({
   shouldHidePin: Boolean,
@@ -99,7 +99,7 @@ const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 // current space
 
 const updateLocalSpaces = () => {
-  emit('updateLocalSpaces')
+  globalStore.triggerSpaceDetailsUpdateLocalSpaces()
 }
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isLoadingSpace = computed(() => globalStore.isLoadingSpace)
@@ -202,7 +202,7 @@ const handleEnterKey = (event) => {
 // group
 
 const userGroups = computed(() => groupStore.getCurrentUserGroups)
-const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
+const spaceGroups = computed(() => groupStore.getCurrentSpaceGroups)
 const currentUserIsGroupAdmin = (group) => {
   return groupStore.getGroupUserIsAdmin({
     userId: userStore.id,
@@ -210,19 +210,18 @@ const currentUserIsGroupAdmin = (group) => {
   })
 }
 const toggleSpaceGroup = async (group) => {
-  const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
+  const shouldRemoveSpaceGroup = spaceGroups.value.find(spaceGroup => spaceGroup.id === group.id)
   if (shouldRemoveSpaceGroup) {
     await removeSpaceGroup(group)
   } else {
-    await updateSpaceGroup(group)
+    await addSpaceToGroup(group)
   }
   updateLocalSpaces()
 }
-const updateSpaceGroup = (group) => {
+const addSpaceToGroup = async (group) => {
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isSpaceCreator) {
-    groupStore.addSpaceToGroup(group)
-    updateLocalSpaces()
+    await groupStore.addSpaceToGroup(group)
   } else {
     globalStore.addNotification({
       message: 'Only space creator can assign to group',
@@ -230,12 +229,11 @@ const updateSpaceGroup = (group) => {
     })
   }
 }
-const removeSpaceGroup = (group) => {
+const removeSpaceGroup = async (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
   const isSpaceCreator = userStore.getUserIsSpaceCreator
   if (isGroupAdmin || isSpaceCreator) {
-    groupStore.removeSpaceFromGroup()
-    updateLocalSpaces()
+    await groupStore.removeSpaceFromGroup(group)
   } else {
     globalStore.addNotification({
       message: 'Only space creator, or group admin, can remove from group',
@@ -292,14 +290,14 @@ template(v-if="isSpaceMember")
         .button-wrap
           .segmented-buttons
             //- Group
-            button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+            button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroups.length}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
               img.icon.group(src="@/assets/group.svg")
             //- Template
             button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
               img.icon.templates(src="@/assets/templates.svg")
             //- Favorite
             FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-          AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+          AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroups="spaceGroups" @closeDialogs="closeDialogs")
       template(v-else)
         //- Favorite
         FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -323,7 +321,7 @@ SpaceOptions(
   @removeSpaceId="removeSpaceId"
 )
 
-SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
+SpaceInfoBadges
 ItemDetailsDebug(:item="currentSpace")
 </template>
 

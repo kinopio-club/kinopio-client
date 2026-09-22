@@ -52,11 +52,6 @@ section.social-proof
     p {{ business }}
     p {{ academic }}
 
-  //- TODO add more case studies
-  //- p.row.blog-post-row
-  //-   a.blog-post.badge.button-badge(href="https://kinopio.club/blog/posts/trove-brands/")
-  //-    span How Trove Brands Makes Projects More Visible
-
   p Kinopio has also been featured in{{' '}}
     a(href="https://www.theverge.com/23845815/threads-web-fabric-car-tech-installer-newsletter") The Verge
     span ,{{' '}}
