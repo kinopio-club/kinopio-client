@@ -268,6 +268,9 @@ export default function webSocketPlugin () {
     const isAction = Boolean(action)
     if (name === 'connected') {
       console.info('🌛 user connected', user)
+    } else if (name === 'joinSpaceRoomError') {
+      console.error('🌛 current user is not authorized to joinSpaceRoom', user)
+      globalStore.updateNotifyConnectionError(true)
     } else if (name === 'userJoinedRoom') {
       spaceStore.addUserToJoinedSpace(user)
     } else if (name === 'userLeftRoom') {
