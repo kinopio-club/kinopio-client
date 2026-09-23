@@ -77,6 +77,7 @@ export default function webSocketPlugin () {
     const userStore = useUserStore(pinia)
     const spaceId = spaceStore.id
     const user = userStore.getUserPublicMeta
+    const credentials = userStore.getUserCredentials
     // check if should join
     if (!websocket) {
       console.info('🌙 cannot join space room: no websocket connection', websocket)
@@ -110,7 +111,8 @@ export default function webSocketPlugin () {
       },
       spaceId,
       user,
-      clientId
+      clientId,
+      credentials
     }))
     console.info('🌜 joined space room', spaceId)
     globalStore.isJoiningSpace = false

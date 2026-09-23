@@ -123,6 +123,15 @@ export const useUserStore = defineStore('user', {
     getUserIsSignedIn () {
       return Boolean(this.apiKey)
     },
+    getUserCredentials () {
+      const spaceStore = useSpaceStore()
+      const space = spaceStore.getSpaceAllState
+      const apiKey = this.apiKey
+      const collaboratorKey = space.collaboratorKey
+      const readOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
+      const userId = this.id
+      return { apiKey, collaboratorKey, readOnlyKey, userId }
+    },
     getUserCardsCreatedIsOverLimit () {
       const freeCardsCreatedLimit = consts.freeCardsCreatedLimit
       if (this.isUpgraded) { return }
