@@ -426,15 +426,10 @@ export default function webSocketPlugin () {
   }
 
   // Return the Pinia plugin
-  return ({ pinia }) => {
-    // Get the broadcast store
-    const broadcastStore = useBroadcastStore(pinia)
-    if (!broadcastStore) {
-      console.error('🚒 broadcastStore not found')
-      return
-    }
+  return ({ pinia, store }) => {
+    if (store.$id !== 'broadcast') { return }
     // Subscribe to broadcast store actions
-    broadcastStore.$onAction(({ name, args }) => {
+    store.$onAction(({ name, args }) => {
       broadcastHandler(pinia, name, args)
     })
   }
