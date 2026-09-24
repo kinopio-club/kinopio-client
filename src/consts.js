@@ -11,6 +11,7 @@ export default {
   viewportObserverMaxRootMarginPercent: 50,
   spaceBetweenCards: 12,
   cardCharacterLimit: 4000,
+  spaceNoteCharacterLimit: 10000,
   defaultCardWidth: 58,
   defaultCardHeight: 70,
   minItemXY: 70,
