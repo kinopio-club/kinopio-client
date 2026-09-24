@@ -76,7 +76,7 @@ const spaceNote = computed({
     return spaceStore.note
   },
   set (newValue) {
-    spaceStore.updateSpace({ note: newValue })
+    spaceStore.updateSpaceNote(newValue)
     textareaSizes()
   }
 })
