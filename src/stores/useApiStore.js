@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -204,6 +205,7 @@ export const useApiStore = defineStore('api', {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const globalStore = useGlobalStore()
+      const broadcastStore = useBroadcastStore()
       const apiKey = userStore.apiKey
       const isOnline = globalStore.isOnline
       const queue = utils.clone(sessionQueue)
@@ -237,6 +239,11 @@ export const useApiStore = defineStore('api', {
       } finally {
         globalStore.clearSendingQueue()
         cache.clearQueueBackup()
+      }
+      // join broadcast for newly created space
+      const isCurrentSpaceCreated = queue.some(operation => operation.name === 'createSpace' && operation.body.id === spaceStore.id)
+      if (response && isCurrentSpaceCreated) {
+        broadcastStore.joinSpaceRoom({ shouldRejoin: true })
       }
     }, 500),
 

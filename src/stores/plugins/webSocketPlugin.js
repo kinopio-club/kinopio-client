@@ -87,7 +87,8 @@ export default function webSocketPlugin () {
       globalStore.isJoiningSpace = false
       return
     }
-    if (currentSpaceRoom === spaceId) {
+    // shouldRejoin when new space created on the server
+    if (currentSpaceRoom === spaceId && !payload?.shouldRejoin) {
       console.info('🌙 already in space room', spaceId)
       globalStore.isJoiningSpace = false
       return
