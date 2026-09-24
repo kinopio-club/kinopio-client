@@ -10,6 +10,7 @@ import { useChangelogStore } from '@/stores/useChangelogStore'
 import Header from '@/components/pages/Header.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
+import BlogSubscribe from '@/components/pages/blog/BlogSubscribe.vue'
 import Footer from '@/components/pages/Footer.vue'
 import blogPosts from 'virtual:blog-posts' // posts [{ slug, title, description, category, date, … }, {…}] from vite build, newest first
 import consts from '@/consts.js'
@@ -269,6 +270,8 @@ const badgeClasses = (post) => {
             .button-wrap
               a(href="/roadmap")
                 button Roadmap
+
+        BlogSubscribe
 
         //- categories filter
         section.categories
