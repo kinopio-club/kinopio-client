@@ -522,6 +522,7 @@ export const useSpaceStore = defineStore('space', {
       const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
       const cardStore = useCardStore()
+      const broadcastStore = useBroadcastStore()
       isLoadingRemoteSpace = false
       space = utils.migrateConnectionTypes(space)
       if (!globalStore.isEmbedMode) {
@@ -557,6 +558,7 @@ export const useSpaceStore = defineStore('space', {
         this.updateUserLastSpaceId()
         this.editedAt = new Date().toISOString()
         globalStore.isLoadingSpace = false
+        broadcastStore.joinSpaceRoom()
         globalStore.triggerDrawingInitialize()
         globalStore.updateTags()
         this.updateOtherUsers()

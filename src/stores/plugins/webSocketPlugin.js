@@ -400,6 +400,7 @@ export default function webSocketPlugin () {
         spaceStore.clients = []
         message.name = 'userLeftRoom'
         queueMessage(pinia, message)
+        currentSpaceRoom = null
         break
       case 'update':
         queueMessage(pinia, message)
