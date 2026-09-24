@@ -77,6 +77,7 @@ export default function webSocketPlugin () {
     const userStore = useUserStore(pinia)
     const spaceId = spaceStore.id
     const user = userStore.getUserPublicMeta
+    const credentials = userStore.getUserCredentials
     // check if should join
     if (!websocket) {
       console.info('🌙 cannot join space room: no websocket connection', websocket)
@@ -86,7 +87,8 @@ export default function webSocketPlugin () {
       globalStore.isJoiningSpace = false
       return
     }
-    if (currentSpaceRoom === spaceId) {
+    // shouldRejoin when new space created on the server
+    if (currentSpaceRoom === spaceId && !payload?.shouldRejoin) {
       console.info('🌙 already in space room', spaceId)
       globalStore.isJoiningSpace = false
       return
@@ -110,7 +112,8 @@ export default function webSocketPlugin () {
       },
       spaceId,
       user,
-      clientId
+      clientId,
+      credentials
     }))
     console.info('🌜 joined space room', spaceId)
     globalStore.isJoiningSpace = false
@@ -266,6 +269,9 @@ export default function webSocketPlugin () {
     const isAction = Boolean(action)
     if (name === 'connected') {
       console.info('🌛 user connected', user)
+    } else if (name === 'joinSpaceRoomError') {
+      console.error('🌛 current user is not authorized to joinSpaceRoom', user)
+      globalStore.updateNotifyConnectionError(true)
     } else if (name === 'userJoinedRoom') {
       spaceStore.addUserToJoinedSpace(user)
     } else if (name === 'userLeftRoom') {
@@ -395,6 +401,7 @@ export default function webSocketPlugin () {
         spaceStore.clients = []
         message.name = 'userLeftRoom'
         queueMessage(pinia, message)
+        currentSpaceRoom = null
         break
       case 'update':
         queueMessage(pinia, message)
@@ -420,15 +427,10 @@ export default function webSocketPlugin () {
   }
 
   // Return the Pinia plugin
-  return ({ pinia }) => {
-    // Get the broadcast store
-    const broadcastStore = useBroadcastStore(pinia)
-    if (!broadcastStore) {
-      console.error('🚒 broadcastStore not found')
-      return
-    }
+  return ({ pinia, store }) => {
+    if (store.$id !== 'broadcast') { return }
     // Subscribe to broadcast store actions
-    broadcastStore.$onAction(({ name, args }) => {
+    store.$onAction(({ name, args }) => {
       broadcastHandler(pinia, name, args)
     })
   }

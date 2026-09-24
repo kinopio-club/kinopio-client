@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -71,12 +72,14 @@ const textareaSizes = async () => {
   element.style.height = element.scrollHeight + 2 + 'px' // +2 for chromium scrollbar fix
 }
 
+const maxNoteCharacterLimit = computed(() => consts.spaceNoteCharacterLimit)
+const isMaxLength = computed(() => spaceStore.note.length >= consts.spaceNoteCharacterLimit)
 const spaceNote = computed({
   get () {
     return spaceStore.note
   },
   set (newValue) {
-    spaceStore.updateSpace({ note: newValue })
+    spaceStore.updateSpaceNote(newValue)
     textareaSizes()
   }
 })
@@ -163,6 +166,9 @@ section.note(v-if="visible" :style="styles")
   .row.title-row
     div
       span Private Note
+    span.badge.danger(v-if="isMaxLength")
+      img.icon.cancel(src="@/assets/add.svg")
+      span Max Length
     button.small-button(v-if="canEdit" title="Copy to Clipboard" @click="copyText")
       img.icon.copy(src="@/assets/copy.svg")
       span Copy
@@ -183,6 +189,7 @@ section.note(v-if="visible" :style="styles")
       ref="textareaElement"
       rows="2"
       placeholder="Type a note for this space here. Only you can see this."
+      :maxlength="maxNoteCharacterLimit"
       v-model="spaceNote"
       @mouseenter="mouseenter"
       @mouseleave="mouseleave"

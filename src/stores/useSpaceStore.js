@@ -522,6 +522,7 @@ export const useSpaceStore = defineStore('space', {
       const globalStore = useGlobalStore()
       const groupStore = useGroupStore()
       const cardStore = useCardStore()
+      const broadcastStore = useBroadcastStore()
       isLoadingRemoteSpace = false
       space = utils.migrateConnectionTypes(space)
       if (!globalStore.isEmbedMode) {
@@ -557,6 +558,7 @@ export const useSpaceStore = defineStore('space', {
         this.updateUserLastSpaceId()
         this.editedAt = new Date().toISOString()
         globalStore.isLoadingSpace = false
+        broadcastStore.joinSpaceRoom()
         globalStore.triggerDrawingInitialize()
         globalStore.updateTags()
         this.updateOtherUsers()
@@ -956,6 +958,8 @@ export const useSpaceStore = defineStore('space', {
     broadcastUpdateSpace (update) {
       const broadcastStore = useBroadcastStore()
       const ignoreKeys = ['id', 'editedAt', 'editedByUserId']
+      update = utils.clone(update)
+      delete update.note
       const keys = Object.keys(update)
       const shouldPrevent = keys.every(key => ignoreKeys.includes(key))
       if (shouldPrevent) { return }
@@ -1015,6 +1019,12 @@ export const useSpaceStore = defineStore('space', {
       this.broadcastUpdateSpace(update)
       await apiStore.addToQueue({ name: 'updateSpace', body: update })
       await cache.updateSpaceByUpdates(update, this.id)
+    },
+    async updateSpaceNote (note) {
+      const apiStore = useApiStore()
+      this.note = note
+      await apiStore.addToQueue({ name: 'updateSpace', body: { id: this.id, note } })
+      await cache.updateSpace('note', note, this.id)
     },
     async updateGroupsLocal (groups) {
       this.groups = groups

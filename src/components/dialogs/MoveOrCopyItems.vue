@@ -151,7 +151,7 @@ const copyToNote = () => {
   } else {
     newValue = text.value
   }
-  spaceStore.updateSpace({ note: newValue })
+  spaceStore.updateSpaceNote(newValue)
   state.isCopiedToNote = true
 }
 const openNote = () => {
