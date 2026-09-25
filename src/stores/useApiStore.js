@@ -345,6 +345,16 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'getEmojis', error })
       }
     },
+    async kinopioBlogNewPostSubscribe (email) {
+      try {
+        const body = { email }
+        const options = await this.requestOptions({ body, method: 'POST' })
+        const response = await fetch(`${consts.apiHost()}/kinopio-blog/new-post/subscribe`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        this.handleServerError({ name: 'subscribeToKinopioBlog', error })
+      }
+    },
 
     // Session Token (sign up spam mitigation)
 

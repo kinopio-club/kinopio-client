@@ -10,6 +10,7 @@ import { useChangelogStore } from '@/stores/useChangelogStore'
 import Header from '@/components/pages/Header.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
+import BlogSubscribe from '@/components/pages/blog/BlogSubscribe.vue'
 import Footer from '@/components/pages/Footer.vue'
 import blogPosts from 'virtual:blog-posts' // posts [{ slug, title, description, category, date, … }, {…}] from vite build, newest first
 import consts from '@/consts.js'
@@ -270,6 +271,8 @@ const badgeClasses = (post) => {
               a(href="/roadmap")
                 button Roadmap
 
+        BlogSubscribe
+
         //- categories filter
         section.categories
           nav
@@ -324,7 +327,7 @@ const badgeClasses = (post) => {
               poster="https://updates.kinopio.club/pages/help/404-poster.webp"
             )
               source(src="https://updates.kinopio.club/pages/help/404.webm")
-
+        BlogSubscribe
       FooterSitemap
   Footer
 </template>
@@ -389,7 +392,7 @@ main.blog-page-wrap
   article.post
     border-bottom 1px solid var(--primary-border)
     padding-bottom 2rem
-    margin-bottom 4rem
+    margin-bottom 2rem
     .row
       align-items center
     h1,

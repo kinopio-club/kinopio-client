@@ -8,7 +8,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import Loader from '@/components/Loader.vue'
+// import Loader from '@/components/Loader.vue'
 
 import { nanoid } from 'nanoid'
 

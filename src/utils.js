@@ -2338,6 +2338,9 @@ export default {
     // https://stackoverflow.com/a/42408099
     return string.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gim) || []
   },
+  emailIsValid (string) {
+    return Boolean(this.emailsFromString(string).length)
+  },
   urlsFromString (string) {
     if (!string) { return [] }
     // remove markdown links
