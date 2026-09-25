@@ -327,7 +327,7 @@ const badgeClasses = (post) => {
               poster="https://updates.kinopio.club/pages/help/404-poster.webp"
             )
               source(src="https://updates.kinopio.club/pages/help/404.webm")
-
+        BlogSubscribe
       FooterSitemap
   Footer
 </template>
@@ -392,7 +392,7 @@ main.blog-page-wrap
   article.post
     border-bottom 1px solid var(--primary-border)
     padding-bottom 2rem
-    margin-bottom 4rem
+    margin-bottom 2rem
     .row
       align-items center
     h1,
