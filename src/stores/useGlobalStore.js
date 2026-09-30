@@ -643,6 +643,7 @@ export const useGlobalStore = defineStore('global', {
     triggerUpdateDrawingDataUrl () {},
     triggerUpdateDrawingStrokes () {},
     triggerSelectDrawingStrokes ({ position, zoom, direction }) {},
+    triggerSelectDrawingStrokesInBoxes (selectedBox) {},
     triggerMoveDrawingStrokes ({ endCursor, prevCursor }) {},
     triggerEndMoveDrawingStrokes () {},
     triggerUpdateRemoteDrawingStrokes (updates) {},

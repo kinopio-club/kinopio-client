@@ -9,6 +9,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -21,6 +22,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const broadcastStore = useBroadcastStore()
+const boxStore = useBoxStore()
 
 let isDrawing = false
 let startPoint
@@ -68,6 +70,8 @@ onMounted(async () => {
         globalStore.triggerEndDrawing()
       } else if (name === 'triggerUpdateDrawingStrokes') {
         spaceStore.drawingStrokes = spaceStrokes
+      } else if (name === 'triggerSelectDrawingStrokesInBoxes') {
+        selectStrokesInBoxes(args[0])
       } else if (name === 'triggerSelectDrawingStrokes') {
         selectStrokes(args[0])
       } else if (name === 'triggerMoveDrawingStrokes') {
@@ -359,6 +363,24 @@ const selectStrokes = ({ position, zoom, direction }) => {
   })
   const ids = paths.map(path => path.id)
   globalStore.updateMultipleDrawingStrokesSelectedIds(ids)
+}
+const selectStrokesInBoxes = (selectedBox) => {
+  const ids = new Set(globalStore.multipleDrawingStrokesSelectedIds)
+  state.paths.forEach(path => {
+    // include the brush width, so that the whole visible stroke is inside the box
+    const radius = path.width / 2
+    const rect = {
+      id: path.id,
+      x: path.rect.x - radius,
+      y: path.rect.y - radius,
+      width: path.rect.width + path.width,
+      height: path.rect.height + path.width
+    }
+    if (boxStore.isItemInSelectedBoxes(rect, selectedBox)) {
+      ids.add(path.id)
+    }
+  })
+  globalStore.updateMultipleDrawingStrokesSelectedIds([...ids])
 }
 
 // move
