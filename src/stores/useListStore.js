@@ -202,6 +202,10 @@ export const useListStore = defineStore('lists', {
       if (!globalStore.currentUserIsDraggingCard) { return }
       if (globalStore.shouldSnapAlign) { return }
       this.updateShouldSnapBackToList()
+      if (globalStore.multipleListsSelectedIds.length) {
+        this.listSnapGuides = {}
+        return
+      }
       const card = cardStore.getCurrentDraggingCard
       const lists = this.getAllLists
       const list = lists.find(listRect => {

@@ -565,9 +565,11 @@ const checkIfShouldRemoveFromList = async () => {
   const cardId = globalStore.currentDraggingCardId
   const card = cardStore.getCard(cardId)
   if (!card?.listId) { return }
-  // if removeing current card from list, remove all selected list cards from lists
+  // if removing current card from list, remove all selected list cards from lists
   let cards = cardStore.getCardsSelected
-  cards = cards.filter(card => card.listId)
+  // cards in selected lists move with their list
+  const selectedListIds = globalStore.multipleListsSelectedIds
+  cards = cards.filter(card => card.listId && !selectedListIds.includes(card.listId))
   cardStore.removeCardsFromLists(cards)
 }
 const checkIfShouldSnapBackToList = async () => {
@@ -662,11 +664,18 @@ const dragItemsOnNextTick = async () => {
   await nextTick()
   dragItems()
 }
+const selectItemsInSelectedListsOnInitialDrag = () => {
+  if (!globalStore.multipleListsSelectedIds.length) { return }
+  const isInitialDrag = !globalStore.cardsWereDragged && !globalStore.boxesWereDragged && !globalStore.linesWereDragged && !globalStore.listsWereDragged
+  if (!isInitialDrag) { return }
+  listStore.selectItemsInSelectedLists()
+}
 const dragItems = () => {
   if (!prevCursor) { return }
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
+  selectItemsInSelectedListsOnInitialDrag()
   if (globalStore.currentUserIsDraggingLine) {
     endCursor.x = 0
     prevCursor.x = 0
