@@ -230,6 +230,7 @@ export const useGlobalStore = defineStore('global', {
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
     remoteLinesSelected: [], // [{ lineId, userId }, …]
     remoteListsSelected: [], // [{ listId, userId }, …]
+    remoteDrawingStrokesSelected: [], // [{ strokeId, userId }, …]
     multipleConnectionsSelectedIds: [],
     isSelectingX: false,
     isSelectingY: false,
@@ -1538,6 +1539,7 @@ export const useGlobalStore = defineStore('global', {
       this.remoteLinesDragging = this.remoteLinesDragging.filter(line => line.userId !== update.user.id)
       this.remoteListsSelected = this.remoteListsSelected.filter(list => list.userId !== update.user.id)
       this.remoteListsDragging = this.remoteListsDragging.filter(list => list.userId !== update.user.id)
+      this.remoteDrawingStrokesSelected = this.remoteDrawingStrokesSelected.filter(stroke => stroke.userId !== update.user.id)
     },
     previousMultipleConnectionsSelectedIds (connectionIds) {
       utils.typeCheck({ value: connectionIds, type: 'array' })
@@ -2090,6 +2092,27 @@ export const useGlobalStore = defineStore('global', {
         lineIds
       }
       broadcastStore.update({ updates, action: 'updateRemoteLinesSelected' })
+    },
+    updateMultipleDrawingStrokesSelectedIds (strokeIds) {
+      const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
+      utils.typeCheck({ value: strokeIds, type: 'array' })
+      this.multipleDrawingStrokesSelectedIds = strokeIds || []
+      const updates = {
+        userId: userStore.id,
+        strokeIds
+      }
+      broadcastStore.update({ updates, action: 'updateRemoteDrawingStrokesSelected' })
+    },
+    updateRemoteDrawingStrokesSelected (update) {
+      this.remoteDrawingStrokesSelected = this.remoteDrawingStrokesSelected.filter(stroke => stroke.userId !== update.userId)
+      const updates = update.strokeIds.map(strokeId => {
+        return {
+          userId: update.userId,
+          strokeId
+        }
+      })
+      this.remoteDrawingStrokesSelected = this.remoteDrawingStrokesSelected.concat(updates)
     },
     updateMultipleListsSelectedIds (listIds) {
       const userStore = useUserStore()

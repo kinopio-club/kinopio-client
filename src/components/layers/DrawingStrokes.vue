@@ -127,6 +127,7 @@ const clearDrawing = () => {
   spaceStrokes = []
   state.paths = []
   globalStore.multipleDrawingStrokesSelectedIds = []
+  globalStore.remoteDrawingStrokesSelected = []
 }
 
 // points
@@ -334,7 +335,11 @@ const endDrawing = async (event) => {
 // select
 
 const selectedStrokeColor = (path) => utils.invertColor(path.color)
-const strokeIsSelected = (id) => globalStore.multipleDrawingStrokesSelectedIds.includes(id)
+const strokeIsSelected = (id) => {
+  const isSelected = globalStore.multipleDrawingStrokesSelectedIds.includes(id)
+  const isRemoteSelected = globalStore.remoteDrawingStrokesSelected.some(stroke => stroke.strokeId === id)
+  return isSelected || isRemoteSelected
+}
 const selectStrokes = ({ position, zoom, direction }) => {
   const paths = state.paths.filter(path => {
     const x = path.rect.x * zoom
@@ -349,7 +354,8 @@ const selectStrokes = ({ position, zoom, direction }) => {
       return x <= position.x
     }
   })
-  globalStore.multipleDrawingStrokesSelectedIds = paths.map(path => path.id)
+  const ids = paths.map(path => path.id)
+  globalStore.updateMultipleDrawingStrokesSelectedIds(ids)
 }
 
 // move
