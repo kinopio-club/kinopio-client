@@ -13,6 +13,7 @@ import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vu
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import ItemTips from '@/components/dialogs/ItemTips.vue'
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
@@ -31,7 +32,8 @@ let prevBoxId
 const state = reactive({
   colorPickerIsVisible: false,
   isUpdated: false,
-  backgroundPickerIsVisible: false
+  backgroundPickerIsVisible: false,
+  itemTipsIsVisible: false
 })
 
 const canEditBox = computed(() => userStore.getUserCanEditBox(currentBox.value))
@@ -117,6 +119,12 @@ const name = computed({
     update({ name })
     textareaSizes()
   }
+})
+const isDefaultName = computed(() => {
+  if (!name.value) { return true }
+  // https://regexr.com/8okka
+  const bool = /^Box \d+$/.test(name.value)
+  return bool
 })
 const focusName = async () => {
   await nextTick()
@@ -233,6 +241,7 @@ const removeBox = () => {
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
   state.backgroundPickerIsVisible = false
+  state.itemTipsIsVisible = false
 }
 const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
@@ -281,6 +290,14 @@ const toggleFilteredInSpace = () => {
     globalStore.addToFilteredBoxId(boxId)
   }
 }
+
+// tips
+
+const toggleItemTipsIsVisible = () => {
+  const value = !state.itemTipsIsVisible
+  closeDialogs()
+  state.itemTipsIsVisible = value
+}
 </script>
 
 <template lang="pug">
@@ -317,8 +334,13 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
           @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
         )
+      //- item tips
+      .button-wrap.inline-button-wrap(v-if="isDefaultName" @click.left.stop="toggleItemTipsIsVisible" :class="{ active: state.itemTipsIsVisible }")
+        button.small-button(tabindex="-1" :class="{ active: state.itemTipsIsVisible }")
+          span ?
+        ItemTips(:visible="state.itemTipsIsVisible")
       //- Filter
-      .button-wrap.filter-button-wrap
+      .button-wrap.inline-button-wrap
         button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
           img.icon(src="@/assets/filter.svg")
 
@@ -352,7 +374,9 @@ dialog.box-details
   transform-origin top left
   .info-row
     align-items flex-start
-  .filter-button-wrap
+  .inline-button-wrap
+    margin 0
+    padding 0
     padding-left 5px
     padding-top 1px
   .background-preview-wrap

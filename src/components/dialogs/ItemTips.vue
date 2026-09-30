@@ -36,6 +36,7 @@ watch(() => props.visible, (value, prevValue) => {
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const meta = computed(() => utils.metaKey())
+const isCard = computed(() => props.itemType === 'card')
 
 // buttons
 const closeDialogs = () => {
@@ -85,16 +86,16 @@ const lineBreakShortcut = computed(() => {
 </script>
 
 <template lang="pug">
-dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible" ref="dialogElement")
+dialog.item-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible" ref="dialogElement")
   section.title-section
     .row.title-row
       span Tips
-      .button-details
+      .button-details(v-if="isCard")
         button.small-button(@click.stop="toggleCardSettingsIsVisible" :class="{ active: state.cardsSettingsIsVisible }")
           img.settings.icon(src="@/assets/settings.svg")
         UserSettingsCards(:visible="state.cardsSettingsIsVisible")
   section
-    template(v-if="props.itemType === 'card'")
+    template(v-if="isCard")
       article
         div
           .badge.info Character limit is {{maxCardCharacterLimit}}
@@ -181,10 +182,10 @@ dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible
 </template>
 
 <style lang="stylus">
-dialog.card-tips
+dialog.item-tips
   left initial
   right 8px
-  top 22px
+  top 12px
   overflow auto
   overscroll-behavior-y auto
   article
@@ -201,4 +202,6 @@ dialog.card-tips
     margin-left 6px
   .row
     justify-content space-between
+  dialog.user-settings-cards-dialog
+    right 0
 </style>
