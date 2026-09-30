@@ -886,6 +886,8 @@ const selectAllItemsBelowCursor = (position) => {
   const cardListIds = cardListIdsToSelect(cards)
   lists = lists.filter(list => (list.y * zoom) > position.y || cardListIds.includes(list.id))
   const listIds = lists.map(list => list.id)
+  // drawing strokes
+  globalStore.triggerSelectDrawingStrokes({ position, zoom, direction: 'below' })
   // select
   selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
   listStore.selectItemsInSelectedLists()
@@ -916,6 +918,8 @@ const selectAllItemsAboveCursor = (position) => {
   const cardListIds = cardListIdsToSelect(cards)
   lists = lists.filter(list => (list.y * zoom) < position.y || cardListIds.includes(list.id))
   const listIds = lists.map(list => list.id)
+  // drawing strokes
+  globalStore.triggerSelectDrawingStrokes({ position, zoom, direction: 'above' })
   // select
   selectItemIds({ position, cardIds, boxIds, lineIds, listIds })
   listStore.selectItemsInSelectedLists()
@@ -946,6 +950,8 @@ const selectAllItemsRightOfCursor = (position) => {
     return (list.x * zoom) >= position.x || cardListIds.includes(list.id)
   })
   const listIds = lists.map(list => list.id)
+  // drawing strokes
+  globalStore.triggerSelectDrawingStrokes({ position, zoom, direction: 'right' })
   selectItemIds({ position, cardIds, boxIds, listIds })
   listStore.selectItemsInSelectedLists()
 }
@@ -975,6 +981,8 @@ const selectAllItemsLeftOfCursor = (position) => {
     return (list.x * zoom) <= position.x || cardListIds.includes(list.id)
   })
   const listIds = lists.map(list => list.id)
+  // drawing strokes
+  globalStore.triggerSelectDrawingStrokes({ position, zoom, direction: 'left' })
   selectItemIds({ position, cardIds, boxIds, listIds })
   listStore.selectItemsInSelectedLists()
 }

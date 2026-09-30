@@ -1623,6 +1623,7 @@ export const useCardStore = defineStore('cards', {
       if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
       if (globalStore.shouldSnapAlign) { return }
+      if (globalStore.multipleListsSelectedIds.length) { return }
       const targetCards = this.getCardsSelectableInViewport()
       /** @type {SnapGuide[]} */
       let snapGuides = []

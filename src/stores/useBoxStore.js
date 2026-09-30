@@ -563,6 +563,7 @@ export const useBoxStore = defineStore('boxes', {
       })
       const connectionIds = connections.map(connection => connection.id)
       globalStore.addMultipleToMultipleConnectionsSelected(connectionIds)
+      globalStore.triggerSelectDrawingStrokesInBoxes(selectedBox)
     },
 
     // snap guides
