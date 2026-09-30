@@ -11,6 +11,7 @@ import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import ListActions from '@/components/subsections/ListActions.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import ItemTips from '@/components/dialogs/ItemTips.vue'
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
@@ -26,7 +27,8 @@ const dialogElement = ref(null)
 const nameElement = ref(null)
 
 const state = reactive({
-  colorPickerIsVisible: false
+  colorPickerIsVisible: false,
+  itemTipsIsVisible: false
 })
 
 let prevList
@@ -60,6 +62,7 @@ const lists = computed(() => listStore.getAllLists)
 
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
+  state.itemTipsIsVisible = false
   globalStore.triggerCloseChildDialogs()
 }
 const closeAllDialogs = () => {
@@ -138,6 +141,11 @@ const name = computed({
     update({ name })
     textareaSizes()
   }
+})
+const isDefaultName = computed(() => {
+  if (!name.value) { return true }
+  const bool = /^List \d+$/.test(name.value)
+  return bool
 })
 const focusName = async () => {
   await nextTick()
@@ -235,6 +243,14 @@ const removeList = () => {
   listStore.removeList(currentList.value.id)
   globalStore.closeAllDialogs()
 }
+
+// tips
+
+const toggleItemTipsIsVisible = () => {
+  const value = !state.itemTipsIsVisible
+  closeDialogs()
+  state.itemTipsIsVisible = value
+}
 </script>
 
 <template lang="pug">
@@ -272,6 +288,11 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
           @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
         )
+      //- item tips
+      .button-wrap.inline-button-wrap(v-if="isDefaultName" @click.left.stop="toggleItemTipsIsVisible" :class="{ active: state.itemTipsIsVisible }")
+        button.small-button(tabindex="-1" :class="{ active: state.itemTipsIsVisible }")
+          span ?
+        ItemTips(:visible="state.itemTipsIsVisible")
     template(v-if="canEditSpace")
       .row
         //- remove
@@ -298,6 +319,11 @@ dialog.link-details
   transform-origin top left
   .info-row
     align-items flex-start
+  .inline-button-wrap
+    margin 0
+    padding 0
+    padding-left 5px
+    padding-top 1px
   .up-arrow
     transform rotate(180deg)
   .down-arrow
