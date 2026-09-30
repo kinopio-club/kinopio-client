@@ -14,7 +14,7 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import CardActions from '@/components/subsections/CardActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
-import CardTips from '@/components/dialogs/CardTips.vue'
+import ItemTips from '@/components/dialogs/ItemTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Tag from '@/components/Tag.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
@@ -108,7 +108,7 @@ onBeforeUnmount(() => {
 const state = reactive({
   lastSelectionStartPosition: 0,
   imagePickerIsVisible: false,
-  cardTipsIsVisible: false,
+  itemTipsIsVisible: false,
   initialSearch: '',
   pastedName: '',
   wasPasted: false,
@@ -183,7 +183,7 @@ const closeCardAndFocus = (event) => {
 const closeDialogs = (shouldSkipGlobalDialogs) => {
   globalStore.triggerCloseChildDialogs()
   state.imagePickerIsVisible = false
-  state.cardTipsIsVisible = false
+  state.itemTipsIsVisible = false
   state.shareItemIsVisible = false
   hidePickers()
   if (shouldSkipGlobalDialogs === true) { return }
@@ -925,14 +925,15 @@ const textEditLinkAction = async () => {
 
 // card tips
 
-const showCardTips = computed(() => {
+const itemTypeString = computed(() => 'card')
+const showItemTips = computed(() => {
   if (name.value) { return }
   return true
 })
-const toggleCardTipsIsVisible = () => {
-  const isVisible = state.cardTipsIsVisible
+const toggleItemTipsIsVisible = () => {
+  const isVisible = state.itemTipsIsVisible
   closeDialogs()
-  state.cardTipsIsVisible = !isVisible
+  state.itemTipsIsVisible = !isVisible
 }
 
 // comment
@@ -1676,10 +1677,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @selectDate="replaceAtTextWithDateMention"
       )
         //- TODO ^ @selectDate
-      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
-        button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")
+      .inline-button-wrap(v-if="showItemTips" @click.left.stop="toggleItemTipsIsVisible" :class="{ active: state.itemTipsIsVisible }")
+        button.inline-button(tabindex="-1" :class="{ active: state.itemTipsIsVisible }")
           span ?
-      CardTips(:visible="state.cardTipsIsVisible")
+      ItemTips(:visible="state.itemTipsIsVisible" :itemType="itemTypeString")
 
     .rows
       .row(v-if="cardPendingUpload")

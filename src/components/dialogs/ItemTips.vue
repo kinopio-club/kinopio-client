@@ -18,7 +18,8 @@ const dialogElement = ref(null)
 const props = defineProps({
   visible: Boolean,
   preventScrollIntoView: Boolean,
-  shouldHideAdvanced: Boolean
+  shouldHideAdvanced: Boolean,
+  itemType: String
 })
 const state = reactive({
   markdownInfoIsVisible: false,
@@ -93,43 +94,44 @@ dialog.card-tips.narrow(v-if="visible" @click.stop="closeDialogs" :open="visible
           img.settings.icon(src="@/assets/settings.svg")
         UserSettingsCards(:visible="state.cardsSettingsIsVisible")
   section
-    article
-      div
-        .badge.info Character limit is {{maxCardCharacterLimit}}
-    article
-      .row
-        p
-          img.icon(src="@/assets/add.svg")
-          span Add Card
-        span.badge.keyboard-shortcut Enter
-    article
-      .row
-        p
-          img.icon(src="@/assets/add.svg")
-          span Add Child Card
-        span.badge.keyboard-shortcut {{childCardShortcut}}
-    article
-      .row
-        p
-          img.icon(src="@/assets/line-break.svg")
-          span Line Break
-        span.badge.keyboard-shortcut {{ lineBreakShortcut }}
-    template(v-if="!shouldHideAdvanced")
+    template(v-if="props.itemType === 'card'")
+      article
+        div
+          .badge.info Character limit is {{maxCardCharacterLimit}}
       article
         .row
           p
-            span Backlinked Tag
-          span.badge.keyboard-shortcut [[
+            img.icon(src="@/assets/add.svg")
+            span Add Card
+          span.badge.keyboard-shortcut Enter
       article
         .row
           p
-            span Link to Other Spaces
-          span.badge.keyboard-shortcut /
+            img.icon(src="@/assets/add.svg")
+            span Add Child Card
+          span.badge.keyboard-shortcut {{childCardShortcut}}
       article
         .row
           p
-            span Assign User or Due Date
-          span.badge.keyboard-shortcut @
+            img.icon(src="@/assets/line-break.svg")
+            span Line Break
+          span.badge.keyboard-shortcut {{ lineBreakShortcut }}
+      template(v-if="!shouldHideAdvanced")
+        article
+          .row
+            p
+              span Backlinked Tag
+            span.badge.keyboard-shortcut [[
+        article
+          .row
+            p
+              span Link to Other Spaces
+            span.badge.keyboard-shortcut /
+        article
+          .row
+            p
+              span Assign User or Due Date
+            span.badge.keyboard-shortcut @
 
     article
       .row
