@@ -76,8 +76,7 @@ onMounted(async () => {
         await saveMovedStrokes()
       } else if (name === 'triggerUpdateRemoteDrawingStrokes') {
         const updates = args[0]
-        const strokes = updates.map(update => update.stroke)
-        updateStrokes(strokes)
+        updateStrokes(updates)
       }
     }
   )
@@ -364,14 +363,22 @@ const selectStrokes = ({ position, zoom, direction }) => {
 
 // move
 
-const updateStrokes = (strokes) => {
-  const strokesById = new Map(strokes.map(stroke => [stroke[0].id, stroke]))
-  spaceStrokes = spaceStrokes.map(stroke => strokesById.get(stroke[0].id) || stroke)
+const updateStrokes = (updates) => {
+  const updatesById = new Map(updates.map(update => [update.stroke[0].id, update]))
+  spaceStrokes = spaceStrokes.map(stroke => {
+    const update = updatesById.get(stroke[0].id)
+    if (!update) { return stroke }
+    return update.stroke
+  })
   state.paths.forEach((path, index) => {
-    const stroke = strokesById.get(path.id)
-    if (!stroke) { return }
-    const newPath = createPathFromStroke(stroke)
-    newPath.rect = utils.rectFromDrawingStrokePath(newPath)
+    const update = updatesById.get(path.id)
+    if (!update) { return }
+    const newPath = createPathFromStroke(update.stroke)
+    if (update.rect) {
+      newPath.rect = update.rect
+    } else {
+      newPath.rect = utils.rectFromDrawingStrokePath(newPath)
+    }
     state.paths[index] = newPath
   })
 }
@@ -400,7 +407,8 @@ const moveSelectedStrokes = ({ endCursor, prevCursor }) => {
     const movedStroke = stroke.map(point => {
       return { ...point, x: point.x + x, y: point.y + y }
     })
-    movedStrokes.push(movedStroke)
+    const rect = { ...path.rect, x: path.rect.x + x, y: path.rect.y + y }
+    movedStrokes.push({ stroke: movedStroke, rect })
     movedStrokeIds.add(id)
     updates.push({ id, stroke: movedStroke })
   })
