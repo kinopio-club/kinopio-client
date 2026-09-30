@@ -680,6 +680,8 @@ const dragItems = () => {
   lineStore.moveLines({ endCursor, prevCursor })
   // lists
   listStore.moveLists({ endCursor, prevCursor })
+  // drawing strokes
+  globalStore.triggerMoveDrawingStrokes({ endCursor, prevCursor })
 }
 const dragBoxes = (event) => {
   const isInitialDrag = !globalStore.boxesWereDragged
@@ -1010,6 +1012,7 @@ const stopInteractions = async (event) => {
   await checkIfShouldUpdateCardPositionsInEdgeLists()
   globalStore.clearSnapGuides()
   globalStore.preventItemSnapping = false
+  globalStore.triggerEndMoveDrawingStrokes()
   if (shouldCancelInteraction(event)) {
     resetGlobalStoreState()
     return

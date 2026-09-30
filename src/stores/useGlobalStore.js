@@ -185,6 +185,9 @@ export const useGlobalStore = defineStore('global', {
     lineDetailsIsVisibleForLineId: '',
     multipleLinesSelectedIds: [],
     remoteLineDetailsVisible: [],
+
+    // drawing strokes
+    multipleDrawingStrokesSelectedIds: [],
     // dragging lines
     currentDraggingLineId: '',
     linesWereDragged: false,
@@ -638,6 +641,10 @@ export const useGlobalStore = defineStore('global', {
     triggerEndDrawing () {},
     triggerUpdateDrawingDataUrl () {},
     triggerUpdateDrawingStrokes () {},
+    triggerSelectDrawingStrokes ({ position, zoom, direction }) {},
+    triggerMoveDrawingStrokes ({ endCursor, prevCursor }) {},
+    triggerEndMoveDrawingStrokes () {},
+    triggerUpdateRemoteDrawingStrokes (updates) {},
     triggerIsSnappingToList () {},
     triggerUpdateLiveSpaces () {},
     triggerUpdateCommunitySpaces () {},
@@ -2104,6 +2111,7 @@ export const useGlobalStore = defineStore('global', {
       this.multipleBoxesSelectedIds = []
       this.multipleLinesSelectedIds = []
       this.multipleListsSelectedIds = []
+      this.multipleDrawingStrokesSelectedIds = []
       broadcastStore.update({ action: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected (connectionId) {
