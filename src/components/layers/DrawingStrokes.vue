@@ -76,7 +76,8 @@ onMounted(async () => {
         await saveMovedStrokes()
       } else if (name === 'triggerUpdateRemoteDrawingStrokes') {
         const updates = args[0]
-        updates.forEach(update => updateStroke(update.stroke))
+        const strokes = updates.map(update => update.stroke)
+        updateStrokes(strokes)
       }
     }
   )
@@ -363,13 +364,16 @@ const selectStrokes = ({ position, zoom, direction }) => {
 
 // move
 
-const updateStroke = (stroke) => {
-  const id = stroke[0].id
-  spaceStrokes = spaceStrokes.map(prevStroke => {
-    if (prevStroke[0].id === id) { return stroke }
-    return prevStroke
+const updateStrokes = (strokes) => {
+  const strokesById = new Map(strokes.map(stroke => [stroke[0].id, stroke]))
+  spaceStrokes = spaceStrokes.map(stroke => strokesById.get(stroke[0].id) || stroke)
+  state.paths.forEach((path, index) => {
+    const stroke = strokesById.get(path.id)
+    if (!stroke) { return }
+    const newPath = createPathFromStroke(stroke)
+    newPath.rect = utils.rectFromDrawingStrokePath(newPath)
+    state.paths[index] = newPath
   })
-  updatePaths(createPathFromStroke(stroke))
 }
 const moveSelectedStrokes = ({ endCursor, prevCursor }) => {
   const ids = globalStore.multipleDrawingStrokesSelectedIds
@@ -382,10 +386,13 @@ const moveSelectedStrokes = ({ endCursor, prevCursor }) => {
     y: (endCursor.y - prevCursor.y) * zoom
   }
   if (!delta.x && !delta.y) { return }
+  const strokesById = new Map(spaceStrokes.map(stroke => [stroke[0].id, stroke]))
+  const pathsById = new Map(state.paths.map(path => [path.id, path]))
+  const movedStrokes = []
   const updates = []
   ids.forEach(id => {
-    const stroke = spaceStrokes.find(stroke => stroke[0].id === id)
-    const path = state.paths.find(path => path.id === id)
+    const stroke = strokesById.get(id)
+    const path = pathsById.get(id)
     if (!stroke || !path) { return }
     // keep stroke inside the space
     const x = Math.max(delta.x, -path.rect.x)
@@ -393,10 +400,11 @@ const moveSelectedStrokes = ({ endCursor, prevCursor }) => {
     const movedStroke = stroke.map(point => {
       return { ...point, x: point.x + x, y: point.y + y }
     })
-    updateStroke(movedStroke)
+    movedStrokes.push(movedStroke)
     movedStrokeIds.add(id)
     updates.push({ id, stroke: movedStroke })
   })
+  updateStrokes(movedStrokes)
   broadcastStore.update({
     updates,
     action: 'triggerUpdateRemoteDrawingStrokes'
