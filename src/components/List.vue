@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, watch, ref, 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useListStore } from '@/stores/useListStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
@@ -21,6 +22,7 @@ import { nanoid } from 'nanoid'
 const globalStore = useGlobalStore()
 const listStore = useListStore()
 const cardStore = useCardStore()
+const boxStore = useBoxStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
@@ -137,6 +139,28 @@ const todoListCardsCompletedPercent = computed(() => {
   let value = todoListCardsCompleted.value.length / todoListCards.value.length
   value = Math.round(value * 100)
   return `${todoListCardsCompleted.value.length}/${todoListCards.value.length}, ${value}% Completed`
+})
+
+// space filters
+
+const isFilteredByBox = computed(() => {
+  const boxIds = globalStore.filteredBoxIds
+  let boxes = boxStore.getAllBoxes
+  boxes = boxes.filter(box => boxIds.includes(box.id))
+  const isInBox = boxes.find(box => {
+    return (
+      props.list.x >= box.x &&
+      props.list.y >= box.y &&
+      (props.list.x + props.list.resizeWidth) <= (box.x + box.resizeWidth) &&
+      (props.list.y + props.list.height) <= (box.y + box.resizeHeight)
+    )
+  })
+  return Boolean(isInBox)
+})
+const isFiltered = computed(() => {
+  if (!globalStore.filteredBoxIds.length) { return }
+  if (currentListIsBeingDragged.value) { return }
+  return !isFilteredByBox.value
 })
 
 // interacting
@@ -456,9 +480,8 @@ const listClasses = computed(() => {
     active: currentListIsBeingDragged.value,
     'is-resizing': isResizing.value,
     'is-selected': currentListIsSelected.value,
-    transition: globalStore.boxIsSnappingTransition
-    // filtered: isFiltered.value,
-    // transition: !globalStore.currentListIsNew || !globalStore.currentUserIsResizingList
+    transition: globalStore.boxIsSnappingTransition,
+    filtered: isFiltered.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -474,6 +497,8 @@ const infoClasses = computed(() => {
   return classes
 })
 const infoStyles = computed(() => {
+  const shouldPreventStyles = isFiltered.value && !props.list.isCollapsed
+  if (shouldPreventStyles) { return {} }
   const styles = {
     backgroundColor: color.value
   }
@@ -725,7 +750,7 @@ const clearFocus = () => {
   .list-info.list-info-bottom(
     v-if="listCards.length && !props.list.isCollapsed"
     :class="infoClasses"
-    :style="{ backgroundColor: color }"
+    :style="infoStyles"
     @mouseover="updateIsHover(true)"
     @mouseleave="updateIsHover(false)"
     @mousedown.left="startListInfoInteraction"

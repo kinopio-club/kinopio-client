@@ -250,6 +250,9 @@ const infoClasses = computed(() => {
   if (colorIsDark.value) {
     classList.push('is-dark')
   }
+  if (isFiltered.value) {
+    classList.push('filtered')
+  }
   const fontId = props.box.headerFontId || 0
   classList.push(`header-font-${fontId}`)
   const fontSize = props.box.headerFontSize || 's'
@@ -259,13 +262,6 @@ const infoClasses = computed(() => {
   if (fontSizeModifier) {
     classList.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
-  if (globalStore.boxIsSnappingTransition) {
-    classList.push('transition')
-  }
-  return classList
-})
-const backgroundClasses = computed(() => {
-  const classList = []
   if (globalStore.boxIsSnappingTransition) {
     classList.push('transition')
   }
@@ -706,7 +702,7 @@ const clearFocus = () => {
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: fillColor}" @animationend="clearFocus")
   teleport(to="#box-backgrounds")
-    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles" classes="backgroundClasses")
+    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   teleport(to="#box-infos")
     //- name
     .box-info(

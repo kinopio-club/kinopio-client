@@ -340,7 +340,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           span ?
         ItemTips(:visible="state.itemTipsIsVisible")
       //- Filter
-      .button-wrap.inline-button-wrap
+      .button-wrap.inline-button-wrap(title="Toggle focus filter")
         button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
           img.icon(src="@/assets/filter.svg")
 
