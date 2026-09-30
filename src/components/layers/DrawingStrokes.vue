@@ -333,7 +333,7 @@ const endDrawing = async (event) => {
 
 // select
 
-const selectedStrokeColor = computed(() => userStore.color)
+const selectedStrokeColor = (path) => utils.invertColor(path.color)
 const strokeIsSelected = (id) => globalStore.multipleDrawingStrokesSelectedIds.includes(id)
 const selectStrokes = ({ position, zoom, direction }) => {
   const paths = state.paths.filter(path => {
@@ -487,12 +487,12 @@ svg.drawing-strokes(
   v-if="strokesAreVisible"
   :width="pageWidth"
   :height="pageHeight"
-  :style="{ '--selected-stroke-color': selectedStrokeColor }"
 )
   //- drawing strokes
   template(v-for="path in state.paths" :key="path.id")
     path(
       :class="{ selected: strokeIsSelected(path.id) }"
+      :style="{ '--selected-stroke-color': selectedStrokeColor(path) }"
       :d="path.d"
       :stroke="path.color"
       :stroke-width="path.width"
@@ -511,12 +511,12 @@ teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted && strok
   svg.drawing-strokes(
     :width="pageWidth"
     :height="pageHeight"
-    :style="{ '--selected-stroke-color': selectedStrokeColor }"
-  )
+    )
     //- drawing strokes
     template(v-for="path in state.paths" :key="path.id")
       path(
         :class="{ selected: strokeIsSelected(path.id) }"
+        :style="{ '--selected-stroke-color': selectedStrokeColor(path) }"
         :d="path.d"
         :stroke="path.color"
         :stroke-width="path.width"
