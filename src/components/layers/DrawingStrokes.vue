@@ -104,11 +104,6 @@ const viewportWidth = computed(() => globalStore.viewportWidth)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => globalStore.getToolbarIsDrawing)
 const spaceComponentIsMounted = computed(() => globalStore.spaceComponentIsMounted)
-const eraserMask = computed(() => {
-  const hasEraserPaths = state.paths.some(path => path.isEraser)
-  if (!hasEraserPaths) { return null }
-  return 'url(#eraserMask)'
-})
 const strokesAreVisible = computed(() => Boolean(state.paths.length))
 
 // clear
@@ -184,8 +179,7 @@ const createPathFromStroke = (stroke) => {
     type: 'path',
     d: pathData,
     color: stroke[0].color,
-    width: stroke[0].diameter,
-    isEraser: stroke[0].isEraser
+    width: stroke[0].diameter
   }
   // For a single point, complete the path by adding a line to the start point
   if (stroke.length === 1) {
@@ -405,43 +399,21 @@ svg.drawing-strokes(
   :width="pageWidth"
   :height="pageHeight"
 )
-  defs
-    //- eraserMask is legacy
-    //- current version does not have isEraser strokes
-    mask#eraserMask
-      rect(:width="pageWidth" :height="pageHeight" fill="white")
-      template(v-for="path in state.paths" :key="path.id")
-        template(v-if="path.isEraser")
-          path(
-            :d="path.d"
-            stroke="black"
-            :stroke-width="path.width"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            :data-id="path.id"
-            :data-rect-x="path.rect.x"
-            :data-rect-y="path.rect.y"
-            :data-rect-width="path.rect.width"
-            :data-rect-height="path.rect.height"
-          )
   //- drawing strokes
-  g(:mask="eraserMask")
-    template(v-for="path in state.paths" :key="path.id")
-      template(v-if="!path.isEraser")
-        path(
-          :d="path.d"
-          :stroke="path.color"
-          :stroke-width="path.width"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          :data-id="path.id"
-          :data-rect-x="path.rect.x"
-          :data-rect-y="path.rect.y"
-          :data-rect-width="path.rect.width"
-          :data-rect-height="path.rect.height"
-        )
+  template(v-for="path in state.paths" :key="path.id")
+    path(
+      :d="path.d"
+      :stroke="path.color"
+      :stroke-width="path.width"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      :data-id="path.id"
+      :data-rect-x="path.rect.x"
+      :data-rect-y="path.rect.y"
+      :data-rect-width="path.rect.width"
+      :data-rect-height="path.rect.height"
+    )
 
 //- duplicate ^ into Space.vue
 teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted && strokesAreVisible")
@@ -449,43 +421,21 @@ teleport(to="#drawing-strokes-background" v-if="spaceComponentIsMounted && strok
     :width="pageWidth"
     :height="pageHeight"
   )
-    defs
-      //- eraserMask is legacy
-      //- current version does not have isEraser strokes
-      mask#eraserMask
-        rect(:width="pageWidth" :height="pageHeight" fill="white")
-        template(v-for="path in state.paths" :key="path.id")
-          template(v-if="path.isEraser")
-            path(
-              :d="path.d"
-              stroke="black"
-              :stroke-width="path.width"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              :data-id="path.id"
-              :data-rect-x="path.rect.x"
-              :data-rect-y="path.rect.y"
-              :data-rect-width="path.rect.width"
-              :data-rect-height="path.rect.height"
-            )
     //- drawing strokes
-    g(:mask="eraserMask")
-      template(v-for="path in state.paths" :key="path.id")
-        template(v-if="!path.isEraser")
-          path(
-            :d="path.d"
-            :stroke="path.color"
-            :stroke-width="path.width"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            :data-id="path.id"
-            :data-rect-x="path.rect.x"
-            :data-rect-y="path.rect.y"
-            :data-rect-width="path.rect.width"
-            :data-rect-height="path.rect.height"
-          )
+    template(v-for="path in state.paths" :key="path.id")
+      path(
+        :d="path.d"
+        :stroke="path.color"
+        :stroke-width="path.width"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        :data-id="path.id"
+        :data-rect-x="path.rect.x"
+        :data-rect-y="path.rect.y"
+        :data-rect-width="path.rect.width"
+        :data-rect-height="path.rect.height"
+      )
 </template>
 
 <style lang="stylus">

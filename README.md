@@ -58,7 +58,8 @@ Linting runs on commit, but you can manually run it with
 | `components/Connection.vue` | Displays connections from `connectionStore` |
 | `components/Box.vue` | Displays boxes from `boxStore` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/layers/PaintSelectCanvas.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other `<canvas>` elements that need to cover the viewport |
+| `components/layers/PaintSelectCanvas.vue` | Paint select strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other `<canvas>` elements that need to cover the viewport |
+| `components/layers/DrawingStrokes.vue` | Space drawing strokes
 
 ## Blank Template Files
 
