@@ -130,7 +130,7 @@ const matchIndexes = (name) => {
 // click
 
 const updateShouldCancel = (event) => {
-  shouldCancel = globalStore.preventDraggedCardFromShowingDetails
+  shouldCancel = globalStore.preventDraggedCardFromShowingDetails || globalStore.preventDraggedBoxFromShowingDetails || globalStore.preventDraggedListFromShowingDetails
 }
 const openUrl = (event, url) => {
   event.preventDefault()
@@ -155,7 +155,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
         template(v-if="markdown.type === 'text'")
           span {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'link'")
-          a(@mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
+          a(@mousedown.left.prevent @mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'h1'")
@@ -323,6 +323,11 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 
   .strikethrough
     text-decoration line-through
+    h1,
+    h2,
+    h3,
+    h4
+      text-decoration line-through
   .badge
     > .loader
       margin-left 0 !important

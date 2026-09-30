@@ -1062,6 +1062,7 @@ export default {
   },
 
   nameTextEditAction ({ action, startPosition, endPosition, name }) {
+    name = name || ''
     let newName, offset
     let md = ''
     if (action === 'bold') {
@@ -1086,6 +1087,18 @@ export default {
       offset = length
     }
     return { newName, offset }
+  },
+  nameTextEditLinkAction ({ startPosition, endPosition, name }) {
+    name = name || ''
+    // lol → [lol](url)
+    const before = name.slice(0, startPosition)
+    const selected = name.slice(startPosition, endPosition)
+    const after = name.slice(endPosition)
+    const newName = before + '[' + selected + '](url)' + after
+    // select 'url'
+    const newStartPosition = endPosition + 3 // [](
+    const newEndPosition = newStartPosition + 3 // url
+    return { newName, newStartPosition, newEndPosition }
   },
 
   // Cards
@@ -3036,6 +3049,15 @@ export default {
       segments.push(segment)
     }
     return segments
+  },
+  itemNameMarkdownSegments (name) {
+    // simplified markdown for box and list names
+    const supportedTypes = ['text', 'link', 'bold', 'h1', 'h2', 'h3', 'h4', 'emphasis', 'strikethrough', 'code']
+    const segments = this.markdownSegments(name)
+    return segments.map(segment => {
+      if (supportedTypes.includes(segment.type)) { return segment }
+      return { type: 'text', content: segment.result[0] }
+    })
   },
   commentPattern () {
     // https://regexr.com/5ju19

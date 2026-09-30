@@ -171,12 +171,24 @@ const toggleTextEditAction = async (action) => {
     action,
     startPosition,
     endPosition,
-    name: nameElement.value.value
+    name: name.value
   })
   update({ name: newName })
   textareaSizes()
   await nextTick()
   setSelectionRange(startPosition + offset, endPosition + offset)
+}
+const textEditLinkAction = async () => {
+  if (!visible.value) { return }
+  const { newName, newStartPosition, newEndPosition } = utils.nameTextEditLinkAction({
+    startPosition: selectionStartPosition(),
+    endPosition: selectionEndPosition(),
+    name: name.value
+  })
+  update({ name: newName })
+  textareaSizes()
+  await nextTick()
+  setSelectionRange(newStartPosition, newEndPosition)
 }
 
 // colors
@@ -302,6 +314,8 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
           @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
           @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
+          @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
+          @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
         )
       //- Filter
       .button-wrap.filter-button-wrap

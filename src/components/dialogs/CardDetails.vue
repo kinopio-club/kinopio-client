@@ -905,26 +905,19 @@ const toggleTextEditWrapAction = async (action) => {
     action,
     startPosition,
     endPosition,
-    name: nameElement.value.value
+    name: name.value
   })
   updateCardName(newName)
   await nextTick()
   setSelectionRange(startPosition + offset, endPosition + offset)
 }
 const textEditLinkAction = async () => {
-  // lol → [lol](url)
   if (!visible.value) { return }
-  const startPosition = selectionStartPosition()
-  const endPosition = selectionEndPosition()
-  const name = nameElement.value.value
-  let before = name.slice(0, startPosition)
-  let selected = name.slice(startPosition, endPosition)
-  const after = name.slice(endPosition)
-  before = before + '['
-  selected = selected + '](url)'
-  const newName = before + selected + after
-  const newStartPosition = endPosition + 3 // [](
-  const newEndPosition = newStartPosition + 3 // url
+  const { newName, newStartPosition, newEndPosition } = utils.nameTextEditLinkAction({
+    startPosition: selectionStartPosition(),
+    endPosition: selectionEndPosition(),
+    name: name.value
+  })
   updateCardName(newName)
   await nextTick()
   setSelectionRange(newStartPosition, newEndPosition)

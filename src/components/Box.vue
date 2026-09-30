@@ -14,7 +14,7 @@ import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
-import smartquotes from 'smartquotes'
+import NameSegment from '@/components/NameSegment.vue'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
@@ -112,13 +112,14 @@ const normalizedName = computed(() => {
   }
   return newName.trim()
 })
-const nameSegments = computed(() => {
-  const markdownSegments = utils.markdownSegments(normalizedName.value)
-  return markdownSegments
+const nameSegment = computed(() => {
+  const content = normalizedName.value || ''
+  return {
+    isText: true,
+    content,
+    markdown: utils.itemNameMarkdownSegments(content)
+  }
 })
-const smartQuotes = (string) => {
-  return smartquotes(string)
-}
 
 // should render
 
@@ -434,6 +435,8 @@ const endBoxInfoInteraction = (event) => {
   if (globalStore.preventDraggedBoxFromShowingDetails) { return }
   if (globalStore.currentUserIsDraggingDuplicateItem) { return }
   if (isMeta) { return }
+  const isLink = event.target.closest('a')
+  if (isLink) { return }
   globalStore.updateBoxDetailsIsVisibleForBoxId(props.box.id)
   event.stopPropagation() // prevent stopInteractions() from closing boxDetails
   globalStore.currentUserIsDraggingBox = false
@@ -730,25 +733,14 @@ const clearFocus = () => {
       //- [·]
       ItemCheckboxButton(:visible="hasCheckbox" :box="box" :canEditItem="canEditBox" @toggleItemChecked="cancelLocking")
       //- name
-      .name-wrap(:class="{'is-checked': isChecked}")
-        //- simplified nameSegments
-        template(v-for="segment in nameSegments")
-          template(v-if="segment.type === 'text'")
-            span {{smartQuotes(segment.content)}}
-          template(v-else-if="segment.type === 'bold'")
-            strong {{smartQuotes(segment.content)}}
-          template(v-else-if="segment.type === 'h1'")
-            h1 {{smartQuotes(segment.content)}}
-          template(v-else-if="segment.type === 'h2'")
-            h2 {{smartQuotes(segment.content)}}
-          template(v-else-if="segment.type === 'h3'")
-            h3 {{smartQuotes(segment.content)}}
-          template(v-else-if="segment.type === 'h4'")
-            h4 {{segment.content}}
-          template(v-else-if="segment.type === 'emphasis'")
-            em {{smartQuotes(segment.content)}}
-          template(v-else-if="segment.type === 'strikethrough'")
-            del {{smartQuotes(segment.content)}}
+      .name-wrap
+        NameSegment(
+          :segment="nameSegment"
+          :isStrikeThrough="isChecked"
+          :backgroundColorIsDark="colorIsDark"
+          :headerFontId="box.headerFontId"
+          :headerFontSize="box.headerFontSize"
+        )
         .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
           img(src="@/assets/anon-avatar.svg")
 
@@ -839,45 +831,16 @@ const clearFocus = () => {
       height 0.2s var(--ease-out-circ),
       left 0.2s var(--ease-out-circ),
       top 0.2s var(--ease-out-circ)
-  &.header-font-0
-    --header-font var(--header-font-0)
-  &.header-font-1
-    --header-font var(--header-font-1)
-  &.header-font-2
-    --header-font var(--header-font-2)
-  &.header-font-3
-    --header-font var(--header-font-3)
-  &.header-font-4
-    --header-font var(--header-font-4)
-  &.header-font-5
-    --header-font var(--header-font-5)
-  &.header-font-6
-    --header-font var(--header-font-6)
-  &.header-font-7
-    --header-font var(--header-font-7)
-  &.header-font-8
-    --header-font var(--header-font-8)
-  &.header-font-9
-    --header-font var(--header-font-9)
-  &.header-font-size-modifier-s
-    h1
-      font-size 18px
-    h2
-      font-size 16px
-  &.header-font-size-m
-    h1
-      font-size 44px
-    h2
-      font-size 36px
-    h3
-      font-size 24px
-  &.header-font-size-l
-    h1
-      font-size 66px
-    h2
-      font-size 52px
-    h3
-      font-size 36px
+  &.header-font-size-s
+    .name-segment .markdown
+      h1
+        font-size 20px
+    &.header-font-size-modifier-s
+      .name-segment .markdown
+        h1
+          font-size 18px
+        h2
+          font-size 16px
   &:hover
     box-shadow var(--hover-shadow)
   &:active
@@ -888,27 +851,15 @@ const clearFocus = () => {
   .name-wrap
     padding 6px 8px
     padding-top 4px
-    // padding-right 4px
     display inline-block
-    &.is-checked
-      text-decoration line-through
-  h1
-    font-family var(--header-font)
-    font-size 20px
-    font-weight bold
-    display inline-block
-  h2
-    font-family var(--header-font)
-    font-weight normal
-    font-size 20px
-    display inline-block
-  h1,
-  h2,
-  h3,
-  h4
-    margin 0
-    margin-top 2px
-    vertical-align sub // to align with checkboxes
+    .markdown
+      h1,
+      h2,
+      h3,
+      h4
+        margin-top 2px
+      code
+        padding 0 5px
 
   .connector
     padding 8px

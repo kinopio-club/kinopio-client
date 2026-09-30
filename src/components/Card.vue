@@ -1994,7 +1994,7 @@ const toggleVideoIsPaused = () => {
           //- Name
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :isStrikeThrough="isChecked" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
         //- Vote Counter
         .card-vote-wrap(v-if="props.card.counterIsVisible")
           CardVote(:card="card")
@@ -2222,10 +2222,6 @@ const toggleVideoIsPaused = () => {
         width 100%
         &.is-checked
           text-decoration line-through
-          h1,
-          h2,
-          h3
-            text-decoration line-through
         &.has-checkbox
           width calc(100% - 32px) // - width of checkbox
           .audio

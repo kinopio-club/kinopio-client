@@ -14,6 +14,7 @@ import Frames from '@/components/Frames.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import ProgressCircle from '@/components/ProgressCircle.vue'
+import NameSegment from '@/components/NameSegment.vue'
 
 import { nanoid } from 'nanoid'
 
@@ -99,6 +100,18 @@ const removeViewportObserver = () => {
 const shouldRender = computed(() => {
   if (globalStore.disableViewportOptimizations) { return true }
   return state.isVisibleInViewport
+})
+
+// name
+
+const nameSegment = computed(() => {
+  let content = props.list.name
+  content = content || ''
+  return {
+    isText: true,
+    content,
+    markdown: utils.itemNameMarkdownSegments(content)
+  }
 })
 
 // cards
@@ -188,6 +201,8 @@ const endListInfoInteraction = (event) => {
   globalStore.clearMultipleSelected()
   // }
   if (globalStore.preventDraggedListFromShowingDetails) { return }
+  const isLink = event.target.closest('a')
+  if (isLink) { return }
   // if (isMeta) { return }
   globalStore.updateListDetailsIsVisibleForListId(props.list.id)
   globalStore.clearAllInteractingWithAndSelected()
@@ -681,7 +696,8 @@ const clearFocus = () => {
     .row.list-info-row
       .left-side
         ProgressCircle(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length" :title="todoListCardsCompletedPercent" :backgroundColor="color" :count="todoListCardsRemainingCount")
-        span.name(:title="props.list.name") {{ props.list.name }}
+        span.name(:title="props.list.name")
+          NameSegment(:segment="nameSegment" :backgroundColorIsDark="colorIsDark")
       .right-side.button-wrap
         //- add card
         .inline-button-wrap(title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
@@ -876,7 +892,20 @@ const clearFocus = () => {
         overflow hidden
         text-overflow ellipsis
         display inline-block
-        // max-width calc(100% - 100px)
+        .markdown
+          white-space nowrap
+          // headings are only bold because list name is single line
+          h1,
+          h2,
+          h3,
+          h4
+            font-family inherit
+            font-size inherit
+            font-weight bold
+            display inline
+          code
+            padding 0 5px
+            vertical-align 1px
   .bottom-button-wrap // resize when list is collapsed
     right -5px
     top 14px

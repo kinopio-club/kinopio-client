@@ -166,6 +166,48 @@ const textareaSizes = () => {
   }
   textarea.style.height = textarea.scrollHeight + modifier + 'px'
 }
+const selectionStartPosition = () => {
+  if (!nameElement.value) { return }
+  const startPosition = nameElement.value.selectionStart
+  return startPosition
+}
+const selectionEndPosition = () => {
+  if (!nameElement.value) { return }
+  const endPosition = nameElement.value.selectionEnd
+  return endPosition
+}
+const setSelectionRange = (start, end) => {
+  if (nameElement.value) {
+    nameElement.value.setSelectionRange(start, end)
+  }
+}
+const toggleTextEditAction = async (action) => {
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const { newName, offset } = utils.nameTextEditAction({
+    action,
+    startPosition,
+    endPosition,
+    name: name.value
+  })
+  update({ name: newName })
+  textareaSizes()
+  await nextTick()
+  setSelectionRange(startPosition + offset, endPosition + offset)
+}
+const textEditLinkAction = async () => {
+  if (!visible.value) { return }
+  const { newName, newStartPosition, newEndPosition } = utils.nameTextEditLinkAction({
+    startPosition: selectionStartPosition(),
+    endPosition: selectionEndPosition(),
+    name: name.value
+  })
+  update({ name: newName })
+  textareaSizes()
+  await nextTick()
+  setSelectionRange(newStartPosition, newEndPosition)
+}
 
 // colors
 
@@ -223,6 +265,12 @@ dialog.narrow.link-details(v-if="visible" :open="visible" :style="styles" @click
           @keydown.enter.stop="handleEnterKey"
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
+          @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
+          @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
+          @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
+          @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
+          @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
+          @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
         )
     template(v-if="canEditSpace")
       .row

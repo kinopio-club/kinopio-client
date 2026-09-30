@@ -226,3 +226,19 @@ describe('isCompositionKeyboardEvent', () => {
     expect(utils.isCompositionKeyboardEvent(enterKeydown())).toBe(true)
   })
 })
+
+describe('nameTextEditLinkAction', () => {
+  it('wraps selected text in a link and selects url', () => {
+    const name = 'see docs here'
+    const result = utils.nameTextEditLinkAction({ startPosition: 4, endPosition: 8, name })
+    expect(result.newName).toBe('see [docs](url) here')
+    expect(result.newName.slice(result.newStartPosition, result.newEndPosition)).toBe('url')
+  })
+
+  it('inserts an empty link when nothing is selected', () => {
+    const name = 'see '
+    const result = utils.nameTextEditLinkAction({ startPosition: 4, endPosition: 4, name })
+    expect(result.newName).toBe('see [](url)')
+    expect(result.newName.slice(result.newStartPosition, result.newEndPosition)).toBe('url')
+  })
+})
