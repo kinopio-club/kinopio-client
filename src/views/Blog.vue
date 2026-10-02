@@ -400,6 +400,7 @@ main.blog-page-wrap
     h3
       font-family var(--header-font-4)
       font-weight normal
+      max-width 440px
     h1
       font-size 24px
     .all-posts-badge
@@ -427,13 +428,18 @@ main.blog-page-wrap
       video,
       img
         border-radius var(--page-entity-radius)
+        &.small
+          max-width 440px
+      figcaption
+        max-width 440px
+        opacity 0.5
+        font-size 13px
       blockquote
+        padding-left 8px
         margin 0
-        p
-          background var(--info-background)
-          padding 12px
-          border-radius var(--entity-radius)
-      ul
+        border-left 1px solid var(--primary)
+      ul,
+      ol
         padding-left 2rem
         li
           max-width 410px
