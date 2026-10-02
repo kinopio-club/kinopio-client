@@ -80,7 +80,11 @@ const initViewportObserver = async () => {
     const callback = (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
+          const isNewlyVisible = !state.isVisibleInViewport
           state.isVisibleInViewport = true
+          if (isNewlyVisible) {
+            listStore.updateListDimensions(props.list)
+          }
         } else {
           state.isVisibleInViewport = false
         }
