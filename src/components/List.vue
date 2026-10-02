@@ -16,6 +16,8 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import ProgressCircle from '@/components/ProgressCircle.vue'
 import NameSegment from '@/components/NameSegment.vue'
+import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
 
@@ -53,6 +55,8 @@ onBeforeUnmount(() => {
 })
 useStoreAction(globalStore, {
   clearDraggingItems: () => { state.isDraggingCardOverList = false },
+  updateRemoteCurrentConnection: () => updateRemoteConnections(),
+  removeRemoteCurrentConnection: () => updateRemoteConnections(),
   triggerUpdateViewportObservers: () => initViewportObserver()
 })
 
@@ -65,7 +69,11 @@ const state = reactive({
   isLocking: false,
   lockingPercent: 0,
   lockingAlpha: 0,
-  isVisibleInViewport: false
+  isVisibleInViewport: false,
+  shouldRenderParent: false,
+  // connections
+  isRemoteConnecting: false,
+  remoteConnectionColor: ''
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
@@ -99,9 +107,12 @@ const removeViewportObserver = () => {
   observer.disconnect()
   observer = null
 }
+const updateShouldRenderParent = (value) => {
+  state.shouldRenderParent = value
+}
 const shouldRender = computed(() => {
   if (globalStore.disableViewportOptimizations) { return true }
-  return state.isVisibleInViewport
+  return state.isVisibleInViewport || state.shouldRenderParent
 })
 
 // name
@@ -185,9 +196,17 @@ const updateIsHover = (value) => {
   if (globalStore.currentUserIsDraggingList) { return }
   if (isPaintSelecting.value) { return }
   state.isHover = value
+  if (value) {
+    globalStore.currentUserIsHoveringOverListId = props.list.id
+  } else {
+    globalStore.currentUserIsHoveringOverListId = ''
+  }
 }
 const startListInfoInteraction = async (event) => {
   let listId = props.list.id
+  if (event.target.closest('.connector')) {
+    return
+  }
   if (!currentListIsSelected.value) {
     globalStore.clearMultipleSelected()
   }
@@ -203,6 +222,7 @@ const startListInfoInteraction = async (event) => {
   listStore.incrementListZ(listId)
 }
 const endListInfoInteraction = (event) => {
+  if (isConnectingTo.value) { return }
   // const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
@@ -232,6 +252,9 @@ const endListInfoInteraction = (event) => {
   globalStore.clearAllInteractingWithAndSelected()
   event.stopPropagation() // prevent stopInteractions() from closing listDetails
 }
+const currentListDetailsIsVisible = computed(() => {
+  return props.list.id === globalStore.listDetailsIsVisibleForListId
+})
 
 // Remote
 
@@ -402,6 +425,51 @@ const endListInfoInteractionTouch = (event) => {
   cancelLocking()
   if (touchIsNearTouchPosition(event)) {
     endListInfoInteraction(event)
+  }
+}
+
+// connections
+
+const isConnectingTo = computed(() => {
+  const connectingToId = globalStore.currentConnectionSuccess.id
+  const isConnecting = connectingToId === props.list.id
+  if (isConnecting) {
+    postMessage.sendHaptics({ name: 'softImpact' })
+  }
+  return isConnecting
+})
+const isConnectingFrom = computed(() => {
+  return globalStore.currentConnectionStartItemIds.includes(props.list.id)
+})
+const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.list.id))
+const connectorIsVisible = computed(() => {
+  const isMember = userStore.getUserIsSpaceMember
+  let isVisible
+  if (state.isRemoteConnecting) {
+    isVisible = true
+  } else if (isMember || canEditSpace.value || connectedConnections.value.length) {
+    isVisible = true
+  }
+  return isVisible
+})
+const connectorIsHiddenByOpacity = computed(() => {
+  if (utils.isMobile()) { return }
+  const isPresentationMode = globalStore.isPresentationMode
+  const isNotHovering = !state.isHover
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
+  return isPresentationMode && isNotHovering && isNotConnected
+})
+const updateRemoteConnections = () => {
+  const connection = globalStore.remoteCurrentConnections.find(remoteConnection => {
+    const isConnectedToStart = remoteConnection.startItemId === props.list.id
+    const isConnectedToEnd = remoteConnection.endItemId === props.list.id
+    return isConnectedToStart || isConnectedToEnd
+  })
+  if (connection) {
+    state.isRemoteConnecting = true
+    state.remoteConnectionColor = connection.color
+  } else {
+    state.isRemoteConnecting = false
   }
 }
 
@@ -733,6 +801,21 @@ const clearFocus = () => {
           button.small-button.inline-button
             img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
+        //- connector
+        ItemConnectorButton(
+          :visible="connectorIsVisible"
+          :isHiddenByOpacity="connectorIsHiddenByOpacity"
+          :list="props.list"
+          :isConnectingTo="isConnectingTo"
+          :isConnectingFrom="isConnectingFrom"
+          :isVisibleInViewport="state.isVisibleInViewport"
+          :isRemoteConnecting="state.isRemoteConnecting"
+          :remoteConnectionColor="state.remoteConnectionColor"
+          :currentBackgroundColor="color"
+          :backgroundIsTransparent="true"
+          :parentDetailsIsVisible="currentListDetailsIsVisible"
+          @shouldRenderParent="updateShouldRenderParent"
+        )
       //- resize collapsed
       .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
@@ -896,6 +979,21 @@ const clearFocus = () => {
     padding-left 0
   .inline-button-wrap:last-child
     padding-right 0
+  // connector
+  .connector
+    display inline-block
+    padding 8px
+    padding-left 0
+    margin-right -8px // offsets .list-info-row padding
+    cursor cell
+    button
+      min-width initial
+      cursor cell
+  .connector-glow
+    left -9px
+  .connected-colors
+    left 1px
+    top 9px
   // name
   .list-info-row
     width 100%

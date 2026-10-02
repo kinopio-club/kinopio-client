@@ -5,6 +5,7 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
@@ -16,6 +17,7 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
@@ -136,8 +138,8 @@ const connectionPathClasses = computed(() => {
 
 const items = computed(() => {
   const { startItemId, endItemId } = props.connection
-  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId]
-  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId]
+  const startItem = cardStore.byId[startItemId] || boxStore.byId[startItemId] || listStore.byId[startItemId]
+  const endItem = cardStore.byId[endItemId] || boxStore.byId[endItemId] || listStore.byId[endItemId]
   return { startItem, endItem }
 })
 const isConnectedToCommentCard = computed(() => {
@@ -153,7 +155,7 @@ const isConnectedToMultipleCardsSelected = computed(() => {
   })
 })
 const isHoveredOverConnectedItem = computed(() => {
-  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId
+  const itemId = globalStore.currentUserIsHoveringOverCardId || globalStore.currentUserIsHoveringOverBoxId || globalStore.currentUserIsHoveringOverListId
   if (!itemId) { return }
   return (itemId === props.connection.startItemId || itemId === props.connection.endItemId)
 })

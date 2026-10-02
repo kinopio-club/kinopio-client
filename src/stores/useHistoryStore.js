@@ -594,7 +594,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'listRemoved':
             list = item.new
-            listStore.createList(list)
+            listStore.createList({ list })
             break
         }
       }
@@ -707,7 +707,7 @@ export const useHistoryStore = defineStore('history', {
             break
           case 'listCreated':
             list = item.new
-            listStore.createList(list.id)
+            listStore.createList({ list })
             break
           case 'listRemoved':
             list = item.new

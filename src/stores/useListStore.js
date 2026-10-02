@@ -242,12 +242,15 @@ export const useListStore = defineStore('lists', {
     // update
 
     updateListsState (updates) {
+      const connectionStore = useConnectionStore()
       updates.forEach(update => {
         this.byId[update.id] = {
           ...this.byId[update.id],
           ...update
         }
       })
+      const ids = updates.map(update => update.id)
+      connectionStore.updateConnectionPathsByItemIds(ids)
     },
     async updateLists (updates) {
       const apiStore = useApiStore()
@@ -518,6 +521,9 @@ export const useListStore = defineStore('lists', {
       this.removeListsFromState(ids)
       broadcastStore.update({ updates: { ids }, store: 'listStore', action: 'removeListsBroadcast' })
       await cache.updateSpace('lists', this.getAllLists, spaceStore.id)
+      await nextTick()
+      const connectionStore = useConnectionStore()
+      connectionStore.removeConnectionsFromItems(ids)
     },
     async removeList (id) {
       await this.removeLists([id])

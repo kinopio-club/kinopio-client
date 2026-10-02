@@ -342,6 +342,7 @@ export const useConnectionStore = defineStore('connections', {
     async removeConnections (ids) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
@@ -350,6 +351,7 @@ export const useConnectionStore = defineStore('connections', {
         await apiStore.addToQueue({ name: 'removeConnection', body: { id } })
       }
       broadcastStore.update({ updates: ids, store: 'connectionStore', action: 'removeConnectionsFromState' })
+      await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },
     async removeConnection (id) {
       await this.removeConnections([id])
