@@ -400,7 +400,6 @@ main.blog-page-wrap
     h3
       font-family var(--header-font-4)
       font-weight normal
-      max-width 440px
     h1
       font-size 24px
     .all-posts-badge
