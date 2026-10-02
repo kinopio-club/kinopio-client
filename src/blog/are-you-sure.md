@@ -17,7 +17,7 @@ A couple months ago, someone joined the Discord and requested a reasonable sound
 
 > Right now, Kinopio takes you straight to a link when you click on it, but that can be abused by bad actors. Do you think you can add a confirmation dialog that warns people 'do you want to go to link'?
 
-Find a restaurant on Yelp and click the 'website' link to view their website? Instead of immediately opening the site, Yelp will display a message telling you that you're opening a site. Gamer platforms like Discord and Steam are even more aggressive, forcing you to confirm that you understand you're opening a website everytime. 
+Find a restaurant on Yelp and click the 'website' link and instead of immediately opening the site, Yelp will display a message warning you that you're opening a site. Higher risk gamer platforms like Discord and Steam are even more aggressive, forcing you to actively confirm that you understand you're opening a website everytime. 
 
 Thanks for the warning, I know I'm doing the thing I asked to do. It's pointless security theatre in 99.99% of cases. But what about that 0.01% case? Theoretically, someone could make a website that looked exactly like a bank sign in page and trick you into fake signing in and stealing your credentials. For someone to fall prey to this, **all** of these have to be true:
 
