@@ -95,7 +95,7 @@ section.blog-subscribe
   flex-wrap nowrap
   img.email
     max-width 50px
-    height fit-content
+    height auto
     margin-right 1rem
   section.subsection
     padding 6px 10px
