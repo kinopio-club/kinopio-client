@@ -649,7 +649,7 @@ export default {
         nameToSplit = nameToSplit || name
         results.push(nameToSplit.substring(0, maxCardCharacterLimit))
         const otherSplit = nameToSplit.substring(maxCardCharacterLimit)
-        if (otherSplit <= maxCardCharacterLimit) {
+        if (otherSplit.length <= maxCardCharacterLimit) {
           results.push(otherSplit)
         } else {
           nameToSplit = otherSplit
