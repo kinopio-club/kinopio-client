@@ -796,23 +796,25 @@ export default {
     return dayjs(date).isToday()
   },
   dateIsPast (date) {
-    date = dayjs(date)
-    const today = dayjs(new Date())
-    const diff = date.diff(today, 'day')
-    return diff <= -1 && !this.dateIsToday(date)
+    return dayjs(date).isBefore(dayjs(), 'day')
   },
   shortRelativeDate (date) {
     if (!date) { return }
-    date = dayjs(date)
-    const today = dayjs(new Date())
+    date = dayjs(date).startOf('day')
+    const today = dayjs().startOf('day')
     const diff = date.diff(today, 'day')
-    if (diff < 0) {
-      return date.fromNow() // 2 hours ago
-    }
-    if (this.dateIsToday(date)) { return 'Today' }
-    if (diff === 0) { return 'Tomorrow' }
-    if (diff <= -1) { return 'Yesterday' }
-    return `${diff} days left`
+    const yearsPast = today.diff(date, 'year')
+    const monthsPast = today.diff(date, 'month')
+    if (diff === 0) { return 'Today' }
+    if (diff === 1) { return 'Tomorrow' }
+    if (diff === -1) { return 'Yesterday' }
+    if (diff > 1) { return `${diff} days left` }
+    // past dates
+    if (yearsPast === 1) { return 'a year ago' }
+    if (yearsPast > 1) { return `${yearsPast} years ago` }
+    if (monthsPast === 1) { return 'a month ago' }
+    if (monthsPast > 1) { return `${monthsPast} months ago` }
+    return `${-diff} days ago`
   },
   shortAbsoluteDate (date) {
     if (!date) { return }
