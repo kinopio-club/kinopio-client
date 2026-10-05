@@ -1,6 +1,6 @@
 ---
 title: Are You Sure You Want to Do What You Wanted to Do?
-date: 2026-11-02
+date: 2026-10-02
 category: How It's Made
 description: Security and usability often exist on a spectrum where you have to make trade-offs to one to strengthen the other. Like most spectrums, it's possible to go too far to the extreme on either side. 
 image: 'https://kinopio-updates.us-east-1.linodeobjects.com/pages/blog/posts/are-you-sure/double-tea-cup.jpg'
