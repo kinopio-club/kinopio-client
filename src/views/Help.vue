@@ -386,31 +386,31 @@ const updateFilterOnSearchFocus = (event) => {
                       span {{ page.title }}
         //- post
         article
-          div(v-if="pageContent")
-            a.category-name(href="/help/#nav")
-              .badge.secondary.button-badge
-                  img.icon.left-arrow(src="@/assets/down-arrow.svg")
-                  span All Topics
-            nav
-              ul
-                li(v-for="page in pagesFilteredByCategory(currentCategory)" :key="page.slug" @click.stop="clearFilter")
-                  router-link(:to="`/help/${page.slug}`")
-                    .badge.button-badge(:class="badgeClasses(page)")
-                      span {{ page.title }}
+          a.category-name(href="/help/#nav")
+            .badge.secondary.button-badge
+                img.icon.left-arrow(src="@/assets/down-arrow.svg")
+                span All Topics
+          nav(v-if="pageContent")
+            ul
+              li(v-for="page in pagesFilteredByCategory(currentCategory)" :key="page.slug" @click.stop="clearFilter")
+                router-link(:to="`/help/${page.slug}`")
+                  .badge.button-badge(:class="badgeClasses(page)")
+                    span {{ page.title }}
             //- post md
             component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
-            h1 404 – Page not found
-            video(
-              autoplay
-              loop
-              muted
-              playsinline
-              aria-label="404 image"
-              poster="https://updates.kinopio.club/pages/help/404-poster.webp"
-            )
-              source(src="https://updates.kinopio.club/pages/help/404.webm")
+            .markdown-body
+              h1 404 – Page not found
+              video(
+                autoplay
+                loop
+                muted
+                playsinline
+                aria-label="404 image"
+                poster="https://updates.kinopio.club/pages/help/404-poster.webp"
+              )
+                source(src="https://updates.kinopio.club/pages/help/404.webm")
       FooterSitemap
   Footer
 </template>
@@ -440,6 +440,7 @@ main.help-page-wrap
     align-items center
     margin-right 0
     margin-bottom 10px
+    margin-top 10px
 
   nav
     margin-bottom 2rem
@@ -474,7 +475,7 @@ main.help-page-wrap
 
   article
     .markdown-body
-      margin-top 1rem
+      margin-top 2rem
       line-height 1.4
       h1
         margin-top 0
