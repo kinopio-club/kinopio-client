@@ -163,6 +163,7 @@ const convertToCanvas = (space) => {
         color: box.color,
         label: box.name
       }
+      canvas.nodes.push(group)
     })
     space.connections.forEach(connection => {
       // direction
