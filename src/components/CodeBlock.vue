@@ -10,6 +10,7 @@ import { highlight } from 'macrolight'
 
 import codeLanguages from '@/data/codeLanguages.json'
 import utils from '@/utils.js'
+import latex from '@/libs/latex.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -17,10 +18,19 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const defaultLanguageName = 'txt'
+const latexLanguageName = 'latex'
 
 const props = defineProps({
   content: String,
   parentCardId: String
+})
+
+const state = reactive({
+  latexHTML: ''
+})
+
+onMounted(() => {
+  updateLatexHTML()
 })
 
 const parentCard = computed(() => cardStore.getCard(props.parentCardId))
@@ -28,7 +38,10 @@ const canEditCard = computed(() => userStore.getUserCanEditCard({ id: props.pare
 
 // syntax highlight
 
-const shouldSyntaxHighlight = computed(() => currentLanguage.value.name !== defaultLanguageName)
+const shouldSyntaxHighlight = computed(() => {
+  const name = currentLanguage.value.name
+  return name !== defaultLanguageName && name !== latexLanguageName
+})
 const languageFromCodeBlock = computed(() => utils.languageFromCodeBlock(props.content))
 const currentLanguage = computed(() => {
   let language = codeLanguages.find(codeLanguage => codeLanguage.name === parentCard.value.codeBlockLanguage)
@@ -36,11 +49,14 @@ const currentLanguage = computed(() => {
   language = language || languageFromCodeBlock.value?.language || codeLanguages[0]
   return language
 })
-const syntaxHighlightHTML = computed(() => {
-  let content = props.content
+const contentWithoutLanguage = computed(() => {
   if (languageFromCodeBlock.value) {
-    content = languageFromCodeBlock.value.newString
+    return languageFromCodeBlock.value.newString
   }
+  return props.content
+})
+const syntaxHighlightHTML = computed(() => {
+  const content = contentWithoutLanguage.value
   const keywords = currentLanguage.value.keywords
   const html = highlight(content, {
     styles: {
@@ -52,6 +68,28 @@ const syntaxHighlightHTML = computed(() => {
     keywords
   })
   return html
+})
+
+// latex
+
+const isLatex = computed(() => currentLanguage.value.name === latexLanguageName)
+const latexIsVisible = computed(() => isLatex.value && Boolean(state.latexHTML))
+const updateLatexHTML = async () => {
+  if (!isLatex.value) {
+    state.latexHTML = ''
+    return
+  }
+  try {
+    state.latexHTML = await latex.renderToString(contentWithoutLanguage.value)
+  } catch (error) {
+    console.error('🚒 updateLatexHTML', error)
+    state.latexHTML = ''
+  }
+  await nextTick()
+  cardStore.updateCardDimensions(props.parentCardId)
+}
+watch([isLatex, contentWithoutLanguage], () => {
+  updateLatexHTML()
 })
 
 // language picker
@@ -112,7 +150,9 @@ const copy = async (event) => {
       button.small-button.inline-button
         img.icon.copy(src="@/assets/copy.svg")
 
-  template(v-if="shouldSyntaxHighlight")
+  template(v-if="latexIsVisible")
+    .latex(v-html="state.latexHTML")
+  template(v-else-if="shouldSyntaxHighlight")
     pre(v-html="syntaxHighlightHTML")
   template(v-else)
     pre {{props.content}}
@@ -172,6 +212,17 @@ const copy = async (event) => {
     span
       font-size 12px
       font-family var(--mono-font)
+  .latex
+    width calc(100% + 20px)
+    max-height 300px
+    overflow auto
+    padding 4px
+    padding-bottom 20px
+    color var(--primary)
+    background-color var(--secondary-active-background)
+    border-radius var(--small-entity-radius)
+    // math
+    //   font-size 16px
   .loader
     width 12px !important
     height 12px !important
