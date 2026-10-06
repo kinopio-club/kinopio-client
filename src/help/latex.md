@@ -5,7 +5,7 @@ category: Advanced
 updated: 2026-10-05
 ---
 
-# LaTeX Support
+# LaTeX Math Support
 
 Write math equations in cards using [LaTeX](https://en.wikibooks.org/wiki/LaTeX/Mathematics). Formulas for your scientific, academic, and engineering papers and projects can live right alongside where you think through problems and collect research.
 
