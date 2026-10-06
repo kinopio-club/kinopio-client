@@ -46,7 +46,7 @@
     "autoprefixer": "^10.4.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "cross-env": "^10.0.0",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.5",
     "eslint-plugin-vue": "^9.21.1",
     "gray-matter": "^4.0.3",
     "jsdom": "^26.1.0",
