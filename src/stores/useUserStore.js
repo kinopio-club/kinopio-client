@@ -183,10 +183,6 @@ export const useUserStore = defineStore('user', {
       }
       return false
     },
-    getUserNewCardColor () {
-      const spaceStore = useSpaceStore()
-      return spaceStore.userNewCardColor || this.newCardColor
-    },
     getUserDrawingColor () {
       return this.drawingColor || this.color
     },

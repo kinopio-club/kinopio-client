@@ -46,7 +46,7 @@ const updateDefaultColor = () => {
   state.defaultColor = utils.cssVariable('secondary-background')
 }
 const newCardColor = computed(() => {
-  const color = userStore.getUserNewCardColor
+  const color = globalStore.getNewCardColor
   if (themeStore.isCardColorThemeDefault(color)) {
     return state.defaultColor
   }

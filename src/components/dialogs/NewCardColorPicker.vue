@@ -69,22 +69,6 @@ const closeDialogs = () => {
 }
 const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
 
-// all spaces (user)
-
-const userNewCardColor = computed(() => userStore.newCardColor || props.defaultColor)
-const toggleUserNewCardColorPickerIsVisible = () => {
-  const value = state.userNewCardColorPickerIsVisible
-  closeDialogs()
-  state.userNewCardColorPickerIsVisible = !value
-}
-const updateUserCardColor = (color) => {
-  color = colord(color).toHex()
-  userStore.updateUser({ newCardColor: color })
-}
-const clearUserCardColor = () => {
-  userStore.updateUser({ newCardColor: null })
-}
-
 // current space (space user)
 
 const spaceUserNewCardColor = computed(() => spaceStore.userNewCardColor || props.defaultColor)
@@ -100,6 +84,22 @@ const updateSpaceUserCardColor = (color) => {
 const clearSpaceUserCardColor = () => {
   spaceStore.updateSpaceUserNewCardColor(null)
 }
+
+// all spaces (user)
+
+const userNewCardColor = computed(() => userStore.newCardColor || props.defaultColor)
+const toggleUserNewCardColorPickerIsVisible = () => {
+  const value = state.userNewCardColorPickerIsVisible
+  closeDialogs()
+  state.userNewCardColorPickerIsVisible = !value
+}
+const updateUserCardColor = (color) => {
+  color = colord(color).toHex()
+  userStore.updateUser({ newCardColor: color })
+}
+const clearUserCardColor = () => {
+  userStore.updateUser({ newCardColor: null })
+}
 </script>
 
 <template lang="pug">
@@ -107,24 +107,6 @@ dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @
   section.title-section
     p New Card Color
   section
-    //- all spaces (user)
-    .row
-      .button-wrap
-        .segmented-buttons
-          button(@click.stop="toggleUserNewCardColorPickerIsVisible" :class="{ active: state.userNewCardColorPickerIsVisible }")
-            .badge.new-user-color-badge(:style="{ backgroundColor: userNewCardColor }")
-            span All Spaces
-          button(@click="clearUserCardColor")
-            img.icon.cancel(src="@/assets/add.svg")
-        ColorPicker(
-          :currentColor="userNewCardColor"
-          :visible="state.userNewCardColorPickerIsVisible"
-          :removeIsVisible="true"
-          :recentColors="itemColors"
-          @selectedColor="updateUserCardColor"
-          @removeColor="clearUserCardColor"
-        )
-
     //- current space (space user)
     .row
       .button-wrap
@@ -141,6 +123,24 @@ dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @
           :recentColors="itemColors"
           @selectedColor="updateSpaceUserCardColor"
           @removeColor="clearSpaceUserCardColor"
+        )
+
+    //- all spaces (user)
+    .row
+      .button-wrap
+        .segmented-buttons
+          button(@click.stop="toggleUserNewCardColorPickerIsVisible" :class="{ active: state.userNewCardColorPickerIsVisible }")
+            .badge.new-user-color-badge(:style="{ backgroundColor: userNewCardColor }")
+            span All Spaces
+          button(@click="clearUserCardColor")
+            img.icon.cancel(src="@/assets/add.svg")
+        ColorPicker(
+          :currentColor="userNewCardColor"
+          :visible="state.userNewCardColorPickerIsVisible"
+          :removeIsVisible="true"
+          :recentColors="itemColors"
+          @selectedColor="updateUserCardColor"
+          @removeColor="clearUserCardColor"
         )
 </template>
 

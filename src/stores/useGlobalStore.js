@@ -351,6 +351,11 @@ export const useGlobalStore = defineStore('global', {
     getGlobalAllState () {
       return { ...this.$state }
     },
+    getNewCardColor () {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      return spaceStore.userNewCardColor || userStore.newCardColor
+    },
     getSpaceZoomDecimal () {
       return this.spaceZoomPercent / 100
     },
