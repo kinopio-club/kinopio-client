@@ -396,8 +396,8 @@ const updateFilterOnSearchFocus = (event) => {
                 router-link(:to="`/help/${page.slug}`")
                   .badge.button-badge(:class="badgeClasses(page)")
                     span {{ page.title }}
-            //- post md
-            component(:is="pageContent")
+          //- post md
+          component(:is="pageContent")
           //- 404
           template(v-if="!pageContent && !currentSlugIsRoot")
             .markdown-body
