@@ -89,7 +89,7 @@ Name | Type | Description
 <code class="users">createdAt</code>                        | `String`  | The date when the user was created
 <code class="users">creditsEarned</code>                    | `Integer` | The number of $ credits earned by referring or inviting new users to Kinopio. Is not user updateable
 <code class="users">creditsUsed</code>                      | `Integer` | The number of $ credits subtracted from your payments so far. Is not user updateable
-<code class="users">defaultCardColor</code>                 | `String` | User preference for a default color to use for new cards
+<code class="users">newCardColor</code>                     | `String` | User preference for a default color to use for new cards
 <code class="users">defaultSpaceBackground</code>           | `String` | User preference for a default background url to use for new spaces. This becomes `null` if `defaultSpaceBackgroundGradient` is set.
 <code class="users">defaultSpaceBackgroundGradient</code>   | `Object`   | User preference for the default background gradient to use for new spaces. This becomes `null` if `defaultSpaceBackground` is set.
 <code class="users">defaultSpaceBackgroundTint</code>       | `String` | User preference for a default background color used to tint new spaces
@@ -229,7 +229,7 @@ Name | Type | Description
 <code class="spaces">updatedAt</code>           | `String`  | The date when any changes in the space were made including a member visiting it
 <code class="spaces">visits</code>              | `Integer` | The number of times the space has been loaded by a person
 <code class="spaces">readOnlyKey</code>         | `String`  | Similar to `collaboratorKey` but only allows users and non-signed-in users to read a private space
-<code class="spaces">userDefaultCardColor</code> | `String`  | The current user's default color for new cards in this space. Overrides the user's `defaultCardColor`. Not visible to other users or collaborators.
+<code class="spaces">userNewCardColor</code>    | `String`  | The current user's default color for new cards in this space. Overrides the user's `newCardColor`. Not visible to other users or collaborators.
 
 </div>
 </section>
