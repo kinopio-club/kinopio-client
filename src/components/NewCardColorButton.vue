@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import NewCardColorPicker from '@/components/dialogs/NewCardColorPicker.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -25,7 +25,7 @@ onMounted(() => {
       if (name === 'triggerUpdateTheme') {
         updateDefaultColor()
       } else if (name === 'closeAllDialogs') {
-        state.colorPickerIsVisible = false
+        state.newCardColorPickerIsVisible = false
       }
     }
   )
@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  colorPickerIsVisible: false,
+  newCardColorPickerIsVisible: false,
   defaultColor: '#e3e3e3'
 })
 
@@ -46,48 +46,35 @@ const updateDefaultColor = () => {
   state.defaultColor = utils.cssVariable('secondary-background')
 }
 const newCardColor = computed(() => {
-  const userNewCardColor = userStore.getUserNewCardColor
-  if (themeStore.isCardColorThemeDefault(userNewCardColor)) {
+  const color = userStore.getUserNewCardColor
+  if (themeStore.isCardColorThemeDefault(color)) {
     return state.defaultColor
   }
-  return userNewCardColor || state.defaultColor
+  return color || state.defaultColor
 })
 
-const toggleColorPicker = () => {
-  const value = !state.colorPickerIsVisible
+const toggleNewCardColorPickerIsVisible = () => {
+  const value = !state.newCardColorPickerIsVisible
   globalStore.closeAllDialogs()
-  state.colorPickerIsVisible = value
+  state.newCardColorPickerIsVisible = value
 }
-const updateCardColor = (color) => {
-  userStore.updateUser({ newCardColor: color })
-}
-const clearCardColor = (color) => {
-  userStore.updateUser({ newCardColor: null })
-}
-const dialogTitle = computed(() => 'New Card Color')
-const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
+
 </script>
 
 <template lang="pug">
 button.small-button.translucent-button.new-card-color-button(
-  @click.left.stop="toggleColorPicker"
-  :class="{active: state.colorPickerIsVisible}"
+  @click.left.stop="toggleNewCardColorPickerIsVisible"
+  :class="{active: state.newCardColorPickerIsVisible}"
   title="Set Color of New Cards"
 )
   .badge.small-badge(:style="{ 'background-color': newCardColor }")
 
   //- TODO dialog pick new card color type
-    //- NewCardColorTypePicker  (all spaces, current space)
+    //- NewCardColorPicker  (all spaces, current space)
   //- TODO remove colorpicker dialog title
 
-  ColorPicker(
-    :currentColor="newCardColor"
-    :visible="state.colorPickerIsVisible"
-    :removeIsVisible="true"
-    :recentColors="itemColors"
-    @selectedColor="updateCardColor"
-    @removeColor="clearCardColor"
-  )
+  NewCardColorPicker(:visible="state.newCardColorPickerIsVisible" :defaultColor="state.defaultColor")
+
 </template>
 
 <style lang="stylus">
@@ -100,7 +87,8 @@ button.small-button.translucent-button.new-card-color-button(
     border-radius var(--small-entity-radius)
     width 15px
     min-width initial
-  .color-picker
+  dialog.new-card-color-picker
     top initial
     bottom 16px
+
 </style>
