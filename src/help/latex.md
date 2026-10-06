@@ -7,23 +7,16 @@ updated: 2026-10-05
 
 # LaTeX Support
 
-Write math equations in cards using LaTeX.
-> what is latex
+Write math equations in cards using [LaTeX](https://en.wikibooks.org/wiki/LaTeX/Mathematics). Formulas for your scientific, academic, and engineering papers and projects can live right alongside where you think through problems and collect research.
 
-> wide range of use among academic people, engineers/programmers. Combining math formulas with Kinopio would be great for better math understanding.
+<img src="https://updates.kinopio.club/pages/help/posts/latex/cards.webp" alt="latex cards" class="">
 
-> share math formulas 
+Enclose your LaTeX between triple backticks to make a [codeblock](/help/codeblocks), then use the code language button on the card to select `latex`.
 
-<!-- img w card back showing latex code -->
-
-<img src="https://media.cleanshot.cloud/media/74811/4pyV96nVAI20SSXyLAvlileluMi8sVptM3MsAjj1.jpeg?Expires=1791250541&Signature=Qp5-d1t3NlhIkVyUcvnzB3jvLahXHntXZETFcTvexUcnpOY6vCK-Z1r0EBujtCo-vNpZwPQ4ujz82sTFjJJOXAilmTtGmCoFkr-I9IPrwwNipKDuQMpwX-ry267LnH4WyuGRPdMc-6vrOG5MJ~-vkqwIsiB6bxciUUK3nZxKh0MyNhEw0NjXKzvS-7QKObiEVX~mnMyzRd-PYWg~Z~53uEzTOOWeqQ0jtGZGKYjsI9DZb3qE~cyStb3psEyvi62I4C4hNckJTM3zD1UMNDC5S27FDTybh4FIXfElPjs4M~s~jiutP-7MVPIsJFYLIvxJ8SvYloQnQ4a5cu-3KGIczA__&Key-Pair-Id=K269JMAT9ZF4GZ" alt="latex cards" class="">
+<img src="https://updates.kinopio.club/pages/help/posts/latex/carddetails.webp" alt="latex cards" class="small">
 
 
-## Writing LaTeX
-
-Enclose your LaTeX between triple backticks to make a code block, then use the code language button on the card to select `latex`.
-
-You can also start the code block with `latex` or `tex` to skip the language picker:
+You can also start the code block with `latex` or `tex` to skip the language picker step:
 
 ````
 ```latex
@@ -31,7 +24,7 @@ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 ```
 ````
 
-## Examples
+## More Examples
 
 Fractions, roots, and exponents
 
