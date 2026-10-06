@@ -960,6 +960,7 @@ export const useSpaceStore = defineStore('space', {
       const ignoreKeys = ['id', 'editedAt', 'editedByUserId']
       update = utils.clone(update)
       delete update.note
+      delete update.defaultCardColor
       const keys = Object.keys(update)
       const shouldPrevent = keys.every(key => ignoreKeys.includes(key))
       if (shouldPrevent) { return }
@@ -1025,6 +1026,13 @@ export const useSpaceStore = defineStore('space', {
       this.note = note
       await apiStore.addToQueue({ name: 'updateSpace', body: { id: this.id, note } })
       await cache.updateSpace('note', note, this.id)
+    },
+    // overrides userStore.defaultCardColor for the current user in this space, null removes it
+    async updateSpaceDefaultCardColor (color) {
+      const apiStore = useApiStore()
+      this.defaultCardColor = color
+      await apiStore.addToQueue({ name: 'updateSpace', body: { id: this.id, defaultCardColor: color } })
+      await cache.updateSpace('defaultCardColor', color, this.id)
     },
     async updateGroupsLocal (groups) {
       this.groups = groups

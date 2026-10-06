@@ -59,10 +59,10 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = value
 }
 const updateCardColor = (color) => {
-  userStore.updateUser({ defaultCardBackgroundColor: color })
+  userStore.updateUser({ defaultCardColor: color })
 }
 const clearCardColor = (color) => {
-  userStore.updateUser({ defaultCardBackgroundColor: null })
+  userStore.updateUser({ defaultCardColor: null })
 }
 const dialogTitle = computed(() => 'New Card Color')
 const itemColors = computed(() => spaceStore.getSpaceItemColors.card)

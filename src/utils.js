@@ -1823,7 +1823,8 @@ export default {
       showInExplore: false,
       proposedShowInExplore: false,
       groups: [],
-      note: ''
+      note: '',
+      defaultCardColor: null
     }
   },
   deletePrivateSpaceMeta (space) {

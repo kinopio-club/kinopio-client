@@ -61,7 +61,7 @@ export const useUserStore = defineStore('user', {
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundGradient: undefined,
     defaultSpaceBackgroundTint: undefined,
-    defaultCardBackgroundColor: undefined,
+    defaultCardColor: undefined,
     defaultConnectionControlPoint: consts.straightLineConnectionPathControlPoint,
     shouldUseStickyCards: true,
     shouldIncreaseUIContrast: false,
@@ -184,8 +184,8 @@ export const useUserStore = defineStore('user', {
       return false
     },
     getUserDefaultNewCardColor () {
-      // TODO userStore.defaultSpaceCardBackgroundColor || userStore.defaultCardBackgroundColor
-      return this.defaultCardBackgroundColor
+      const spaceStore = useSpaceStore()
+      return spaceStore.defaultCardColor || this.defaultCardColor
     },
     getUserDrawingColor () {
       return this.drawingColor || this.color

@@ -89,7 +89,7 @@ Name | Type | Description
 <code class="users">createdAt</code>                        | `String`  | The date when the user was created
 <code class="users">creditsEarned</code>                    | `Integer` | The number of $ credits earned by referring or inviting new users to Kinopio. Is not user updateable
 <code class="users">creditsUsed</code>                      | `Integer` | The number of $ credits subtracted from your payments so far. Is not user updateable
-<code class="users">defaultCardBackgroundColor</code>       | `String` | User preference for a default background color to use for new cards
+<code class="users">defaultCardColor</code>                 | `String` | User preference for a default color to use for new cards
 <code class="users">defaultSpaceBackground</code>           | `String` | User preference for a default background url to use for new spaces. This becomes `null` if `defaultSpaceBackgroundGradient` is set.
 <code class="users">defaultSpaceBackgroundGradient</code>   | `Object`   | User preference for the default background gradient to use for new spaces. This becomes `null` if `defaultSpaceBackground` is set.
 <code class="users">defaultSpaceBackgroundTint</code>       | `String` | User preference for a default background color used to tint new spaces
@@ -199,6 +199,7 @@ Name | Type | Description
 <code class="spaces">collaborators</code>       | `Array`   | A list of users that can also edit the space
 <code class="spaces">connections</code>         | `Array`   | A list of <a href="#connections" class="badge button-badge connections">Connections</a>
 <code class="spaces">createdAt</code>           | `String`  | The date when the space was created
+<code class="spaces">defaultCardColor</code>    | `String`  | The current user's default color for new cards in this space. Overrides the user's `defaultCardColor`. Not visible to other users or collaborators.
 <code class="spaces">drawingImage</code>        | `String`  | The image url for drawings on the space. The image is regenerated on the server after each drawing stroke.
 <code class="spaces">editedAt</code>            | `String`  | The date when card contents in the space was last added or changed
 <code class="spaces">editedByUserId</code>      | `String`  | The user id of the last user who edited or created a card in the space
