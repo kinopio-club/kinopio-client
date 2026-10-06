@@ -9,7 +9,7 @@
     "build-env-development": "cross-env MODE=development vite-ssg build",
     "preview": "vite preview",
     "build-dev": "nodemon --ignore dist --ext vue,styl,js,html --exec \"npm run build-env-development && npm run preview\"",
-    "lint": "eslint src --ext .js,.vue",
+    "lint": "eslint src",
     "test": "vitest"
   },
   "dependencies": {
@@ -48,6 +48,7 @@
     "cross-env": "^10.0.0",
     "eslint": "^9.39.5",
     "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
     "gray-matter": "^4.0.3",
     "jsdom": "^26.1.0",
     "lint-staged": "^13.2.1",
@@ -64,36 +65,6 @@
     "vite-ssg": "^28.3.0",
     "vitest": "^4.1.11",
     "yorkie": "^2.0.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-recommended",
-      "@vue/standard"
-    ],
-    "rules": {
-      "no-throw-literal": "off",
-      "no-unused-vars": "off",
-      "vue/multi-word-component-names": "off",
-      "vue/no-reserved-component-names": "off",
-      "vue/require-default-prop": "off",
-      "array-callback-return": "off",
-      "prefer-regex-literals": "off"
-    },
-    "parserOptions": {
-      "parser": "@babel/eslint-parser",
-      "requireConfigFile": false,
-      "ecmaVersion": 2022,
-      "sourceType": "module",
-      "babelOptions": {
-        "plugins": [
-          "transform-es2015-modules-commonjs"
-        ]
-      }
-    }
   },
   "postcss": {
     "plugins": {
