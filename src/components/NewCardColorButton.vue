@@ -46,7 +46,7 @@ const updateDefaultColor = () => {
   state.defaultColor = utils.cssVariable('secondary-background')
 }
 const newCardColor = computed(() => {
-  const userDefault = userStore.defaultCardBackgroundColor
+  const userDefault = userStore.getUserDefaultNewCardColor
   if (themeStore.isCardColorThemeDefault(userDefault)) {
     return state.defaultColor
   }
@@ -75,6 +75,10 @@ button.small-button.translucent-button.new-card-color-button(
   title="Set Color of New Cards"
 )
   .badge.small-badge(:style="{ 'background-color': newCardColor }")
+
+  //- TODO dialog pick new card color type (all spaces, current space)
+  //- TODO remove colorpicker dialog title
+
   ColorPicker(
     :currentColor="newCardColor"
     :visible="state.colorPickerIsVisible"

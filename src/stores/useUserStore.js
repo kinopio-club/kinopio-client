@@ -183,6 +183,10 @@ export const useUserStore = defineStore('user', {
       }
       return false
     },
+    getUserDefaultNewCardColor () {
+      // TODO userStore.defaultSpaceCardBackgroundColor || userStore.defaultCardBackgroundColor
+      return this.defaultCardBackgroundColor
+    },
     getUserDrawingColor () {
       return this.drawingColor || this.color
     },
