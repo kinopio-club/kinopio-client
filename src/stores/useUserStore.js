@@ -185,7 +185,7 @@ export const useUserStore = defineStore('user', {
     },
     getUserDefaultNewCardColor () {
       const spaceStore = useSpaceStore()
-      return spaceStore.defaultCardColor || this.defaultCardColor
+      return spaceStore.userDefaultCardColor || this.defaultCardColor
     },
     getUserDrawingColor () {
       return this.drawingColor || this.color

@@ -1824,7 +1824,7 @@ export default {
       proposedShowInExplore: false,
       groups: [],
       note: '',
-      defaultCardColor: null
+      userDefaultCardColor: null
     }
   },
   deletePrivateSpaceMeta (space) {

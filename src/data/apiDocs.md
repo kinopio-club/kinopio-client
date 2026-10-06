@@ -199,7 +199,6 @@ Name | Type | Description
 <code class="spaces">collaborators</code>       | `Array`   | A list of users that can also edit the space
 <code class="spaces">connections</code>         | `Array`   | A list of <a href="#connections" class="badge button-badge connections">Connections</a>
 <code class="spaces">createdAt</code>           | `String`  | The date when the space was created
-<code class="spaces">defaultCardColor</code>    | `String`  | The current user's default color for new cards in this space. Overrides the user's `defaultCardColor`. Not visible to other users or collaborators.
 <code class="spaces">drawingImage</code>        | `String`  | The image url for drawings on the space. The image is regenerated on the server after each drawing stroke.
 <code class="spaces">editedAt</code>            | `String`  | The date when card contents in the space was last added or changed
 <code class="spaces">editedByUserId</code>      | `String`  | The user id of the last user who edited or created a card in the space
@@ -230,6 +229,7 @@ Name | Type | Description
 <code class="spaces">updatedAt</code>           | `String`  | The date when any changes in the space were made including a member visiting it
 <code class="spaces">visits</code>              | `Integer` | The number of times the space has been loaded by a person
 <code class="spaces">readOnlyKey</code>         | `String`  | Similar to `collaboratorKey` but only allows users and non-signed-in users to read a private space
+<code class="spaces">userDefaultCardColor</code> | `String`  | The current user's default color for new cards in this space. Overrides the user's `defaultCardColor`. Not visible to other users or collaborators.
 
 </div>
 </section>
