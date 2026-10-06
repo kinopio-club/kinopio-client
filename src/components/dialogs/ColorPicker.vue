@@ -42,8 +42,7 @@ const props = defineProps({
   },
   luminosityIsDark: Boolean,
   luminosityIsLight: Boolean,
-  shouldHideOpacity: Boolean,
-  dialogTitle: String
+  shouldHideOpacity: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -254,8 +253,6 @@ const toggleOpacity = () => {
 
 <template lang="pug">
 dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
-  section.title-section(v-if="props.dialogTitle")
-    p {{props.dialogTitle}}
   section(:style="{backgroundColor: props.currentColor}")
     .row
       input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)

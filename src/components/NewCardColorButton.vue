@@ -83,7 +83,6 @@ button.small-button.translucent-button.new-card-color-button(
     :currentColor="newCardColor"
     :visible="state.colorPickerIsVisible"
     :removeIsVisible="true"
-    :dialogTitle="dialogTitle"
     :recentColors="itemColors"
     @selectedColor="updateCardColor"
     @removeColor="clearCardColor"
