@@ -1,5 +1,5 @@
 ---
-title: LaTeX Support
+title: LaTeX Math Support
 description: Write math equations in cards with LaTeX code blocks
 category: Advanced
 updated: 2026-10-05
