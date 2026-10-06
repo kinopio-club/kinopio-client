@@ -21,7 +21,7 @@ const themeStore = useThemeStore()
 const changelogStore = useChangelogStore()
 const route = useRoute()
 
-const siteDescription = 'How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Completely hand-written.'
+const siteDescription = 'How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Written by Piri and other Kinopio fans, without AI.'
 const defaultImage = 'https://files.kinopio.club/og-image.png'
 
 const categoryDetails = {
