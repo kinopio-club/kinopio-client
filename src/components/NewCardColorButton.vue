@@ -68,13 +68,7 @@ button.small-button.translucent-button.new-card-color-button(
   title="Set Color of New Cards"
 )
   .badge.small-badge(:style="{ 'background-color': newCardColor }")
-
-  //- TODO dialog pick new card color type
-    //- NewCardColorPicker  (all spaces, current space)
-  //- TODO remove colorpicker dialog title
-
   NewCardColorPicker(:visible="state.newCardColorPickerIsVisible" :defaultColor="state.defaultColor")
-
 </template>
 
 <style lang="stylus">
@@ -90,5 +84,4 @@ button.small-button.translucent-button.new-card-color-button(
   dialog.new-card-color-picker
     top initial
     bottom 16px
-
 </style>

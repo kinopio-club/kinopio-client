@@ -67,6 +67,7 @@ const closeDialogs = () => {
   state.userNewCardColorPickerIsVisible = false
   state.spaceUserNewCardColorPickerIsVisible = false
 }
+const spacePreviewThumbnailImage = computed(() => spaceStore.previewThumbnailImagePrivate || spaceStore.previewThumbnailImage)
 const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
 
 // current space (space user)
@@ -113,6 +114,7 @@ dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @
         .segmented-buttons
           button(@click.stop="toggleSpaceUserNewCardColorPickerIsVisible" :class="{ active: state.spaceUserNewCardColorPickerIsVisible }")
             .badge.new-user-color-badge(:style="{ backgroundColor: spaceUserNewCardColor }")
+            img.preview-thumbnail-image(v-if="spacePreviewThumbnailImage" :src="spacePreviewThumbnailImage")
             span Current Space
           button(@click="clearSpaceUserCardColor")
             img.icon.cancel(src="@/assets/add.svg")
