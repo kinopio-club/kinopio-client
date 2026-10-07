@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
@@ -67,7 +68,6 @@ const closeDialogs = () => {
   state.userNewCardColorPickerIsVisible = false
   state.spaceUserNewCardColorPickerIsVisible = false
 }
-const spacePreviewThumbnailImage = computed(() => spaceStore.previewThumbnailImagePrivate || spaceStore.previewThumbnailImage)
 const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
 
 // current space (space user)
@@ -114,7 +114,7 @@ dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @
         .segmented-buttons
           button(@click.stop="toggleSpaceUserNewCardColorPickerIsVisible" :class="{ active: state.spaceUserNewCardColorPickerIsVisible }")
             .badge.new-user-color-badge(:style="{ backgroundColor: spaceUserNewCardColor }")
-            img.preview-thumbnail-image(v-if="spacePreviewThumbnailImage" :src="spacePreviewThumbnailImage")
+            MinimapCanvas(:visible="true" :size="20" :viewportIsHidden="true" :parentIsDialog="true" :shouldShowSpaceBackgroundImage="true")
             span Current Space
           button(@click="clearSpaceUserCardColor")
             img.icon.cancel(src="@/assets/add.svg")
@@ -157,6 +157,14 @@ dialog.new-card-color-picker
     width 15px
     min-width initial
     margin-right 5px
+  .minimap-canvas
+    display inline-block
+    vertical-align -3px
+    margin-right 5px
+    pointer-events none
+    height 17px
+    canvas
+      display block
 
   dialog.color-picker
     top initial

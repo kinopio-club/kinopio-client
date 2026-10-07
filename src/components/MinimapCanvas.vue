@@ -10,6 +10,7 @@ import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
+import backgroundImages from '@/data/backgroundImages.json'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
@@ -160,7 +161,8 @@ const props = defineProps({
   viewportIsHidden: Boolean,
   backgroundColor: String,
   parentIsDialog: Boolean,
-  preventAnimation: Boolean
+  preventAnimation: Boolean,
+  shouldShowSpaceBackgroundImage: Boolean
 })
 const state = reactive({
   scrollX: 0,
@@ -204,7 +206,29 @@ const styles = computed(() => {
   if (!props.parentIsDialog && !shouldIncreaseUIContrast.value) {
     color = colord(color).alpha(0.8).toRgbString()
   }
-  return { backgroundColor: color }
+  if (props.shouldShowSpaceBackgroundImage) {
+    color = null
+  }
+  const styles = { backgroundColor: color }
+  if (spaceBackgroundImageUrl.value) {
+    styles.backgroundImage = `url('${spaceBackgroundImageUrl.value}')`
+  }
+  return styles
+})
+
+// space background image
+
+const spaceBackgroundImageUrl = computed(() => {
+  if (!props.shouldShowSpaceBackgroundImage) { return }
+  const space = props.space || spaceStore
+  if (space.backgroundIsGradient) { return }
+  const url = space.background
+  if (!url) { return }
+  const backgroundImage = backgroundImages.find(image => image.url === url)
+  if (backgroundImage?.thumbnailUrl) {
+    return backgroundImage.thumbnailUrl
+  }
+  return url
 })
 
 // canvas
@@ -451,7 +475,7 @@ const viewportStyle = computed(() => {
 // pan viewport
 
 const positionInSpace = (event) => {
-  const element = document.querySelector('#minimap-canvas')
+  const element = canvasElement.value
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   let x = event.clientX - rect.left
@@ -536,6 +560,8 @@ const viewportIsVisible = computed(() => {
 <style lang="stylus">
 .minimap-canvas
   touch-action none
+  background-size cover
+  background-position center
   border-radius var(--entity-radius)
   position relative
   margin 0
