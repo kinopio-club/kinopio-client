@@ -157,7 +157,9 @@ dialog.new-card-color-picker
     width 15px
     min-width initial
     margin-right 5px
-
+  .preview-thumbnail-image
+    height 17px
+    vertical-align -3px
   dialog.color-picker
     top initial
     bottom 16px

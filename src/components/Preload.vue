@@ -2,8 +2,10 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 const globalStore = useGlobalStore()
+const spaceStore = useSpaceStore()
 
 const state = reactive({
   spaceLoaded: false
@@ -16,11 +18,16 @@ watch(() => globalStore.isLoadingSpace, (value) => {
     state.spaceLoaded = true
   }
 })
+
+const spacePreviewThumbnailImage = computed(() => spaceStore.previewThumbnailImagePrivate || spaceStore.previewThumbnailImage)
 </script>
 
 <template lang="pug">
 .preload
   .icons.hidden(v-if="state.spaceLoaded")
+    //- space preview thumbnail
+    img(v-if="spacePreviewThumbnailImage" :src="spacePreviewThumbnailImage")
+
     //- logo
     img.icon(src="@/assets/logos/logo-hover.png")
     img.icon(src="@/assets/logos/logo-active.png")
