@@ -61,7 +61,7 @@ export const useUserStore = defineStore('user', {
     defaultSpaceBackground: undefined,
     defaultSpaceBackgroundGradient: undefined,
     defaultSpaceBackgroundTint: undefined,
-    defaultCardBackgroundColor: undefined,
+    newCardColor: undefined,
     defaultConnectionControlPoint: consts.straightLineConnectionPathControlPoint,
     shouldUseStickyCards: true,
     shouldIncreaseUIContrast: false,

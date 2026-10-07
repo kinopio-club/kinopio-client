@@ -482,7 +482,7 @@ const mergeSelectedCards = () => {
   remove({ shouldRemoveCardsOnly: true })
   const cardWithBackgroundColor = cards.find(card => card.backgroundColor)
   const cardBackgroundColor = cardWithBackgroundColor?.backgroundColor
-  const userCardBackgroundColor = userStore.defaultCardBackgroundColor
+  const userCardBackgroundColor = globalStore.getNewCardColor
   const newCardId = nanoid()
   const mentions = atUserMentions.map(mention => {
     mention.id = nanoid()
