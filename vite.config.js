@@ -172,6 +172,9 @@ export default defineConfig(async ({ command, mode }) => {
     server: {
       port: 8080,
       host: '0.0.0.0',
+      watch: {
+        ignored: ['**/src-tauri/**']
+      },
       fs: {
         // Allow serving files from one level up to the project root
         allow: ['..']

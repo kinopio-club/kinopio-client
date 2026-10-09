@@ -149,3 +149,84 @@ The prerender extension in Netlify compiles space URLs into static html, so that
 - [github.com/kinopio-club](https://github.com/kinopio-club)
 - [User Forums](https://forum.kinopio.club)
 - [Discord](https://kinopio.club/discord)
+
+-------
+
+# Desktop App
+
+The desktop app is a [Tauri](https://tauri.app) native wrapper around the website, it lives in `src-tauri`. It only needs to be rebuilt when the files in `src-tauri` change.
+
+## Install
+
+Building the desktop app needs Rust and the Xcode command line tools
+
+    xcode-select --install
+    brew install rustup
+    rustup default stable
+
+Homebrew doesn't add Rust to your PATH, so add this to `~/.bash_profile` or `~/.zshrc`
+
+    export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+## Run
+
+Make sure `npm run dev` is already running, then in another terminal
+
+    npm run desktop
+
+Changes to `/src-tauri` rebuild and relaunch the app automatically, and changes to `/src` hot reload.
+
+## Build
+
+    rustup target add x86_64-apple-darwin
+    npx tauri build --target universal-apple-darwin
+    npm run desktop:build
+
+Builds for the architecture of your Mac, and outputs to
+
+    src-tauri/target/release/bundle/macos/Kinopio.app
+    src-tauri/target/release/bundle/dmg/
+
+To only build the `.app` and skip the `.dmg`, use `npx tauri build --bundles app`.
+
+To build a universal app that also runs on Intel Macs
+
+    
+
+which outputs to `src-tauri/target/universal-apple-darwin/release/bundle/`.
+
+## Sign and Notarize
+
+Without signing, the built app only opens on your own Mac. To distribute it you need a `Developer ID Application` certificate from your Apple Developer account (Xcode → Settings → Accounts → Manage Certificates), and an [app-specific password](https://account.apple.com) for notarization.
+
+Find the name of your certificate with
+
+    security find-identity -v -p codesigning
+
+Then set these environment variables before running `npm run desktop:build`. The app is signed, notarized, and stapled as part of the build.
+
+    export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+    export APPLE_ID="you@example.com"
+    export APPLE_PASSWORD="app-specific-password"
+    export APPLE_TEAM_ID="TEAMID"
+
+Check that the built app is signed and notarized with
+
+    spctl -a -vv src-tauri/target/release/bundle/macos/Kinopio.app
+
+## Icons
+
+App icons in `src-tauri/icons` are generated from `src-tauri/app-icon.png`. To update them, replace that file and run
+
+    npx tauri icon src-tauri/app-icon.png
+
+then delete the `android` and `ios` folders that it adds to `src-tauri/icons`.
+
+## Desktop Files
+
+| File | Description |
+| ------------- |-------------|
+| `src-tauri/tauri.conf.json` | App name, identifier, window size, dev and production URLs |
+| `src-tauri/src/lib.rs` | Creates windows and tabs, menu, opens external links in the system browser |
+| `src-tauri/src/init.js` | Script injected into the website by the desktop app, handles link clicks and key events |
+| `src-tauri/dev-runner.sh` | Used by `npm run desktop` to name the dev app `[DEV] Kinopio` in the dock |

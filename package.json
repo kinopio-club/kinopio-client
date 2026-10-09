@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "build-dev": "nodemon --ignore dist --ext vue,styl,js,html --exec \"npm run build-env-development && npm run preview\"",
     "lint": "eslint src",
-    "test": "vitest"
+    "test": "vitest",
+    "desktop": "tauri dev --runner ./dev-runner.sh",
+    "desktop:build": "tauri build"
   },
   "dependencies": {
     "@aguezz/qs-parse": "^2.0.0",
@@ -37,6 +39,7 @@
     "@babel/core": "^7.29.6",
     "@babel/eslint-parser": "^7.23.3",
     "@babel/preset-env": "^7.26.9",
+    "@tauri-apps/cli": "^2.12.1",
     "@types/lodash-es": "^4.17.3",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/compiler-sfc": "^3.2.6",
