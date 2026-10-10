@@ -3,7 +3,7 @@ title: Why Just Passwords?
 date: 2026-10-09
 category: How It's Made
 description: I get it, no one wants to be responsible for screwing up critical security, so authentication has become scary. 
-image: 'https://kinopio-updates.us-east-1.linodeobjects.com/pages/blog/posts/passwords/1.webp'
+image: 'https://updates.kinppio.club/pages/blog/posts/passwords/1.webp'
 ---
 
 
@@ -13,7 +13,7 @@ So why has Kinopio only had password-based login since it launched in 2018? Beca
 
 Let's go through them:
 
-<img src="https://kinopio-updates.us-east-1.linodeobjects.com/pages/blog/posts/passwords/1.webp" class="">
+<img src="https://updates.kinppio.club/pages/blog/posts/passwords/1.webp" class="">
 
 
 ## Password-Less Auth With an Emailed Token
@@ -25,7 +25,7 @@ Using email to authenticate is much less intimidating to build because you don't
 - If you're lucky the email is ready in your inbox, but usually you'll be waiting a minute or two for it to show up. (Assuming it doesn't get silently swallowed up by spam filters).
 - Because mobile email clients open links in their own sandboxed embedded browsers, the magic link has become a decidedly less magical 2FA code that you have to manually copy and paste yourself, like an animal. 
 
-<img src="https://kinopio-updates.us-east-1.linodeobjects.com/pages/blog/posts/passwords/2.webp" class="">
+<img src="https://updates.kinppio.club/pages/blog/posts/passwords/2.webp" class="">
 
 Defenders of the pattern are correct that storing minimum user data is a [good security practice](https://idlewords.com/talks/haunted_by_data.htm). But the ad-trackers, AI training, and unredacted and never-purged logs in most modern apps make this a practically meaningless gesture.
 
@@ -39,7 +39,7 @@ The major advantage of this pattern is low friction. New users don't have to typ
 
 But in exchange for the convenience, you're giving over user data to big-tech corporations and the advertising-industrial complex that's sloppifying the web, and subverting democracy. 
 
-<img src="https://kinopio-updates.us-east-1.linodeobjects.com/pages/blog/posts/passwords/3.webp" class="small">
+<img src="https://updates.kinppio.club/pages/blog/posts/passwords/3.webp" class="small">
 
 
 Also you can't just do one of them because someone will inevitably tell you that they don't have a [Google] account, but they do use [Microsoft] at work. So your sign in screen ends up looking like a rainbow colored mess of corporate logos, and users have to remember which of these providers they used with your app. 
