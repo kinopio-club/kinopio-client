@@ -105,6 +105,7 @@ if (consts.isDevelopment()) {
   window.historyStore = useHistoryStore()
   window.groupStore = useGroupStore()
   window.cache = cache
+  window.consts = consts
 }
 console.info('🍍 Pinia stores: window.globalStore, window.spaceStore, window.cardStore, window.boxStore')
 

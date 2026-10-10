@@ -41,6 +41,7 @@ export default {
   systemCommands: { explore: 'Explore', newSpace: 'New', templates: 'Templates', apps: 'Apps and Extensions' },
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
+  isAndroid: false,
   cdnHost: 'https://cdn.kinopio.club',
   imgproxyHost: 'https://img.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/squiggle-background-2x.png',

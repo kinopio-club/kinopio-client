@@ -238,3 +238,11 @@ The app checks `https://updates.kinopio.club/desktop/latest.json` when it launch
 App icons in `src-tauri/icons` are generated using
 
     npx tauri icon src-tauri/app-icon.png
+
+-------
+
+# Android
+
+    bubblewrap build
+
+produces an `.aab` for the Play Store and an `.apk` for testing on a phone.
