@@ -122,7 +122,20 @@ export default defineConfig(async ({ command, mode }) => {
         registerType: 'autoUpdate',
         strategies: 'generateSW',
         manifest: {
-          start_url: '/app'
+          name: 'Kinopio',
+          short_name: 'Kinopio',
+          description: 'Kinopio is a spatial note-taking tool for collecting and connecting your thoughts, ideas, and plans.',
+          start_url: '/app',
+          scope: '/',
+          display: 'standalone',
+          theme_color: '#ffffff',
+          background_color: '#ffffff',
+          icons: [
+            { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+            { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+            // has a solid background and extra margin, so that android can crop it into any icon shape
+            { src: '/maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          ]
         },
         workbox: {
           navigateFallback: '/app.html',
