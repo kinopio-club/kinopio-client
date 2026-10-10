@@ -4,6 +4,7 @@ use tauri::utils::config::{FrontendDist, WebviewUrl};
 use tauri::webview::{NewWindowResponse, PageLoadEvent};
 use tauri::{AppHandle, Manager, Url, WebviewWindow, WebviewWindowBuilder};
 use tauri_plugin_opener::OpenerExt;
+use tauri_plugin_updater::UpdaterExt;
 
 const APP_HOSTS: [&str; 2] = ["kinopio.club", "kinopio.local"];
 // external pages that the app redirects to and back from, they stay in the app
@@ -15,6 +16,7 @@ const RELOAD_MENU_ID: &str = "reload";
 const BACK_MENU_ID: &str = "back";
 const FORWARD_MENU_ID: &str = "forward";
 const WEB_INSPECTOR_MENU_ID: &str = "web-inspector";
+const UPDATE_CHECK_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 60 * 6);
 
 static TAB_COUNT: AtomicUsize = AtomicUsize::new(0);
 
@@ -185,6 +187,19 @@ fn open_tab_from_focused_window(app: &AppHandle) {
   open_tab(app, url, window.label().to_string());
 }
 
+// About window with the logo, the default one shows a generic icon
+#[cfg(target_os = "macos")]
+fn about_menu_item(app: &AppHandle) -> tauri::Result<PredefinedMenuItem<tauri::Wry>> {
+  let package_info = app.package_info();
+  let metadata = tauri::menu::AboutMetadata {
+    name: Some(package_info.name.clone()),
+    version: Some(package_info.version.to_string()),
+    icon: Some(tauri::include_image!("./about-icon.png")),
+    ..Default::default()
+  };
+  PredefinedMenuItem::about(app, None, Some(metadata))
+}
+
 // default menu, plus File → New Tab, and View → Reload, Back, Forward, Web Inspector
 fn build_menu(app: &AppHandle) -> tauri::Result<Menu<tauri::Wry>> {
   let menu = Menu::default(app)?;
@@ -202,6 +217,12 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<tauri::Wry>> {
   let separator = PredefinedMenuItem::separator(app)?;
   let view_items: [&dyn IsMenuItem<tauri::Wry>; 5] =
     [&reload, &back, &forward, &separator, &web_inspector];
+  // on macOS the first menu is the app menu, and its first item is About
+  #[cfg(target_os = "macos")]
+  if let Some(app_menu) = menu.items()?.first().and_then(|item| item.as_submenu()) {
+    app_menu.remove_at(0)?;
+    app_menu.insert(&about_menu_item(app)?, 0)?;
+  }
   let mut has_view_menu = false;
   for item in menu.items()? {
     let Some(submenu) = item.as_submenu() else {
@@ -255,6 +276,46 @@ fn handle_menu_event(app: &AppHandle, id: &str) {
   }
 }
 
+// downloads and installs a new version of the app if there is one, returns true if an update was installed
+async fn install_update(app: &AppHandle) -> bool {
+  let updater = match app.updater() {
+    Ok(updater) => updater,
+    Err(error) => {
+      log::error!("could not start updater {}", error);
+      return false;
+    }
+  };
+  let update = match updater.check().await {
+    Ok(Some(update)) => update,
+    Ok(None) => return false,
+    Err(error) => {
+      log::error!("could not check for update {}", error);
+      return false;
+    }
+  };
+  if let Err(error) = update.download_and_install(|_, _| {}, || {}).await {
+    log::error!("could not install update {}", error);
+    return false;
+  }
+  log::info!("installed update {}", update.version);
+  true
+}
+
+// silent updates: checks on launch and every few hours, an installed update is used the next time the app is launched
+fn start_update_checks(app: &AppHandle) {
+  if tauri::is_dev() {
+    return;
+  }
+  let app = app.clone();
+  std::thread::spawn(move || loop {
+    let is_updated = tauri::async_runtime::block_on(install_update(&app));
+    if is_updated {
+      break;
+    }
+    std::thread::sleep(UPDATE_CHECK_INTERVAL);
+  });
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -264,6 +325,7 @@ pub fn run() {
         .open_js_links_on_click(false)
         .build(),
     )
+    .plugin(tauri_plugin_updater::Builder::new().build())
     .menu(build_menu)
     .on_menu_event(|app, event| handle_menu_event(app, event.id().as_ref()))
     .setup(|app| {
@@ -275,6 +337,7 @@ pub fn run() {
         )?;
       }
       build_window(app.handle(), MAIN_WINDOW_LABEL, None, true)?;
+      start_update_checks(app.handle());
       Ok(())
     })
     .run(tauri::generate_context!())

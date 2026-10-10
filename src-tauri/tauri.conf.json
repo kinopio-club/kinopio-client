@@ -25,6 +25,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -35,6 +36,14 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMyRkY4RTIzRjVCOTQ3RjEKUldUeFI3bjFJNDcvTXM4eEpjbGhVL1lkOWlaVUUyUEpnbTc5RWxoQlo1QzM1d2hCREJYT2VYM28K",
+      "endpoints": [
+        "https://updates.kinopio.club/desktop/latest.json"
+      ]
     }
   }
 }
