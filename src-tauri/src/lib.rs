@@ -10,6 +10,7 @@ const APP_HOSTS: [&str; 2] = ["kinopio.club", "kinopio.local"];
 // external pages that the app redirects to and back from, they stay in the app
 const IN_APP_HOSTS: [&str; 2] = ["checkout.stripe.com", "billing.stripe.com"];
 const MAIN_WINDOW_LABEL: &str = "main";
+const HOME_PATH: &str = "/app";
 const TABBING_IDENTIFIER: &str = "kinopio";
 const NEW_TAB_MENU_ID: &str = "new-tab";
 const RELOAD_MENU_ID: &str = "reload";
@@ -40,7 +41,8 @@ fn is_browser_url(url: &Url) -> bool {
   is_web_url(url) && !host_is_in(url, &APP_HOSTS) && !host_is_in(url, &IN_APP_HOSTS)
 }
 
-fn home_url(app: &AppHandle) -> Url {
+// the dev or production website, from tauri.conf.json
+fn site_url(app: &AppHandle) -> Url {
   let build = &app.config().build;
   if tauri::is_dev() {
     if let Some(url) = &build.dev_url {
@@ -51,6 +53,15 @@ fn home_url(app: &AppHandle) -> Url {
     return url.clone();
   }
   Url::parse("https://kinopio.club").unwrap()
+}
+
+// windows open at /app, because / is the about page for new users
+fn home_url(app: &AppHandle) -> Url {
+  let site = site_url(app);
+  match site.join(HOME_PATH) {
+    Ok(url) => url,
+    Err(_) => site,
+  }
 }
 
 fn open_in_browser(app: &AppHandle, url: &Url) {
@@ -70,9 +81,11 @@ fn build_window(
   let mut config = app.config().app.windows[0].clone();
   config.label = label.to_string();
   config.visible = visible;
+  let mut window_url = home_url(app);
   if let Some(url) = url {
-    config.url = WebviewUrl::External(url);
+    window_url = url;
   }
+  config.url = WebviewUrl::External(window_url);
   let new_window_app = app.clone();
   let new_window_label = label.to_string();
   let page_load_app = app.clone();

@@ -1,5 +1,5 @@
 // Collects the files for an app update into src-tauri/target/update, ready to upload to the updates bucket.
-// Run after building the app, with `npm run desktop:update-files`
+// Runs automatically after `npm run desktop:build`
 
 import fs from 'fs'
 import path from 'path'

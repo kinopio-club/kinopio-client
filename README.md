@@ -165,7 +165,7 @@ A [native](https://tauri.app) wrapper around the website, it lives in `src-tauri
 | `src-tauri/src/init.js` | Script injected into the website by the desktop app, handles link clicks and key events |
 | `src-tauri/dev-runner.sh` | Used by `npm run desktop` to name the dev app `[DEV] Kinopio` in the dock |
 | `src-tauri/notarize-dmg.js` | Runs after `npm run desktop:build` to notarize and staple the `.dmg` |
-| `src-tauri/update-files.js` | Used by `npm run desktop:update-files` to collect the files for an app update |
+| `src-tauri/update-files.js` | Runs after `npm run desktop:build` to collect the files for an app update |
 
 ## Install
 
@@ -218,16 +218,18 @@ Both should say `accepted` and `source=Notarized Developer ID`.
 In `.env.local` specify 
 
     TAURI_SIGNING_PRIVATE_KEY=/Users/you/.tauri/kinopio.key
+    TAURI_SIGNING_PRIVATE_KEY_PASSWORD=
+
+The key has no password, but the blank password line is needed, otherwise the build stops to ask for one.
 
 The same private key at `~/.tauri/kinopio.key` needs to be on every machine that builds the app. 
 
 ## Ship an Update
 
 1. Increase `version` in `src-tauri/tauri.conf.json`
-2. Build the app with `npm run desktop:build`
-3. Build the update files for previous versions with `npm run desktop:update`
-4. Upload the app dmg in `src-tauri/target/release/bundle/dmg`, and the update files in `src-tauri/target/update` to the `kinopio-updates/desktop` bucket
-5. Rename app to `kinopio.dmg` 
+2. Build the app with `npm run desktop:build`. This also builds the update files for previous versions
+3. Upload the app dmg in `src-tauri/target/release/bundle/dmg`, and the update files in `src-tauri/target/update` to the `kinopio-updates/desktop` bucket
+4. Rename app to `kinopio.dmg` 
 
 The app checks `https://updates.kinopio.club/desktop/latest.json` when it launches, and every 6 hours after that. If the version there is newer than its own, it silently downloads and installs the update, which is used the next time the app is launched.
 
