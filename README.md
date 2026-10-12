@@ -174,6 +174,7 @@ Building the desktop app needs Rust and the Xcode command line tools
     xcode-select --install
     brew install rustup
     rustup default stable
+    rustup target add x86_64-apple-darwin
 
 Homebrew doesn't add Rust to your PATH, so add this to `~/.bash_profile` or `~/.zshrc`
 
@@ -189,9 +190,9 @@ Changes to `src-tauri` rebuild and relaunch the app automatically.
 
 ## Build Production
 
-    npm run desktop:build
+Builds a mac app to `src-tauri/target/universal-apple-darwin/release/bundle/…`
 
-Builds for the architecture of your Mac, and outputs to `src-tauri/target/release/bundle/…`
+    npm run desktop:build
 
 ## Sign and Notarize
 
@@ -210,8 +211,8 @@ Then add these to `.env.local`, which `npm run desktop:build` loads. The app is 
 
 Check that the built app and dmg are signed and notarized with
 
-    spctl -a -vv src-tauri/target/release/bundle/macos/Kinopio.app
-    spctl -a -vv -t open --context context:primary-signature src-tauri/target/release/bundle/dmg/*.dmg
+    spctl -a -vv src-tauri/target/universal-apple-darwin/release/bundle/macos/Kinopio.app
+    spctl -a -vv -t open --context context:primary-signature src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
 
 Both should say `accepted` and `source=Notarized Developer ID`.
 
@@ -228,7 +229,7 @@ The same private key at `~/.tauri/kinopio.key` needs to be on every machine that
 
 1. Increase `version` in `src-tauri/tauri.conf.json`
 2. Build the app with `npm run desktop:build`. This also builds the update files for previous versions
-3. Upload the app dmg in `src-tauri/target/release/bundle/dmg`, and the update files in `src-tauri/target/update` to the `kinopio-updates/desktop` bucket
+3. Upload the app dmg in `src-tauri/target/universal-apple-darwin/release/bundle/dmg`, and the update files in `src-tauri/target/update` to the `kinopio-updates/desktop` bucket
 4. Rename app to `kinopio.dmg` 
 
 The app checks `https://updates.kinopio.club/desktop/latest.json` when it launches, and every 6 hours after that. If the version there is newer than its own, it silently downloads and installs the update, which is used the next time the app is launched.
