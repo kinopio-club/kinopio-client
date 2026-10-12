@@ -23,7 +23,8 @@ export const useListStore = defineStore('lists', {
     byId: {},
     allIds: [],
     listSnapGuides: {}, // { listId, listPositionIndex, cards }
-    listChildPlaceholders: {} // { listId: [ card{ id, x, y, height }, {..}] }
+    listChildPlaceholders: {}, // { listId: [ card{ id, x, y, height }, {..}] }
+    listIdsRemoving: [] // lists animating out before being removed
   }),
 
   getters: {
@@ -540,6 +541,16 @@ export const useListStore = defineStore('lists', {
         return listAge < maxListAge && listCards.length <= 1
       })
       if (!ids.length) { return }
+      // animate fade-out, then remove list
+      const duration = 200 // matches .list-fade-out
+      this.listIdsRemoving = this.listIdsRemoving.concat(ids)
+      const prevHeights = ids.map(id => {
+        return { id, height: this.getList(id).height }
+      })
+      this.updateListsState(prevHeights) // keep list size while animating
+      await new Promise(resolve => setTimeout(resolve, duration))
+      this.listIdsRemoving = this.listIdsRemoving.filter(id => !ids.includes(id))
+      ids = ids.filter(id => Boolean(this.getList(id)))
       await this.removeLists(ids)
     }
   }

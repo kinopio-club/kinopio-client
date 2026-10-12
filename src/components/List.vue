@@ -546,6 +546,9 @@ const addSizeClasses = (classes) => {
   classes['l-height'] = height > sizes.l
   return classes
 }
+const isListFadingOut = computed(() => {
+  return listStore.listIdsRemoving.includes(props.list.id)
+})
 const listClasses = computed(() => {
   let classes = {
     hover: state.isHover,
@@ -553,7 +556,8 @@ const listClasses = computed(() => {
     'is-resizing': isResizing.value,
     'is-selected': currentListIsSelected.value,
     transition: globalStore.boxIsSnappingTransition,
-    filtered: isFiltered.value
+    filtered: isFiltered.value,
+    'list-fade-out': isListFadingOut.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -764,6 +768,7 @@ const clearFocus = () => {
           :data-list-id="props.list.id"
           :data-card-id="card.id"
           :data-card-listPositionIndex="card.listPositionIndex"
+          :class="{ 'list-fade-out': isListFadingOut }"
         )
 
   .list-info(
@@ -1061,4 +1066,13 @@ const clearFocus = () => {
 @keyframes placeholderGuide
   50%
     transform scaleY(115%)
+
+.list-fade-out
+  animation listFadeOut 0.2s ease-out
+@keyframes listFadeOut
+  0%
+    opacity 1
+  100%
+    opacity 0
+    transform scale(0.95)
 </style>
