@@ -154,7 +154,7 @@ The prerender extension in Netlify compiles space URLs into static html, so that
 
 # Tauri
 
-A [native](https://tauri.app) wrapper around the website, it lives in `src-tauri`. It only needs to be rebuilt when the files in `src-tauri` change.
+A [native](https://tauri.app) app wrapper around the website, it lives in `src-tauri`. It only needs to be rebuilt when the files in `src-tauri` change.
 
 ## Files
 
