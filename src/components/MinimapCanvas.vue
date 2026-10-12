@@ -30,8 +30,11 @@ let canvas, context
 let offscreenCanvas, offscreenContext
 let cachedDrawingImage, cachedDrawingDataUrl
 let startPanningPosition
+let pingCanvas, pingContext, pingFrameId
+let pingRipples = [] // { x, y, color, radius, speed, decay, lineWidth, shouldDestroy, opacity }
 const itemRadius = 1
 const canvasElement = ref(null)
+const pingCanvasElement = ref(null)
 
 let unsubscribes
 
@@ -81,6 +84,9 @@ onMounted(async () => {
       if (globalStoreActions.includes(name)) {
         await nextTick()
         updateThrottle()
+      } else if (name === 'triggerSonarPing') {
+        const ping = args[0]
+        createPingRipples(ping)
       }
     }
   )
@@ -141,6 +147,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', update)
   window.removeEventListener('pointerup', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
+  window.cancelAnimationFrame(pingFrameId)
   unsubscribes()
 })
 
@@ -411,6 +418,110 @@ const drawCards = () => {
   }
 }
 
+// sonar pings
+
+const shouldPreventPing = (ping) => {
+  let user
+  // check remote user
+  if (ping.isFromBroadcast) {
+    user = spaceStore.getSpaceCollaboratorById(ping.user.id)
+  // check current user
+  } else {
+    user = userStore.getUserIsSpaceMember
+  }
+  if (!user) {
+    return true
+  }
+}
+const createPingRipples = (ping) => {
+  if (!props.visible) { return }
+  if (props.space) { return } // pings only apply to the current space
+  if (shouldPreventPing(ping)) { return }
+  const rippleCount = 4
+  const { x, y } = ping
+  const color = colord(ping.color).toHsl()
+  for (let i = 1; i < rippleCount + 1; i++) {
+    const decay = Math.pow(0.65, i)
+    const ripple = {
+      x,
+      y,
+      color,
+      radius: 1,
+      speed: 1,
+      decay,
+      lineWidth: 3,
+      shouldDestroy: false,
+      opacity: 1
+    }
+    pingRipples.push(ripple)
+  }
+  if (!pingFrameId) {
+    pingFrameId = window.requestAnimationFrame(pingFrame)
+  }
+}
+const updatePingCanvas = () => {
+  pingCanvas = pingCanvasElement.value
+  if (!pingCanvas) { return }
+  const targetWidth = state.pageWidth * window.devicePixelRatio
+  const targetHeight = state.pageHeight * window.devicePixelRatio
+  if (pingCanvas.width !== targetWidth || pingCanvas.height !== targetHeight) {
+    pingCanvas.width = targetWidth
+    pingCanvas.height = targetHeight
+    pingCanvas.style.width = state.pageWidth + 'px'
+    pingCanvas.style.height = state.pageHeight + 'px'
+    pingContext = pingCanvas.getContext('2d')
+    pingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  }
+}
+const drawPingRipples = () => {
+  const r = ratio.value
+  pingContext.clearRect(0, 0, state.pageWidth, state.pageHeight)
+  for (const ripple of pingRipples) {
+    const { lineWidth, radius, color, opacity } = ripple
+    const x = ripple.x * r
+    const y = ripple.y * r
+    pingContext.beginPath()
+    pingContext.lineWidth = lineWidth
+    pingContext.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})`
+    pingContext.arc(x, y, radius, 0, 2 * Math.PI)
+    pingContext.stroke()
+    pingContext.closePath()
+  }
+}
+const updatePingRipples = () => {
+  const fadeRadius = 25
+  const destroyRadius = 40
+  for (const ripple of pingRipples) {
+    ripple.radius += ripple.speed * ripple.decay
+    if (ripple.lineWidth > 1) {
+      ripple.lineWidth -= 0.1 * ripple.decay
+    }
+    if (ripple.radius > fadeRadius && ripple.opacity > 0) {
+      ripple.opacity = Math.max(ripple.opacity - 0.1, 0)
+    }
+    if (ripple.radius > destroyRadius) {
+      ripple.shouldDestroy = true
+    }
+  }
+  pingRipples = pingRipples.filter(ripple => !ripple.shouldDestroy)
+}
+const pingFrame = () => {
+  pingFrameId = null
+  updatePingCanvas()
+  if (!pingCanvas) {
+    pingRipples = []
+    return
+  }
+  drawPingRipples()
+  updatePingRipples()
+  // stop animating once the last frame has cleared the canvas
+  if (pingRipples.length) {
+    pingFrameId = window.requestAnimationFrame(pingFrame)
+  } else {
+    pingContext.clearRect(0, 0, state.pageWidth, state.pageHeight)
+  }
+}
+
 // viewport
 
 const updateScroll = () => {
@@ -530,6 +641,7 @@ const viewportIsVisible = computed(() => {
 <template lang="pug">
 .minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast, 'prevent-interaction': shouldPreventInteraction }")
   canvas#minimap-canvas(ref="canvasElement")
+  canvas.sonar-pings(ref="pingCanvasElement")
   .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
 </template>
 
@@ -544,6 +656,12 @@ const viewportIsVisible = computed(() => {
     backdrop-filter blur(8px)
   &.prevent-interaction
     pointer-events none
+  .sonar-pings
+    position absolute
+    top 0
+    left 0
+    pointer-events none
+    border-radius var(--entity-radius)
   .viewport
     cursor grab
     position absolute
