@@ -81,11 +81,13 @@ fn open_in_browser(app: &AppHandle, url: &Url) {
   }
 }
 
-// init.js, with the page paths added so that the list is only defined here
+// init.js, with the app hosts and page paths added so that the lists are only defined here
 fn init_script() -> String {
+  let app_hosts = serde_json::to_string(&APP_HOSTS).unwrap();
   let page_paths = serde_json::to_string(&PAGE_PATHS).unwrap();
   format!(
-    "window.kinopioDesktopPagePaths = {};\n{}",
+    "window.kinopioDesktopAppHosts = {};\nwindow.kinopioDesktopPagePaths = {};\n{}",
+    app_hosts,
     page_paths,
     include_str!("init.js")
   )

@@ -52,9 +52,14 @@
     const firstPathSegment = url.pathname.split('/')[1]
     return pagePaths.includes(firstPathSegment)
   }
+  // this is APP_HOSTS from lib.rs. The current page's origin can't be used to recognize kinopio urls,
+  // because this script also runs on other pages that are shown in the app, like stripe checkout
+  const appHosts = window.kinopioDesktopAppHosts
+  const isKinopioUrl = (url) => {
+    return appHosts.includes(url.hostname)
+  }
   const isAppUrl = (url) => {
-    const isKinopioUrl = url.origin === window.location.origin
-    if (!isKinopioUrl) { return }
+    if (!isKinopioUrl(url)) { return false }
     return !isPageUrl(url)
   }
 
@@ -80,7 +85,7 @@
     const link = event.target.closest('a[href]')
     if (!link) { return }
     const url = new URL(link.href, window.location.href)
-    if (url.origin !== window.location.origin) { return }
+    if (!isKinopioUrl(url)) { return }
     if (!isPageUrl(url)) { return }
     event.preventDefault()
     event.stopPropagation()
@@ -97,6 +102,9 @@
     if (link.hasAttribute('download')) { return }
     const url = new URL(link.href, window.location.href)
     if (!isWebUrl(url)) { return }
+    // other sites shown in the app, like stripe checkout, can move between their own pages
+    const isOtherSite = !isKinopioUrl(window.location)
+    if (isOtherSite && url.origin === window.location.origin) { return }
     if (!isAppUrl(url)) {
       event.preventDefault()
       nativeOpen(url.href)
