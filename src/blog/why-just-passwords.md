@@ -6,6 +6,7 @@ description: I get it, no one wants to be responsible for screwing up critical s
 image: 'https://updates.kinopio.club/pages/blog/posts/passwords/1.webp'
 ---
 
+> Also published at [https://pketh.org/why-just-passwords](https://pketh.org/why-just-passwords.html)
 
 From all the confusing and annoying ways to sign in to software we wade through everyday, developers must fear storing/encrypting/hashing passwords. I get it, no one wants to be responsible for screwing up critical security, so authentication has become one of those [“no one ever got fired for buying IBM”](https://www.goodreads.com/quotes/12058538-no-one-ever-got-fired-for-hiring-ibm-goes-the) type of problem that considers the user last.
 
