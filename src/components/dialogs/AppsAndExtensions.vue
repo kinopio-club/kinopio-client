@@ -56,7 +56,8 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   dialogHeight: null,
   isDesktop: true,
-  isAndroid: false
+  isAndroid: false,
+  desktopPlatformsIsVisible: false
 })
 
 // platform
@@ -74,9 +75,19 @@ const updateCurrentDeviceView = () => {
     state.isDesktop = true
   }
 }
+const toggleDesktopPlatformsIsVisible = () => {
+  state.desktopPlatformsIsVisible = !state.desktopPlatformsIsVisible
+}
 
 // url
 
+const desktopDownloadUrl = computed(() => {
+  if (utils.isMacOrIpad()) {
+    return 'https://updates.kinopio.club/desktop/kinopio.dmg'
+  } else {
+    return 'https://dl.todesktop.com/201223j48l03cxi'
+  }
+})
 const stripUrlPath = () => {
   title = document.title
   pathname = window.location.pathname
@@ -118,40 +129,52 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
     .row
       p Mac, Windows, and Linux
     .row
-      a(href="https://dl.todesktop.com/201223j48l03cxi" download)
-        button
-          img.icon(src="@/assets/system.svg")
-          span Download App
-    .row
+      .segmented-buttons
+        a(:href="desktopDownloadUrl" download)
+          button
+            img.icon(src="@/assets/system.svg")
+            span Download App
+        button(@click="toggleDesktopPlatformsIsVisible" :class="{active: state.desktopPlatformsIsVisible}")
+          img.icon.down-arrow(src="@/assets/down-arrow.svg")
+
+    //- platform links
+    section.subsection(v-if="state.desktopPlatformsIsVisible")
+      .button-wrap
+        a(href="https://updates.kinopio.club/desktop/kinopio.dmg" download)
+          button Mac
+      .button-wrap
+        a(href="https://dl.todesktop.com/201223j48l03cxi/windows/nsis/x64" download)
+          button Windows
+      .button-wrap
+        a(href="https://dl.todesktop.com/201223j48l03cxi/linux/appImage/x64" download)
+          button Linux
+
+    //- extensions
+    section.subsection
       p Extensions
-    .row
-      .button-wrap
-        a(href="https://addons.mozilla.org/en-US/firefox/addon/add-to-kinopio")
-          button
-            span Firefox{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://chrome.google.com/webstore/detail/kinopio/hodmmkfpchpgmaemlicohlkiigpejakn")
-          button
-            span Chrome{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-    .row
-      .button-wrap
-        a(href="https://apps.apple.com/app/add-to-kinopio/id1614926102")
-          button
-            span Safari{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://www.raycast.com/pirijan/kinopio-inbox")
-          button
-            span Raycast{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-    .row
-      .button-wrap
-        a(href="https://phonetonote.com/")
-          button
-            span SMS via phonetonote{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
+      .row
+        .button-wrap
+          a(href="https://addons.mozilla.org/en-US/firefox/addon/add-to-kinopio")
+            button
+              span Firefox{{' '}}
+        .button-wrap
+          a(href="https://chrome.google.com/webstore/detail/kinopio/hodmmkfpchpgmaemlicohlkiigpejakn")
+            button
+              span Chrome{{' '}}
+      .row
+        .button-wrap
+          a(href="https://apps.apple.com/app/add-to-kinopio/id1614926102")
+            button
+              span Safari{{' '}}
+        .button-wrap
+          a(href="https://www.raycast.com/pirijan/kinopio-inbox")
+            button
+              span Raycast{{' '}}
+      .row
+        .button-wrap
+          a(href="https://phonetonote.com/")
+            button
+              span SMS via phonetonote{{' '}}
 
   section(v-if="!state.isDesktop")
     .logo-wrap
@@ -225,4 +248,8 @@ dialog.apps
       padding-top 10px
       margin-left 5px
       user-select text
+  .down-arrow
+    padding 0
+    vertical-align 2px
+
 </style>
