@@ -499,6 +499,7 @@ const stopResizingBoxes = () => {
 const checkIfShouldSnapToBox = (event) => {
   if (globalStore.preventItemSnapping) { return }
   if (!globalStore.cardsWereDragged && !globalStore.boxesWereDragged) { return }
+  if (cardStore.cardSnapGuides.length) { return }
   if (listStore.listSnapGuides.listId) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
@@ -604,8 +605,13 @@ const checkIfShouldSnapToCard = async (event) => {
   if (!cardStore.cardSnapGuides.length) { return }
   if (!globalStore.itemSnappingIsReady) { return }
   if (event.shiftKey) { return }
-  const { target, side, item } = cardStore.cardSnapGuides[0]
+  let { target, side, item } = cardStore.cardSnapGuides[0]
   const cards = cardStore.getCardsSelected
+  // create new list
+  if (!target.listId) {
+    await cardStore.createListFromCards([target])
+    target = cardStore.getCard(target.id)
+  }
   // add card to list
   const list = listStore.getList(target.listId)
   const targetPositionIndex = target.listPositionIndex

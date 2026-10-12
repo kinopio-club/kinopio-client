@@ -1526,6 +1526,19 @@ export const useCardStore = defineStore('cards', {
       return value
     },
     /** @param {Card[]} cards */
+    async createListFromCards (cards) {
+      const listStore = useListStore()
+      const card = cards[0]
+      const list = {
+        id: nanoid(),
+        y: card.y - consts.listInfoHeight,
+        x: card.x - consts.listPadding
+      }
+      listStore.createList({ list })
+      await nextTick()
+      await this.addCardsToList({ cards, list, targetPositionIndex: null })
+    },
+    /** @param {Card[]} cards */
     async toggleListCards (cards) {
       const globalStore = useGlobalStore()
       const listStore = useListStore()
@@ -1556,15 +1569,7 @@ export const useCardStore = defineStore('cards', {
         listStore.removeList(list.id)
       // create list, add cards to list
       } else {
-        const card = cards[0]
-        const list = {
-          id: nanoid(),
-          y: card.y - consts.listInfoHeight,
-          x: card.x - consts.listPadding
-        }
-        listStore.createList({ list })
-        await nextTick()
-        await this.addCardsToList({ cards, list, targetPositionIndex: null })
+        await this.createListFromCards(cards)
       }
       globalStore.clearMultipleSelected()
       globalStore.closeAllDialogs()
@@ -1620,11 +1625,14 @@ export const useCardStore = defineStore('cards', {
     updateCardSnapGuides ({ items, cursor }) {
       const globalStore = useGlobalStore()
       const listStore = useListStore()
+      const userStore = useUserStore()
       if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
       if (globalStore.shouldSnapAlign) { return }
       if (globalStore.multipleListsSelectedIds.length) { return }
       const targetCards = this.getCardsSelectableInViewport()
+      const isSnappingToList = Boolean(listStore.listSnapGuides.listId) || globalStore.shouldSnapBackToList
+      const canSnapToCard = userStore.getUserIsSpaceMember && !isSnappingToList
       /** @type {SnapGuide[]} */
       let snapGuides = []
       // find
@@ -1632,7 +1640,7 @@ export const useCardStore = defineStore('cards', {
       if (!card) { return }
       targetCards.forEach(target => {
         if (target.id === card.id) { return }
-        if (!target.listId) { return } // only snap to list cards
+        if (!target.listId && !canSnapToCard) { return }
         const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
         if (isTargetSelected) { return }
         // assign card sides
