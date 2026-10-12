@@ -89,4 +89,52 @@
       window.location.assign(url.href)
     }
   })
+
+  // Shows the url of the hovered link in the bottom left, like the status bar in a browser.
+  // Uses the app's theme colors when they're available.
+  let linkStatus
+  const linkStatusElement = () => {
+    if (linkStatus) { return linkStatus }
+    linkStatus = document.createElement('div')
+    Object.assign(linkStatus.style, {
+      position: 'fixed',
+      left: '0',
+      bottom: '0',
+      zIndex: '2147483647',
+      maxWidth: '60%',
+      padding: '2px 6px',
+      font: '11px -apple-system, system-ui, sans-serif',
+      color: 'var(--primary, #000)',
+      background: 'var(--secondary-background, #e3e3e3)',
+      border: '1px solid var(--primary-border, #bbb)',
+      borderLeft: 'none',
+      borderBottom: 'none',
+      borderTopRightRadius: '4px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      pointerEvents: 'none',
+      display: 'none'
+    })
+    document.documentElement.appendChild(linkStatus)
+    return linkStatus
+  }
+  const hideLinkStatus = () => {
+    if (!linkStatus) { return }
+    linkStatus.style.display = 'none'
+  }
+  window.addEventListener('mouseover', (event) => {
+    if (!event.target.closest) { return }
+    const link = event.target.closest('a[href]')
+    if (!link) {
+      hideLinkStatus()
+      return
+    }
+    const element = linkStatusElement()
+    element.textContent = link.href
+    element.style.display = 'block'
+  }, true)
+  const hideLinkStatusEvents = ['mousedown', 'scroll', 'blur']
+  hideLinkStatusEvents.forEach(name => window.addEventListener(name, hideLinkStatus, true))
+  document.addEventListener('mouseleave', hideLinkStatus)
 })()
