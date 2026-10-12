@@ -45,8 +45,17 @@
   const isWebUrl = (url) => {
     return url.protocol === 'http:' || url.protocol === 'https:'
   }
+  // static pages on the website that aren't part of the app, they open in the system browser.
+  // this is PAGE_PATHS from lib.rs, which adds it to the page before this script runs
+  const pagePaths = window.kinopioDesktopPagePaths
+  const isPageUrl = (url) => {
+    const firstPathSegment = url.pathname.split('/')[1]
+    return pagePaths.includes(firstPathSegment)
+  }
   const isAppUrl = (url) => {
-    return url.origin === window.location.origin
+    const isKinopioUrl = url.origin === window.location.origin
+    if (!isKinopioUrl) { return }
+    return !isPageUrl(url)
   }
 
   // window.open requests are handled natively: app urls become tabs, other urls open in the system browser
@@ -63,6 +72,20 @@
     }
     return nativeOpen(resolvedUrl.href, ...args)
   }
+
+  // links to static pages are caught in the capture phase, before the app's router can handle them
+  window.addEventListener('click', (event) => {
+    if (event.button !== 0) { return }
+    if (!event.target.closest) { return }
+    const link = event.target.closest('a[href]')
+    if (!link) { return }
+    const url = new URL(link.href, window.location.href)
+    if (url.origin !== window.location.origin) { return }
+    if (!isPageUrl(url)) { return }
+    event.preventDefault()
+    event.stopPropagation()
+    nativeOpen(url.href)
+  }, true)
 
   // bubble phase, so that links the app has already handled are left alone
   window.addEventListener('click', (event) => {

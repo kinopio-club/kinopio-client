@@ -7,6 +7,8 @@ use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_updater::UpdaterExt;
 
 const APP_HOSTS: [&str; 2] = ["kinopio.club", "kinopio.local"];
+// static pages on the website that aren't part of the app, they open in the system browser
+const PAGE_PATHS: [&str; 4] = ["blog", "about", "help", "api"];
 // external pages that the app redirects to and back from, they stay in the app
 const IN_APP_HOSTS: [&str; 2] = ["checkout.stripe.com", "billing.stripe.com"];
 const MAIN_WINDOW_LABEL: &str = "main";
@@ -32,13 +34,21 @@ fn host_is_in(url: &Url, hosts: &[&str]) -> bool {
   }
 }
 
-fn is_app_url(url: &Url) -> bool {
-  is_web_url(url) && host_is_in(url, &APP_HOSTS)
+fn is_page_url(url: &Url) -> bool {
+  let first_path_segment = url.path_segments().and_then(|mut segments| segments.next());
+  match first_path_segment {
+    Some(segment) => PAGE_PATHS.contains(&segment),
+    None => false,
+  }
 }
 
-// external web pages that should be opened in the system browser
+fn is_app_url(url: &Url) -> bool {
+  is_web_url(url) && host_is_in(url, &APP_HOSTS) && !is_page_url(url)
+}
+
+// web pages that should be opened in the system browser: other sites, and the website's static pages
 fn is_browser_url(url: &Url) -> bool {
-  is_web_url(url) && !host_is_in(url, &APP_HOSTS) && !host_is_in(url, &IN_APP_HOSTS)
+  is_web_url(url) && !is_app_url(url) && !host_is_in(url, &IN_APP_HOSTS)
 }
 
 // the dev or production website, from tauri.conf.json
@@ -71,6 +81,16 @@ fn open_in_browser(app: &AppHandle, url: &Url) {
   }
 }
 
+// init.js, with the page paths added so that the list is only defined here
+fn init_script() -> String {
+  let page_paths = serde_json::to_string(&PAGE_PATHS).unwrap();
+  format!(
+    "window.kinopioDesktopPagePaths = {};\n{}",
+    page_paths,
+    include_str!("init.js")
+  )
+}
+
 // window settings come from tauri.conf.json, windows are created here so that handlers can be attached
 fn build_window(
   app: &AppHandle,
@@ -91,7 +111,7 @@ fn build_window(
   let page_load_app = app.clone();
   WebviewWindowBuilder::from_config(app, &config)?
     .tabbing_identifier(TABBING_IDENTIFIER)
-    .initialization_script(include_str!("init.js"))
+    .initialization_script(init_script())
     .on_document_title_changed(|window, title| {
       if let Err(error) = window.set_title(&title) {
         log::error!("could not set window title {}", error);
