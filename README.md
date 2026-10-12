@@ -149,3 +149,101 @@ The prerender extension in Netlify compiles space URLs into static html, so that
 - [github.com/kinopio-club](https://github.com/kinopio-club)
 - [User Forums](https://forum.kinopio.club)
 - [Discord](https://kinopio.club/discord)
+
+-------
+
+# Tauri
+
+A [native](https://tauri.app) app wrapper around the website, it lives in `src-tauri`. It only needs to be rebuilt when the files in `src-tauri` change.
+
+## Files
+
+| File | Description |
+| ------------- |-------------|
+| `src-tauri/tauri.conf.json` | App name, identifier, window size, dev and production URLs |
+| `src-tauri/src/lib.rs` | Creates windows and tabs, menu, opens external links in the system browser |
+| `src-tauri/src/init.js` | Script injected into the website by the desktop app, handles link clicks and key events |
+| `src-tauri/dev-runner.sh` | Used by `npm run desktop` to name the dev app `[DEV] Kinopio` in the dock |
+| `src-tauri/notarize-dmg.js` | Runs after `npm run desktop:build` to notarize and staple the `.dmg` |
+| `src-tauri/update-files.js` | Runs after `npm run desktop:build` to collect the files for an app update |
+
+## Install
+
+Building the desktop app needs Rust and the Xcode command line tools
+
+    xcode-select --install
+    brew install rustup
+    rustup default stable
+    rustup target add x86_64-apple-darwin
+
+Homebrew doesn't add Rust to your PATH, so add this to `~/.bash_profile` or `~/.zshrc`
+
+    export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+## Run Development
+
+Make sure `npm run dev` is already running, then in another terminal
+
+    npm run desktop
+
+Changes to `src-tauri` rebuild and relaunch the app automatically.
+
+## Build Production
+
+Builds a mac app to `src-tauri/target/universal-apple-darwin/release/bundle/…`
+
+    npm run desktop:build
+
+## Sign and Notarize
+
+Without signing, the built app only opens on your own Mac. To distribute it you need a `Developer ID Application` certificate from your Apple Developer account (Xcode → Settings → Accounts → Manage Certificates), and an [app-specific password](https://account.apple.com) for notarization.
+
+Find the name of your certificate with
+
+    security find-identity -v -p codesigning
+
+Then add these to `.env.local`, which `npm run desktop:build` loads. The app is signed, notarized, and stapled as part of the build. The tauri build only notarizes the `.app`, so after it finishes `src-tauri/notarize-dmg.js` runs automatically to notarize and staple the `.dmg` too. Notarizing uploads to Apple and can take a few minutes.
+
+    APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+    APPLE_ID=you@example.com
+    APPLE_PASSWORD=app-specific-password
+    APPLE_TEAM_ID=TEAMID
+
+Check that the built app and dmg are signed and notarized with
+
+    spctl -a -vv src-tauri/target/universal-apple-darwin/release/bundle/macos/Kinopio.app
+    spctl -a -vv -t open --context context:primary-signature src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+
+Both should say `accepted` and `source=Notarized Developer ID`.
+
+In `.env.local` specify 
+
+    TAURI_SIGNING_PRIVATE_KEY=/Users/you/.tauri/kinopio.key
+    TAURI_SIGNING_PRIVATE_KEY_PASSWORD=
+
+The key has no password, but the blank password line is needed, otherwise the build stops to ask for one.
+
+The same private key at `~/.tauri/kinopio.key` needs to be on every machine that builds the app. 
+
+## Ship an Update
+
+1. Increase `version` in `src-tauri/tauri.conf.json`
+2. Build the app with `npm run desktop:build`. This also builds the update files for previous versions
+3. Upload the app dmg in `src-tauri/target/universal-apple-darwin/release/bundle/dmg`, and the update files in `src-tauri/target/update` to the `kinopio-updates/desktop` bucket
+4. Rename app to `kinopio.dmg` 
+
+The app checks `https://updates.kinopio.club/desktop/latest.json` when it launches, and every 6 hours after that. If the version there is newer than its own, it silently downloads and installs the update, which is used the next time the app is launched.
+
+## Icons
+
+App icons in `src-tauri/icons` are generated using
+
+    npx tauri icon src-tauri/app-icon.png
+
+-------
+
+# Android
+
+    bubblewrap build
+
+produces an `.aab` for the Play Store and an `.apk` for testing on a phone.

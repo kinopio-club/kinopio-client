@@ -564,9 +564,11 @@ const colorClasses = computed(() => {
 
 // position and dimensions
 
-const updateDimensionsAndPaths = () => {
+const updateDimensionsAndPaths = async () => {
   if (globalStore.isLoadingSpace) { return }
-  globalStore.triggerUpdateCardDimensionsAndPaths(props.card.id)
+  await cardStore.updateCardDimensions(props.card.id)
+  await nextTick()
+  connectionStore.updateConnectionPathByItemId(props.card.id)
 }
 const checkIfShouldUpdateDimensions = () => {
   if (utils.isMissingDimensions(props.card)) {

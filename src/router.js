@@ -97,6 +97,7 @@ const router = {
       name: 'space',
       component: () => import('./views/Space.vue'),
       beforeEnter: (to, from, next) => {
+        consts.isAndroid = Boolean(to.query.isAndroid)
         if (!consts.isStaticPrerenderingPage) {
           const globalStore = useGlobalStore()
           globalStore.disableViewportOptimizations = utils.stringToBoolean(to.query.disableViewportOptimizations)

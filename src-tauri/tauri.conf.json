@@ -1,0 +1,49 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Kinopio",
+  "version": "0.3.0",
+  "identifier": "club.kinopio.desktop",
+  "build": {
+    "frontendDist": "https://kinopio.club",
+    "devUrl": "https://kinopio.local:8080"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Kinopio",
+        "create": false,
+        "width": 1280,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMyRkY4RTIzRjVCOTQ3RjEKUldUeFI3bjFJNDcvTXM4eEpjbGhVL1lkOWlaVUUyUEpnbTc5RWxoQlo1QzM1d2hCREJYT2VYM28K",
+      "endpoints": [
+        "https://updates.kinopio.club/desktop/latest.json"
+      ]
+    }
+  }
+}
