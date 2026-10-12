@@ -572,7 +572,9 @@ const checkIfShouldRemoveFromList = async () => {
   // cards in selected lists move with their list
   const selectedListIds = globalStore.multipleListsSelectedIds
   cards = cards.filter(card => card.listId && !selectedListIds.includes(card.listId))
+  const listIds = uniq(cards.map(card => card.listId))
   cardStore.removeCardsFromLists(cards)
+  listStore.removeAccidentalLists(listIds)
 }
 const checkIfShouldSnapBackToList = async () => {
   if (!globalStore.currentUserIsDraggingCard) { return }
