@@ -240,7 +240,7 @@ App icons in `src-tauri/icons` are generated using
 
     npx tauri icon src-tauri/app-icon.png
 
-On macOS 26+ the icon comes from `src-tauri/icon-composer.icon`
+On macOS >26, the icon is compiled from `src-tauri/icon-composer.icon`
 
 -------
 

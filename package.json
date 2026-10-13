@@ -13,6 +13,7 @@
     "test": "vitest",
     "desktop": "tauri dev --runner ./dev-runner.sh",
     "desktop:build": "node --env-file-if-exists=.env.local node_modules/@tauri-apps/cli/tauri.js build --target universal-apple-darwin",
+    "predesktop:build": "node src-tauri/compile-icon.js",
     "postdesktop:build": "node --env-file-if-exists=.env.local src-tauri/notarize-dmg.js && node src-tauri/update-files.js"
   },
   "dependencies": {
