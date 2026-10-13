@@ -352,6 +352,8 @@ export const useCardStore = defineStore('cards', {
     },
     /** @return {Card[]} */
     getCardsSelectableInViewport () {
+      const globalStore = useGlobalStore()
+      const zoom = globalStore.getSpaceCounterZoomDecimal
       /** @type NodeListOf<HTMLElement> */
       const elements = document.querySelectorAll('.card-wrap')
       /** @type {Card[]} */
@@ -364,8 +366,8 @@ export const useCardStore = defineStore('cards', {
         const rect = element.getBoundingClientRect()
         const card = {
           ...data,
-          width: Math.round(rect.width || data.width),
-          height: Math.round(rect.height || data.height)
+          width: Math.round((rect.width * zoom) || data.width),
+          height: Math.round((rect.height * zoom) || data.height)
         }
         cards.push(card)
       })
