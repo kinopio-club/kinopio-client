@@ -89,6 +89,8 @@ let unsubscribes
 let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 let statusRetryCount = 0
+const minimapPanningDelay = 200 // ms
+let minimapPanningTimer
 
 // expose pinia stores to browser console for developers
 window.globalStore = useGlobalStore()
@@ -236,7 +238,8 @@ onBeforeUnmount(() => {
 
 const state = reactive({
   startCursor: {},
-  currentInteractingItem: null
+  currentInteractingItem: null,
+  minimapIsPanningReady: false
 })
 
 const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
@@ -768,12 +771,24 @@ const showMultipleSelectedActions = (event) => {
 
 // minimap
 
+watch(() => isPanning.value, (value) => {
+  clearTimeout(minimapPanningTimer)
+  if (!value) {
+    state.minimapIsPanningReady = false
+    return
+  }
+  // delay expanding so a quick right click (sonar ping) doesn't flash the minimap
+  minimapPanningTimer = setTimeout(() => {
+    state.minimapIsPanningReady = isPanning.value
+  }, minimapPanningDelay)
+})
+const minimapIsExpanded = computed(() => isPanningReady.value || state.minimapIsPanningReady)
 const minimapIsVisible = computed(() => {
   if (globalStore.shouldExplicitlyHideFooter) { return }
-  return userStore.shouldShowMinimap || isPanningReady.value || isPanning.value
+  return userStore.shouldShowMinimap || minimapIsExpanded.value
 })
 const minimapSize = computed(() => {
-  if (isPanningReady.value || isPanning.value) {
+  if (minimapIsExpanded.value) {
     return 200
   } else {
     return 120
@@ -1231,7 +1246,7 @@ const shouldPrevent = computed(() => {
   TagDetails
   UserDetails
   #space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
-    MinimapCanvas(:visible="true" :size="minimapSize" :preventAnimation="!(isPanning || isPanningReady)")
+    MinimapCanvas(:visible="true" :size="minimapSize" :preventAnimation="!minimapIsExpanded")
   //- handlers
   WindowHistoryHandler
   KeyboardShortcutsHandler
