@@ -13,6 +13,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+import MinimapCanvas from '@/components/MinimapCanvas.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -37,7 +38,9 @@ const state = reactive({
   spacePickerIsVisible: false,
   loading: false,
   cardsCreatedIsOverLimit: false,
-  isCopiedToNote: false
+  isCopiedToNote: false,
+  selectedSpaceData: null,
+  isLoading: false
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -88,6 +91,56 @@ const toggleSpacePickerIsVisible = () => {
 const selectedSpaceIsRecentSpace = (space) => {
   return state.selectedSpace.id === space.id
 }
+
+// minimap
+
+watch(() => state.selectedSpace, (value, prevValue) => {
+  if (!value) { return }
+  updateSelectedSpaceData(state.selectedSpace)
+})
+const updateSelectedSpaceData = async (space) => {
+  try {
+    state.selectedSpaceData = null
+    state.isLoading = true
+    // local
+    const cachedSpace = await cache.space(space.id)
+    if (cachedSpace.cards) {
+      state.selectedSpaceData = cachedSpace
+    }
+    // remote
+    const remoteSpace = await spaceStore.getRemoteSpace(space)
+    if (!remoteSpace) {
+      throw new Error('remote space not found')
+    }
+    if (state.selectedSpace.id !== remoteSpace.id) {
+      throw new Error('remoteSpace is not selected')
+    }
+    state.selectedSpaceData = remoteSpace
+  } catch (error) {
+    console.warn('🚒 updateSelectedSpaceData', error)
+  }
+  state.isLoading = false
+}
+const minimapPageSize = computed(() => {
+  const space = state.selectedSpaceData
+  if (!space) { return }
+  const cards = space.cards || []
+  const boxes = space.boxes || []
+  const lists = space.lists || []
+  let lines = space.lines || []
+  lines = lines.map(line => {
+    return {
+      x: 0,
+      y: line.y,
+      height: 25
+    }
+  })
+  const items = cards.concat(boxes).concat(lists).concat(lines)
+  items.push({
+    x: 0, y: 0, width: 500, height: 500 // minimum page size
+  })
+  return utils.pageSizeFromItems(items)
+})
 
 // items
 
@@ -276,6 +329,14 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
           span {{state.selectedSpace.name}}
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true" :shouldExcludeCurrentSpace="true")
+
+    //- minimap
+    .row.minimap-row(v-if="state.selectedSpaceData")
+      MinimapCanvas(:visible="true" :space="state.selectedSpaceData" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportIsHidden="true" :parentIsDialog="true")
+      Loader(:visible="state.isLoading")
+    .row(v-else-if="state.isLoading")
+      Loader(:visible="true")
+
     //- recent spaces
     //- .row.recent-spaces-row(v-if="recentSpaces.length")
     //-   .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
@@ -309,6 +370,12 @@ dialog.more-or-copy-items
     // top -100px
     .results-section
       max-height 250px
+  .minimap-row
+    position relative
+    .loader
+      position absolute
+      top 4px
+      right 4px
   .copied-to-note
     margin-right 0
     justify-content space-between

@@ -272,6 +272,7 @@ const updateCanvas = async () => {
 // drawing
 
 const drawDrawing = () => {
+  if (props.space) { return Promise.resolve() } // drawing only applies to the current space
   const dataUrl = globalStore.drawingDataUrl
   if (!dataUrl) { return Promise.resolve() }
   // Reuse cached image if the data URL hasn't changed
@@ -365,7 +366,7 @@ const drawLines = () => {
   const lines = mapLines.value
   if (!lines.length) { return }
   const r = ratio.value
-  const width = Math.floor(globalStore.pageWidth * r)
+  const width = Math.floor(pageWidth.value * r)
   context.lineWidth = 1
   for (const line of lines) {
     const y = Math.floor(line.y * r)
