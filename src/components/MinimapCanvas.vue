@@ -169,6 +169,7 @@ const props = defineProps({
   pageHeight: Number,
   pageWidth: Number,
   space: Object,
+  selectedItems: Object, // drawn above space items
   viewportIsHidden: Boolean,
   viewportRect: Object, // for CopyOrMoveItems destination
   backgroundColor: String,
@@ -194,6 +195,9 @@ watch(() => props.space, (value, prevValue) => {
   if (value) {
     update()
   }
+})
+watch(() => props.selectedItems, (value, prevValue) => {
+  update()
 })
 watch(() => props.size, (value, prevValue) => {
   if (value) {
@@ -239,11 +243,16 @@ const update = async () => {
   context = offscreenContext
   if (!context) { return }
   await drawDrawing()
-  drawBoxes()
-  drawConnections()
-  drawLists()
-  drawCards()
-  drawLines()
+  drawItems({
+    boxes: mapBoxes.value,
+    connections: mapConnections.value,
+    lists: mapLists.value,
+    cards: mapCards.value,
+    lines: mapLines.value
+  })
+  if (props.selectedItems) {
+    drawItems(props.selectedItems)
+  }
   // Blit the fully-composited offscreen canvas to the visible canvas to prevent flickering
   context = visibleContext
   context.clearRect(0, 0, state.pageWidth, state.pageHeight)
@@ -360,30 +369,46 @@ const drawDrawing = () => {
   })
 }
 
+// items
+
+const spaceItems = (type, getStoreItems) => {
+  if (!props.space) {
+    return getStoreItems()
+  }
+  const items = props.space[type]
+  if (!items) { return [] }
+  return items
+}
+const drawItems = (items) => {
+  drawBoxes(items.boxes)
+  drawConnections(items)
+  drawLists(items.lists)
+  drawCards(items.cards)
+  drawLines(items.lines)
+}
+
 // connections
 
-const mapConnections = computed(() => {
-  return props.space?.connections || connectionStore.getAllConnections
-})
+const mapConnections = computed(() => spaceItems('connections', () => connectionStore.getAllConnections))
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
   point.y = point.y * ratio.value
   return point
 }
-const connectionIsValid = (connection) => {
+const connectionIsValid = (connection, items) => {
   if (!props.space) {
     return connectionStore.getConnectionIsValid(connection)
   }
-  const items = mapCards.value.concat(mapBoxes.value, mapLists.value)
+  items = items.cards.concat(items.boxes, items.lists)
   const startItem = items.find(item => item.id === connection.startItemId)
   const endItem = items.find(item => item.id === connection.endItemId)
   return Boolean(startItem && endItem)
 }
-const drawConnections = () => {
-  const connections = mapConnections.value
+const drawConnections = (items) => {
+  const connections = items.connections
   if (!connections.length) { return }
   for (const connection of connections) {
-    if (!connectionIsValid(connection)) { continue }
+    if (!connectionIsValid(connection, items)) { continue }
     context.lineWidth = 1
     context.lineCap = 'round'
     context.strokeStyle = connection.color
@@ -404,11 +429,8 @@ const drawConnections = () => {
 
 // boxes
 
-const mapBoxes = computed(() => {
-  return props.space?.boxes || boxStore.getAllBoxes
-})
-const drawBoxes = () => {
-  const boxes = mapBoxes.value
+const mapBoxes = computed(() => spaceItems('boxes', () => boxStore.getAllBoxes))
+const drawBoxes = (boxes) => {
   const r = ratio.value
   context.lineWidth = 1
   for (const box of boxes) {
@@ -431,11 +453,8 @@ const drawBoxes = () => {
 
 // lines
 
-const mapLines = computed(() => {
-  return props.space?.lines || lineStore.getAllLines
-})
-const drawLines = () => {
-  const lines = mapLines.value
+const mapLines = computed(() => spaceItems('lines', () => lineStore.getAllLines))
+const drawLines = (lines) => {
   if (!lines.length) { return }
   const r = ratio.value
   const width = Math.floor(pageWidth.value * r)
@@ -452,11 +471,8 @@ const drawLines = () => {
 
 // lists
 
-const mapLists = computed(() => {
-  return props.space?.lists || listStore.getAllLists
-})
-const drawLists = () => {
-  const lists = mapLists.value
+const mapLists = computed(() => spaceItems('lists', () => listStore.getAllLists))
+const drawLists = (lists) => {
   const r = ratio.value
   for (const list of lists) {
     const x = list.x * r
@@ -472,12 +488,9 @@ const drawLists = () => {
 
 // cards
 
-const mapCards = computed(() => {
-  return props.space?.cards || cardStore.getAllCards
-})
-const drawCards = () => {
+const mapCards = computed(() => spaceItems('cards', () => cardStore.getAllCards))
+const drawCards = (cards) => {
   const defaultColor = utils.cssVariable('secondary-background')
-  const cards = mapCards.value
   const r = ratio.value
   for (const card of cards) {
     const x = card.x * r

@@ -11,7 +11,6 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import consts from '@/consts.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -124,19 +123,7 @@ const updateSelectedSpaceData = async (space) => {
   }
   state.isLoading = false
 }
-const minimapSpace = computed(() => {
-  const space = state.selectedSpaceData
-  if (!space) { return }
-  // selected items offset to destination pos
-  const items = offsetItems(selectedItems.value, state.itemsOffset)
-  const minimapSpace = { ...space }
-  for (const type of consts.itemTypes) {
-    if (!items[type]) { continue }
-    const spaceItems = space[type] || []
-    minimapSpace[type] = spaceItems.concat(items[type])
-  }
-  return minimapSpace
-})
+const currentOffsetItems = computed(() => offsetItems(selectedItems.value, state.itemsOffset))
 const minimapPageSize = computed(() => {
   const space = state.selectedSpaceData
   if (!space) { return }
@@ -414,7 +401,7 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
 
     //- minimap
     .row.minimap-row(v-if="state.selectedSpaceData")
-      MinimapCanvas(:visible="true" :space="minimapSpace" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportRect="minimapViewportRect" @updateViewportRectPosition="updateItemsOffset" :preventAnimation="true" :shouldPulseViewport="true" :parentIsDialog="true" :shouldDrawBackgroundImage="true")
+      MinimapCanvas(:visible="true" :space="state.selectedSpaceData" :selectedItems="currentOffsetItems" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportRect="minimapViewportRect" @updateViewportRectPosition="updateItemsOffset" :preventAnimation="true" :shouldPulseViewport="true" :parentIsDialog="true" :shouldDrawBackgroundImage="true")
       Loader(:visible="state.isLoading")
     .row(v-else-if="state.isLoading")
       Loader(:visible="true")
