@@ -307,11 +307,20 @@ const updatePointWithRatio = (point) => {
   point.y = point.y * ratio.value
   return point
 }
+const connectionIsValid = (connection) => {
+  if (!props.space) {
+    return connectionStore.getConnectionIsValid(connection)
+  }
+  const items = mapCards.value.concat(mapBoxes.value, mapLists.value)
+  const startItem = items.find(item => item.id === connection.startItemId)
+  const endItem = items.find(item => item.id === connection.endItemId)
+  return Boolean(startItem && endItem)
+}
 const drawConnections = () => {
   const connections = mapConnections.value
   if (!connections.length) { return }
   for (const connection of connections) {
-    if (!connectionStore.getConnectionIsValid(connection)) { continue }
+    if (!connectionIsValid(connection)) { continue }
     context.lineWidth = 1
     context.lineCap = 'round'
     context.strokeStyle = connection.color

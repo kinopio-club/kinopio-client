@@ -121,8 +121,22 @@ const updateSelectedSpaceData = async (space) => {
   }
   state.isLoading = false
 }
-const minimapPageSize = computed(() => {
+const minimapSpace = computed(() => {
   const space = state.selectedSpaceData
+  if (!space) { return }
+  // selected items drawn at their current positions, as they'd be copied
+  const items = selectedItems.value
+  const itemTypes = ['cards', 'connections', 'boxes', 'lines', 'lists']
+  const minimapSpace = { ...space }
+  for (const type of itemTypes) {
+    const spaceItems = space[type] || []
+    const newItems = items[type].filter(item => Boolean(item))
+    minimapSpace[type] = spaceItems.concat(newItems)
+  }
+  return minimapSpace
+})
+const minimapPageSize = computed(() => {
+  const space = minimapSpace.value
   if (!space) { return }
   const cards = space.cards || []
   const boxes = space.boxes || []
@@ -332,7 +346,7 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
 
     //- minimap
     .row.minimap-row(v-if="state.selectedSpaceData")
-      MinimapCanvas(:visible="true" :space="state.selectedSpaceData" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportIsHidden="true" :parentIsDialog="true")
+      MinimapCanvas(:visible="true" :space="minimapSpace" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportIsHidden="true" :parentIsDialog="true")
       Loader(:visible="state.isLoading")
     .row(v-else-if="state.isLoading")
       Loader(:visible="true")
