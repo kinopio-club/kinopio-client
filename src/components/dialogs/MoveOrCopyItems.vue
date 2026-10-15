@@ -40,7 +40,8 @@ const state = reactive({
   cardsCreatedIsOverLimit: false,
   isCopiedToNote: false,
   selectedSpaceData: null,
-  isLoading: false
+  isLoading: false,
+  itemsOffset: { x: 0, y: 0 }
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -51,6 +52,7 @@ watch(() => props.visible, async (value, prevValue) => {
     scrollIntoView()
     updateSpaces()
     state.isCopiedToNote = false
+    state.itemsOffset = { x: 0, y: 0 }
   }
 })
 
@@ -124,24 +126,25 @@ const updateSelectedSpaceData = async (space) => {
 const minimapSpace = computed(() => {
   const space = state.selectedSpaceData
   if (!space) { return }
-  // selected items drawn at their current positions, as they'd be copied
-  const items = selectedItems.value
+  // selected items drawn where they'd be copied to
+  const items = offsetItems(selectedItems.value, state.itemsOffset)
   const itemTypes = ['cards', 'connections', 'boxes', 'lines', 'lists']
   const minimapSpace = { ...space }
   for (const type of itemTypes) {
     const spaceItems = space[type] || []
-    const newItems = items[type].filter(item => Boolean(item))
-    minimapSpace[type] = spaceItems.concat(newItems)
+    minimapSpace[type] = spaceItems.concat(items[type])
   }
   return minimapSpace
 })
 const minimapPageSize = computed(() => {
-  const space = minimapSpace.value
+  // from the original item positions, so the minimap scale doesn't change while dragging
+  const space = state.selectedSpaceData
   if (!space) { return }
-  const cards = space.cards || []
-  const boxes = space.boxes || []
-  const lists = space.lists || []
-  let lines = space.lines || []
+  const selected = existingSelectedItems.value
+  const cards = (space.cards || []).concat(selected.cards)
+  const boxes = (space.boxes || []).concat(selected.boxes)
+  const lists = (space.lists || []).concat(selected.lists)
+  let lines = (space.lines || []).concat(selected.lines)
   lines = lines.map(line => {
     return {
       x: 0,
@@ -153,8 +156,71 @@ const minimapPageSize = computed(() => {
   items.push({
     x: 0, y: 0, width: 500, height: 500 // minimum page size
   })
-  return utils.pageSizeFromItems(items)
+  const pageSize = utils.pageSizeFromItems(items)
+  // room to move the items past the end of the space
+  const rect = itemsRect.value
+  return {
+    width: pageSize.width + rect.width,
+    height: pageSize.height + rect.height
+  }
 })
+const existingSelectedItems = computed(() => offsetItems(selectedItems.value, { x: 0, y: 0 }))
+const itemsRect = computed(() => {
+  const items = existingSelectedItems.value
+  const padding = 20
+  const rect = utils.boundaryRectFromItems(items.cards.concat(items.boxes, items.lists))
+  return {
+    x: rect.x - padding,
+    y: rect.y - padding,
+    width: rect.width + (padding * 2),
+    height: rect.height + (padding * 2)
+  }
+})
+const minimapViewportRect = computed(() => {
+  const rect = itemsRect.value
+  return {
+    ...rect,
+    x: rect.x + state.itemsOffset.x,
+    y: rect.y + state.itemsOffset.y
+  }
+})
+const updateItemsOffset = (position) => {
+  // keep the items inside the minimap page
+  const rect = itemsRect.value
+  const pageSize = minimapPageSize.value
+  let x = Math.min(position.x, pageSize.width - rect.width)
+  let y = Math.min(position.y, pageSize.height - rect.height)
+  x = Math.max(x, 0)
+  y = Math.max(y, 0)
+  state.itemsOffset = {
+    x: Math.round(x - rect.x),
+    y: Math.round(y - rect.y)
+  }
+}
+const offsetItems = (items, offset) => {
+  items = utils.clone(items)
+  const types = ['cards', 'boxes', 'lists']
+  for (const type of types) {
+    items[type] = items[type].filter(item => Boolean(item))
+    for (const item of items[type]) {
+      item.x = item.x + offset.x
+      item.y = item.y + offset.y
+    }
+  }
+  items.lines = items.lines.filter(line => Boolean(line))
+  for (const line of items.lines) {
+    line.y = line.y + offset.y
+  }
+  items.connections = items.connections.filter(connection => Boolean(connection))
+  for (const connection of items.connections) {
+    const start = utils.startCoordsFromConnectionPath(connection.path)
+    if (!start) { continue }
+    // only the path start is absolute, the curve and end are relative to it
+    const startPath = `m${start.x + offset.x},${start.y + offset.y}`
+    connection.path = connection.path.replace(/^m[\d.-]+,[\d.-]+/, startPath)
+  }
+  return items
+}
 
 // items
 
@@ -230,11 +296,12 @@ const openNote = () => {
 const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
+  items = offsetItems(items, state.itemsOffset)
   newItems = await spaceStore.getNewItems(items, selectedSpaceId)
   newItems = utils.removeOrphanedConnections(newItems)
   // update cache
-  const space = await cache.space(selectedSpaceId).cards
-  const spaceIsCached = Boolean(space)
+  const space = await cache.space(selectedSpaceId)
+  const spaceIsCached = Boolean(space.id)
   if (!spaceIsCached) {
     await cache.saveSpace({ id: selectedSpaceId })
   }
@@ -346,7 +413,7 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
 
     //- minimap
     .row.minimap-row(v-if="state.selectedSpaceData")
-      MinimapCanvas(:visible="true" :space="minimapSpace" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportIsHidden="true" :parentIsDialog="true")
+      MinimapCanvas(:visible="true" :space="minimapSpace" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportRect="minimapViewportRect" @updateViewportRectPosition="updateItemsOffset" :preventAnimation="true" :parentIsDialog="true")
       Loader(:visible="state.isLoading")
     .row(v-else-if="state.isLoading")
       Loader(:visible="true")

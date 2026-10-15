@@ -42,7 +42,7 @@ onMounted(async () => {
   update()
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', update)
-  window.addEventListener('pointerup', endPanningViewport)
+  window.addEventListener('pointerup', endPanningViewport, true) // capture, because parent dialogs can stop pointerup propagation
   window.addEventListener('pointermove', panViewport)
 
   const globalStoreActions = [
@@ -145,7 +145,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', update)
-  window.removeEventListener('pointerup', endPanningViewport)
+  window.removeEventListener('pointerup', endPanningViewport, true)
   window.removeEventListener('pointermove', panViewport)
   window.cancelAnimationFrame(pingFrameId)
   unsubscribes()
@@ -156,7 +156,7 @@ watch(() => globalStore.isLoadingSpace, async (value, prevValue) => {
   update()
 })
 
-const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['updateCount', 'updateViewportRectPosition'])
 
 const props = defineProps({
   visible: Boolean,
@@ -165,6 +165,7 @@ const props = defineProps({
   pageWidth: Number,
   space: Object,
   viewportIsHidden: Boolean,
+  viewportRect: Object, // optional {x, y, width, height} in space coordinates, dragging emits a new position instead of scrolling
   backgroundColor: String,
   parentIsDialog: Boolean,
   preventAnimation: Boolean
@@ -538,7 +539,25 @@ const updateScroll = () => {
   state.scrollX = window.scrollX
   state.scrollY = window.scrollY
 }
+const viewportRectStyle = computed(() => {
+  const rect = props.viewportRect
+  const r = ratio.value
+  const styles = {
+    left: `${rect.x * r}px`,
+    top: `${rect.y * r}px`,
+    width: `${rect.width * r}px`,
+    height: `${rect.height * r}px`,
+    borderColor: userStore.color
+  }
+  if (state.isPanningViewport) {
+    styles.cursor = 'grabbing'
+  }
+  return styles
+})
 const viewportStyle = computed(() => {
+  if (props.viewportRect) {
+    return viewportRectStyle.value
+  }
   const counterZoom = globalStore.getSpaceCounterZoomDecimal
   const offset = globalStore.spaceZoomOffset
   const color = userStore.color
@@ -572,7 +591,7 @@ const viewportStyle = computed(() => {
 // pan viewport
 
 const positionInSpace = (event) => {
-  const element = document.querySelector('#minimap-canvas')
+  const element = canvasElement.value
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   let x = event.clientX - rect.left
@@ -612,8 +631,28 @@ const startPanningViewport = (event) => {
   state.isPanningViewport = true
   panToPosition(event)
 }
+const positionIsInViewportRect = (position) => {
+  const rect = props.viewportRect
+  const isInX = position.x >= rect.x && position.x <= rect.x + rect.width
+  const isInY = position.y >= rect.y && position.y <= rect.y + rect.height
+  return isInX && isInY
+}
+const moveViewportRectToPosition = (position) => {
+  state.prevPosition = position
+  if (positionIsInViewportRect(position)) { return }
+  // center the rect on the position
+  const rect = props.viewportRect
+  emit('updateViewportRectPosition', {
+    x: position.x - (rect.width / 2),
+    y: position.y - (rect.height / 2)
+  })
+}
 const panToPosition = (event) => {
   const position = positionInSpace(event)
+  if (props.viewportRect) {
+    moveViewportRectToPosition(position)
+    return
+  }
   const centerPosition = positionInViewportCenter(position)
   // convert space coordinates back to scroll coordinates
   const scroll = spaceToScroll(centerPosition)
@@ -633,6 +672,14 @@ const panViewport = (event) => {
   const delta = {
     x: position.x - state.prevPosition.x,
     y: position.y - state.prevPosition.y
+  }
+  if (props.viewportRect) {
+    emit('updateViewportRectPosition', {
+      x: props.viewportRect.x + delta.x,
+      y: props.viewportRect.y + delta.y
+    })
+    state.prevPosition = position
+    return
   }
   // delta is in space coordinates, scale to scroll coordinates
   const zoom = globalStore.getSpaceZoomDecimal
