@@ -1287,13 +1287,11 @@ progress::-moz-progress-bar
 
 .pulse
   // https://easings.net/#easeOutQuad
-  animation fadeIn 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
+  animation pulse 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
   animation-direction alternate-reverse
-.fade-in
-  animation fadeIn 0.5s ease-out
-@keyframes fadeIn
+@keyframes pulse
   0%
-    opacity 0
+    opacity 0.3
   100%
     opacity 1
 
