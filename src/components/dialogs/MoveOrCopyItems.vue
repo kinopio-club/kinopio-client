@@ -212,6 +212,7 @@ const offsetItems = (items, offset) => {
     line.y = line.y + offset.y
   }
   items.connections = items.connections.filter(connection => Boolean(connection))
+  items = utils.removeOrphanedConnections(items)
   for (const connection of items.connections) {
     const start = utils.startCoordsFromConnectionPath(connection.path)
     if (!start) { continue }
@@ -225,7 +226,7 @@ const offsetItems = (items, offset) => {
 // items
 
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
-const itemsCount = computed(() => utils.countArrayItems(selectedItems.value))
+const itemsCount = computed(() => utils.countArrayItems(normalizedSelectedItems.value))
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const sortedByY = (items) => {
   items = items.sort((a, b) => {
