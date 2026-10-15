@@ -47,7 +47,7 @@ onMounted(async () => {
   update()
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', update)
-  window.addEventListener('pointerup', endPanningViewport, true) // capture, because parent dialogs can stop pointerup propagation
+  window.addEventListener('pointerup', endPanningViewport, true)
   window.addEventListener('pointermove', panViewport)
 
   const globalStoreActions = [
@@ -170,7 +170,7 @@ const props = defineProps({
   pageWidth: Number,
   space: Object,
   viewportIsHidden: Boolean,
-  viewportRect: Object, // optional {x, y, width, height} in space coordinates, dragging emits a new position instead of scrolling
+  viewportRect: Object, // for CopyOrMoveItems destination
   backgroundColor: String,
   parentIsDialog: Boolean,
   preventAnimation: Boolean,
@@ -299,9 +299,9 @@ const backgroundUrl = computed(() => {
   }
   return data.url
 })
-watch([() => props.shouldDrawBackgroundImage, backgroundUrl], async ([shouldDraw, url]) => {
+watch(backgroundUrl, async (url) => {
   state.backgroundImageSize = null
-  if (!shouldDraw) { return }
+  if (!props.shouldDrawBackgroundImage) { return }
   const size = await utils.imageSize(url)
   if (url !== backgroundUrl.value) { return }
   if (!size) { return }

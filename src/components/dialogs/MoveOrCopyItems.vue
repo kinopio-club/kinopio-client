@@ -11,6 +11,7 @@ import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -126,21 +127,20 @@ const updateSelectedSpaceData = async (space) => {
 const minimapSpace = computed(() => {
   const space = state.selectedSpaceData
   if (!space) { return }
-  // selected items drawn where they'd be copied to
+  // selected items offset to destination pos
   const items = offsetItems(selectedItems.value, state.itemsOffset)
-  const itemTypes = ['cards', 'connections', 'boxes', 'lines', 'lists']
   const minimapSpace = { ...space }
-  for (const type of itemTypes) {
+  for (const type of consts.itemTypes) {
+    if (!items[type]) { continue }
     const spaceItems = space[type] || []
     minimapSpace[type] = spaceItems.concat(items[type])
   }
   return minimapSpace
 })
 const minimapPageSize = computed(() => {
-  // from the original item positions, so the minimap scale doesn't change while dragging
   const space = state.selectedSpaceData
   if (!space) { return }
-  const selected = existingSelectedItems.value
+  const selected = normalizedSelectedItems.value
   const cards = (space.cards || []).concat(selected.cards)
   const boxes = (space.boxes || []).concat(selected.boxes)
   const lists = (space.lists || []).concat(selected.lists)
@@ -164,10 +164,10 @@ const minimapPageSize = computed(() => {
     height: pageSize.height + rect.height
   }
 })
-const existingSelectedItems = computed(() => offsetItems(selectedItems.value, { x: 0, y: 0 }))
+const normalizedSelectedItems = computed(() => offsetItems(selectedItems.value, { x: 0, y: 0 }))
 const itemsRect = computed(() => {
-  const items = existingSelectedItems.value
-  const padding = 20
+  const items = normalizedSelectedItems.value
+  const padding = 40
   const rect = utils.boundaryRectFromItems(items.cards.concat(items.boxes, items.lists))
   return {
     x: rect.x - padding,
