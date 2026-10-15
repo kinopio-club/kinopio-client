@@ -40,6 +40,7 @@ let pingRipples = [] // { x, y, color, radius, speed, decay, lineWidth, shouldDe
 const itemRadius = 1
 const canvasElement = ref(null)
 const pingCanvasElement = ref(null)
+const viewportRectMinSize = 20
 
 let isUpdating = false
 let shouldUpdateAgain = false
@@ -634,8 +635,21 @@ const updateScroll = () => {
   state.scrollX = window.scrollX
   state.scrollY = window.scrollY
 }
+const displayViewportRect = computed(() => {
+  const rect = { ...props.viewportRect }
+  const minSize = viewportRectMinSize / ratio.value
+  if (rect.width < minSize) {
+    rect.x = rect.x - ((minSize - rect.width) / 2)
+    rect.width = minSize
+  }
+  if (rect.height < minSize) {
+    rect.y = rect.y - ((minSize - rect.height) / 2)
+    rect.height = minSize
+  }
+  return rect
+})
 const viewportRectStyle = computed(() => {
-  const rect = props.viewportRect
+  const rect = displayViewportRect.value
   const r = ratio.value
   const styles = {
     left: `${rect.x * r}px`,
@@ -727,7 +741,7 @@ const startPanningViewport = (event) => {
   panToPosition(event)
 }
 const positionIsInViewportRect = (position) => {
-  const rect = props.viewportRect
+  const rect = displayViewportRect.value
   const isInX = position.x >= rect.x && position.x <= rect.x + rect.width
   const isInY = position.y >= rect.y && position.y <= rect.y + rect.height
   return isInX && isInY
