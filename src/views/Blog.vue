@@ -1,6 +1,6 @@
 <script setup>
-import { reactive, computed, onMounted, defineAsyncComponent } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, defineAsyncComponent } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -20,6 +20,7 @@ const globalStore = useGlobalStore()
 const themeStore = useThemeStore()
 const changelogStore = useChangelogStore()
 const route = useRoute()
+const router = useRouter()
 
 const siteDescription = 'How new Kinopio features are built, guides for real world use, and the occasional progress bulletin. Written by Piri and other Kinopio fans, without AI.'
 const defaultImage = 'https://files.kinopio.club/og-image.png'
@@ -46,10 +47,6 @@ onMounted(() => {
   }
   // set css vars
   Object.keys(categoryDetails).forEach(key => utils.setCssVariable(key, categoryDetails[key].color))
-})
-
-const state = reactive({
-  category: ''
 })
 
 // each md file becomes its own lazy-loaded chunk
@@ -79,12 +76,23 @@ const categories = Object.keys(categoryDetails)
   .sort((a, b) => a.index - b.index)
 
 const categorySlug = (post) => utils.normalizeString(post.category)
+const currentCategory = computed(() => {
+  const slug = route.query.category
+  if (!categoryDetails[slug]) { return '' }
+  return slug
+})
 const postsFiltered = computed(() => {
-  if (!state.category) { return blogPosts }
-  return blogPosts.filter(post => categorySlug(post) === state.category)
+  if (!currentCategory.value) { return blogPosts }
+  return blogPosts.filter(post => categorySlug(post) === currentCategory.value)
 })
 const toggleCategory = (slug) => {
-  state.category = state.category === slug ? '' : slug
+  const query = { ...route.query }
+  if (currentCategory.value === slug) {
+    delete query.category
+  } else {
+    query.category = slug
+  }
+  router.replace({ query })
 }
 
 const closeAllDialogs = () => {
@@ -281,7 +289,7 @@ const badgeClasses = (post) => {
                 v-for="category in categories"
                 :key="category.slug"
                 @click.stop="toggleCategory(category.slug)"
-                :class="[category.slug, { active: state.category === category.slug }]"
+                :class="[category.slug, { active: currentCategory === category.slug }]"
               )
                 span {{ category.name }}
         //- posts
