@@ -154,7 +154,7 @@ const minimapPageSize = computed(() => {
 const normalizedSelectedItems = computed(() => offsetItems(selectedItems.value, { x: 0, y: 0 }))
 const itemsRect = computed(() => {
   const items = normalizedSelectedItems.value
-  const padding = 40
+  const padding = 60
   const rect = utils.boundaryRectFromItems(items.cards.concat(items.boxes, items.lists))
   return {
     x: rect.x - padding,
