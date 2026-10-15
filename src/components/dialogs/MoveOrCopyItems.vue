@@ -413,7 +413,7 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
 
     //- minimap
     .row.minimap-row(v-if="state.selectedSpaceData")
-      MinimapCanvas(:visible="true" :space="minimapSpace" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportRect="minimapViewportRect" @updateViewportRectPosition="updateItemsOffset" :preventAnimation="true" :parentIsDialog="true")
+      MinimapCanvas(:visible="true" :space="minimapSpace" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportRect="minimapViewportRect" @updateViewportRectPosition="updateItemsOffset" :preventAnimation="true" :shouldPulseViewport="true" :parentIsDialog="true" :shouldDrawBackgroundImage="true")
       Loader(:visible="state.isLoading")
     .row(v-else-if="state.isLoading")
       Loader(:visible="true")

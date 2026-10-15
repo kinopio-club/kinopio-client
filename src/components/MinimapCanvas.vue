@@ -9,6 +9,10 @@ import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+
+import backgroundImages from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -25,6 +29,7 @@ const lineStore = useLineStore()
 const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 let canvas, context
 let offscreenCanvas, offscreenContext
@@ -168,13 +173,16 @@ const props = defineProps({
   viewportRect: Object, // optional {x, y, width, height} in space coordinates, dragging emits a new position instead of scrolling
   backgroundColor: String,
   parentIsDialog: Boolean,
-  preventAnimation: Boolean
+  preventAnimation: Boolean,
+  shouldPulseViewport: Boolean,
+  shouldDrawBackgroundImage: Boolean
 })
 const state = reactive({
   scrollX: 0,
   scrollY: 0,
   isPanningViewport: false,
-  prevPosition: {}
+  prevPosition: {},
+  backgroundImageSize: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -269,6 +277,60 @@ const updateCanvas = async () => {
     offscreenContext.clearRect(0, 0, state.pageWidth, state.pageHeight)
   }
 }
+
+// background
+
+const backgroundSpace = computed(() => props.space || spaceStore.getSpaceAllState)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const backgroundIsGradient = computed(() => backgroundSpace.value.backgroundIsGradient)
+const backgroundUrl = computed(() => {
+  const background = backgroundSpace.value.background
+  let data
+  if (background) {
+    data = backgroundImages.find(item => item.url === background)
+  } else {
+    data = backgroundImages.find(item => item.isBlank)
+  }
+  if (!data) {
+    return utils.imgproxyUrl(background)
+  }
+  if (isThemeDark.value) {
+    return data.darkUrl || data.url
+  }
+  return data.url
+})
+watch([() => props.shouldDrawBackgroundImage, backgroundUrl], async ([shouldDraw, url]) => {
+  state.backgroundImageSize = null
+  if (!shouldDraw) { return }
+  const size = await utils.imageSize(url)
+  if (url !== backgroundUrl.value) { return }
+  if (!size) { return }
+  // retina images tile at half their natural size
+  if (utils.urlIsRetina(url)) {
+    size.width = size.width / 2
+    size.height = size.height / 2
+  }
+  state.backgroundImageSize = size
+}, { immediate: true })
+const backgroundImageStyles = computed(() => {
+  const size = state.backgroundImageSize
+  if (!size) { return }
+  // background images repeat at their natural size in the space, so scale the tile with the minimap
+  const width = size.width * ratio.value
+  const height = size.height * ratio.value
+  return {
+    backgroundImage: `url('${backgroundUrl.value}')`,
+    backgroundSize: `${width}px ${height}px`
+  }
+})
+const backgroundTint = computed(() => {
+  let color = backgroundSpace.value.backgroundTint
+  if (!color) { return }
+  if (isThemeDark.value && !utils.colorIsDark(color, 0.8)) {
+    color = colord(color).darken(0.4).toRgbString()
+  }
+  return color
+})
 
 // drawing
 
@@ -697,9 +759,13 @@ const viewportIsVisible = computed(() => {
 
 <template lang="pug">
 .minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast, 'prevent-interaction': shouldPreventInteraction }")
+  .minimap-background(v-if="props.shouldDrawBackgroundImage")
+    SpaceBackgroundGradients(v-if="backgroundIsGradient" :visible="true" :layers="backgroundSpace.backgroundGradient")
+    .background-image(v-else :style="backgroundImageStyles")
+    .background-tint(v-if="backgroundTint" :style="{ background: backgroundTint }")
   canvas#minimap-canvas(ref="canvasElement")
   canvas.sonar-pings(ref="pingCanvasElement")
-  .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
+  .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation, pulse: props.shouldPulseViewport }")
 </template>
 
 <style lang="stylus">
@@ -713,6 +779,28 @@ const viewportIsVisible = computed(() => {
     backdrop-filter blur(8px)
   &.prevent-interaction
     pointer-events none
+  #minimap-canvas
+    position relative // above .minimap-background
+  .minimap-background
+    position absolute
+    top 0
+    left 0
+    width 100%
+    height 100%
+    overflow hidden
+    pointer-events none
+    border-radius var(--entity-radius)
+    .background-image,
+    .background-tint
+      position absolute
+      top 0
+      left 0
+      width 100%
+      height 100%
+    .background-image
+      background-color var(--primary-background)
+    .background-tint
+      mix-blend-mode multiply
   .sonar-pings
     position absolute
     top 0
