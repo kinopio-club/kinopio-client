@@ -41,6 +41,9 @@ const itemRadius = 1
 const canvasElement = ref(null)
 const pingCanvasElement = ref(null)
 
+let isUpdating = false
+let shouldUpdateAgain = false
+
 let unsubscribes
 
 onMounted(async () => {
@@ -234,6 +237,23 @@ const updateThrottle = throttle((color) => {
 }, 100) // 10fps
 
 const update = async () => {
+  // prevent overlapping updates, which can leave context pointing at the offscreen canvas
+  if (isUpdating) {
+    shouldUpdateAgain = true
+    return
+  }
+  isUpdating = true
+  try {
+    await drawCanvas()
+  } finally {
+    isUpdating = false
+  }
+  if (shouldUpdateAgain) {
+    shouldUpdateAgain = false
+    update()
+  }
+}
+const drawCanvas = async () => {
   await nextTick()
   if (!props.visible) { return }
   await updateCanvas()

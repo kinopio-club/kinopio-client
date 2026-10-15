@@ -184,6 +184,10 @@ const updateItemsOffset = (position) => {
     y: Math.round(y - rect.y)
   }
 }
+watch(minimapPageSize, (value, prevValue) => {
+  if (!value) { return }
+  updateItemsOffset(minimapViewportRect.value)
+})
 const offsetItems = (items, offset) => {
   items = utils.clone(items)
   const types = ['cards', 'boxes', 'lists']
