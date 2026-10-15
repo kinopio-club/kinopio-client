@@ -417,7 +417,8 @@ main.blog-page-wrap
         margin-top 1.4rem
       h2
         font-size 20px
-      p
+      p,
+      aside
         margin 1rem 0
         max-width 440px
         &:last-child
@@ -425,6 +426,34 @@ main.blog-page-wrap
         &:has(img),
         &:has(video)
           max-width 100%
+      figure
+        margin 0
+      aside
+        display flex
+        padding 14px
+        align-items flex-start
+        max-width 440px !important
+        border-radius var(--page-entity-radius)
+        img
+          max-width 70px
+          margin 8px 12px
+          margin-left 0
+          margin-top 2px
+          border-radius var(--entity-radius)
+      section.subsection
+        border-radius var(--page-entity-radius)
+        padding 14px
+        blockquote
+          margin-bottom 1rem
+        p:first-child
+          margin-top 0
+        code
+          vertical-align 1px
+          display inline-block
+          background var(--search-background)
+          margin-right 0
+      section.subsection + section.subsection
+        margin-top 1rem
       video,
       img
         border-radius var(--page-entity-radius)
