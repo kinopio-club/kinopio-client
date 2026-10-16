@@ -537,17 +537,14 @@ export const useSpaceStore = defineStore('space', {
       globalStore.resetPageSizes()
       // load local space while fetching remote space
       try {
-        const [localData, remoteData] = await Promise.all([
-          this.restoreSpaceLocal(space),
-          this.loadRemoteSpace(space)
-        ])
+        this.restoreSpaceLocal(space)
+        const remoteSpacePromise = this.loadRemoteSpace(space)
+        // draw cached strokes while the remote space loads
+        globalStore.triggerDrawingInitialize()
         // restore remote space
-        const remoteSpace = remoteData
+        const remoteSpace = await remoteSpacePromise
         console.info('🎑 remoteSpace', remoteSpace)
-        if (!remoteSpace) {
-          globalStore.triggerDrawingInitialize()
-          return
-        }
+        if (!remoteSpace) { return }
         globalStore.triggerUpdateWindowTitle()
         groupStore.loadGroups(remoteSpace)
         this.updateSpacePreviewImage()
@@ -581,8 +578,8 @@ export const useSpaceStore = defineStore('space', {
         globalStore.isLoadingSpace = true
         const remoteSpace = await this.loadRemoteSpace({ id: this.id })
         await this.restoreSpaceRemote(remoteSpace)
-        globalStore.triggerDrawingInitialize()
         this.saveSpaceToCache()
+        globalStore.triggerDrawingInitialize()
         globalStore.isLoadingSpace = false
         globalStore.notifySpaceOutOfSync = false
       } catch (error) {
