@@ -600,10 +600,14 @@ const toggleIsCollapsed = async () => {
 }
 const updateIsCollapsed = async (value) => {
   if (globalStore.preventDraggedListFromShowingDetails) { return }
-  listStore.updateList({
+  const update = {
     id: props.list.id,
     isCollapsed: value
-  })
+  }
+  listStore.updateList(update)
+  if (!canEditSpace.value) {
+    listStore.updateListsState([update])
+  }
   const cards = listCards.value
   const cardIds = cards.map(card => card.id)
   if (!value) {
@@ -800,9 +804,9 @@ const clearFocus = () => {
         ProgressCircle(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length" :title="todoListCardsCompletedPercent" :backgroundColor="color" :count="todoListCardsRemainingCount")
         span.name(:title="props.list.name")
           NameSegment(:segment="nameSegment" :backgroundColorIsDark="colorIsDark")
-      .right-side.button-wrap(v-if="canEditSpace")
+      .right-side.button-wrap
         //- add card
-        .inline-button-wrap(title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
+        .inline-button-wrap(v-if="canEditSpace" title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
           button.small-button.inline-button
             img.icon.add(src="@/assets/add.svg")
         //- toggle collapse
