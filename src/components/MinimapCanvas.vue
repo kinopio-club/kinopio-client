@@ -9,6 +9,10 @@ import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+
+import backgroundImages from '@/data/backgroundImages.json'
+import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -25,6 +29,7 @@ const lineStore = useLineStore()
 const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 let canvas, context
 let offscreenCanvas, offscreenContext
@@ -35,6 +40,10 @@ let pingRipples = [] // { x, y, color, radius, speed, decay, lineWidth, shouldDe
 const itemRadius = 1
 const canvasElement = ref(null)
 const pingCanvasElement = ref(null)
+const viewportRectMinSize = 20
+
+let isUpdating = false
+let shouldUpdateAgain = false
 
 let unsubscribes
 
@@ -42,7 +51,7 @@ onMounted(async () => {
   update()
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', update)
-  window.addEventListener('pointerup', endPanningViewport)
+  window.addEventListener('pointerup', endPanningViewport, true)
   window.addEventListener('pointermove', panViewport)
 
   const globalStoreActions = [
@@ -145,7 +154,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', update)
-  window.removeEventListener('pointerup', endPanningViewport)
+  window.removeEventListener('pointerup', endPanningViewport, true)
   window.removeEventListener('pointermove', panViewport)
   window.cancelAnimationFrame(pingFrameId)
   unsubscribes()
@@ -156,7 +165,7 @@ watch(() => globalStore.isLoadingSpace, async (value, prevValue) => {
   update()
 })
 
-const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['updateCount', 'updateViewportRectPosition'])
 
 const props = defineProps({
   visible: Boolean,
@@ -164,16 +173,21 @@ const props = defineProps({
   pageHeight: Number,
   pageWidth: Number,
   space: Object,
+  selectedItems: Object, // drawn above space items
   viewportIsHidden: Boolean,
+  viewportRect: Object, // for CopyOrMoveItems destination
   backgroundColor: String,
   parentIsDialog: Boolean,
-  preventAnimation: Boolean
+  preventAnimation: Boolean,
+  shouldPulseViewport: Boolean,
+  shouldDrawBackgroundImage: Boolean
 })
 const state = reactive({
   scrollX: 0,
   scrollY: 0,
   isPanningViewport: false,
-  prevPosition: {}
+  prevPosition: {},
+  backgroundImageSize: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -185,6 +199,9 @@ watch(() => props.space, (value, prevValue) => {
   if (value) {
     update()
   }
+})
+watch(() => props.selectedItems, (value, prevValue) => {
+  update()
 })
 watch(() => props.size, (value, prevValue) => {
   if (value) {
@@ -221,6 +238,23 @@ const updateThrottle = throttle((color) => {
 }, 100) // 10fps
 
 const update = async () => {
+  // prevent overlapping updates, which can leave context pointing at the offscreen canvas
+  if (isUpdating) {
+    shouldUpdateAgain = true
+    return
+  }
+  isUpdating = true
+  try {
+    await drawCanvas()
+  } finally {
+    isUpdating = false
+  }
+  if (shouldUpdateAgain) {
+    shouldUpdateAgain = false
+    update()
+  }
+}
+const drawCanvas = async () => {
   await nextTick()
   if (!props.visible) { return }
   await updateCanvas()
@@ -230,11 +264,16 @@ const update = async () => {
   context = offscreenContext
   if (!context) { return }
   await drawDrawing()
-  drawBoxes()
-  drawConnections()
-  drawLists()
-  drawCards()
-  drawLines()
+  drawItems({
+    boxes: mapBoxes.value,
+    connections: mapConnections.value,
+    lists: mapLists.value,
+    cards: mapCards.value,
+    lines: mapLines.value
+  })
+  if (props.selectedItems) {
+    drawItems(props.selectedItems)
+  }
   // Blit the fully-composited offscreen canvas to the visible canvas to prevent flickering
   context = visibleContext
   context.clearRect(0, 0, state.pageWidth, state.pageHeight)
@@ -269,9 +308,64 @@ const updateCanvas = async () => {
   }
 }
 
+// background
+
+const backgroundSpace = computed(() => props.space || spaceStore.getSpaceAllState)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const backgroundIsGradient = computed(() => backgroundSpace.value.backgroundIsGradient)
+const backgroundUrl = computed(() => {
+  const background = backgroundSpace.value.background
+  let data
+  if (background) {
+    data = backgroundImages.find(item => item.url === background)
+  } else {
+    data = backgroundImages.find(item => item.isBlank)
+  }
+  if (!data) {
+    return utils.imgproxyUrl(background)
+  }
+  if (isThemeDark.value) {
+    return data.darkUrl || data.url
+  }
+  return data.url
+})
+watch(backgroundUrl, async (url) => {
+  state.backgroundImageSize = null
+  if (!props.shouldDrawBackgroundImage) { return }
+  const size = await utils.imageSize(url)
+  if (url !== backgroundUrl.value) { return }
+  if (!size) { return }
+  // retina images tile at half their natural size
+  if (utils.urlIsRetina(url)) {
+    size.width = size.width / 2
+    size.height = size.height / 2
+  }
+  state.backgroundImageSize = size
+}, { immediate: true })
+const backgroundImageStyles = computed(() => {
+  const size = state.backgroundImageSize
+  if (!size) { return }
+  // background images repeat at their natural size in the space, so scale the tile with the minimap
+  const width = size.width * ratio.value
+  const height = size.height * ratio.value
+  return {
+    backgroundImage: `url('${backgroundUrl.value}')`,
+    backgroundSize: `${width}px ${height}px`
+  }
+})
+const backgroundTint = computed(() => {
+  let color = backgroundSpace.value.backgroundTint
+  if (!color) { return }
+  if (isThemeDark.value && !utils.colorIsDark(color, 0.8)) {
+    color = colord(color).darken(0.4).toRgbString()
+  }
+  return color
+})
+
 // drawing
 
 const drawDrawing = () => {
+  if (props.space) { return Promise.resolve() } // drawing only applies to the current space
   const dataUrl = globalStore.drawingDataUrl
   if (!dataUrl) { return Promise.resolve() }
   // Reuse cached image if the data URL hasn't changed
@@ -296,21 +390,46 @@ const drawDrawing = () => {
   })
 }
 
+// items
+
+const spaceItems = (type, getStoreItems) => {
+  if (!props.space) {
+    return getStoreItems()
+  }
+  const items = props.space[type]
+  if (!items) { return [] }
+  return items
+}
+const drawItems = (items) => {
+  drawBoxes(items.boxes)
+  drawConnections(items)
+  drawLists(items.lists)
+  drawCards(items.cards)
+  drawLines(items.lines)
+}
+
 // connections
 
-const mapConnections = computed(() => {
-  return props.space?.connections || connectionStore.getAllConnections
-})
+const mapConnections = computed(() => spaceItems('connections', () => connectionStore.getAllConnections))
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
   point.y = point.y * ratio.value
   return point
 }
-const drawConnections = () => {
-  const connections = mapConnections.value
+const connectionIsValid = (connection, items) => {
+  if (!props.space) {
+    return connectionStore.getConnectionIsValid(connection)
+  }
+  items = items.cards.concat(items.boxes, items.lists)
+  const startItem = items.find(item => item.id === connection.startItemId)
+  const endItem = items.find(item => item.id === connection.endItemId)
+  return Boolean(startItem && endItem)
+}
+const drawConnections = (items) => {
+  const connections = items.connections
   if (!connections.length) { return }
   for (const connection of connections) {
-    if (!connectionStore.getConnectionIsValid(connection)) { continue }
+    if (!connectionIsValid(connection, items)) { continue }
     context.lineWidth = 1
     context.lineCap = 'round'
     context.strokeStyle = connection.color
@@ -331,11 +450,8 @@ const drawConnections = () => {
 
 // boxes
 
-const mapBoxes = computed(() => {
-  return props.space?.boxes || boxStore.getAllBoxes
-})
-const drawBoxes = () => {
-  const boxes = mapBoxes.value
+const mapBoxes = computed(() => spaceItems('boxes', () => boxStore.getAllBoxes))
+const drawBoxes = (boxes) => {
   const r = ratio.value
   context.lineWidth = 1
   for (const box of boxes) {
@@ -358,14 +474,11 @@ const drawBoxes = () => {
 
 // lines
 
-const mapLines = computed(() => {
-  return props.space?.lines || lineStore.getAllLines
-})
-const drawLines = () => {
-  const lines = mapLines.value
+const mapLines = computed(() => spaceItems('lines', () => lineStore.getAllLines))
+const drawLines = (lines) => {
   if (!lines.length) { return }
   const r = ratio.value
-  const width = Math.floor(globalStore.pageWidth * r)
+  const width = Math.floor(pageWidth.value * r)
   context.lineWidth = 1
   for (const line of lines) {
     const y = Math.floor(line.y * r)
@@ -379,11 +492,8 @@ const drawLines = () => {
 
 // lists
 
-const mapLists = computed(() => {
-  return props.space?.lists || listStore.getAllLists
-})
-const drawLists = () => {
-  const lists = mapLists.value
+const mapLists = computed(() => spaceItems('lists', () => listStore.getAllLists))
+const drawLists = (lists) => {
   const r = ratio.value
   for (const list of lists) {
     const x = list.x * r
@@ -399,12 +509,9 @@ const drawLists = () => {
 
 // cards
 
-const mapCards = computed(() => {
-  return props.space?.cards || cardStore.getAllCards
-})
-const drawCards = () => {
+const mapCards = computed(() => spaceItems('cards', () => cardStore.getAllCards))
+const drawCards = (cards) => {
   const defaultColor = utils.cssVariable('secondary-background')
-  const cards = mapCards.value
   const r = ratio.value
   for (const card of cards) {
     const x = card.x * r
@@ -528,7 +635,38 @@ const updateScroll = () => {
   state.scrollX = window.scrollX
   state.scrollY = window.scrollY
 }
+const displayViewportRect = computed(() => {
+  const rect = { ...props.viewportRect }
+  const minSize = viewportRectMinSize / ratio.value
+  if (rect.width < minSize) {
+    rect.x = rect.x - ((minSize - rect.width) / 2)
+    rect.width = minSize
+  }
+  if (rect.height < minSize) {
+    rect.y = rect.y - ((minSize - rect.height) / 2)
+    rect.height = minSize
+  }
+  return rect
+})
+const viewportRectStyle = computed(() => {
+  const rect = displayViewportRect.value
+  const r = ratio.value
+  const styles = {
+    left: `${rect.x * r}px`,
+    top: `${rect.y * r}px`,
+    width: `${rect.width * r}px`,
+    height: `${rect.height * r}px`,
+    borderColor: userStore.color
+  }
+  if (state.isPanningViewport) {
+    styles.cursor = 'grabbing'
+  }
+  return styles
+})
 const viewportStyle = computed(() => {
+  if (props.viewportRect) {
+    return viewportRectStyle.value
+  }
   const counterZoom = globalStore.getSpaceCounterZoomDecimal
   const offset = globalStore.spaceZoomOffset
   const color = userStore.color
@@ -562,7 +700,7 @@ const viewportStyle = computed(() => {
 // pan viewport
 
 const positionInSpace = (event) => {
-  const element = document.querySelector('#minimap-canvas')
+  const element = canvasElement.value
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   let x = event.clientX - rect.left
@@ -602,8 +740,28 @@ const startPanningViewport = (event) => {
   state.isPanningViewport = true
   panToPosition(event)
 }
+const positionIsInViewportRect = (position) => {
+  const rect = displayViewportRect.value
+  const isInX = position.x >= rect.x && position.x <= rect.x + rect.width
+  const isInY = position.y >= rect.y && position.y <= rect.y + rect.height
+  return isInX && isInY
+}
+const moveViewportRectToPosition = (position) => {
+  state.prevPosition = position
+  if (positionIsInViewportRect(position)) { return }
+  // center the rect on the position
+  const rect = props.viewportRect
+  emit('updateViewportRectPosition', {
+    x: position.x - (rect.width / 2),
+    y: position.y - (rect.height / 2)
+  })
+}
 const panToPosition = (event) => {
   const position = positionInSpace(event)
+  if (props.viewportRect) {
+    moveViewportRectToPosition(position)
+    return
+  }
   const centerPosition = positionInViewportCenter(position)
   // convert space coordinates back to scroll coordinates
   const scroll = spaceToScroll(centerPosition)
@@ -624,6 +782,14 @@ const panViewport = (event) => {
     x: position.x - state.prevPosition.x,
     y: position.y - state.prevPosition.y
   }
+  if (props.viewportRect) {
+    emit('updateViewportRectPosition', {
+      x: props.viewportRect.x + delta.x,
+      y: props.viewportRect.y + delta.y
+    })
+    state.prevPosition = position
+    return
+  }
   // delta is in space coordinates, scale to scroll coordinates
   const zoom = globalStore.getSpaceZoomDecimal
   window.scrollBy(delta.x * zoom, delta.y * zoom, 'instant')
@@ -640,9 +806,13 @@ const viewportIsVisible = computed(() => {
 
 <template lang="pug">
 .minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast, 'prevent-interaction': shouldPreventInteraction }")
+  .minimap-background(v-if="props.shouldDrawBackgroundImage")
+    SpaceBackgroundGradients(v-if="backgroundIsGradient" :visible="true" :layers="backgroundSpace.backgroundGradient")
+    .background-image(v-else :style="backgroundImageStyles")
+    .background-tint(v-if="backgroundTint" :style="{ background: backgroundTint }")
   canvas#minimap-canvas(ref="canvasElement")
   canvas.sonar-pings(ref="pingCanvasElement")
-  .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation }")
+  .viewport(v-if="viewportIsVisible" :style="viewportStyle" :class="{ blink: !props.preventAnimation, pulse: props.shouldPulseViewport }")
 </template>
 
 <style lang="stylus">
@@ -656,6 +826,28 @@ const viewportIsVisible = computed(() => {
     backdrop-filter blur(8px)
   &.prevent-interaction
     pointer-events none
+  #minimap-canvas
+    position relative // above .minimap-background
+  .minimap-background
+    position absolute
+    top 0
+    left 0
+    width 100%
+    height 100%
+    overflow hidden
+    pointer-events none
+    border-radius var(--entity-radius)
+    .background-image,
+    .background-tint
+      position absolute
+      top 0
+      left 0
+      width 100%
+      height 100%
+    .background-image
+      background-color var(--primary-background)
+    .background-tint
+      mix-blend-mode multiply
   .sonar-pings
     position absolute
     top 0

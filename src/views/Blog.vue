@@ -466,6 +466,7 @@ main.blog-page-wrap
       img
         border-radius var(--page-entity-radius)
         &.small
+          width 100%
           max-width 440px
       figcaption
         max-width 440px

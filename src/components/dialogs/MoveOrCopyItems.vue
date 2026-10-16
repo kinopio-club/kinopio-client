@@ -13,6 +13,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+import MinimapCanvas from '@/components/MinimapCanvas.vue'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -37,7 +38,10 @@ const state = reactive({
   spacePickerIsVisible: false,
   loading: false,
   cardsCreatedIsOverLimit: false,
-  isCopiedToNote: false
+  isCopiedToNote: false,
+  selectedSpaceData: null,
+  isLoading: false,
+  itemsOffset: { x: 0, y: 0 }
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -48,6 +52,7 @@ watch(() => props.visible, async (value, prevValue) => {
     scrollIntoView()
     updateSpaces()
     state.isCopiedToNote = false
+    state.itemsOffset = { x: 0, y: 0 }
   }
 })
 
@@ -89,10 +94,130 @@ const selectedSpaceIsRecentSpace = (space) => {
   return state.selectedSpace.id === space.id
 }
 
+// minimap
+
+watch(() => state.selectedSpace, (value, prevValue) => {
+  if (!value) { return }
+  updateSelectedSpaceData(state.selectedSpace)
+})
+const updateSelectedSpaceData = async (space) => {
+  try {
+    state.selectedSpaceData = null
+    state.isLoading = true
+    // local
+    const cachedSpace = await cache.space(space.id)
+    if (cachedSpace.cards) {
+      state.selectedSpaceData = cachedSpace
+    }
+    // remote
+    const remoteSpace = await spaceStore.getRemoteSpace(space)
+    if (!remoteSpace) {
+      throw new Error('remote space not found')
+    }
+    if (state.selectedSpace.id !== remoteSpace.id) {
+      throw new Error('remoteSpace is not selected')
+    }
+    state.selectedSpaceData = remoteSpace
+  } catch (error) {
+    console.warn('🚒 updateSelectedSpaceData', error)
+  }
+  state.isLoading = false
+}
+const currentOffsetItems = computed(() => offsetItems(selectedItems.value, state.itemsOffset))
+const minimapPageSize = computed(() => {
+  const space = state.selectedSpaceData
+  if (!space) { return }
+  const selected = normalizedSelectedItems.value
+  const cards = (space.cards || []).concat(selected.cards)
+  const boxes = (space.boxes || []).concat(selected.boxes)
+  const lists = (space.lists || []).concat(selected.lists)
+  let lines = (space.lines || []).concat(selected.lines)
+  lines = lines.map(line => {
+    return {
+      x: 0,
+      y: line.y,
+      height: 25
+    }
+  })
+  const items = cards.concat(boxes).concat(lists).concat(lines)
+  items.push({
+    x: 0, y: 0, width: 500, height: 500 // minimum page size
+  })
+  const pageSize = utils.pageSizeFromItems(items)
+  // room to move the items past the end of the space
+  const rect = itemsRect.value
+  return {
+    width: pageSize.width + rect.width,
+    height: pageSize.height + rect.height
+  }
+})
+const normalizedSelectedItems = computed(() => offsetItems(selectedItems.value, { x: 0, y: 0 }))
+const itemsRect = computed(() => {
+  const items = normalizedSelectedItems.value
+  const padding = 60
+  const rect = utils.boundaryRectFromItems(items.cards.concat(items.boxes, items.lists))
+  return {
+    x: rect.x - padding,
+    y: rect.y - padding,
+    width: rect.width + (padding * 2),
+    height: rect.height + (padding * 2)
+  }
+})
+const minimapViewportRect = computed(() => {
+  const rect = itemsRect.value
+  return {
+    ...rect,
+    x: rect.x + state.itemsOffset.x,
+    y: rect.y + state.itemsOffset.y
+  }
+})
+const updateItemsOffset = (position) => {
+  // keep the items inside the minimap page
+  const rect = itemsRect.value
+  const pageSize = minimapPageSize.value
+  let x = Math.min(position.x, pageSize.width - rect.width)
+  let y = Math.min(position.y, pageSize.height - rect.height)
+  x = Math.max(x, 0)
+  y = Math.max(y, 0)
+  state.itemsOffset = {
+    x: Math.round(x - rect.x),
+    y: Math.round(y - rect.y)
+  }
+}
+watch(minimapPageSize, (value, prevValue) => {
+  if (!value) { return }
+  updateItemsOffset(minimapViewportRect.value)
+})
+const offsetItems = (items, offset) => {
+  items = utils.clone(items)
+  const types = ['cards', 'boxes', 'lists']
+  for (const type of types) {
+    items[type] = items[type].filter(item => Boolean(item))
+    for (const item of items[type]) {
+      item.x = item.x + offset.x
+      item.y = item.y + offset.y
+    }
+  }
+  items.lines = items.lines.filter(line => Boolean(line))
+  for (const line of items.lines) {
+    line.y = line.y + offset.y
+  }
+  items.connections = items.connections.filter(connection => Boolean(connection))
+  items = utils.removeOrphanedConnections(items)
+  for (const connection of items.connections) {
+    const start = utils.startCoordsFromConnectionPath(connection.path)
+    if (!start) { continue }
+    // only the path start is absolute, the curve and end are relative to it
+    const startPath = `m${start.x + offset.x},${start.y + offset.y}`
+    connection.path = connection.path.replace(/^m[\d.-]+,[\d.-]+/, startPath)
+  }
+  return items
+}
+
 // items
 
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
-const itemsCount = computed(() => utils.countArrayItems(selectedItems.value))
+const itemsCount = computed(() => utils.countArrayItems(normalizedSelectedItems.value))
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const sortedByY = (items) => {
   items = items.sort((a, b) => {
@@ -163,11 +288,12 @@ const openNote = () => {
 const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
+  items = offsetItems(items, state.itemsOffset)
   newItems = await spaceStore.getNewItems(items, selectedSpaceId)
   newItems = utils.removeOrphanedConnections(newItems)
   // update cache
-  const space = await cache.space(selectedSpaceId).cards
-  const spaceIsCached = Boolean(space)
+  const space = await cache.space(selectedSpaceId)
+  const spaceIsCached = Boolean(space.id)
   if (!spaceIsCached) {
     await cache.saveSpace({ id: selectedSpaceId })
   }
@@ -276,6 +402,14 @@ dialog.narrow.more-or-copy-items(v-if="visible" :open="visible" ref="dialogEleme
           span {{state.selectedSpace.name}}
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
         SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true" :shouldExcludeCurrentSpace="true")
+
+    //- minimap
+    .row.minimap-row(v-if="state.selectedSpaceData")
+      MinimapCanvas(:visible="true" :space="state.selectedSpaceData" :selectedItems="currentOffsetItems" :size="210" :pageWidth="minimapPageSize.width" :pageHeight="minimapPageSize.height" :viewportRect="minimapViewportRect" @updateViewportRectPosition="updateItemsOffset" :preventAnimation="true" :shouldPulseViewport="true" :parentIsDialog="true" :shouldDrawBackgroundImage="true")
+      Loader(:visible="state.isLoading")
+    .row(v-else-if="state.isLoading")
+      Loader(:visible="true")
+
     //- recent spaces
     //- .row.recent-spaces-row(v-if="recentSpaces.length")
     //-   .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
@@ -309,6 +443,12 @@ dialog.more-or-copy-items
     // top -100px
     .results-section
       max-height 250px
+  .minimap-row
+    position relative
+    .loader
+      position absolute
+      top 4px
+      right 4px
   .copied-to-note
     margin-right 0
     justify-content space-between
