@@ -548,21 +548,13 @@ const updatePositionFrame = () => {
     cancelUpdatePosition()
   }
 }
+// keep visible when the ios keyboard shifts the visual viewport
 const updatePositionInVisualViewport = () => {
   const viewport = utils.visualViewport()
-  const scale = utils.roundFloat(viewport.scale)
-  const counterScale = utils.roundFloat(1 / viewport.scale)
-  const left = Math.round(viewport.offsetLeft)
   const top = Math.round(viewport.offsetTop)
-  const style = {
-    transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-    maxWidth: Math.round(viewport.width * scale) + 'px'
-  }
-  if (utils.isIPhone() && scale <= 1) {
-    style.transform = 'none'
-    style.zoom = counterScale
-  }
-  state.position = style
+  const transform = `translate(0px, ${top}px)`
+  if (state.position.transform === transform) { return }
+  state.position = { transform }
 }
 
 // notifications

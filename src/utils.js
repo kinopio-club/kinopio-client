@@ -94,7 +94,7 @@ export default {
     if (!element) { return }
     element = element.getBoundingClientRect()
     const viewport = this.visualViewport()
-    const offset = (viewport.width * viewport.scale) - (element.x + element.width)
+    const offset = viewport.width - (element.x + element.width)
     if (offset < 0) {
       return true
     } else {
@@ -114,10 +114,6 @@ export default {
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
     }
-    const zoomScale = viewport.scale
-    if (zoomScale > 1) {
-      height = height * zoomScale
-    }
     return height
   },
   elementHeight (element, isChildElement) {
@@ -131,10 +127,6 @@ export default {
       const dialog = element.closest('dialog')
       const dialogRect = dialog.getBoundingClientRect()
       height = height - (rect.y - dialogRect.y)
-    }
-    const zoomScale = this.visualViewport().scale
-    if (zoomScale > 1) {
-      height = height * zoomScale
     }
     return height
   },
@@ -166,29 +158,14 @@ export default {
       return false
     }
   },
-  shouldIgnoreTouchInteraction (event) {
-    if (!event) { return true }
-    const isScroll = event.type === 'scroll'
-    const isResize = event.type === 'resize'
-    const dialogIsVisible = this.dialogIsVisible()
-    if (dialogIsVisible) { return true }
-    if (isScroll || isResize) { return }
-    const fromDialog = event.target.closest('dialog')
-    const fromHeader = event.target.closest('header')
-    const fromFooter = event.target.closest('footer')
-    return fromDialog || fromHeader || fromFooter || dialogIsVisible
-  },
+  // spaces replace native pinch zoom with space zoom
   disablePinchZoom () {
-    if (this.isIPhone()) {
-      const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, user-scalable=0, maximum-scale=1')
-    }
+    const viewport = document.querySelector('head meta[name=viewport]')
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no')
   },
   enablePinchZoom () {
-    if (this.isIPhone()) {
-      const viewport = document.querySelector('head meta[name=viewport]')
-      viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
-    }
+    const viewport = document.querySelector('head meta[name=viewport]')
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
   },
   cursorPositionInViewport (event) {
     let x, y
@@ -318,17 +295,6 @@ export default {
     viewport.pageLeft = Math.round(viewport.pageLeft)
     viewport.pageTop = Math.round(viewport.pageTop)
     return viewport
-  },
-  pinchCounterZoomDecimal () {
-    return 1 / this.visualViewport().scale
-  },
-  isSignificantlyPinchZoomed () {
-    const pinchZoomScale = this.visualViewport().scale
-    return !this.isBetween({
-      value: pinchZoomScale,
-      min: 0.8,
-      max: 1.3
-    })
   },
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))

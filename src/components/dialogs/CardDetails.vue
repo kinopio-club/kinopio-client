@@ -217,13 +217,6 @@ const showTagDetailsIsVisible = (event, tag) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = 1
-  if (utils.isAndroid()) {
-    zoom = globalStore.getSpaceZoomDecimal * utils.visualViewport().scale
-  } else if (globalStore.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = globalStore.getSpaceZoomDecimal
-  }
   const minWidth = consts.defaultDialogWidth
   let width = userStore.cardDetailsResizeWidth || minWidth
   width = Math.max(width, minWidth)
@@ -241,11 +234,7 @@ const styles = computed(() => {
   }
   const left = `${position.x + offset}px`
   top = `${top}px`
-  const styles = { left, top, width }
-  if (zoom !== 1) {
-    styles.transform = `scale(${zoom})`
-  }
-  return styles
+  return { left, top, width }
 })
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
@@ -380,7 +369,6 @@ const showCard = async (cardId) => {
   await nextTick()
   broadcastShowCardDetails()
   clearErrors()
-  updatePinchCounterZoomDecimal()
   scrollIntoViewAndFocus()
   await updatePreviousTags()
   updateNameSplitIntoCardsCount()
@@ -1583,15 +1571,6 @@ const updatePicker = (event) => {
   }
   checkIfIsInsertLineBreak(event)
 }
-
-// touch mobile
-
-const resetPinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = 1
-}
-const updatePinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-}
 </script>
 
 <template lang="pug">
@@ -1645,8 +1624,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @keydown.ctrl.i.exact.stop.prevent="toggleTextEditWrapAction('italic')"
         @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
         @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
-
-        @focus="resetPinchCounterZoomDecimal"
       )
 
       TagPicker(

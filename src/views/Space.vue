@@ -157,7 +157,6 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', updateConnectionDirectionsIsPaused)
   // update viewport size
   window.addEventListener('touchend', updateViewportSizes)
-  window.addEventListener('gesturecancel', updateViewportSizes)
   window.addEventListener('resize', updateViewportSizes)
   updateViewportSizes()
   // when a card is added through Add.vue in a sharesheet with the space open behind it
@@ -228,7 +227,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('touchend', updateViewportSizes)
-  window.removeEventListener('gesturecancel', updateViewportSizes)
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(hourlyTasks)
@@ -1191,7 +1189,7 @@ const shouldPrevent = computed(() => {
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
   :style="{ width: appPageWidth + 'px', height: appPageHeight + 'px', cursor: pageCursor }"
-  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark,  'is-touch-device': isTouchDevice}"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
   //- page

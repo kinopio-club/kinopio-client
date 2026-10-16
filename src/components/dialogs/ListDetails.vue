@@ -95,22 +95,11 @@ const scrollIntoViewAndFocus = async () => {
 // styles
 
 const styles = computed(() => {
-  let zoom = 1
-  if (utils.isAndroid()) {
-    zoom = globalStore.getSpaceZoomDecimal * utils.visualViewport().scale
-  } else if (globalStore.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = globalStore.getSpaceZoomDecimal
-  }
   const position = globalStore.getSpacePositionInPage(currentList.value)
-  const styles = {
+  return {
     left: `${position.x + 8}px`,
     top: `${position.y + 8}px`
   }
-  if (zoom !== 1) {
-    styles.transform = `scale(${zoom})`
-  }
-  return styles
 })
 const broadcastShowListDetails = () => {
   if (!canEditSpace.value) { return }

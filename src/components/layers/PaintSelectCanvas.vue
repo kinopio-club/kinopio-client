@@ -331,12 +331,6 @@ const updateCirclesWithScroll = () => {
   }
   updatePrevScrollPosition()
 }
-const updateCircleForAndroid = (circle) => {
-  if (!utils.isAndroid()) { return circle }
-  circle.x = circle.x - window.visualViewport.offsetLeft
-  circle.y = circle.y - window.visualViewport.offsetTop
-  return circle
-}
 const checkIsCircleVisible = (circle) => {
   let { x, y, radius } = circle
   radius = radius || circleRadius
@@ -368,7 +362,6 @@ const offscreenCircle = (circle) => {
   return circle
 }
 const drawCircle = (circle, context, shouldDrawOffscreen) => {
-  circle = updateCircleForAndroid(circle)
   const isCircleVisible = checkIsCircleVisible(circle)
   if (!isCircleVisible && !shouldDrawOffscreen) { return }
   if (!isCircleVisible && shouldDrawOffscreen) { circle = offscreenCircle(circle) }
@@ -718,8 +711,7 @@ const lockingAnimationFrame = (timestamp) => {
   }
   const elaspedTime = timestamp - lockingStartTime
   lockingPercentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-  const zoom = Math.min(utils.pinchCounterZoomDecimal(), 1)
-  const cursorsAreClose = utils.cursorsAreClose(startCursor, state.currentCursor, zoom)
+  const cursorsAreClose = utils.cursorsAreClose(startCursor, state.currentCursor, 1)
   if (!cursorsAreClose) {
     currentUserIsLocking = false
   }

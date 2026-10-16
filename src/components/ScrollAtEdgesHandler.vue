@@ -240,11 +240,7 @@ const scrollSpeed = (cursor, direction) => {
 }
 const scrollBy = (delta) => {
   if (utils.isAndroid()) { return }
-  let zoom = spaceZoomDecimal.value
-  if (zoom === 1) {
-    const viewport = utils.visualViewport()
-    zoom = viewport.scale
-  }
+  const zoom = spaceZoomDecimal.value
   const currentUserIsBoxSelecting = globalStore.currentUserIsBoxSelecting
   const isDraggingItem = (
     isDraggingCard.value ||

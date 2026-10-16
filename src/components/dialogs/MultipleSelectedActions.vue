@@ -84,7 +84,6 @@ const visible = computed(() => {
 watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
-    globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
     updatePositionClamped()
     closeDialogs()
     globalStore.shouldExplicitlyHideFooter = true
@@ -110,7 +109,6 @@ const classes = computed(() => {
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
-const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
@@ -238,19 +236,11 @@ const backgroundColor = computed(() => {
 })
 const styles = computed(() => {
   const position = globalStore.getSpacePositionInPage(globalStore.multipleSelectedActionsPosition)
-  let zoom = 1
-  if (globalStore.isTouchDevice) {
-    zoom = spaceZoomDecimal.value / utils.visualViewport().scale
-  }
-  const styles = {
+  return {
     backgroundColor: backgroundColor.value,
     left: position.x + 'px',
     top: position.y + 'px'
   }
-  if (zoom !== 1) {
-    styles.transform = `scale(${zoom})`
-  }
-  return styles
 })
 
 // cards

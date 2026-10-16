@@ -33,17 +33,10 @@ const user = computed(() => globalStore.userDetailsUser)
 const position = computed(() => globalStore.userDetailsPosition)
 
 const styles = computed(() => {
-  let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
+  const { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
   let zoom = globalStore.getSpaceCounterZoomDecimal
   if (shouldIgnoreZoom) {
     zoom = 1
-  }
-  if (globalStore.isTouchDevice) {
-    zoom = utils.pinchCounterZoomDecimal()
-    if (zoom > 1) {
-      x = x * zoom
-      y = y * zoom
-    }
   }
   const styles = {
     transform: `scale(${zoom})`,

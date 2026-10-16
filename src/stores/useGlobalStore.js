@@ -61,7 +61,6 @@ export const useGlobalStore = defineStore('global', {
     // zoom and scroll
     spaceZoomPercent: consts.spaceZoom.default,
     spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
-    pinchCounterZoomDecimal: 1,
     isPinchZooming: false,
     isTouchScrolling: false,
 
@@ -476,7 +475,6 @@ export const useGlobalStore = defineStore('global', {
       }
     },
     getShouldScrollAtEdges (event) {
-      if (window.visualViewport.scale > 1) { return }
       let isPaintSelecting
       if (event.touches) {
         isPaintSelecting = this.currentUserIsPaintSelectingLocked
