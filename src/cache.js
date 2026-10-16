@@ -220,20 +220,26 @@ export default {
       return false
     }
   },
-  async addToSpace ({ cards, connections, boxes }, spaceId) {
+  async addToSpace ({ cards, connections, boxes, lists, lines }, spaceId) {
     // space items
     const space = await this.space(spaceId)
     space.cards = space.cards || []
     space.connections = space.connections || []
     space.boxes = space.boxes || []
+    space.lists = space.lists || []
+    space.lines = space.lines || []
     // new items
     cards = cards || []
     connections = connections || []
     boxes = boxes || []
+    lists = lists || []
+    lines = lines || []
     // add new items
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
     boxes.forEach(box => space.boxes.push(box))
+    lists.forEach(list => space.lists.push(list))
+    lines.forEach(line => space.lines.push(line))
     await this.saveSpace(space)
   },
   async saveSpace (space) {

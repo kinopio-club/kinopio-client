@@ -5,6 +5,8 @@ import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
+import { useLineStore } from '@/stores/useLineStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
@@ -19,6 +21,8 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
+const lineStore = useLineStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
@@ -330,6 +334,8 @@ const moveOrCopyToSpace = async () => {
   if (props.actionIsMove) {
     removeCards(items.cards)
     removeBoxes(items.boxes)
+    removeLists(items.lists)
+    removeLines(items.lines)
     items.isRemoved = true
   }
   userStore.updateUserCardsCreatedCount(items.cards)
@@ -343,6 +349,14 @@ const removeCards = (cards) => {
 const removeBoxes = (boxes) => {
   const ids = boxes.map(box => box.id)
   boxStore.removeBoxes(ids)
+}
+const removeLists = (lists) => {
+  const ids = lists.map(list => list.id)
+  listStore.removeLists(ids)
+}
+const removeLines = (lines) => {
+  const ids = lines.map(line => line.id)
+  lineStore.removeLines(ids)
 }
 
 // should upgrade user
