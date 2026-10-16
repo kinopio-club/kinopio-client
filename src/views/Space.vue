@@ -1191,7 +1191,7 @@ const shouldPrevent = computed(() => {
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
   :style="{ width: appPageWidth + 'px', height: appPageHeight + 'px', cursor: pageCursor }"
-  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
+  :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark,  'is-touch-device': isTouchDevice}"
   :data-current-user-id="currentUserId"
 )
   //- page
@@ -1223,14 +1223,6 @@ const shouldPrevent = computed(() => {
     Lists
     ItemUnlockButtons
     DrawingStrokes
-    BoxDetails
-    LineDetails
-    ListDetails
-    CardDetails
-    OtherCardDetails
-    ConnectionDetails
-    CodeLanguagePicker
-    MultipleSelectedActions
     ScrollAtEdgesHandler
     NotificationsWithPosition(layer="space")
     BoxSelecting
@@ -1239,6 +1231,18 @@ const shouldPrevent = computed(() => {
     PaintSelectCanvas
     DrawingHandler
     SonarPing
+  .space-item-dialogs(
+    @mousedown.left="initInteractions"
+    @touchstart="initInteractions"
+  )
+    BoxDetails
+    LineDetails
+    ListDetails
+    CardDetails
+    OtherCardDetails
+    ConnectionDetails
+    CodeLanguagePicker
+    MultipleSelectedActions
   //- page ui, dialogs
   Header
   RightSideToc

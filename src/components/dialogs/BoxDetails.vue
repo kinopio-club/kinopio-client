@@ -91,20 +91,23 @@ const update = (updates) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
+  let zoom = 1
   if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
+    zoom = globalStore.getSpaceZoomDecimal * utils.visualViewport().scale
   } else if (globalStore.isTouchDevice) {
     // on iOS, keyboard focus zooms
-    zoom = 1
+    zoom = globalStore.getSpaceZoomDecimal
   }
+  const position = globalStore.getSpacePositionInPage(currentBox.value)
 
   const backgroundColor = colord(currentBox.value.color).alpha(1).toRgbString()
   const styles = {
-    transform: `scale(${zoom})`,
-    left: `${currentBox.value.x + 8}px`,
-    top: `${currentBox.value.y + 8}px`,
+    left: `${position.x + 8}px`,
+    top: `${position.y + 8}px`,
     backgroundColor
+  }
+  if (zoom !== 1) {
+    styles.transform = `scale(${zoom})`
   }
   return styles
 })

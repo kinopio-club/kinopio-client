@@ -206,8 +206,7 @@ video
   max-width 100%
 
 input,
-textarea,
-.stripe-element
+textarea
   color var(--primary)
   touch-action manipulation
   margin 0
@@ -230,6 +229,12 @@ textarea,
   &.is-background-dark
     color var(--primary-background)
     border-color var(--primary-background)
+
+.is-touch-device // disable ios keyboard zoom in
+  input,
+  textarea
+    font-size 16px
+
 button,
 input[type="color"],
 select,
