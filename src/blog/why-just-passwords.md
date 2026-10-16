@@ -26,7 +26,7 @@ Using email to authenticate is much less intimidating to build because you don't
 - If you're lucky the email is ready in your inbox, but usually you'll be waiting a minute or two for it to show up. (Assuming it doesn't get silently swallowed up by spam filters).
 - Because mobile email clients open links in their own sandboxed embedded browsers, the magic link has become a decidedly less magical 2FA code that you have to manually copy and paste yourself, like an animal. 
 
-<img src="https://updates.kinopio.club/pages/blog/posts/passwords/2.webp" class="">
+<img src="https://updates.kinopio.club/pages/blog/posts/passwords/2.webp" class="tiny">
 
 Defenders of the pattern are correct that storing minimum user data is a [good security practice](https://idlewords.com/talks/haunted_by_data.htm). But the ad-trackers, AI training, and unredacted and never-purged logs in most modern apps make this a practically meaningless gesture.
 
@@ -40,10 +40,10 @@ The major advantage of this pattern is low friction. New users don't have to typ
 
 But in exchange for the convenience, you're giving over user data to big-tech corporations and the advertising-industrial complex that's sloppifying the web, and subverting democracy. 
 
-<img src="https://updates.kinopio.club/pages/blog/posts/passwords/3.webp" class="small">
+<img src="https://updates.kinopio.club/pages/blog/posts/passwords/3.webp" class="">
 
 
-Also you can't just do one of them because someone will inevitably tell you that they don't have a [Google] account, but they do use [Microsoft] at work. So your sign in screen ends up looking like a rainbow colored mess of corporate logos, and users have to remember which of these providers they used with your app. 
+You can't just do one of them because someone will inevitably tell you that they don't have a [Google] account, but they do use [Microsoft] at work. So your sign in screen ends up looking like a rainbow colored mess of corporate logos, and users have to remember which of these providers they used with your app. 
 
 And lord help you if they sign in with a different provider later and think that their data has disappeared. This is a very common support issue. You'll lose the time you've saved to figuring out how to safely merge user accounts associated with different providers.
 

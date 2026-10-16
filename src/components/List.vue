@@ -800,7 +800,7 @@ const clearFocus = () => {
         ProgressCircle(v-if="todoListCards.length" :value="todoListCardsCompleted.length" :max="todoListCards.length" :title="todoListCardsCompletedPercent" :backgroundColor="color" :count="todoListCardsRemainingCount")
         span.name(:title="props.list.name")
           NameSegment(:segment="nameSegment" :backgroundColorIsDark="colorIsDark")
-      .right-side.button-wrap
+      .right-side.button-wrap(v-if="canEditSpace")
         //- add card
         .inline-button-wrap(title="Add Card" @click.left.stop="addCard" @touchend.stop="addCard")
           button.small-button.inline-button

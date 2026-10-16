@@ -468,6 +468,9 @@ main.blog-page-wrap
         &.small
           width 100%
           max-width 440px
+        &.tiny
+          width 100%
+          max-width 240px
       figcaption
         max-width 440px
         opacity 0.5
@@ -479,6 +482,7 @@ main.blog-page-wrap
       ul,
       ol
         padding-left 2rem
+        margin-bottom 1.5rem
         li
           max-width 410px
         li + li
