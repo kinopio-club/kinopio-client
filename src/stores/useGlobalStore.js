@@ -238,6 +238,8 @@ export const useGlobalStore = defineStore('global', {
     multipleCardsSelectedIdsToLoad: [],
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
+    multipleListsSelectedIdsToLoad: [],
+    multipleLinesSelectedIdsToLoad: [],
     currentUserIsDraggingMultipleSelectedActionsDialog: false,
 
     // connections
@@ -1420,14 +1422,20 @@ export const useGlobalStore = defineStore('global', {
       this.multipleCardsSelectedIdsToLoad = items.cards.map(card => card.id)
       this.multipleConnectionsSelectedIdsToLoad = items.connections.map(connection => connection.id)
       this.multipleBoxesSelectedIdsToLoad = items.boxes.map(box => box.id)
+      this.multipleListsSelectedIdsToLoad = items.lists.map(list => list.id)
+      this.multipleLinesSelectedIdsToLoad = items.lines.map(line => line.id)
     },
     restoreMultipleSelectedItemsToLoad () {
       this.multipleCardsSelectedIds = this.multipleCardsSelectedIdsToLoad
       this.multipleConnectionsSelectedIds = this.multipleConnectionsSelectedIdsToLoad
       this.multipleBoxesSelectedIds = this.multipleBoxesSelectedIdsToLoad
+      this.multipleListsSelectedIds = this.multipleListsSelectedIdsToLoad
+      this.multipleLinesSelectedIds = this.multipleLinesSelectedIdsToLoad
       this.multipleCardsSelectedIdsToLoad = []
       this.multipleConnectionsSelectedIdsToLoad = []
       this.multipleBoxesSelectedIdsToLoad = []
+      this.multipleListsSelectedIdsToLoad = []
+      this.multipleLinesSelectedIdsToLoad = []
     },
     async clearAllSelected () {
       this.clearDraggingItems()
