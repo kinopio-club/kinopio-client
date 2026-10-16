@@ -143,7 +143,18 @@ const minimapPageSize = computed(() => {
       height: 25
     }
   })
-  const items = cards.concat(boxes).concat(lists).concat(lines)
+  // the furthest point of each drawing stroke
+  let strokes = space.drawingStrokes || []
+  strokes = strokes.filter(stroke => stroke?.length)
+  strokes = strokes.map(stroke => {
+    return {
+      x: Math.max(...stroke.map(point => point.x)),
+      y: Math.max(...stroke.map(point => point.y)),
+      width: stroke[0].diameter,
+      height: stroke[0].diameter
+    }
+  })
+  const items = cards.concat(boxes).concat(lists).concat(lines).concat(strokes)
   items.push({
     x: 0, y: 0, width: 500, height: 500 // minimum page size
   })

@@ -364,8 +364,36 @@ const backgroundTint = computed(() => {
 
 // drawing
 
+const drawDrawingFromStrokes = () => {
+  const strokes = props.space.drawingStrokes
+  if (!strokes) { return }
+  const r = ratio.value
+  context.lineCap = 'round'
+  context.lineJoin = 'round'
+  for (const stroke of strokes) {
+    if (!stroke?.length) { continue }
+    const { color, diameter } = stroke[0]
+    context.strokeStyle = color
+    context.lineWidth = diameter * r
+    context.beginPath()
+    context.moveTo(stroke[0].x * r, stroke[0].y * r)
+    // a single point is drawn as a dot
+    if (stroke.length === 1) {
+      context.lineTo(stroke[0].x * r, stroke[0].y * r)
+    }
+    for (const point of stroke.slice(1)) {
+      context.lineTo(point.x * r, point.y * r)
+    }
+    context.stroke()
+  }
+}
 const drawDrawing = () => {
-  if (props.space) { return Promise.resolve() } // drawing only applies to the current space
+  // other spaces draw from their saved strokes, the current space uses the live drawing image
+  if (props.space) {
+    drawDrawingFromStrokes()
+    return Promise.resolve()
+  }
+  // draw drawing from drawing image
   const dataUrl = globalStore.drawingDataUrl
   if (!dataUrl) { return Promise.resolve() }
   // Reuse cached image if the data URL hasn't changed
