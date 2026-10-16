@@ -110,7 +110,6 @@ const classes = computed(() => {
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
@@ -130,9 +129,11 @@ const updatePositionClamped = () => {
   const rect = element.getBoundingClientRect()
   const { height, width } = rect
   const margin = 16
+  // position is stored in space coords, dialog is rendered in page coords
   const zoom = spaceZoomDecimal.value || 1
-  const maxX = (window.scrollX + globalStore.viewportWidth - width - margin) / zoom
-  const maxY = (window.scrollY + globalStore.viewportHeight - height - margin) / zoom
+  const offset = globalStore.spaceZoomOffset
+  const maxX = (window.scrollX + globalStore.viewportWidth - width - margin - offset.x) / zoom
+  const maxY = (window.scrollY + globalStore.viewportHeight - height - margin - offset.y) / zoom
   if (x < 0) {
     x = 0
   } else if (x > maxX) {
@@ -236,17 +237,20 @@ const backgroundColor = computed(() => {
   return color
 })
 const styles = computed(() => {
-  const position = globalStore.multipleSelectedActionsPosition
-  let zoom = spaceCounterZoomDecimal.value
+  const position = globalStore.getSpacePositionInPage(globalStore.multipleSelectedActionsPosition)
+  let zoom = 1
   if (globalStore.isTouchDevice) {
-    zoom = 1 / utils.visualViewport().scale
+    zoom = spaceZoomDecimal.value / utils.visualViewport().scale
   }
-  return {
+  const styles = {
     backgroundColor: backgroundColor.value,
     left: position.x + 'px',
-    top: position.y + 'px',
-    transform: `scale(${zoom})`
+    top: position.y + 'px'
   }
+  if (zoom !== 1) {
+    styles.transform = `scale(${zoom})`
+  }
+  return styles
 })
 
 // cards

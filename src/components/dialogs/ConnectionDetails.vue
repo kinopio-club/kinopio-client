@@ -56,18 +56,19 @@ const isThemeDarkAndColorLight = computed(() => {
   return isThemeDark && !colorisDark.value
 })
 const styles = computed(() => {
-  const position = globalStore.connectionDetailsPosition
-  let zoom
+  const position = globalStore.getSpacePositionInPage(globalStore.connectionDetailsPosition)
+  let zoom = 1
   if (utils.isSignificantlyPinchZoomed()) {
-    zoom = pinchCounterZoomDecimal.value
-  } else {
-    zoom = spaceCounterZoomDecimal.value
+    zoom = globalStore.getSpaceZoomDecimal * pinchCounterZoomDecimal.value
   }
-  return {
+  const styles = {
     left: `${position.x}px`,
-    top: `${position.y}px`,
-    transform: `scale(${zoom})`
+    top: `${position.y}px`
   }
+  if (zoom !== 1) {
+    styles.transform = `scale(${zoom})`
+  }
+  return styles
 })
 const scrollIntoView = async () => {
   await nextTick()
@@ -108,7 +109,6 @@ const closeDialogs = () => {
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 
 // current connection

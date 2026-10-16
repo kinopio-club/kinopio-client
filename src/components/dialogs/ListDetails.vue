@@ -95,17 +95,20 @@ const scrollIntoViewAndFocus = async () => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
+  let zoom = 1
   if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
+    zoom = globalStore.getSpaceZoomDecimal * utils.visualViewport().scale
   } else if (globalStore.isTouchDevice) {
     // on iOS, keyboard focus zooms
-    zoom = 1
+    zoom = globalStore.getSpaceZoomDecimal
   }
+  const position = globalStore.getSpacePositionInPage(currentList.value)
   const styles = {
-    transform: `scale(${zoom})`,
-    left: `${currentList.value.x + 8}px`,
-    top: `${currentList.value.y + 8}px`
+    left: `${position.x + 8}px`,
+    top: `${position.y + 8}px`
+  }
+  if (zoom !== 1) {
+    styles.transform = `scale(${zoom})`
   }
   return styles
 })

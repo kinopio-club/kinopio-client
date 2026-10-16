@@ -105,17 +105,21 @@ const languageColorStyle = (language) => {
 
 const styles = computed(() => {
   // adapted from card details
-  let zoom = globalStore.getSpaceCounterZoomDecimal
+  // rendered outside #space, and position is already in page coords
+  let zoom = 1
   if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
+    zoom = globalStore.getSpaceZoomDecimal * utils.visualViewport().scale
   } else if (globalStore.isTouchDevice) {
-    zoom = 1
+    zoom = globalStore.getSpaceZoomDecimal
   }
-  const transform = `scale(${zoom})`
   const left = `${position.value.x}px`
   const top = `${position.value.y}px`
   const maxHeight = `${state.dialogHeight}px`
-  return { transform, left, top, maxHeight }
+  const styles = { left, top, maxHeight }
+  if (zoom !== 1) {
+    styles.transform = `scale(${zoom})`
+  }
+  return styles
 })
 const updateDialogHeight = async () => {
   await nextTick()

@@ -217,30 +217,35 @@ const showTagDetailsIsVisible = (event, tag) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
+  let zoom = 1
   if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
+    zoom = globalStore.getSpaceZoomDecimal * utils.visualViewport().scale
   } else if (globalStore.isTouchDevice) {
     // on iOS, keyboard focus zooms
-    zoom = 1
+    zoom = globalStore.getSpaceZoomDecimal
   }
   const minWidth = consts.defaultDialogWidth
   let width = userStore.cardDetailsResizeWidth || minWidth
   width = Math.max(width, minWidth)
   width = `${width}px`
-  const transform = `scale(${zoom})`
   const offset = 8
-  const left = `${card.value.x + offset}px`
-  let top
   // conditional top pos
+  let y = card.value.y
   if (userStore.cardDetailsIsBelowCard) {
-    const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
-    top = card.value.y + card.value.height - offset
-  } else {
-    top = card.value.y + offset
+    y = card.value.y + card.value.height
   }
-  top = top + 'px'
-  return { transform, left, top, width }
+  const position = globalStore.getSpacePositionInPage({ x: card.value.x, y })
+  let top = position.y + offset
+  if (userStore.cardDetailsIsBelowCard) {
+    top = position.y - offset
+  }
+  const left = `${position.x + offset}px`
+  top = `${top}px`
+  const styles = { left, top, width }
+  if (zoom !== 1) {
+    styles.transform = `scale(${zoom})`
+  }
+  return styles
 })
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
