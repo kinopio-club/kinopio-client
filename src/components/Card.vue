@@ -1667,6 +1667,7 @@ const shouldNotStick = computed(() => {
   if (iframeIsVisible.value) { return true }
   if (globalStore.codeLanguagePickerIsVisible) { return true }
   if (globalStore.currentUserIsDraggingConnectionIdLabel) { return true }
+  if (globalStore.currentUserIsDraggingConnectionIdPath) { return true }
   if (currentUserIsHoveringOverButtonCardId.value) { return true }
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   const currentUserIsPanning = globalStore.currentUserIsPanningReady || globalStore.currentUserIsPanning
