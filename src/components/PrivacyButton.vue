@@ -94,6 +94,7 @@ const updateLocalSpaces = () => {
 .privacy-button
   button
     height initial
+    align-items center
     .badge
       margin 0
 
