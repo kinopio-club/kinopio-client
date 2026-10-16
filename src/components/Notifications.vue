@@ -323,8 +323,16 @@ const changeSpace = (spaceId) => {
   spaceStore.changeSpace(space)
   globalStore.closeAllDialogs()
 }
-const changeSpaceAndSelectItems = (spaceId, items) => {
+const changeSpaceAndFocusItems = (spaceId, items) => {
   globalStore.multipleSelectedItemsToLoad(items)
+  let itemId
+  consts.itemTypesWithPositions.forEach(type => {
+    if (itemId) { return }
+    if (items[type].length) {
+      itemId = items[type][0].id
+    }
+  })
+  globalStore.loadSpaceFocusOnItemId = itemId
   changeSpace(spaceId)
 }
 const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value || globalStore.currentUserIsResizingList)
@@ -552,7 +560,7 @@ aside.notifications(@click.left="closeAllDialogs")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
     .row
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
-        button(@click.left.prevent.stop="changeSpaceAndSelectItems(notifyMoveOrCopyToSpaceDetails.id, notifyMoveOrCopyToSpaceDetails.items)") {{notifyMoveOrCopyToSpaceDetails.name}} →
+        button(@click.left.prevent.stop="changeSpaceAndFocusItems(notifyMoveOrCopyToSpaceDetails.id, notifyMoveOrCopyToSpaceDetails.items)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
   .persistent-item.danger(v-if="notifySpaceIsUnavailableOffline")
     OfflineBadge
