@@ -33,7 +33,7 @@ const themeStore = useThemeStore()
 
 let canvas, context
 let offscreenCanvas, offscreenContext
-let cachedDrawingImage, cachedDrawingDataUrl
+let strokesCanvas, prevStrokesCanvasInfo
 let startPanningPosition
 let pingCanvas, pingContext, pingFrameId
 let pingRipples = [] // { x, y, color, radius, speed, decay, lineWidth, shouldDestroy, opacity }
@@ -263,7 +263,7 @@ const drawCanvas = async () => {
   const visibleContext = context
   context = offscreenContext
   if (!context) { return }
-  await drawDrawing()
+  drawDrawing()
   drawItems({
     boxes: mapBoxes.value,
     connections: mapConnections.value,
@@ -364,58 +364,50 @@ const backgroundTint = computed(() => {
 
 // drawing
 
-const drawDrawingFromStrokes = () => {
-  const strokes = props.space.drawingStrokes
-  if (!strokes) { return }
+const drawingStrokes = computed(() => {
+  if (props.space) {
+    return props.space.drawingStrokes
+  }
+  return globalStore.currentDrawingStrokes
+})
+const drawStrokes = (strokesContext, strokes) => {
   const r = ratio.value
-  context.lineCap = 'round'
-  context.lineJoin = 'round'
+  strokesContext.lineCap = 'round'
+  strokesContext.lineJoin = 'round'
   for (const stroke of strokes) {
     if (!stroke?.length) { continue }
     const { color, diameter } = stroke[0]
-    context.strokeStyle = color
-    context.lineWidth = diameter * r
-    context.beginPath()
-    context.moveTo(stroke[0].x * r, stroke[0].y * r)
+    strokesContext.strokeStyle = color
+    strokesContext.lineWidth = diameter * r
+    strokesContext.beginPath()
+    strokesContext.moveTo(stroke[0].x * r, stroke[0].y * r)
     // a single point is drawn as a dot
     if (stroke.length === 1) {
-      context.lineTo(stroke[0].x * r, stroke[0].y * r)
+      strokesContext.lineTo(stroke[0].x * r, stroke[0].y * r)
     }
     for (const point of stroke.slice(1)) {
-      context.lineTo(point.x * r, point.y * r)
+      strokesContext.lineTo(point.x * r, point.y * r)
     }
-    context.stroke()
+    strokesContext.stroke()
   }
 }
 const drawDrawing = () => {
-  // other spaces draw from their saved strokes, the current space uses the live drawing image
-  if (props.space) {
-    drawDrawingFromStrokes()
-    return Promise.resolve()
+  const strokes = drawingStrokes.value
+  if (!strokes?.length) { return }
+  const width = offscreenCanvas.width
+  const height = offscreenCanvas.height
+  const r = ratio.value
+  const info = { strokes, width, height, r }
+  // perf only redraw strokes if info is changed
+  const infoIsChanged = !prevStrokesCanvasInfo || prevStrokesCanvasInfo.strokes !== strokes || prevStrokesCanvasInfo.width !== width || prevStrokesCanvasInfo.height !== height || prevStrokesCanvasInfo.r !== r
+  if (infoIsChanged) {
+    strokesCanvas = new OffscreenCanvas(width, height)
+    const strokesContext = strokesCanvas.getContext('2d')
+    strokesContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    drawStrokes(strokesContext, strokes)
+    prevStrokesCanvasInfo = info
   }
-  // draw drawing from drawing image
-  const dataUrl = globalStore.drawingDataUrl
-  if (!dataUrl) { return Promise.resolve() }
-  // Reuse cached image if the data URL hasn't changed
-  if (cachedDrawingImage && cachedDrawingDataUrl === dataUrl) {
-    const width = cachedDrawingImage.width * ratio.value
-    const height = cachedDrawingImage.height * ratio.value
-    context.drawImage(cachedDrawingImage, 0, 0, width, height)
-    return Promise.resolve()
-  }
-  return new Promise((resolve) => {
-    const image = new Image()
-    image.onload = () => {
-      cachedDrawingImage = image
-      cachedDrawingDataUrl = dataUrl
-      const width = image.width * ratio.value
-      const height = image.height * ratio.value
-      context.drawImage(image, 0, 0, width, height)
-      resolve()
-    }
-    image.onerror = resolve
-    image.src = dataUrl
-  })
+  context.drawImage(strokesCanvas, 0, 0, state.pageWidth, state.pageHeight)
 }
 
 // items

@@ -1,4 +1,4 @@
-import { nextTick } from 'vue'
+import { nextTick, markRaw } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
@@ -124,7 +124,7 @@ export const useGlobalStore = defineStore('global', {
     // drawing
     drawingEraserIsActive: false,
     drawingStrokeColors: [],
-    drawingDataUrl: '',
+    currentDrawingStrokes: markRaw([]), // markRaw because large static data
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -645,7 +645,7 @@ export const useGlobalStore = defineStore('global', {
     triggerAddDrawingStroke (updates) {},
     triggerRemoveDrawingStroke (updates) {},
     triggerEndDrawing () {},
-    triggerUpdateDrawingDataUrl () {},
+    triggerUpdateCurrentDrawingStrokes () {},
     triggerUpdateDrawingStrokes () {},
     triggerSelectDrawingStrokes ({ position, zoom, direction }) {},
     triggerSelectDrawingStrokesInBoxes (selectedBox) {},

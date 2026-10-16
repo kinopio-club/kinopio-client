@@ -2,7 +2,7 @@
 
 // stroke → paths [{ id, x, y, color }]
 
-import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick, markRaw } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
@@ -62,11 +62,11 @@ onMounted(async () => {
         spaceStrokes.reverse()
         spaceStore.drawingStrokes = []
         redrawStrokes()
-        await updateDrawingDataUrl()
+        updateCurrentDrawingStrokes()
       } else if (name === 'triggerDrawingReset') {
         clearDrawing()
-      } else if (name === 'triggerUpdateDrawingDataUrl') {
-        await updateDrawingDataUrl()
+      } else if (name === 'triggerUpdateCurrentDrawingStrokes') {
+        updateCurrentDrawingStrokes({ shouldPreventBroadcast: true })
         globalStore.triggerEndDrawing()
       } else if (name === 'triggerUpdateDrawingStrokes') {
         spaceStore.drawingStrokes = spaceStrokes
@@ -122,7 +122,7 @@ const strokesAreVisible = computed(() => Boolean(state.paths.length))
 
 // clear
 const clearDrawing = () => {
-  globalStore.drawingDataUrl = ''
+  globalStore.currentDrawingStrokes = markRaw([])
   globalStore.drawingStrokeColors = []
   globalStore.drawingEraserIsActive = false
   redoStack = []
@@ -222,17 +222,11 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   }
 }
 // for minimap
-const updateDrawingDataUrl = async () => {
-  await nextTick()
-  const element = document.querySelector('svg.drawing-strokes')
-  let dataUrl = '' // no strokes
-  if (element) {
-    const svgString = new XMLSerializer().serializeToString(element)
-    dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)))
-  }
-  globalStore.drawingDataUrl = dataUrl
+const updateCurrentDrawingStrokes = ({ shouldPreventBroadcast } = {}) => {
+  globalStore.currentDrawingStrokes = markRaw([...spaceStrokes]) // new array so the minimap knows to redraw strokes
+  if (shouldPreventBroadcast) { return }
   broadcastStore.update({
-    action: 'triggerUpdateDrawingDataUrl'
+    action: 'triggerUpdateCurrentDrawingStrokes'
   })
 }
 
@@ -302,7 +296,7 @@ const redrawStrokes = async () => {
 // stop
 
 const saveStroke = async ({ stroke, isUndoStroke }) => {
-  await updateDrawingDataUrl()
+  updateCurrentDrawingStrokes()
   globalStore.triggerEndDrawing()
   updatePageSizes()
   if (isUndoStroke) {
@@ -317,7 +311,7 @@ const endDrawing = async (event) => {
   isDrawing = false
   // erase
   if (globalStore.drawingEraserIsActive) {
-    await updateDrawingDataUrl()
+    updateCurrentDrawingStrokes()
     globalStore.triggerEndDrawing()
     await cache.updateSpace('drawingStrokes', spaceStrokes, spaceStore.id)
     startPoint = null
@@ -445,7 +439,7 @@ const saveMovedStrokes = async () => {
   const strokes = spaceStrokes.filter(stroke => movedStrokeIds.has(stroke[0].id))
   movedStrokeIds = new Set()
   updatePageSizes()
-  await updateDrawingDataUrl()
+  updateCurrentDrawingStrokes()
   globalStore.triggerEndDrawing()
   // there's no update stroke operation, so replace the saved stroke
   for (const stroke of strokes) {
