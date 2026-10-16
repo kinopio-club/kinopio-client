@@ -427,8 +427,11 @@ export const useSpaceStore = defineStore('space', {
     async loadRemoteSpace (space) {
       const globalStore = useGlobalStore()
       const userStore = useUserStore()
+      const apiStore = useApiStore()
       let remoteSpace
       try {
+        // send pending operations first, so the remote space includes items just added to it, like copied items
+        await apiStore.flushQueue()
         remoteSpace = await this.getRemoteSpace(space)
       } catch (error) {
         const preventRepeatError = loadSpaceIdsError.includes(space.id)

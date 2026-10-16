@@ -17,7 +17,9 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let sessionQueue = []
+let sendingQueuePromise = null
 const cardNameUpdatedAtByCardId = {}
+const sendQueueDebounced = debounce((apiStore) => apiStore.sendQueueNow(), 500)
 
 const restoreSessionQueueFromBackup = async () => {
   sessionQueue = await cache.queueBackup()
@@ -201,7 +203,20 @@ export const useApiStore = defineStore('api', {
 
     // Add and Send Queue Operations
 
-    sendQueue: debounce(async function () {
+    sendQueue () {
+      sendQueueDebounced(this)
+    },
+    async flushQueue () {
+      // send queued operations now, and wait for any that are already sending
+      sendQueueDebounced.cancel()
+      await sendingQueuePromise
+      await this.sendQueueNow()
+    },
+    async sendQueueNow () {
+      sendingQueuePromise = this.sendQueueOperations()
+      await sendingQueuePromise
+    },
+    async sendQueueOperations () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const globalStore = useGlobalStore()
@@ -245,7 +260,7 @@ export const useApiStore = defineStore('api', {
       if (response && isCurrentSpaceCreated) {
         broadcastStore.joinSpaceRoom({ shouldRejoin: true })
       }
-    }, 500),
+    },
 
     async addToQueue ({ name, body, spaceId, allowNonMember }) {
       const userStore = useUserStore()
