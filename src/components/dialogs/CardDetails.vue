@@ -99,6 +99,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   unsubscribes()
+  removeOnscreenKeyboardListener()
 })
 
 const state = reactive({
@@ -250,15 +251,37 @@ const triggerUpdateHeaderAndFooterPosition = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const scrollIntoViewAndFocus = async () => {
-  let behavior, positionIsCenter
-  if (utils.isIPhone()) {
-    positionIsCenter = true
-  }
   await nextTick()
-  scrollIntoView(behavior, positionIsCenter)
+  scrollIntoView()
+  // focus within the tap event so that ios shows the onscreen keyboard
   await nextTick()
+  addOnscreenKeyboardListener()
   focusName()
   triggerUpdatePaintSelectCanvasPositionOffset()
+}
+
+// onscreen keyboard
+
+const scrollAboveOnscreenKeyboard = () => {
+  removeOnscreenKeyboardListener()
+  const element = nameElement.value
+  if (!element) { return }
+  const viewport = window.visualViewport
+  const rect = element.getBoundingClientRect()
+  const visibleBottom = viewport.offsetTop + viewport.height
+  if (rect.bottom <= visibleBottom) { return }
+  const padding = 20
+  window.scrollBy({ top: rect.bottom - visibleBottom + padding, behavior: 'smooth' })
+}
+const addOnscreenKeyboardListener = () => {
+  if (!window.visualViewport) { return }
+  if (!utils.isMobile()) { return }
+  removeOnscreenKeyboardListener()
+  window.visualViewport.addEventListener('resize', scrollAboveOnscreenKeyboard)
+}
+const removeOnscreenKeyboardListener = () => {
+  if (!window.visualViewport) { return }
+  window.visualViewport.removeEventListener('resize', scrollAboveOnscreenKeyboard)
 }
 const triggerUpdatePaintSelectCanvasPositionOffset = () => {
   globalStore.triggerUpdatePaintSelectCanvasPositionOffset()
@@ -358,13 +381,13 @@ const toggleShareItemIsVisible = (event) => {
   state.shareItemIsVisible = !isVisible
   copyCardUrl(event)
 }
-const scrollIntoView = async (behavior, positionIsCenter) => {
+const scrollIntoView = async (behavior) => {
   // wait for element to be rendered before getting position
   await nextTick()
   await nextTick()
   await nextTick()
   const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element, behavior, positionIsCenter })
+  globalStore.scrollElementIntoView({ element, behavior })
 }
 const showCard = async (cardId) => {
   await nextTick()
@@ -386,6 +409,7 @@ const showCard = async (cardId) => {
   textareaSizes()
 }
 const closeCard = async () => {
+  removeOnscreenKeyboardListener()
   globalStore.triggerHideTouchInterface()
   const cardId = prevCardId
   const item = cardStore.getCard(cardId)
