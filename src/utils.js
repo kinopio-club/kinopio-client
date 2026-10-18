@@ -553,6 +553,7 @@ export default {
   focusTextarea (element) {
     if (!element) { return }
     element.focus()
+    if (this.isMobile()) { return } // ios only shows the onscreen keyboard when focused within the tap event
     setTimeout(() => { // use setTimeout focus to prevent 1password lag
       element.focus()
     }, 1)

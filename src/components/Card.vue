@@ -1495,6 +1495,10 @@ const showCardDetailsTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     showCardDetails(event)
   }
+  // prevent ios compat mouse events from blurring the focused name, which hides the onscreen keyboard
+  if (globalStore.cardDetailsIsVisibleForCardId === props.card.id) {
+    event.preventDefault()
+  }
   const userId = userStore.id
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })
 }
