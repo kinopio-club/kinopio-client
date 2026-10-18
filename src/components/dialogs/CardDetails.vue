@@ -252,7 +252,6 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 const scrollIntoViewAndFocus = async () => {
   let behavior, positionIsCenter
   if (utils.isIPhone()) {
-    behavior = 'auto'
     positionIsCenter = true
   }
   await nextTick()
@@ -452,11 +451,6 @@ const resetTextareaHeight = () => {
   nameElement.value.style.height = 'initial'
 }
 const focusName = async (position) => {
-  if (globalStore.shouldPreventNextFocusOnName) {
-    triggerUpdateHeaderAndFooterPosition()
-    globalStore.shouldPreventNextFocusOnName = false
-    return
-  }
   await nextTick()
   const element = nameElement.value
   const length = name.value.length

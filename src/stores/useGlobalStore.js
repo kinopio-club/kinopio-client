@@ -39,7 +39,6 @@ export const useGlobalStore = defineStore('global', {
     webfontIsLoaded: false,
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
-    shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
     isSpacePage: false,
