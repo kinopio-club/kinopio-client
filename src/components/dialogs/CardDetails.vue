@@ -250,12 +250,14 @@ const triggerUpdateHeaderAndFooterPosition = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const scrollIntoViewAndFocus = async () => {
-  let behavior
+  let behavior, positionIsCenter
   if (utils.isIPhone()) {
     behavior = 'auto'
+    positionIsCenter = true
   }
   await nextTick()
-  scrollIntoView(behavior)
+  scrollIntoView(behavior, positionIsCenter)
+  await nextTick()
   focusName()
   triggerUpdatePaintSelectCanvasPositionOffset()
 }
@@ -357,13 +359,13 @@ const toggleShareItemIsVisible = (event) => {
   state.shareItemIsVisible = !isVisible
   copyCardUrl(event)
 }
-const scrollIntoView = async (behavior) => {
+const scrollIntoView = async (behavior, positionIsCenter) => {
   // wait for element to be rendered before getting position
   await nextTick()
   await nextTick()
   await nextTick()
   const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element, behavior })
+  globalStore.scrollElementIntoView({ element, behavior, positionIsCenter })
 }
 const showCard = async (cardId) => {
   await nextTick()
