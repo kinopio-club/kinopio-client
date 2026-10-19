@@ -396,7 +396,7 @@ const shouldCancel = (event) => {
   }
   const fromDialog = event.target.closest('dialog')
   const fromHeader = event.target.closest('header')
-  const fromFooter = event.target.closest('footer')
+  const fromFooter = event.target.closest('.footer-wrap') // includes right side controls outside of footer
   return fromDialog || fromHeader || fromFooter
 }
 const stopPainting = (event) => {
