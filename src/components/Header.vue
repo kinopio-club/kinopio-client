@@ -60,9 +60,10 @@ let unsubscribes
 let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
+const fadeOutDelay = 200
 const hiddenDuration = 20
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let fadeOutIteration, fadeOutTimer, fadeOutDelayTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 const readOnlyElement = ref(null)
 
@@ -125,6 +126,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  clearFadeOutDelay()
   window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
   unsubscribes()
@@ -172,9 +174,10 @@ watch(() => isPinchZooming.value, (value, prevValue) => {
 const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
 watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
-    fadeOut()
+    fadeOutAfterDelay()
     updatePosition()
   } else {
+    clearFadeOutDelay()
     shouldCancelFadeOut = true
     cancelFadeOut()
   }
@@ -509,6 +512,17 @@ const fadeOut = () => {
   if (fadeOutTimer) { return }
   shouldCancelFadeOut = false
   fadeOutTimer = window.requestAnimationFrame(fadeOutFrame)
+}
+const fadeOutAfterDelay = () => {
+  if (fadeOutDelayTimer) { return }
+  fadeOutDelayTimer = setTimeout(() => {
+    fadeOutDelayTimer = undefined
+    fadeOut()
+  }, fadeOutDelay)
+}
+const clearFadeOutDelay = () => {
+  clearTimeout(fadeOutDelayTimer)
+  fadeOutDelayTimer = undefined
 }
 const cancelFadeOut = () => {
   window.cancelAnimationFrame(fadeOutTimer)
