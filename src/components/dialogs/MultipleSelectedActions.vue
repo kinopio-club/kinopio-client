@@ -711,6 +711,7 @@ dialog.narrow.multiple-selected-actions(
 .multiple-selected-actions
   transform-origin top left
   cursor grab
+  touch-action none // touch dragging the dialog shouldn't scroll the page
   &.is-dragging,
   &.is-pointer-down
     cursor grabbing
