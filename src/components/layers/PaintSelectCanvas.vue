@@ -52,6 +52,7 @@ let remotePaintingCircles = []
 const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
+const lockingMoveThreshold = 10 // px, finger jitter while holding shouldn't pan or cancel locking
 let currentUserIsLocking, lockingStartTime, shouldCancelLocking, lockingPercentComplete
 
 // notify offscreen cards
@@ -90,7 +91,7 @@ onMounted(() => {
   // shift circle positions with scroll to simulate full size canvas
   updatePrevScrollPosition()
   window.addEventListener('scroll', userScroll)
-  window.addEventListener('touchmove', userScroll) // android fix
+  window.addEventListener('touchmove', touchMove, { passive: false })
   window.addEventListener('load', clearCircles)
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
@@ -136,7 +137,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopPainting)
   window.removeEventListener('touchend', stopPainting)
   window.removeEventListener('scroll', userScroll)
-  window.removeEventListener('touchmove', userScroll)
+  window.removeEventListener('touchmove', touchMove, { passive: false })
   window.removeEventListener('load', clearCircles)
   window.removeEventListener('visibilitychange', clearRect)
   window.removeEventListener('mousedown', startPainting)
@@ -291,6 +292,13 @@ const userScroll = () => {
     updateSelectableConnectionsInViewport()
   }
   scroll()
+}
+const touchMove = (event) => {
+  if (isHoldingStillWhileLocking(event)) {
+    event.preventDefault() // ScrollAndTouchHandler won't pan prevented touches
+    return
+  }
+  userScroll() // android fix
 }
 const scroll = () => {
   updateCirclesWithScroll()
@@ -705,6 +713,13 @@ const startLocking = () => {
     startPaintingCirclesTimer()
   }, lockingPreDuration)
 }
+const isHoldingStillWhileLocking = (event) => {
+  if (!currentUserIsLocking) { return }
+  if (utils.isMultiTouch(event)) { return }
+  const cursor = utils.cursorPositionInViewport(event)
+  const distance = utils.distanceBetweenTwoPoints(startCursor, cursor)
+  return distance < lockingMoveThreshold
+}
 const lockingAnimationFrame = (timestamp) => {
   if (!lockingStartTime) {
     lockingStartTime = timestamp
@@ -723,7 +738,7 @@ const lockingAnimationFrame = (timestamp) => {
     lockingStartTime = undefined
     return
   }
-  if (lockingPercentComplete <= 1) {
+  if (lockingPercentComplete < 1) {
     const minSize = circleRadius
     const percentRemaining = Math.abs(lockingPercentComplete - 1)
     const circleRadiusDelta = initialLockCircleRadius - minSize
@@ -738,7 +753,7 @@ const lockingAnimationFrame = (timestamp) => {
       iteration: 1
     }
     drawCircle(circle, context)
-  } else if (lockingPercentComplete >= 1) {
+  } else {
     globalStore.currentUserIsPaintSelecting = true
     globalStore.currentUserIsPaintSelectingLocked = true
     console.info('🔒 lockingAnimationFrame locked')
