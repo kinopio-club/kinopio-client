@@ -430,6 +430,10 @@ const endListInfoInteractionTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     endListInfoInteraction(event)
   }
+  // prevent ios compat mouse events from blurring the focused name, which hides the onscreen keyboard
+  if (globalStore.listDetailsIsVisibleForListId === props.list.id) {
+    event.preventDefault()
+  }
 }
 
 // connections

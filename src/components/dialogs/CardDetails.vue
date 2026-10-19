@@ -31,6 +31,7 @@ import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import CardDetailsResize from '@/components/CardDetailsResize.vue'
+import { useOnscreenKeyboard } from '@/composables/useOnscreenKeyboard.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -57,6 +58,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
+const { addOnscreenKeyboardListener, removeOnscreenKeyboardListener } = useOnscreenKeyboard(nameElement)
 
 let unsubscribes
 
@@ -99,7 +101,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   unsubscribes()
-  removeOnscreenKeyboardListener()
 })
 
 const state = reactive({
@@ -264,35 +265,6 @@ const scrollIntoViewAndFocus = async () => {
   triggerUpdatePaintSelectCanvasPositionOffset()
 }
 
-// onscreen keyboard
-
-let viewportHeightBeforeKeyboard
-const scrollAboveOnscreenKeyboard = debounce(() => {
-  const viewport = window.visualViewport
-  // ignore resizes from the safari toolbar collapsing before the keyboard is up
-  const keyboardIsVisible = viewport.height < viewportHeightBeforeKeyboard
-  if (!keyboardIsVisible) { return }
-  removeOnscreenKeyboardListener()
-  const element = nameElement.value
-  if (!element) { return }
-  const rect = element.getBoundingClientRect()
-  const visibleBottom = viewport.offsetTop + viewport.height
-  if (rect.bottom <= visibleBottom) { return }
-  const padding = 20
-  window.scrollBy({ top: rect.bottom - visibleBottom + padding, behavior: 'smooth' })
-}, 100) // wait for the keyboard animation to finish resizing the viewport
-const addOnscreenKeyboardListener = () => {
-  if (!window.visualViewport) { return }
-  if (!utils.isMobile()) { return }
-  removeOnscreenKeyboardListener()
-  viewportHeightBeforeKeyboard = window.visualViewport.height
-  window.visualViewport.addEventListener('resize', scrollAboveOnscreenKeyboard)
-}
-const removeOnscreenKeyboardListener = () => {
-  if (!window.visualViewport) { return }
-  scrollAboveOnscreenKeyboard.cancel()
-  window.visualViewport.removeEventListener('resize', scrollAboveOnscreenKeyboard)
-}
 const triggerUpdatePaintSelectCanvasPositionOffset = () => {
   globalStore.triggerUpdatePaintSelectCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()

@@ -195,6 +195,10 @@ const endLineInfoInteractionTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     endLineInfoInteraction(event)
   }
+  // prevent ios compat mouse events from blurring the focused name, which hides the onscreen keyboard
+  if (globalStore.lineDetailsIsVisibleForLineId === props.line.id) {
+    event.preventDefault()
+  }
 }
 
 // touch locking

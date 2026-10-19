@@ -12,6 +12,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import ListActions from '@/components/subsections/ListActions.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import ItemTips from '@/components/dialogs/ItemTips.vue'
+import { useOnscreenKeyboard } from '@/composables/useOnscreenKeyboard.js'
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
@@ -25,6 +26,7 @@ const broadcastStore = useBroadcastStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
+const { addOnscreenKeyboardListener, removeOnscreenKeyboardListener } = useOnscreenKeyboard(nameElement)
 
 const state = reactive({
   colorPickerIsVisible: false,
@@ -49,6 +51,7 @@ watch(() => visible.value, async (value, prevValue) => {
     globalStore.preventMultipleSelectedActionsIsVisible = false
     prevList = currentList.value
   } else {
+    removeOnscreenKeyboardListener()
     globalStore.currentDraggingListId = ''
     globalStore.updateMultipleListsSelectedIds([])
     await nextTick()
@@ -76,19 +79,22 @@ const handleEnterKey = (event) => {
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
-const scrollIntoView = async () => {
+const scrollIntoView = async (behavior) => {
   await nextTick()
   const element = dialogElement.value
   await nextTick()
-  globalStore.scrollElementIntoView({ element })
+  await globalStore.scrollElementIntoView({ element, behavior })
 }
 const scrollIntoViewAndFocus = async () => {
   let behavior
-  if (utils.isIPhone()) {
+  if (utils.isMobile()) {
+    // finish scrolling before focus, so it doesn't fight the ios scroll to the focused field
     behavior = 'auto'
   }
   await nextTick()
-  scrollIntoView(behavior)
+  await scrollIntoView(behavior)
+  // focus within the tap event so that ios shows the onscreen keyboard
+  addOnscreenKeyboardListener()
   focusName()
 }
 

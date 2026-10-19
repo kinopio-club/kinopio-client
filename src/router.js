@@ -236,6 +236,7 @@ const router = {
         const globalStore = useGlobalStore()
         const userStore = useUserStore()
         const themeStore = useThemeStore()
+
         const spaceId = to.params.spaceId
         const collaboratorKey = to.query.collaboratorKey
         const readOnlyKey = to.query.readOnlyKey
