@@ -180,9 +180,9 @@ const touchMove = (event) => {
   if (utils.isMultiTouch(event)) {
     event.preventDefault() // disable native pinch zoom
   }
+  shouldCancelUndo = true // moving fingers isn't a multi-touch tap
   if (!touchGesture) { return }
   event.preventDefault() // disable native swipe scrolling
-  shouldCancelUndo = true
   const prevPosition = touchGesture.position
   const position = touchesCenter(event.touches)
   const delta = {
@@ -275,7 +275,8 @@ const updateTouchGesture = (event) => {
     touchGesture = null
     return
   }
-  const isNewGesture = event.type === 'touchstart' && touches.length === 1
+  // fingers can land together in a single touchstart
+  const isNewGesture = event.type === 'touchstart' && touches.length === event.changedTouches.length
   if (isNewGesture) {
     touchGesture = null
     if (!isTouchGestureFromSpace(event)) { return }
