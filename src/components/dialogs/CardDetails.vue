@@ -251,10 +251,14 @@ const triggerUpdateHeaderAndFooterPosition = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
 const scrollIntoViewAndFocus = async () => {
+  let behavior
+  if (utils.isMobile()) {
+    // finish scrolling before focus, so it doesn't fight the ios scroll to the focused field
+    behavior = 'auto'
+  }
   await nextTick()
-  scrollIntoView()
+  await scrollIntoView(behavior)
   // focus within the tap event so that ios shows the onscreen keyboard
-  await nextTick()
   addOnscreenKeyboardListener()
   focusName()
   triggerUpdatePaintSelectCanvasPositionOffset()
@@ -262,25 +266,31 @@ const scrollIntoViewAndFocus = async () => {
 
 // onscreen keyboard
 
-const scrollAboveOnscreenKeyboard = () => {
+let viewportHeightBeforeKeyboard
+const scrollAboveOnscreenKeyboard = debounce(() => {
+  const viewport = window.visualViewport
+  // ignore resizes from the safari toolbar collapsing before the keyboard is up
+  const keyboardIsVisible = viewport.height < viewportHeightBeforeKeyboard
+  if (!keyboardIsVisible) { return }
   removeOnscreenKeyboardListener()
   const element = nameElement.value
   if (!element) { return }
-  const viewport = window.visualViewport
   const rect = element.getBoundingClientRect()
   const visibleBottom = viewport.offsetTop + viewport.height
   if (rect.bottom <= visibleBottom) { return }
   const padding = 20
   window.scrollBy({ top: rect.bottom - visibleBottom + padding, behavior: 'smooth' })
-}
+}, 100) // wait for the keyboard animation to finish resizing the viewport
 const addOnscreenKeyboardListener = () => {
   if (!window.visualViewport) { return }
   if (!utils.isMobile()) { return }
   removeOnscreenKeyboardListener()
+  viewportHeightBeforeKeyboard = window.visualViewport.height
   window.visualViewport.addEventListener('resize', scrollAboveOnscreenKeyboard)
 }
 const removeOnscreenKeyboardListener = () => {
   if (!window.visualViewport) { return }
+  scrollAboveOnscreenKeyboard.cancel()
   window.visualViewport.removeEventListener('resize', scrollAboveOnscreenKeyboard)
 }
 const triggerUpdatePaintSelectCanvasPositionOffset = () => {
@@ -387,7 +397,7 @@ const scrollIntoView = async (behavior) => {
   await nextTick()
   await nextTick()
   const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element, behavior })
+  await globalStore.scrollElementIntoView({ element, behavior })
 }
 const showCard = async (cardId) => {
   await nextTick()

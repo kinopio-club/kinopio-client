@@ -722,7 +722,7 @@ export const useGlobalStore = defineStore('global', {
       this.viewportHeight = Math.round(viewport.height)
     },
 
-    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter, positionIsTop }) {
+    async scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter, positionIsTop }) {
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const smallCardCharacterLimit = 300
@@ -748,12 +748,11 @@ export const useGlobalStore = defineStore('global', {
         this.pageHeight += rect.height
       }
       // scroll page
-      nextTick(() => {
-        element.scrollIntoView({
-          behavior,
-          block: vertical,
-          inline: horizontal
-        })
+      await nextTick()
+      element.scrollIntoView({
+        behavior,
+        block: vertical,
+        inline: horizontal
       })
     },
 
