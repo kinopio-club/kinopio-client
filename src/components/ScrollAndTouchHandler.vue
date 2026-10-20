@@ -220,7 +220,7 @@ const touchEnd = (event) => {
   checkIfShouldStartMomentum(event)
   updateTouchGesture(event)
   if (!isSpacePage.value) { return }
-  globalStore.isPinchZooming = false
+  endPinchZoom()
   if (shouldCancelUndo) {
     shouldCancelUndo = false
     multiTouchAction = ''
@@ -237,7 +237,7 @@ const touchEnd = (event) => {
   multiTouchAction = null
 }
 const touchCancel = (event) => {
-  globalStore.isPinchZooming = false
+  endPinchZoom()
   globalStore.isTouchScrolling = false
   multiTouchAction = null
   updateTouchGesture(event)
@@ -329,6 +329,12 @@ const pinchZoomSpace = (event, prevPosition, position) => {
   // zoom around the previous touches center, and move it to follow the current one
   // panning in the same step lets it grow the outside space, where scrollBy would clamp at 0
   globalStore.zoomSpaceTo({ percent, origin: prevPosition, target: position })
+}
+
+const endPinchZoom = () => {
+  if (!globalStore.isPinchZooming) { return }
+  globalStore.isPinchZooming = false
+  globalStore.updateSpacePositionAfterPinch()
 }
 
 // momentum, after panning

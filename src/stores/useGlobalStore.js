@@ -2312,6 +2312,48 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
+    // position: the page scroll the space would need without an outside space offset, negative when the space is moved away from the top left
+    async updateSpacePosition (position) {
+      const canHaveOutsideSpace = this.spaceZoomPercent < consts.spaceZoom.default
+      const offset = {}
+      const scroll = {}
+      const axes = ['x', 'y']
+      axes.forEach(axis => {
+        // scroll can't be negative, so the outside space offset makes up the rest
+        if (position[axis] < 0 && canHaveOutsideSpace) {
+          offset[axis] = -position[axis]
+          scroll[axis] = 0
+        } else {
+          offset[axis] = 0
+          scroll[axis] = Math.max(position[axis], 0)
+        }
+      })
+      this.spaceZoomOffset = offset
+      // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
+      await nextTick()
+      window.scrollTo(scroll.x, scroll.y)
+      // the browser rounds scroll to the pixel grid, so shift the space by the remainder to keep it exactly in place
+      // otherwise slow zooming jitters by a pixel, and the rounding adds up into drift
+      const remainder = {
+        x: window.scrollX - scroll.x,
+        y: window.scrollY - scroll.y
+      }
+      const isRounding = Math.abs(remainder.x) < 1 && Math.abs(remainder.y) < 1
+      if (!isRounding) { return }
+      this.spaceZoomOffset = {
+        x: offset.x + remainder.x,
+        y: offset.y + remainder.y
+      }
+    },
+    // after pinching, move the space from the offset back into page scroll
+    updateSpacePositionAfterPinch () {
+      const offset = this.spaceZoomOffset
+      const position = {
+        x: window.scrollX - offset.x,
+        y: window.scrollY - offset.y
+      }
+      return this.updateSpacePosition(position)
+    },
     // target: where the space point under origin should end up, for panning while pinching. defaults to origin
     async zoomSpaceTo ({ percent, origin, target }) {
       percent = Math.max(percent, consts.spaceZoom.min)
@@ -2329,49 +2371,20 @@ export const useGlobalStore = defineStore('global', {
         x: (window.scrollX + origin.x - offset.x) / prevZoom,
         y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
-      // the scroll that puts point under the target
-      // when it would be negative, grow the outside space offset instead, so the space shifts away from the top left
-      // when it is positive, shrink the offset back down first
-      const newOffset = { x: offset.x, y: offset.y }
-      const scroll = {
-        x: (point.x * zoom) + offset.x - target.x,
-        y: (point.y * zoom) + offset.y - target.y
-      }
-      const axes = ['x', 'y']
-      axes.forEach(axis => {
-        if (scroll[axis] < 0) {
-          newOffset[axis] = offset[axis] - scroll[axis]
-          scroll[axis] = 0
-        } else {
-          const delta = Math.min(offset[axis], scroll[axis])
-          newOffset[axis] = offset[axis] - delta
-          scroll[axis] = scroll[axis] - delta
-        }
-      })
-      // at >100% there should be no outside space margin
-      if (percent >= consts.spaceZoom.default) {
-        axes.forEach(axis => {
-          scroll[axis] = Math.max(scroll[axis] - newOffset[axis], 0)
-          newOffset[axis] = 0
-        })
+      const position = {
+        x: (point.x * zoom) - target.x,
+        y: (point.y * zoom) - target.y
       }
       this.spaceZoomPercent = percent
-      this.spaceZoomOffset = newOffset
-      // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
-      await nextTick()
-      window.scrollTo(scroll.x, scroll.y)
-      // the browser rounds scroll to the pixel grid, so shift the space by the remainder to keep point exactly under the target
-      // otherwise slow zooming jitters by a pixel, and the rounding adds up into drift
-      const remainder = {
-        x: window.scrollX - scroll.x,
-        y: window.scrollY - scroll.y
+      // while pinching, ios safari reverts scrollTo calls made during the touch, so only move the space with its offset
+      if (this.isPinchZooming) {
+        this.spaceZoomOffset = {
+          x: window.scrollX - position.x,
+          y: window.scrollY - position.y
+        }
+        return
       }
-      const isRounding = Math.abs(remainder.x) < 1 && Math.abs(remainder.y) < 1
-      if (!isRounding) { return }
-      this.spaceZoomOffset = {
-        x: newOffset.x + remainder.x,
-        y: newOffset.y + remainder.y
-      }
+      await this.updateSpacePosition(position)
     },
     zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
       this.closeAllDialogs()
