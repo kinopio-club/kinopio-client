@@ -17,7 +17,9 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let sessionQueue = []
-let sendingQueuePromise = null
+let sendingQueuePromise = Promise.resolve()
+const nonCriticalOperationErrorStatusCodes = [400, 401, 404]
+const maxOperationRetryCount = 3
 const cardNameUpdatedAtByCardId = {}
 const sendQueueDebounced = debounce((apiStore) => apiStore.sendQueueNow(), 500)
 
@@ -45,6 +47,67 @@ const mergeOperationBody = (prev, next) => {
     merged.nameUpdatedAt = prev.nameUpdatedAt
   }
   return merged
+}
+
+// try to to merge new item into matching prev one
+const addItemToQueue = (queue, newItem) => {
+  const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+  const shouldNotMergeOperations = ['createList', 'createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
+  let isPrevItem
+  const newQueue = queue.map(prevItem => {
+    const isOperationName = prevItem.name === newItem.name
+    const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
+    const isItemId = prevItem.body.id === newItem.body.id
+    const shouldIncrement = isOperationName && isOperationDelta
+    const shouldMerge = isOperationName && isItemId && !shouldNotMergeOperations.includes(newItem.name)
+    if (shouldIncrement) {
+      newItem.body.delta = newItem.body.delta + prevItem.body.delta
+      isPrevItem = true
+      return newItem
+    } else if (shouldMerge) {
+      isPrevItem = true
+      newItem.body = mergeOperationBody(prevItem.body, newItem.body) // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } → { a: 1, b: 3, c:2 }
+      return newItem
+    } else {
+      return prevItem
+    }
+  })
+  // if no matching prev item, add new item to the queue
+  if (!isPrevItem) {
+    newQueue.push(newItem)
+  }
+  return newQueue
+}
+
+// put operations that failed to send back at the front of the queue, ahead of operations added while sending
+const requeueOperations = async (operations) => {
+  let queue = operations
+  sessionQueue.forEach(item => {
+    queue = addItemToQueue(queue, item)
+  })
+  sessionQueue = queue
+  await cache.saveQueue(sessionQueue)
+  await cache.saveQueueBackup(sessionQueue)
+  console.warn('🛫 requeued operations', operations)
+}
+
+const filterOperationsWithinRetryCount = (operations) => {
+  return operations.filter(operation => {
+    operation.retryCount = operation.retryCount || 0
+    operation.retryCount += 1
+    const isWithinRetryCount = operation.retryCount <= maxOperationRetryCount
+    if (!isWithinRetryCount) {
+      console.error('🚒 operation exceeded retry count, it will not be sent again', operation)
+    }
+    return isWithinRetryCount
+  })
+}
+
+const isNonCriticalOperationError = (error) => {
+  if (nonCriticalOperationErrorStatusCodes.includes(error.status)) { return true }
+  // sequelize validation errors, like a unique violation from re-sending an operation that was already saved, nest their status
+  const nestedStatus = error.errors?.[0]?.status
+  return nonCriticalOperationErrorStatusCodes.includes(nestedStatus)
 }
 
 // checks that body name is most recent nameUpdatedAt across queues
@@ -179,26 +242,66 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+    // returns the operations to send again
     async handleServerOperationsError ({ error, response, queue }) {
       const globalStore = useGlobalStore()
-      if (!response) {
+      // network error or server unavailable, send all operations again
+      if (!response || response.status >= 500) {
         console.error('🚒 handleServerOperationsError', error, response, queue)
-        globalStore.updateNotifyServerCouldNotSave(true)
-        return
+        const isNetworkError = error instanceof TypeError
+        let isServerOnline = true
+        // confirm that the server is unreachable before switching to offline mode
+        if (isNetworkError) {
+          isServerOnline = await this.getStatus()
+        }
+        if (isServerOnline) {
+          globalStore.updateNotifyServerCouldNotSave(true)
+        } else {
+          globalStore.updateIsOnline(false)
+        }
+        return queue
       }
-      const data = await response.json()
+      let data = {}
+      try {
+        data = await response.json()
+      } catch (error) {
+        console.error('🚒 handleServerOperationsError response', error, response)
+      }
       console.warn('🚑 serverOperationsError', data)
-      const { operations, errors } = data
-      const nonCriticalErrorStatusCodes = [400, 401, 404]
+      // other request errors, like an invalid or too large request, won't succeed if sent again
+      if (response.status !== 422) {
+        globalStore.updateNotifyServerCouldNotSave(true)
+        return []
+      }
+      // unexpected error before operations were processed
+      const { errors } = data
+      if (!errors) {
+        globalStore.updateNotifyServerCouldNotSave(true)
+        return filterOperationsWithinRetryCount(queue)
+      }
+      const createdSpaceIds = queue.filter(operation => operation.name === 'createSpace').map(operation => operation.body.id)
+      const retryOperationIds = []
       errors.forEach(error => {
-        const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
+        const operation = queue.find(operation => operation.body.operationId === error.operationId)
+        const isCritical = !isNonCriticalOperationError(error)
+        // operations in a space created in the same request can fail if the space isn't ready yet
+        let isInCreatedSpace
+        if (operation && operation.name !== 'createSpace') {
+          const isUnauthorizedOrNotFound = [401, 404].includes(error.status)
+          isInCreatedSpace = isUnauthorizedOrNotFound && createdSpaceIds.includes(operation.body.spaceId)
+        }
         if (isCritical) {
           console.error('🚒 critical serverOperationsError operation', error)
           globalStore.updateNotifyServerCouldNotSave(true)
         } else {
           console.warn('🚑 non-critical serverOperationsError operation', error)
         }
+        if (isCritical || isInCreatedSpace) {
+          retryOperationIds.push(error.operationId)
+        }
       })
+      const retryOperations = queue.filter(operation => retryOperationIds.includes(operation.body.operationId))
+      return filterOperationsWithinRetryCount(retryOperations)
     },
 
     // Add and Send Queue Operations
@@ -207,13 +310,15 @@ export const useApiStore = defineStore('api', {
       sendQueueDebounced(this)
     },
     async flushQueue () {
-      // send queued operations now, and wait for any that are already sending
+      // send queued operations now, after any that are already sending
       sendQueueDebounced.cancel()
-      await sendingQueuePromise
       await this.sendQueueNow()
     },
     async sendQueueNow () {
-      sendingQueuePromise = this.sendQueueOperations()
+      // send one request at a time, so that requeued operations are sent before newer ones
+      sendingQueuePromise = sendingQueuePromise
+        .catch(error => console.error('🚒 sendQueueNow', error))
+        .then(() => this.sendQueueOperations())
       await sendingQueuePromise
     },
     async sendQueueOperations () {
@@ -226,6 +331,10 @@ export const useApiStore = defineStore('api', {
       const queue = utils.clone(sessionQueue)
       await cache.saveQueue(queue)
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
+      if (!spaceStore.id) {
+        console.warn('🚑 sendQueue: operation missing spaceId', queue)
+        return
+      }
       // empty queue into sendingQueue
       globalStore.sendingQueue = queue
       // clear queue before sending
@@ -233,10 +342,10 @@ export const useApiStore = defineStore('api', {
       cache.clearQueue()
       // send
       let response
+      let retryQueue = []
       try {
         const requestId = nanoid()
         console.warn('🛫 sending operations', queue, `●requestId=${requestId}`)
-        if (!spaceStore.id) { throw 'operation missing spaceId' }
         const options = await this.requestOptions({ body: queue, method: 'POST', requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
@@ -250,11 +359,15 @@ export const useApiStore = defineStore('api', {
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)
-        this.handleServerOperationsError({ error, response, queue })
-      } finally {
-        globalStore.clearSendingQueue()
-        cache.clearQueueBackup()
+        retryQueue = await this.handleServerOperationsError({ error, response, queue })
       }
+      if (retryQueue.length) {
+        await requeueOperations(retryQueue)
+      } else {
+        // remove sent operations from backup, keeping operations added while sending
+        await cache.saveQueueBackup(sessionQueue)
+      }
+      globalStore.clearSendingQueue()
       // join broadcast for newly created space
       const isCurrentSpaceCreated = queue.some(operation => operation.name === 'createSpace' && operation.body.id === spaceStore.id)
       if (response && isCurrentSpaceCreated) {
@@ -262,9 +375,17 @@ export const useApiStore = defineStore('api', {
       }
     },
 
+    getQueuedCreateSpaceIds () {
+      const globalStore = useGlobalStore()
+      const queue = globalStore.sendingQueue.concat(sessionQueue)
+      const operations = queue.filter(operation => operation.name === 'createSpace')
+      return operations.map(operation => operation.body.id)
+    },
+
     async addToQueue ({ name, body, spaceId, allowNonMember }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const globalStore = useGlobalStore()
       if (!allowNonMember && !userStore.getUserCanEditSpace) { return }
       body = utils.clone(body)
       body.operationId = nanoid()
@@ -278,34 +399,10 @@ export const useApiStore = defineStore('api', {
         name,
         body
       }
-      // try to to merge new item into matching prev one
-      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
-      const shouldNotMergeOperations = ['createList', 'createCard', 'createBox', 'createConnection', 'createDrawingStroke', 'removeDrawingStroke', 'createUserNotification']
-      let isPrevItem
-      const newQueue = sessionQueue.map(prevItem => {
-        const isOperationName = prevItem.name === newItem.name
-        const isOperationDelta = cumulativeDeltaOperations.includes(newItem.name)
-        const isItemId = prevItem.body.id === newItem.body.id
-        const shouldIncrement = isOperationName && isOperationDelta
-        const shouldMerge = isOperationName && isItemId && !shouldNotMergeOperations.includes(newItem.name)
-        if (shouldIncrement) {
-          newItem.body.delta = newItem.body.delta + prevItem.body.delta
-          isPrevItem = true
-          return newItem
-        } else if (shouldMerge) {
-          isPrevItem = true
-          newItem.body = mergeOperationBody(prevItem.body, newItem.body) // { a: 1, b: 2 }, { a: 1, b: 3, c:2 } → { a: 1, b: 3, c:2 }
-          return newItem
-        } else {
-          return prevItem
-        }
-      })
-      // if no matching prev item, add new item to the queue
-      if (!isPrevItem) {
-        newQueue.push(newItem)
-      }
-      sessionQueue = newQueue
-      cache.saveQueueBackup(sessionQueue)
+      sessionQueue = addItemToQueue(sessionQueue, newItem)
+      // backup includes operations that are sending, in case they fail
+      const sendingQueue = utils.clone(globalStore.sendingQueue)
+      cache.saveQueueBackup(sendingQueue.concat(sessionQueue))
       // send to API after debounce period
       this.sendQueue()
     },

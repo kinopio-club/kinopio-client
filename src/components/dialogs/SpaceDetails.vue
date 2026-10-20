@@ -339,8 +339,14 @@ const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const isOffline = computed(() => !globalStore.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
+  state.isLoadingRemoteSpaces = true
+  // send queued operations first, so that spaces created offline are saved remotely
+  await apiStore.flushQueue()
+  if (isOffline.value) {
+    state.isLoadingRemoteSpaces = false
+    return
+  }
   try {
-    state.isLoadingRemoteSpaces = true
     const [userSpaces, groupSpaces] = await Promise.all([
       apiStore.getUserSpaces(),
       apiStore.getUserGroupSpaces()
@@ -379,8 +385,10 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
         await cache.saveSpace(remoteSpace)
       }
     }
-    // update removed spaces
+    // update removed spaces, except spaces that are queued to be created
+    const queuedCreateSpaceIds = apiStore.getQueuedCreateSpaceIds()
     for (const cacheSpaceId of cacheSpaceIds) {
+      if (queuedCreateSpaceIds.includes(cacheSpaceId)) { continue }
       await cache.removeSpace({ id: cacheSpaceId })
     }
   } catch (error) {
