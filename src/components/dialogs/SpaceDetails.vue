@@ -339,14 +339,14 @@ const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const isOffline = computed(() => !globalStore.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
-  state.isLoadingRemoteSpaces = true
-  // send queued operations first, so that spaces created offline are saved remotely
-  await apiStore.flushQueue()
-  if (isOffline.value) {
-    state.isLoadingRemoteSpaces = false
-    return
-  }
   try {
+    state.isLoadingRemoteSpaces = true
+    // send queued operations first, so that spaces created offline are saved remotely
+    await apiStore.flushQueue()
+    if (isOffline.value) {
+      state.isLoadingRemoteSpaces = false
+      return
+    }
     const [userSpaces, groupSpaces] = await Promise.all([
       apiStore.getUserSpaces(),
       apiStore.getUserGroupSpaces()
