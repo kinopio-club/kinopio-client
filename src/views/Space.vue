@@ -89,6 +89,7 @@ let unsubscribes
 let prevCursor, endCursor, endSpaceCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 let statusRetryCount = 0
+let statusRetryTimer
 const minimapPanningDelay = 200 // ms
 let minimapPanningTimer
 
@@ -1102,8 +1103,16 @@ const updateServerIsOnline = async () => {
     delay = Math.pow(2, statusRetryCount) * initialDelay
   }
   delay = delay || 15 * 60 * 1000 // 15 minutes
-  setTimeout(updateServerIsOnline, delay)
+  clearTimeout(statusRetryTimer)
+  statusRetryTimer = setTimeout(updateServerIsOnline, delay)
 }
+// check again soon after going offline, like when sending operations fails
+watch(() => globalStore.isOnline, (value, prevValue) => {
+  if (value || !prevValue) { return }
+  statusRetryCount = 0
+  clearTimeout(statusRetryTimer)
+  statusRetryTimer = setTimeout(updateServerIsOnline, 1000)
+})
 
 // theme
 

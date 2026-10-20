@@ -1907,6 +1907,7 @@ export const useGlobalStore = defineStore('global', {
 
     updateIsOnline (isOnline) {
       utils.typeCheck({ value: isOnline, type: 'boolean' })
+      const apiStore = useApiStore()
       const prevIsOnline = this.isOnline
       const reconnected = isOnline && !prevIsOnline
       const disconnected = !isOnline && prevIsOnline
@@ -1919,6 +1920,10 @@ export const useGlobalStore = defineStore('global', {
         // this.addNotification({ icon: 'offline', message: 'Offline mode', type: 'info' })
       }
       this.isOnline = isOnline
+      // send operations queued while offline
+      if (reconnected) {
+        apiStore.flushQueue()
+      }
     },
     async updateCurrentSpaceIsUnavailableOffline (spaceId) {
       const spaceStore = useSpaceStore()
