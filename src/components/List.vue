@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, watch, ref, nextTick } from 'vue'
+import { reactive, computed, watch, ref } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useListStore } from '@/stores/useListStore'
@@ -10,6 +10,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { useViewportObserver } from '@/composables/useViewportObserver.js'
 
 import Frames from '@/components/Frames.vue'
 import utils from '@/utils.js'
@@ -40,24 +41,12 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
-let observer
-
 const listElement = ref(null)
 
-onMounted(() => {
-  initViewportObserver()
-})
-onUpdated(() => {
-  initViewportObserver()
-})
-onBeforeUnmount(() => {
-  removeViewportObserver()
-})
 useStoreAction(globalStore, {
   clearDraggingItems: () => { state.isDraggingCardOverList = false },
   updateRemoteCurrentConnection: () => updateRemoteConnections(),
-  removeRemoteCurrentConnection: () => updateRemoteConnections(),
-  triggerUpdateViewportObservers: () => initViewportObserver()
+  removeRemoteCurrentConnection: () => updateRemoteConnections()
 })
 
 const props = defineProps({
@@ -81,36 +70,13 @@ const userColor = computed(() => userStore.color)
 
 // is visible in viewport, perf, should render
 
-const initViewportObserver = async () => {
-  removeViewportObserver()
-  await nextTick()
-  try {
-    const callback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const isNewlyVisible = !state.isVisibleInViewport
-          state.isVisibleInViewport = true
-          if (isNewlyVisible) {
-            listStore.updateListDimensions(props.list)
-          }
-        } else {
-          state.isVisibleInViewport = false
-        }
-      })
-    }
-    const target = listElement.value
-    if (!target) { return }
-    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
-    observer.observe(target)
-  } catch (error) {
-    console.error('🚒 listElement initViewportObserver', error)
+useViewportObserver('lists', listElement, (isIntersecting) => {
+  const isNewlyVisible = isIntersecting && !state.isVisibleInViewport
+  state.isVisibleInViewport = isIntersecting
+  if (isNewlyVisible) {
+    listStore.updateListDimensions(props.list)
   }
-}
-const removeViewportObserver = () => {
-  if (!observer) { return }
-  observer.disconnect()
-  observer = null
-}
+})
 const updateShouldRenderParent = (value) => {
   state.shouldRenderParent = value
 }

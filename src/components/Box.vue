@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onUnmounted, watch, ref } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { useViewportObserver } from '@/composables/useViewportObserver.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -39,25 +40,13 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
-let observer
-
 let prevSelectedBox
 
 const boxElement = ref(null)
 
-onMounted(() => {
-  initViewportObserver()
-})
-onUpdated(() => {
-  initViewportObserver()
-})
-onBeforeUnmount(() => {
-  removeViewportObserver()
-})
 useStoreAction(globalStore, {
   updateRemoteCurrentConnection: () => updateRemoteConnections(),
-  removeRemoteCurrentConnection: () => updateRemoteConnections(),
-  triggerUpdateViewportObservers: () => initViewportObserver()
+  removeRemoteCurrentConnection: () => updateRemoteConnections()
 })
 
 const props = defineProps({
@@ -134,32 +123,9 @@ const shouldRender = computed(() => {
 
 // is visible in viewport
 
-const initViewportObserver = async () => {
-  removeViewportObserver()
-  await nextTick()
-  try {
-    const callback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          state.isVisibleInViewport = true
-        } else {
-          state.isVisibleInViewport = false
-        }
-      })
-    }
-    const target = boxElement.value
-    if (!target) { return }
-    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
-    observer.observe(target)
-  } catch (error) {
-    console.error('🚒 boxElement initViewportObserver', error)
-  }
-}
-const removeViewportObserver = () => {
-  if (!observer) { return }
-  observer.disconnect()
-  observer = null
-}
+useViewportObserver('boxes', boxElement, (isIntersecting) => {
+  state.isVisibleInViewport = isIntersecting
+})
 
 // styles
 
