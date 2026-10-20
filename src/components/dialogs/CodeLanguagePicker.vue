@@ -105,7 +105,6 @@ const languageColorStyle = (language) => {
 
 const styles = computed(() => {
   // adapted from card details
-  // rendered outside #space, and position is already in page coords
   const left = `${position.value.x}px`
   const top = `${position.value.y}px`
   const maxHeight = `${state.dialogHeight}px`

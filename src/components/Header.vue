@@ -566,7 +566,7 @@ const updatePositionFrame = () => {
 const updatePositionInVisualViewport = () => {
   const viewport = utils.visualViewport()
   const top = Math.round(viewport.offsetTop)
-  const transform = `translate(0px, ${top}px)`
+  const transform = `translateY(${top}px)`
   if (state.position.transform === transform) { return }
   state.position = { transform }
 }

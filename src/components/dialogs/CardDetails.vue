@@ -254,12 +254,10 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 const scrollIntoViewAndFocus = async () => {
   let behavior
   if (utils.isMobile()) {
-    // finish scrolling before focus, so it doesn't fight the ios scroll to the focused field
     behavior = 'auto'
   }
   await nextTick()
   await scrollIntoView(behavior)
-  // focus within the tap event so that ios shows the onscreen keyboard
   addOnscreenKeyboardListener()
   focusName()
   triggerUpdatePaintSelectCanvasPositionOffset()

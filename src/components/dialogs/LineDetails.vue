@@ -71,12 +71,10 @@ const scrollIntoView = async (behavior) => {
 const scrollIntoViewAndFocus = async () => {
   let behavior
   if (utils.isMobile()) {
-    // finish scrolling before focus, so it doesn't fight the ios scroll to the focused field
     behavior = 'auto'
   }
   await nextTick()
   await scrollIntoView(behavior)
-  // focus within the tap event so that ios shows the onscreen keyboard
   addOnscreenKeyboardListener()
   focusName()
 }
@@ -84,7 +82,6 @@ const scrollIntoViewAndFocus = async () => {
 // styles
 
 const styles = computed(() => {
-  // lines span the space width, so they have no x
   const position = globalStore.getSpacePositionInPage({ x: 0, y: currentLine.value.y })
   return {
     left: `${position.x + 8}px`,
