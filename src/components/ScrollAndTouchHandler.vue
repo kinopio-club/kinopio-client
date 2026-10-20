@@ -197,7 +197,7 @@ const touchMove = (event) => {
     return
   }
   if (utils.isMultiTouch(event)) {
-    pinchZoomSpace(event, prevPosition, delta)
+    pinchZoomSpace(event, prevPosition, position)
   } else {
     panSpace(delta, elapsedTime)
   }
@@ -319,16 +319,16 @@ const panSpace = (delta, elapsedTime) => {
 
 // pinch zoom
 
-const pinchZoomSpace = async (event, prevPosition, delta) => {
+const pinchZoomSpace = (event, prevPosition, position) => {
   if (!globalStore.isPinchZooming) {
     globalStore.isPinchZooming = true
     globalStore.closeAllDialogs()
   }
   const scale = touchesDistance(event.touches) / touchGesture.distance
   const percent = Math.round(touchGesture.zoomPercent * scale * 10) / 10
-  // zoom around the previous touches center, then pan to follow the current one
-  await globalStore.zoomSpaceTo({ percent, origin: prevPosition })
-  window.scrollBy({ left: delta.x, top: delta.y, behavior: 'instant' })
+  // zoom around the previous touches center, and move it to follow the current one
+  // panning in the same step lets it grow the outside space, where scrollBy would clamp at 0
+  globalStore.zoomSpaceTo({ percent, origin: prevPosition, target: position })
 }
 
 // momentum, after panning

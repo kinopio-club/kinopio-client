@@ -2312,27 +2312,30 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    async zoomSpaceTo ({ percent, origin }) {
+    // target: where the space point under origin should end up, for panning while pinching. defaults to origin
+    async zoomSpaceTo ({ percent, origin, target }) {
       percent = Math.max(percent, consts.spaceZoom.min)
       percent = Math.min(percent, consts.spaceZoom.max)
       const prevZoom = this.getSpaceZoomDecimal
       const zoom = percent / 100
-      if (zoom === prevZoom) { return }
       const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
       origin = origin || viewportCenter
+      target = target || origin
+      const isPanning = target.x !== origin.x || target.y !== origin.y
+      if (zoom === prevZoom && !isPanning) { return }
       const offset = this.spaceZoomOffset
       // space point currently under the origin
       const point = {
         x: (window.scrollX + origin.x - offset.x) / prevZoom,
         y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
-      // the scroll that keeps point under the origin
+      // the scroll that puts point under the target
       // when it would be negative, grow the outside space offset instead, so the space shifts away from the top left
       // when it is positive, shrink the offset back down first
       const newOffset = { x: offset.x, y: offset.y }
       const scroll = {
-        x: (point.x * zoom) + offset.x - origin.x,
-        y: (point.y * zoom) + offset.y - origin.y
+        x: (point.x * zoom) + offset.x - target.x,
+        y: (point.y * zoom) + offset.y - target.y
       }
       const axes = ['x', 'y']
       axes.forEach(axis => {
@@ -2357,6 +2360,18 @@ export const useGlobalStore = defineStore('global', {
       // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
       await nextTick()
       window.scrollTo(scroll.x, scroll.y)
+      // the browser rounds scroll to the pixel grid, so shift the space by the remainder to keep point exactly under the target
+      // otherwise slow zooming jitters by a pixel, and the rounding adds up into drift
+      const remainder = {
+        x: window.scrollX - scroll.x,
+        y: window.scrollY - scroll.y
+      }
+      const isRounding = Math.abs(remainder.x) < 1 && Math.abs(remainder.y) < 1
+      if (!isRounding) { return }
+      this.spaceZoomOffset = {
+        x: newOffset.x + remainder.x,
+        y: newOffset.y + remainder.y
+      }
     },
     zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
       this.closeAllDialogs()
