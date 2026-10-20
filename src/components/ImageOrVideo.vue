@@ -15,7 +15,7 @@ const imageElement = ref(null)
 let pausedCanvas
 
 onMounted(() => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
   window.addEventListener('focus', updateIsPlaying)
@@ -55,7 +55,9 @@ const props = defineProps({
 
 const state = reactive({
   imageUrl: null,
-  imageProxySrcSet: null
+  imageProxySrcSet: null,
+  pendingImageIsDownscaled: false,
+  imageIsDownscaled: false
 })
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
@@ -66,7 +68,7 @@ watch(() => props.image, (url) => {
     state.imageProxySrcSet = null
   }
   const onLoaded = () => {
-    state.imageUrl = imgproxyUrl(url, props.width, props.height)
+    updateImageUrl(url)
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
@@ -79,13 +81,14 @@ watch(() => props.image, (url) => {
 watch(() => props.pendingUploadDataUrl, (url) => {
   if (url) {
     state.imageUrl = url
+    state.pendingImageIsDownscaled = false
   }
 })
 watch(() => props.width, (width) => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
 })
 watch(() => props.height, (height) => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
 })
 watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
   if (value) { return }
@@ -269,21 +272,33 @@ const removeCanvasSelectedClass = () => {
 
 // serve smaller images w imgproxy
 
-const imgproxyUrl = (imageUrl, width, height) => {
+const imgproxyUrl = (imageUrl, width, height, zoomLevel = globalStore.getMediaZoomLevel) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
   // images are drawn smaller when the space is zoomed out, so load smaller ones
-  const maxDimensions = Math.max(width || 0, height || 0) * globalStore.getMediaZoomLevel
+  const maxDimensions = Math.max(width || 0, height || 0) * zoomLevel
   return utils.imgproxyBreakpointUrl(imageUrl, maxDimensions)
+}
+const updateImageUrl = (imageUrl) => {
+  const url = imgproxyUrl(imageUrl, props.width, props.height)
+  state.imageUrl = url
+  // applied once it loads, because the previous image stays drawn until then
+  state.pendingImageIsDownscaled = url !== imgproxyUrl(imageUrl, props.width, props.height, 1)
 }
 const mediaZoomLevel = computed(() => globalStore.getMediaZoomLevel)
 const updateImageUrlForZoom = () => {
   if (!props.image) { return }
   if (globalStore.isPinchZooming) { return }
   // the previous image stays drawn until the new src loads, and offscreen lazy images aren't fetched
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
 }
+// a downscaled image would lay out smaller than at full zoom, so keep it at the card's saved width
+const imageStyles = computed(() => {
+  if (!state.imageIsDownscaled) { return }
+  if (!props.width) { return }
+  return { width: `${props.width}px` }
+})
 watch(() => mediaZoomLevel.value, updateImageUrlForZoom)
 watch(() => globalStore.isPinchZooming, updateImageUrlForZoom)
 
@@ -291,6 +306,12 @@ watch(() => globalStore.isPinchZooming, updateImageUrlForZoom)
 
 const handleSuccess = (event) => {
   emit('loadSuccess')
+}
+const handleImageLoad = (event) => {
+  state.imageIsDownscaled = state.pendingImageIsDownscaled
+  // the card's dimensions come from the full size image
+  if (state.imageIsDownscaled) { return }
+  handleSuccess(event)
 }
 const handleError = (event) => {
 }
@@ -306,7 +327,8 @@ img.image(
   ref="imageElement"
   :src="state.imageUrl"
   :class="{selected: isSelectedOrDragging}"
-  @load="handleSuccess"
+  :style="imageStyles"
+  @load="handleImageLoad"
   @error="handleError"
   :loading="lazyLoading"
 )
