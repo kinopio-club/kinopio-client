@@ -1920,9 +1920,9 @@ export const useGlobalStore = defineStore('global', {
         // this.addNotification({ icon: 'offline', message: 'Offline mode', type: 'info' })
       }
       this.isOnline = isOnline
-      // send operations queued while offline
+      // send operations queued while offline, unless waiting to retry a failed send
       if (reconnected) {
-        apiStore.flushQueue()
+        apiStore.sendQueueNow()
       }
     },
     async updateCurrentSpaceIsUnavailableOffline (spaceId) {

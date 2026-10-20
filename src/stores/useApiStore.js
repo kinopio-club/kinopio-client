@@ -20,6 +20,10 @@ let sessionQueue = []
 let sendingQueuePromise = Promise.resolve()
 const nonCriticalOperationErrorStatusCodes = [400, 401, 404]
 const maxOperationRetryCount = 3
+const maxSendQueueRetryDelay = 5 * 60 * 1000 // 5 minutes
+let sendQueueFailureCount = 0
+let sendQueueRetryAt = 0
+let sendQueueRetryTimer
 const cardNameUpdatedAtByCardId = {}
 const sendQueueDebounced = debounce((apiStore) => apiStore.sendQueueNow(), 500)
 
@@ -89,6 +93,33 @@ const requeueOperations = async (operations) => {
   await cache.saveQueue(sessionQueue)
   await cache.saveQueueBackup(sessionQueue)
   console.warn('🛫 requeued operations', operations)
+}
+
+// Retry-After header seconds, from rate limited responses
+const retryAfterDelay = (response) => {
+  if (!response) { return 0 }
+  const seconds = parseInt(response.headers?.get('Retry-After'))
+  if (!seconds) { return 0 }
+  return Math.min(seconds * 1000, maxSendQueueRetryDelay)
+}
+
+// wait longer after each failed send, so that failing requests don't overload the server
+const updateSendQueueRetryDelay = (apiStore, response) => {
+  sendQueueFailureCount += 1
+  let delay = Math.pow(2, sendQueueFailureCount) * 1000
+  delay = Math.min(delay, maxSendQueueRetryDelay)
+  // random jitter, so that clients don't all retry at the same time
+  delay = (delay / 2) + (Math.random() * delay / 2)
+  delay = Math.max(delay, retryAfterDelay(response))
+  sendQueueRetryAt = Date.now() + delay
+  clearTimeout(sendQueueRetryTimer)
+  sendQueueRetryTimer = setTimeout(() => apiStore.sendQueueNow({ shouldIgnoreRetryDelay: true }), delay)
+  console.warn('🛫 retry sending operations in', Math.round(delay / 1000), 's')
+}
+const resetSendQueueRetryDelay = () => {
+  sendQueueFailureCount = 0
+  sendQueueRetryAt = 0
+  clearTimeout(sendQueueRetryTimer)
 }
 
 const filterOperationsWithinRetryCount = (operations) => {
@@ -245,6 +276,11 @@ export const useApiStore = defineStore('api', {
     // returns the operations to send again
     async handleServerOperationsError ({ error, response, queue }) {
       const globalStore = useGlobalStore()
+      // rate limited, send all operations again after waiting
+      if (response?.status === 429) {
+        console.warn('🚑 handleServerOperationsError rate limited', queue)
+        return queue
+      }
       // network error or server unavailable, send all operations again
       if (!response || response.status >= 500) {
         console.error('🚒 handleServerOperationsError', error, response, queue)
@@ -310,18 +346,18 @@ export const useApiStore = defineStore('api', {
       sendQueueDebounced(this)
     },
     async flushQueue () {
-      // send queued operations now, after any that are already sending
+      // send queued operations now, after any that are already sending, even if waiting to retry a failed send
       sendQueueDebounced.cancel()
-      await this.sendQueueNow()
+      await this.sendQueueNow({ shouldIgnoreRetryDelay: true })
     },
-    async sendQueueNow () {
+    async sendQueueNow (options = {}) {
       // send one request at a time, so that requeued operations are sent before newer ones
       sendingQueuePromise = sendingQueuePromise
         .catch(error => console.error('🚒 sendQueueNow', error))
-        .then(() => this.sendQueueOperations())
+        .then(() => this.sendQueueOperations(options))
       await sendingQueuePromise
     },
-    async sendQueueOperations () {
+    async sendQueueOperations ({ shouldIgnoreRetryDelay } = {}) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const globalStore = useGlobalStore()
@@ -331,6 +367,9 @@ export const useApiStore = defineStore('api', {
       const queue = utils.clone(sessionQueue)
       await cache.saveQueue(queue)
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
+      // after a failed send, the retry timer sends the queue
+      const isWaitingToRetry = Date.now() < sendQueueRetryAt
+      if (isWaitingToRetry && !shouldIgnoreRetryDelay) { return }
       if (!spaceStore.id) {
         console.warn('🚑 sendQueue: operation missing spaceId', queue)
         return
@@ -363,9 +402,11 @@ export const useApiStore = defineStore('api', {
       }
       if (retryQueue.length) {
         await requeueOperations(retryQueue)
+        updateSendQueueRetryDelay(this, response)
       } else {
         // remove sent operations from backup, keeping operations added while sending
         await cache.saveQueueBackup(sessionQueue)
+        resetSendQueueRetryDelay()
       }
       globalStore.clearSendingQueue()
       // join broadcast for newly created space
