@@ -157,7 +157,6 @@ onMounted(async () => {
   document.addEventListener('visibilitychange', updateConnectionDirectionsIsPaused)
   // update viewport size
   window.addEventListener('touchend', updateViewportSizes)
-  window.addEventListener('gesturecancel', updateViewportSizes)
   window.addEventListener('resize', updateViewportSizes)
   updateViewportSizes()
   // when a card is added through Add.vue in a sharesheet with the space open behind it
@@ -228,7 +227,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('touchend', updateViewportSizes)
-  window.removeEventListener('gesturecancel', updateViewportSizes)
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(hourlyTasks)
@@ -1223,14 +1221,6 @@ const shouldPrevent = computed(() => {
     Lists
     ItemUnlockButtons
     DrawingStrokes
-    BoxDetails
-    LineDetails
-    ListDetails
-    CardDetails
-    OtherCardDetails
-    ConnectionDetails
-    CodeLanguagePicker
-    MultipleSelectedActions
     ScrollAtEdgesHandler
     NotificationsWithPosition(layer="space")
     BoxSelecting
@@ -1239,6 +1229,18 @@ const shouldPrevent = computed(() => {
     PaintSelectCanvas
     DrawingHandler
     SonarPing
+  .space-item-dialogs(
+    @mousedown.left="initInteractions"
+    @touchstart="initInteractions"
+  )
+    BoxDetails
+    LineDetails
+    ListDetails
+    CardDetails
+    OtherCardDetails
+    ConnectionDetails
+    CodeLanguagePicker
+    MultipleSelectedActions
   //- page ui, dialogs
   Header
   RightSideToc

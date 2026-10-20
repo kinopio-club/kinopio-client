@@ -24,11 +24,18 @@ const boxStore = useBoxStore()
 const lineStore = useLineStore()
 const listStore = useListStore()
 
+// touch panning momentum, similar to native ios scroll deceleration
+const momentumDeceleration = 0.998 // per ms
+const momentumMinVelocity = 0.02 // px per ms
+const momentumMaxVelocity = 8 // px per ms
+const momentumMaxIdleTime = 100 // ms, pausing before release doesn't fling
+
 let multiTouchAction, shouldCancelUndo
 
-let inertiaScrollEndIntervalTimer, prevPosition
+let touchGesture, touchesCount, panVelocity, momentumTimer, prevMomentumTime
 
 onMounted(() => {
+  utils.disablePinchZoom()
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
   // use timer to prevent being fired from page reload scroll
   // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
@@ -36,14 +43,23 @@ onMounted(() => {
     window.addEventListener('scroll', scroll)
   }, 100)
   window.addEventListener('touchstart', touchStart)
-  window.addEventListener('touchmove', touchMove)
+  window.addEventListener('touchmove', touchMove, { passive: false })
   window.addEventListener('touchend', touchEnd)
+  window.addEventListener('touchcancel', touchCancel)
+  // safari pinch zoom
+  window.addEventListener('gesturestart', preventGesture, { passive: false })
+  window.addEventListener('gesturechange', preventGesture, { passive: false })
 })
 onBeforeUnmount(() => {
+  utils.enablePinchZoom()
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
   window.removeEventListener('touchstart', touchStart)
-  window.removeEventListener('touchmove', touchMove)
+  window.removeEventListener('touchmove', touchMove, { passive: false })
   window.removeEventListener('touchend', touchEnd)
+  window.removeEventListener('touchcancel', touchCancel)
+  window.removeEventListener('gesturestart', preventGesture, { passive: false })
+  window.removeEventListener('gesturechange', preventGesture, { passive: false })
+  cancelMomentum()
 })
 
 const isSpacePage = computed(() => globalStore.isSpacePage)
@@ -134,6 +150,12 @@ const updatePrevSpacePagePosition = debounce(() => {
 // touch start
 
 const touchStart = (event) => {
+  // tapping to stop momentum shouldn't add a card
+  if (momentumTimer) {
+    globalStore.shouldAddCard = false
+  }
+  cancelMomentum()
+  updateTouchGesture(event)
   shouldCancelUndo = false
   if (!utils.isMultiTouch(event)) {
     multiTouchAction = null
@@ -141,9 +163,6 @@ const touchStart = (event) => {
   }
   globalStore.shouldAddCard = false
   const touches = event.touches.length
-  if (touches >= 2) {
-    toggleIsPinchZooming(event)
-  }
   // undo/redo
   if (touches === 2) {
     multiTouchAction = 'undo'
@@ -155,18 +174,53 @@ const touchStart = (event) => {
 // touch move
 
 const touchMove = (event) => {
-  const isFromDialog = event.target.closest('dialog')
-  if (isFromDialog) { return }
-  shouldCancelUndo = true
-  globalStore.isTouchScrolling = true
+  if (!isSpacePage.value) { return }
+  // touches already handled by an item, slider, or drawing
+  const isHandled = event.defaultPrevented
+  if (utils.isMultiTouch(event)) {
+    event.preventDefault() // disable native pinch zoom
+  }
+  shouldCancelUndo = true // moving fingers isn't a multi-touch tap
+  if (!touchGesture) { return }
+  event.preventDefault() // disable native swipe scrolling
+  const prevPosition = touchGesture.position
+  const position = touchesCenter(event.touches)
+  const delta = {
+    x: prevPosition.x - position.x,
+    y: prevPosition.y - position.y
+  }
+  const elapsedTime = event.timeStamp - touchGesture.timeStamp
+  touchGesture.position = position
+  touchGesture.timeStamp = event.timeStamp
+  if (isHandled || isInteracting()) {
+    panVelocity = null
+    return
+  }
+  if (utils.isMultiTouch(event)) {
+    pinchZoomSpace(event, prevPosition, delta)
+  } else {
+    panSpace(delta, elapsedTime)
+  }
+}
+const isInteracting = () => {
+  return (
+    globalStore.getIsInteractingWithItem ||
+    globalStore.getIsInteractingWithConnection ||
+    globalStore.currentUserIsDraggingLine ||
+    globalStore.currentUserIsTiltingCard ||
+    globalStore.currentUserIsPaintSelecting ||
+    globalStore.currentUserIsBoxSelecting ||
+    globalStore.currentUserIsDrawing
+  )
 }
 
 // touch end
 
-const touchEnd = () => {
+const touchEnd = (event) => {
+  checkIfShouldStartMomentum(event)
+  updateTouchGesture(event)
   if (!isSpacePage.value) { return }
   globalStore.isPinchZooming = false
-  checkIfInertiaScrollEnd()
   if (shouldCancelUndo) {
     shouldCancelUndo = false
     multiTouchAction = ''
@@ -182,33 +236,133 @@ const touchEnd = () => {
   }
   multiTouchAction = null
 }
-const checkIfInertiaScrollEnd = () => {
-  if (!utils.isAndroid) { return }
-  if (inertiaScrollEndIntervalTimer) { return }
-  prevPosition = null
-  inertiaScrollEndIntervalTimer = setInterval(() => {
-    const viewport = utils.visualViewport()
-    const current = {
-      left: viewport.offsetLeft,
-      top: viewport.offsetTop
-    }
-    if (!prevPosition) {
-      prevPosition = current
-    } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
-      clearInterval(inertiaScrollEndIntervalTimer)
-      inertiaScrollEndIntervalTimer = null
-      globalStore.isTouchScrolling = false
-    } else {
-      prevPosition = current
-    }
-  }, 250)
+const touchCancel = (event) => {
+  globalStore.isPinchZooming = false
+  globalStore.isTouchScrolling = false
+  multiTouchAction = null
+  updateTouchGesture(event)
+}
+
+// touch gesture
+// native swipe scrolling and pinch zooming are replaced with desktop panning and space zooming
+
+const touchesCenter = (touches) => {
+  const center = { x: 0, y: 0 }
+  Array.from(touches).forEach(touch => {
+    center.x += touch.clientX / touches.length
+    center.y += touch.clientY / touches.length
+  })
+  return center
+}
+const touchesDistance = (touches) => {
+  const start = { x: touches[0].clientX, y: touches[0].clientY }
+  const end = { x: touches[1].clientX, y: touches[1].clientY }
+  return utils.distanceBetweenTwoPoints(start, end)
+}
+// touches that start in dialogs keep native scrolling
+const isTouchGestureFromSpace = (event) => {
+  if (!isSpacePage.value) { return }
+  const isFromDialog = event.target.closest('dialog')
+  const isFromMinimap = event.target.closest('.minimap-canvas-wrap')
+  return !isFromDialog && !isFromMinimap
+}
+// restart the gesture from current touches whenever a finger is added or lifted, so the space doesn't jump
+const updateTouchGesture = (event) => {
+  const touches = event.touches
+  touchesCount = touches.length
+  panVelocity = null
+  if (!touches.length) {
+    touchGesture = null
+    return
+  }
+  // fingers can land together in a single touchstart
+  const isNewGesture = event.type === 'touchstart' && touches.length === event.changedTouches.length
+  if (isNewGesture) {
+    touchGesture = null
+    if (!isTouchGestureFromSpace(event)) { return }
+    touchGesture = {}
+  }
+  if (!touchGesture) { return }
+  touchGesture.position = touchesCenter(touches)
+  touchGesture.timeStamp = event.timeStamp
+  if (touches.length > 1) {
+    touchGesture.distance = touchesDistance(touches)
+    touchGesture.zoomPercent = globalStore.spaceZoomPercent
+  }
+}
+const preventGesture = (event) => {
+  if (!isSpacePage.value) { return }
+  if (!touchesCount) { return } // trackpad gestures in desktop safari
+  event.preventDefault()
+}
+
+// pan
+
+const panSpace = (delta, elapsedTime) => {
+  globalStore.isTouchScrolling = true
+  window.scrollBy({ left: delta.x, top: delta.y, behavior: 'instant' })
+  if (!elapsedTime) { return }
+  const clampVelocity = (value) => {
+    return Math.max(Math.min(value, momentumMaxVelocity), -momentumMaxVelocity)
+  }
+  const velocity = {
+    x: clampVelocity(delta.x / elapsedTime),
+    y: clampVelocity(delta.y / elapsedTime)
+  }
+  panVelocity = panVelocity || velocity
+  // smooth out uneven touchmove intervals
+  panVelocity = {
+    x: (panVelocity.x * 0.2) + (velocity.x * 0.8),
+    y: (panVelocity.y * 0.2) + (velocity.y * 0.8)
+  }
 }
 
 // pinch zoom
 
-const toggleIsPinchZooming = (event) => {
-  if (utils.shouldIgnoreTouchInteraction(event)) { return }
-  globalStore.isPinchZooming = true
+const pinchZoomSpace = async (event, prevPosition, delta) => {
+  if (!globalStore.isPinchZooming) {
+    globalStore.isPinchZooming = true
+    globalStore.closeAllDialogs()
+  }
+  const scale = touchesDistance(event.touches) / touchGesture.distance
+  const percent = Math.round(touchGesture.zoomPercent * scale * 10) / 10
+  // zoom around the previous touches center, then pan to follow the current one
+  await globalStore.zoomSpaceTo({ percent, origin: prevPosition })
+  window.scrollBy({ left: delta.x, top: delta.y, behavior: 'instant' })
+}
+
+// momentum, after panning
+
+const checkIfShouldStartMomentum = (event) => {
+  if (event.touches.length) { return }
+  if (!touchGesture || !panVelocity) { return }
+  const idleTime = event.timeStamp - touchGesture.timeStamp
+  if (idleTime > momentumMaxIdleTime) { return }
+  startMomentum(panVelocity)
+}
+const startMomentum = (velocity) => {
+  cancelMomentum()
+  prevMomentumTime = performance.now()
+  const momentumFrame = (timestamp) => {
+    const elapsedTime = Math.max(timestamp - prevMomentumTime, 0)
+    prevMomentumTime = timestamp
+    const decay = Math.pow(momentumDeceleration, elapsedTime)
+    velocity.x *= decay
+    velocity.y *= decay
+    const velocityIsLow = Math.abs(velocity.x) < momentumMinVelocity && Math.abs(velocity.y) < momentumMinVelocity
+    if (velocityIsLow) {
+      cancelMomentum()
+      return
+    }
+    window.scrollBy({ left: velocity.x * elapsedTime, top: velocity.y * elapsedTime, behavior: 'instant' })
+    momentumTimer = window.requestAnimationFrame(momentumFrame)
+  }
+  momentumTimer = window.requestAnimationFrame(momentumFrame)
+}
+const cancelMomentum = () => {
+  window.cancelAnimationFrame(momentumTimer)
+  momentumTimer = null
+  prevMomentumTime = null
 }
 </script>
 

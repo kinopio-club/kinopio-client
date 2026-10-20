@@ -26,10 +26,6 @@ const dialogElement = ref(null)
 const nameElement = ref(null)
 const infoSectionElement = ref(null)
 
-onMounted(() => {
-  updatePinchCounterZoomDecimal()
-})
-
 const state = reactive({
   colorPickerIsVisible: false,
   connectionSettingsIsVisible: false
@@ -40,7 +36,6 @@ const state = reactive({
 const visible = computed(() => Boolean(globalStore.connectionDetailsIsVisibleForConnectionId))
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    updatePinchCounterZoomDecimal()
     closeDialogs()
     scrollIntoViewAndFocus()
   } else {
@@ -56,17 +51,10 @@ const isThemeDarkAndColorLight = computed(() => {
   return isThemeDark && !colorisDark.value
 })
 const styles = computed(() => {
-  const position = globalStore.connectionDetailsPosition
-  let zoom
-  if (utils.isSignificantlyPinchZoomed()) {
-    zoom = pinchCounterZoomDecimal.value
-  } else {
-    zoom = spaceCounterZoomDecimal.value
-  }
+  const position = globalStore.getSpacePositionInPage(globalStore.connectionDetailsPosition)
   return {
     left: `${position.x}px`,
-    top: `${position.y}px`,
-    transform: `scale(${zoom})`
+    top: `${position.y}px`
   }
 })
 const scrollIntoView = async () => {
@@ -86,12 +74,6 @@ const scrollIntoViewAndFocus = async () => {
     element.setSelectionRange(length, length)
   }
 }
-const focus = () => {
-  globalStore.pinchCounterZoomDecimal = 1
-}
-const updatePinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-}
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
@@ -108,8 +90,6 @@ const closeDialogs = () => {
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
-const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 
 // current connection
 
@@ -220,7 +200,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="state.colorPickerIsVisible" @selectedColor="updateColor" :recentColors="recentColors")
-      input.connection-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="name" ref="nameElement" @focus="focus" @blur="blur" :class="{'is-dark': colorisDark}" @keyup.enter.prevent="closeAllDialogs")
+      input.connection-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="name" ref="nameElement" @blur="blur" :class="{'is-dark': colorisDark}" @keyup.enter.prevent="closeAllDialogs")
 
     .row.title-row(v-if="canEditConnection")
       div

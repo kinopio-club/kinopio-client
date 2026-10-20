@@ -31,6 +31,7 @@ import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemDetailsCheckboxButton from '@/components/ItemDetailsCheckboxButton.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
 import CardDetailsResize from '@/components/CardDetailsResize.vue'
+import { useOnscreenKeyboard } from '@/composables/useOnscreenKeyboard.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -57,6 +58,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
+const { addOnscreenKeyboardListener, removeOnscreenKeyboardListener } = useOnscreenKeyboard(nameElement)
 
 let unsubscribes
 
@@ -217,30 +219,24 @@ const showTagDetailsIsVisible = (event, tag) => {
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
-  if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
-  } else if (globalStore.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = 1
-  }
   const minWidth = consts.defaultDialogWidth
   let width = userStore.cardDetailsResizeWidth || minWidth
   width = Math.max(width, minWidth)
   width = `${width}px`
-  const transform = `scale(${zoom})`
   const offset = 8
-  const left = `${card.value.x + offset}px`
-  let top
   // conditional top pos
+  let y = card.value.y
   if (userStore.cardDetailsIsBelowCard) {
-    const cardDetailsHeight = utils.elementHeight(dialogElement.value) || 400
-    top = card.value.y + card.value.height - offset
-  } else {
-    top = card.value.y + offset
+    y = card.value.y + card.value.height
   }
-  top = top + 'px'
-  return { transform, left, top, width }
+  const position = globalStore.getSpacePositionInPage({ x: card.value.x, y })
+  let top = position.y + offset
+  if (userStore.cardDetailsIsBelowCard) {
+    top = position.y - offset
+  }
+  const left = `${position.x + offset}px`
+  top = `${top}px`
+  return { left, top, width }
 })
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
@@ -257,14 +253,16 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 }
 const scrollIntoViewAndFocus = async () => {
   let behavior
-  if (utils.isIPhone()) {
+  if (utils.isMobile()) {
     behavior = 'auto'
   }
   await nextTick()
-  scrollIntoView(behavior)
+  await scrollIntoView(behavior)
+  addOnscreenKeyboardListener()
   focusName()
   triggerUpdatePaintSelectCanvasPositionOffset()
 }
+
 const triggerUpdatePaintSelectCanvasPositionOffset = () => {
   globalStore.triggerUpdatePaintSelectCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
@@ -369,13 +367,12 @@ const scrollIntoView = async (behavior) => {
   await nextTick()
   await nextTick()
   const element = dialogElement.value
-  globalStore.scrollElementIntoView({ element, behavior })
+  await globalStore.scrollElementIntoView({ element, behavior })
 }
 const showCard = async (cardId) => {
   await nextTick()
   broadcastShowCardDetails()
   clearErrors()
-  updatePinchCounterZoomDecimal()
   scrollIntoViewAndFocus()
   await updatePreviousTags()
   updateNameSplitIntoCardsCount()
@@ -392,6 +389,7 @@ const showCard = async (cardId) => {
   textareaSizes()
 }
 const closeCard = async () => {
+  removeOnscreenKeyboardListener()
   globalStore.triggerHideTouchInterface()
   const cardId = prevCardId
   const item = cardStore.getCard(cardId)
@@ -457,11 +455,6 @@ const resetTextareaHeight = () => {
   nameElement.value.style.height = 'initial'
 }
 const focusName = async (position) => {
-  if (globalStore.shouldPreventNextFocusOnName) {
-    triggerUpdateHeaderAndFooterPosition()
-    globalStore.shouldPreventNextFocusOnName = false
-    return
-  }
   await nextTick()
   const element = nameElement.value
   const length = name.value.length
@@ -1578,15 +1571,6 @@ const updatePicker = (event) => {
   }
   checkIfIsInsertLineBreak(event)
 }
-
-// touch mobile
-
-const resetPinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = 1
-}
-const updatePinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
-}
 </script>
 
 <template lang="pug">
@@ -1640,8 +1624,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @keydown.ctrl.i.exact.stop.prevent="toggleTextEditWrapAction('italic')"
         @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
         @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
-
-        @focus="resetPinchCounterZoomDecimal"
       )
 
       TagPicker(

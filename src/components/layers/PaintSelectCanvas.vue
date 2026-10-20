@@ -52,6 +52,7 @@ let remotePaintingCircles = []
 const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
+const lockingMoveThreshold = 10 // px, finger jitter while holding shouldn't pan or cancel locking
 let currentUserIsLocking, lockingStartTime, shouldCancelLocking, lockingPercentComplete
 
 // notify offscreen cards
@@ -90,7 +91,7 @@ onMounted(() => {
   // shift circle positions with scroll to simulate full size canvas
   updatePrevScrollPosition()
   window.addEventListener('scroll', userScroll)
-  window.addEventListener('touchmove', userScroll) // android fix
+  window.addEventListener('touchmove', touchMove, { passive: false })
   window.addEventListener('load', clearCircles)
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
@@ -136,7 +137,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopPainting)
   window.removeEventListener('touchend', stopPainting)
   window.removeEventListener('scroll', userScroll)
-  window.removeEventListener('touchmove', userScroll)
+  window.removeEventListener('touchmove', touchMove, { passive: false })
   window.removeEventListener('load', clearCircles)
   window.removeEventListener('visibilitychange', clearRect)
   window.removeEventListener('mousedown', startPainting)
@@ -292,6 +293,13 @@ const userScroll = () => {
   }
   scroll()
 }
+const touchMove = (event) => {
+  if (isHoldingStillWhileLocking(event)) {
+    event.preventDefault() // ScrollAndTouchHandler won't pan prevented touches
+    return
+  }
+  userScroll() // android fix
+}
 const scroll = () => {
   updateCirclesWithScroll()
   cancelLocking()
@@ -331,12 +339,6 @@ const updateCirclesWithScroll = () => {
   }
   updatePrevScrollPosition()
 }
-const updateCircleForAndroid = (circle) => {
-  if (!utils.isAndroid()) { return circle }
-  circle.x = circle.x - window.visualViewport.offsetLeft
-  circle.y = circle.y - window.visualViewport.offsetTop
-  return circle
-}
 const checkIsCircleVisible = (circle) => {
   let { x, y, radius } = circle
   radius = radius || circleRadius
@@ -368,7 +370,6 @@ const offscreenCircle = (circle) => {
   return circle
 }
 const drawCircle = (circle, context, shouldDrawOffscreen) => {
-  circle = updateCircleForAndroid(circle)
   const isCircleVisible = checkIsCircleVisible(circle)
   if (!isCircleVisible && !shouldDrawOffscreen) { return }
   if (!isCircleVisible && shouldDrawOffscreen) { circle = offscreenCircle(circle) }
@@ -395,7 +396,7 @@ const shouldCancel = (event) => {
   }
   const fromDialog = event.target.closest('dialog')
   const fromHeader = event.target.closest('header')
-  const fromFooter = event.target.closest('footer')
+  const fromFooter = event.target.closest('.footer-wrap') // includes right side controls outside of footer
   return fromDialog || fromHeader || fromFooter
 }
 const stopPainting = (event) => {
@@ -712,14 +713,20 @@ const startLocking = () => {
     startPaintingCirclesTimer()
   }, lockingPreDuration)
 }
+const isHoldingStillWhileLocking = (event) => {
+  if (!currentUserIsLocking) { return }
+  if (utils.isMultiTouch(event)) { return }
+  const cursor = utils.cursorPositionInViewport(event)
+  const distance = utils.distanceBetweenTwoPoints(startCursor, cursor)
+  return distance < lockingMoveThreshold
+}
 const lockingAnimationFrame = (timestamp) => {
   if (!lockingStartTime) {
     lockingStartTime = timestamp
   }
   const elaspedTime = timestamp - lockingStartTime
   lockingPercentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-  const zoom = Math.min(utils.pinchCounterZoomDecimal(), 1)
-  const cursorsAreClose = utils.cursorsAreClose(startCursor, state.currentCursor, zoom)
+  const cursorsAreClose = utils.cursorsAreClose(startCursor, state.currentCursor, 1)
   if (!cursorsAreClose) {
     currentUserIsLocking = false
   }
@@ -731,7 +738,7 @@ const lockingAnimationFrame = (timestamp) => {
     lockingStartTime = undefined
     return
   }
-  if (lockingPercentComplete <= 1) {
+  if (lockingPercentComplete < 1) {
     const minSize = circleRadius
     const percentRemaining = Math.abs(lockingPercentComplete - 1)
     const circleRadiusDelta = initialLockCircleRadius - minSize
@@ -746,7 +753,7 @@ const lockingAnimationFrame = (timestamp) => {
       iteration: 1
     }
     drawCircle(circle, context)
-  } else if (lockingPercentComplete >= 1) {
+  } else {
     globalStore.currentUserIsPaintSelecting = true
     globalStore.currentUserIsPaintSelectingLocked = true
     console.info('🔒 lockingAnimationFrame locked')

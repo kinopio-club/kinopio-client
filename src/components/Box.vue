@@ -617,6 +617,10 @@ const endBoxInfoInteractionTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     endBoxInfoInteraction(event)
   }
+  // prevent ios compat mouse events from blurring the focused name, which hides the onscreen keyboard
+  if (globalStore.boxDetailsIsVisibleForBoxId === props.box.id) {
+    event.preventDefault()
+  }
 }
 
 // connections

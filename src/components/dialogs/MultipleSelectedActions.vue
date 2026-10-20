@@ -84,7 +84,6 @@ const visible = computed(() => {
 watch(() => visible.value, async (value, prevValue) => {
   if (value) {
     await nextTick()
-    globalStore.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
     updatePositionClamped()
     closeDialogs()
     globalStore.shouldExplicitlyHideFooter = true
@@ -110,8 +109,6 @@ const classes = computed(() => {
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const userColor = computed(() => userStore.color)
-const spaceCounterZoomDecimal = computed(() => globalStore.getSpaceCounterZoomDecimal)
-const pinchCounterZoomDecimal = computed(() => globalStore.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const selectedItems = computed(() => spaceStore.getSpaceSelectedItems)
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
@@ -130,9 +127,11 @@ const updatePositionClamped = () => {
   const rect = element.getBoundingClientRect()
   const { height, width } = rect
   const margin = 16
+  // position is stored in space coords, dialog is rendered in page coords
   const zoom = spaceZoomDecimal.value || 1
-  const maxX = (window.scrollX + globalStore.viewportWidth - width - margin) / zoom
-  const maxY = (window.scrollY + globalStore.viewportHeight - height - margin) / zoom
+  const offset = globalStore.spaceZoomOffset
+  const maxX = (window.scrollX + globalStore.viewportWidth - width - margin - offset.x) / zoom
+  const maxY = (window.scrollY + globalStore.viewportHeight - height - margin - offset.y) / zoom
   if (x < 0) {
     x = 0
   } else if (x > maxX) {
@@ -236,16 +235,11 @@ const backgroundColor = computed(() => {
   return color
 })
 const styles = computed(() => {
-  const position = globalStore.multipleSelectedActionsPosition
-  let zoom = spaceCounterZoomDecimal.value
-  if (globalStore.isTouchDevice) {
-    zoom = 1 / utils.visualViewport().scale
-  }
+  const position = globalStore.getSpacePositionInPage(globalStore.multipleSelectedActionsPosition)
   return {
     backgroundColor: backgroundColor.value,
     left: position.x + 'px',
-    top: position.y + 'px',
-    transform: `scale(${zoom})`
+    top: position.y + 'px'
   }
 })
 
@@ -717,6 +711,7 @@ dialog.narrow.multiple-selected-actions(
 .multiple-selected-actions
   transform-origin top left
   cursor grab
+  touch-action none // touch dragging the dialog shouldn't scroll the page
   &.is-dragging,
   &.is-pointer-down
     cursor grabbing

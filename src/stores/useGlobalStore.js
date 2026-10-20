@@ -39,7 +39,6 @@ export const useGlobalStore = defineStore('global', {
     webfontIsLoaded: false,
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
-    shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
     isSpacePage: false,
@@ -61,7 +60,6 @@ export const useGlobalStore = defineStore('global', {
     // zoom and scroll
     spaceZoomPercent: consts.spaceZoom.default,
     spaceZoomOffset: { x: 0, y: 0 }, // above and left outside space
-    pinchCounterZoomDecimal: 1,
     isPinchZooming: false,
     isTouchScrolling: false,
 
@@ -467,8 +465,15 @@ export const useGlobalStore = defineStore('global', {
       const scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
     },
+    getSpacePositionInPage ({ x, y }) {
+      const zoom = this.getSpaceZoomDecimal
+      const offset = this.spaceZoomOffset
+      return {
+        x: offset.x + (x * zoom),
+        y: offset.y + (y * zoom)
+      }
+    },
     getShouldScrollAtEdges (event) {
-      if (window.visualViewport.scale > 1) { return }
       let isPaintSelecting
       if (event.touches) {
         isPaintSelecting = this.currentUserIsPaintSelectingLocked
@@ -717,7 +722,7 @@ export const useGlobalStore = defineStore('global', {
       this.viewportHeight = Math.round(viewport.height)
     },
 
-    scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter, positionIsTop }) {
+    async scrollElementIntoView ({ element, behavior = 'smooth', positionIsCenter, positionIsTop }) {
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const smallCardCharacterLimit = 300
@@ -743,12 +748,11 @@ export const useGlobalStore = defineStore('global', {
         this.pageHeight += rect.height
       }
       // scroll page
-      nextTick(() => {
-        element.scrollIntoView({
-          behavior,
-          block: vertical,
-          inline: horizontal
-        })
+      await nextTick()
+      element.scrollIntoView({
+        behavior,
+        block: vertical,
+        inline: horizontal
       })
     },
 
@@ -2343,6 +2347,7 @@ export const useGlobalStore = defineStore('global', {
       window.scrollTo(scroll.x, scroll.y)
     },
     zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
+      this.closeAllDialogs()
       let percent = this.spaceZoomPercent
       if (shouldZoomIn) {
         percent = percent + speed

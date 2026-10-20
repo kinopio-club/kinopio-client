@@ -607,7 +607,7 @@ const tiltResizeIsVisible = computed(() => {
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
   // on mobile, resize handlers get in the way of touching when zoomed out
   if (globalStore.isTouchDevice || utils.isMobile()) {
-    if (globalStore.spaceZoomPercent < 50 || globalStore.pinchCounterZoomDecimal < 0.5) { return }
+    if (globalStore.spaceZoomPercent < 50) { return }
   }
   return true
 })
@@ -1494,6 +1494,10 @@ const showCardDetailsTouch = (event) => {
   cancelLocking()
   if (touchIsNearTouchPosition(event)) {
     showCardDetails(event)
+  }
+  // prevent ios compat mouse events from blurring the focused name, which hides the onscreen keyboard
+  if (globalStore.cardDetailsIsVisibleForCardId === props.card.id) {
+    event.preventDefault()
   }
   const userId = userStore.id
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteCardsDragging' })

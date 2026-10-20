@@ -69,14 +69,10 @@ const isLoadingOtherItems = computed(() => globalStore.isLoadingOtherItems)
 // dialog styles
 
 const styles = computed(() => {
-  const position = globalStore.otherItemDetailsPosition
-  let zoom = globalStore.getSpaceCounterZoomDecimal
-  if (globalStore.isTouchDevice) {
-    zoom = 1 / utils.visualViewport().scale
-  }
+  const position = globalStore.getSpacePositionInPage(globalStore.otherItemDetailsPosition)
   const left = `${position.x + 8}px`
   const top = `${position.y + 8}px`
-  return { transform: `scale(${zoom})`, left, top }
+  return { left, top }
 })
 const scrollIntoView = async () => {
   await nextTick()

@@ -375,9 +375,6 @@ const updateResultsSectionHeight = async () => {
   const element = resultsSectionElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
-const resetPinchCounterZoomDecimal = () => {
-  globalStore.pinchCounterZoomDecimal = 1
-}
 </script>
 
 <template lang="pug">
@@ -431,7 +428,6 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
         :placeholder="placeholder"
         v-model="searchInput"
         ref="searchInputElement"
-        @focus="resetPinchCounterZoomDecimal"
         @keyup.stop.backspace
         @keyup.stop.enter
         @mouseup.stop

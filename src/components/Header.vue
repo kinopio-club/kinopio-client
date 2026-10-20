@@ -60,9 +60,10 @@ let unsubscribes
 let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
+const fadeOutDelay = 200
 const hiddenDuration = 20
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let fadeOutIteration, fadeOutTimer, fadeOutDelayTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 const readOnlyElement = ref(null)
 
@@ -125,6 +126,7 @@ onMounted(() => {
   }
 })
 onBeforeUnmount(() => {
+  clearFadeOutDelay()
   window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
   unsubscribes()
@@ -172,9 +174,10 @@ watch(() => isPinchZooming.value, (value, prevValue) => {
 const isTouchScrolling = computed(() => globalStore.isTouchScrolling)
 watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
-    fadeOut()
+    fadeOutAfterDelay()
     updatePosition()
   } else {
+    clearFadeOutDelay()
     shouldCancelFadeOut = true
     cancelFadeOut()
   }
@@ -510,6 +513,17 @@ const fadeOut = () => {
   shouldCancelFadeOut = false
   fadeOutTimer = window.requestAnimationFrame(fadeOutFrame)
 }
+const fadeOutAfterDelay = () => {
+  if (fadeOutDelayTimer) { return }
+  fadeOutDelayTimer = setTimeout(() => {
+    fadeOutDelayTimer = undefined
+    fadeOut()
+  }, fadeOutDelay)
+}
+const clearFadeOutDelay = () => {
+  clearTimeout(fadeOutDelayTimer)
+  fadeOutDelayTimer = undefined
+}
 const cancelFadeOut = () => {
   window.cancelAnimationFrame(fadeOutTimer)
   fadeOutTimer = undefined
@@ -548,21 +562,13 @@ const updatePositionFrame = () => {
     cancelUpdatePosition()
   }
 }
+// keep visible when the ios keyboard shifts the visual viewport
 const updatePositionInVisualViewport = () => {
   const viewport = utils.visualViewport()
-  const scale = utils.roundFloat(viewport.scale)
-  const counterScale = utils.roundFloat(1 / viewport.scale)
-  const left = Math.round(viewport.offsetLeft)
   const top = Math.round(viewport.offsetTop)
-  const style = {
-    transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
-    maxWidth: Math.round(viewport.width * scale) + 'px'
-  }
-  if (utils.isIPhone() && scale <= 1) {
-    style.transform = 'none'
-    style.zoom = counterScale
-  }
-  state.position = style
+  const transform = `translateY(${top}px)`
+  if (state.position.transform === transform) { return }
+  state.position = { transform }
 }
 
 // notifications

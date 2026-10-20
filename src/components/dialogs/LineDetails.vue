@@ -10,6 +10,7 @@ import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import ItemDetailsDebug from '@/components/ItemDetailsDebug.vue'
+import { useOnscreenKeyboard } from '@/composables/useOnscreenKeyboard.js'
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
@@ -23,6 +24,7 @@ const broadcastStore = useBroadcastStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
+const { addOnscreenKeyboardListener, removeOnscreenKeyboardListener } = useOnscreenKeyboard(nameElement)
 
 const state = reactive({
   colorPickerIsVisible: false
@@ -42,6 +44,7 @@ watch(() => visible.value, async (value, prevValue) => {
     textareaSizes()
     globalStore.preventMultipleSelectedActionsIsVisible = false
   } else {
+    removeOnscreenKeyboardListener()
     globalStore.currentDraggingLineId = ''
     globalStore.updateMultipleLinesSelectedIds([])
   }
@@ -59,38 +62,31 @@ const closeAllDialogs = () => {
 const blur = () => {
   globalStore.triggerUpdateHeaderAndFooterPosition()
 }
-const scrollIntoView = async () => {
+const scrollIntoView = async (behavior) => {
   await nextTick()
   const element = dialogElement.value
   await nextTick()
-  globalStore.scrollElementIntoView({ element })
+  await globalStore.scrollElementIntoView({ element, behavior })
 }
 const scrollIntoViewAndFocus = async () => {
   let behavior
-  if (utils.isIPhone()) {
+  if (utils.isMobile()) {
     behavior = 'auto'
   }
   await nextTick()
-  scrollIntoView(behavior)
+  await scrollIntoView(behavior)
+  addOnscreenKeyboardListener()
   focusName()
 }
 
 // styles
 
 const styles = computed(() => {
-  let zoom = globalStore.getSpaceCounterZoomDecimal
-  if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
-  } else if (globalStore.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = 1
+  const position = globalStore.getSpacePositionInPage({ x: 0, y: currentLine.value.y })
+  return {
+    left: `${position.x + 8}px`,
+    top: `${position.y + 8}px`
   }
-  const styles = {
-    transform: `scale(${zoom})`,
-    left: `${currentLine.value.x + 8}px`,
-    top: `${currentLine.value.y + 8}px`
-  }
-  return styles
 })
 const broadcastShowLineDetails = () => {
   if (canEditSpace.value) { return }
