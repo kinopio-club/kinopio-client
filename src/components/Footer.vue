@@ -210,8 +210,13 @@ const updatePosition = (event) => {
     bottom = 40
   }
   bottom = `max(${bottom}px, env(safe-area-inset-bottom))`
-  if (state.position.bottom === bottom) { return }
-  state.position = { bottom }
+  const position = { bottom }
+  if (globalStore.getIsTouchDevice) {
+    position.transform = 'translateY(0px)'
+  }
+  const isUnchanged = state.position.bottom === position.bottom && state.position.transform === position.transform
+  if (isUnchanged) { return }
+  state.position = position
 }
 </script>
 
