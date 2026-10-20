@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, toRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, watch, ref, toRef, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
@@ -16,6 +16,7 @@ import { useThemeStore } from '@/stores/useThemeStore'
 
 import { useStickyCard } from '@/composables/useStickyCard.js'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { useViewportObserver } from '@/composables/useViewportObserver.js'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -75,8 +76,6 @@ const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
-let observer
-
 onMounted(async () => {
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
   const shouldFocus = globalStore.loadSpaceFocusOnItemId === props.card.id
@@ -86,10 +85,6 @@ onMounted(async () => {
   await updateUrlPreviewOnload()
   updateUrls()
   checkIfShouldUpdateIframeUrl()
-  initViewportObserver()
-})
-onBeforeUnmount(() => {
-  removeViewportObserver()
 })
 useStoreAction(globalStore, {
   updateRemoteCurrentConnection: () => updateRemoteConnections(),
@@ -111,8 +106,7 @@ useStoreAction(globalStore, {
   },
   triggerUpdateTheme: () => updateDefaultBackgroundColor(utils.cssVariable('secondary-background')),
   triggerCancelLocking: () => cancelLocking(),
-  triggerIsSnappingToList: () => { state.isSnappingToList = true },
-  triggerUpdateViewportObservers: () => initViewportObserver()
+  triggerIsSnappingToList: () => { state.isSnappingToList = true }
 })
 
 const props = defineProps({
@@ -1600,32 +1594,12 @@ const userDetailsIsUser = computed(() => {
 
 // is visible in viewport, perf, should render
 
-const initViewportObserver = async () => {
-  removeViewportObserver()
-  await nextTick()
-  try {
-    const callback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          state.isVisibleInViewport = true
-          checkIfShouldUpdateDimensions()
-        } else {
-          state.isVisibleInViewport = false
-        }
-      })
-    }
-    const target = cardElement.value
-    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
-    observer.observe(target)
-  } catch (error) {
-    console.error('🚒 card initViewportObserver', error)
+useViewportObserver('cards', cardElement, (isIntersecting) => {
+  state.isVisibleInViewport = isIntersecting
+  if (isIntersecting) {
+    checkIfShouldUpdateDimensions()
   }
-}
-const removeViewportObserver = () => {
-  if (!observer) { return }
-  observer.disconnect()
-  observer = null
-}
+})
 const shouldRender = computed(() => {
   const shouldExplitlyRender = globalStore.shouldExplicitlyRenderCardIds[props.card.id]
   if (isConnectingFrom.value) { return true }
