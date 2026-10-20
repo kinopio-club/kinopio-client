@@ -370,6 +370,13 @@ export const useGlobalStore = defineStore('global', {
       const margin = Math.round(consts.viewportObserverMaxRootMarginPercent * zoom)
       return `${margin}%`
     },
+    getMediaZoomLevel () {
+      // stepped so images aren't re-requested on every zoom change
+      const zoom = this.getSpaceZoomDecimal
+      const level = consts.mediaZoomLevels.find(level => level >= zoom)
+      if (!level) { return 1 }
+      return level
+    },
     getIsTouchDevice () {
       return this.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },

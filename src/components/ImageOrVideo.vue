@@ -151,9 +151,34 @@ const pauseVideo = () => {
 const playVideo = () => {
   if (!props.video) { return }
   if (props.videoIsPaused) { return }
+  if (isZoomedOut.value) { return }
   const element = videoElement.value
   element.play()
 }
+
+// pause videos when zoomed out, to limit how many are decoding at once
+const isZoomedOut = computed(() => globalStore.getMediaZoomLevel < 1)
+const shouldAutoplayVideo = computed(() => !props.videoIsPaused && !isZoomedOut.value)
+const videoPreload = computed(() => {
+  if (shouldAutoplayVideo.value) {
+    return 'auto'
+  } else {
+    return 'metadata'
+  }
+})
+// ugc videos have no poster, so a media fragment makes ios safari draw the first frame while paused
+const videoUrl = computed(() => {
+  if (props.video.includes('#')) { return props.video }
+  return `${props.video}#t=0.001`
+})
+watch(() => isZoomedOut.value, (value) => {
+  if (isTouching.value) { return } // resumes after touching
+  if (value) {
+    pauseVideo()
+  } else {
+    playVideo()
+  }
+})
 
 // gif
 
@@ -248,18 +273,19 @@ const imgproxyUrl = (imageUrl, width, height) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
-  const containerBreakpoints = [100, 200, 400, 600, 800, 1200, 3000]
-  const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
-  const maxDimensions = Math.max(width || 0, height || 0)
-  let url = utils.imgproxyUrl(imageUrl)
-  for (const breakpoint of containerBreakpoints) {
-    if (maxDimensions <= breakpoint) {
-      url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
-      break
-    }
-  }
-  return url
+  // images are drawn smaller when the space is zoomed out, so load smaller ones
+  const maxDimensions = Math.max(width || 0, height || 0) * globalStore.getMediaZoomLevel
+  return utils.imgproxyBreakpointUrl(imageUrl, maxDimensions)
 }
+const mediaZoomLevel = computed(() => globalStore.getMediaZoomLevel)
+const updateImageUrlForZoom = () => {
+  if (!props.image) { return }
+  if (globalStore.isPinchZooming) { return }
+  // the previous image stays drawn until the new src loads, and offscreen lazy images aren't fetched
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+}
+watch(() => mediaZoomLevel.value, updateImageUrlForZoom)
+watch(() => globalStore.isPinchZooming, updateImageUrlForZoom)
 
 // events
 
@@ -272,8 +298,8 @@ const handleError = (event) => {
 
 <template lang="pug">
 //- Video
-video(v-if="Boolean(props.video)" :autoplay="!props.videoIsPaused" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
-  source(:src="props.video")
+video(v-if="Boolean(props.video)" :autoplay="shouldAutoplayVideo" :preload="videoPreload" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
+  source(:src="videoUrl")
 //- Image
 img.image(
   v-if="state.imageUrl"

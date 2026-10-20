@@ -36,7 +36,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  isActive: null
+  isActive: null,
+  previewImageProxyFailed: false
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -71,6 +72,13 @@ const colorClasses = computed(() => {
 
 const previewImageIsVisible = computed(() => {
   return props.card.urlPreviewImage && !shouldHideImage.value
+})
+// sized to the card, and smaller when zoomed out. only kinopio hosted images can be resized by imgproxy
+const previewImageUrl = computed(() => {
+  const url = props.card.urlPreviewImage
+  if (state.previewImageProxyFailed) { return url }
+  const maxDimensions = (props.card.width || 0) * globalStore.getMediaZoomLevel
+  return utils.imgproxyBreakpointUrl(url, maxDimensions)
 })
 const lazyLoading = computed(() => {
   if (globalStore.disableViewportOptimizations) {
@@ -169,6 +177,11 @@ const removeTrailingAttributionText = (description) => {
 
 const handleImageError = (event) => {
   console.info('🚑 urlPreviewCard handleImageError', event)
+  // retry the original image before hiding the preview
+  if (previewImageUrl.value !== props.card.urlPreviewImage) {
+    state.previewImageProxyFailed = true
+    return
+  }
   // remove after 2025
   const url = props.card.urlPreviewUrl
   const isInstagram = url.includes('instagram')
@@ -259,7 +272,7 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" :loading="lazyLoading")
+      img.preview-image(:src="previewImageUrl" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" :loading="lazyLoading")
 
   //- embed
   template(v-if="shouldDisplayIframe")

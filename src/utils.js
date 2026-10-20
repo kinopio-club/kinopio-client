@@ -77,6 +77,14 @@ export default {
       return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
     }
   },
+  imgproxyBreakpointUrl (url, maxDimensions) {
+    // snapped to breakpoints so resizing and zooming don't request a new image every px
+    const containerBreakpoints = [100, 200, 400, 600, 800, 1200, 3000]
+    const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
+    const breakpoint = containerBreakpoints.find(breakpoint => maxDimensions <= breakpoint)
+    if (!breakpoint) { return this.imgproxyUrl(url) }
+    return this.imgproxyUrl(url, breakpoint * devicePixelRatio)
+  },
   mobileTouchPosition (event, type) {
     let touch
     if (event.touches[0]) {
