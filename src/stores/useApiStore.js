@@ -25,7 +25,7 @@ let sendQueueFailureCount = 0
 let sendQueueRetryAt = 0
 let sendQueueRetryTimer
 const cardNameUpdatedAtByCardId = {}
-const sendQueueDebounced = debounce((apiStore) => apiStore.sendQueueNow(), 500)
+const sendQueueDebounced = debounce((apiStore) => apiStore.trySendQueue(), 500)
 
 const restoreSessionQueueFromBackup = async () => {
   sessionQueue = await cache.queueBackup()
@@ -113,7 +113,7 @@ const updateSendQueueRetryDelay = (apiStore, response) => {
   delay = Math.max(delay, retryAfterDelay(response))
   sendQueueRetryAt = Date.now() + delay
   clearTimeout(sendQueueRetryTimer)
-  sendQueueRetryTimer = setTimeout(() => apiStore.sendQueueNow({ shouldIgnoreRetryDelay: true }), delay)
+  sendQueueRetryTimer = setTimeout(() => apiStore.flushQueue(), delay)
   console.warn('🛫 retry sending operations in', Math.round(delay / 1000), 's')
 }
 const resetSendQueueRetryDelay = () => {
@@ -342,18 +342,18 @@ export const useApiStore = defineStore('api', {
 
     // Add and Send Queue Operations
 
-    sendQueue () {
+    scheduleSendQueue () {
       sendQueueDebounced(this)
     },
     async flushQueue () {
       // send queued operations now, after any that are already sending, even if waiting to retry a failed send
       sendQueueDebounced.cancel()
-      await this.sendQueueNow({ shouldIgnoreRetryDelay: true })
+      await this.trySendQueue({ shouldIgnoreRetryDelay: true })
     },
-    async sendQueueNow (options = {}) {
+    async trySendQueue (options = {}) {
       // send one request at a time, so that requeued operations are sent before newer ones
       sendingQueuePromise = sendingQueuePromise
-        .catch(error => console.error('🚒 sendQueueNow', error))
+        .catch(error => console.error('🚒 trySendQueue', error))
         .then(() => this.sendQueueOperations(options))
       await sendingQueuePromise
     },
@@ -445,7 +445,7 @@ export const useApiStore = defineStore('api', {
       const sendingQueue = utils.clone(globalStore.sendingQueue)
       cache.saveQueueBackup(sendingQueue.concat(sessionQueue))
       // send to API after debounce period
-      this.sendQueue()
+      this.scheduleSendQueue()
     },
 
     // Meta

@@ -1922,7 +1922,7 @@ export const useGlobalStore = defineStore('global', {
       this.isOnline = isOnline
       // send operations queued while offline, unless waiting to retry a failed send
       if (reconnected) {
-        apiStore.sendQueueNow()
+        apiStore.trySendQueue()
       }
     },
     async updateCurrentSpaceIsUnavailableOffline (spaceId) {
