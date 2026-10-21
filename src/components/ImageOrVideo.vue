@@ -50,14 +50,16 @@ const props = defineProps({
   videoIsPaused: Boolean,
   cardId: String,
   width: Number,
-  height: Number
+  height: Number,
+  isVisibleInViewport: { type: Boolean, default: true }
 })
 
 const state = reactive({
   imageUrl: null,
   imageProxySrcSet: null,
   pendingImageIsDownscaled: false,
-  imageIsDownscaled: false
+  imageIsDownscaled: false,
+  measuredImageUrl: null
 })
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
@@ -292,9 +294,15 @@ const mediaZoomLevel = computed(() => globalStore.getMediaZoomLevel)
 const updateImageUrlForZoom = () => {
   if (!props.image) { return }
   if (globalStore.isPinchZooming) { return }
+  // offscreen cards update when they become visible, so crossing a zoom level doesn't update every image in the space in one frame
+  if (!props.isVisibleInViewport) { return }
   // the previous image stays drawn until the new src loads, and offscreen lazy images aren't fetched
   updateImageUrl(props.image)
 }
+watch(() => props.isVisibleInViewport, (value) => {
+  if (!value) { return }
+  updateImageUrlForZoom()
+})
 // a downscaled image would lay out smaller than at full zoom, so keep it at the card's saved width
 const imageStyles = computed(() => {
   if (!state.imageIsDownscaled) { return }
@@ -313,6 +321,11 @@ const handleImageLoad = (event) => {
   state.imageIsDownscaled = state.pendingImageIsDownscaled
   // the card's dimensions come from the full size image
   if (state.imageIsDownscaled) { return }
+  // reloading the same full size image after zooming back in can't change the card's dimensions,
+  // and measuring every visible card at once causes a hitch
+  const url = event.target.getAttribute('src')
+  if (url === state.measuredImageUrl) { return }
+  state.measuredImageUrl = url
   handleSuccess(event)
 }
 const handleError = (event) => {
@@ -329,6 +342,7 @@ img.image(
   v-if="state.imageUrl"
   ref="imageElement"
   :loading="lazyLoading"
+  decoding="async"
   :src="state.imageUrl"
   :class="{selected: isSelectedOrDragging, 'is-animated-gif': imageIsGif}"
   :style="imageStyles"

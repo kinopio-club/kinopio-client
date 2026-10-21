@@ -899,6 +899,9 @@ const clearFocus = () => {
     top 34px // consts.listInfoHeight
 .list-placeholder
   min-width var(--min-list-background-width)
+  // a gradient instead of the inset box-shadow, because every placeholder's blurred shadow repaints while scrolling and zooming
+  box-shadow none
+  background-image linear-gradient(to bottom, var(--heavy-shadow), transparent 3px)
   &.active
     animation placeholderGuide var(--snap-guide-ready-duration) infinite ease-in-out forwards
 

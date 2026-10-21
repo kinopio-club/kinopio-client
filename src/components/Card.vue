@@ -1936,6 +1936,7 @@ const toggleVideoIsPaused = () => {
         :cardId="card.id"
         :width="props.card.width"
         :height="props.card.height"
+        :isVisibleInViewport="shouldRender"
       )
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
