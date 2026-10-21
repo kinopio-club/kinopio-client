@@ -330,7 +330,7 @@ img.image(
   ref="imageElement"
   :loading="lazyLoading"
   :src="state.imageUrl"
-  :class="{selected: isSelectedOrDragging}"
+  :class="{selected: isSelectedOrDragging, 'is-animated-gif': imageIsGif}"
   :style="imageStyles"
   @load="handleImageLoad"
   @error="handleError"
@@ -347,4 +347,7 @@ img.image(
     content-visibility auto
     &.selected
       mix-blend-mode color-burn
+  // own compositing layer, so each gif frame redraws only the gif instead of repainting the page sized space layer
+  .image.is-animated-gif
+    will-change transform
 </style>
