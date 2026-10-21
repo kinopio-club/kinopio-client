@@ -77,11 +77,23 @@ export default {
       return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
     }
   },
-  imgproxyBreakpointUrl (url, maxDimensions) {
+  // the first frame of a gif, resized, because animated gifs are decoded at full size
+  imgproxyStillGifUrl (url, maxDimensions) {
+    if (!this.isKinopioUploadUrl(url)) {
+      return url
+    }
+    return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:png/plain/${encodeURIComponent(url)}`
+  },
+  imgproxyBreakpointUrl (url, maxDimensions, shouldPauseGif) {
     // snapped to breakpoints so resizing and zooming don't request a new image every px
     const containerBreakpoints = [100, 200, 400, 600, 800, 1200, 3000]
     const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
     const breakpoint = containerBreakpoints.find(breakpoint => maxDimensions <= breakpoint)
+    const isGif = url.includes('.gif')
+    if (shouldPauseGif && isGif) {
+      const stillBreakpoint = breakpoint || last(containerBreakpoints)
+      return this.imgproxyStillGifUrl(url, stillBreakpoint * devicePixelRatio)
+    }
     if (!breakpoint) { return this.imgproxyUrl(url) }
     return this.imgproxyUrl(url, breakpoint * devicePixelRatio)
   },

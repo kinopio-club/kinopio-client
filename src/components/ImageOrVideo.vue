@@ -195,6 +195,7 @@ watch(() => isTouching.value, (value) => {
 const imageIsGif = computed(() => {
   const url = state.imageUrl
   if (!url) { return }
+  if (state.imageIsDownscaled) { return } // a still frame when zoomed out
   return url.includes('.gif')
 })
 const updateIsPlaying = () => {
@@ -276,9 +277,10 @@ const imgproxyUrl = (imageUrl, width, height, zoomLevel = globalStore.getMediaZo
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
-  // images are drawn smaller when the space is zoomed out, so load smaller ones
+  // images are drawn smaller when the space is zoomed out, so load smaller ones, and gifs as still frames
   const maxDimensions = Math.max(width || 0, height || 0) * zoomLevel
-  return utils.imgproxyBreakpointUrl(imageUrl, maxDimensions)
+  const shouldPauseGif = zoomLevel < 1
+  return utils.imgproxyBreakpointUrl(imageUrl, maxDimensions, shouldPauseGif)
 }
 const updateImageUrl = (imageUrl) => {
   const url = imgproxyUrl(imageUrl, props.width, props.height)
