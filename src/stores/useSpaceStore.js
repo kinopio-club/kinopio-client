@@ -23,6 +23,7 @@ import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
+import { colord } from 'colord'
 import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
@@ -45,6 +46,22 @@ export const useSpaceStore = defineStore('space', {
   getters: {
     getSpaceAllState () {
       return { ...this.$state }
+    },
+    getBackgroundTintColor () {
+      const themeStore = useThemeStore()
+      let color = this.backgroundTint
+      if (!color) { return }
+      const colorIsDark = utils.colorIsDark(color, 0.8)
+      if (themeStore.getIsThemeDark) {
+        let darkness = 0.4
+        if (colorIsDark) {
+          darkness = 0
+        }
+        color = colord(color).darken(darkness).toRgbString()
+      } else {
+        color = colord(color).toRgbString()
+      }
+      return color
     },
     getSpaceAllItems () {
       const cardStore = useCardStore()
