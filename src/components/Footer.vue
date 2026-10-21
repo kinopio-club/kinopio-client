@@ -277,6 +277,7 @@ const updatePosition = (event) => {
 
   .right
     margin-left auto
+    min-width 0 // lets the zoom slider shrink
     display flex
     align-items center
     pointer-events all
