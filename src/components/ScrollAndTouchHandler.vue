@@ -334,7 +334,7 @@ const pinchZoomSpace = (event, prevPosition, position) => {
 const endPinchZoom = () => {
   if (!globalStore.isPinchZooming) { return }
   globalStore.isPinchZooming = false
-  globalStore.updateSpacePositionAfterPinch()
+  globalStore.updateSpacePositionAfterTouch()
 }
 
 // momentum, after panning

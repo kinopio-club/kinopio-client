@@ -2345,8 +2345,15 @@ export const useGlobalStore = defineStore('global', {
         y: offset.y + remainder.y
       }
     },
-    // after pinching, move the space from the offset back into page scroll
-    updateSpacePositionAfterPinch () {
+    // ios safari reverts scrollTo calls made while a finger is down, so touch gestures only move the space with its offset
+    updateSpacePositionWhileTouching (position) {
+      this.spaceZoomOffset = {
+        x: window.scrollX - position.x,
+        y: window.scrollY - position.y
+      }
+    },
+    // after the touch, move the space from the offset back into page scroll
+    updateSpacePositionAfterTouch () {
       const offset = this.spaceZoomOffset
       const position = {
         x: window.scrollX - offset.x,
@@ -2376,12 +2383,8 @@ export const useGlobalStore = defineStore('global', {
         y: (point.y * zoom) - target.y
       }
       this.spaceZoomPercent = percent
-      // while pinching, ios safari reverts scrollTo calls made during the touch, so only move the space with its offset
       if (this.isPinchZooming) {
-        this.spaceZoomOffset = {
-          x: window.scrollX - position.x,
-          y: window.scrollY - position.y
-        }
+        this.updateSpacePositionWhileTouching(position)
         return
       }
       await this.updateSpacePosition(position)
