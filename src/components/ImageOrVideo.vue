@@ -324,15 +324,16 @@ const handleError = (event) => {
 video(v-if="Boolean(props.video)" :autoplay="shouldAutoplayVideo" :preload="videoPreload" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="videoUrl")
 //- Image
+//- loading before src, because webkit starts loading as soon as src is set
 img.image(
   v-if="state.imageUrl"
   ref="imageElement"
+  :loading="lazyLoading"
   :src="state.imageUrl"
   :class="{selected: isSelectedOrDragging}"
   :style="imageStyles"
   @load="handleImageLoad"
   @error="handleError"
-  :loading="lazyLoading"
 )
 </template>
 

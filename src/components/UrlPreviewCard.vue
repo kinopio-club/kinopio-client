@@ -272,7 +272,8 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="previewImageUrl" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" :loading="lazyLoading")
+      //- loading before src, because webkit starts loading as soon as src is set
+      img.preview-image(:loading="lazyLoading" :src="previewImageUrl" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded")
 
   //- embed
   template(v-if="shouldDisplayIframe")
