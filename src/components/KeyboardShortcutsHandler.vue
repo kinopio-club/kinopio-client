@@ -324,7 +324,7 @@ const handleShortcutsOnKeyDown = (event) => {
   // Zoom In
   } else if (isMeta && key === '=') {
     const zoom = globalStore.spaceZoomPercent
-    if (zoom === 100) {
+    if (zoom >= consts.spaceZoom.max) {
       browserZoomLevel += 1
       return
     }
