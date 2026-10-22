@@ -27,11 +27,19 @@ const backgroundIsDefault = computed(() => !spaceStore.background)
 
 const backgroundStyles = computed(() => {
   let url = backgroundUrl.value
-  const tintColor = spaceStore.backgroundTint
+  const tintColor = spaceStore.getBackgroundTintColor
   let styles = {}
   styles = globalStore.updateSpaceBorderRadiusStyles(styles)
   if (tintColor) {
     styles.background = 'transparent'
+  }
+  // tint image backgrounds here, instead of with a page sized mix-blend-mode layer (SpaceBackgroundTint) that costs hundreds of MB on ios
+  const shouldTint = tintColor && !spaceStore.backgroundIsGradient
+  if (shouldTint) {
+    styles.background = tintColor
+    styles.backgroundBlendMode = 'multiply'
+    styles.width = `${globalStore.pageWidth}px`
+    styles.height = `${globalStore.pageHeight}px`
   }
   if (!url) {
     return styles

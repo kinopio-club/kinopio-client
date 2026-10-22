@@ -176,6 +176,7 @@ const isBoxSelecting = computed(() => globalStore.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => globalStore.currentUserToolbar === 'card')
 const toolbarIsBox = computed(() => globalStore.getToolbarIsBox)
 const toolbarIsList = computed(() => globalStore.getToolbarIsList)
+const toolbarIsLine = computed(() => globalStore.getToolbarIsLine)
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
@@ -545,6 +546,10 @@ const startPainting = (event) => {
   } else if (shouldAdd && toolbarIsList.value) {
     globalStore.triggerAddList(event)
     return
+  // add line
+  } else if (shouldAdd && toolbarIsLine.value) {
+    globalStore.triggerAddLine(event)
+    return
   }
   // clear selected
   if (!event.shiftKey) {
@@ -655,7 +660,7 @@ const painting = (event) => {
 // Initial Circles
 
 const createInitialCircle = (circle) => {
-  if (toolbarIsBox.value || toolbarIsList.value) { return }
+  if (toolbarIsBox.value || toolbarIsList.value || toolbarIsLine.value) { return }
   const initialCircle = {
     x: startCursor.x,
     y: startCursor.y,
@@ -706,7 +711,7 @@ const cancelLocking = () => {
   shouldCancelLocking = true
 }
 const startLocking = () => {
-  if (toolbarIsBox.value || toolbarIsList.value) { return }
+  if (toolbarIsBox.value || toolbarIsList.value || toolbarIsLine.value) { return }
   currentUserIsLocking = true
   shouldCancelLocking = false
   setTimeout(() => {

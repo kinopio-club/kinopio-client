@@ -159,7 +159,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
       img.icon.inbox-icon(src="@/assets/inbox.svg")
     //- preview image
     .preview-thumbnail-image-wrap(v-if="previewImage(props.space)")
-      img.preview-thumbnail-image(:src="previewImage(props.space)" loading="lazy")
+      img.preview-thumbnail-image(loading="lazy" :src="previewImage(props.space)")
     //- groups
     template(v-for="group in spaceGroups" :key="group.id")
       GroupLabel(:group="group")

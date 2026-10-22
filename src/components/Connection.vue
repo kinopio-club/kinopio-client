@@ -10,6 +10,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { useViewportObserver } from '@/composables/useViewportObserver.js'
 
 import utils from '@/utils.js'
 
@@ -24,18 +25,15 @@ const uploadStore = useUploadStore()
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
 let dragConnectionIds, dragUpdates
-let observer
 
 const connectionElement = ref(null)
 const connectionPathElement = ref(null)
 const observerTarget = ref(null)
 
 onMounted(() => {
-  initViewportObserver()
   inferConnectionPath()
 })
 onBeforeUnmount(() => {
-  removeViewportObserver()
   stopDraggingConnection()
 })
 useStoreAction(globalStore, {
@@ -53,7 +51,6 @@ useStoreAction(globalStore, {
     showConnectionDetails(event, isFromStore)
   },
   closeAllDialogs: () => updatePathWhileDragging(null),
-  triggerUpdateViewportObservers: () => initViewportObserver(),
   triggerUpdateConnectionPathWhileDragging: (updates) => {
     const update = updates.find(update => update.id === props.connection.id)
     if (!update) { return }
@@ -545,33 +542,10 @@ const checkIsMultiTouch = (event) => {
 
 // is visible in viewport
 
-const initViewportObserver = async () => {
-  if (globalStore.disableViewportOptimizations) { return }
-  removeViewportObserver()
-  await nextTick()
-  try {
-    const callback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          state.isVisibleInViewport = true
-        } else {
-          state.isVisibleInViewport = false
-        }
-      })
-    }
-    const target = observerTarget.value
-    if (!target) { return }
-    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
-    observer.observe(target)
-  } catch (error) {
-    console.error('🚒 connection initViewportObserver', error)
-  }
-}
-const removeViewportObserver = () => {
-  if (!observer) { return }
-  observer.disconnect()
-  observer = null
-}
+useViewportObserver('connections', observerTarget, (isIntersecting) => {
+  if (globalStore.disableViewportOptimizations) { return } // stays visible
+  state.isVisibleInViewport = isIntersecting
+})
 </script>
 
 <template lang="pug">
