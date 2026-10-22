@@ -190,6 +190,7 @@ const startListInfoInteraction = async (event) => {
     globalStore.currentDraggingListId = listId
   }
   listStore.incrementListZ(listId)
+  globalStore.selectListsFromMultipleSelectedItems()
 }
 const selectListAndConnectedCards = () => {
   const connections = connectionStore.getAllConnections
