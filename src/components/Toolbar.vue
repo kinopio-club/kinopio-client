@@ -4,7 +4,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useLineStore } from '@/stores/useLineStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
 import ToolbarTooltip from '@/components/dialogs/ToolbarTooltip.vue'
@@ -12,7 +11,6 @@ import ToolbarTooltip from '@/components/dialogs/ToolbarTooltip.vue'
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
-const lineStore = useLineStore()
 
 let tooltipTimer
 const tooltipTimerDelay = 600
@@ -48,6 +46,10 @@ const toolbarIsList = computed(() => {
   if (globalStore.currentUserIsResizingList) { return }
   return globalStore.getToolbarIsList
 })
+const toolbarIsLine = computed(() => {
+  if (globalStore.currentUserIsDraggingLine) { return }
+  return globalStore.getToolbarIsLine
+})
 const toolbarIsDrawing = computed(() => {
   return globalStore.getToolbarIsDrawing
 })
@@ -58,10 +60,6 @@ const toggleToolbar = (value) => {
   } else {
     globalStore.updateCurrentUserToolbar(value)
   }
-}
-const addLine = () => {
-  globalStore.updateCurrentUserToolbar('card')
-  lineStore.createLine()
 }
 const DrawingLabel = computed(() => {
   if (globalStore.drawingEraserIsActive) {
@@ -80,6 +78,7 @@ const closeAllTooltips = () => {
   state.tooltipIsVisible.drawing = false
 }
 const startTooltipTimer = (tool) => {
+  if (globalStore.getIsTouchDevice) { return }
   if (currentUserToolbar.value === tool) { return }
   tooltipTimer = setTimeout(() => {
     closeAllTooltips()
@@ -129,15 +128,17 @@ nav#toolbar.toolbar(v-if="visible")
 
       //- Line
       .button-wrap(
-          aria-label="Add Line Divider (-)"
-          @mouseenter="startTooltipTimer('line')"
-          @mouseleave="cancelTooltip"
-        )
+        @mouseenter="startTooltipTimer('line')"
+        @mouseleave="cancelTooltip"
+      )
         button(
-          @click="addLine"
-          :class="{ 'translucent-button': !shouldIncreaseUIContrast }"
+          aria-label="Add Line Divider (-)"
+          :class="{ active: toolbarIsLine, 'translucent-button': !shouldIncreaseUIContrast }"
+          @click="toggleToolbar('line')"
         )
           img.icon.line-icon(src="@/assets/line.svg")
+        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="toolbarIsLine")
+          span Add Line Divider (-)
         ToolbarTooltip(:visible="state.tooltipIsVisible.line" tool="line")
 
       //- Drawing

@@ -252,8 +252,7 @@ const handleShortcutsOnKeyUp = (event) => {
     const isMeta = event.metaKey || event.ctrlKey
     if (isMeta) { return }
     if (!canEditSpace) { return }
-    const line = { y: currentCursorPosition.y }
-    lineStore.createLine(line)
+    globalStore.toggleCurrentUserToolbar('line')
   }
 }
 // on key down
@@ -356,12 +355,14 @@ const checkIsOnMinimap = (event) => {
 const checkShouldBoxSelect = (isPanScope) => {
   const toolbarIsBox = globalStore.getToolbarIsBox
   const toolbarIsList = globalStore.getToolbarIsList
+  const toolbarIsLine = globalStore.getToolbarIsLine
   const isNotConnecting = !globalStore.currentUserIsDrawingConnection
   const shouldBoxSelect =
     event.shiftKey &&
     isPanScope &&
     !toolbarIsBox &&
     !toolbarIsList &&
+    !toolbarIsLine &&
     isNotConnecting &&
     !globalStore.currentUserIsResizingBox &&
     !globalStore.currentUserIsResizingList &&

@@ -457,6 +457,9 @@ export const useGlobalStore = defineStore('global', {
     getToolbarIsList () {
       return this.currentUserToolbar === 'list'
     },
+    getToolbarIsLine () {
+      return this.currentUserToolbar === 'line'
+    },
     getTags () {
       const spaceStore = useSpaceStore()
       const tags = spaceStore.tags.concat(this.tags)
@@ -638,6 +641,7 @@ export const useGlobalStore = defineStore('global', {
     triggerClearUserNotifications () {},
     triggerAddBox (event) {},
     triggerAddList (event) {},
+    triggerAddLine (event) {},
     triggerClearTaskFilters () {},
     triggerToggleGroupSpaceFilter (group) {},
     // select all below
