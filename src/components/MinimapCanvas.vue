@@ -211,6 +211,10 @@ watch(() => props.size, (value, prevValue) => {
     update()
   }
 })
+watch([() => globalStore.pageWidth, () => globalStore.pageHeight], () => {
+  if (props.pageWidth || props.pageHeight) { return }
+  updateThrottle()
+})
 
 const pageHeight = computed(() => {
   return props.pageHeight || globalStore.pageHeight

@@ -690,10 +690,18 @@ export const useGlobalStore = defineStore('global', {
       this.shouldPreventNextEnterKey = false
       this.triggerDrawingReset()
     },
-    updatePageSizesFromRect (itemsRect) {
+    updatePageSizesFromRect (itemsRect, shouldShrink) {
       if (!itemsRect) { return }
-      const pageWidth = Math.max(this.viewportWidth, itemsRect.width, this.pageWidth)
-      const pageHeight = Math.max(this.viewportHeight, itemsRect.height, this.pageHeight)
+      let minWidth = this.pageWidth
+      let minHeight = this.pageHeight
+      // shrink to fit items, but not past the current scroll position
+      if (shouldShrink) {
+        const zoom = this.getSpaceCounterZoomDecimal
+        minWidth = (window.scrollX + this.viewportWidth) * zoom
+        minHeight = (window.scrollY + this.viewportHeight) * zoom
+      }
+      const pageWidth = Math.max(this.viewportWidth, itemsRect.width, minWidth)
+      const pageHeight = Math.max(this.viewportHeight, itemsRect.height, minHeight)
       this.pageWidth = Math.round(pageWidth)
       this.pageHeight = Math.round(pageHeight)
     },
@@ -721,7 +729,8 @@ export const useGlobalStore = defineStore('global', {
       const itemsRect = utils.pageSizeFromItems(items)
       const drawingRect = await utils.imageSize(spaceStore.drawingImage)
       const rect = utils.mergeRectSizes(itemsRect, drawingRect)
-      this.updatePageSizesFromRect(rect)
+      const shouldShrink = true
+      this.updatePageSizesFromRect(rect, shouldShrink)
     },
     updateViewportSizes () {
       const viewport = utils.visualViewport()
