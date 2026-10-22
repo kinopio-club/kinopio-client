@@ -868,7 +868,7 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" @touchend.prevent :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   .minimap-background(v-if="props.shouldDrawBackgroundImage")
     SpaceBackgroundGradients(v-if="backgroundIsGradient" :visible="true" :layers="backgroundSpace.backgroundGradient")
     .background-image(v-else :style="backgroundImageStyles")
