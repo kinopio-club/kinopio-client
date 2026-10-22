@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { queueFrameTask } from '@/composables/useFrameTaskQueue.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -296,8 +297,12 @@ const updateImageUrlForZoom = () => {
   if (globalStore.isPinchZooming) { return }
   // offscreen cards update when they become visible, so crossing a zoom level doesn't update every image in the space in one frame
   if (!props.isVisibleInViewport) { return }
-  // the previous image stays drawn until the new src loads, and offscreen lazy images aren't fetched
-  updateImageUrl(props.image)
+  // the previous image stays drawn until the new src loads, and offscreen lazy images aren't fetched.
+  // visible images are spread over frames too
+  queueFrameTask(() => {
+    if (!props.image) { return }
+    updateImageUrl(props.image)
+  })
 }
 watch(() => props.isVisibleInViewport, (value) => {
   if (!value) { return }
@@ -326,7 +331,16 @@ const handleImageLoad = (event) => {
   const url = event.target.getAttribute('src')
   if (url === state.measuredImageUrl) { return }
   state.measuredImageUrl = url
+  if (savedSizeFitsImage(event.target)) { return }
   handleSuccess(event)
+}
+// measuring the card forces a layout, so skip it when the card's saved size already fits the image,
+// new cards (default size), changed images, and missing sizes still get measured
+const savedSizeFitsImage = (image) => {
+  if (!props.width || !props.height) { return }
+  if (!image.naturalWidth || !image.naturalHeight) { return }
+  const expectedHeight = props.width * (image.naturalHeight / image.naturalWidth)
+  return Math.abs(expectedHeight - props.height) <= 2
 }
 const handleError = (event) => {
 }

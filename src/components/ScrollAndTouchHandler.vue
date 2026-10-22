@@ -33,6 +33,8 @@ const momentumMaxIdleTime = 100 // ms, pausing before release doesn't fling
 let multiTouchAction, shouldCancelUndo
 
 let touchGesture, touchesCount, panVelocity, momentumTimer, prevMomentumTime
+let wheelZoomSpeed = 0
+let wheelZoomOrigin, wheelZoomFrame
 
 onMounted(() => {
   utils.disablePinchZoom()
@@ -60,6 +62,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('gesturestart', preventGesture, { passive: false })
   window.removeEventListener('gesturechange', preventGesture, { passive: false })
   cancelMomentum()
+  window.cancelAnimationFrame(wheelZoomFrame)
 })
 
 const isSpacePage = computed(() => globalStore.isSpacePage)
@@ -90,8 +93,26 @@ const handleMouseWheelEvents = (event) => {
   }
   let speed = Math.max(Math.abs(deltaY), 1)
   speed = Math.min(maxSpeed, speed)
-  const origin = { x: event.clientX, y: event.clientY }
-  globalStore.zoomSpace({ shouldZoomIn, shouldZoomOut, speed, origin })
+  if (shouldZoomIn) {
+    wheelZoomSpeed += speed
+  } else if (shouldZoomOut) {
+    wheelZoomSpeed -= speed
+  }
+  wheelZoomOrigin = { x: event.clientX, y: event.clientY }
+  if (wheelZoomFrame) { return }
+  wheelZoomFrame = window.requestAnimationFrame(zoomWithWheel)
+}
+// trackpads send several wheel events per frame, so zoom once per frame with their combined speed
+const zoomWithWheel = () => {
+  wheelZoomFrame = null
+  const speed = wheelZoomSpeed
+  wheelZoomSpeed = 0
+  globalStore.zoomSpace({
+    shouldZoomIn: speed > 0,
+    shouldZoomOut: speed < 0,
+    speed: Math.abs(speed),
+    origin: wheelZoomOrigin
+  })
 }
 
 // items being dragged should follow wheel/trackpad scroll panning
