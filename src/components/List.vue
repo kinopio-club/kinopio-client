@@ -191,9 +191,41 @@ const startListInfoInteraction = async (event) => {
   }
   listStore.incrementListZ(listId)
 }
+const selectListAndConnectedCards = () => {
+  const connections = connectionStore.getAllConnections
+  const cardIds = listCards.value.map(card => card.id)
+  const selectedItems = [props.list.id, ...cardIds]
+  let shouldSearch = true
+  while (shouldSearch) {
+    let cancelSearch = true
+    connections.forEach(connection => {
+      const startItem = connection.startItemId
+      const endItem = connection.endItemId
+      const startItemIsConnected = selectedItems.includes(startItem)
+      const endItemIsConnected = selectedItems.includes(endItem)
+      if (!startItemIsConnected && endItemIsConnected) {
+        selectedItems.push(startItem)
+        cancelSearch = false
+      }
+      if (startItemIsConnected && !endItemIsConnected) {
+        selectedItems.push(endItem)
+        cancelSearch = false
+      }
+    })
+    if (cancelSearch) {
+      shouldSearch = false
+    }
+  }
+  const selectedCardIds = selectedItems.filter(id => cardStore.getCard(id))
+  globalStore.updateMultipleSelectedActionsIsVisible(false)
+  globalStore.updateMultipleListsSelectedIds([props.list.id])
+  globalStore.updateMultipleCardsSelectedIds(selectedCardIds)
+  globalStore.currentUserIsDraggingList = false
+  globalStore.shouldCancelNextMouseUpInteraction = true
+}
 const endListInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
-  // const isMeta = event.metaKey || event.ctrlKey
+  const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (isMultiTouch) { return }
@@ -205,19 +237,15 @@ const endListInfoInteraction = (event) => {
   if (!canEditSpace.value) { globalStore.triggerReadOnlyJiggle() }
   broadcastStore.update({ updates: { userId }, action: 'clearRemoteListsDragging' })
   globalStore.closeAllDialogs()
-  // if (isMeta) {
-  //   globalStore.updateMultipleListsSelectedIds([props.list.id])
-  //   listStore.selectItemsInSelectedLists()
-  //   globalStore.updateMultipleListsSelectedIds([])
-  //   globalStore.currentUserIsDraggingList = false
-  //   globalStore.shouldCancelNextMouseUpInteraction = true
-  // } else {
+  const shouldSelect = isMeta && canEditSpace.value && !globalStore.preventDraggedListFromShowingDetails
+  if (shouldSelect) {
+    selectListAndConnectedCards()
+    return
+  }
   globalStore.clearMultipleSelected()
-  // }
   if (globalStore.preventDraggedListFromShowingDetails) { return }
   const isLink = event.target.closest('a')
   if (isLink) { return }
-  // if (isMeta) { return }
   globalStore.updateListDetailsIsVisibleForListId(props.list.id)
   globalStore.clearAllInteractingWithAndSelected()
   event.stopPropagation() // prevent stopInteractions() from closing listDetails
