@@ -41,6 +41,9 @@ const defaultValue = computed(() => consts.spaceZoom.default) // 100
 const spaceZoomPercent = computed(() => globalStore.spaceZoomPercent)
 const minKeyboardShortcut = computed(() => 'Z')
 
+const isMobileOrTouch = computed(() => {
+  return globalStore.getIsTouchDevice
+})
 const closeAllDialogs = () => {
   globalStore.clearMultipleSelected()
   globalStore.closeAllDialogs()
@@ -80,7 +83,7 @@ const removeAnimations = () => {
 </script>
 
 <template lang="pug">
-.space-zoom
+.space-zoom(v-if="!isMobileOrTouch")
   Slider(
     @updatePlayhead="updateSpaceZoom"
     :minValue="min"
@@ -100,9 +103,5 @@ const removeAnimations = () => {
 .space-zoom
   display block
   width 100px
-  min-width 50px
-  flex-shrink 1 // narrower on small screens, so the footer buttons still fit
   margin-top -2px
-  .slider
-    width 100%
 </style>
