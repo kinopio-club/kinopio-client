@@ -548,7 +548,19 @@ const drawCards = (cards) => {
     const rect = new Path2D()
     rect.roundRect(x, y, width, height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
-    context.fill(rect)
+    if (card.tilt) {
+      // rotate around the card's transform-origin, 16px in from the top right
+      const originX = x + width - (16 * r)
+      const originY = y + (16 * r)
+      context.save()
+      context.translate(originX, originY)
+      context.rotate(card.tilt * Math.PI / 180)
+      context.translate(-originX, -originY)
+      context.fill(rect)
+      context.restore()
+    } else {
+      context.fill(rect)
+    }
   }
 }
 
