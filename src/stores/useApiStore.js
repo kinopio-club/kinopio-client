@@ -1353,8 +1353,11 @@ export const useApiStore = defineStore('api', {
       }
     },
     async updateCardCounter (body) {
+      const spaceStore = useSpaceStore()
       try {
-        const options = await this.requestOptions({ body, method: 'PATCH' })
+        const space = spaceStore.getSpaceAllState
+        const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
+        const options = await this.requestOptions({ body, method: 'PATCH', space, spaceReadOnlyKey })
         const response = await fetch(`${consts.apiHost()}/card/update-counter`, options)
         return normalizeResponse(response)
       } catch (error) {
