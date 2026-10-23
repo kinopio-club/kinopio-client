@@ -4,19 +4,49 @@
 import { watch, onBeforeUnmount } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
+import { queueFrameTask } from '@/composables/useFrameTaskQueue.js'
 
 const observers = new Map() // type → IntersectionObserver
 const callbacksByType = new Map() // type → Map of element → callback
+const reportedValues = new Map() // element → isIntersecting last sent to its callback
+const pendingElements = new Set() // elements in the root margin waiting to be shown
 let isSubscribed
 
+const report = (element, value, callback) => {
+  pendingElements.delete(element)
+  if (reportedValues.get(element) === value) { return }
+  reportedValues.set(element, value)
+  callback(value)
+}
+const isInViewport = (rect) => {
+  return rect.right > 0 && rect.bottom > 0 && rect.left < window.innerWidth && rect.top < window.innerHeight
+}
 const createObserver = (type) => {
   const globalStore = useGlobalStore()
   const callbacks = callbacksByType.get(type)
   const handleEntries = (entries) => {
     entries.forEach(entry => {
-      const callback = callbacks.get(entry.target)
+      const element = entry.target
+      const callback = callbacks.get(element)
       if (!callback) { return }
-      callback(entry.isIntersecting)
+      if (!entry.isIntersecting || isInViewport(entry.boundingClientRect)) {
+        report(element, entry.isIntersecting, callback)
+        return
+      }
+      // items only in the root margin aren't seen yet, so they're shown over the next frames,
+      // otherwise a larger margin (zooming out) renders every newly near item in one frame
+      if (reportedValues.get(element)) {
+        pendingElements.delete(element)
+        return
+      }
+      if (pendingElements.has(element)) { return }
+      pendingElements.add(element)
+      queueFrameTask(() => {
+        if (!pendingElements.has(element)) { return }
+        const currentCallback = callbacks.get(element)
+        if (!currentCallback) { return }
+        report(element, true, currentCallback)
+      })
     })
   }
   const observer = new IntersectionObserver(handleEntries, { rootMargin: globalStore.getViewportObserverRootMargin })
@@ -56,6 +86,8 @@ const observe = (type, element, callback) => {
   observer.observe(element)
 }
 const unobserve = (type, element) => {
+  reportedValues.delete(element)
+  pendingElements.delete(element)
   callbacksByType.get(type)?.delete(element)
   observers.get(type)?.unobserve(element)
 }
