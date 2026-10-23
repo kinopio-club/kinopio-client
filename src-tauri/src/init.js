@@ -1,16 +1,20 @@
 // Injected into every page by the desktop app.
-// App links open in the current window, or in a new tab if shift is held.
+// App links open in the current window, or in a new tab if shift, cmd, or ctrl is held.
 // All other links are passed to the native side, which opens them in the system browser.
 
 (() => {
-  let shiftKey = false
-  const updateShiftKey = (event) => {
-    shiftKey = event.shiftKey
+  // the app checks cmd and ctrl for new tabs, shift is the desktop app's own shortcut
+  const isNewTabEvent = (event) => {
+    return event.shiftKey || event.metaKey || event.ctrlKey
+  }
+  let isNewTabKey = false
+  const updateIsNewTabKey = (event) => {
+    isNewTabKey = isNewTabEvent(event)
   }
   const events = ['keydown', 'keyup', 'pointerdown', 'pointerup', 'click']
-  events.forEach(name => window.addEventListener(name, updateShiftKey, true))
+  events.forEach(name => window.addEventListener(name, updateIsNewTabKey, true))
   window.addEventListener('blur', () => {
-    shiftKey = false
+    isNewTabKey = false
   })
 
   // Browsers on macOS don't send keyup for keys pressed while cmd is held, but the webview does.
@@ -71,7 +75,7 @@
       return nativeOpen(url, ...args)
     }
     const resolvedUrl = new URL(url, window.location.href)
-    if (isAppUrl(resolvedUrl) && !shiftKey) {
+    if (isAppUrl(resolvedUrl) && !isNewTabKey) {
       window.location.assign(resolvedUrl.href)
       return null
     }
@@ -110,7 +114,8 @@
       nativeOpen(url.href)
       return
     }
-    if (event.shiftKey) {
+    // the webview's own cmd-click handling blanks the page instead of opening a tab
+    if (isNewTabEvent(event)) {
       event.preventDefault()
       nativeOpen(url.href)
       return

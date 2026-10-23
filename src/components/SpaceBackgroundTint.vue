@@ -3,36 +3,22 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
-import { useThemeStore } from '@/stores/useThemeStore'
 
 import postMessage from '@/postMessage.js'
-import utils from '@/utils.js'
-
-import { colord } from 'colord'
 
 const globalStore = useGlobalStore()
 const spaceStore = useSpaceStore()
-const themeStore = useThemeStore()
 
 const visible = computed(() => globalStore.isSpacePage)
-const isThemeDark = computed(() => themeStore.getIsThemeDark)
-const currentSpace = computed(() => spaceStore.getSpaceAllState)
+// image backgrounds are tinted in SpaceBackground with background-blend-mode instead,
+// because a page sized mix-blend-mode layer costs hundreds of MB on ios
+const isGradient = computed(() => spaceStore.backgroundIsGradient)
 
 // tint
 
 const backgroundTint = computed(() => {
-  let color = currentSpace.value.backgroundTint
+  const color = spaceStore.getBackgroundTintColor
   if (!color) { return }
-  const colorIsDark = utils.colorIsDark(color, 0.8)
-  if (isThemeDark.value) {
-    let darkness = 0.4
-    if (colorIsDark) {
-      darkness = 0
-    }
-    color = colord(color).darken(darkness).toRgbString()
-  } else {
-    color = colord(color).toRgbString()
-  }
   postMessage.send({ name: 'setBackgroundTintColor', value: color })
   return color
 })
@@ -56,7 +42,7 @@ const styles = computed(() => {
 </script>
 
 <template lang="pug">
-#space-background-tint(v-if="visible && backgroundTint" :style="styles")
+#space-background-tint(v-if="visible && backgroundTint && isGradient" :style="styles")
 </template>
 
 <style lang="stylus">

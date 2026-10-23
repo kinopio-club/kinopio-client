@@ -52,6 +52,7 @@ onMounted(async () => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', update)
   window.addEventListener('pointerup', endPanningViewport, true)
+  window.addEventListener('pointercancel', endPanningViewport, true)
   window.addEventListener('pointermove', panViewport)
 
   const globalStoreActions = [
@@ -155,6 +156,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', update)
   window.removeEventListener('pointerup', endPanningViewport, true)
+  window.removeEventListener('pointercancel', endPanningViewport, true)
   window.removeEventListener('pointermove', panViewport)
   window.cancelAnimationFrame(pingFrameId)
   unsubscribes()
@@ -186,6 +188,7 @@ const state = reactive({
   scrollX: 0,
   scrollY: 0,
   isPanningViewport: false,
+  isTouchPanningSpace: false,
   prevPosition: {},
   backgroundImageSize: null
 })
@@ -207,6 +210,10 @@ watch(() => props.size, (value, prevValue) => {
   if (value) {
     update()
   }
+})
+watch([() => globalStore.pageWidth, () => globalStore.pageHeight], () => {
+  if (props.pageWidth || props.pageHeight) { return }
+  updateThrottle()
 })
 
 const pageHeight = computed(() => {
@@ -541,7 +548,19 @@ const drawCards = (cards) => {
     const rect = new Path2D()
     rect.roundRect(x, y, width, height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
-    context.fill(rect)
+    if (card.tilt) {
+      // rotate around the card's transform-origin, 16px in from the top right
+      const originX = x + width - (16 * r)
+      const originY = y + (16 * r)
+      context.save()
+      context.translate(originX, originY)
+      context.rotate(card.tilt * Math.PI / 180)
+      context.translate(-originX, -originY)
+      context.fill(rect)
+      context.restore()
+    } else {
+      context.fill(rect)
+    }
   }
 }
 
@@ -754,11 +773,30 @@ const panToPositionRightLeftClick = (event) => {
   if (!isRightAndLeftClick) { return }
   panToPosition(event)
 }
-const shouldPreventInteraction = computed(() => utils.isMobile() && !props.parentIsDialog)
 const startPanningViewport = (event) => {
   if (props.viewportIsHidden) { return }
   state.isPanningViewport = true
+  state.isTouchPanningSpace = event.pointerType === 'touch' && !props.viewportRect
+  if (state.isTouchPanningSpace) {
+    panToPositionWhileTouching(event)
+    return
+  }
   panToPosition(event)
+}
+// touch centers the space on the finger, and follows it while dragging
+const panToPositionWhileTouching = (event) => {
+  const position = positionInSpace(event)
+  if (!position) { return }
+  const zoom = globalStore.getSpaceZoomDecimal
+  const center = positionInViewportCenter(position)
+  // keep within the scrollable page, so the space doesn't jump back when the touch ends
+  const maxX = Math.max(globalStore.pageWidth * zoom, globalStore.pageWidth, globalStore.viewportWidth) - globalStore.viewportWidth
+  const maxY = Math.max(globalStore.pageHeight * zoom, globalStore.pageHeight, globalStore.viewportHeight) - globalStore.viewportHeight
+  globalStore.updateSpacePositionWhileTouching({
+    x: Math.min(center.x * zoom, maxX),
+    y: Math.min(center.y * zoom, maxY)
+  })
+  state.prevPosition = position
 }
 const positionIsInViewportRect = (position) => {
   const rect = displayViewportRect.value
@@ -794,8 +832,10 @@ const panToPosition = (event) => {
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
-  if (utils.isMobile()) { return } // disable touch pan because jittery
-  if (event.touches) { return } // ^
+  if (state.isTouchPanningSpace) {
+    panToPositionWhileTouching(event)
+    return
+  }
   const position = positionInSpace(event)
   if (!position) { return }
   const delta = {
@@ -817,6 +857,9 @@ const panViewport = (event) => {
 }
 const endPanningViewport = (event) => {
   state.isPanningViewport = false
+  if (!state.isTouchPanningSpace) { return }
+  state.isTouchPanningSpace = false
+  globalStore.updateSpacePositionAfterTouch()
 }
 const viewportIsVisible = computed(() => {
   if (props.viewportIsHidden) { return }
@@ -825,7 +868,7 @@ const viewportIsVisible = computed(() => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" :class="{ 'translucent-minimap': !shouldIncreaseUIContrast, 'prevent-interaction': shouldPreventInteraction }")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown.stop="startPanningViewport" @mousedown.stop="panToPositionRightLeftClick" @touchend.prevent :class="{ 'translucent-minimap': !shouldIncreaseUIContrast }")
   .minimap-background(v-if="props.shouldDrawBackgroundImage")
     SpaceBackgroundGradients(v-if="backgroundIsGradient" :visible="true" :layers="backgroundSpace.backgroundGradient")
     .background-image(v-else :style="backgroundImageStyles")
@@ -844,8 +887,6 @@ const viewportIsVisible = computed(() => {
   padding 0
   &.translucent-minimap
     backdrop-filter blur(8px)
-  &.prevent-interaction
-    pointer-events none
   #minimap-canvas
     position relative // above .minimap-background
   .minimap-background
