@@ -1392,7 +1392,7 @@ export default {
     const padding = 250
     const defaultSize = 200
     items = this.clone(items)
-    items = items.filter(item => Number.isFinite(item.x) && Number.isFinite(item.y))
+    items = items.filter(item => Number.isFinite(item.x) && Number.isFinite(item.y)) // 0 is valid value
     if (!items.length) {
       return { width: 0, height: 0 }
     }
