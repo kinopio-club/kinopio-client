@@ -52,7 +52,6 @@ import TagDetails from '@/components/dialogs/TagDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
-import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -1252,7 +1251,6 @@ const shouldPrevent = computed(() => {
     :data-zoom="spaceZoomDecimal"
   )
     SpaceBackground
-    SpaceBackgroundTint
     #drawing-strokes-background
     ItemsLocked
     #box-backgrounds
