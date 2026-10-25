@@ -243,6 +243,11 @@ const toggleDatePickerIsVisible = () => {
 const selectDate = (date) => {
   emit('selectDate', date)
 }
+/**
+ * @param {string|number} number
+ * @param {'day'|'week'|'month'|'year'} unit
+ * @return {dayjs.Dayjs}
+ */
 const dateFromToday = (number, unit) => {
   if (typeof number === 'string') {
     number = parseInt(number, 10)
@@ -250,6 +255,10 @@ const dateFromToday = (number, unit) => {
   const date = dayjs().add(number, unit)
   return date
 }
+/**
+ * @param {string|number} number
+ * @return {dayjs.Dayjs}
+ */
 const dateDaysFromToday = (number) => {
   return dateFromToday(number, 'day')
 }
