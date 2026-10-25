@@ -186,14 +186,32 @@ const parseDateString = (input) => {
   return date
 }
 
+const dayPattern = /^\d{1,2}d$/i // 1-2 digits + d
+const weekPattern = /^\d{1,2}w$/i // 1-2 digits + w
+const monthPattern = /^\d{1,2}m$/i // 1-2 digits + m
+const yearPattern = /^\d{1,2}y$/i // 1-2 digits + m
 const dateFromSearch = computed(() => {
   if (!props.search) { return }
   // @2d
   // https://regexr.com/8nef7
-  const dayPattern = /^\d{1,2}d$/i // 1-2 digits + d
   const isDays = dayPattern.test(props.search)
   if (isDays) {
     return dateDaysFromToday(parseInt(props.search))
+  }
+  // @2w
+  const isWeeks = weekPattern.test(props.search)
+  if (isWeeks) {
+    return dateWeeksFromToday(parseInt(props.search))
+  }
+  // @2m
+  const isMonths = monthPattern.test(props.search)
+  if (isMonths) {
+    return dateMonthsFromToday(parseInt(props.search))
+  }
+  // @2y
+  const isYears = yearPattern.test(props.search)
+  if (isYears) {
+    return dateYearsFromToday(parseInt(props.search))
   }
   // @today
   const isToday = 'today'.startsWith(props.search)
@@ -227,6 +245,18 @@ const selectDate = (date) => {
 }
 const dateDaysFromToday = (number) => {
   const date = dayjs().add(number, 'day')
+  return date
+}
+const dateWeeksFromToday = (number) => {
+  const date = dayjs().add(number, 'week')
+  return date
+}
+const dateMonthsFromToday = (number) => {
+  const date = dayjs().add(number, 'month')
+  return date
+}
+const dateYearsFromToday = (number) => {
+  const date = dayjs().add(number, 'year')
   return date
 }
 
