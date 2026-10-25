@@ -1352,11 +1352,11 @@ export const useApiStore = defineStore('api', {
         this.handleServerError({ name: 'search', error })
       }
     },
-    async updateCardCounter (body) {
+    async updateCardVote (body) {
       const spaceStore = useSpaceStore()
       try {
         const space = spaceStore.getSpaceAllState
-        const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
+        const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space) // allows read only users to vote
         const options = await this.requestOptions({ body, method: 'PATCH', space, spaceReadOnlyKey })
         const response = await fetch(`${consts.apiHost()}/card/update-counter`, options)
         return normalizeResponse(response)
