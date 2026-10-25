@@ -472,7 +472,7 @@ span.space-list-wrap
             //- preview image
             template(v-if="!props.hidePreviewImage")
               .preview-thumbnail-image-wrap(v-if="previewImage(space) && isOnline" :class="{wide: previewImageIsWide, 'full-size': props.previewImageIsFullSize}")
-                img.preview-thumbnail-image(:src="previewImage(space)" loading="lazy")
+                img.preview-thumbnail-image(loading="lazy" :src="previewImage(space)")
             //- groups
             .group-labels(v-if="props.showSpaceGroups")
               template(v-for="group in spaceGroups(space)" :key="group.id")
