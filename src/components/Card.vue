@@ -84,7 +84,6 @@ onMounted(async () => {
   }
   await updateUrlPreviewOnload()
   updateUrls()
-  checkIfShouldUpdateIframeUrl()
 })
 useStoreAction(globalStore, {
   updateRemoteCurrentConnection: () => updateRemoteConnections(),
@@ -1159,16 +1158,6 @@ const updateUrlPreviewSuccess = async (url, data) => {
   cardStore.updateCardDimensions(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
-// remove after 2025
-const retryUrlPreview = () => {
-  if (!canEditSpace.value) { return }
-  const update = {
-    id: props.card.id,
-    shouldUpdateUrlPreview: true
-  }
-  cardStore.updateCard(update)
-  updateUrlPreview()
-}
 const shouldUpdateUrlPreview = (url) => {
   if (props.card.shouldUpdateUrlPreview) { return true }
   const previewIsVisible = props.card.urlPreviewIsVisible
@@ -1784,14 +1773,6 @@ const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
 
-// migration added July 2024
-
-const checkIfShouldUpdateIframeUrl = () => {
-  if (props.card.urlPreviewEmbedHtml && !props.card.urlPreviewIframeUrl) {
-    retryUrlPreview()
-  }
-}
-
 // containing box
 
 const containingBoxes = computed(() => {
@@ -2050,7 +2031,6 @@ const toggleVideoIsPaused = () => {
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
           :isLoadingUrlPreview="isLoadingUrlPreview"
-          @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
     //- url preview loading

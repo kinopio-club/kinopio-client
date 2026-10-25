@@ -12,8 +12,6 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const themeStore = useThemeStore()
 
-let hasRetried
-
 onMounted(() => {
   window.addEventListener('touchend', disableIsActive)
   window.addEventListener('mouseup', disableIsActive)
@@ -21,9 +19,6 @@ onMounted(() => {
 watch(() => globalStore.preventDraggedCardFromShowingDetails, (value, prevValue) => {
   disableIsActive()
 })
-
-// remove retryUrlPreview after 2025
-const emit = defineEmits(['retryUrlPreview'])
 
 const props = defineProps({
   card: Object,
@@ -182,22 +177,11 @@ const handleImageError = (event) => {
     state.previewImageProxyFailed = true
     return
   }
-  // remove after 2025
-  const url = props.card.urlPreviewUrl
-  const isInstagram = url.includes('instagram')
-  // generic image error
-  if (!isInstagram) {
-    const update = {
-      id: props.card.id,
-      shouldHideUrlPreviewImage: true
-    }
-    cardStore.updateCard(update)
-    return
+  const update = {
+    id: props.card.id,
+    shouldHideUrlPreviewImage: true
   }
-  // instagram url signature expiry
-  if (hasRetried) { return }
-  emit('retryUrlPreview')
-  hasRetried = true
+  cardStore.updateCard(update)
 }
 const handleImageLoaded = (event) => {
   cardStore.updateCardDimensions(props.card.id)
@@ -272,7 +256,6 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      //- loading before src, because webkit starts loading as soon as src is set
       img.preview-image(:loading="lazyLoading" :src="previewImageUrl" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded")
 
   //- embed
