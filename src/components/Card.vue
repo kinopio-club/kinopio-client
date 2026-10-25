@@ -423,7 +423,6 @@ const cardWrapStyle = computed(() => {
     styles.transition = 'all 0.2s ease-out'
   }
   styles = updateStylesWithWidth(styles)
-  // while .card is hidden, size the wrap from saved dimensions so the viewport observer sees the whole card, not just its top left
   if (!shouldRender.value) {
     styles.width = `${props.card.resizeWidth || props.card.width}px`
     styles.height = `${props.card.height}px`

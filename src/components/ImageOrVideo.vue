@@ -172,13 +172,13 @@ const videoPreload = computed(() => {
     return 'metadata'
   }
 })
-// ugc videos have no poster, so a media fragment makes ios safari draw the first frame while paused
+// use first frame of video as poster thumbnail
 const videoUrl = computed(() => {
   if (props.video.includes('#')) { return props.video }
   return `${props.video}#t=0.001`
 })
 watch(() => isZoomedOut.value, (value) => {
-  if (isTouching.value) { return } // resumes after touching
+  if (isTouching.value) { return }
   if (value) {
     pauseVideo()
   } else {
@@ -280,7 +280,6 @@ const imgproxyUrl = (imageUrl, width, height, zoomLevel = globalStore.getMediaZo
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
-  // images are drawn smaller when the space is zoomed out, so load smaller ones, and gifs as still frames
   const maxDimensions = Math.max(width || 0, height || 0) * zoomLevel
   const shouldPauseGif = zoomLevel < 1
   return utils.imgproxyBreakpointUrl(imageUrl, maxDimensions, shouldPauseGif)
@@ -297,8 +296,7 @@ const updateImageUrlForZoom = () => {
   if (globalStore.isPinchZooming) { return }
   // offscreen cards update when they become visible, so crossing a zoom level doesn't update every image in the space in one frame
   if (!props.isVisibleInViewport) { return }
-  // the previous image stays drawn until the new src loads, and offscreen lazy images aren't fetched.
-  // visible images are spread over frames too
+  // the previous image stays drawn until the new src loads
   queueFrameTask(() => {
     if (!props.image) { return }
     updateImageUrl(props.image)
@@ -319,7 +317,7 @@ watch(() => globalStore.isPinchZooming, updateImageUrlForZoom)
 
 // events
 
-const handleSuccess = (event) => {
+const handleSuccess = () => {
   emit('loadSuccess')
 }
 const handleImageLoad = (event) => {
@@ -332,7 +330,7 @@ const handleImageLoad = (event) => {
   if (url === state.measuredImageUrl) { return }
   state.measuredImageUrl = url
   if (savedSizeFitsImage(event.target)) { return }
-  handleSuccess(event)
+  handleSuccess()
 }
 // measuring the card forces a layout, so skip it when the card's saved size already fits the image,
 // new cards (default size), changed images, and missing sizes still get measured
@@ -351,7 +349,6 @@ const handleError = (event) => {
 video(v-if="Boolean(props.video)" :autoplay="shouldAutoplayVideo" :preload="videoPreload" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="videoUrl")
 //- Image
-//- loading before src, because webkit starts loading as soon as src is set
 img.image(
   v-if="state.imageUrl"
   ref="imageElement"
@@ -375,7 +372,7 @@ img.image(
     content-visibility auto
     &.selected
       mix-blend-mode color-burn
-  // own compositing layer, so each gif frame redraws only the gif instead of repainting the page sized space layer
+  // seperate compositing layer, so each gif frame redraws only the gif instead of repainting the page sized space layer
   .image.is-animated-gif
     will-change transform
 </style>
