@@ -196,22 +196,22 @@ const dateFromSearch = computed(() => {
   // https://regexr.com/8nef7
   const isDays = dayPattern.test(props.search)
   if (isDays) {
-    return dateDaysFromToday(parseInt(props.search))
+    return dateFromToday(props.search, 'day')
   }
   // @2w
   const isWeeks = weekPattern.test(props.search)
   if (isWeeks) {
-    return dateWeeksFromToday(parseInt(props.search))
+    return dateFromToday(props.search, 'week')
   }
   // @2m
   const isMonths = monthPattern.test(props.search)
   if (isMonths) {
-    return dateMonthsFromToday(parseInt(props.search))
+    return dateFromToday(props.search, 'month')
   }
   // @2y
   const isYears = yearPattern.test(props.search)
   if (isYears) {
-    return dateYearsFromToday(parseInt(props.search))
+    return dateFromToday(props.search, 'year')
   }
   // @today
   const isToday = 'today'.startsWith(props.search)
@@ -243,21 +243,15 @@ const toggleDatePickerIsVisible = () => {
 const selectDate = (date) => {
   emit('selectDate', date)
 }
+const dateFromToday = (number, unit) => {
+  if (typeof number === 'string') {
+    number = parseInt(number, 10)
+  }
+  const date = dayjs().add(number, unit)
+  return date
+}
 const dateDaysFromToday = (number) => {
-  const date = dayjs().add(number, 'day')
-  return date
-}
-const dateWeeksFromToday = (number) => {
-  const date = dayjs().add(number, 'week')
-  return date
-}
-const dateMonthsFromToday = (number) => {
-  const date = dayjs().add(number, 'month')
-  return date
-}
-const dateYearsFromToday = (number) => {
-  const date = dayjs().add(number, 'year')
-  return date
+  return dateFromToday(number, 'day')
 }
 
 const isNoResults = computed(() => {
