@@ -1,4 +1,5 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use tauri::menu::{IsMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::utils::config::{FrontendDist, WebviewUrl};
 use tauri::webview::{NewWindowResponse, PageLoadEvent};
@@ -7,7 +8,8 @@ use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_updater::UpdaterExt;
 
 const APP_HOSTS: [&str; 2] = ["kinopio.club", "kinopio.local"];
-// static pages on the website that aren't part of the app, they open in the system browser
+// static pages on the website that aren't part of the app, they open in the system browser.
+// they're also excluded from universal links in public/.well-known/apple-app-site-association
 const PAGE_PATHS: [&str; 4] = ["blog", "about", "help", "api"];
 // external pages that the app redirects to and back from, they stay in the app
 const IN_APP_HOSTS: [&str; 2] = ["checkout.stripe.com", "billing.stripe.com"];
@@ -22,6 +24,10 @@ const WEB_INSPECTOR_MENU_ID: &str = "web-inspector";
 const UPDATE_CHECK_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 60 * 6);
 
 static TAB_COUNT: AtomicUsize = AtomicUsize::new(0);
+// a link that launches the app can arrive before the main window is built
+static LAUNCH_URL: Mutex<Option<Url>> = Mutex::new(None);
+// links that arrive while the main window is loading its first page replace it, instead of opening a tab
+static IS_MAIN_WINDOW_LOADED: AtomicBool = AtomicBool::new(false);
 
 fn is_web_url(url: &Url) -> bool {
   url.scheme() == "http" || url.scheme() == "https"
@@ -132,6 +138,9 @@ fn build_window(
       let url = payload.url();
       if payload.event() == PageLoadEvent::Finished {
         log::info!("page loaded {} {}", window.label(), url);
+        if window.label() == MAIN_WINDOW_LABEL {
+          IS_MAIN_WINDOW_LOADED.store(true, Ordering::Relaxed);
+        }
         return;
       }
       // fallback for navigations that init.js can't see, like redirects.
@@ -191,8 +200,9 @@ fn open_tab(app: &AppHandle, url: Url, parent_label: String) {
         }
         if !is_attached {
           let _ = window.show();
-          let _ = window.set_focus();
         }
+        // also brings the app to the front, for links opened from other apps
+        let _ = window.set_focus();
       });
       if let Err(error) = result {
         log::error!("could not attach tab {}", error);
@@ -220,6 +230,52 @@ fn open_tab_from_focused_window(app: &AppHandle) {
     }
   }
   open_tab(app, url, window.label().to_string());
+}
+
+// kinopio.club links clicked in other apps, which macOS sends here because of universal links.
+// the app isn't focused when they arrive, so they open as a tab of the main window, or of another window if it was closed
+#[cfg(target_os = "macos")]
+fn open_link(app: &AppHandle, url: Url) {
+  log::info!("opening link {}", url);
+  if !is_app_url(&url) {
+    if is_browser_url(&url) {
+      open_in_browser(app, &url);
+    }
+    return;
+  }
+  let windows = app.webview_windows();
+  // the link launched the app, and setup will open it in the main window
+  if windows.is_empty() {
+    *LAUNCH_URL.lock().unwrap() = Some(url);
+    return;
+  }
+  // the link launched the app, and the main window is still loading the home page
+  if let Some(window) = windows.get(MAIN_WINDOW_LABEL) {
+    if !IS_MAIN_WINDOW_LOADED.load(Ordering::Relaxed) {
+      if let Err(error) = window.navigate(url) {
+        log::error!("could not open link {}", error);
+      }
+      let _ = window.set_focus();
+      return;
+    }
+  }
+  let mut parent_label = MAIN_WINDOW_LABEL.to_string();
+  if !windows.contains_key(MAIN_WINDOW_LABEL) {
+    if let Some(label) = windows.into_keys().next() {
+      parent_label = label;
+    }
+  }
+  open_tab(app, url, parent_label);
+}
+
+#[cfg_attr(not(target_os = "macos"), allow(unused_variables))]
+fn handle_run_event(app: &AppHandle, event: tauri::RunEvent) {
+  #[cfg(target_os = "macos")]
+  if let tauri::RunEvent::Opened { urls } = event {
+    for url in urls {
+      open_link(app, url);
+    }
+  }
 }
 
 // About window with the logo, the default one shows a generic icon
@@ -371,10 +427,12 @@ pub fn run() {
             .build(),
         )?;
       }
-      build_window(app.handle(), MAIN_WINDOW_LABEL, None, true)?;
+      let launch_url = LAUNCH_URL.lock().unwrap().take();
+      build_window(app.handle(), MAIN_WINDOW_LABEL, launch_url, true)?;
       start_update_checks(app.handle());
       Ok(())
     })
-    .run(tauri::generate_context!())
-    .expect("error while building tauri application");
+    .build(tauri::generate_context!())
+    .expect("error while building tauri application")
+    .run(handle_run_event);
 }

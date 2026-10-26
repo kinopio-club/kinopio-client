@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- these must match embedded.provisionprofile, or macOS won't launch the app -->
+  <key>com.apple.application-identifier</key>
+  <string>VWRQY6FSN5.club.kinopio.desktop</string>
+  <key>com.apple.developer.team-identifier</key>
+  <string>VWRQY6FSN5</string>
+  <!-- universal links: kinopio.club links clicked in other apps open in the app, paths are in public/.well-known/apple-app-site-association -->
+  <key>com.apple.developer.associated-domains</key>
+  <array>
+    <string>applinks:kinopio.club</string>
+  </array>
+</dict>
+</plist>
