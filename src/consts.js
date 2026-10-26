@@ -9,6 +9,7 @@ export default {
     default: 100
   },
   viewportObserverMaxRootMarginPercent: 50,
+  mediaZoomLevels: [0.25, 0.5, 1], // media is loaded at the smallest level that covers the current zoom
   spaceBetweenCards: 12,
   cardCharacterLimit: 4000,
   spaceNoteCharacterLimit: 10000,

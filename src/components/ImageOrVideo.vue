@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { queueFrameTask } from '@/composables/useFrameTaskQueue.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -15,7 +16,7 @@ const imageElement = ref(null)
 let pausedCanvas
 
 onMounted(() => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
   window.addEventListener('focus', updateIsPlaying)
@@ -50,12 +51,16 @@ const props = defineProps({
   videoIsPaused: Boolean,
   cardId: String,
   width: Number,
-  height: Number
+  height: Number,
+  isVisibleInViewport: { type: Boolean, default: true }
 })
 
 const state = reactive({
   imageUrl: null,
-  imageProxySrcSet: null
+  imageProxySrcSet: null,
+  pendingImageIsDownscaled: false,
+  imageIsDownscaled: false,
+  measuredImageUrl: null
 })
 
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
@@ -66,7 +71,7 @@ watch(() => props.image, (url) => {
     state.imageProxySrcSet = null
   }
   const onLoaded = () => {
-    state.imageUrl = imgproxyUrl(url, props.width, props.height)
+    updateImageUrl(url)
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
@@ -79,13 +84,14 @@ watch(() => props.image, (url) => {
 watch(() => props.pendingUploadDataUrl, (url) => {
   if (url) {
     state.imageUrl = url
+    state.pendingImageIsDownscaled = false
   }
 })
 watch(() => props.width, (width) => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
 })
 watch(() => props.height, (height) => {
-  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+  updateImageUrl(props.image)
 })
 watch(() => globalStore.multipleSelectedActionsIsVisible, (value) => {
   if (value) { return }
@@ -151,9 +157,34 @@ const pauseVideo = () => {
 const playVideo = () => {
   if (!props.video) { return }
   if (props.videoIsPaused) { return }
+  if (isZoomedOut.value) { return }
   const element = videoElement.value
   element.play()
 }
+
+// pause videos when zoomed out, to limit how many are decoding at once
+const isZoomedOut = computed(() => globalStore.getMediaZoomLevel < 1)
+const shouldAutoplayVideo = computed(() => !props.videoIsPaused && !isZoomedOut.value)
+const videoPreload = computed(() => {
+  if (shouldAutoplayVideo.value) {
+    return 'auto'
+  } else {
+    return 'metadata'
+  }
+})
+// use first frame of video as poster thumbnail
+const videoUrl = computed(() => {
+  if (props.video.includes('#')) { return props.video }
+  return `${props.video}#t=0.001`
+})
+watch(() => isZoomedOut.value, (value) => {
+  if (isTouching.value) { return }
+  if (value) {
+    pauseVideo()
+  } else {
+    playVideo()
+  }
+})
 
 // gif
 
@@ -167,6 +198,7 @@ watch(() => isTouching.value, (value) => {
 const imageIsGif = computed(() => {
   const url = state.imageUrl
   if (!url) { return }
+  if (state.imageIsDownscaled) { return } // a still frame when zoomed out
   return url.includes('.gif')
 })
 const updateIsPlaying = () => {
@@ -244,27 +276,69 @@ const removeCanvasSelectedClass = () => {
 
 // serve smaller images w imgproxy
 
-const imgproxyUrl = (imageUrl, width, height) => {
+const imgproxyUrl = (imageUrl, width, height, zoomLevel = globalStore.getMediaZoomLevel) => {
   if (props.pendingUploadDataUrl) {
     return props.pendingUploadDataUrl
   }
-  const containerBreakpoints = [100, 200, 400, 600, 800, 1200, 3000]
-  const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
-  const maxDimensions = Math.max(width || 0, height || 0)
-  let url = utils.imgproxyUrl(imageUrl)
-  for (const breakpoint of containerBreakpoints) {
-    if (maxDimensions <= breakpoint) {
-      url = utils.imgproxyUrl(imageUrl, breakpoint * devicePixelRatio)
-      break
-    }
-  }
-  return url
+  const maxDimensions = Math.max(width || 0, height || 0) * zoomLevel
+  const shouldPauseGif = zoomLevel < 1
+  return utils.imgproxyBreakpointUrl(imageUrl, maxDimensions, shouldPauseGif)
 }
+const updateImageUrl = (imageUrl) => {
+  const url = imgproxyUrl(imageUrl, props.width, props.height)
+  state.imageUrl = url
+  // applied once it loads, because the previous image stays drawn until then
+  state.pendingImageIsDownscaled = url !== imgproxyUrl(imageUrl, props.width, props.height, 1)
+}
+const mediaZoomLevel = computed(() => globalStore.getMediaZoomLevel)
+const updateImageUrlForZoom = () => {
+  if (!props.image) { return }
+  if (globalStore.isPinchZooming) { return }
+  // offscreen cards update when they become visible, so crossing a zoom level doesn't update every image in the space in one frame
+  if (!props.isVisibleInViewport) { return }
+  // the previous image stays drawn until the new src loads
+  queueFrameTask(() => {
+    if (!props.image) { return }
+    updateImageUrl(props.image)
+  })
+}
+watch(() => props.isVisibleInViewport, (value) => {
+  if (!value) { return }
+  updateImageUrlForZoom()
+})
+// a downscaled image would lay out smaller than at full zoom, so keep it at the card's saved width
+const imageStyles = computed(() => {
+  if (!state.imageIsDownscaled) { return }
+  if (!props.width) { return }
+  return { width: `${props.width}px` }
+})
+watch(() => mediaZoomLevel.value, updateImageUrlForZoom)
+watch(() => globalStore.isPinchZooming, updateImageUrlForZoom)
 
 // events
 
-const handleSuccess = (event) => {
+const handleSuccess = () => {
   emit('loadSuccess')
+}
+const handleImageLoad = (event) => {
+  state.imageIsDownscaled = state.pendingImageIsDownscaled
+  // the card's dimensions come from the full size image
+  if (state.imageIsDownscaled) { return }
+  // reloading the same full size image after zooming back in can't change the card's dimensions,
+  // and measuring every visible card at once causes a hitch
+  const url = event.target.getAttribute('src')
+  if (url === state.measuredImageUrl) { return }
+  state.measuredImageUrl = url
+  if (savedSizeFitsImage(event.target)) { return }
+  handleSuccess()
+}
+// measuring the card forces a layout, so skip it when the card's saved size already fits the image,
+// new cards (default size), changed images, and missing sizes still get measured
+const savedSizeFitsImage = (image) => {
+  if (!props.width || !props.height) { return }
+  if (!image.naturalWidth || !image.naturalHeight) { return }
+  const expectedHeight = props.width * (image.naturalHeight / image.naturalWidth)
+  return Math.abs(expectedHeight - props.height) <= 2
 }
 const handleError = (event) => {
 }
@@ -272,17 +346,19 @@ const handleError = (event) => {
 
 <template lang="pug">
 //- Video
-video(v-if="Boolean(props.video)" :autoplay="!props.videoIsPaused" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
-  source(:src="props.video")
+video(v-if="Boolean(props.video)" :autoplay="shouldAutoplayVideo" :preload="videoPreload" loop muted playsinline :key="props.video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
+  source(:src="videoUrl")
 //- Image
 img.image(
   v-if="state.imageUrl"
   ref="imageElement"
-  :src="state.imageUrl"
-  :class="{selected: isSelectedOrDragging}"
-  @load="handleSuccess"
-  @error="handleError"
   :loading="lazyLoading"
+  decoding="async"
+  :src="state.imageUrl"
+  :class="{selected: isSelectedOrDragging, 'is-animated-gif': imageIsGif}"
+  :style="imageStyles"
+  @load="handleImageLoad"
+  @error="handleError"
 )
 </template>
 
@@ -296,4 +372,7 @@ img.image(
     content-visibility auto
     &.selected
       mix-blend-mode color-burn
+  // seperate compositing layer, so each gif frame redraws only the gif instead of repainting the page sized space layer
+  .image.is-animated-gif
+    will-change transform
 </style>

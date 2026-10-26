@@ -77,6 +77,26 @@ export default {
       return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
     }
   },
+  // the first frame of a gif, resized, because animated gifs are decoded at full size
+  imgproxyStillGifUrl (url, maxDimensions) {
+    if (!this.isKinopioUploadUrl(url)) {
+      return url
+    }
+    return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:png/plain/${encodeURIComponent(url)}`
+  },
+  imgproxyBreakpointUrl (url, maxDimensions, shouldPauseGif) {
+    // snapped to breakpoints so resizing and zooming don't request a new image every px
+    const containerBreakpoints = [100, 200, 400, 600, 800, 1200, 3000]
+    const devicePixelRatio = Math.round(window.devicePixelRatio || 1)
+    const breakpoint = containerBreakpoints.find(breakpoint => maxDimensions <= breakpoint)
+    const isGif = url.includes('.gif')
+    if (shouldPauseGif && isGif) {
+      const stillBreakpoint = breakpoint || last(containerBreakpoints)
+      return this.imgproxyStillGifUrl(url, stillBreakpoint * devicePixelRatio)
+    }
+    if (!breakpoint) { return this.imgproxyUrl(url) }
+    return this.imgproxyUrl(url, breakpoint * devicePixelRatio)
+  },
   mobileTouchPosition (event, type) {
     let touch
     if (event.touches[0]) {
@@ -1372,7 +1392,7 @@ export default {
     const padding = 250
     const defaultSize = 200
     items = this.clone(items)
-    items = items.filter(item => item.x && item.y)
+    items = items.filter(item => Number.isFinite(item.x) && Number.isFinite(item.y)) // 0 is valid value
     if (!items.length) {
       return { width: 0, height: 0 }
     }
@@ -2352,7 +2372,7 @@ export default {
     // then '.', or ':' + portnumbers
     // followed by at least 1 alphanumeric, '=', or '.'
     // then optional trailing '/' or '-'
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.!]+\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.!)]+\/?-?/igm)
     const localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)

@@ -370,6 +370,13 @@ export const useGlobalStore = defineStore('global', {
       const margin = Math.round(consts.viewportObserverMaxRootMarginPercent * zoom)
       return `${margin}%`
     },
+    getMediaZoomLevel () {
+      // stepped so images aren't re-requested on every zoom change
+      const zoom = this.getSpaceZoomDecimal
+      const level = consts.mediaZoomLevels.find(level => level >= zoom)
+      if (!level) { return 1 }
+      return level
+    },
     getIsTouchDevice () {
       return this.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
@@ -449,6 +456,9 @@ export const useGlobalStore = defineStore('global', {
     },
     getToolbarIsList () {
       return this.currentUserToolbar === 'list'
+    },
+    getToolbarIsLine () {
+      return this.currentUserToolbar === 'line'
     },
     getTags () {
       const spaceStore = useSpaceStore()
@@ -631,6 +641,7 @@ export const useGlobalStore = defineStore('global', {
     triggerClearUserNotifications () {},
     triggerAddBox (event) {},
     triggerAddList (event) {},
+    triggerAddLine (event) {},
     triggerClearTaskFilters () {},
     triggerToggleGroupSpaceFilter (group) {},
     // select all below
@@ -683,10 +694,18 @@ export const useGlobalStore = defineStore('global', {
       this.shouldPreventNextEnterKey = false
       this.triggerDrawingReset()
     },
-    updatePageSizesFromRect (itemsRect) {
+    updatePageSizesFromRect (itemsRect, shouldShrink) {
       if (!itemsRect) { return }
-      const pageWidth = Math.max(this.viewportWidth, itemsRect.width, this.pageWidth)
-      const pageHeight = Math.max(this.viewportHeight, itemsRect.height, this.pageHeight)
+      let minWidth = this.pageWidth
+      let minHeight = this.pageHeight
+      // shrink to fit items, but not past the current scroll position
+      if (shouldShrink) {
+        const zoom = this.getSpaceCounterZoomDecimal
+        minWidth = (window.scrollX + this.viewportWidth) * zoom
+        minHeight = (window.scrollY + this.viewportHeight) * zoom
+      }
+      const pageWidth = Math.max(this.viewportWidth, itemsRect.width, minWidth)
+      const pageHeight = Math.max(this.viewportHeight, itemsRect.height, minHeight)
       this.pageWidth = Math.round(pageWidth)
       this.pageHeight = Math.round(pageHeight)
     },
@@ -714,7 +733,8 @@ export const useGlobalStore = defineStore('global', {
       const itemsRect = utils.pageSizeFromItems(items)
       const drawingRect = await utils.imageSize(spaceStore.drawingImage)
       const rect = utils.mergeRectSizes(itemsRect, drawingRect)
-      this.updatePageSizesFromRect(rect)
+      const shouldShrink = true
+      this.updatePageSizesFromRect(rect, shouldShrink)
     },
     updateViewportSizes () {
       const viewport = utils.visualViewport()
@@ -2305,51 +2325,82 @@ export const useGlobalStore = defineStore('global', {
 
     // scrolling and zoom
 
-    async zoomSpaceTo ({ percent, origin }) {
+    // position: the page scroll the space would need without an outside space offset, negative when the space is moved away from the top left
+    async updateSpacePosition (position) {
+      const canHaveOutsideSpace = this.spaceZoomPercent < consts.spaceZoom.default
+      const offset = {}
+      const scroll = {}
+      const axes = ['x', 'y']
+      axes.forEach(axis => {
+        // scroll can't be negative, so the outside space offset makes up the rest
+        if (position[axis] < 0 && canHaveOutsideSpace) {
+          offset[axis] = -position[axis]
+          scroll[axis] = 0
+        } else {
+          offset[axis] = 0
+          scroll[axis] = Math.max(position[axis], 0)
+        }
+      })
+      this.spaceZoomOffset = offset
+      // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
+      await nextTick()
+      window.scrollTo(scroll.x, scroll.y)
+      // the browser rounds scroll to the pixel grid, so shift the space by the remainder to keep it exactly in place
+      // otherwise slow zooming jitters by a pixel, and the rounding adds up into drift
+      const remainder = {
+        x: window.scrollX - scroll.x,
+        y: window.scrollY - scroll.y
+      }
+      const isRounding = Math.abs(remainder.x) < 1 && Math.abs(remainder.y) < 1
+      if (!isRounding) { return }
+      this.spaceZoomOffset = {
+        x: offset.x + remainder.x,
+        y: offset.y + remainder.y
+      }
+    },
+    // ios safari reverts scrollTo calls made while a finger is down, so touch gestures only move the space with its offset
+    updateSpacePositionWhileTouching (position) {
+      this.spaceZoomOffset = {
+        x: window.scrollX - position.x,
+        y: window.scrollY - position.y
+      }
+    },
+    // after the touch, move the space from the offset back into page scroll
+    updateSpacePositionAfterTouch () {
+      const offset = this.spaceZoomOffset
+      const position = {
+        x: window.scrollX - offset.x,
+        y: window.scrollY - offset.y
+      }
+      return this.updateSpacePosition(position)
+    },
+    // target: where the space point under origin should end up, for panning while pinching. defaults to origin
+    async zoomSpaceTo ({ percent, origin, target }) {
       percent = Math.max(percent, consts.spaceZoom.min)
       percent = Math.min(percent, consts.spaceZoom.max)
       const prevZoom = this.getSpaceZoomDecimal
       const zoom = percent / 100
-      if (zoom === prevZoom) { return }
       const viewportCenter = { x: this.viewportWidth / 2, y: this.viewportHeight / 2 }
       origin = origin || viewportCenter
+      target = target || origin
+      const isPanning = target.x !== origin.x || target.y !== origin.y
+      if (zoom === prevZoom && !isPanning) { return }
       const offset = this.spaceZoomOffset
       // space point currently under the origin
       const point = {
         x: (window.scrollX + origin.x - offset.x) / prevZoom,
         y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
-      // the scroll that keeps point under the origin
-      // when it would be negative, grow the outside space offset instead, so the space shifts away from the top left
-      // when it is positive, shrink the offset back down first
-      const newOffset = { x: offset.x, y: offset.y }
-      const scroll = {
-        x: (point.x * zoom) + offset.x - origin.x,
-        y: (point.y * zoom) + offset.y - origin.y
-      }
-      const axes = ['x', 'y']
-      axes.forEach(axis => {
-        if (scroll[axis] < 0) {
-          newOffset[axis] = offset[axis] - scroll[axis]
-          scroll[axis] = 0
-        } else {
-          const delta = Math.min(offset[axis], scroll[axis])
-          newOffset[axis] = offset[axis] - delta
-          scroll[axis] = scroll[axis] - delta
-        }
-      })
-      // at >100% there should be no outside space margin
-      if (percent >= consts.spaceZoom.default) {
-        axes.forEach(axis => {
-          scroll[axis] = Math.max(scroll[axis] - newOffset[axis], 0)
-          newOffset[axis] = 0
-        })
+      const position = {
+        x: (point.x * zoom) - target.x,
+        y: (point.y * zoom) - target.y
       }
       this.spaceZoomPercent = percent
-      this.spaceZoomOffset = newOffset
-      // scroll after the scaled space renders, otherwise scrollTo clamps to the old space size
-      await nextTick()
-      window.scrollTo(scroll.x, scroll.y)
+      if (this.isPinchZooming) {
+        this.updateSpacePositionWhileTouching(position)
+        return
+      }
+      await this.updateSpacePosition(position)
     },
     zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
       this.closeAllDialogs()

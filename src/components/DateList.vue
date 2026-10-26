@@ -114,7 +114,7 @@ const selectFocusedItem = () => {
 const dateSearchLabel = computed(() => {
   const date = props.dateFromSearch
   if (!date) { return }
-  return utils.shortAbsoluteDate(date)
+  return dayjs(date).format('ddd MMM D, YYYY')
 })
 const dateSearchIsToday = computed(() => props.dateFromSearch.isSame(dayjs(), 'day'))
 

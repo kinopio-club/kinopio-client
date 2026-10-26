@@ -12,4 +12,4 @@ The Kinopio API is used to find, save, and update the spaces of signed up users.
 
 All routes, attributes and how to authenticate can be found in the [API Docs](/api).
 
-Some things people have built with it include quick add shortcuts, alternate ways to visualize spaces, and custom MCP support. If you have a question aobut the API, the best place to get help is in the community [Discord](/discord) or the [Forums](/forum).
+Some things people have built with it include quick add shortcuts, alternate ways to visualize spaces, and custom MCP support. If you have a question about the API, the best place to get help is in the community [Discord](/discord) or the [Forums](/forum).
