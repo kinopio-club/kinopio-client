@@ -174,7 +174,7 @@ onMounted(async () => {
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
-    apiStore.sendQueue()
+    apiStore.scheduleSendQueue()
   }, 5000) // every 5 seconds
   // update inbox space in local storage, one time
   hourlyTasks = setInterval(() => {
