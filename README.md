@@ -246,6 +246,6 @@ On macOS >26, the icon is compiled from `src-tauri/icon-composer.icon`
 
 # Android
 
-    bubblewrap build
+[wip]
 
 produces an `.aab` for the Play Store and an `.apk` for testing on a phone.

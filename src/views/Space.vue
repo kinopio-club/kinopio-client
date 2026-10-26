@@ -52,7 +52,6 @@ import TagDetails from '@/components/dialogs/TagDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
-import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -192,6 +191,9 @@ onMounted(async () => {
       } else if (name === 'triggerAddList') {
         const event = args[0]
         addList(event)
+      } else if (name === 'triggerAddLine') {
+        const event = args[0]
+        addLine(event)
       } else if (name === 'triggerUserIsLoaded') {
         updateSystemTheme()
       }
@@ -317,11 +319,12 @@ const pageCursor = computed(() => {
   const isPanningReady = globalStore.currentUserIsPanningReady
   const toolbarIsBox = globalStore.getToolbarIsBox
   const toolbarIsList = globalStore.getToolbarIsList
+  const toolbarIsLine = globalStore.getToolbarIsLine
   if (isPanning) {
     return 'grabbing'
   } else if (isPanningReady) {
     return 'grab'
-  } else if (toolbarIsBox || toolbarIsList) {
+  } else if (toolbarIsBox || toolbarIsList || toolbarIsLine) {
     return 'crosshair'
   }
   return undefined
@@ -667,6 +670,38 @@ const checkIfShouldUpdateCardPositionsInEdgeLists = () => {
     cardStore.updateCardPositionsInList(list)
   })
   globalStore.multipleListsWereDraggedToEdge = []
+}
+
+// lines
+
+const addLine = (event) => {
+  const position = utils.cursorPositionInSpace(event)
+  userStore.notifyReadOnly(position)
+  if (!userStore.getUserIsSpaceMember) {
+    globalStore.updateCurrentUserToolbar('card')
+    return
+  }
+  const line = {
+    id: nanoid(),
+    y: position.y
+  }
+  lineStore.createLine(line)
+  // start dragging the new line
+  globalStore.linesWereDragged = false
+  globalStore.currentUserIsDraggingLine = true
+  globalStore.currentDraggingLineId = line.id
+  const updates = {
+    lineId: line.id,
+    userId: userStore.id
+  }
+  broadcastStore.update({ updates, action: 'addToRemoteLinesDragging' })
+  prevCursor = utils.cursorPositionInViewport(event)
+  event.preventDefault() // allows dragging lines without scrolling on touch
+}
+const stopAddingLine = () => {
+  if (!globalStore.getToolbarIsLine) { return }
+  if (!globalStore.currentUserIsDraggingLine) { return }
+  globalStore.updateCurrentUserToolbar('card')
 }
 
 // drag items
@@ -1064,6 +1099,7 @@ const stopInteractions = async (event) => {
   stopTiltingCards()
   stopResizingBoxes()
   stopResizingLists()
+  stopAddingLine()
   resetGlobalStoreState()
   await nextTick()
   await nextTick()
@@ -1215,7 +1251,6 @@ const shouldPrevent = computed(() => {
     :data-zoom="spaceZoomDecimal"
   )
     SpaceBackground
-    SpaceBackgroundTint
     #drawing-strokes-background
     ItemsLocked
     #box-backgrounds

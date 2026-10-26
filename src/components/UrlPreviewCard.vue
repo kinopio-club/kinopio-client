@@ -12,8 +12,6 @@ const globalStore = useGlobalStore()
 const cardStore = useCardStore()
 const themeStore = useThemeStore()
 
-let hasRetried
-
 onMounted(() => {
   window.addEventListener('touchend', disableIsActive)
   window.addEventListener('mouseup', disableIsActive)
@@ -21,9 +19,6 @@ onMounted(() => {
 watch(() => globalStore.preventDraggedCardFromShowingDetails, (value, prevValue) => {
   disableIsActive()
 })
-
-// remove retryUrlPreview after 2025
-const emit = defineEmits(['retryUrlPreview'])
 
 const props = defineProps({
   card: Object,
@@ -36,7 +31,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  isActive: null
+  isActive: null,
+  previewImageProxyFailed: false
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -71,6 +67,13 @@ const colorClasses = computed(() => {
 
 const previewImageIsVisible = computed(() => {
   return props.card.urlPreviewImage && !shouldHideImage.value
+})
+// sized to the card, and smaller when zoomed out. only kinopio hosted images can be resized by imgproxy
+const previewImageUrl = computed(() => {
+  const url = props.card.urlPreviewImage
+  if (state.previewImageProxyFailed) { return url }
+  const maxDimensions = (props.card.width || 0) * globalStore.getMediaZoomLevel
+  return utils.imgproxyBreakpointUrl(url, maxDimensions)
 })
 const lazyLoading = computed(() => {
   if (globalStore.disableViewportOptimizations) {
@@ -169,22 +172,16 @@ const removeTrailingAttributionText = (description) => {
 
 const handleImageError = (event) => {
   console.info('🚑 urlPreviewCard handleImageError', event)
-  // remove after 2025
-  const url = props.card.urlPreviewUrl
-  const isInstagram = url.includes('instagram')
-  // generic image error
-  if (!isInstagram) {
-    const update = {
-      id: props.card.id,
-      shouldHideUrlPreviewImage: true
-    }
-    cardStore.updateCard(update)
+  // retry the original image before hiding the preview
+  if (previewImageUrl.value !== props.card.urlPreviewImage) {
+    state.previewImageProxyFailed = true
     return
   }
-  // instagram url signature expiry
-  if (hasRetried) { return }
-  emit('retryUrlPreview')
-  hasRetried = true
+  const update = {
+    id: props.card.id,
+    shouldHideUrlPreviewImage: true
+  }
+  cardStore.updateCard(update)
 }
 const handleImageLoaded = (event) => {
   cardStore.updateCardDimensions(props.card.id)
@@ -259,7 +256,7 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded" :loading="lazyLoading")
+      img.preview-image(:loading="lazyLoading" :src="previewImageUrl" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" @load="handleImageLoaded")
 
   //- embed
   template(v-if="shouldDisplayIframe")

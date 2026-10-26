@@ -32,6 +32,7 @@ Use `Sidebar → @` to stay on top of the cards that have been assigned to you, 
 You can also use `@` to add due dates to cards. Either by clicking a date, or by typing out a date with the following syntaxes:
 
 - `@1d` will add a date `1` `d`ay from now. `@2d` will do `2` `d`ays from now. And so on.
+- Add longer timeframe dates with `3w`, `2m`, `1y` for weeks, months and years respectively
 - `@today` and `@tomorrow`
 - `@nov20` or `@jan5` specify dates with the 3 letter month code and the day number (no spaces)
 

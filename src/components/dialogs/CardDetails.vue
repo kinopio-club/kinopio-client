@@ -1299,6 +1299,7 @@ const checkIfIsInsertLineBreak = (event) => {
   }
 }
 const insertLineBreak = (event) => {
+  event.preventDefault() // safari fix
   const position = nameElement.value.selectionEnd
   let newName = card.value.name
   newName = newName.substring(0, position) + '\n' + name.value.substring(position)
