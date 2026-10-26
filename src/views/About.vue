@@ -83,10 +83,13 @@ AboutJsonLd
           height="511"
         )
           source(src="https://updates.kinopio.club/pages/about/hero/1.webm")
-        p Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
+        p Started in 2018, Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
-        p Free for 100 cards. No sign up required. No ads or AI crap.
+        .row
+          img.icon.palm-trees(src="https://updates.kinopio.club/pages/about/palm-trees.svg" alt="palm-trees")
+          p An oasis for the mind, with no ads, tracking, or AI bloat.
+        p Free for 100 cards. No sign up required.
 
         //- cta
         .button-wrap
@@ -137,4 +140,16 @@ AboutJsonLd
 
 <style lang="stylus">
 // page.styl
+.page
+  section.intro
+    .row
+      display flex
+      align-items center
+      margin 1rem 0
+      max-width 370px
+      img.palm-trees
+        width 60px
+        margin-right 5px
+      p
+        margin-top 0
 </style>

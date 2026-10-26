@@ -10,7 +10,7 @@ const isSafari = computed(() => utils.isSafari() || utils.isIPhone())
 
 <template lang="pug">
 section.how-to
-  h2 How To
+  h2 Tap, Type, Connect, Paint, and Snap
   .how-to-wrap
     .row
       .side.left
@@ -47,7 +47,7 @@ section.how-to
     .row
       .side.left
         h3 Boxes and Lists to Organize
-        p Use Boxes to keep related items together. Lists let you vertically group and easily reorder cards, and are ideal for Kanban-style project management.
+        p Use Boxes to keep related items together. Snap cards into lists to vertically group and reorder them. Lists are ideal for turning ideas into projects.
 
       .side.right
         video(

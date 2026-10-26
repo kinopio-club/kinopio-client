@@ -11,7 +11,9 @@ section.faq
     section.subsection
       p Physical whiteboards are so productive because drawing and writing with markers is a naturally messy, chaotic process, which produces novel new ideas and shared understanding.
       p But the typical software whiteboard is designed around neatness and conformity. Expressiveness and personality is replaced with a maze through endless toolbars and sticky notes in one of five designer-approved pastel shades.
-      p Taking a different approach, Kinopio's just-click-and-type design and visual customizability is designed to encourage creativity and experimentation.
+      p Taking a{{' '}}
+        a(href="https://pketh.org/towards-a-better-whiteboard.html") different approach
+        span , Kinopio's just-click-and-type design and visual customizability is designed to encourage creativity and experimentation.
       p Like a physical whiteboard, the outputs produced this way tend to be{{' '}}
         a(href="https://uxdesign.cc/low-fidelity-design-is-higher-up-the-value-chain-fdf1824c6aa1") lower-fidelity
         span {{' '}}and conceptual – ideal for problem solving, and for turning debates into discussions.
