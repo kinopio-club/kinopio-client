@@ -173,7 +173,8 @@ const toggleTipsIsVisible = () => {
 // date
 
 const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday',
+  'friday', 'saturday']
 /**
  * @param {string} input
  * @return {dayjs.Dayjs|undefined}
@@ -195,17 +196,20 @@ const parseDateString = (input) => {
  * @return {dayjs.Dayjs|undefined}
  */
 const parseDayOfWeekString = (input) => {
+  if (input.length < 2) { return }
   const lower = input.toLowerCase()
-  const day = dayOfWeek.indexOf(lower)
-  if (day === -1) { return }
-  let date = dayjs()
-  if (date.day() === day) {
-    date = date.add(1, 'day')
+  for (let day = 0; day < dayOfWeek.length; day++) {
+    if (dayOfWeek[day].startsWith(lower)) {
+      let date = dayjs()
+      if (date.day() === day) {
+        date = date.add(1, 'day')
+      }
+      while (date.day() !== day) {
+        date = date.add(1, 'day')
+      }
+      return date
+    }
   }
-  while (date.day() !== day) {
-    date = date.add(1, 'day')
-  }
-  return date
 }
 
 const numDaysPattern = /^\d{1,2}d$/i // 1-2 digits + d
@@ -252,10 +256,10 @@ const dateFromSearch = computed(() => {
   if (isDate) {
     return parseDateString(props.search)
   }
-  // @mon
-  const isDayOfweek = dayOfWeekPattern.test(props.search)
-  if (isDayOfweek) {
-    return parseDayOfWeekString(props.search)
+  // @monday, etc.
+  const dayOfWeekDate = parseDayOfWeekString(props.search)
+  if (dayOfWeekDate !== undefined) {
+    return dayOfWeekDate
   }
   return null
 })
@@ -324,7 +328,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
       .row(v-if="state.tipsIsVisible")
         span.badge.info.tips-badge
           p To @mention other people, invite them to this space, or a group.
-          p Type dates with '5d', '3w', '2m', '1y', 'today', 'tomorrow', 'mon', or 'nov20' syntax.
+          p Type dates with '5d', '3w', '2m', '1y', 'today', 'tomorrow', 'monday', or 'nov20' syntax.
     //- users
     UserList(
       :users="filteredUsers"
