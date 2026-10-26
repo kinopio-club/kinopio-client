@@ -172,44 +172,68 @@ const toggleTipsIsVisible = () => {
 
 // date
 
+const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+/**
+ * @param {string} input
+ * @return {dayjs.Dayjs|undefined}
+ */
 const parseDateString = (input) => {
-  const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
   const lower = input.toLowerCase()
   const monthPart = lower.slice(0, 3)
   const dayPart = lower.slice(3)
-  if (!months.includes(monthPart)) { return }
   const month = months.indexOf(monthPart)
+  if (month === -1) { return }
   const day = parseInt(dayPart, 10) || 1 // if no day, use 1
   const year = dayjs().year()
   let date = dayjs(new Date(year, month, day))
   if (date.isBefore(dayjs(), 'day')) date = date.add(1, 'year') // if date is past, use next year
   return date
 }
+/**
+ * @param {string} input
+ * @return {dayjs.Dayjs|undefined}
+ */
+const parseDayOfWeekString = (input) => {
+  const lower = input.toLowerCase()
+  const day = dayOfWeek.indexOf(lower)
+  if (day === -1) { return }
+  let date = dayjs()
+  if (date.day() === day) {
+    date = date.add(1, 'day')
+  }
+  while (date.day() !== day) {
+    date = date.add(1, 'day')
+  }
+  return date
+}
 
-const dayPattern = /^\d{1,2}d$/i // 1-2 digits + d
-const weekPattern = /^\d{1,2}w$/i // 1-2 digits + w
-const monthPattern = /^\d{1,2}m$/i // 1-2 digits + m
-const yearPattern = /^\d{1,2}y$/i // 1-2 digits + m
+const numDaysPattern = /^\d{1,2}d$/i // 1-2 digits + d
+const numWeeksPattern = /^\d{1,2}w$/i // 1-2 digits + w
+const numMonthsPattern = /^\d{1,2}m$/i // 1-2 digits + m
+const numYearsPattern = /^\d{1,2}y$/i // 1-2 digits + m
+const monthPattern = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d{0,2}$/i // match + 0-2 digits
+const dayOfWeekPattern = /^(sun|mon|tue|wed|thu|fri|sat)\d{0,2}$/i // match + 0-2 digits
 const dateFromSearch = computed(() => {
   if (!props.search) { return }
   // @2d
   // https://regexr.com/8nef7
-  const isDays = dayPattern.test(props.search)
+  const isDays = numDaysPattern.test(props.search)
   if (isDays) {
     return dateFromToday(props.search, 'day')
   }
   // @2w
-  const isWeeks = weekPattern.test(props.search)
+  const isWeeks = numWeeksPattern.test(props.search)
   if (isWeeks) {
     return dateFromToday(props.search, 'week')
   }
   // @2m
-  const isMonths = monthPattern.test(props.search)
+  const isMonths = numMonthsPattern.test(props.search)
   if (isMonths) {
     return dateFromToday(props.search, 'month')
   }
   // @2y
-  const isYears = yearPattern.test(props.search)
+  const isYears = numYearsPattern.test(props.search)
   if (isYears) {
     return dateFromToday(props.search, 'year')
   }
@@ -224,10 +248,14 @@ const dateFromSearch = computed(() => {
     return dateDaysFromToday(1)
   }
   // @nov20
-  const datePattern = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d{0,2}$/i // match + 0-2 digits
-  const isDate = datePattern.test(props.search)
+  const isDate = monthPattern.test(props.search)
   if (isDate) {
     return parseDateString(props.search)
+  }
+  // @mon
+  const isDayOfweek = dayOfWeekPattern.test(props.search)
+  if (isDayOfweek) {
+    return parseDayOfWeekString(props.search)
   }
   return null
 })
@@ -296,7 +324,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
       .row(v-if="state.tipsIsVisible")
         span.badge.info.tips-badge
           p To @mention other people, invite them to this space, or a group.
-          p Type dates with '5d', '3w', '2m', '1y', 'today', 'tomorrow', or 'nov20' syntax.
+          p Type dates with '5d', '3w', '2m', '1y', 'today', 'tomorrow', 'mon', or 'nov20' syntax.
     //- users
     UserList(
       :users="filteredUsers"
