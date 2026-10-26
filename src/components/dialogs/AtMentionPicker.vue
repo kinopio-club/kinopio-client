@@ -296,7 +296,7 @@ dialog.narrow.at-picker(v-if="props.visible" :open="props.visible" @click.left.s
       .row(v-if="state.tipsIsVisible")
         span.badge.info.tips-badge
           p To @mention other people, invite them to this space, or a group.
-          p Type dates with '5d', 'today', 'tomorrow', or 'nov20' syntax.
+          p Type dates with '5d', '3w', '2m', '1y', 'today', 'tomorrow', or 'nov20' syntax.
     //- users
     UserList(
       :users="filteredUsers"
