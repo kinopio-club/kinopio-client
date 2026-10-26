@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useListStore } from '@/stores/useListStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
@@ -10,6 +11,7 @@ import consts from '@/consts.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
+const listStore = useListStore()
 const themeStore = useThemeStore()
 
 onMounted(() => {
@@ -183,8 +185,11 @@ const handleImageError = (event) => {
   }
   cardStore.updateCard(update)
 }
-const handleImageLoaded = (event) => {
-  cardStore.updateCardDimensions(props.card.id)
+const handleImageLoaded = async (event) => {
+  await cardStore.updateCardDimensions(props.card.id)
+  if (!props.card.listId) { return }
+  const list = listStore.getList(props.card.listId)
+  cardStore.updateCardPositionsInList(list)
 }
 
 // title, description
