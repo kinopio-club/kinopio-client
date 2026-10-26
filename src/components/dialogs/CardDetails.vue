@@ -1276,6 +1276,7 @@ const handleEnterKey = (event) => {
 }
 // 🎹 ctrl-enter, alt-enter
 const handleOptionEnterKey = (event) => {
+  event.preventDefault()
   const optionEnterChildCard = !userStore.cardSettingsShiftEnterShouldAddChildCard
   if (optionEnterChildCard) {
     globalStore.triggerAddChildCard()
@@ -1285,6 +1286,7 @@ const handleOptionEnterKey = (event) => {
 }
 // 🎹 shift-enter
 const handleShiftEnterKey = (event) => {
+  event.preventDefault()
   const shiftEnterChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
   if (shiftEnterChildCard) {
     globalStore.triggerAddChildCard()
