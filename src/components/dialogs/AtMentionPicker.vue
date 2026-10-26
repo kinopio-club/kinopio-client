@@ -217,7 +217,6 @@ const numWeeksPattern = /^\d{1,2}w$/i // 1-2 digits + w
 const numMonthsPattern = /^\d{1,2}m$/i // 1-2 digits + m
 const numYearsPattern = /^\d{1,2}y$/i // 1-2 digits + m
 const monthPattern = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d{0,2}$/i // match + 0-2 digits
-const dayOfWeekPattern = /^(sun|mon|tue|wed|thu|fri|sat)\d{0,2}$/i // match + 0-2 digits
 const dateFromSearch = computed(() => {
   if (!props.search) { return }
   // @2d
