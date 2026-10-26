@@ -8,6 +8,22 @@
             "NOT /help/*",
             "/*"
         ]
+      },
+      {
+        "appIDs": ["VWRQY6FSN5.club.kinopio.desktop"],
+        "components": [
+          { "/": "/", "exclude": true, "comment": "static pages open in the browser, these match PAGE_PATHS in src-tauri/src/lib.rs" },
+          { "/": "/about", "exclude": true },
+          { "/": "/about/*", "exclude": true },
+          { "/": "/from/*", "exclude": true },
+          { "/": "/blog", "exclude": true },
+          { "/": "/blog/*", "exclude": true },
+          { "/": "/help", "exclude": true },
+          { "/": "/help/*", "exclude": true },
+          { "/": "/api", "exclude": true },
+          { "/": "/api/*", "exclude": true },
+          { "/": "/*" }
+        ]
       }
     ]
   },

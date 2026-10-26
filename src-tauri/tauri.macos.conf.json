@@ -2,6 +2,12 @@
   "bundle": {
     "resources": {
       "icons/Assets.car": "Assets.car"
+    },
+    "macOS": {
+      "entitlements": "./Entitlements.plist",
+      "files": {
+        "embedded.provisionprofile": "./embedded.provisionprofile"
+      }
     }
   }
 }
