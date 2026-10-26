@@ -1209,7 +1209,7 @@ export const useCardStore = defineStore('cards', {
       if (globalStore.getShouldPreventCardVote(update)) { return }
       this.updateCardsState([card])
       globalStore.updateCardVote(update)
-      apiStore.updateCardCounter(update)
+      apiStore.updateCardVote(update)
       broadcastStore.update({ updates: [card], store: 'cardStore', action: 'updateCardsState' })
     },
 

@@ -393,24 +393,24 @@ export const useListStore = defineStore('lists', {
       const cardStore = useCardStore()
       if (!list) { return }
       cards = cards || cardStore.getCardsByList(list.id)
+      let height = consts.listEmptyHeight
       // list has cards
       if (cards.length) {
         const card = last(cards)
         const listInfoBottomOffset = 26
-        const listHeight = (card.y - list.y) + card.height + consts.listPadding + listInfoBottomOffset
+        height = (card.y - list.y) + card.height + consts.listPadding + listInfoBottomOffset
+      }
+      // called whenever a list scrolls into view, so skip unchanged updates, which would save, broadcast, and re-render placeholders
+      if (list.height !== height) {
         this.updateList({
           id: list.id,
-          height: listHeight
-        })
-        this.listChildPlaceholders[list.id] = cards
-      // list is empty
-      } else {
-        this.listChildPlaceholders[list.id] = []
-        this.updateList({
-          id: list.id,
-          height: consts.listEmptyHeight
+          height
         })
       }
+      const placeholders = this.listChildPlaceholders[list.id]
+      const placeholdersAreUnchanged = placeholders && placeholders.length === cards.length && placeholders.every((placeholder, index) => placeholder === cards[index])
+      if (placeholdersAreUnchanged) { return }
+      this.listChildPlaceholders[list.id] = cards
     },
     selectItemsInSelectedLists () {
       const globalStore = useGlobalStore()

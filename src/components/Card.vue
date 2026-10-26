@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, toRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, watch, ref, toRef, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
@@ -16,6 +16,7 @@ import { useThemeStore } from '@/stores/useThemeStore'
 
 import { useStickyCard } from '@/composables/useStickyCard.js'
 import { useStoreAction } from '@/composables/useStoreAction.js'
+import { useViewportObserver } from '@/composables/useViewportObserver.js'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -75,8 +76,6 @@ const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
-let observer
-
 onMounted(async () => {
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
   const shouldFocus = globalStore.loadSpaceFocusOnItemId === props.card.id
@@ -85,11 +84,6 @@ onMounted(async () => {
   }
   await updateUrlPreviewOnload()
   updateUrls()
-  checkIfShouldUpdateIframeUrl()
-  initViewportObserver()
-})
-onBeforeUnmount(() => {
-  removeViewportObserver()
 })
 useStoreAction(globalStore, {
   updateRemoteCurrentConnection: () => updateRemoteConnections(),
@@ -111,8 +105,7 @@ useStoreAction(globalStore, {
   },
   triggerUpdateTheme: () => updateDefaultBackgroundColor(utils.cssVariable('secondary-background')),
   triggerCancelLocking: () => cancelLocking(),
-  triggerIsSnappingToList: () => { state.isSnappingToList = true },
-  triggerUpdateViewportObservers: () => initViewportObserver()
+  triggerIsSnappingToList: () => { state.isSnappingToList = true }
 })
 
 const props = defineProps({
@@ -429,6 +422,11 @@ const cardWrapStyle = computed(() => {
     styles.transition = 'all 0.2s ease-out'
   }
   styles = updateStylesWithWidth(styles)
+  if (!shouldRender.value) {
+    styles.width = `${props.card.resizeWidth || props.card.width}px`
+    styles.height = `${props.card.height}px`
+    styles.pointerEvents = 'none'
+  }
   return styles
 })
 const cardStyle = computed(() => {
@@ -1160,16 +1158,6 @@ const updateUrlPreviewSuccess = async (url, data) => {
   cardStore.updateCardDimensions(cardId)
   await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
-// remove after 2025
-const retryUrlPreview = () => {
-  if (!canEditSpace.value) { return }
-  const update = {
-    id: props.card.id,
-    shouldUpdateUrlPreview: true
-  }
-  cardStore.updateCard(update)
-  updateUrlPreview()
-}
 const shouldUpdateUrlPreview = (url) => {
   if (props.card.shouldUpdateUrlPreview) { return true }
   const previewIsVisible = props.card.urlPreviewIsVisible
@@ -1594,32 +1582,12 @@ const userDetailsIsUser = computed(() => {
 
 // is visible in viewport, perf, should render
 
-const initViewportObserver = async () => {
-  removeViewportObserver()
-  await nextTick()
-  try {
-    const callback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          state.isVisibleInViewport = true
-          checkIfShouldUpdateDimensions()
-        } else {
-          state.isVisibleInViewport = false
-        }
-      })
-    }
-    const target = cardElement.value
-    observer = new IntersectionObserver(callback, { rootMargin: globalStore.getViewportObserverRootMargin })
-    observer.observe(target)
-  } catch (error) {
-    console.error('🚒 card initViewportObserver', error)
+useViewportObserver('cards', cardElement, (isIntersecting) => {
+  state.isVisibleInViewport = isIntersecting
+  if (isIntersecting) {
+    checkIfShouldUpdateDimensions()
   }
-}
-const removeViewportObserver = () => {
-  if (!observer) { return }
-  observer.disconnect()
-  observer = null
-}
+})
 const shouldRender = computed(() => {
   const shouldExplitlyRender = globalStore.shouldExplicitlyRenderCardIds[props.card.id]
   if (isConnectingFrom.value) { return true }
@@ -1805,14 +1773,6 @@ const closeAllDialogs = () => {
   globalStore.closeAllDialogs()
 }
 
-// migration added July 2024
-
-const checkIfShouldUpdateIframeUrl = () => {
-  if (props.card.urlPreviewEmbedHtml && !props.card.urlPreviewIframeUrl) {
-    retryUrlPreview()
-  }
-}
-
 // containing box
 
 const containingBoxes = computed(() => {
@@ -1956,6 +1916,7 @@ const toggleVideoIsPaused = () => {
         :cardId="card.id"
         :width="props.card.width"
         :height="props.card.height"
+        :isVisibleInViewport="shouldRender"
       )
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
@@ -2070,7 +2031,6 @@ const toggleVideoIsPaused = () => {
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
           :isLoadingUrlPreview="isLoadingUrlPreview"
-          @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
     //- url preview loading

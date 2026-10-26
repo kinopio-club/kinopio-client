@@ -170,13 +170,26 @@ export const useLineStore = defineStore('lines', {
       lines.forEach(line => {
         let y = Math.round(line.y + delta.y)
         y = Math.max(0, y)
-        updates.push({
+        const update = {
           id: line.id,
           y
-        })
+        }
+        updates.push(update)
+        this.updatePageSize(update)
       })
       this.updateLines(updates)
       globalStore.linesWereDragged = true
+    },
+
+    // position
+
+    updatePageSize (line) {
+      const globalStore = useGlobalStore()
+      const lineHeight = 25
+      const lineY = line.y + lineHeight
+      if (lineY >= globalStore.pageHeight) {
+        globalStore.pageHeight = lineY
+      }
     },
 
     // line details

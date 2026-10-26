@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import backgroundImages from '@/data/backgroundImages.json'
 import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
+import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -27,11 +28,18 @@ const backgroundIsDefault = computed(() => !spaceStore.background)
 
 const backgroundStyles = computed(() => {
   let url = backgroundUrl.value
-  const tintColor = spaceStore.backgroundTint
+  const tintColor = backgroundTint.value
   let styles = {}
   styles = globalStore.updateSpaceBorderRadiusStyles(styles)
   if (tintColor) {
     styles.background = 'transparent'
+  }
+  const shouldTint = tintColor && !spaceStore.backgroundIsGradient
+  if (shouldTint) {
+    styles.background = tintColor
+    styles.backgroundBlendMode = 'multiply'
+    styles.width = `${globalStore.pageWidth}px`
+    styles.height = `${globalStore.pageHeight}px`
   }
   if (!url) {
     return styles
@@ -79,6 +87,14 @@ const backgroundUrl = computed(() => {
   return url
 })
 
+// Tint
+
+const backgroundTint = computed(() => spaceStore.getBackgroundTintColor)
+watch(backgroundTint, (color) => {
+  if (!color) { return }
+  postMessage.send({ name: 'setBackgroundTintColor', value: color })
+}, { immediate: true })
+
 // Background Gradient
 
 const gradientLayers = computed(() => {
@@ -91,7 +107,7 @@ const gradientLayers = computed(() => {
 <template lang="pug">
 //- gradient
 template(v-if="spaceStore.backgroundIsGradient")
-  SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
+  SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles" :backgroundTint="backgroundTint")
 //- or image
 template(v-else)
   #space-background-image(:style="backgroundStyles")

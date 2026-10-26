@@ -8,7 +8,8 @@ const globalStore = useGlobalStore()
 const props = defineProps({
   visible: Boolean,
   layers: Array,
-  backgroundStyles: Object
+  backgroundStyles: Object,
+  backgroundTint: String
 })
 
 const layer = (index) => {
@@ -31,6 +32,8 @@ const layer = (index) => {
   .gradients-layer.layer-4(:style="layer(4)")
   .gradients-layer.layer-5(:style="layer(5)")
   .gradients-layer.layer-6(:style="layer(6)")
+  //- the gradient is several layers, so it's tinted by blending a layer over them, instead of with background-blend-mode
+  #space-background-tint(v-if="props.backgroundTint" :style="{ backgroundColor: props.backgroundTint }")
 </template>
 
 <style lang="stylus">
@@ -72,4 +75,10 @@ const layer = (index) => {
     transition background 1000ms
     opacity 1
     z-index 5
+  #space-background-tint
+    position absolute
+    width 100%
+    height 100%
+    z-index 101
+    mix-blend-mode multiply
 </style>
