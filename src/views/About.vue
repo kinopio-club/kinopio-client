@@ -83,7 +83,9 @@ AboutJsonLd
           height="511"
         )
           source(src="https://updates.kinopio.club/pages/about/hero/1.webm")
-        p Started in 2018, Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded and{{' '}}
+        p Started in 2018, Kinopio is a note-taking canvas for collecting and connecting your thoughts, ideas, and plans by yourself or collaboratively. Community-funded,{{' '}}
+          a(href="https://pketh.org/open-sourcing-kinopio.html") publicly coded
+          span , and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
         .row
