@@ -10,7 +10,7 @@ import Header from '@/components/pages/Header.vue'
 import Wordmark from '@/components/pages/Wordmark.vue'
 import FooterSitemap from '@/components/pages/FooterSitemap.vue'
 import Footer from '@/components/pages/Footer.vue'
-import helpPages from 'virtual:help-pages' // pages [{ slug, title, description, category }, {…}] from vite build
+import allHelpPages from 'virtual:help-pages' // pages [{ slug, title, description, category }, {…}] from vite build
 import AboutHowTo from '@/components/pages/about/AboutHowTo.vue'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import consts from '@/consts.js'
@@ -103,6 +103,7 @@ const normalizeNewCategory = (name) => {
   const index = categoryDetails[slug].index
   return { name, slug, color, index }
 }
+const helpPages = allHelpPages.filter(page => !page.hidden)
 let categories = helpPages.reduce((list, page) => {
   const category = list.find(item => item.name === page.category)
   if (category) {
@@ -124,7 +125,7 @@ const currentSlug = computed(() => route.params.page)
 const currentSlugIsRoot = computed(() => !currentSlug.value)
 const pageContent = computed(() => asyncPageComponent(currentSlug.value))
 const pageMeta = computed(() => helpPages.find(page => page.slug === currentSlug.value))
-const currentPage = computed(() => helpPages.find(page => page.slug === currentSlug.value))
+const currentPage = computed(() => allHelpPages.find(page => page.slug === currentSlug.value))
 const currentCategory = computed(() => categories.find(category => category.name === currentPage.value?.category))
 const categoryByPage = (page) => {
   return categories.find(category => page.category === category.name)
@@ -209,7 +210,7 @@ const pageSchema = (page, url, description, image) => {
     url,
     // the index is as fresh as its most recently updated page. iso dates sort
     // lexicographically, so max() needs no parsing
-    dateModified: helpPages.map(helpPage => helpPage.updated).filter(date => date).sort().pop(),
+    dateModified: allHelpPages.map(helpPage => helpPage.updated).filter(date => date).sort().pop(),
     inLanguage: 'en',
     publisher: organization,
     mainEntity: {
