@@ -49,7 +49,7 @@ const showDirectionsIsVisible = () => {
 // label
 
 const isSomeLabelsVisible = computed(() => {
-  const connections = props.connections.filter(connection => connection.labelIsVisible)
+  const connections = props.connections.filter(connection => connection.labelIsVisible && connection.name)
   return connections.length
 })
 const showLabelsIsVisible = () => {

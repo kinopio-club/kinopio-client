@@ -253,6 +253,7 @@ export const useConnectionStore = defineStore('connections', {
       connection.spaceId = spaceStore.id
       connection.userId = userStore.id
       connection.color = this.getNewConnectionColor
+      connection.labelIsVisible = true
       globalStore.lastInteractedConnectionColor = connection.color
       this.addConnectionToState(connection)
       broadcastStore.update({ updates: connection, store: 'connectionStore', action: 'addConnectionToState' })

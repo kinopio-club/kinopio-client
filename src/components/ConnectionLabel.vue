@@ -134,7 +134,7 @@ const items = computed(() => {
 // visible
 
 const visible = computed(() => {
-  return state.connectionIsVisible && props.connection.labelIsVisible
+  return state.connectionIsVisible && props.connection.labelIsVisible && props.connection.name
 })
 
 // filter
