@@ -113,12 +113,7 @@ const toggleUserSettingsIsVisible = () => {
 }
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const signOut = async () => {
-  postMessage.send({ name: 'onLogout' })
-  userStore.clearUserLastSpaceId()
-  await cache.removeAll()
-  // clear history wipe state from vue-router
-  window.history.replaceState({}, 'Kinopio', '/')
-  location.reload()
+  userStore.signOut()
 }
 
 // spaces

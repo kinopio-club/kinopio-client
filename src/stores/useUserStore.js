@@ -340,15 +340,19 @@ export const useUserStore = defineStore('user', {
       cache.saveUser(allState)
     },
     async restoreRemoteUser () {
-      const apiStore = useApiStore()
-      const themeStore = useThemeStore()
-      if (!this.getUserIsSignedIn) { return }
-      const user = await apiStore.getUser()
-      if (!user) { return }
-      user.updatedAt = utils.unixTime(user.updatedAt)
-      console.info('🌸 Initialize user from remote', user)
-      this.initializeUserState(user)
-      themeStore.restoreTheme()
+      try {
+        const apiStore = useApiStore()
+        const themeStore = useThemeStore()
+        if (!this.getUserIsSignedIn) { return }
+        const user = await apiStore.getUser()
+        if (!user) { return }
+        user.updatedAt = utils.unixTime(user.updatedAt)
+        console.info('🌸 Initialize user from remote', user)
+        this.initializeUserState(user)
+        themeStore.restoreTheme()
+      } catch (error) {
+        console.error('🚒 restoreRemoteUser', error)
+      }
     },
     async restoreUserAssociatedData () {
       const globalStore = useGlobalStore()
@@ -684,6 +688,17 @@ export const useUserStore = defineStore('user', {
         filterUnchecked: false,
         filterComments: false
       })
+    },
+
+    // sign out
+
+    async signOut () {
+      postMessage.send({ name: 'onLogout' })
+      this.clearUserLastSpaceId()
+      await cache.removeAll()
+      // clear history wipe state from vue-router
+      window.history.replaceState({}, 'Kinopio', '/')
+      location.reload()
     }
   }
 })
