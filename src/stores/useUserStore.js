@@ -352,6 +352,9 @@ export const useUserStore = defineStore('user', {
         themeStore.restoreTheme()
       } catch (error) {
         console.error('🚒 restoreRemoteUser', error)
+        if (error.status === 401) {
+          this.signOut()
+        }
       }
     },
     async restoreUserAssociatedData () {
