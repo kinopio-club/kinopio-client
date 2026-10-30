@@ -101,10 +101,13 @@ export const useUploadStore = defineStore('upload', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const cardStore = useCardStore()
+      const spaceStore = useSpaceStore()
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
-      const id = cardId || spaceId || boxId
-      const key = `${id}/${fileName}`
+      let key = `${spaceStore.id}/${nanoid(6)}/${fileName}`
+      if (file.presignedPostKey) {
+        key = file.presignedPostKey
+      }
       this.checkIfFileTooBig(file)
       this.checkIfFileTypeBlocked(file)
       // add presignedPostData to upload
@@ -126,6 +129,7 @@ export const useUploadStore = defineStore('upload', {
         request.upload.onprogress = async (event) => {
           const percentComplete = event.loaded / event.total * 100
           const percentCompleteDisplay = Math.floor(percentComplete)
+          const id = cardId || boxId || spaceId
           console.info(`🛫 Uploading ${fileName} for ${id}, percent: ${percentCompleteDisplay}`)
           const updates = {
             cardId,
@@ -165,6 +169,7 @@ export const useUploadStore = defineStore('upload', {
       const userStore = useUserStore()
       const cardStore = useCardStore()
       const globalStore = useGlobalStore()
+      const spaceStore = useSpaceStore()
       position = position || utils.cursorPositionInSpace(event)
       userStore.notifyReadOnly(position)
       const canEditSpace = userStore.getUserCanEditSpace
@@ -221,7 +226,7 @@ export const useUploadStore = defineStore('upload', {
         }
         cardStore.createCard(newCard)
         const fileName = utils.normalizeFileUrl(file.name)
-        const key = `${cardIds[index]}/${fileName}`
+        const key = `${spaceStore.id}/${nanoid(6)}/${fileName}`
         filesPostData.push({
           key,
           type: file.type,
@@ -233,6 +238,7 @@ export const useUploadStore = defineStore('upload', {
       const multiplePresignedPostData = await apiStore.createMultiplePresignedPosts({ files: filesPostData })
       files.map((file, index) => {
         file.presignedPostData = multiplePresignedPostData[index]
+        file.presignedPostKey = filesPostData[index].key
       })
       // upload files
       await Promise.all(files.map(async (file, index) => {
