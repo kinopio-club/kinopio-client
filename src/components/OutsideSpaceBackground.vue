@@ -54,7 +54,11 @@ onMounted(() => {
   canvas = document.getElementById('outside-space-background')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  start()
+  updateBackgroundColor()
+  updateIsCycling()
+  window.addEventListener('focus', updateIsCycling)
+  window.addEventListener('blur', updateIsCycling)
+  document.addEventListener('visibilitychange', updateIsCycling)
 
   const spaceActionUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
@@ -71,6 +75,9 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   cancel()
+  window.removeEventListener('focus', updateIsCycling)
+  window.removeEventListener('blur', updateIsCycling)
+  document.removeEventListener('visibilitychange', updateIsCycling)
   unsubscribes()
 })
 const isTouching = computed(() => globalStore.isPinchZooming || globalStore.isTouchScrolling)
@@ -82,14 +89,22 @@ watch(() => isTouching.value, (value, prevValue) => {
   }
 })
 const start = () => {
-  updateBackgroundColor()
-  colorCycleIteration = 0
   if (colorCycleTimer) { return }
+  colorCycleIteration = 0
   colorCycleTimer = window.requestAnimationFrame(colorCycleFrame)
 }
 const cancel = () => {
   window.cancelAnimationFrame(colorCycleTimer)
   colorCycleTimer = undefined
+}
+// pause while the window or tab is inactive to reduce idle cpu and gpu use
+const updateIsCycling = () => {
+  const windowIsActive = !document.hidden && document.hasFocus()
+  if (windowIsActive) {
+    start()
+  } else {
+    cancel()
+  }
 }
 const spaceZoomDecimal = computed(() => globalStore.getSpaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
@@ -150,7 +165,7 @@ const colorCycleFrame = () => {
   if (shouldUpdate()) {
     updateBackgroundColor()
   }
-  window.requestAnimationFrame(colorCycleFrame)
+  colorCycleTimer = window.requestAnimationFrame(colorCycleFrame)
 }
 const updateMetaThemeColor = (color) => {
   const metaThemeColor = document.querySelector('meta[name=theme-color]')
