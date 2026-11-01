@@ -9,7 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import TaskFilters from '@/components/dialogs/TaskFilters.vue'
+import TodoFilters from '@/components/dialogs/TodoFilters.vue'
 import ItemList from '@/components/ItemList.vue'
 import ProgressCircle from '@/components/ProgressCircle.vue'
 import utils from '@/utils.js'
@@ -80,7 +80,7 @@ const props = defineProps({
   subsectionHeight: Number
 })
 const state = reactive({
-  taskFiltersIsVisible: false,
+  todoFiltersIsVisible: false,
   isLoading: false,
   isError: false,
   cards: [],
@@ -110,35 +110,35 @@ const styles = computed(() => {
   }
 })
 const closeDialogs = () => {
-  state.taskFiltersIsVisible = false
+  state.todoFiltersIsVisible = false
 }
-const childDialogIsVisible = computed(() => state.taskFiltersIsVisible)
+const childDialogIsVisible = computed(() => state.todoFiltersIsVisible)
 const updateScopeIsCurrentSpace = async (value) => {
   if (globalStore.sidebarScopeIsCurrentSpace === value) { return }
   globalStore.sidebarScopeIsCurrentSpace = value
-  globalStore.sidebarTasksItemsBySpace = null
+  globalStore.sidebarTodosItemsBySpace = null
   updateItems()
 }
 const scopeIsCurrentSpace = computed(() => globalStore.sidebarScopeIsCurrentSpace)
-const itemsBySpace = computed(() => globalStore.sidebarTasksItemsBySpace)
+const itemsBySpace = computed(() => globalStore.sidebarTodosItemsBySpace)
 
 // filters
 
-const shouldShowCompleted = computed(() => globalStore.sidebarTasksFilters.shouldShowCompleted)
-const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly)
+const shouldShowCompleted = computed(() => globalStore.sidebarTodosFilters.shouldShowCompleted)
+const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTodosFilters.shouldShowAtUserMentionOnly)
 const atUserMentionsCurrentUser = (atUserMentions) => {
   if (!atUserMentions) { return }
   const currentUserId = userStore.id
   return atUserMentions.find(mention => mention.userId === currentUserId)
 }
-const taskFiltersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
-const toggleTaskFiltersIsVisible = () => {
-  const value = !state.taskFiltersIsVisible
+const todoFiltersIsActive = computed(() => Boolean(shouldShowCompleted.value || shouldShowAtUserMentionOnly.value))
+const toggleTodoFiltersIsVisible = () => {
+  const value = !state.todoFiltersIsVisible
   closeDialogs()
-  state.taskFiltersIsVisible = value
+  state.todoFiltersIsVisible = value
 }
 const clearAllFilters = () => {
-  globalStore.triggerClearTaskFilters()
+  globalStore.triggerClearTodoFilters()
 }
 
 // items
@@ -175,10 +175,10 @@ const updateItemsBySpace = async () => {
     state.isLoading = true
     state.isError = false
     if (!itemsBySpace.value) {
-      globalStore.sidebarTasksItemsBySpace = await apiStore.getUserTodos()
+      globalStore.sidebarTodosItemsBySpace = await apiStore.getUserTodos()
     }
     // update items
-    globalStore.sidebarTasksItemsBySpace.forEach(space => {
+    globalStore.sidebarTodosItemsBySpace.forEach(space => {
       state.cards = state.cards.concat(space.cards)
       state.boxes = state.boxes.concat(space.boxes)
     })
@@ -246,32 +246,32 @@ const itemsRemainingCount = computed(() => {
 </script>
 
 <template lang="pug">
-.tasks(v-if="props.visible" :style="styles" :class="{ overflow: !childDialogIsVisible }" @click.stop="closeDialogs")
+.todos(v-if="props.visible" :style="styles" :class="{ overflow: !childDialogIsVisible }" @click.stop="closeDialogs")
   section
     .row.title-row
       div
         ProgressCircle(v-if="isTodoItems" :value="filteredCompleteTodoItems.length" :max="filteredTodoItems.length" :title="progressCircleTitle" :count="itemsRemainingCount")
-        span Tasks
+        span Todos
         Loader(:visible="state.isLoading" :isSmall="true")
         OfflineBadge
 
       //- Filters
       .button-wrap
         //- no filters
-        template(v-if="!taskFiltersIsActive")
-          .button-wrap.section-top.filter-button(@click.left.stop="toggleTaskFiltersIsVisible")
-            button.small-button(:class="{ active: state.taskFiltersIsVisible }")
+        template(v-if="!todoFiltersIsActive")
+          .button-wrap.section-top.filter-button(@click.left.stop="toggleTodoFiltersIsVisible")
+            button.small-button(:class="{ active: state.todoFiltersIsVisible }")
               img.icon(src="@/assets/filter.svg")
         //- filters active
-        template(v-if="taskFiltersIsActive")
+        template(v-if="todoFiltersIsActive")
           .segmented-buttons.section-top.filter-button
-            button.small-button(@click.left.stop="toggleTaskFiltersIsVisible" :class="{ active: state.taskFiltersIsVisible || taskFiltersIsActive }")
+            button.small-button(@click.left.stop="toggleTodoFiltersIsVisible" :class="{ active: state.todoFiltersIsVisible || todoFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active
 
             button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
-        TaskFilters(:visible="state.taskFiltersIsVisible")
+        TodoFilters(:visible="state.todoFiltersIsVisible")
 
     .row
       .segmented-buttons
@@ -292,7 +292,7 @@ const itemsRemainingCount = computed(() => {
     section.subsection.tips(v-if="!isTodoItems && !state.isLoading")
       span Prepend cards or boxes with
         span.badge.info [ ]
-        span to create todo tasks that you can track here.
+        span to create todos that you can track here.
 
   //- items
   template(v-if="isTodoItems")
@@ -307,7 +307,7 @@ const itemsRemainingCount = computed(() => {
 </template>
 
 <style lang="stylus">
-.tasks
+.todos
   overflow auto
   border-top 1px solid var(--primary-border)
   min-height 160px

@@ -44,7 +44,7 @@ When the due date arrives, space members and group members who have contributed 
 
 <img src="https://updates.kinopio.club/pages/help/posts/mentions/timezone.webp" class="small">
 
-Just like with Tasks, use `Sidebar → Due Dates` to view, and jump to, your upcoming due dates across all your spaces.
+Just like with Todos, use `Sidebar → Due Dates` to view, and jump to, your upcoming due dates across all your spaces.
 
 <img src="https://updates.kinopio.club/pages/help/posts/mentions/sidebar-due.webp" class="small">
 

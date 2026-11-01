@@ -19,7 +19,7 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
-      if (name === 'triggerClearTaskFilters') {
+      if (name === 'triggerClearTodoFilters') {
         clearAllFilters()
       }
     }
@@ -54,8 +54,8 @@ const updateDialogHeight = async () => {
 }
 
 const clearAllFilters = () => {
-  globalStore.sidebarTasksFilters.shouldShowCompleted = false
-  globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly = false
+  globalStore.sidebarTodosFilters.shouldShowCompleted = false
+  globalStore.sidebarTodosFilters.shouldShowAtUserMentionOnly = false
 }
 const totalFiltersIsActive = computed(() => {
   return shouldShowCompleted.value || shouldShowAtUserMentionOnly.value
@@ -64,26 +64,26 @@ const totalFiltersIsActive = computed(() => {
 // show completed
 
 const currentUser = computed(() => userStore.getUserAllState)
-const shouldShowCompleted = computed(() => globalStore.sidebarTasksFilters.shouldShowCompleted)
+const shouldShowCompleted = computed(() => globalStore.sidebarTodosFilters.shouldShowCompleted)
 const toggleShouldShowCompleted = () => {
-  globalStore.sidebarTasksFilters.shouldShowCompleted = !globalStore.sidebarTasksFilters.shouldShowCompleted
+  globalStore.sidebarTodosFilters.shouldShowCompleted = !globalStore.sidebarTodosFilters.shouldShowCompleted
 }
 
 // show @user only
 
-const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly)
+const shouldShowAtUserMentionOnly = computed(() => globalStore.sidebarTodosFilters.shouldShowAtUserMentionOnly)
 const toggleShouldShowAtUserMentionOnly = () => {
-  globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly = !globalStore.sidebarTasksFilters.shouldShowAtUserMentionOnly
+  globalStore.sidebarTodosFilters.shouldShowAtUserMentionOnly = !globalStore.sidebarTodosFilters.shouldShowAtUserMentionOnly
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.todo-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
       div
-        span Task Filters
-      button.small-button(@click.left="clearAllFilters" title="Clear all task filters")
+        span Todo Filters
+      button.small-button(@click.left="clearAllFilters" title="Clear all todo filters")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
         span.badge.info.filter-is-active(v-if="totalFiltersIsActive")
@@ -102,7 +102,7 @@ dialog.narrow.task-filters(v-if="props.visible" :open="props.visible" @click.lef
 </template>
 
 <style lang="stylus">
-dialog.task-filters
+dialog.todo-filters
   left initial
   right 0
   width 200px

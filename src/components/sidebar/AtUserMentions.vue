@@ -91,7 +91,7 @@ const styles = computed(() => {
   }
 })
 const closeDialogs = () => {
-  // state.taskFiltersIsVisible = false
+  // state.todoFiltersIsVisible = false
 }
 const updateScopeIsCurrentSpace = async (value) => {
   if (globalStore.sidebarScopeIsCurrentSpace === value) { return }

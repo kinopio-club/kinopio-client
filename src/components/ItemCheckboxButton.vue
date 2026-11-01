@@ -48,7 +48,7 @@ const updateItemChecked = (value) => {
     }
   // update item in other space
   } else {
-    globalStore.updateSidebarTasksItem({
+    globalStore.updateSidebarTodosItem({
       spaceId: item.value.spaceId,
       itemId: item.value.id,
       value

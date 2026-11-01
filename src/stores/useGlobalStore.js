@@ -110,11 +110,11 @@ export const useGlobalStore = defineStore('global', {
     lastInteractedConnectionColor: '',
 
     // sidebar state
-    sidebarTasksItemsBySpace: undefined,
+    sidebarTodosItemsBySpace: undefined,
     sidebarAtUserMentionsItemsBySpace: undefined,
     sidebarAtDateMentionsItemsBySpace: undefined,
     sidebarScopeIsCurrentSpace: false,
-    sidebarTasksFilters: {
+    sidebarTodosFilters: {
       shouldShowCompleted: false,
       shouldShowAtUserMentionOnly: false
     },
@@ -544,8 +544,8 @@ export const useGlobalStore = defineStore('global', {
     updateSessionDate () {
       this.sessionDate = new Date().toISOString()
     },
-    updateSidebarTasksItem  ({ spaceId, itemId, value }) {
-      this.sidebarTasksItemsBySpace = this.sidebarTasksItemsBySpace.map(space => {
+    updateSidebarTodosItem  ({ spaceId, itemId, value }) {
+      this.sidebarTodosItemsBySpace = this.sidebarTodosItemsBySpace.map(space => {
         if (space.id !== spaceId) { return space }
         // update card
         space.cards = space.cards.map(card => {
@@ -642,7 +642,7 @@ export const useGlobalStore = defineStore('global', {
     triggerAddBox (event) {},
     triggerAddList (event) {},
     triggerAddLine (event) {},
-    triggerClearTaskFilters () {},
+    triggerClearTodoFilters () {},
     triggerToggleGroupSpaceFilter (group) {},
     // select all below
     triggerSelectAllItemsBelowCursor (position) {},
