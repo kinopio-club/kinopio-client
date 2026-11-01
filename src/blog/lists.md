@@ -42,7 +42,7 @@ You can hide/show the contents of lists by expanding them with the arrow button.
   <source src="https://updates.kinopio.club/pages/blog/posts/lists/collapse.mp4">
 </video>
 
-## Task Lists
+## Todo Lists
 
 If one or more cards in the list are todo cards then a progress meter will appear on the card. As you check off todos, the meter and the todos remaining count will update.
 
