@@ -21,10 +21,7 @@ const state = reactive({
     tooManyAttempts: false,
     passwordTooShort: false
   },
-  loading: {
-    updatePassword: false
-  },
-  success: false
+  loading: false
 })
 
 const clearErrors = () => {
@@ -66,7 +63,7 @@ const isSuccess = (response) => {
   return Boolean(success.includes(response.status))
 }
 const handleErrors = async (response) => {
-  state.loading.updatePassword = false
+  state.loading = false
   state.error.tooManyAttempts = false
   state.error.unknownServerError = false
   if (!response) {
@@ -80,27 +77,28 @@ const handleErrors = async (response) => {
   }
 }
 const updatePassword = async (event) => {
-  if (state.loading.updatePassword) { return }
-  const password = event.target[0].value
-  const confirmPassword = event.target[1].value
-  if (!isPasswordTooShort(password)) { return }
-  if (!isPasswordsMatch(password, confirmPassword)) { return }
-  state.loading.updatePassword = true
-  const passwordResetToken = globalStore.passwordResetToken
-  let response
-  if (passwordResetToken) {
-    response = await apiStore.resetPassword({ password, passwordResetToken })
-  } else {
-    response = await apiStore.updatePassword({ password, apiKey: userStore.apiKey })
+  try {
+    if (state.loading) { return }
+    const password = event.target[0].value
+    const confirmPassword = event.target[1].value
+    if (!isPasswordTooShort(password)) { return }
+    if (!isPasswordsMatch(password, confirmPassword)) { return }
+    state.loading = true
+    const passwordResetToken = globalStore.passwordResetToken
+    let response
+    if (passwordResetToken) {
+      response = await apiStore.resetPassword({ password, passwordResetToken })
+    } else {
+      response = await apiStore.updatePassword({ password, apiKey: userStore.apiKey })
+    }
+    if (!isSuccess(response)) {
+      await handleErrors(response)
+      return
+    }
+    await userStore.signOut()
+  } catch (error) {
+    await handleErrors(error)
   }
-  const result = await response.json()
-  if (isSuccess(response)) {
-    state.success = true
-    globalStore.passwordResetToken = ''
-  } else {
-    await handleErrors(result)
-  }
-  state.loading.updatePassword = false
 }
 
 </script>
@@ -119,11 +117,10 @@ section
     .row(v-if="state.error.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
     .row
-      button(type="submit" :class="{active : state.loading.updatePassword}")
+      button(type="submit" :class="{active : state.loading}")
         span Update Password
-        Loader(:visible="state.loading.updatePassword")
-    .row(v-if="state.success")
-      .badge.success Your password has been changed. You can now use it to Sign In
+        Loader(:visible="state.loading")
+    p This will sign you out on all devices.
 </template>
 
 <style lang="stylus">
