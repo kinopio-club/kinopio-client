@@ -1179,8 +1179,9 @@ export const useApiStore = defineStore('api', {
         const options = await this.requestOptions({ body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         const data = await normalizeResponse(response)
-        const collaboratorKey = data.collaboratorKey
-        spaceStore.updateSpace({ collaboratorKey })
+        // TODO user should explicitly rotate collaborator key
+        // const collaboratorKey = data.collaboratorKey
+        // spaceStore.updateSpace({ collaboratorKey })
       } catch (error) {
         this.handleServerError({ name: 'removeSpaceCollaborator', error })
       }
