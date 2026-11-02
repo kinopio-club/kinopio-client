@@ -1237,8 +1237,10 @@ export const useApiStore = defineStore('api', {
 
     async sendOtherItemsQueue () {
       const globalStore = useGlobalStore()
-      globalStore.isLoadingOtherItems = true
       const { cardIds, spaceIds, invites } = otherItemsQueue
+      const isEmpty = !cardIds.length && !spaceIds.length && !invites.length
+      if (isEmpty) { return }
+      globalStore.isLoadingOtherItems = true
       clearOtherItemsQueue()
       const body = { cardIds, spaceIds, invites }
       try {
@@ -1248,9 +1250,8 @@ export const useApiStore = defineStore('api', {
         const data = await normalizeResponse(response)
         globalStore.updateOtherItems(data)
       } catch (error) {
-        this.handleServerError({ name: 'getSpaces', error })
+        this.handleServerError({ name: 'sendOtherItemsQueue', error })
       }
-      clearOtherItemsQueue()
       globalStore.isLoadingOtherItems = false
     },
 
