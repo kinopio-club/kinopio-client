@@ -6,6 +6,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
@@ -14,16 +15,15 @@ const boxStore = useBoxStore()
 const listStore = useListStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribes
 
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
-      if (name === 'triggerTocLabelsIsVisible') {
-        toggleTocLabelsIsVisible()
-      } else if (name === 'closeAllDialogs') {
-        state.tocLabelsIsVisible = false
+      if (name === 'closeAllDialogs') {
+        state.tocItemsIsVisible = false
       }
     }
   )
@@ -37,7 +37,7 @@ onBeforeUnmount(() => {
 
 const state = reactive({
   hoverItemId: '',
-  tocLabelsIsVisible: false
+  tocItemsIsVisible: false
 })
 
 const isVisible = computed(() => {
@@ -63,6 +63,8 @@ const allItems = computed(() => {
     return box
   })
   let items = lines.concat(lists, boxes)
+  const tocItemsHidden = spaceStore.tocItemsHidden || []
+  items = items.filter(item => !tocItemsHidden.includes(item.id))
   items = utils.sortByY(items)
   return items
 })
@@ -94,9 +96,9 @@ const classes = (item) => {
 }
 const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
-  state.tocLabelsIsVisible = true
+  state.tocItemsIsVisible = true
 }
-const shouldDisplayList = computed(() => {
+const shouldDisplayListItems = computed(() => {
   const distanceBetweenItems = 4
   const itemHeight = 18 + distanceBetweenItems
   const tocHeight = (allItems.value.length + 1) * itemHeight
@@ -114,60 +116,58 @@ const shouldDisplayList = computed(() => {
   const availableHeight = globalStore.viewportHeight - header.height - footer.height - minimapHeight
   return tocHeight < availableHeight
 })
+const shouldShowTocButton = computed(() => {
+  if (!shouldDisplayListItems.value) { return true }
+  return state.tocItemsIsVisible
+})
 const triggerTocIsVisible = () => {
   globalStore.triggerTocIsVisible()
 }
 
-// toc labels
+// toc items
 
 const updateHoverItem = (itemId) => {
   state.hoverItemId = itemId
 }
 const shouldShowLabel = (item) => {
-  if (state.tocLabelsIsVisible) { return true }
+  if (state.tocItemsIsVisible) { return true }
   return state.hoverItemId === item.id
 }
-const toggleTocLabelsIsVisible = () => {
-  if (shouldDisplayList.value) {
-    state.tocLabelsIsVisible = !state.tocLabelsIsVisible
-  } else {
-    triggerTocIsVisible()
-  }
-}
-const toggleShowLabels = (value) => {
-  state.tocLabelsIsVisible = value
+const toggleShowTocItems = (value) => {
+  if (!shouldDisplayListItems.value) { return }
+  state.tocItemsIsVisible = value
 }
 </script>
 
 <template lang="pug">
 nav.right-side-toc(v-if="isVisible")
-  //- full height list
   .toc-list(
-    v-if="shouldDisplayList"
-    @mouseover="toggleShowLabels(true)"
-    @mouseleave="toggleShowLabels(false)"
+    :class="{'is-short': !shouldDisplayListItems}"
+    @mouseover="toggleShowTocItems(true)"
+    @mouseleave="toggleShowTocItems(false)"
   )
-    template(v-for="item in allItems" :key="item.id")
-      .badge-wrap(@click="focusItem(item)")
-        .badge.toc-item-badge(
-          :class="classes(item)"
-          :style="{background: item.color}"
-        )
-          span.name(v-show="shouldShowLabel(item)") {{item.name}}
-          .line-marker(v-if="isLine(item)" :style="{background: item.color}")
-  //- short height list
-  //- when toc list is taller than available viewport space, replace list with button
-  .toc-short(v-else)
-    .button-wrap.toc-button-wrap
+    //- toc items
+    template(v-if="shouldDisplayListItems")
+      template(v-for="item in allItems" :key="item.id")
+        .badge-wrap(@click="focusItem(item)")
+          .badge.toc-item-badge(
+            :class="classes(item)"
+            :style="{background: item.color}"
+          )
+            span.name(v-show="shouldShowLabel(item)") {{item.name}}
+            .line-marker(v-if="isLine(item)" :style="{background: item.color}")
+
+    //- toc button
+    .button-wrap.toc-button-wrap(v-if="shouldShowTocButton")
       button.small-button.toc-button(
         v-if="allItems.length"
         @click.stop="triggerTocIsVisible"
         @touchend.stop
-        :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-        title="Toggle TOC Labels (C)"
+        :class="{'hidden': state.isHiddenOnTouch, 'translucent-button': !shouldIncreaseUIContrast}"
+        title="Toggle TOC (C)"
       )
         img.icon.toc(src="@/assets/toc.svg")
-        .badge.info.label-badge.label-badge {{allItems.length}}
+        //- .badge.info.label-badge.label-badge {{allItems.length}}
 </template>
 
 <style lang="stylus">
@@ -184,7 +184,6 @@ nav.right-side-toc(v-if="isVisible")
   flex-direction column
   align-content flex-end
 
-  // full height list
   .toc-list
     pointer-events all
     padding-top 20px
@@ -228,9 +227,8 @@ nav.right-side-toc(v-if="isVisible")
             top 8px
     .badge-wrap + .badge-wrap
       padding-top 4px
-
-  // short height list
-  .toc-short
+    &.is-short
+      padding 0
     .label-badge
       font-size 12px
       height: fit-content;
@@ -239,9 +237,11 @@ nav.right-side-toc(v-if="isVisible")
       margin 0
       left -3px
     .toc-button-wrap
+      display block
       pointer-events all
       width max-content
       margin-left auto
+      padding-right 3px
     .toc-button
       min-width 19px
       margin-right 8px

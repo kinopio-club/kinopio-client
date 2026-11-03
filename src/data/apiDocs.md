@@ -230,6 +230,7 @@ Name | Type | Description
 <code class="spaces">visits</code>              | `Integer` | The number of times the space has been loaded by a person
 <code class="spaces">readOnlyKey</code>         | `String`  | Similar to `collaboratorKey` but only allows users and non-signed-in users to read a private space
 <code class="spaces">userNewCardColor</code>    | `String`  | The current user's default color for new cards in this space. Overrides `user.newCardColor`. Not visible to other users or collaborators.
+<code class="spaces">tocItemsHidden</code>      | `Array`   | box, line, and list itemIds that are hidden from the <a href="https://kinopio.club/help/table-of-contents">right-side Table of Contents (TOC)</a>
 
 </div>
 </section>

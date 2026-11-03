@@ -6,6 +6,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ItemList from '@/components/ItemList.vue'
 import utils from '@/utils.js'
@@ -15,6 +16,7 @@ const boxStore = useBoxStore()
 const listStore = useListStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const rowElement = ref(null)
@@ -61,8 +63,29 @@ const toggleDialogIsPinned = () => {
 const lines = computed(() => lineStore.getAllLines)
 const boxes = computed(() => boxStore.getAllBoxes)
 const lists = computed(() => listStore.getAllLists)
+const itemIds = computed(() => {
+  const items = lines.value.concat(boxes.value, lists.value)
+  return items.map(item => item.id)
+})
 const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
+}
+
+// item visibility
+
+const tocItemsHidden = computed(() => spaceStore.tocItemsHidden || [])
+const itemsVisibleState = computed(() => {
+  return itemIds.value.map(itemId => {
+    const value = !tocItemsHidden.value.includes(itemId)
+    return { itemId, value }
+  })
+})
+const updateItemIsVisible = (item, value) => {
+  const itemIdsHidden = tocItemsHidden.value.filter(itemId => itemId !== item.id)
+  if (!value) {
+    itemIdsHidden.push(item.id)
+  }
+  spaceStore.updateSpace({ tocItemsHidden: itemIdsHidden })
 }
 </script>
 
@@ -83,7 +106,16 @@ dialog.narrow.toc.is-pinnable#toc(
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
   section.results-section.results-section-border-top
-    ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem" :shouldSortByY="true")
+    ItemList(
+      :lines="lines"
+      :boxes="boxes"
+      :lists="lists"
+      @selectItem="focusItem"
+      :shouldSortByY="true"
+      :itemsHaveVisibilityButton="true"
+      :itemsVisibleState="itemsVisibleState"
+      @updateItemIsVisible="updateItemIsVisible"
+    )
 </template>
 
 <style lang="stylus">

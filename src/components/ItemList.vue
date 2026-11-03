@@ -11,6 +11,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import utils from '@/utils.js'
 import CardListItem from '@/components/CardListItem.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import ItemVisibilityButton from '@/components/ItemVisibilityButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
 const globalStore = useGlobalStore()
@@ -20,7 +21,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
 
-const emit = defineEmits(['selectItem', 'selectSpace'])
+const emit = defineEmits(['selectItem', 'selectSpace', 'updateItemIsVisible'])
 
 const props = defineProps({
   lines: {
@@ -41,7 +42,12 @@ const props = defineProps({
   },
   space: Object,
   shouldShowMarkAllComplete: Boolean,
-  shouldSortByY: Boolean
+  shouldSortByY: Boolean,
+  itemsHaveVisibilityButton: Boolean,
+  itemsVisibleState: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const state = reactive({
@@ -117,6 +123,22 @@ const selectSpace = () => {
   updateConfirmMarkAllCompleteIsVisible(false)
 }
 
+// item visibility
+
+const itemVisibilityButtonIsVisible = computed(() => props.itemsHaveVisibilityButton && canEditSpace.value)
+const itemIsVisible = (item) => {
+  const itemVisibleState = props.itemsVisibleState.find(itemVisibleState => itemVisibleState.itemId === item.id)
+  if (!itemVisibleState) { return false }
+  return itemVisibleState.value
+}
+const itemIsFadedOut = (item) => {
+  if (!props.itemsHaveVisibilityButton) { return }
+  return !itemIsVisible(item)
+}
+const updateItemIsVisible = (item, value) => {
+  emit('updateItemIsVisible', item, value)
+}
+
 // space
 
 const isCurrentSpace = computed(() => props.space.id === spaceStore.id)
@@ -183,7 +205,8 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
   template(v-for="item in allItems" :key="item.id")
     //- box
     template(v-if="item.itemType === 'box'")
-      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)" :class="{'faded-out': itemIsFadedOut(item)}")
+        ItemVisibilityButton(v-if="itemVisibilityButtonIsVisible" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         ItemCheckboxButton(:visible="boxIsTodo(item)" :box="item" :canEditItem="canEditSpace" :parentIsList="true")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
@@ -191,13 +214,15 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
         span {{ boxName(item) }}
     //- line
     template(v-if="item.itemType === 'line'")
-      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)" :class="{'faded-out': itemIsFadedOut(item)}")
+        ItemVisibilityButton(v-if="itemVisibilityButtonIsVisible" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         .badge-horizontal-line(:style="{ background: item.color }")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- list
     template(v-if="item.itemType === 'list'")
-      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+      li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)" :class="{'faded-out': itemIsFadedOut(item)}")
+        ItemVisibilityButton(v-if="itemVisibilityButtonIsVisible" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- card
@@ -251,4 +276,6 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     justify-content flex-end
   .card-image
     margin-right 5px
+  li.faded-out
+    opacity 0.5
 </style>

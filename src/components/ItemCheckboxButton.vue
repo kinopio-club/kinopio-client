@@ -101,7 +101,7 @@ const handleMouseLeaveCheckbox = () => {
   @touchend.prevent="toggleItemChecked"
   @mouseenter="handleMouseEnterCheckbox"
   @mouseleave="handleMouseLeaveCheckbox"
-  :class="{ 'is-box': props.box, 'parent-is-list': props.parentIsList }"
+  :class="{ 'is-box': props.box, 'parent-is-list': props.parentIsList, 'is-disabled': !props.canEditItem }"
 )
   label(:class="{active: isChecked, disabled: !props.canEditItem}")
     input(name="checkbox" type="checkbox" v-model="checkboxState")
@@ -138,7 +138,9 @@ const handleMouseLeaveCheckbox = () => {
       width 10px
       height 10px
       background-size contain
-  &:hover
+  &.is-disabled
+    cursor default
+  &:not(.is-disabled):hover
     label
       box-shadow 3px 3px 0 var(--heavy-shadow)
       background-color var(--secondary-hover-background)
@@ -149,7 +151,7 @@ const handleMouseLeaveCheckbox = () => {
       background-color var(--secondary-active-background)
       input
         background-color var(--secondary-active-background)
-  &:active
+  &:not(.is-disabled):active
     label
       box-shadow none
       color var(--primary)
