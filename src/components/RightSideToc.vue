@@ -6,6 +6,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
@@ -14,6 +15,7 @@ const boxStore = useBoxStore()
 const listStore = useListStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribes
 
@@ -61,6 +63,8 @@ const allItems = computed(() => {
     return box
   })
   let items = lines.concat(lists, boxes)
+  const tocItemsHidden = spaceStore.tocItemsHidden || []
+  items = items.filter(item => !tocItemsHidden.includes(item.id))
   items = utils.sortByY(items)
   return items
 })
@@ -159,11 +163,11 @@ nav.right-side-toc(v-if="isVisible")
         v-if="allItems.length"
         @click.stop="triggerTocIsVisible"
         @touchend.stop
-        :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocItemsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
+        :class="{'hidden': state.isHiddenOnTouch, 'translucent-button': !shouldIncreaseUIContrast}"
         title="Toggle TOC (C)"
       )
         img.icon.toc(src="@/assets/toc.svg")
-        .badge.info.label-badge.label-badge {{allItems.length}}
+        //- .badge.info.label-badge.label-badge {{allItems.length}}
 </template>
 
 <style lang="stylus">
@@ -237,6 +241,7 @@ nav.right-side-toc(v-if="isVisible")
       pointer-events all
       width max-content
       margin-left auto
+      padding-right 3px
     .toc-button
       min-width 19px
       margin-right 8px
