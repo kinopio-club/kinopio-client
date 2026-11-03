@@ -73,11 +73,7 @@ const focusItem = (item) => {
 
 // item visibility
 
-const tocItemsHidden = computed(() => {
-  let itemIdsHidden = spaceStore.tocItemsHidden
-  itemIdsHidden = itemIdsHidden || []
-  return itemIdsHidden
-})
+const tocItemsHidden = computed(() => spaceStore.tocItemsHidden || [])
 const itemsVisibleState = computed(() => {
   return itemIds.value.map(itemId => {
     const value = !tocItemsHidden.value.includes(itemId)
