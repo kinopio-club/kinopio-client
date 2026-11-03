@@ -162,7 +162,7 @@ const handleShortcutsOnKeyUp = (event) => {
     globalStore.triggerSpaceDetailsInfoIsVisible()
   // c
   } else if (keyC && (isSpaceScope || isTocDialogScope)) {
-    globalStore.triggerTocLabelsIsVisible()
+    globalStore.triggerTocIsVisible()
   // m
   } else if (keyM && isSpaceScope) {
     const value = !userStore.shouldShowMinimap

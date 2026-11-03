@@ -20,9 +20,7 @@ let unsubscribes
 onMounted(() => {
   const globalActionUnsubscribe = globalStore.$onAction(
     ({ name, args }) => {
-      if (name === 'triggerTocLabelsIsVisible') {
-        toggleTocLabelsIsVisible()
-      } else if (name === 'closeAllDialogs') {
+      if (name === 'closeAllDialogs') {
         state.tocLabelsIsVisible = false
       }
     }
@@ -37,8 +35,7 @@ onBeforeUnmount(() => {
 
 const state = reactive({
   hoverItemId: '',
-  tocLabelsIsVisible: false,
-  isHovered: false
+  tocLabelsIsVisible: false
 })
 
 const isVisible = computed(() => {
@@ -117,13 +114,8 @@ const shouldDisplayListItems = computed(() => {
 })
 const shouldShowTocButton = computed(() => {
   if (!shouldDisplayListItems.value) { return true }
-  return state.isHovered
+  return state.tocLabelsIsVisible
 })
-const updateIsHovered = (value) => {
-  state.isHovered = value
-  if (!shouldDisplayListItems.value) { return }
-  toggleShowLabels(value)
-}
 const triggerTocIsVisible = () => {
   globalStore.triggerTocIsVisible()
 }
@@ -137,14 +129,8 @@ const shouldShowLabel = (item) => {
   if (state.tocLabelsIsVisible) { return true }
   return state.hoverItemId === item.id
 }
-const toggleTocLabelsIsVisible = () => {
-  if (shouldDisplayListItems.value) {
-    state.tocLabelsIsVisible = !state.tocLabelsIsVisible
-  } else {
-    triggerTocIsVisible()
-  }
-}
-const toggleShowLabels = (value) => {
+const toggleShowTocLabels = (value) => {
+  if (!shouldDisplayListItems.value) { return }
   state.tocLabelsIsVisible = value
 }
 </script>
@@ -153,8 +139,8 @@ const toggleShowLabels = (value) => {
 nav.right-side-toc(v-if="isVisible")
   .toc-list(
     :class="{'is-short': !shouldDisplayListItems}"
-    @mouseover="updateIsHovered(true)"
-    @mouseleave="updateIsHovered(false)"
+    @mouseover="toggleShowTocLabels(true)"
+    @mouseleave="toggleShowTocLabels(false)"
   )
     //- toc items
     template(v-if="shouldDisplayListItems")
@@ -174,7 +160,7 @@ nav.right-side-toc(v-if="isVisible")
         @click.stop="triggerTocIsVisible"
         @touchend.stop
         :class="{'hidden': state.isHiddenOnTouch, 'active': state.tocLabelsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}"
-        title="Toggle TOC Labels (C)"
+        title="Toggle TOC (C)"
       )
         img.icon.toc(src="@/assets/toc.svg")
         .badge.info.label-badge.label-badge {{allItems.length}}
