@@ -602,26 +602,6 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.box.id)
 })
-const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.box.id))
-const connectorIsVisible = computed(() => {
-  const isMember = userStore.getUserIsSpaceMember
-  let isVisible
-  if (isLocked.value) { return }
-  if (state.isRemoteConnecting) {
-    isVisible = true
-  } else if (isMember || canEditBox.value || connectedConnections.value.length) {
-    isVisible = true
-  }
-  return isVisible
-})
-const connectorIsHiddenByOpacity = computed(() => {
-  if (utils.isMobile()) { return }
-  const isPresentationMode = globalStore.isPresentationMode
-  const isNotHovering = !state.isHover
-  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
-  return isPresentationMode && isNotHovering && isNotConnected
-})
-
 const updateRemoteConnections = () => {
   const connection = globalStore.remoteCurrentConnections.find(remoteConnection => {
     const isConnectedToStart = remoteConnection.startItemId === props.box.id
@@ -711,8 +691,6 @@ const clearFocus = () => {
           img(src="@/assets/anon-avatar.svg")
 
       ItemConnectorButton(
-        :visible="connectorIsVisible"
-        :isHiddenByOpacity="connectorIsHiddenByOpacity"
         :box="box"
         :isConnectingTo="isConnectingTo"
         :isConnectingFrom="isConnectingFrom"
@@ -838,6 +816,9 @@ const clearFocus = () => {
     pointer-events all
     position relative
     display inline-block
+    transform translateY(1px)
+    &.is-disabled
+      pointer-events none
     button
       z-index 1
   .connector-glow

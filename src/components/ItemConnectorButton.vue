@@ -27,8 +27,6 @@ useStoreAction(globalStore, {
 const emit = defineEmits(['shouldRenderParent'])
 
 const props = defineProps({
-  visible: Boolean,
-  isHiddenByOpacity: Boolean,
   card: Object,
   box: Object,
   list: Object,
@@ -73,6 +71,19 @@ const canEditItem = computed(() => {
     return userStore.getItemIsCreatedByUser(item.value)
   }
   return canEditSpace.value
+})
+const isPresentationMode = computed(() => globalStore.isPresentationMode)
+const isDisabled = computed(() => {
+  if (item.value.isLocked) { return true }
+  return !canEditItem.value
+})
+const connectorClasses = computed(() => {
+  return {
+    'is-disabled': isDisabled.value,
+    'has-connections': hasConnections.value,
+    'is-presentation-mode': isPresentationMode.value,
+    'is-connecting': props.isConnectingTo || props.isConnectingFrom
+  }
 })
 
 // connections
@@ -268,7 +279,7 @@ const clearCurrentConnectorColor = () => {
 // handle events
 
 const startConnecting = (event) => {
-  if (!canEditItem.value) { return }
+  if (isDisabled.value) { return }
   if (utils.isMultiTouch(event)) { return }
   globalStore.closeAllDialogs()
   globalStore.preventDraggedCardFromShowingDetails = true
@@ -295,14 +306,13 @@ const handleMouseLeaveConnector = () => {
 
 <template lang="pug">
 .connector(
-  v-if="props.visible"
   :data-item-id="item.id"
   :key="item.id"
   @mousedown.left="startConnecting"
   @touchstart="startConnecting"
   @mouseenter="handleMouseEnterConnector"
   @mouseleave="handleMouseLeaveConnector"
-  :class="{ 'is-hidden-by-opacity': props.isHiddenByOpacity }"
+  :class="connectorClasses"
 )
   .connector-glow(:style="connectorGlowStyle" tabindex="-1")
   .connected-colors
@@ -334,6 +344,18 @@ const handleMouseLeaveConnector = () => {
   cursor cell
   button
     z-index 1
+  &.is-disabled
+    opacity 0.5
+    pointer-events none
+    cursor default
+    &.has-connections
+      opacity 1
+  &.is-presentation-mode
+    opacity 0.5
+    &:hover,
+    &.is-connecting,
+    &.has-connections
+      opacity 1
 
   // &.invisible
   //   height 32px

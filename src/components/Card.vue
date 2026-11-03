@@ -172,7 +172,6 @@ const isSelectedOrDragging = computed(() => {
     remoteUserTiltingCardsColor.value
   )
 })
-const isHovering = computed(() => globalStore.currentUserIsHoveringOverCardId === props.card.id)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserColor = computed(() => userStore.color)
 
@@ -664,27 +663,6 @@ const connectedConnections = computed(() => connectionStore.getConnectionsByItem
 
 const currentUserIsHoveringOverButtonCardId = computed(() => {
   return globalStore.currentUserIsHoveringOverButtonCardId === props.card.id
-})
-const connectorIsVisible = computed(() => {
-  const isMember = userStore.getUserIsSpaceMember
-  let isVisible
-  if (state.isRemoteConnecting) {
-    isVisible = true
-  } else if (isMember || canEditCard.value || connectedConnections.value.length) {
-    isVisible = true
-  }
-  return isVisible
-})
-const connectorIsHiddenByOpacity = computed(() => {
-  if (utils.isMobile()) { return }
-  const isPresentationMode = globalStore.isPresentationMode
-  if (!isPresentationMode) { return }
-  const isNotHovering = !isHovering.value
-  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
-  return isNotHovering && isNotConnected
-})
-const isCardButtonsVisible = computed(() => {
-  return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
 const isUrlPreviewError = computed(() => {
   if (!props.card.urlPreviewErrorUrl) { return }
@@ -1968,7 +1946,7 @@ const toggleVideoIsPaused = () => {
           CardVote(:card="card")
 
       //- Right buttons
-      span.card-buttons-wrap(v-if="isCardButtonsVisible")
+      span.card-buttons-wrap
         //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
           .url.inline-button-wrap
@@ -1985,8 +1963,6 @@ const toggleVideoIsPaused = () => {
         template(v-else)
           //- connector
           ItemConnectorButton(
-            :visible="connectorIsVisible"
-            :isHiddenByOpacity="connectorIsHiddenByOpacity"
             :card="card"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
