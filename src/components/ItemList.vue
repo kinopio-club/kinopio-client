@@ -125,6 +125,7 @@ const selectSpace = () => {
 
 // item visibility
 
+const itemVisibilityButtonIsVisible = computed(() => props.itemsHaveVisibilityButton && canEditSpace.value)
 const itemIsVisible = (item) => {
   const itemVisibleState = props.itemsVisibleState.find(itemVisibleState => itemVisibleState.itemId === item.id)
   if (!itemVisibleState) { return false }
@@ -205,7 +206,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- box
     template(v-if="item.itemType === 'box'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)" :class="{'faded-out': itemIsFadedOut(item)}")
-        ItemVisibilityButton(v-if="props.itemsHaveVisibilityButton" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
+        ItemVisibilityButton(v-if="itemVisibilityButtonIsVisible" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         ItemCheckboxButton(:visible="boxIsTodo(item)" :box="item" :canEditItem="canEditSpace" :parentIsList="true")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
@@ -214,14 +215,14 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- line
     template(v-if="item.itemType === 'line'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)" :class="{'faded-out': itemIsFadedOut(item)}")
-        ItemVisibilityButton(v-if="props.itemsHaveVisibilityButton" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
+        ItemVisibilityButton(v-if="itemVisibilityButtonIsVisible" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         .badge-horizontal-line(:style="{ background: item.color }")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- list
     template(v-if="item.itemType === 'list'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)" :class="{'faded-out': itemIsFadedOut(item)}")
-        ItemVisibilityButton(v-if="props.itemsHaveVisibilityButton" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
+        ItemVisibilityButton(v-if="itemVisibilityButtonIsVisible" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- card
