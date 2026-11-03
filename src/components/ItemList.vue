@@ -11,6 +11,7 @@ import { useGroupStore } from '@/stores/useGroupStore'
 import utils from '@/utils.js'
 import CardListItem from '@/components/CardListItem.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import ItemVisibilityButton from '@/components/ItemVisibilityButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
 const globalStore = useGlobalStore()
@@ -129,8 +130,7 @@ const itemIsVisible = (item) => {
   if (!itemVisibleState) { return false }
   return itemVisibleState.value
 }
-const toggleItemIsVisible = (item) => {
-  const value = !itemIsVisible(item)
+const updateItemIsVisible = (item, value) => {
   emit('updateItemIsVisible', item, value)
 }
 
@@ -201,9 +201,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- box
     template(v-if="item.itemType === 'box'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
-        button.small-button.item-visibility-button(v-if="props.itemsHaveVisibilityButton" :class="{active: !itemIsVisible(item)}" @click.left.stop="toggleItemIsVisible(item)" title="Toggle Visibility")
-          img.icon.view(v-if="itemIsVisible(item)" src="@/assets/view.svg")
-          img.icon.view-hidden(v-else src="@/assets/view-hidden.svg")
+        ItemVisibilityButton(v-if="props.itemsHaveVisibilityButton" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         ItemCheckboxButton(:visible="boxIsTodo(item)" :box="item" :canEditItem="canEditSpace" :parentIsList="true")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
@@ -212,18 +210,14 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- line
     template(v-if="item.itemType === 'line'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
-        button.small-button.item-visibility-button(v-if="props.itemsHaveVisibilityButton" :class="{active: !itemIsVisible(item)}" @click.left.stop="toggleItemIsVisible(item)" title="Toggle Visibility")
-          img.icon.view(v-if="itemIsVisible(item)" src="@/assets/view.svg")
-          img.icon.view-hidden(v-else src="@/assets/view-hidden.svg")
+        ItemVisibilityButton(v-if="props.itemsHaveVisibilityButton" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         .badge-horizontal-line(:style="{ background: item.color }")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- list
     template(v-if="item.itemType === 'list'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
-        button.small-button.item-visibility-button(v-if="props.itemsHaveVisibilityButton" :class="{active: !itemIsVisible(item)}" @click.left.stop="toggleItemIsVisible(item)" title="Toggle Visibility")
-          img.icon.view(v-if="itemIsVisible(item)" src="@/assets/view.svg")
-          img.icon.view-hidden(v-else src="@/assets/view-hidden.svg")
+        ItemVisibilityButton(v-if="props.itemsHaveVisibilityButton" :isVisible="itemIsVisible(item)" @toggleIsVisible="updateItemIsVisible(item, $event)")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- card
@@ -277,7 +271,4 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     justify-content flex-end
   .card-image
     margin-right 5px
-  .item-visibility-button
-    margin-right 5px
-    z-index 1
 </style>
