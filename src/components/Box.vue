@@ -816,6 +816,7 @@ const clearFocus = () => {
     pointer-events all
     position relative
     display inline-block
+    transform translateY(1px)
     &.is-disabled
       pointer-events none
     button

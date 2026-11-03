@@ -978,6 +978,7 @@ const clearFocus = () => {
     padding-left 0
     margin-right -8px // offsets .list-info-row padding
     cursor cell
+    transform translateY(1px)
     button
       min-width initial
       cursor cell
