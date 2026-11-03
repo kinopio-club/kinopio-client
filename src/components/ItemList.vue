@@ -20,7 +20,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
 
-const emit = defineEmits(['selectItem', 'selectSpace'])
+const emit = defineEmits(['selectItem', 'selectSpace', 'checkedItem'])
 
 const props = defineProps({
   lines: {
@@ -41,7 +41,12 @@ const props = defineProps({
   },
   space: Object,
   shouldShowMarkAllComplete: Boolean,
-  shouldSortByY: Boolean
+  shouldSortByY: Boolean,
+  itemsHaveCheckbox: Boolean,
+  itemsCheckboxState: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const state = reactive({
@@ -117,6 +122,18 @@ const selectSpace = () => {
   updateConfirmMarkAllCompleteIsVisible(false)
 }
 
+// item checkbox
+
+const itemCheckboxValue = (item) => {
+  const checkbox = props.itemsCheckboxState.find(checkbox => checkbox.itemId === item.id)
+  if (!checkbox) { return true }
+  return checkbox.value
+}
+const toggleItemCheckbox = (item) => {
+  const value = !itemCheckboxValue(item)
+  emit('checkedItem', item, value)
+}
+
 // space
 
 const isCurrentSpace = computed(() => props.space.id === spaceStore.id)
@@ -184,6 +201,8 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- box
     template(v-if="item.itemType === 'box'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+        label.item-list-checkbox(v-if="props.itemsHaveCheckbox" :class="{active: itemCheckboxValue(item)}" @click.left.prevent.stop="toggleItemCheckbox(item)")
+          input(type="checkbox" :checked="itemCheckboxValue(item)" tabindex="-1")
         ItemCheckboxButton(:visible="boxIsTodo(item)" :box="item" :canEditItem="canEditSpace" :parentIsList="true")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
@@ -192,12 +211,16 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- line
     template(v-if="item.itemType === 'line'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+        label.item-list-checkbox(v-if="props.itemsHaveCheckbox" :class="{active: itemCheckboxValue(item)}" @click.left.prevent.stop="toggleItemCheckbox(item)")
+          input(type="checkbox" :checked="itemCheckboxValue(item)" tabindex="-1")
         .badge-horizontal-line(:style="{ background: item.color }")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- list
     template(v-if="item.itemType === 'list'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
+        label.item-list-checkbox(v-if="props.itemsHaveCheckbox" :class="{active: itemCheckboxValue(item)}" @click.left.prevent.stop="toggleItemCheckbox(item)")
+          input(type="checkbox" :checked="itemCheckboxValue(item)" tabindex="-1")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- card
@@ -251,4 +274,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     justify-content flex-end
   .card-image
     margin-right 5px
+  .item-list-checkbox
+    margin-right 5px
+    z-index 1
 </style>

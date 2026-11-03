@@ -32,7 +32,8 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  itemsCheckboxState: []
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -64,6 +65,14 @@ const lists = computed(() => listStore.getAllLists)
 const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
 }
+const updateItemsCheckboxState = (item, value) => {
+  const checkbox = state.itemsCheckboxState.find(checkbox => checkbox.itemId === item.id)
+  if (checkbox) {
+    checkbox.value = value
+  } else {
+    state.itemsCheckboxState.push({ itemId: item.id, value })
+  }
+}
 </script>
 
 <template lang="pug">
@@ -83,7 +92,16 @@ dialog.narrow.toc.is-pinnable#toc(
         button.small-button(:class="{active: dialogIsPinned}")
           img.icon.pin.right-pin(src="@/assets/pin.svg")
   section.results-section.results-section-border-top
-    ItemList(:lines="lines" :boxes="boxes" :lists="lists" @selectItem="focusItem" :shouldSortByY="true")
+    ItemList(
+      :lines="lines"
+      :boxes="boxes"
+      :lists="lists"
+      @selectItem="focusItem"
+      :shouldSortByY="true"
+      :itemsHaveCheckbox="true"
+      :itemsCheckboxState="state.itemsCheckboxState"
+      @checkedItem="updateItemsCheckboxState"
+    )
 </template>
 
 <style lang="stylus">
