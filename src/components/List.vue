@@ -444,24 +444,6 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.list.id)
 })
-const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.list.id))
-const connectorIsVisible = computed(() => {
-  const isMember = userStore.getUserIsSpaceMember
-  let isVisible
-  if (state.isRemoteConnecting) {
-    isVisible = true
-  } else if (isMember || canEditSpace.value || connectedConnections.value.length) {
-    isVisible = true
-  }
-  return isVisible
-})
-const connectorIsHiddenByOpacity = computed(() => {
-  if (utils.isMobile()) { return }
-  const isPresentationMode = globalStore.isPresentationMode
-  const isNotHovering = !state.isHover
-  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
-  return isPresentationMode && isNotHovering && isNotConnected
-})
 const updateRemoteConnections = () => {
   const connection = globalStore.remoteCurrentConnections.find(remoteConnection => {
     const isConnectedToStart = remoteConnection.startItemId === props.list.id
@@ -815,8 +797,6 @@ const clearFocus = () => {
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
         //- connector
         ItemConnectorButton(
-          :visible="connectorIsVisible"
-          :isHiddenByOpacity="connectorIsHiddenByOpacity"
           :list="props.list"
           :isConnectingTo="isConnectingTo"
           :isConnectingFrom="isConnectingFrom"
