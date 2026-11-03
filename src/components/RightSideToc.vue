@@ -37,7 +37,8 @@ onBeforeUnmount(() => {
 
 const state = reactive({
   hoverItemId: '',
-  tocLabelsIsVisible: false
+  tocLabelsIsVisible: false,
+  isHovered: false
 })
 
 const isVisible = computed(() => {
@@ -96,7 +97,7 @@ const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
   state.tocLabelsIsVisible = true
 }
-const shouldDisplayList = computed(() => {
+const shouldDisplayListItems = computed(() => {
   const distanceBetweenItems = 4
   const itemHeight = 18 + distanceBetweenItems
   const tocHeight = (allItems.value.length + 1) * itemHeight
@@ -114,6 +115,15 @@ const shouldDisplayList = computed(() => {
   const availableHeight = globalStore.viewportHeight - header.height - footer.height - minimapHeight
   return tocHeight < availableHeight
 })
+const shouldShowTocButton = computed(() => {
+  if (!shouldDisplayListItems.value) { return true }
+  return state.isHovered
+})
+const updateIsHovered = (value) => {
+  state.isHovered = value
+  if (!shouldDisplayListItems.value) { return }
+  toggleShowLabels(value)
+}
 const triggerTocIsVisible = () => {
   globalStore.triggerTocIsVisible()
 }
@@ -128,7 +138,7 @@ const shouldShowLabel = (item) => {
   return state.hoverItemId === item.id
 }
 const toggleTocLabelsIsVisible = () => {
-  if (shouldDisplayList.value) {
+  if (shouldDisplayListItems.value) {
     state.tocLabelsIsVisible = !state.tocLabelsIsVisible
   } else {
     triggerTocIsVisible()
@@ -141,24 +151,24 @@ const toggleShowLabels = (value) => {
 
 <template lang="pug">
 nav.right-side-toc(v-if="isVisible")
-  //- full height list
   .toc-list(
-    v-if="shouldDisplayList"
-    @mouseover="toggleShowLabels(true)"
-    @mouseleave="toggleShowLabels(false)"
+    :class="{'is-short': !shouldDisplayListItems}"
+    @mouseover="updateIsHovered(true)"
+    @mouseleave="updateIsHovered(false)"
   )
-    template(v-for="item in allItems" :key="item.id")
-      .badge-wrap(@click="focusItem(item)")
-        .badge.toc-item-badge(
-          :class="classes(item)"
-          :style="{background: item.color}"
-        )
-          span.name(v-show="shouldShowLabel(item)") {{item.name}}
-          .line-marker(v-if="isLine(item)" :style="{background: item.color}")
-  //- short height list
-  //- when toc list is taller than available viewport space, replace list with button
-  .toc-short(v-else)
-    .button-wrap.toc-button-wrap
+    //- toc items
+    template(v-if="shouldDisplayListItems")
+      template(v-for="item in allItems" :key="item.id")
+        .badge-wrap(@click="focusItem(item)")
+          .badge.toc-item-badge(
+            :class="classes(item)"
+            :style="{background: item.color}"
+          )
+            span.name(v-show="shouldShowLabel(item)") {{item.name}}
+            .line-marker(v-if="isLine(item)" :style="{background: item.color}")
+
+    //- toc button
+    .button-wrap.toc-button-wrap(v-if="shouldShowTocButton")
       button.small-button.toc-button(
         v-if="allItems.length"
         @click.stop="triggerTocIsVisible"
@@ -184,7 +194,6 @@ nav.right-side-toc(v-if="isVisible")
   flex-direction column
   align-content flex-end
 
-  // full height list
   .toc-list
     pointer-events all
     padding-top 20px
@@ -228,9 +237,8 @@ nav.right-side-toc(v-if="isVisible")
             top 8px
     .badge-wrap + .badge-wrap
       padding-top 4px
-
-  // short height list
-  .toc-short
+    &.is-short
+      padding 0
     .label-badge
       font-size 12px
       height: fit-content;
@@ -239,6 +247,7 @@ nav.right-side-toc(v-if="isVisible")
       margin 0
       left -3px
     .toc-button-wrap
+      display block
       pointer-events all
       width max-content
       margin-left auto
