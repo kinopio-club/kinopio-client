@@ -126,7 +126,7 @@ const selectSpace = () => {
 
 const itemCheckboxValue = (item) => {
   const checkbox = props.itemsCheckboxState.find(checkbox => checkbox.itemId === item.id)
-  if (!checkbox) { return true }
+  if (!checkbox) { return false }
   return checkbox.value
 }
 const toggleItemCheckbox = (item) => {

@@ -6,6 +6,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useLineStore } from '@/stores/useLineStore'
 import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ItemList from '@/components/ItemList.vue'
 import utils from '@/utils.js'
@@ -15,6 +16,7 @@ const boxStore = useBoxStore()
 const listStore = useListStore()
 const lineStore = useLineStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const rowElement = ref(null)
@@ -32,8 +34,7 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  dialogHeight: null,
-  itemsCheckboxState: []
+  dialogHeight: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -62,16 +63,30 @@ const toggleDialogIsPinned = () => {
 const lines = computed(() => lineStore.getAllLines)
 const boxes = computed(() => boxStore.getAllBoxes)
 const lists = computed(() => listStore.getAllLists)
+const itemIds = computed(() => {
+  const items = lines.value.concat(boxes.value, lists.value)
+  return items.map(item => item.id)
+})
 const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
 }
+
+// item checkboxes
+
+const tocItemsHidden = computed(() => spaceStore.getTocItemsHidden)
+const itemsCheckboxState = computed(() => {
+  return itemIds.value.map(itemId => {
+    const value = !tocItemsHidden.value.includes(itemId)
+    return { itemId, value }
+  })
+})
 const updateItemsCheckboxState = (item, value) => {
-  const checkbox = state.itemsCheckboxState.find(checkbox => checkbox.itemId === item.id)
-  if (checkbox) {
-    checkbox.value = value
-  } else {
-    state.itemsCheckboxState.push({ itemId: item.id, value })
+  const itemIdsHidden = tocItemsHidden.value.filter(itemId => itemId !== item.id)
+  if (!value) {
+    itemIdsHidden.push(item.id)
   }
+  // TODO save as space.tocItemsHidden
+  console.log('🌳 updateItemsCheckboxState', itemIdsHidden)
 }
 </script>
 
@@ -99,7 +114,7 @@ dialog.narrow.toc.is-pinnable#toc(
       @selectItem="focusItem"
       :shouldSortByY="true"
       :itemsHaveCheckbox="true"
-      :itemsCheckboxState="state.itemsCheckboxState"
+      :itemsCheckboxState="itemsCheckboxState"
       @checkedItem="updateItemsCheckboxState"
     )
 </template>

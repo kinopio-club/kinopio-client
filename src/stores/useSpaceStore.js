@@ -227,6 +227,10 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceTags () {
       return uniqBy(this.tags, 'name') || []
+    },
+    getTocItemsHidden () {
+      // stub until space.tocItemsHidden is a space attribute
+      return ['itemid', 'itemid2']
     }
   },
 
