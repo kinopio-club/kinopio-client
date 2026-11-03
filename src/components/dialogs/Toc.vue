@@ -71,22 +71,25 @@ const focusItem = (item) => {
   globalStore.updateFocusOnItemId(item.id)
 }
 
-// item checkboxes
+// item visibility
 
-const tocItemsHidden = computed(() => spaceStore.getTocItemsHidden)
-const itemsCheckboxState = computed(() => {
+const tocItemsHidden = computed(() => {
+  let itemIdsHidden = spaceStore.tocItemsHidden
+  itemIdsHidden = itemIdsHidden || []
+  return itemIdsHidden
+})
+const itemsVisibleState = computed(() => {
   return itemIds.value.map(itemId => {
     const value = !tocItemsHidden.value.includes(itemId)
     return { itemId, value }
   })
 })
-const updateItemsCheckboxState = (item, value) => {
+const updateItemIsVisible = (item, value) => {
   const itemIdsHidden = tocItemsHidden.value.filter(itemId => itemId !== item.id)
   if (!value) {
     itemIdsHidden.push(item.id)
   }
-  // TODO save as space.tocItemsHidden
-  console.log('🌳 updateItemsCheckboxState', itemIdsHidden)
+  spaceStore.updateSpace({ tocItemsHidden: itemIdsHidden })
 }
 </script>
 
@@ -113,9 +116,9 @@ dialog.narrow.toc.is-pinnable#toc(
       :lists="lists"
       @selectItem="focusItem"
       :shouldSortByY="true"
-      :itemsHaveCheckbox="true"
-      :itemsCheckboxState="itemsCheckboxState"
-      @checkedItem="updateItemsCheckboxState"
+      :itemsHaveVisibilityButton="true"
+      :itemsVisibleState="itemsVisibleState"
+      @updateItemIsVisible="updateItemIsVisible"
     )
 </template>
 

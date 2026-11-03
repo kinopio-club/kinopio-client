@@ -20,7 +20,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
 
-const emit = defineEmits(['selectItem', 'selectSpace', 'checkedItem'])
+const emit = defineEmits(['selectItem', 'selectSpace', 'updateItemIsVisible'])
 
 const props = defineProps({
   lines: {
@@ -42,8 +42,8 @@ const props = defineProps({
   space: Object,
   shouldShowMarkAllComplete: Boolean,
   shouldSortByY: Boolean,
-  itemsHaveCheckbox: Boolean,
-  itemsCheckboxState: {
+  itemsHaveVisibilityButton: Boolean,
+  itemsVisibleState: {
     type: Array,
     default: () => []
   }
@@ -122,16 +122,16 @@ const selectSpace = () => {
   updateConfirmMarkAllCompleteIsVisible(false)
 }
 
-// item checkbox
+// item visibility
 
-const itemCheckboxValue = (item) => {
-  const checkbox = props.itemsCheckboxState.find(checkbox => checkbox.itemId === item.id)
-  if (!checkbox) { return false }
-  return checkbox.value
+const itemIsVisible = (item) => {
+  const itemVisibleState = props.itemsVisibleState.find(itemVisibleState => itemVisibleState.itemId === item.id)
+  if (!itemVisibleState) { return false }
+  return itemVisibleState.value
 }
-const toggleItemCheckbox = (item) => {
-  const value = !itemCheckboxValue(item)
-  emit('checkedItem', item, value)
+const toggleItemIsVisible = (item) => {
+  const value = !itemIsVisible(item)
+  emit('updateItemIsVisible', item, value)
 }
 
 // space
@@ -201,8 +201,9 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- box
     template(v-if="item.itemType === 'box'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
-        label.item-list-checkbox(v-if="props.itemsHaveCheckbox" :class="{active: itemCheckboxValue(item)}" @click.left.prevent.stop="toggleItemCheckbox(item)")
-          input(type="checkbox" :checked="itemCheckboxValue(item)" tabindex="-1")
+        button.small-button.item-visibility-button(v-if="props.itemsHaveVisibilityButton" :class="{active: !itemIsVisible(item)}" @click.left.stop="toggleItemIsVisible(item)" title="Toggle Visibility")
+          img.icon.view(v-if="itemIsVisible(item)" src="@/assets/view.svg")
+          img.icon.view-hidden(v-else src="@/assets/view-hidden.svg")
         ItemCheckboxButton(:visible="boxIsTodo(item)" :box="item" :canEditItem="canEditSpace" :parentIsList="true")
         .box-badge.badge(:style="boxBadgeStyles(item)")
           .box-info(:style="{backgroundColor: item.color}")
@@ -211,16 +212,18 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     //- line
     template(v-if="item.itemType === 'line'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
-        label.item-list-checkbox(v-if="props.itemsHaveCheckbox" :class="{active: itemCheckboxValue(item)}" @click.left.prevent.stop="toggleItemCheckbox(item)")
-          input(type="checkbox" :checked="itemCheckboxValue(item)" tabindex="-1")
+        button.small-button.item-visibility-button(v-if="props.itemsHaveVisibilityButton" :class="{active: !itemIsVisible(item)}" @click.left.stop="toggleItemIsVisible(item)" title="Toggle Visibility")
+          img.icon.view(v-if="itemIsVisible(item)" src="@/assets/view.svg")
+          img.icon.view-hidden(v-else src="@/assets/view-hidden.svg")
         .badge-horizontal-line(:style="{ background: item.color }")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- list
     template(v-if="item.itemType === 'list'")
       li(@click.left="selectItem(item)" tabindex="0" v-on:keyup.enter="selectItem(item)")
-        label.item-list-checkbox(v-if="props.itemsHaveCheckbox" :class="{active: itemCheckboxValue(item)}" @click.left.prevent.stop="toggleItemCheckbox(item)")
-          input(type="checkbox" :checked="itemCheckboxValue(item)" tabindex="-1")
+        button.small-button.item-visibility-button(v-if="props.itemsHaveVisibilityButton" :class="{active: !itemIsVisible(item)}" @click.left.stop="toggleItemIsVisible(item)" title="Toggle Visibility")
+          img.icon.view(v-if="itemIsVisible(item)" src="@/assets/view.svg")
+          img.icon.view-hidden(v-else src="@/assets/view-hidden.svg")
         .badge.button-badge(:style="{background: item.color}" :class="badgeColorClasses(item)")
           span {{ item.name }}
     //- card
@@ -274,7 +277,7 @@ ul.results-list.item-list(v-if="allItems.length" :class="{ 'item-list-border': p
     justify-content flex-end
   .card-image
     margin-right 5px
-  .item-list-checkbox
+  .item-visibility-button
     margin-right 5px
     z-index 1
 </style>

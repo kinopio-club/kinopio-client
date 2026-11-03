@@ -1811,7 +1811,8 @@ export default {
       proposedShowInExplore: false,
       groups: [],
       note: '',
-      userNewCardColor: null
+      userNewCardColor: null,
+      tocItemsHidden: []
     }
   },
   deletePrivateSpaceMeta (space) {
