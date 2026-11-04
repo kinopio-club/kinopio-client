@@ -495,7 +495,8 @@ export const useGlobalStore = defineStore('global', {
       const isDraggingBox = this.currentUserIsDraggingBox
       const isDraggingLine = this.currentUserIsDraggingLine
       const isDraggingList = this.currentUserIsDraggingList
-      return isPaintSelecting || isDrawingConnection || isDraggingCard || isDraggingBox || isDraggingLine || isDraggingList
+      const isResizingBox = this.currentUserIsResizingBox
+      return isPaintSelecting || isDrawingConnection || isDraggingCard || isDraggingBox || isDraggingLine || isDraggingList || isResizingBox
     },
     getOtherUserById (userId) {
       return this.otherUsers[userId]

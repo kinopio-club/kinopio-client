@@ -19,6 +19,7 @@ let unsubscribes
 const threshold = 50
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth, currentEvent
 let movementDirection = {}
+let frameResizeDelta = { x: 0, y: 0 }
 
 onMounted(() => {
   window.addEventListener('mousedown', initInteractions)
@@ -115,6 +116,7 @@ const isResizingCard = computed(() => globalStore.currentUserIsResizingCard)
 const isDraggingBox = computed(() => globalStore.currentUserIsDraggingBox)
 const isDraggingLine = computed(() => globalStore.currentUserIsDraggingLine)
 const isDraggingList = computed(() => globalStore.currentUserIsDraggingList)
+const isResizingBox = computed(() => globalStore.currentUserIsResizingBox)
 
 // position
 
@@ -135,8 +137,19 @@ const shouldPreventResize = computed(() => currentUserIsPaintSelecting.value || 
 
 // scroll
 
+// resizeBoxes reads sizes from the dom, so x and y scroll deltas are combined into one resize per frame
+const resizeBoxesWithScroll = () => {
+  if (!isResizingBox.value) { return }
+  const delta = frameResizeDelta
+  frameResizeDelta = { x: 0, y: 0 }
+  if (!delta.x && !delta.y) { return }
+  const ids = globalStore.currentUserIsResizingBoxIds
+  boxStore.resizeBoxes(ids, delta)
+  globalStore.updatePageSizes()
+}
 const scrollFrame = () => {
   let delta, currentSpeed
+  frameResizeDelta = { x: 0, y: 0 }
   const currentCursor = cursor()
   const cursorIsTopSide = currentCursor.y <= threshold
   const cursorIsBottomSide = currentCursor.y >= (viewportHeight.value - threshold)
@@ -177,6 +190,7 @@ const scrollFrame = () => {
     increasePageWidth(delta)
     scrollBy(delta)
   }
+  resizeBoxesWithScroll()
   if (scrollTimer) {
     window.requestAnimationFrame(scrollFrame)
   }
@@ -248,9 +262,18 @@ const scrollBy = (delta) => {
     isDraggingLine.value ||
     isDraggingList.value
   )
+  // box edge grows by the scrolled distance in space units, so it stays under the cursor
+  const resizeDelta = {
+    x: Math.round(delta.x),
+    y: Math.round(delta.y)
+  }
   delta = {
     left: Math.round(delta.x * zoom),
     top: Math.round(delta.y * zoom)
+  }
+  if (isResizingBox.value) {
+    frameResizeDelta.x += resizeDelta.x
+    frameResizeDelta.y += resizeDelta.y
   }
   if (isDraggingItem) {
     const slowMultiplier = 0.9
