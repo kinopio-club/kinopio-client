@@ -41,22 +41,29 @@ const start = (event, action) => {
     userId: userStore.id,
     cardIds
   }
-  if (action === 'resize') {
-    globalStore.currentUserIsResizingCard = true
-    globalStore.currentUserIsResizingCardIds = cardIds
-    broadcastStore.update({ updates, action: 'updateRemoteUserResizingCards' })
+  if (action === 'resizeWidth') {
+    startResizing(cardIds, updates, 'width')
+  } else if (action === 'resizeHeight') {
+    startResizing(cardIds, updates, 'height')
   } else if (action === 'tilt') {
     globalStore.currentUserIsTiltingCard = true
     globalStore.currentUserIsTiltingCardIds = cardIds
     broadcastStore.update({ updates, action: 'updateRemoteUserTiltingCards' })
   }
 }
+const startResizing = (cardIds, updates, dimension) => {
+  globalStore.currentUserIsResizingCard = true
+  globalStore.currentUserIsResizingCardIds = cardIds
+  globalStore.currentUserResizingCardDimension = dimension
+  updates.dimension = dimension
+  broadcastStore.update({ updates, action: 'updateRemoteUserResizingCards' })
+}
 const remove = (action) => {
   let cardIds = [props.card.id]
   if (globalStore.multipleCardsSelectedIds.length) {
     cardIds = globalStore.multipleCardsSelectedIds
   }
-  if (action === 'resize') {
+  if (action === 'resizeWidth') {
     const shouldRemoveResizeWidth = true
     cardStore.clearResizeCards(cardIds, shouldRemoveResizeWidth)
   } else if (action === 'tilt') {
@@ -97,16 +104,18 @@ const isResizing = computed(() => {
 </script>
 
 <template lang="pug">
-//- resize
+//- resize width
 .right-resize.bottom-button-wrap(v-if="resizeIsVisible")
   .inline-button-wrap(
-    @mousedown.left.stop="start($event, 'resize')"
-    @touchstart.stop="start($event, 'resize')"
-    @dblclick="remove('resize')"
+    @mousedown.left.stop="start($event, 'resizeWidth')"
+    @touchstart.stop="start($event, 'resizeWidth')"
+    @dblclick="remove('resizeWidth')"
     title="Drag to Resize"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
+//- resize height
+
 //- tilt
 .left-tilt.bottom-button-wrap(v-if="tiltIsVisible")
   .inline-button-wrap(
