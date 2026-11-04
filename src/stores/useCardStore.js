@@ -1712,7 +1712,7 @@ export const useCardStore = defineStore('cards', {
  * @property {string} [tag]
  * @property {boolean} [isTag]
  * @property {string} [link]
- * @property {boolean} [isLink]
+ * @property {boolean} [isSpaceLink]
  * @property {string} [file]
  * @property {boolean} [isFile]
  * @property {string} [command]

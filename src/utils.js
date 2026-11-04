@@ -2888,15 +2888,13 @@ export default {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
       const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-      const segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
+      const segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isSpaceLink: true }
       if (this.urlIsSpaceInvite(link)) {
         segment.isInviteLink = true
         const url = new URL(link)
         const queryObject = qs.decode(url.search)
         segment.spaceId = queryObject.spaceId
         segment.collaboratorKey = queryObject.collaboratorKey
-      } else if (this.urlIsSpace(link)) {
-        segment.isLink = true
       }
       segments.push(segment)
     })

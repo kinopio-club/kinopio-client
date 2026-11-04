@@ -971,7 +971,7 @@ const nameSegments = computed(() => {
       const { spaceId, collaboratorKey } = segment
       segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
     // space or card
-    } else if (segment.isLink) {
+    } else if (segment.isSpaceLink) {
       const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
       segment.otherSpace = globalStore.getOtherSpaceById(spaceId)
       segment.otherCard = globalStore.getOtherCardById(cardId)

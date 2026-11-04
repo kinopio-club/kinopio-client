@@ -72,7 +72,7 @@ const textClasses = computed(() => {
 
 const dataMarkdownType = computed(() => {
   if (props.segment.isTag) { return 'tag' }
-  if (props.segment.isLink) { return 'link' }
+  if (props.segment.isSpaceLink) { return 'link' }
   if (props.segment.isInviteLink) { return 'inviteLink' }
   if (!props.segment.markdown) { return 'text' }
   const markdown = props.segment.markdown.filter(item => Boolean(item.content))
@@ -92,7 +92,7 @@ const dataTagName = computed(() => {
 })
 const isSpaceLink = (segment) => {
   if (segment.cardId) { return }
-  return segment.isLink
+  return segment.isSpaceLink
 }
 const escapedUrl = (url) => {
   if (url.includes('javascript:')) {
