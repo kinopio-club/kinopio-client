@@ -11,6 +11,8 @@ import { highlight } from 'macrolight'
 import codeLanguages from '@/data/codeLanguages.json'
 import utils from '@/utils.js'
 import latex from '@/libs/latex.js'
+import markdownHighlight from '@/libs/markdownHighlight.js'
+import yamlHighlight from '@/libs/yamlHighlight.js'
 
 const globalStore = useGlobalStore()
 const cardStore = useCardStore()
@@ -19,6 +21,11 @@ const spaceStore = useSpaceStore()
 
 const defaultLanguageName = 'txt'
 const latexLanguageName = 'latex'
+// languages that macrolight can't tokenize well
+const customHighlights = {
+  md: markdownHighlight,
+  yaml: yamlHighlight
+}
 
 const props = defineProps({
   content: String,
@@ -57,6 +64,10 @@ const contentWithoutLanguage = computed(() => {
 })
 const syntaxHighlightHTML = computed(() => {
   const content = contentWithoutLanguage.value
+  const customHighlight = customHighlights[currentLanguage.value.name]
+  if (customHighlight) {
+    return customHighlight(content)
+  }
   const keywords = currentLanguage.value.keywords
   const html = highlight(content, {
     styles: {
@@ -244,4 +255,10 @@ const copy = async (event) => {
   .macrolight-keyword
     font-weight bold
     color var(--code-keyword)
+  .yaml-scalar
+    font-weight normal
+  .markdown-italic
+    font-style italic
+  .markdown-strike
+    text-decoration line-through
 </style>
