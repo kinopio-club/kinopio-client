@@ -241,7 +241,10 @@ const touchEnd = (event) => {
   checkIfShouldStartMomentum(event)
   updateTouchGesture(event)
   if (!isSpacePage.value) { return }
-  endPinchZoom()
+  // the pinch continues until every finger lifts, ios safari reverts scrolling while a finger is still down
+  if (!event.touches.length) {
+    endPinchZoom()
+  }
   if (shouldCancelUndo) {
     shouldCancelUndo = false
     multiTouchAction = ''
@@ -320,6 +323,11 @@ const preventGesture = (event) => {
 // pan
 
 const panSpace = (delta, elapsedTime) => {
+  // the finger left over from a pinch moves the space with its offset, like the pinch
+  if (globalStore.isPinchZooming) {
+    globalStore.panSpaceWhileTouching(delta)
+    return
+  }
   globalStore.isTouchScrolling = true
   window.scrollBy({ left: delta.x, top: delta.y, behavior: 'instant' })
   if (!elapsedTime) { return }

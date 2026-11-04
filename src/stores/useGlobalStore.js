@@ -2357,12 +2357,34 @@ export const useGlobalStore = defineStore('global', {
         y: offset.y + remainder.y
       }
     },
+    // outside space shrinks as zoom nears the default, where there is none
+    // otherwise zooming in past the default with outside space showing snaps the space to the page edge
+    clampSpacePositionToOutsideSpace (position) {
+      const minZoom = consts.spaceZoom.min
+      const defaultZoom = consts.spaceZoom.default
+      let ratio = (defaultZoom - this.spaceZoomPercent) / (defaultZoom - minZoom)
+      ratio = Math.max(ratio, 0)
+      return {
+        x: Math.max(position.x, -this.viewportWidth * ratio),
+        y: Math.max(position.y, -this.viewportHeight * ratio)
+      }
+    },
     // ios safari reverts scrollTo calls made while a finger is down, so touch gestures only move the space with its offset
     updateSpacePositionWhileTouching (position) {
+      position = this.clampSpacePositionToOutsideSpace(position)
       this.spaceZoomOffset = {
         x: window.scrollX - position.x,
         y: window.scrollY - position.y
       }
+    },
+    // panning with the finger left over from a pinch
+    panSpaceWhileTouching (delta) {
+      const offset = this.spaceZoomOffset
+      const position = {
+        x: window.scrollX - offset.x + delta.x,
+        y: window.scrollY - offset.y + delta.y
+      }
+      this.updateSpacePositionWhileTouching(position)
     },
     // after the touch, move the space from the offset back into page scroll
     updateSpacePositionAfterTouch () {
@@ -2390,7 +2412,7 @@ export const useGlobalStore = defineStore('global', {
         x: (window.scrollX + origin.x - offset.x) / prevZoom,
         y: (window.scrollY + origin.y - offset.y) / prevZoom
       }
-      const position = {
+      let position = {
         x: (point.x * zoom) - target.x,
         y: (point.y * zoom) - target.y
       }
@@ -2399,6 +2421,7 @@ export const useGlobalStore = defineStore('global', {
         this.updateSpacePositionWhileTouching(position)
         return
       }
+      position = this.clampSpacePositionToOutsideSpace(position)
       await this.updateSpacePosition(position)
     },
     zoomSpace ({ shouldZoomIn, shouldZoomOut, speed, origin }) {
