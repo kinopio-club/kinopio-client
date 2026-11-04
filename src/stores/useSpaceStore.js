@@ -1279,12 +1279,17 @@ export const useSpaceStore = defineStore('space', {
     },
     async updateTagColorByName (updatedTag) {
       const apiStore = useApiStore()
-      this.tags = this.tags.map(tag => {
+      const userStore = useUserStore()
+      const globalStore = useGlobalStore()
+      const updateColor = (tag) => {
         if (tag.name === updatedTag.name) {
           tag.color = updatedTag.color
         }
         return tag
-      })
+      }
+      this.tags = this.tags.map(updateColor)
+      userStore.tags = userStore.tags.map(updateColor)
+      globalStore.tags = globalStore.tags.map(updateColor)
       await cache.updateTagColorInAllSpaces(updatedTag)
       await apiStore.addToQueue({ name: 'updateTagColorByName', body: { tag: updatedTag } })
     },

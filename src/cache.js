@@ -370,7 +370,7 @@ export default {
   async updateTagColorInAllSpaces (tag) {
     const spaces = await this.getAllSpaces()
     for (const space of spaces) {
-      if (!space.tags) { return }
+      if (!space.tags) { continue }
       const newSpaceTags = space.tags.map(spaceTag => {
         if (spaceTag.name === tag.name) {
           spaceTag.color = tag.color
@@ -383,7 +383,7 @@ export default {
   async removeTagsByName (tag) {
     const spaces = await this.getAllSpaces()
     for (const space of spaces) {
-      if (!space.tags) { return }
+      if (!space.tags) { continue }
       const newSpaceTags = space.tags.filter(spaceTag => spaceTag.name !== tag.name)
       await this.updateSpace('tags', newSpaceTags, space.id)
     }
