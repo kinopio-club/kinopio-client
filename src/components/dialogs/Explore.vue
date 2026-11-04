@@ -47,6 +47,10 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
+watch(() => [props.loading, props.errorIsLoading], () => {
+  updateHeights()
+})
+
 const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
@@ -78,19 +82,24 @@ const parentDialog = computed(() => 'explore')
 const updateHeights = async () => {
   await nextTick()
   updateDialogHeight()
+  await nextTick()
   updateResultsSectionHeight()
 }
-const updateDialogHeight = async () => {
+const updateDialogHeight = () => {
   if (!props.visible) { return }
-  await nextTick()
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeightFromHeader(element)
 }
-const updateResultsSectionHeight = async () => {
+// derived from the dialog height instead of the results element's own rect,
+// which depends on its previous max-height and can overflow the dialog (double scrollbars)
+const updateResultsSectionHeight = () => {
   if (!props.visible) { return }
-  await nextTick()
+  const dialog = dialogElement.value
   const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+  if (!dialog || !element || !state.dialogHeight) { return }
+  const offset = element.getBoundingClientRect().y - dialog.getBoundingClientRect().y
+  const border = dialog.clientTop
+  state.resultsSectionHeight = state.dialogHeight - offset - border
 }
 
 // unread sections
@@ -203,6 +212,7 @@ const randomUser = computed(() => {
 
 const toggleTipsIsVisible = () => {
   state.tipsIsVisible = !state.tipsIsVisible
+  updateHeights()
 }
 
 </script>
