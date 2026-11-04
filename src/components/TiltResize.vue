@@ -115,7 +115,15 @@ const isResizing = computed(() => {
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
 //- resize height
-
+.middle-resize.bottom-button-wrap(v-if="resizeIsVisible")
+  .inline-button-wrap(
+    @mousedown.left.stop="start($event, 'resizeHeight')"
+    @touchstart.stop="start($event, 'resizeHeight')"
+    @dblclick="remove('resizeHeight')"
+    title="Drag to Resize"
+  )
+    button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
+      img.icon(src="@/assets/resize-middle.svg" :class="colorClass")
 //- tilt
 .left-tilt.bottom-button-wrap(v-if="tiltIsVisible")
   .inline-button-wrap(
@@ -171,8 +179,17 @@ const isResizing = computed(() => {
       button
         cursor nwse-resize
         transform scaleX(-1)
-  // resize
+  // resize width
   &.right-resize
     .inline-button-wrap
       padding-left 0
+  // resize height
+  &.middle-resize
+    left calc(50% - 14px)
+    bottom -2px
+    .inline-button-wrap
+      padding-left 0
+      cursor ns-resize
+      button
+        cursor ns-resize
 </style>
