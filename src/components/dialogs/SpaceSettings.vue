@@ -106,8 +106,9 @@ const clearUserCardColor = () => {
 <template lang="pug">
 dialog.narrow.space-settings(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
-    p New Card Color
+    p Space Settings
   section
+    p New Card Color
     //- current space (space user)
     .row
       .button-wrap
@@ -144,6 +145,9 @@ dialog.narrow.space-settings(v-if="props.visible" :open="props.visible" @click.l
           @selectedColor="updateUserCardColor"
           @removeColor="clearUserCardColor"
         )
+  section
+    p snap card
+    //- todo checkbox button Snap Cards
 </template>
 
 <style lang="stylus">

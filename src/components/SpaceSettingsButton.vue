@@ -64,10 +64,10 @@ const isCardSnapEnabled = computed(() => !spaceStore.shouldPreventSnapToCard)
 </script>
 
 <template lang="pug">
-button.small-button.translucent-button.new-card-color-button(
+button.small-button.translucent-button.space-settings-button(
   @click.left.stop="toggleSpaceSettingsIsVisible"
   :class="{active: state.spaceSettingsIsVisible}"
-  title="Set Color of New Cards"
+  title="Space Settings"
 )
   //- new card color
   .badge.small-badge(:style="{ 'background-color': newCardColor }" title="New Card Color")
@@ -78,7 +78,7 @@ button.small-button.translucent-button.new-card-color-button(
 </template>
 
 <style lang="stylus">
-.new-card-color-button
+.space-settings-button
   > .badge
     margin 0
     display inline-block
