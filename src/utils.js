@@ -558,6 +558,14 @@ export default {
       return event.touches.length > 1
     }
   },
+  // classic scrollbars sit outside the element's client area, overlay scrollbars can't be detected
+  isOverScrollbar (event) {
+    const element = event.target
+    if (!(element instanceof Element)) { return }
+    const isOverVertical = element.scrollHeight > element.clientHeight && event.offsetX > element.clientWidth
+    const isOverHorizontal = element.scrollWidth > element.clientWidth && event.offsetY > element.clientHeight
+    return isOverVertical || isOverHorizontal
+  },
   // non-latin (IME) input for japanese kanji
   isCompositionKeyboardEvent (event) {
     if (isComposionEvent) { return true }
