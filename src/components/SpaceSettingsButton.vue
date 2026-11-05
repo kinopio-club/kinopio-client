@@ -88,9 +88,10 @@ button.small-button.translucent-button.space-settings-button(
     width 15px
     min-width initial
 
-  .card-snap-enabled
-    margin-left 5px
+  .icon.card-snap-enabled
     vertical-align -1px
+  > .icon.card-snap-enabled
+    margin-left 5px
 
   dialog.space-settings
     top initial

@@ -101,6 +101,15 @@ const updateUserCardColor = (color) => {
 const clearUserCardColor = () => {
   userStore.updateUser({ newCardColor: null })
 }
+
+// card snap
+
+const shouldPreventSnapToCard = computed(() => spaceStore.shouldPreventSnapToCard)
+const toggleShouldPreventSnapToCard = () => {
+  const value = shouldPreventSnapToCard.value
+  closeDialogs()
+  spaceStore.shouldPreventSnapToCard = !value
+}
 </script>
 
 <template lang="pug">
@@ -146,8 +155,12 @@ dialog.narrow.space-settings(v-if="props.visible" :open="props.visible" @click.l
           @removeColor="clearUserCardColor"
         )
   section
-    p snap card
-    //- todo checkbox button Snap Cards
+    .row
+      label(:class="{ active: shouldPreventSnapToCard }" @click.left.prevent="toggleShouldPreventSnapToCard" @keydown.stop.enter="toggleShouldPreventSnapToCard")
+        input(type="checkbox" v-model="shouldPreventSnapToCard")
+        img.icon.card-snap-enabled(src="@/assets/card-snap-enabled.svg")
+        span Disable Card-to-Card Snap
+
 </template>
 
 <style lang="stylus">
