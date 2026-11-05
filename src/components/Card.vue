@@ -1242,6 +1242,13 @@ const startDraggingCard = async (event) => {
   cardStore.incrementCardZ(cardId)
   globalStore.selectListsFromMultipleSelectedItems()
 }
+const cancelDraggingCardOnScroll = () => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentDraggingCardId !== props.card.id) { return }
+  globalStore.currentUserIsDraggingCard = false
+  globalStore.preventDraggedCardFromShowingDetails = true
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteCardsDragging' })
+}
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
   const isDrawingConnection = globalStore.currentUserIsDrawingConnection
@@ -1849,6 +1856,7 @@ const toggleVideoIsPaused = () => {
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
+    @scroll.capture="cancelDraggingCardOnScroll"
 
     @mouseenter="handleMouseEnter"
     @mousemove="stickToCursor"
