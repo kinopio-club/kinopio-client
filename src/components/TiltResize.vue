@@ -122,7 +122,7 @@ const isResizing = computed(() => {
     @mousedown.left.stop="start($event, 'resizeHeight')"
     @touchstart.stop="start($event, 'resizeHeight')"
     @dblclick="remove('resizeHeight')"
-    title="Drag to Resize"
+    title="Drag to Truncate"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-middle.svg" :class="colorClass")
