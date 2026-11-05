@@ -104,7 +104,7 @@ const clearUserCardColor = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.space-settings(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p New Card Color
   section
@@ -147,7 +147,7 @@ dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @
 </template>
 
 <style lang="stylus">
-dialog.new-card-color-picker
+dialog.space-settings
   .new-user-color-badge
     margin 0
     display inline-block
