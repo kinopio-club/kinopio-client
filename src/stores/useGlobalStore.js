@@ -163,6 +163,7 @@ export const useGlobalStore = defineStore('global', {
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
+    currentUserResizingCardDimension: '', // 'width' or 'truncateHeight'
     remoteUserResizingCards: [],
     // tilting card
     currentUserIsTiltingCard: false,

@@ -34,7 +34,7 @@ import postMessage from '@/postMessage.js'
 // Card only child components
 import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
 import CardVote from '@/components/CardVote.vue'
-import TiltResize from '@/components/TiltResize.vue'
+import TiltResizeTruncate from '@/components/TiltResizeTruncate.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 
@@ -453,6 +453,9 @@ const cardStyle = computed(() => {
     styles.background = color
   }
   styles = updateStylesWithWidth(styles)
+  if (props.card.truncateHeight) {
+    styles.height = `${props.card.truncateHeight}px`
+  }
   return styles
 })
 const cardContentStyles = computed(() => {
@@ -506,7 +509,8 @@ const cardClasses = computed(() => {
     'child-is-hovered': currentUserIsHoveringOverButtonCardId.value && !currentCardIsBeingDragged.value,
     'is-in-checked-box': isInCheckedBox.value,
     'is-checked': isChecked.value,
-    'is-comment': isComment.value
+    'is-comment': isComment.value,
+    'is-truncated-height': props.card.truncateHeight
   }
   classes = addSizeClasses(classes)
   return classes
@@ -596,7 +600,6 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
-  if (isInList.value) { return }
   if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
@@ -1209,6 +1212,10 @@ const startDraggingCard = async (event) => {
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPanningReady) { return }
+  if (utils.isOverScrollbar(event)) {
+    globalStore.preventDraggedCardFromShowingDetails = true
+    return
+  }
   if (utils.isMultiTouch(event)) {
     isMultiTouch = true
     return
@@ -1237,6 +1244,13 @@ const startDraggingCard = async (event) => {
   checkIfShouldDragMultipleCards(event, cardId)
   cardStore.incrementCardZ(cardId)
   globalStore.selectListsFromMultipleSelectedItems()
+}
+const cancelDraggingCardOnScroll = () => {
+  if (!globalStore.currentUserIsDraggingCard) { return }
+  if (globalStore.currentDraggingCardId !== props.card.id) { return }
+  globalStore.currentUserIsDraggingCard = false
+  globalStore.preventDraggedCardFromShowingDetails = true
+  broadcastStore.update({ updates: { userId: userStore.id }, action: 'clearRemoteCardsDragging' })
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
@@ -1845,6 +1859,7 @@ const toggleVideoIsPaused = () => {
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
+    @scroll.capture="cancelDraggingCardOnScroll"
 
     @mouseenter="handleMouseEnter"
     @mousemove="stickToCursor"
@@ -1897,7 +1912,7 @@ const toggleVideoIsPaused = () => {
         :isVisibleInViewport="shouldRender"
       )
 
-    TiltResize(:card="card" :visible="tiltResizeIsVisible")
+    TiltResizeTruncate(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
 
     //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
@@ -2098,6 +2113,37 @@ const toggleVideoIsPaused = () => {
         color var(--primary-on-dark-background)
     &:focus
       outline 2px solid var(--primary-border)
+
+    &.is-truncated-height
+      overflow-y auto
+      overflow-x hidden
+      // keeps connector and other buttons on top
+      .card-buttons-wrap
+        position sticky
+        top 0
+        z-index 1
+      // sticky only works within the parent, so flatten .card-content-wrap
+      // to make .card the parent, the buttons then stay pinned past the url preview too
+      // (media cards already overlay their buttons on the media)
+      &:not(.media-card)
+        display flex
+        flex-wrap wrap
+        align-items flex-start
+        .card-content-wrap
+          display contents
+        .card-content,
+        .card-comment
+          flex 1
+        .url-preview-wrap
+          flex-basis 100%
+      .middle-truncate
+        button.inline-button
+          img.icon
+            border-bottom 3px solid var(--primary)
+            border-left 20px solid var(--primary)
+            border-top-left-radius var(--entity-radius)
+            border-top-right-radius var(--entity-radius)
+            transform translateX(-4px)
 
     &.is-comment
       opacity 0.5

@@ -925,9 +925,9 @@ export const useCardStore = defineStore('cards', {
      */
     resetDimensions ({ cardIds, cardId }) {
       if (cardId) {
-        this.clearResizeCards([cardId])
+        this.clearResizeCardsWidth([cardId])
       } else if (cardIds) {
-        this.clearResizeCards(cardIds)
+        this.clearResizeCardsWidth(cardIds)
       }
     },
     /** @param {Card[]} cards */
@@ -964,9 +964,9 @@ export const useCardStore = defineStore('cards', {
       for (const update of updates) {
         // calc height delta
         const card = this.getCard(update.id)
-        if (!card) { return }
+        if (!card) { continue }
         const deltaHeight = update.height - update.prevHeight
-        if (deltaHeight === 0) { return }
+        if (deltaHeight === 0) { continue }
         // skip lists
         if (card.listId) {
           listIds.push(card.listId)
@@ -974,7 +974,7 @@ export const useCardStore = defineStore('cards', {
         }
         // distributeVertically aligned cards below
         const alignedCards = this.getVerticallyAlignedCardsBelow(card.id, deltaHeight)
-        if (!alignedCards.length) { return }
+        if (!alignedCards.length) { continue }
         alignedCards.unshift(card)
         await this.distributeCardsVertically(alignedCards)
         const cardIds = alignedCards.map(card => card.id)
@@ -1151,7 +1151,7 @@ export const useCardStore = defineStore('cards', {
      * @param {string[]} ids
      * @param {number} deltaX
      */
-    resizeCards (ids, deltaX) {
+    resizeCardsWidth (ids, deltaX) {
       const minImageWidth = 64
       /** @type {CardUpdate[]} */
       const updates = []
@@ -1167,9 +1167,66 @@ export const useCardStore = defineStore('cards', {
     },
     /**
      * @param {string[]} ids
+     * @param {number} deltaY
+     */
+    truncateCardsHeight (ids, deltaY) {
+      const minHeight = 33
+      /** @type {CardUpdate[]} */
+      const updates = []
+      ids.forEach(id => {
+        const card = this.getCard(id)
+        let height = card.truncateHeight || card.height
+        height = height + deltaY
+        height = Math.max(minHeight, height)
+        height = Math.round(height)
+        updates.push({ id, truncateHeight: height })
+      })
+      this.updateCards(updates)
+      this.updateListsWithTruncatedCards(updates)
+    },
+    /**
+     * reflow lists while their child cards are truncated, truncated card height matches truncateHeight
+     * @param {CardUpdate[]} updates
+     */
+    updateListsWithTruncatedCards (updates) {
+      const listStore = useListStore()
+      let listIds = []
+      /** @type {CardUpdate[]} */
+      const heightUpdates = []
+      updates.forEach(update => {
+        const card = this.getCard(update.id)
+        if (!card?.listId) { return }
+        listIds.push(card.listId)
+        heightUpdates.push({ id: card.id, height: update.truncateHeight })
+      })
+      if (!listIds.length) { return }
+      this.updateCards(heightUpdates)
+      listIds = uniq(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        this.updateCardPositionsInList(list)
+      })
+    },
+    /**
+     * @param {string[]} ids
+     */
+    async clearTruncateCardsHeight (ids) {
+      const connectionStore = useConnectionStore()
+      /** @type {CardUpdate[]} */
+      const updates = ids.map(id => {
+        return { id, truncateHeight: null }
+      })
+      this.updateCards(updates)
+      await nextTick()
+      await this.updateCardsDimensions(ids)
+      await nextTick()
+      connectionStore.updateConnectionPathsByItemIds(ids)
+    },
+    /**
+     * @param {string[]} ids
      * @param {boolean} [shouldRemoveResizeWidth]
      */
-    async clearResizeCards (ids, shouldRemoveResizeWidth) {
+    async clearResizeCardsWidth (ids, shouldRemoveResizeWidth) {
       const connectionStore = useConnectionStore()
       /** @type {CardUpdate[]} */
       const updates = []
@@ -1502,7 +1559,7 @@ export const useCardStore = defineStore('cards', {
         }
       })
       this.updateCards(updates)
-      this.clearResizeCards(ids, true)
+      this.clearResizeCardsWidth(ids, true)
       for (const listId of listIds) {
         const list = listStore.getList(listId)
         await this.updateCardPositionsInList(list)
@@ -1768,6 +1825,7 @@ export const useCardStore = defineStore('cards', {
  * @property {number} xDisplay
  * @property {number} yDisplay
  * @property {number|null} resizeWidth The width a user manually set a card to be.
+ * @property {number|null} truncateHeight The height a user manually truncated a card to be, content scrolls if taller.
  * @property {string|null} backgroundColor
  * @property {number} [frameId]
  * @property {User} user

@@ -138,6 +138,10 @@ export const useStickyCard = ({ card, cardElement, x, y, shouldNotStick }) => {
       stopSticking()
       return
     }
+    if (utils.isOverScrollbar(event)) {
+      stopSticking()
+      return
+    }
     // position
     const stretchResistance = state.stickyStretchResistance
     const { height, width } = card.value

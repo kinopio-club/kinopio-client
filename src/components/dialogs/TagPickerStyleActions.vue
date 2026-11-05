@@ -111,7 +111,7 @@ const addToCards = (tagString) => {
 const updateCardDimensions = () => {
   const cards = utils.clone(props.cards)
   const cardIds = cards.map(card => card.id)
-  cardStore.clearResizeCards(cardIds)
+  cardStore.clearResizeCardsWidth(cardIds)
 }
 const addTag = (name) => {
   let tag = currentTags.value.find(item => item.name === name)
