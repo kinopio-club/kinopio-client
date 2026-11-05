@@ -2106,8 +2106,13 @@ const toggleVideoIsPaused = () => {
     &.is-resized-height
       overflow-y scroll
       overflow-x hidden
-      borderBottomLeftRadius var(--entity-radius)
-      borderBottomRightRadius var(--entity-radius)
+      border-bottom-left-radius var(--entity-radius)
+      border-bottom-left-radius var(--entity-radius)
+      // keeps connector and other buttons on top
+      .card-buttons-wrap
+        position sticky
+        top 0
+        z-index 1
       .middle-resize
         button.inline-button
           img.icon
@@ -2115,6 +2120,7 @@ const toggleVideoIsPaused = () => {
             border-left 20px solid var(--primary)
             border-top-left-radius var(--entity-radius)
             border-top-right-radius var(--entity-radius)
+            transform translateX(-4px)
 
     &.is-comment
       opacity 0.5
