@@ -1213,6 +1213,10 @@ const startDraggingCard = async (event) => {
   if (event.ctrlKey) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPanningReady) { return }
+  if (utils.isOverScrollbar(event)) {
+    globalStore.preventDraggedCardFromShowingDetails = true
+    return
+  }
   if (utils.isMultiTouch(event)) {
     isMultiTouch = true
     return
