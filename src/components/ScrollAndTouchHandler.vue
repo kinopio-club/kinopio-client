@@ -151,8 +151,8 @@ const resizeItemsWithScroll = (event) => {
   } else if (globalStore.currentUserIsResizingCard) {
     if (globalStore.currentUserResizingCardDimension === 'width') {
       cardStore.resizeCardsWidth(globalStore.currentUserIsResizingCardIds, delta.x)
-    } else if (globalStore.currentUserResizingCardDimension === 'height') {
-      cardStore.resizeCardsHeight(globalStore.currentUserIsResizingCardIds, delta.y)
+    } else if (globalStore.currentUserResizingCardDimension === 'truncateHeight') {
+      cardStore.truncateCardsHeight(globalStore.currentUserIsResizingCardIds, delta.y)
     }
   } else if (globalStore.currentUserIsResizingList) {
     listStore.resizeLists(globalStore.currentUserIsResizingListIds, delta)

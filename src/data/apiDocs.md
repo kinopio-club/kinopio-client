@@ -297,7 +297,7 @@ Name | Type | Description
 <code class="cards">nameUpdatedAt</code>            | `String`  | The date when the card name was last updated
 <code class="cards">nameUpdatedByUserId</code>      | `String`  | The user id that last updated the name of the card
 <code class="cards">resizeWidth</code>              | `Integer` | The width of a card that's been manually resized by the user
-<code class="cards">resizeHeight</code>             | `Integer` | The height of a card that's been manually resized by the user
+<code class="cards">truncateHeight</code>           | `Integer` | The height of a card that's been manually truncated (vertically resized) by the user
 <code class="cards">shouldHideUrlPreviewImage</code>    | `Boolean` | Whether the card will display it's url preview image
 <code class="cards">shouldHideUrlPreviewInfo</code>     | `Boolean` | Whether the card will display it's url preview title and description
 <code class="cards">shouldUpdateUrlPreview</code>       | `Boolean` | Whether the card should be checked for a url preview the next time it's space is loaded in the kinopio-client app. This attribute is automatically assigned to cards created by /card POSTs

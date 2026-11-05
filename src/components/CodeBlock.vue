@@ -81,9 +81,9 @@ const syntaxHighlightHTML = computed(() => {
   return html
 })
 
-// resize height
+// truncate height
 
-const resizeHeight = computed(() => parentCard.value.resizeHeight)
+const truncateHeight = computed(() => parentCard.value.truncateHeight)
 const nameIsOnlyCodeBlock = computed(() => {
   const name = parentCard.value.name.trim()
   const isWrappedInFence = name.startsWith('```') && name.endsWith('```')
@@ -91,11 +91,11 @@ const nameIsOnlyCodeBlock = computed(() => {
   return isWrappedInFence && hasOneCodeBlock
 })
 const preStyles = computed(() => {
-  if (!resizeHeight.value) { return }
+  if (!truncateHeight.value) { return }
   if (!nameIsOnlyCodeBlock.value) { return }
   const padding = 15
   return {
-    height: `${resizeHeight.value - padding}px`
+    height: `${truncateHeight.value - padding}px`
   }
 })
 
@@ -180,11 +180,11 @@ const copy = async (event) => {
         img.icon.copy(src="@/assets/copy.svg")
 
   template(v-if="latexIsVisible")
-    .latex(v-html="state.latexHTML" :class="{'is-resized-height': resizeHeight}")
+    .latex(v-html="state.latexHTML" :class="{'is-truncated-height': truncateHeight}")
   template(v-else-if="shouldSyntaxHighlight")
-    pre(v-html="syntaxHighlightHTML" :style="preStyles" :class="{'is-resized-height': resizeHeight}")
+    pre(v-html="syntaxHighlightHTML" :style="preStyles" :class="{'is-truncated-height': truncateHeight}")
   template(v-else)
-    pre(:style="preStyles" :class="{'is-resized-height': resizeHeight}") {{props.content}}
+    pre(:style="preStyles" :class="{'is-truncated-height': truncateHeight}") {{props.content}}
 
 </template>
 
@@ -254,7 +254,7 @@ const copy = async (event) => {
     // math
     //   font-size 16px
 
-  .is-resized-height
+  .is-truncated-height
     max-height none
 
   .loader

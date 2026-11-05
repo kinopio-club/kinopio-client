@@ -44,8 +44,8 @@ const start = (event, action) => {
   }
   if (action === 'resizeWidth') {
     startResizing(cardIds, updates, 'width')
-  } else if (action === 'resizeHeight') {
-    startResizing(cardIds, updates, 'height')
+  } else if (action === 'truncateHeight') {
+    startResizing(cardIds, updates, 'truncateHeight')
   } else if (action === 'tilt') {
     globalStore.currentUserIsTiltingCard = true
     globalStore.currentUserIsTiltingCardIds = cardIds
@@ -67,8 +67,8 @@ const remove = (action) => {
   if (action === 'resizeWidth') {
     const shouldRemoveResizeWidth = true
     cardStore.clearResizeCardsWidth(cardIds, shouldRemoveResizeWidth)
-  } else if (action === 'resizeHeight') {
-    cardStore.clearResizeCardsHeight(cardIds)
+  } else if (action === 'truncateHeight') {
+    cardStore.clearTruncateCardsHeight(cardIds)
   } else if (action === 'tilt') {
     cardStore.clearTiltCards(cardIds)
   }
@@ -119,11 +119,11 @@ const isResizing = computed(() => {
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
 //- resize height
-.middle-resize.bottom-button-wrap(v-if="resizeIsVisible")
+.middle-truncate.bottom-button-wrap(v-if="resizeIsVisible")
   .inline-button-wrap(
-    @mousedown.left.stop="start($event, 'resizeHeight')"
-    @touchstart.stop="start($event, 'resizeHeight')"
-    @dblclick="remove('resizeHeight')"
+    @mousedown.left.stop="start($event, 'truncateHeight')"
+    @touchstart.stop="start($event, 'truncateHeight')"
+    @dblclick="remove('truncateHeight')"
     title="Drag to Truncate"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
@@ -188,7 +188,7 @@ const isResizing = computed(() => {
     .inline-button-wrap
       padding-left 0
   // resize height
-  &.middle-resize
+  &.middle-truncate
     left calc(50% - 14px)
     bottom -2px
     .inline-button-wrap

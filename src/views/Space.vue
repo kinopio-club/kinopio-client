@@ -445,9 +445,9 @@ const resizeCards = async (event) => {
   if (globalStore.currentUserResizingCardDimension === 'width') {
     const deltaX = Math.round((endCursor.x - prevCursor.x) * zoom)
     cardStore.resizeCardsWidth(cardIds, deltaX)
-  } else if (globalStore.currentUserResizingCardDimension === 'height') {
+  } else if (globalStore.currentUserResizingCardDimension === 'truncateHeight') {
     const deltaY = Math.round((endCursor.y - prevCursor.y) * zoom)
-    cardStore.resizeCardsHeight(cardIds, deltaY)
+    cardStore.truncateCardsHeight(cardIds, deltaY)
   }
   await nextTick()
   cardStore.updateCardsDimensions(cardIds)

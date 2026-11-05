@@ -34,7 +34,7 @@ import postMessage from '@/postMessage.js'
 // Card only child components
 import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
 import CardVote from '@/components/CardVote.vue'
-import TiltResize from '@/components/TiltResize.vue'
+import TiltResizeTruncate from '@/components/TiltResizeTruncate.vue'
 import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 
@@ -453,8 +453,8 @@ const cardStyle = computed(() => {
     styles.background = color
   }
   styles = updateStylesWithWidth(styles)
-  if (props.card.resizeHeight) {
-    styles.height = `${props.card.resizeHeight}px`
+  if (props.card.truncateHeight) {
+    styles.height = `${props.card.truncateHeight}px`
   }
   return styles
 })
@@ -510,7 +510,7 @@ const cardClasses = computed(() => {
     'is-in-checked-box': isInCheckedBox.value,
     'is-checked': isChecked.value,
     'is-comment': isComment.value,
-    'is-resized-height': props.card.resizeHeight
+    'is-truncated-height': props.card.truncateHeight
   }
   classes = addSizeClasses(classes)
   return classes
@@ -1912,7 +1912,7 @@ const toggleVideoIsPaused = () => {
         :isVisibleInViewport="shouldRender"
       )
 
-    TiltResize(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
+    TiltResizeTruncate(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
 
     //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
@@ -2114,7 +2114,7 @@ const toggleVideoIsPaused = () => {
     &:focus
       outline 2px solid var(--primary-border)
 
-    &.is-resized-height
+    &.is-truncated-height
       overflow-y auto
       overflow-x hidden
       // keeps connector and other buttons on top
@@ -2136,7 +2136,7 @@ const toggleVideoIsPaused = () => {
           flex 1
         .url-preview-wrap
           flex-basis 100%
-      .middle-resize
+      .middle-truncate
         button.inline-button
           img.icon
             border-bottom 3px solid var(--primary)
