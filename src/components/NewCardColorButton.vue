@@ -59,6 +59,8 @@ const toggleNewCardColorPickerIsVisible = () => {
   state.newCardColorPickerIsVisible = value
 }
 
+const isCardSnapEnabled = computed(() => !spaceStore.shouldPreventSnapToCard)
+
 </script>
 
 <template lang="pug">
@@ -67,7 +69,12 @@ button.small-button.translucent-button.new-card-color-button(
   :class="{active: state.newCardColorPickerIsVisible}"
   title="Set Color of New Cards"
 )
-  .badge.small-badge(:style="{ 'background-color': newCardColor }")
+  //- new card color
+  .badge.small-badge(:style="{ 'background-color': newCardColor }" title="New Card Color")
+  //- card snap enabled
+  .badge.small-badge.secondary.letter-badge(v-if="isCardSnapEnabled" title="Card Snap is Enabled")
+    span S
+
   NewCardColorPicker(:visible="state.newCardColorPickerIsVisible" :defaultColor="state.defaultColor")
 </template>
 
@@ -81,6 +88,21 @@ button.small-button.translucent-button.new-card-color-button(
     border-radius var(--small-entity-radius)
     width 15px
     min-width initial
+    &.letter-badge
+      padding 0
+      display inline-flex
+      align-items center
+      justify-content center
+      vertical-align 1px
+      // background-color var(--primary)
+      span
+        font-size 11px
+        line-height 1
+        // color var(--primary-background)
+
+  > .badge + .badge
+    margin-left 5px
+
   dialog.new-card-color-picker
     top initial
     bottom 16px
