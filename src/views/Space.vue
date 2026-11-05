@@ -444,9 +444,10 @@ const resizeCards = async (event) => {
   const zoom = globalStore.getSpaceCounterZoomDecimal
   if (globalStore.currentUserResizingCardDimension === 'width') {
     const deltaX = Math.round((endCursor.x - prevCursor.x) * zoom)
-    cardStore.resizeCards(cardIds, deltaX)
+    cardStore.resizeCardsWidth(cardIds, deltaX)
   } else if (globalStore.currentUserResizingCardDimension === 'height') {
-    // TODO resize card height
+    const deltaY = Math.round((endCursor.y - prevCursor.y) * zoom)
+    cardStore.resizeCardsHeight(cardIds, deltaY)
   }
   await nextTick()
   cardStore.updateCardsDimensions(cardIds)

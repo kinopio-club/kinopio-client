@@ -453,6 +453,9 @@ const cardStyle = computed(() => {
     styles.background = color
   }
   styles = updateStylesWithWidth(styles)
+  if (props.card.resizeHeight) {
+    styles.height = `${props.card.resizeHeight}px`
+  }
   return styles
 })
 const cardContentStyles = computed(() => {
@@ -506,7 +509,8 @@ const cardClasses = computed(() => {
     'child-is-hovered': currentUserIsHoveringOverButtonCardId.value && !currentCardIsBeingDragged.value,
     'is-in-checked-box': isInCheckedBox.value,
     'is-checked': isChecked.value,
-    'is-comment': isComment.value
+    'is-comment': isComment.value,
+    'is-resized-height': props.card.resizeHeight
   }
   classes = addSizeClasses(classes)
   return classes
@@ -2098,6 +2102,15 @@ const toggleVideoIsPaused = () => {
         color var(--primary-on-dark-background)
     &:focus
       outline 2px solid var(--primary-border)
+
+    &.is-resized-height
+      overflow-y scroll
+      overflow-x hidden
+      borderBottomLeftRadius var(--entity-radius)
+      borderBottomRightRadius var(--entity-radius)
+      .middle-resize
+        button.inline-button
+          opacity 1
 
     &.is-comment
       opacity 0.5

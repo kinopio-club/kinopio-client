@@ -925,9 +925,9 @@ export const useCardStore = defineStore('cards', {
      */
     resetDimensions ({ cardIds, cardId }) {
       if (cardId) {
-        this.clearResizeCards([cardId])
+        this.clearResizeCardsWidth([cardId])
       } else if (cardIds) {
-        this.clearResizeCards(cardIds)
+        this.clearResizeCardsWidth(cardIds)
       }
     },
     /** @param {Card[]} cards */
@@ -1151,7 +1151,7 @@ export const useCardStore = defineStore('cards', {
      * @param {string[]} ids
      * @param {number} deltaX
      */
-    resizeCards (ids, deltaX) {
+    resizeCardsWidth (ids, deltaX) {
       const minImageWidth = 64
       /** @type {CardUpdate[]} */
       const updates = []
@@ -1167,9 +1167,42 @@ export const useCardStore = defineStore('cards', {
     },
     /**
      * @param {string[]} ids
+     * @param {number} deltaY
+     */
+    resizeCardsHeight (ids, deltaY) {
+      const minHeight = 32
+      /** @type {CardUpdate[]} */
+      const updates = []
+      ids.forEach(id => {
+        const card = this.getCard(id)
+        let height = card.resizeHeight || card.height
+        height = height + deltaY
+        height = Math.max(minHeight, height)
+        height = Math.round(height)
+        updates.push({ id, resizeHeight: height })
+      })
+      this.updateCards(updates)
+    },
+    /**
+     * @param {string[]} ids
+     */
+    async clearResizeCardsHeight (ids) {
+      const connectionStore = useConnectionStore()
+      /** @type {CardUpdate[]} */
+      const updates = ids.map(id => {
+        return { id, resizeHeight: null }
+      })
+      this.updateCards(updates)
+      await nextTick()
+      await this.updateCardsDimensions(ids)
+      await nextTick()
+      connectionStore.updateConnectionPathsByItemIds(ids)
+    },
+    /**
+     * @param {string[]} ids
      * @param {boolean} [shouldRemoveResizeWidth]
      */
-    async clearResizeCards (ids, shouldRemoveResizeWidth) {
+    async clearResizeCardsWidth (ids, shouldRemoveResizeWidth) {
       const connectionStore = useConnectionStore()
       /** @type {CardUpdate[]} */
       const updates = []
@@ -1502,7 +1535,7 @@ export const useCardStore = defineStore('cards', {
         }
       })
       this.updateCards(updates)
-      this.clearResizeCards(ids, true)
+      this.clearResizeCardsWidth(ids, true)
       for (const listId of listIds) {
         const list = listStore.getList(listId)
         await this.updateCardPositionsInList(list)
@@ -1768,6 +1801,7 @@ export const useCardStore = defineStore('cards', {
  * @property {number} xDisplay
  * @property {number} yDisplay
  * @property {number|null} resizeWidth The width a user manually set a card to be.
+ * @property {number|null} resizeHeight The height a user manually set a card to be, content scrolls if taller.
  * @property {string|null} backgroundColor
  * @property {number} [frameId]
  * @property {User} user

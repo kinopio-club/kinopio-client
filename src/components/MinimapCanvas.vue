@@ -65,10 +65,12 @@ onMounted(async () => {
   const cardStoreActions = [
     'updateCards',
     'removeCards',
-    'clearResizeCards',
+    'clearResizeCardsWidth',
+    'clearResizeCardsHeight',
     'moveCards',
     'createCard',
-    'resizeCards',
+    'resizeCardsWidth',
+    'resizeCardsHeight',
     'pasteCards'
   ]
   const connectionStoreActions = [

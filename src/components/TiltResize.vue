@@ -65,7 +65,9 @@ const remove = (action) => {
   }
   if (action === 'resizeWidth') {
     const shouldRemoveResizeWidth = true
-    cardStore.clearResizeCards(cardIds, shouldRemoveResizeWidth)
+    cardStore.clearResizeCardsWidth(cardIds, shouldRemoveResizeWidth)
+  } else if (action === 'resizeHeight') {
+    cardStore.clearResizeCardsHeight(cardIds)
   } else if (action === 'tilt') {
     cardStore.clearTiltCards(cardIds)
   }

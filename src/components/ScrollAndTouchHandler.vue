@@ -150,9 +150,9 @@ const resizeItemsWithScroll = (event) => {
     boxStore.resizeBoxes(globalStore.currentUserIsResizingBoxIds, delta)
   } else if (globalStore.currentUserIsResizingCard) {
     if (globalStore.currentUserResizingCardDimension === 'width') {
-      cardStore.resizeCards(globalStore.currentUserIsResizingCardIds, delta.x)
+      cardStore.resizeCardsWidth(globalStore.currentUserIsResizingCardIds, delta.x)
     } else if (globalStore.currentUserResizingCardDimension === 'height') {
-      // TODO resize card height
+      cardStore.resizeCardsHeight(globalStore.currentUserIsResizingCardIds, delta.y)
     }
   } else if (globalStore.currentUserIsResizingList) {
     listStore.resizeLists(globalStore.currentUserIsResizingListIds, delta)
