@@ -9,7 +9,7 @@ import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import NewCardColorButton from '@/components/NewCardColorButton.vue'
+import SpaceSettingsButton from '@/components/SpaceSettingsButton.vue'
 import Toc from '@/components/dialogs/Toc.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -235,7 +235,7 @@ const updatePosition = (event) => {
           .footer-button-wrap
             FavoriteSpaceButton(:isSmall="true")
         .footer-button-wrap
-          NewCardColorButton
+          SpaceSettingsButton
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")

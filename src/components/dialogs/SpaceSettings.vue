@@ -101,13 +101,23 @@ const updateUserCardColor = (color) => {
 const clearUserCardColor = () => {
   userStore.updateUser({ newCardColor: null })
 }
+
+// card snap
+
+const shouldPreventSnapToCard = computed(() => spaceStore.shouldPreventSnapToCard)
+const toggleShouldPreventSnapToCard = () => {
+  const value = shouldPreventSnapToCard.value
+  closeDialogs()
+  spaceStore.shouldPreventSnapToCard = !value
+}
 </script>
 
 <template lang="pug">
-dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.space-settings(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
-    p New Card Color
+    p Space Settings
   section
+    p New Card Color
     //- current space (space user)
     .row
       .button-wrap
@@ -144,10 +154,17 @@ dialog.narrow.new-card-color-picker(v-if="props.visible" :open="props.visible" @
           @selectedColor="updateUserCardColor"
           @removeColor="clearUserCardColor"
         )
+  section
+    .row
+      label(:class="{ active: shouldPreventSnapToCard }" @click.left.prevent="toggleShouldPreventSnapToCard" @keydown.stop.enter="toggleShouldPreventSnapToCard")
+        input(type="checkbox" v-model="shouldPreventSnapToCard")
+        img.icon.card-snap-enabled(src="@/assets/card-snap-enabled.svg")
+        span Disable Card-to-Card Snap
+
 </template>
 
 <style lang="stylus">
-dialog.new-card-color-picker
+dialog.space-settings
   .new-user-color-badge
     margin 0
     display inline-block

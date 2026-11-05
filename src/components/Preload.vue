@@ -65,6 +65,7 @@ const spacePreviewThumbnailImage = computed(() => spaceStore.previewThumbnailIma
     img.icon(src="@/assets/camera.svg")
     img.icon(src="@/assets/cal.svg")
     img.icon(src="@/assets/card.svg")
+    img.icon(src="@/assets/card-snap-enabled.svg")
     img.icon(src="@/assets/center-horizontally.svg")
     img.icon(src="@/assets/checkmark-invert.svg")
     img.icon(src="@/assets/checkmark.svg")
