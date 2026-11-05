@@ -2106,13 +2106,25 @@ const toggleVideoIsPaused = () => {
     &.is-resized-height
       overflow-y scroll
       overflow-x hidden
-      border-bottom-left-radius var(--entity-radius)
-      border-bottom-left-radius var(--entity-radius)
       // keeps connector and other buttons on top
       .card-buttons-wrap
         position sticky
         top 0
         z-index 1
+      // sticky only works within the parent, so flatten .card-content-wrap
+      // to make .card the parent, the buttons then stay pinned past the url preview too
+      // (media cards already overlay their buttons on the media)
+      &:not(.media-card)
+        display flex
+        flex-wrap wrap
+        align-items flex-start
+        .card-content-wrap
+          display contents
+        .card-content,
+        .card-comment
+          flex 1
+        .url-preview-wrap
+          flex-basis 100%
       .middle-resize
         button.inline-button
           img.icon
