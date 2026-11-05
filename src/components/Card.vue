@@ -600,7 +600,6 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
-  if (isInList.value) { return }
   if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
@@ -1913,7 +1912,7 @@ const toggleVideoIsPaused = () => {
         :isVisibleInViewport="shouldRender"
       )
 
-    TiltResize(:card="card" :visible="tiltResizeIsVisible")
+    TiltResize(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
 
     //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")

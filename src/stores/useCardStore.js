@@ -964,9 +964,9 @@ export const useCardStore = defineStore('cards', {
       for (const update of updates) {
         // calc height delta
         const card = this.getCard(update.id)
-        if (!card) { return }
+        if (!card) { continue }
         const deltaHeight = update.height - update.prevHeight
-        if (deltaHeight === 0) { return }
+        if (deltaHeight === 0) { continue }
         // skip lists
         if (card.listId) {
           listIds.push(card.listId)
@@ -974,7 +974,7 @@ export const useCardStore = defineStore('cards', {
         }
         // distributeVertically aligned cards below
         const alignedCards = this.getVerticallyAlignedCardsBelow(card.id, deltaHeight)
-        if (!alignedCards.length) { return }
+        if (!alignedCards.length) { continue }
         alignedCards.unshift(card)
         await this.distributeCardsVertically(alignedCards)
         const cardIds = alignedCards.map(card => card.id)
@@ -1182,6 +1182,30 @@ export const useCardStore = defineStore('cards', {
         updates.push({ id, resizeHeight: height })
       })
       this.updateCards(updates)
+      this.updateListsWithResizedCards(updates)
+    },
+    /**
+     * reflow lists while their child cards are resized, resized card height matches resizeHeight
+     * @param {CardUpdate[]} updates
+     */
+    updateListsWithResizedCards (updates) {
+      const listStore = useListStore()
+      let listIds = []
+      /** @type {CardUpdate[]} */
+      const heightUpdates = []
+      updates.forEach(update => {
+        const card = this.getCard(update.id)
+        if (!card?.listId) { return }
+        listIds.push(card.listId)
+        heightUpdates.push({ id: card.id, height: update.resizeHeight })
+      })
+      if (!listIds.length) { return }
+      this.updateCards(heightUpdates)
+      listIds = uniq(listIds)
+      listIds.forEach(listId => {
+        const list = listStore.getList(listId)
+        this.updateCardPositionsInList(list)
+      })
     },
     /**
      * @param {string[]} ids

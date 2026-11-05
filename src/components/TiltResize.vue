@@ -18,7 +18,8 @@ const broadcastStore = useBroadcastStore()
 
 const props = defineProps({
   visible: Boolean,
-  card: Object
+  card: Object,
+  isInList: Boolean
 })
 
 const isPresentationMode = computed(() => globalStore.isPresentationMode)
@@ -84,7 +85,7 @@ const tiltIsVisible = computed(() => {
   if (utils.isMobile()) { return }
   const minCardWidth = consts.defaultCardWidth
   const cardIsWideEnough = props.card.width >= minCardWidth
-  return props.visible && cardIsWideEnough
+  return props.visible && cardIsWideEnough && !props.isInList
 })
 const isTilting = computed(() => {
   const cardIds = globalStore.currentUserIsTiltingCardIds
@@ -98,6 +99,7 @@ const isComment = computed(() => cardStore.getIsCommentCard(props.card))
 const resizeIsVisible = computed(() => {
   return props.visible && !isComment.value
 })
+const resizeWidthIsVisible = computed(() => resizeIsVisible.value && !props.isInList)
 const isResizing = computed(() => {
   const cardIds = globalStore.currentUserIsResizingCardIds
   if (!cardIds.length) { return }
@@ -107,7 +109,7 @@ const isResizing = computed(() => {
 
 <template lang="pug">
 //- resize width
-.right-resize.bottom-button-wrap(v-if="resizeIsVisible")
+.right-resize.bottom-button-wrap(v-if="resizeWidthIsVisible")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'resizeWidth')"
     @touchstart.stop="start($event, 'resizeWidth')"
