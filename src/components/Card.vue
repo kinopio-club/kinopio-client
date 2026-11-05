@@ -2104,7 +2104,7 @@ const toggleVideoIsPaused = () => {
       outline 2px solid var(--primary-border)
 
     &.is-resized-height
-      overflow-y scroll
+      overflow-y auto
       overflow-x hidden
       // keeps connector and other buttons on top
       .card-buttons-wrap
