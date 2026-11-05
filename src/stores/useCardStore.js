@@ -1170,7 +1170,7 @@ export const useCardStore = defineStore('cards', {
      * @param {number} deltaY
      */
     resizeCardsHeight (ids, deltaY) {
-      const minHeight = 32
+      const minHeight = 33
       /** @type {CardUpdate[]} */
       const updates = []
       ids.forEach(id => {

@@ -2110,7 +2110,11 @@ const toggleVideoIsPaused = () => {
       borderBottomRightRadius var(--entity-radius)
       .middle-resize
         button.inline-button
-          opacity 1
+          img.icon
+            border-bottom 3px solid var(--primary)
+            border-left 20px solid var(--primary)
+            border-top-left-radius var(--entity-radius)
+            border-top-right-radius var(--entity-radius)
 
     &.is-comment
       opacity 0.5
