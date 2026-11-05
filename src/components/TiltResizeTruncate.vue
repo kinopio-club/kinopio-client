@@ -96,10 +96,10 @@ const isTilting = computed(() => {
 // resize
 
 const isComment = computed(() => cardStore.getIsCommentCard(props.card))
-const resizeIsVisible = computed(() => {
+const resizeTruncateIsVisible = computed(() => {
   return props.visible && !isComment.value
 })
-const resizeWidthIsVisible = computed(() => resizeIsVisible.value && !props.isInList)
+const resizeWidthIsVisible = computed(() => resizeTruncateIsVisible.value && !props.isInList)
 const isResizing = computed(() => {
   const cardIds = globalStore.currentUserIsResizingCardIds
   if (!cardIds.length) { return }
@@ -119,7 +119,7 @@ const isResizing = computed(() => {
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
 //- resize height
-.middle-truncate.bottom-button-wrap(v-if="resizeIsVisible")
+.middle-truncate.bottom-button-wrap(v-if="resizeTruncateIsVisible")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'truncateHeight')"
     @touchstart.stop="start($event, 'truncateHeight')"
