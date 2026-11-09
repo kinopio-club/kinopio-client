@@ -59,7 +59,7 @@ const toggleSpaceSettingsIsVisible = () => {
   state.spaceSettingsIsVisible = value
 }
 
-const isCardSnapEnabled = computed(() => !spaceStore.shouldPreventSnapToCard)
+const isCardSnapDisabled = computed(() => spaceStore.shouldPreventSnapToCard)
 
 </script>
 
@@ -72,7 +72,7 @@ button.small-button.translucent-button.space-settings-button(
   //- new card color
   .badge.small-badge(:style="{ 'background-color': newCardColor }" title="New Card Color")
   //- card snap enabled
-  img.icon.card-snap-enabled(src="@/assets/card-snap-enabled.svg" v-if="isCardSnapEnabled" title="Card Snap is Enabled")
+  img.icon.card-snap-disabled(src="@/assets/card-snap-disabled.svg" v-if="isCardSnapDisabled" title="Card Snap is Enabled")
 
   SpaceSettings(:visible="state.spaceSettingsIsVisible" :defaultColor="state.defaultColor")
 </template>
@@ -88,9 +88,9 @@ button.small-button.translucent-button.space-settings-button(
     width 15px
     min-width initial
 
-  .icon.card-snap-enabled
-    vertical-align -1px
-  > .icon.card-snap-enabled
+  // .icon.card-snap-disabled
+  //   vertical-align -1px
+  > .icon.card-snap-disabled
     margin-left 5px
 
   dialog.space-settings

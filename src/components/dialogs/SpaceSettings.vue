@@ -45,8 +45,8 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
-  userNewCardColorPickerIsVisible: false,
-  spaceUserNewCardColorPickerIsVisible: false
+  newCardColorPickerIsVisible: false,
+  scope: 'space' // user
 
 })
 
@@ -64,42 +64,49 @@ const updateDialogHeight = async () => {
 }
 
 const closeDialogs = () => {
-  state.userNewCardColorPickerIsVisible = false
-  state.spaceUserNewCardColorPickerIsVisible = false
+  state.newCardColorPickerIsVisible = false
 }
+
 const spacePreviewThumbnailImage = computed(() => spaceStore.previewThumbnailImagePrivate || spaceStore.previewThumbnailImage)
 const itemColors = computed(() => spaceStore.getSpaceItemColors.card)
 
-// current space (space user)
+// scope
 
-const spaceUserNewCardColor = computed(() => spaceStore.userNewCardColor || props.defaultColor)
-const toggleSpaceUserNewCardColorPickerIsVisible = () => {
-  const value = state.spaceUserNewCardColorPickerIsVisible
+const scopeIsSpace = computed(() => state.scope === 'space')
+const scopeIsUser = computed(() => state.scope === 'user')
+const toggleScope = (value) => {
+  state.scope = value
+}
+
+// new card color
+
+const newCardColor = computed(() => {
+  if (scopeIsSpace.value) {
+    return spaceStore.userNewCardColor || props.defaultColor
+  } else {
+    return userStore.newCardColor || props.defaultColor
+  }
+})
+const toggleNewCardColorPickerIsVisible = () => {
+  const value = state.newCardColorPickerIsVisible
   closeDialogs()
-  state.spaceUserNewCardColorPickerIsVisible = !value
+  state.newCardColorPickerIsVisible = !value
 }
-const updateSpaceUserCardColor = (color) => {
-  color = colord(color).toHex()
-  spaceStore.updateSpaceUserNewCardColor(color)
+const updateNewCardColor = (color) => {
+  if (scopeIsSpace.value) {
+    color = colord(color).toHex()
+    spaceStore.updateSpaceUserNewCardColor(color)
+  } else {
+    color = colord(color).toHex()
+    userStore.updateUser({ newCardColor: color })
+  }
 }
-const clearSpaceUserCardColor = () => {
-  spaceStore.updateSpaceUserNewCardColor(null)
-}
-
-// all spaces (user)
-
-const userNewCardColor = computed(() => userStore.newCardColor || props.defaultColor)
-const toggleUserNewCardColorPickerIsVisible = () => {
-  const value = state.userNewCardColorPickerIsVisible
-  closeDialogs()
-  state.userNewCardColorPickerIsVisible = !value
-}
-const updateUserCardColor = (color) => {
-  color = colord(color).toHex()
-  userStore.updateUser({ newCardColor: color })
-}
-const clearUserCardColor = () => {
-  userStore.updateUser({ newCardColor: null })
+const clearNewCardColor = () => {
+  if (scopeIsSpace.value) {
+    spaceStore.updateSpaceUserNewCardColor(null)
+  } else {
+    userStore.updateUser({ newCardColor: null })
+  }
 }
 
 // card snap
@@ -110,56 +117,43 @@ const toggleShouldPreventSnapToCard = () => {
   closeDialogs()
   spaceStore.shouldPreventSnapToCard = !value
 }
+
 </script>
 
 <template lang="pug">
 dialog.narrow.space-settings(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     p Space Settings
+    .segmented-buttons
+      button(:class="{ active: scopeIsSpace }" @click="toggleScope('space')")
+        span Current Space
+      button(:class="{ active: scopeIsUser }" @click="toggleScope('user')")
+        span All Spaces
   section
-    p New Card Color
-    //- current space (space user)
-    .row
-      .button-wrap
-        .segmented-buttons
-          button(@click.stop="toggleSpaceUserNewCardColorPickerIsVisible" :class="{ active: state.spaceUserNewCardColorPickerIsVisible }")
-            .badge.new-user-color-badge(:style="{ backgroundColor: spaceUserNewCardColor }")
-            img.preview-thumbnail-image(v-if="spacePreviewThumbnailImage" :src="spacePreviewThumbnailImage")
-            span Current Space
-          button(@click="clearSpaceUserCardColor")
-            img.icon.cancel(src="@/assets/add.svg")
-        ColorPicker(
-          :currentColor="spaceUserNewCardColor"
-          :visible="state.spaceUserNewCardColorPickerIsVisible"
-          :removeIsVisible="true"
-          :recentColors="itemColors"
-          @selectedColor="updateSpaceUserCardColor"
-          @removeColor="clearSpaceUserCardColor"
-        )
 
     //- all spaces (user)
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.stop="toggleUserNewCardColorPickerIsVisible" :class="{ active: state.userNewCardColorPickerIsVisible }")
-            .badge.new-user-color-badge(:style="{ backgroundColor: userNewCardColor }")
-            span All Spaces
-          button(@click="clearUserCardColor")
+          button(@click.stop="toggleNewCardColorPickerIsVisible" :class="{ active: state.newCardColorPickerIsVisible }")
+            .badge.new-user-color-badge(:style="{ backgroundColor: newCardColor }")
+            span New Card Color
+          button(@click="clearNewCardColor")
             img.icon.cancel(src="@/assets/add.svg")
         ColorPicker(
-          :currentColor="userNewCardColor"
-          :visible="state.userNewCardColorPickerIsVisible"
+          :currentColor="newCardColor"
+          :visible="state.newCardColorPickerIsVisible"
           :removeIsVisible="true"
           :recentColors="itemColors"
-          @selectedColor="updateUserCardColor"
-          @removeColor="clearUserCardColor"
+          @selectedColor="updateNewCardColor"
+          @removeColor="clearNewCardColor"
         )
-  section
-    .row
+
+    .row(v-if="scopeIsSpace")
       label(:class="{ active: shouldPreventSnapToCard }" @click.left.prevent="toggleShouldPreventSnapToCard" @keydown.stop.enter="toggleShouldPreventSnapToCard")
         input(type="checkbox" v-model="shouldPreventSnapToCard")
-        img.icon.card-snap-enabled(src="@/assets/card-snap-enabled.svg")
-        span Disable Card-to-Card Snap
+        img.icon.card-snap-disabled(src="@/assets/card-snap-disabled.svg")
+        span Disable Card Snapping
 
 </template>
 
