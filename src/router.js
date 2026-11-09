@@ -22,8 +22,10 @@ const resetStoresForStaticPage = () => {
   useListStore().$reset()
 }
 
+// when adding page, also update consts.staticPagePaths
+
 const affiliatePromoCodes = ['foxy', 'phonetonote', 'fran', 'happy']
-const aboutPaths = ['/about', '/from']
+const aboutPaths = ['/about', '/from'] // depcrecate after 2026
 
 const router = {
   history: consts.isStaticPrerenderingPage ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),

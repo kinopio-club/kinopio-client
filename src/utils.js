@@ -2513,7 +2513,16 @@ export default {
       spaceUrlPattern = new RegExp(/(https:\/\/kinopio\.club\/)(?:(?!invite\?).)(['A-Za-z0-9-]*)/gi)
     }
     const isSpaceUrl = url.match(spaceUrlPattern)
-    return Boolean(isSpaceUrl)
+    if (!isSpaceUrl) { return }
+    if (this.urlIsKinopioRootOrStaticPage(url)) { return }
+    return true
+  },
+  urlIsKinopioRootOrStaticPage (url) {
+    url = this.newUrl(url)
+    if (!url) { return }
+    const path = url.pathname.split('/')[1]
+    if (!path) { return true }
+    return consts.staticPagePaths.includes(path.toLowerCase())
   },
   urlIsWebsite (url) {
     const isImage = this.urlIsImage(url)
@@ -2896,15 +2905,13 @@ export default {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
       const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-      const segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
+      const segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isSpaceLink: true }
       if (this.urlIsSpaceInvite(link)) {
         segment.isInviteLink = true
         const url = new URL(link)
         const queryObject = qs.decode(url.search)
         segment.spaceId = queryObject.spaceId
         segment.collaboratorKey = queryObject.collaboratorKey
-      } else if (this.urlIsSpace(link)) {
-        segment.isLink = true
       }
       segments.push(segment)
     })

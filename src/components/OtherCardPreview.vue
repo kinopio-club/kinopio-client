@@ -117,8 +117,8 @@ const updateNameSegments = () => {
   }
   card = cardStore.cardWithNameSegments(card)
   card.nameSegments = card.nameSegments.map(segment => {
-    if (segment.isLink) {
-      segment.isLink = false
+    if (segment.isSpaceLink) {
+      segment.isSpaceLink = false
       segment.isText = true
       segment.content = segment.name
     } else if (segment.isText) {

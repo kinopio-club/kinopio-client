@@ -1685,10 +1685,15 @@ export const useCardStore = defineStore('cards', {
       const globalStore = useGlobalStore()
       const listStore = useListStore()
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       if (globalStore.preventItemSnapping) { return }
       if (!items.length) { return }
       if (globalStore.shouldSnapAlign) { return }
       if (globalStore.multipleListsSelectedIds.length) { return }
+      if (spaceStore.shouldPreventSnapToCard) {
+        this.cardSnapGuides = []
+        return
+      }
       const targetCards = this.getCardsSelectableInViewport()
       const isSnappingToList = Boolean(listStore.listSnapGuides.listId) || globalStore.shouldSnapBackToList
       const canSnapToCard = userStore.getUserIsSpaceMember && !isSnappingToList
@@ -1769,7 +1774,7 @@ export const useCardStore = defineStore('cards', {
  * @property {string} [tag]
  * @property {boolean} [isTag]
  * @property {string} [link]
- * @property {boolean} [isLink]
+ * @property {boolean} [isSpaceLink]
  * @property {string} [file]
  * @property {boolean} [isFile]
  * @property {string} [command]

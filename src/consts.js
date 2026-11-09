@@ -3,6 +3,7 @@
 const env = import.meta.env
 
 export default {
+  staticPagePaths: ['add', 'about', 'api', 'help', 'blog', 'from', 'app', 'reset-password', 'update-arena-access-token', 'explore', 'new', 'inbox', 'embed', 'donation-success', 'subscription-success', 'affiliates', 'group', 'space'], // from router.js
   spaceZoom: {
     max: 300,
     min: 20,

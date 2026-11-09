@@ -223,6 +223,7 @@ Name | Type | Description
 <code class="spaces">previewThumbnailImagePrivate</code>  | `String`  | Same as `previewImageThumbnail`, except images in cards are not rendered. This is used for private space unfurling.
 <code class="spaces">url</code>                 | `String`  | The url of a space is determined by its `name` and `id`. For example, `kinopio.club/:space-name-:id`
 <code class="spaces">users</code>               | `Array`   | The user who created/owns the space (a space will always have only one user)
+<code class="spaces">shouldPreventSnapToCard</code>  | `Boolean` | Whether to prevent snaping cards together to make lists
 <code class="spaces">showInExplore</code>       | `Boolean` | Whether the space is shown in explore
 <code class="spaces">tags</code>                | `Array`   | A list of <a href="#tags" class="badge button-badge tags">Tags</a>
 <code class="spaces">groups</code>              | `Array`   | A list of groups that the space belongs to (if any). Each group includes `addedTogroupByUserId` and `users` for group user public metadata

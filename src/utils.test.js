@@ -242,3 +242,27 @@ describe('nameTextEditLinkAction', () => {
     expect(result.newName.slice(result.newStartPosition, result.newEndPosition)).toBe('url')
   })
 })
+
+describe('urlIsSpace', () => {
+  it('passes for space urls', () => {
+    expect(utils.urlIsSpace('https://kinopio.club/hello-space-abcdefghijklmnopqrstu')).toBe(true)
+    expect(utils.urlIsSpace('https://kinopio.club/hello-space-abcdefghijklmnopqrstu/card-id')).toBe(true)
+  })
+
+  it('fails for root domain', () => {
+    expect(utils.urlIsSpace('https://kinopio.club')).toBeFalsy()
+    expect(utils.urlIsSpace('https://kinopio.club/')).toBeFalsy()
+  })
+
+  it('fails for static pages', () => {
+    expect(utils.urlIsSpace('https://kinopio.club/help')).toBeFalsy()
+    expect(utils.urlIsSpace('https://kinopio.club/help/markdown')).toBeFalsy()
+    expect(utils.urlIsSpace('https://kinopio.club/blog/some-post')).toBeFalsy()
+    expect(utils.urlIsSpace('https://kinopio.club/app')).toBeFalsy()
+    expect(utils.urlIsSpace('https://kinopio.club/explore')).toBeFalsy()
+  })
+
+  it('fails for other domains', () => {
+    expect(utils.urlIsSpace('https://example.com/hello')).toBeFalsy()
+  })
+})
