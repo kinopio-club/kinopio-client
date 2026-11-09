@@ -7,8 +7,6 @@ updated: 2026-11-09
 
 # Per Space Settings
 
-TODO: why you would want to: different spaces have different purposes, so the way you work in them can be different too
-
 Open Space Settings by clicking the `Space Settings button` in the footer.
 
 Settings can apply to the `Current Space` only, or to `All Spaces`. Current Space settings override All Spaces settings.

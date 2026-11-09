@@ -88,8 +88,6 @@ button.small-button.translucent-button.space-settings-button(
     width 15px
     min-width initial
 
-  // .icon.card-snap-disabled
-  //   vertical-align -1px
   > .icon.card-snap-disabled
     margin-left 5px
 
