@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useThemeStore } from '@/stores/useThemeStore'
 
-import NewCardColorPicker from '@/components/dialogs/NewCardColorPicker.vue'
+import SpaceSettings from '@/components/dialogs/SpaceSettings.vue'
 import utils from '@/utils.js'
 
 const globalStore = useGlobalStore()
@@ -25,7 +25,7 @@ onMounted(() => {
       if (name === 'triggerUpdateTheme') {
         updateDefaultColor()
       } else if (name === 'closeAllDialogs') {
-        state.newCardColorPickerIsVisible = false
+        state.spaceSettingsIsVisible = false
       }
     }
   )
@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  newCardColorPickerIsVisible: false,
+  spaceSettingsIsVisible: false,
   defaultColor: '#e3e3e3'
 })
 
@@ -53,26 +53,32 @@ const newCardColor = computed(() => {
   return color || state.defaultColor
 })
 
-const toggleNewCardColorPickerIsVisible = () => {
-  const value = !state.newCardColorPickerIsVisible
+const toggleSpaceSettingsIsVisible = () => {
+  const value = !state.spaceSettingsIsVisible
   globalStore.closeAllDialogs()
-  state.newCardColorPickerIsVisible = value
+  state.spaceSettingsIsVisible = value
 }
+
+const isCardSnapDisabled = computed(() => spaceStore.shouldPreventSnapToCard)
 
 </script>
 
 <template lang="pug">
-button.small-button.translucent-button.new-card-color-button(
-  @click.left.stop="toggleNewCardColorPickerIsVisible"
-  :class="{active: state.newCardColorPickerIsVisible}"
-  title="Set Color of New Cards"
+button.small-button.translucent-button.space-settings-button(
+  @click.left.stop="toggleSpaceSettingsIsVisible"
+  :class="{active: state.spaceSettingsIsVisible}"
+  title="Space Settings"
 )
-  .badge.small-badge(:style="{ 'background-color': newCardColor }")
-  NewCardColorPicker(:visible="state.newCardColorPickerIsVisible" :defaultColor="state.defaultColor")
+  //- new card color
+  .badge.small-badge(:style="{ 'background-color': newCardColor }" title="New Card Color")
+  //- card snap enabled
+  img.icon.card-snap-disabled(src="@/assets/card-snap-disabled.svg" v-if="isCardSnapDisabled" title="Card Snap is Enabled")
+
+  SpaceSettings(:visible="state.spaceSettingsIsVisible" :defaultColor="state.defaultColor")
 </template>
 
 <style lang="stylus">
-.new-card-color-button
+.space-settings-button
   > .badge
     margin 0
     display inline-block
@@ -81,7 +87,11 @@ button.small-button.translucent-button.new-card-color-button(
     border-radius var(--small-entity-radius)
     width 15px
     min-width initial
-  dialog.new-card-color-picker
+
+  > .icon.card-snap-disabled
+    margin-left 5px
+
+  dialog.space-settings
     top initial
     bottom 16px
 </style>
