@@ -1,12 +1,12 @@
 ---
-title: Card Styling
+title: Card Styling and Sizing
 description: Cards colors, formatting, frames, resizing, header fonts, tags, frames, colors, and more.
 category: Basics
-updated: 2026-09-03
+updated: 2026-11-10
 image: https://updates.kinopio.club/pages/help/posts/styling-cards/card-details.webp
 ---
 
-# Styling Cards
+# Styles
 
 `Card → down arrow` toggles advanced card options like header fonts, tags, frames, colors, and more.
 
@@ -27,7 +27,7 @@ If you're often using the same card color, or want to use a specific color in a 
 Happy styling ヾ(＾∇＾)
 
 
-## Resizing and Tilting Cards
+## Resize and Tilt
 
 To resize a card, drag it's bottom-right corner. To tilt, drag from the bottom-left. Double click a corner to reset size or tilt.
 
@@ -36,4 +36,18 @@ To resize a card, drag it's bottom-right corner. To tilt, drag from the bottom-l
 </video>
 
 
-On mobile, tilting is unavailable, and you'll need to be pinch zoomed in ~60% before you can resize.
+On mobile, tilting is unavailable, and you'll need to be pinch zoomed in over 60% before you can resize.
+
+## Truncate Card Height
+
+If you have tall cards with multiple-paragraphs or long quotes that you want to keep compact, drag from the bottom middle of a card to truncate it. 
+
+And for codeblocks, you can truncate in the opposite direction to show more or less. 
+
+<video class="" autoplay loop muted playsinline>
+  <source src="https://updates.kinopio.club/pages/help/posts/styling-cards/resize-tilt.mp4">
+</video>
+
+When a card is truncated, the handle turns into a little notch. Double-click the notch to remove truncation. 
+
+Just like resizing, you'll need to be pinch zoomed in over 60% before you can resize on mobile.
