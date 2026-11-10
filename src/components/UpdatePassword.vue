@@ -84,7 +84,7 @@ const updatePassword = async (event) => {
     if (!isPasswordTooShort(password)) { return }
     if (!isPasswordsMatch(password, confirmPassword)) { return }
     state.loading = true
-    const passwordResetToken = globalStore.passwordResetToken
+    const passwordResetToken = globalStore.passwordResetToken // from reset password email
     let response
     if (passwordResetToken) {
       response = await apiStore.resetPassword({ password, passwordResetToken })
@@ -120,7 +120,7 @@ section
       button(type="submit" :class="{active : state.loading}")
         span Update Password
         Loader(:visible="state.loading")
-    p This will sign you out on all devices.
+    p Changing your password will sign you out on all devices.
 </template>
 
 <style lang="stylus">
