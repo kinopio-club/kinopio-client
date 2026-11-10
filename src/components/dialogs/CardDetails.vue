@@ -224,10 +224,12 @@ const styles = computed(() => {
   width = Math.max(width, minWidth)
   width = `${width}px`
   const offset = 8
+  const maxShiftBelowCard = 300
   // conditional top pos
   let y = card.value.y
   if (userStore.cardDetailsIsBelowCard) {
-    y = card.value.y + card.value.height
+    const shiftY = Math.min(card.value.height, maxShiftBelowCard)
+    y = card.value.y + shiftY
   }
   const position = globalStore.getSpacePositionInPage({ x: card.value.x, y })
   let top = position.y + offset
