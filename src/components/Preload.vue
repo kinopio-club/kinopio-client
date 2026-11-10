@@ -129,6 +129,7 @@ const spacePreviewThumbnailImage = computed(() => spaceStore.previewThumbnailIma
     img.icon(src="@/assets/refresh.svg")
     img.icon(src="@/assets/remove.svg")
     img.icon(src="@/assets/resize-corner.svg")
+    img.icon(src="@/assets/resize-middle.svg")
     img.icon(src="@/assets/resize.svg")
     img.icon(src="@/assets/right-arrow.svg")
     img.icon(src="@/assets/right-arrow-invert.svg")

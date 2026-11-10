@@ -224,10 +224,12 @@ const styles = computed(() => {
   width = Math.max(width, minWidth)
   width = `${width}px`
   const offset = 8
+  const maxShiftBelowCard = 300
   // conditional top pos
   let y = card.value.y
   if (userStore.cardDetailsIsBelowCard) {
-    y = card.value.y + card.value.height
+    const shiftY = Math.min(card.value.height, maxShiftBelowCard)
+    y = card.value.y + shiftY
   }
   const position = globalStore.getSpacePositionInPage({ x: card.value.x, y })
   let top = position.y + offset
@@ -1786,7 +1788,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
       template(v-if="state.error.unknownUploadError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      ItemDetailsDebug(:item="card" :keys="['atUserMentions', 'atDateMentions']")
+      ItemDetailsDebug(:item="card" :keys="['truncateHeight']")
     CardDetailsResize
 </template>
 

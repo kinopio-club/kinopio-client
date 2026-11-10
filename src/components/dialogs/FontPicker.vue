@@ -19,9 +19,12 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
+  restoreCardDetailsIsBelowCard()
 })
 
 const emit = defineEmits(['selectFont', 'selectFontSize'])
+
+let prevCardDetailsIsBelowCard = null
 
 const props = defineProps({
   visible: Boolean,
@@ -42,12 +45,27 @@ const state = reactive({
 
 watch(() => props.visible, async (value, prevValue) => {
   if (value) {
+    shiftCardDetailsBelowCard()
     await nextTick()
     scrollIntoView()
     await nextTick()
     updateDialogHeight()
+  } else {
+    restoreCardDetailsIsBelowCard()
   }
 })
+
+const shiftCardDetailsBelowCard = () => {
+  if (prevCardDetailsIsBelowCard === null) {
+    prevCardDetailsIsBelowCard = userStore.cardDetailsIsBelowCard
+  }
+  userStore.cardDetailsIsBelowCard = true
+}
+const restoreCardDetailsIsBelowCard = () => {
+  if (prevCardDetailsIsBelowCard === null) { return }
+  userStore.cardDetailsIsBelowCard = prevCardDetailsIsBelowCard
+  prevCardDetailsIsBelowCard = null
+}
 
 const updateDialogHeight = async () => {
   if (!props.visible) { return }

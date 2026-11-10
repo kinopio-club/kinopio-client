@@ -18,7 +18,8 @@ const broadcastStore = useBroadcastStore()
 
 const props = defineProps({
   visible: Boolean,
-  card: Object
+  card: Object,
+  isInList: Boolean
 })
 
 const isPresentationMode = computed(() => globalStore.isPresentationMode)
@@ -41,24 +42,33 @@ const start = (event, action) => {
     userId: userStore.id,
     cardIds
   }
-  if (action === 'resize') {
-    globalStore.currentUserIsResizingCard = true
-    globalStore.currentUserIsResizingCardIds = cardIds
-    broadcastStore.update({ updates, action: 'updateRemoteUserResizingCards' })
+  if (action === 'resizeWidth') {
+    startResizing(cardIds, updates, 'width')
+  } else if (action === 'truncateHeight') {
+    startResizing(cardIds, updates, 'truncateHeight')
   } else if (action === 'tilt') {
     globalStore.currentUserIsTiltingCard = true
     globalStore.currentUserIsTiltingCardIds = cardIds
     broadcastStore.update({ updates, action: 'updateRemoteUserTiltingCards' })
   }
 }
+const startResizing = (cardIds, updates, dimension) => {
+  globalStore.currentUserIsResizingCard = true
+  globalStore.currentUserIsResizingCardIds = cardIds
+  globalStore.currentUserResizingCardDimension = dimension
+  updates.dimension = dimension
+  broadcastStore.update({ updates, action: 'updateRemoteUserResizingCards' })
+}
 const remove = (action) => {
   let cardIds = [props.card.id]
   if (globalStore.multipleCardsSelectedIds.length) {
     cardIds = globalStore.multipleCardsSelectedIds
   }
-  if (action === 'resize') {
+  if (action === 'resizeWidth') {
     const shouldRemoveResizeWidth = true
-    cardStore.clearResizeCards(cardIds, shouldRemoveResizeWidth)
+    cardStore.clearResizeCardsWidth(cardIds, shouldRemoveResizeWidth)
+  } else if (action === 'truncateHeight') {
+    cardStore.clearTruncateCardsHeight(cardIds)
   } else if (action === 'tilt') {
     cardStore.clearTiltCards(cardIds)
   }
@@ -75,7 +85,7 @@ const tiltIsVisible = computed(() => {
   if (utils.isMobile()) { return }
   const minCardWidth = consts.defaultCardWidth
   const cardIsWideEnough = props.card.width >= minCardWidth
-  return props.visible && cardIsWideEnough
+  return props.visible && cardIsWideEnough && !props.isInList
 })
 const isTilting = computed(() => {
   const cardIds = globalStore.currentUserIsTiltingCardIds
@@ -86,9 +96,10 @@ const isTilting = computed(() => {
 // resize
 
 const isComment = computed(() => cardStore.getIsCommentCard(props.card))
-const resizeIsVisible = computed(() => {
+const resizeTruncateIsVisible = computed(() => {
   return props.visible && !isComment.value
 })
+const resizeWidthIsVisible = computed(() => resizeTruncateIsVisible.value && !props.isInList)
 const isResizing = computed(() => {
   const cardIds = globalStore.currentUserIsResizingCardIds
   if (!cardIds.length) { return }
@@ -97,16 +108,26 @@ const isResizing = computed(() => {
 </script>
 
 <template lang="pug">
-//- resize
-.right-resize.bottom-button-wrap(v-if="resizeIsVisible")
+//- resize width
+.right-resize.bottom-button-wrap(v-if="resizeWidthIsVisible")
   .inline-button-wrap(
-    @mousedown.left.stop="start($event, 'resize')"
-    @touchstart.stop="start($event, 'resize')"
-    @dblclick="remove('resize')"
+    @mousedown.left.stop="start($event, 'resizeWidth')"
+    @touchstart.stop="start($event, 'resizeWidth')"
+    @dblclick="remove('resizeWidth')"
     title="Drag to Resize"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
+//- resize height
+.middle-truncate.bottom-button-wrap(v-if="resizeTruncateIsVisible")
+  .inline-button-wrap(
+    @mousedown.left.stop="start($event, 'truncateHeight')"
+    @touchstart.stop="start($event, 'truncateHeight')"
+    @dblclick="remove('truncateHeight')"
+    title="Drag to Truncate"
+  )
+    button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
+      img.icon(src="@/assets/resize-middle.svg" :class="colorClass")
 //- tilt
 .left-tilt.bottom-button-wrap(v-if="tiltIsVisible")
   .inline-button-wrap(
@@ -162,8 +183,17 @@ const isResizing = computed(() => {
       button
         cursor nwse-resize
         transform scaleX(-1)
-  // resize
+  // resize width
   &.right-resize
     .inline-button-wrap
       padding-left 0
+  // resize height
+  &.middle-truncate
+    left calc(50% - 14px)
+    bottom -2px
+    .inline-button-wrap
+      padding-left 0
+      cursor ns-resize
+      button
+        cursor ns-resize
 </style>

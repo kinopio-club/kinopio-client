@@ -81,6 +81,24 @@ const syntaxHighlightHTML = computed(() => {
   return html
 })
 
+// truncate height
+
+const truncateHeight = computed(() => parentCard.value.truncateHeight)
+const nameIsOnlyCodeBlock = computed(() => {
+  const name = parentCard.value.name.trim()
+  const isWrappedInFence = name.startsWith('```') && name.endsWith('```')
+  const hasOneCodeBlock = name.split('```').length === 3
+  return isWrappedInFence && hasOneCodeBlock
+})
+const preStyles = computed(() => {
+  if (!truncateHeight.value) { return }
+  if (!nameIsOnlyCodeBlock.value) { return }
+  const padding = 15
+  return {
+    height: `${truncateHeight.value - padding}px`
+  }
+})
+
 // latex
 
 const isLatex = computed(() => currentLanguage.value.name === latexLanguageName)
@@ -162,11 +180,11 @@ const copy = async (event) => {
         img.icon.copy(src="@/assets/copy.svg")
 
   template(v-if="latexIsVisible")
-    .latex(v-html="state.latexHTML")
+    .latex(v-html="state.latexHTML" :class="{'is-truncated-height': truncateHeight}")
   template(v-else-if="shouldSyntaxHighlight")
-    pre(v-html="syntaxHighlightHTML")
+    pre(v-html="syntaxHighlightHTML" :style="preStyles" :class="{'is-truncated-height': truncateHeight}")
   template(v-else)
-    pre {{props.content}}
+    pre(:style="preStyles" :class="{'is-truncated-height': truncateHeight}") {{props.content}}
 
 </template>
 
@@ -223,6 +241,7 @@ const copy = async (event) => {
     span
       font-size 12px
       font-family var(--mono-font)
+
   .latex
     width calc(100% + 20px)
     max-height 300px
@@ -234,6 +253,10 @@ const copy = async (event) => {
     border-radius var(--small-entity-radius)
     // math
     //   font-size 16px
+
+  .is-truncated-height
+    max-height none
+
   .loader
     width 12px !important
     height 12px !important
