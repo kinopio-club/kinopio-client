@@ -1192,6 +1192,22 @@ const addSplitCards = async (newCards) => {
   let prevCard = utils.clone(card.value)
   globalStore.closeAllDialogs()
   cardStore.createCards(newCards)
+  // insert into list
+  if (prevCard.listId) {
+    const list = listStore.getList(prevCard.listId)
+    await nextTick()
+    await cardStore.addCardsToList({ cards: newCards, list, targetPositionIndex: prevCard.listPositionIndex })
+    // update list positions after split
+    await new Promise(resolve => setTimeout(resolve, 150))
+    const ids = cardStore.getCardsByList(list.id).map(listCard => listCard.id)
+    globalStore.updateShouldExplicitlyRenderCardIds(ids)
+    await nextTick()
+    await cardStore.updateCardsDimensions(ids)
+    await cardStore.updateCardPositionsInList(list)
+    newCards.forEach(newCard => globalStore.triggerUpdateUrlPreview(newCard.id))
+    globalStore.updatePageSizes()
+    return
+  }
   // update y positions
   // wait for cards to be added to dom
   setTimeout(() => {
