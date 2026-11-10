@@ -20,6 +20,7 @@ The `kinopio-client` is the client web app that users use to read and update spa
     npm install -g @vue/cli
     npm install -g hostile
     hostile set localhost kinopio.local
+    hostile set ::1 kinopio.local
 
 ## Run
 
