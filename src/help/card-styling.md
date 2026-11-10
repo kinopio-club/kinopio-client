@@ -45,7 +45,7 @@ If you have tall cards with multiple-paragraphs or long quotes that you want to 
 And for codeblocks, you can truncate in the opposite direction to show more or less. 
 
 <video class="" autoplay loop muted playsinline>
-  <source src="https://updates.kinopio.club/pages/help/posts/styling-cards/resize-tilt.mp4">
+  <source src="https://updates.kinopio.club/pages/help/posts/styling-cards/truncate.mp4">
 </video>
 
 When a card is truncated, the handle turns into a little notch. Double-click the notch to remove truncation. 
