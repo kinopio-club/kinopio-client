@@ -234,6 +234,7 @@ const openUrl = async (event, url) => {
   const userIsConnecting = globalStore.currentConnectionStartItemIds.length
   if (userIsConnecting) { return }
   state.isActive = false
+  if (globalStore.isTouchScrolling) { return }
   globalStore.clearAllInteractingWithAndSelected()
   if (globalStore.currentUserIsDraggingConnectionIdLabel) { return }
   if (globalStore.preventDraggedCardFromShowingDetails) { return }
