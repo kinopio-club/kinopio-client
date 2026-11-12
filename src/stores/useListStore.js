@@ -136,6 +136,11 @@ export const useListStore = defineStore('lists', {
       const ids = removeItems.map(list => list.id)
       this.removeListsFromState(ids)
       this.updateListsShouldUpdateList()
+      this.updateListsDimensions()
+    },
+    updateListsDimensions () {
+      const lists = this.getAllLists
+      lists.forEach(list => this.updateListDimensions(list))
     },
 
     // create
