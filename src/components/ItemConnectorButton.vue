@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, watch, ref, nextTick } from 'vue'
+import { reactive, computed, watch, ref, nextTick, onBeforeUnmount } from 'vue'
 
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
@@ -22,6 +22,13 @@ const themeStore = useThemeStore()
 useStoreAction(globalStore, {
   triggerUpdateCurrentConnectorColor: () => updateCurrentConnectorColor(),
   triggerClearCurrentConnectorColor: () => clearCurrentConnectorColor()
+})
+
+// connector can remount on the other side of the card while drawing a connection
+onBeforeUnmount(() => {
+  if (globalStore.currentUserIsHoveringOverConnectorItemId === item.value.id) {
+    globalStore.currentUserIsHoveringOverConnectorItemId = ''
+  }
 })
 
 const emit = defineEmits(['shouldRenderParent'])

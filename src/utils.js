@@ -1112,6 +1112,7 @@ export default {
     const cardId = card.id
     card.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
     card.isLocked = this.stringToBoolean(element.dataset.isLocked)
+    card.connectorPosition = element.dataset.connectorPosition
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -1494,6 +1495,9 @@ export default {
     const rightSide = item.x + width
     let x = rightSide
     x = x - offset
+    if (item.connectorPosition === 'top-left' && !item.isLocked) {
+      x = item.x + offset
+    }
     let y = item.y
     y = y + offset
     const position = {

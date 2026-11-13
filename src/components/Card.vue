@@ -661,6 +661,34 @@ const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
 const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
+const connectorPosition = computed(() => {
+  if (isLocked.value) { return 'top-right' }
+  return props.card.connectorPosition || 'top-right'
+})
+const connectorIsLeft = computed(() => connectorPosition.value === 'top-left')
+const connectorElement = () => {
+  const cardElement = utils.cardElementFromId(props.card.id)
+  return cardElement?.querySelector('.card-content-wrap .connector')
+}
+// slide the connector from its previous side to its new side
+watch(connectorPosition, async () => {
+  const prevElement = connectorElement()
+  if (!prevElement) { return }
+  const prevRect = prevElement.getBoundingClientRect()
+  await nextTick()
+  const element = connectorElement()
+  if (!element) { return }
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion) { return }
+  const rect = element.getBoundingClientRect()
+  const scale = rect.width / element.offsetWidth || 1
+  const deltaX = (prevRect.x - rect.x) / scale
+  if (!deltaX) { return }
+  element.animate([
+    { transform: `translateX(${deltaX}px)` },
+    { transform: 'translateX(0)' }
+  ], { duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' })
+})
 
 // card buttons
 
@@ -1835,6 +1863,7 @@ const toggleVideoIsPaused = () => {
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
+  :data-connector-position="connectorPosition"
   :data-tilt-degrees="card.tilt"
   :data-sticky-stretch-resistance="stickyState.stickyStretchResistance"
   :data-x="x"
@@ -1916,6 +1945,20 @@ const toggleVideoIsPaused = () => {
 
     //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
+      //- Left connector
+      span.card-buttons-wrap.left-connector-wrap(v-if="connectorIsLeft")
+        ItemConnectorButton(
+          :card="card"
+          :isConnectingTo="isConnectingTo"
+          :isConnectingFrom="isConnectingFrom"
+          :isVisibleInViewport="state.isVisibleInViewport"
+          :isRemoteConnecting="state.isRemoteConnecting"
+          :remoteConnectionColor="state.remoteConnectionColor"
+          :defaultBackgroundColor="state.defaultBackgroundColor"
+          :currentBackgroundColor="currentBackgroundColor"
+          :parentDetailsIsVisible="currentCardDetailsIsVisible"
+          @shouldRenderParent="updateShouldRenderParent"
+        )
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -1978,6 +2021,7 @@ const toggleVideoIsPaused = () => {
         template(v-else)
           //- connector
           ItemConnectorButton(
+            v-if="!connectorIsLeft"
             :card="card"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
@@ -2187,6 +2231,10 @@ const toggleVideoIsPaused = () => {
       display flex
       margin-left -8px // cancels out margin-right in .card-content or .card-comment
       height 32px
+      &.left-connector-wrap
+        margin-left 0
+        margin-right -8px // cancels out margin-left in .name
+        flex-shrink 0
 
     .loader
       width 14px

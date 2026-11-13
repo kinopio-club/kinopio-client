@@ -77,6 +77,7 @@ const drawCurrentConnection = (event) => {
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
+  updateStartCardConnectorPosition(event)
   const endItemId = checkCurrentConnectionSuccess(event)
   const color = connectionStore.getNewConnectionColor
   globalStore.currentConnectionShiftKeyIsActive = event.shiftKey
@@ -90,6 +91,35 @@ const drawCurrentConnection = (event) => {
     path
   }
   broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
+}
+
+// move connector to nearest top corner when dragging within the start card
+
+const startCardElementAtCursor = (event) => {
+  if (!event) { return }
+  const startItemIds = globalStore.currentConnectionStartItemIds
+  if (startItemIds.length !== 1) { return }
+  const card = cardStore.getCard(props.startItemId)
+  if (!card || card.isLocked) { return }
+  const position = utils.cursorPositionInViewport(event)
+  const cardElement = utils.cardElementFromPosition(position.x, position.y)
+  if (cardElement?.dataset.cardId !== card.id) { return }
+  return cardElement
+}
+const updateStartCardConnectorPosition = (event) => {
+  const cardElement = startCardElementAtCursor(event)
+  if (!cardElement) { return }
+  const card = cardStore.getCard(props.startItemId)
+  const position = utils.cursorPositionInViewport(event)
+  const rect = cardElement.querySelector('.card').getBoundingClientRect()
+  const centerX = rect.x + (rect.width / 2)
+  let connectorPosition = 'top-right'
+  if (position.x < centerX) {
+    connectorPosition = 'top-left'
+  }
+  const currentConnectorPosition = card.connectorPosition || 'top-right'
+  if (currentConnectorPosition === connectorPosition) { return }
+  cardStore.updateCard({ id: card.id, connectorPosition })
 }
 
 // connect to item
@@ -154,6 +184,7 @@ const addConnections = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
+  if (startCardElementAtCursor(event)) { return }
   if (currentConnectionSuccess.id) {
     endItemId = currentConnectionSuccess.id
   } else {
