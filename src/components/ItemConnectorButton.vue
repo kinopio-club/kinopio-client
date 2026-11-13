@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, watch, ref, nextTick, onBeforeUnmount } from 'vue'
+import { reactive, computed, watch, ref, nextTick } from 'vue'
 
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
@@ -22,13 +22,6 @@ const themeStore = useThemeStore()
 useStoreAction(globalStore, {
   triggerUpdateCurrentConnectorColor: () => updateCurrentConnectorColor(),
   triggerClearCurrentConnectorColor: () => clearCurrentConnectorColor()
-})
-
-// connector can remount on the other side of the card while drawing a connection
-onBeforeUnmount(() => {
-  if (globalStore.currentUserIsHoveringOverConnectorItemId === item.value.id) {
-    globalStore.currentUserIsHoveringOverConnectorItemId = ''
-  }
 })
 
 const emit = defineEmits(['shouldRenderParent'])
@@ -392,8 +385,9 @@ const handleMouseLeaveConnector = () => {
   .connector-button
     background-color transparent
     border-radius 100px
-    width 14px
-    height 14px
+    width 10px
+    height 10px
+    margin 2px // keeps the 14px footprint, so the button center is unchanged
     padding 0
     border 1px solid var(--primary-border)
 
@@ -401,7 +395,7 @@ const handleMouseLeaveConnector = () => {
     position absolute
     left -1px
     top -1px
-    width 9.5px
+    width 7px
     user-drag none
     -webkit-user-drag none
     pointer-events none
@@ -419,8 +413,9 @@ const handleMouseLeaveConnector = () => {
   .connected-colors
     position absolute
     display flex
-    height 12px
-    width 12px
+    height 8px
+    width 8px
+    margin 2px // matches .connector-button margin
     top 10px
     left 9px
     overflow hidden

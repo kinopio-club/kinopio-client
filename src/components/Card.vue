@@ -665,30 +665,7 @@ const connectorPosition = computed(() => {
   if (isLocked.value) { return 'top-right' }
   return props.card.connectorPosition || 'top-right'
 })
-const connectorIsLeft = computed(() => connectorPosition.value === 'top-left')
-const connectorElement = () => {
-  const cardElement = utils.cardElementFromId(props.card.id)
-  return cardElement?.querySelector('.card-content-wrap .connector')
-}
-// slide the connector from its previous side to its new side
-watch(connectorPosition, async () => {
-  const prevElement = connectorElement()
-  if (!prevElement) { return }
-  const prevRect = prevElement.getBoundingClientRect()
-  await nextTick()
-  const element = connectorElement()
-  if (!element) { return }
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (prefersReducedMotion) { return }
-  const rect = element.getBoundingClientRect()
-  const scale = rect.width / element.offsetWidth || 1
-  const deltaX = (prevRect.x - rect.x) / scale
-  if (!deltaX) { return }
-  element.animate([
-    { transform: `translateX(${deltaX}px)` },
-    { transform: 'translateX(0)' }
-  ], { duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' })
-})
+const connectorPositionClass = computed(() => `connector-${connectorPosition.value}`)
 
 // card buttons
 
@@ -1927,6 +1904,21 @@ const toggleVideoIsPaused = () => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:item="card")
 
+    //- Connector, positioned over the space reserved by .connector-spacer
+    .connector-position-wrap(v-if="!isLocked" :class="connectorPositionClass")
+      ItemConnectorButton(
+        :card="card"
+        :isConnectingTo="isConnectingTo"
+        :isConnectingFrom="isConnectingFrom"
+        :isVisibleInViewport="state.isVisibleInViewport"
+        :isRemoteConnecting="state.isRemoteConnecting"
+        :remoteConnectionColor="state.remoteConnectionColor"
+        :defaultBackgroundColor="state.defaultBackgroundColor"
+        :currentBackgroundColor="currentBackgroundColor"
+        :parentDetailsIsVisible="currentCardDetailsIsVisible"
+        @shouldRenderParent="updateShouldRenderParent"
+      )
+
     template(v-if="isVisualCard || pendingUploadDataUrl")
       ImageOrVideo(
         :isSelectedOrDragging="isSelectedOrDragging"
@@ -1945,20 +1937,8 @@ const toggleVideoIsPaused = () => {
 
     //- Content
     span.card-content-wrap(:style="cardContentWrapStyles")
-      //- Left connector
-      span.card-buttons-wrap.left-connector-wrap(v-if="connectorIsLeft")
-        ItemConnectorButton(
-          :card="card"
-          :isConnectingTo="isConnectingTo"
-          :isConnectingFrom="isConnectingFrom"
-          :isVisibleInViewport="state.isVisibleInViewport"
-          :isRemoteConnecting="state.isRemoteConnecting"
-          :remoteConnectionColor="state.remoteConnectionColor"
-          :defaultBackgroundColor="state.defaultBackgroundColor"
-          :currentBackgroundColor="currentBackgroundColor"
-          :parentDetailsIsVisible="currentCardDetailsIsVisible"
-          @shouldRenderParent="updateShouldRenderParent"
-        )
+      //- reserves space for the top-left connector
+      span.connector-spacer(v-if="connectorPosition === 'top-left'")
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -2019,20 +1999,8 @@ const toggleVideoIsPaused = () => {
             button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
-          //- connector
-          ItemConnectorButton(
-            v-if="!connectorIsLeft"
-            :card="card"
-            :isConnectingTo="isConnectingTo"
-            :isConnectingFrom="isConnectingFrom"
-            :isVisibleInViewport="state.isVisibleInViewport"
-            :isRemoteConnecting="state.isRemoteConnecting"
-            :remoteConnectionColor="state.remoteConnectionColor"
-            :defaultBackgroundColor="state.defaultBackgroundColor"
-            :currentBackgroundColor="currentBackgroundColor"
-            :parentDetailsIsVisible="currentCardDetailsIsVisible"
-            @shouldRenderParent="updateShouldRenderParent"
-          )
+          //- reserves space for the top-right connector
+          span.connector-spacer(v-if="connectorPosition === 'top-right'")
     .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
@@ -2166,6 +2134,10 @@ const toggleVideoIsPaused = () => {
         position sticky
         top 0
         z-index 1
+      .connector-position-wrap
+        position sticky
+        top 0
+        flex-basis 100%
       // sticky only works within the parent, so flatten .card-content-wrap
       // to make .card the parent, the buttons then stay pinned past the url preview too
       // (media cards already overlay their buttons on the media)
@@ -2231,10 +2203,6 @@ const toggleVideoIsPaused = () => {
       display flex
       margin-left -8px // cancels out margin-right in .card-content or .card-comment
       height 32px
-      &.left-connector-wrap
-        margin-left 0
-        margin-right -8px // cancels out margin-left in .name
-        flex-shrink 0
 
     .loader
       width 14px
@@ -2292,6 +2260,30 @@ const toggleVideoIsPaused = () => {
         z-index 1
     .connector
       padding-top 9px
+
+    // a zero-height row at the top of the card, so the connector can sit in any corner
+    .connector-position-wrap
+      position relative
+      height 0
+      width 100%
+      z-index 2
+      .connector
+        position absolute
+        top 0
+        left 0
+        --connector-easing cubic-bezier(0.2, 0.8, 0.2, 1)
+        transition left 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
+        @media (prefers-reduced-motion)
+          transition none
+      &.connector-top-right
+        .connector
+          left 100%
+          transform translateX(-100%)
+    .connector-spacer
+      flex-shrink 0
+      width 30px // .connector width
+    .card-content-wrap > .connector-spacer
+      width 22px // .connector width - .name margin-left
 
     .url-wrap
       padding 0
