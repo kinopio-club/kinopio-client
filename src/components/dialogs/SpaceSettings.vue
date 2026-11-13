@@ -115,7 +115,7 @@ const shouldPreventSnapToCard = computed(() => spaceStore.shouldPreventSnapToCar
 const toggleShouldPreventSnapToCard = () => {
   const value = shouldPreventSnapToCard.value
   closeDialogs()
-  spaceStore.shouldPreventSnapToCard = !value
+  spaceStore.updateSpace({ shouldPreventSnapToCard: !value })
 }
 
 </script>
