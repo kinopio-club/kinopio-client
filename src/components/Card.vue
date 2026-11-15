@@ -665,7 +665,10 @@ const connectorPosition = computed(() => {
   if (isLocked.value) { return 'top-right' }
   return props.card.connectorPosition || 'top-right'
 })
-const connectorPositionClass = computed(() => `connector-${connectorPosition.value}`)
+const connectorPositionClass = computed(() => {
+  if (isLocked.value) { return }
+  return `connector-${connectorPosition.value}`
+})
 
 // card buttons
 
@@ -1904,7 +1907,7 @@ const toggleVideoIsPaused = () => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:item="card")
 
-    //- Connector, positioned over the space reserved by .connector-spacer
+    //- Connector, positioned over the space reserved by .card-content-wrap margins
     .connector-position-wrap(v-if="!isLocked" :class="connectorPositionClass")
       ItemConnectorButton(
         :card="card"
@@ -1936,9 +1939,7 @@ const toggleVideoIsPaused = () => {
     TiltResizeTruncate(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
 
     //- Content
-    span.card-content-wrap(:style="cardContentWrapStyles")
-      //- reserves space for the top-left connector
-      span.connector-spacer(v-if="connectorPosition === 'top-left'")
+    span.card-content-wrap(:style="cardContentWrapStyles" :class="connectorPositionClass")
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -1983,7 +1984,7 @@ const toggleVideoIsPaused = () => {
         .card-vote-wrap(v-if="props.card.counterIsVisible")
           CardVote(:card="card")
 
-      //- Right buttons
+      //- Top Right buttons
       span.card-buttons-wrap
         //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
@@ -1992,15 +1993,11 @@ const toggleVideoIsPaused = () => {
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
         //- Lock
-        template(v-if="isLocked")
-          //- based on CardUnlockButtons.vue
-          //- .connector maintains connection paths when card is locked
-          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
-            button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
-              img.icon.lock-icon(src="@/assets/lock.svg")
-        template(v-else)
-          //- reserves space for the top-right connector
-          span.connector-spacer(v-if="connectorPosition === 'top-right'")
+        //- based on CardUnlockButtons.vue
+        //- .connector maintains connection paths when card is locked
+        .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
+          button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
+            img.icon.lock-icon(src="@/assets/lock.svg")
     .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
@@ -2277,13 +2274,20 @@ const toggleVideoIsPaused = () => {
           transition none
       &.connector-top-right
         .connector
+          // enable connector animation
           left 100%
           transform translateX(-100%)
-    .connector-spacer
-      flex-shrink 0
-      width 30px // .connector width
-    .card-content-wrap > .connector-spacer
-      width 22px // .connector width - .name margin-left
+    // reserves space for the connector
+    .card-content-wrap
+      &.connector-top-left
+        .card-content,
+        .card-comment
+          margin-left 22px // .connector width - .name margin-left
+      &.connector-top-right
+        .card-buttons-wrap
+          margin-right 30px // .connector width
+          .url-wrap:only-child
+            padding-right 0
 
     .url-wrap
       padding 0
