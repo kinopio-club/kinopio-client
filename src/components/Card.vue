@@ -2283,6 +2283,9 @@ const toggleVideoIsPaused = () => {
         .card-content,
         .card-comment
           margin-left 22px // .connector width - .name margin-left
+        // when no top-left buttons
+        .card-buttons-wrap:empty
+          margin-left 0
       &.connector-top-right
         .card-buttons-wrap
           margin-right 30px // .connector width
