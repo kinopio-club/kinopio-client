@@ -78,10 +78,10 @@ section.how-to
       flex-wrap wrap
       justify-content space-between
       .left
-        max-width calc(45% - var(--how-to-column-gap))
+        max-width calc(40% - var(--how-to-column-gap))
         margin-right var(--how-to-column-gap)
       .right
-        max-width 55%
+        max-width 60%
       @media(max-width 600px)
         flex-wrap nowrap
         flex-direction column

@@ -88,7 +88,7 @@ AboutJsonLd
           span , and{{' '}}
           a(href="https://pketh.org/organic-software.html") built for the long-term
           span .
-        .row
+        .row.oasis-row
           img.icon.palm-trees(src="https://updates.kinopio.club/pages/about/palm-trees.svg" alt="palm-trees")
           p An oasis for the mind, with no ads, tracking, or AI bloat.
         p Free for 100 cards. No sign up required.
@@ -144,14 +144,15 @@ AboutJsonLd
 // page.styl
 .page
   section.intro
-    .row:not(.wordmark)
+    .oasis-row
       display flex
       align-items center
       margin 1rem 0
-      max-width 370px
+      // max-width 400px
       img.palm-trees
         width 60px
         margin-right 5px
       p
         margin-top 0
+        padding-right 5px
 </style>

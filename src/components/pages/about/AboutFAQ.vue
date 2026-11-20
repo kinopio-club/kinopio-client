@@ -120,7 +120,7 @@ section.faq
 
 <style lang="stylus">
 section.faq
-  max-width 480px
+  max-width 540px
   section.subsection
     padding 12px !important
     padding-top 2px !important

@@ -168,7 +168,7 @@ section.examples(ref="parentElement")
 
 section.examples
   .examples-wrap
-    max-width 520px
+    max-width 650px
     background-color var(--example-background)
     border-radius var(--page-entity-radius)
     padding 2rem

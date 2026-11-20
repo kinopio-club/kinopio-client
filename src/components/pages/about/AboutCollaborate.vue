@@ -142,8 +142,23 @@ section.for-work
     //-   em If only
     //-   span {{' '}}projects could go straight from A to B. Every technical issue would be anticipated. Clients would never change their minds. The new feature would be as intuitive as it seemed in the mockup…
     //- p Kinopio is designed for real-world collaborative projects where teams need to be able to iterate and adapt to new information as they build.
-    p Capture and connect ideas together, build them up into plans, kanban lists, and tasks assigned to team-mates.
-    p When projects are planned and tracked in Kinopio, teams stay aligned, projects get done faster, and meetings get shorter (or cut altogether).
+    .row.row-description
+      p Capture and connect ideas together, build them up into plans, kanban lists, and tasks assigned to team-mates.
+      p Teams stay aligned, projects get done faster, and meetings get shorter (or cut altogether).
+
+    .row.row-cells
+      div Real-Time Collaboration
+      div Private or Public
+      div Invite to Edit or Read-Only
+      div Workspace Groups
+      div @user and @due dates
+
+    //- .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
+    //-   .row.horizontal
+    //-     p.marquee(v-pause-animation) {{ collaborationFeatures }}
+    //- .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
+    //-   span {{ collaborationFeatures }}
+
     figure
       .button-wrap.play-button-wrap.badge.secondary(@click="toggleVideoIsPaused")
         button.small-button(title="Pause or Play Video")
@@ -161,12 +176,6 @@ section.for-work
         source(src="https://updates.kinopio.club/pages/about/at-work/1.webm")
       //- figcaption
       //-   p Capture and connect ideas together, build them up into plans and tasks, and work on them all in the same space.
-
-    .scrolling-rows(v-if="!state.isStatic" @click="toggleIsStatic")
-      .row.horizontal
-        p.marquee(v-pause-animation) {{ collaborationFeatures }}
-    .static-row.row(v-if="state.isStatic" @click="toggleIsStatic")
-      span {{ collaborationFeatures }}
 
     //- .row.groups(@click="updateRandomGroups")
     //-   template(v-for="group in state.randomGroups" :key="group.id")
@@ -198,9 +207,24 @@ section.for-work
     padding 2rem
     video
       border-radius calc(var(--entity-radius) * 2)
-
+    .row-description
+      margin-bottom 1rem
+    // table
+    //   border-radius 0 // var(--small-entity-radius)
+    //   max-width 100%
+    //   td
+    //     white-space nowrap
+    //     color white
+    //     // overflow-x scroll
+    .row-cells
+      display flex
+      div
+        border 1px solid white
+        padding 6px 12px
+        margin-top -1px
+        margin-right -1px
     p
-      max-width 460px
+      max-width 400px
     > p:first-child
       margin-top 0
     @media(max-width 460px)
