@@ -96,7 +96,7 @@ export default defineConfig(async ({ command, mode }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src')
+        '@': path.resolve(import.meta.dirname, './src')
       }
     },
     plugins: [
