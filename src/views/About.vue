@@ -144,7 +144,7 @@ AboutJsonLd
 // page.styl
 .page
   section.intro
-    .row
+    .row:not(.wordmark)
       display flex
       align-items center
       margin 1rem 0
