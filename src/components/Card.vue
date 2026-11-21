@@ -661,10 +661,7 @@ const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
 const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
-const connectorPosition = computed(() => {
-  if (isLocked.value) { return 'top-right' }
-  return props.card.connectorPosition || 'top-right'
-})
+const connectorPosition = computed(() => utils.cardConnectorPosition(props.card))
 const connectorPositionClass = computed(() => {
   if (isLocked.value) { return }
   return `connector-${connectorPosition.value}`
@@ -2131,10 +2128,6 @@ const toggleVideoIsPaused = () => {
         position sticky
         top 0
         z-index 1
-      .connector-position-wrap
-        position sticky
-        top 0
-        flex-basis 100%
       // sticky only works within the parent, so flatten .card-content-wrap
       // to make .card the parent, the buttons then stay pinned past the url preview too
       // (media cards already overlay their buttons on the media)
@@ -2258,35 +2251,57 @@ const toggleVideoIsPaused = () => {
     .connector
       padding-top 9px
 
-    // a zero-height row at the top of the card, so the connector can sit in any corner
+    // overlays the card so the connector can sit in any corner.
+    // .card isn't positioned, so this is positioned to .card-wrap and doesn't scroll with truncated cards
     .connector-position-wrap
-      position relative
-      height 0
+      position absolute
+      top 0
+      left 0
       width 100%
+      height 100%
       z-index 2
+      pointer-events none
       .connector
         position absolute
         top 0
         left 0
+        transform translate(0, 0)
         --connector-easing cubic-bezier(0.2, 0.8, 0.2, 1)
-        transition left 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
+        transition left 0.2s var(--connector-easing), top 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
         @media (prefers-reduced-motion)
           transition none
+        &:not(.is-disabled)
+          pointer-events auto
+        // inline buttons get line-height space below them, which would offset bottom positions
+        button
+          display block
+      // 100% puts the connector outside the card, translate pulls it back in by its own size.
+      // left/top are used instead of right/bottom so position changes can animate
       &.connector-top-right
         .connector
-          // enable connector animation
           left 100%
-          transform translateX(-100%)
+          transform translate(-100%, 0)
+      &.connector-bottom-left
+        .connector
+          top 100%
+          transform translate(0, -100%)
+      &.connector-bottom-right
+        .connector
+          left 100%
+          top 100%
+          transform translate(-100%, -100%)
     // reserves space for the connector
     .card-content-wrap
-      &.connector-top-left
+      &.connector-top-left,
+      &.connector-bottom-left
         .card-content,
         .card-comment
           margin-left 22px // .connector width - .name margin-left
-        // when no top-left buttons
+        // without buttons there's no .card-content padding-right to cancel out
         .card-buttons-wrap:empty
           margin-left 0
-      &.connector-top-right
+      &.connector-top-right,
+      &.connector-bottom-right
         .card-buttons-wrap
           margin-right 30px // .connector width
           .url-wrap:only-child

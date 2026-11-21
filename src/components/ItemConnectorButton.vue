@@ -290,6 +290,14 @@ const startConnecting = (event) => {
   }
   globalStore.updateCurrentUserIsDrawingConnection(true)
 }
+// double click resets a card connector to its default top-right position
+const resetConnectorPosition = () => {
+  if (!props.card) { return }
+  if (isDisabled.value) { return }
+  const connectorPosition = utils.cardConnectorPosition(props.card)
+  if (connectorPosition === 'top-right') { return }
+  cardStore.updateCard({ id: props.card.id, connectorPosition: null })
+}
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
   if (globalStore.currentUserIsDrawingConnection) { return }
@@ -310,6 +318,7 @@ const handleMouseLeaveConnector = () => {
   :key="item.id"
   @mousedown.left="startConnecting"
   @touchstart="startConnecting"
+  @dblclick="resetConnectorPosition"
   @mouseenter="handleMouseEnterConnector"
   @mouseleave="handleMouseLeaveConnector"
   :class="connectorClasses"

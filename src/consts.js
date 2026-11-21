@@ -21,6 +21,7 @@ export default {
   minLineYOutdent: 175,
   minListWidth: 200,
   normalCardWrapWidth: 200,
+  cardConnectorPositions: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
   wideCardWrapWidth: 390,
   minCardIframeWidth: 310,
   freeCardsCreatedLimit: 100,

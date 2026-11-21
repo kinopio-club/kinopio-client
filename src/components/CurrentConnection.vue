@@ -93,7 +93,7 @@ const drawCurrentConnection = (event) => {
   broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
 }
 
-// move connector to nearest top corner when dragging within the start card
+// move connector to the nearest corner when dragging within the start card
 
 const startCardElementAtCursor = (event) => {
   if (!event) { return }
@@ -113,11 +113,17 @@ const updateStartCardConnectorPosition = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const rect = cardElement.querySelector('.card').getBoundingClientRect()
   const centerX = rect.x + (rect.width / 2)
-  let connectorPosition = 'top-right'
-  if (position.x < centerX) {
-    connectorPosition = 'top-left'
+  const centerY = rect.y + (rect.height / 2)
+  let vertical = 'top'
+  if (position.y > centerY) {
+    vertical = 'bottom'
   }
-  const currentConnectorPosition = card.connectorPosition || 'top-right'
+  let horizontal = 'right'
+  if (position.x < centerX) {
+    horizontal = 'left'
+  }
+  const connectorPosition = `${vertical}-${horizontal}`
+  const currentConnectorPosition = utils.cardConnectorPosition(card)
   if (currentConnectorPosition === connectorPosition) { return }
   cardStore.updateCard({ id: card.id, connectorPosition })
 }
