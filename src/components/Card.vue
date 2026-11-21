@@ -661,6 +661,11 @@ const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
 const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
+const connectorPosition = computed(() => utils.cardConnectorPosition(props.card))
+const connectorPositionClass = computed(() => {
+  if (isLocked.value) { return }
+  return `connector-${connectorPosition.value}`
+})
 
 // card buttons
 
@@ -1835,6 +1840,7 @@ const toggleVideoIsPaused = () => {
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
+  :data-connector-position="connectorPosition"
   :data-tilt-degrees="card.tilt"
   :data-sticky-stretch-resistance="stickyState.stickyStretchResistance"
   :data-x="x"
@@ -1898,6 +1904,21 @@ const toggleVideoIsPaused = () => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:item="card")
 
+    //- Connector, positioned over the space reserved by .card-content-wrap margins
+    .connector-position-wrap(v-if="!isLocked" :class="connectorPositionClass")
+      ItemConnectorButton(
+        :card="card"
+        :isConnectingTo="isConnectingTo"
+        :isConnectingFrom="isConnectingFrom"
+        :isVisibleInViewport="state.isVisibleInViewport"
+        :isRemoteConnecting="state.isRemoteConnecting"
+        :remoteConnectionColor="state.remoteConnectionColor"
+        :defaultBackgroundColor="state.defaultBackgroundColor"
+        :currentBackgroundColor="currentBackgroundColor"
+        :parentDetailsIsVisible="currentCardDetailsIsVisible"
+        @shouldRenderParent="updateShouldRenderParent"
+      )
+
     template(v-if="isVisualCard || pendingUploadDataUrl")
       ImageOrVideo(
         :isSelectedOrDragging="isSelectedOrDragging"
@@ -1915,7 +1936,7 @@ const toggleVideoIsPaused = () => {
     TiltResizeTruncate(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
 
     //- Content
-    span.card-content-wrap(:style="cardContentWrapStyles")
+    span.card-content-wrap(:style="cardContentWrapStyles" :class="connectorPositionClass")
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -1960,7 +1981,7 @@ const toggleVideoIsPaused = () => {
         .card-vote-wrap(v-if="props.card.counterIsVisible")
           CardVote(:card="card")
 
-      //- Right buttons
+      //- Top Right buttons
       span.card-buttons-wrap
         //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
@@ -1969,26 +1990,11 @@ const toggleVideoIsPaused = () => {
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
         //- Lock
-        template(v-if="isLocked")
-          //- based on CardUnlockButtons.vue
-          //- .connector maintains connection paths when card is locked
-          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
-            button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
-              img.icon.lock-icon(src="@/assets/lock.svg")
-        template(v-else)
-          //- connector
-          ItemConnectorButton(
-            :card="card"
-            :isConnectingTo="isConnectingTo"
-            :isConnectingFrom="isConnectingFrom"
-            :isVisibleInViewport="state.isVisibleInViewport"
-            :isRemoteConnecting="state.isRemoteConnecting"
-            :remoteConnectionColor="state.remoteConnectionColor"
-            :defaultBackgroundColor="state.defaultBackgroundColor"
-            :currentBackgroundColor="currentBackgroundColor"
-            :parentDetailsIsVisible="currentCardDetailsIsVisible"
-            @shouldRenderParent="updateShouldRenderParent"
-          )
+        //- based on CardUnlockButtons.vue
+        //- .connector maintains connection paths when card is locked
+        .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
+          button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
+            img.icon.lock-icon(src="@/assets/lock.svg")
     .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
@@ -2244,6 +2250,62 @@ const toggleVideoIsPaused = () => {
         z-index 1
     .connector
       padding-top 9px
+
+    // overlays the card so the connector can sit in any corner.
+    // .card isn't positioned, so this is positioned to .card-wrap and doesn't scroll with truncated cards
+    .connector-position-wrap
+      position absolute
+      top 0
+      left 0
+      width 100%
+      height 100%
+      z-index 2
+      pointer-events none
+      .connector
+        position absolute
+        top 0
+        left 0
+        transform translate(0, 0)
+        --connector-easing cubic-bezier(0.2, 0.8, 0.2, 1)
+        transition left 0.2s var(--connector-easing), top 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
+        @media (prefers-reduced-motion)
+          transition none
+        &:not(.is-disabled)
+          pointer-events auto
+        // inline buttons get line-height space below them, which would offset bottom positions
+        button
+          display block
+      // 100% puts the connector outside the card, translate pulls it back in by its own size.
+      // left/top are used instead of right/bottom so position changes can animate
+      &.connector-top-right
+        .connector
+          left 100%
+          transform translate(-100%, 0)
+      &.connector-bottom-left
+        .connector
+          top 100%
+          transform translate(0, -100%)
+      &.connector-bottom-right
+        .connector
+          left 100%
+          top 100%
+          transform translate(-100%, -100%)
+    // reserves space for the connector
+    .card-content-wrap
+      &.connector-top-left,
+      &.connector-bottom-left
+        .card-content,
+        .card-comment
+          margin-left 22px // .connector width - .name margin-left
+        // without buttons there's no .card-content padding-right to cancel out
+        .card-buttons-wrap:empty
+          margin-left 0
+      &.connector-top-right,
+      &.connector-bottom-right
+        .card-buttons-wrap
+          margin-right 30px // .connector width
+          .url-wrap:only-child
+            padding-right 0
 
     .url-wrap
       padding 0

@@ -279,6 +279,7 @@ Name | Type | Description
 <code class="cards">backgroundColor</code>          | `String`  | The background color for the card
 <code class="cards">createdAt</code>                | `String`  | The date when the card was created
 <code class="cards">codeBlockLanguage</code>        | `String`  | Code language syntax highlighting to use for markdown <code>```</code> code blocks
+<code class="cards">connectorPosition</code>        | `String`  | The corner of the card that its connector button is in. Can be `top-left`, `top-right` (default), `bottom-left`, or `bottom-right`. Locked cards always use `top-right`
 <code class="cards">counterIsVisible</code>         | `Boolean`  | Whether the card counter for voting is visible
 <code class="cards">counterValue</code>             | `Integer`  | The incremented number of the card counter. Default value is `0`
 <code class="cards">frameId</code>                  | `Integer`  | The id of type of frame applied to the card, if any

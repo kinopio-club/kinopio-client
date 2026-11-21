@@ -1112,6 +1112,7 @@ export default {
     const cardId = card.id
     card.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
     card.isLocked = this.stringToBoolean(element.dataset.isLocked)
+    card.connectorPosition = element.dataset.connectorPosition
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -1485,6 +1486,13 @@ export default {
       y: position.y + offset
     }
   },
+  // a card's valid connector position, invalid or missing values and locked cards use 'top-right'
+  cardConnectorPosition (card) {
+    const position = card?.connectorPosition
+    if (card?.isLocked) { return 'top-right' }
+    if (!consts.cardConnectorPositions.includes(position)) { return 'top-right' }
+    return position
+  },
   estimatedItemConnectorPosition (item) {
     const offset = 15
     if (item.itemType === 'box' && item.isLocked) {
@@ -1496,6 +1504,13 @@ export default {
     x = x - offset
     let y = item.y
     y = y + offset
+    const connectorPosition = this.cardConnectorPosition(item)
+    if (connectorPosition.endsWith('-left')) {
+      x = item.x + offset
+    }
+    if (connectorPosition.startsWith('bottom-')) {
+      y = item.y + item.height - offset
+    }
     const position = {
       x: Math.round(x),
       y: Math.round(y)
