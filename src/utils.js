@@ -1491,7 +1491,15 @@ export default {
     const position = card?.connectorPosition
     if (card?.isLocked) { return 'top-right' }
     if (!consts.cardConnectorPositions.includes(position)) { return 'top-right' }
+    if (this.cardHeightIsSingleLine(card)) {
+      return position.replace('bottom-', 'top-')
+    }
     return position
+  },
+  cardHeightIsSingleLine (card) {
+    if (!card?.height) { return }
+    const height = card.truncateHeight || card.height
+    return height <= consts.emptyCard().height + 1
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15

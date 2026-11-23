@@ -115,7 +115,7 @@ const updateStartCardConnectorPosition = (event) => {
   const centerX = rect.x + (rect.width / 2)
   const centerY = rect.y + (rect.height / 2)
   let vertical = 'top'
-  if (position.y > centerY) {
+  if (position.y > centerY && !utils.cardHeightIsSingleLine(card)) {
     vertical = 'bottom'
   }
   let horizontal = 'right'
