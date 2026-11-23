@@ -3,6 +3,7 @@ import { reactive, computed, watch, ref, nextTick } from 'vue'
 
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -15,6 +16,7 @@ import last from 'lodash-es/last'
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const cardStore = useCardStore()
+const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
@@ -290,13 +292,18 @@ const startConnecting = (event) => {
   }
   globalStore.updateCurrentUserIsDrawingConnection(true)
 }
-// double click resets a card connector to its default top-right position
+// double click resets a card or box connector to its default top-right position
 const resetConnectorPosition = () => {
-  if (!props.card) { return }
   if (isDisabled.value) { return }
-  const connectorPosition = utils.cardConnectorPosition(props.card)
-  if (connectorPosition === 'top-right') { return }
-  cardStore.updateCard({ id: props.card.id, connectorPosition: null })
+  if (props.card) {
+    const connectorPosition = utils.cardConnectorPosition(props.card)
+    if (connectorPosition === 'top-right') { return }
+    cardStore.updateCard({ id: props.card.id, connectorPosition: null })
+  } else if (props.box) {
+    const connectorPosition = utils.boxConnectorPosition(props.box)
+    if (connectorPosition === 'top-right') { return }
+    boxStore.updateBox({ id: props.box.id, connectorPosition: null })
+  }
 }
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id

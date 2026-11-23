@@ -1137,6 +1137,7 @@ export default {
     box.height = parseInt(element.dataset.resizeHeight)
     box.infoWidth = parseInt(element.dataset.infoWidth)
     box.infoHeight = parseInt(element.dataset.infoHeight)
+    box.connectorPosition = element.dataset.connectorPosition
     box.itemType = 'box'
     return box
   },
@@ -1496,6 +1497,13 @@ export default {
     }
     return position
   },
+  // a box's valid connector position in its box-info, invalid or missing values and locked boxes use 'top-right'
+  boxConnectorPosition (box) {
+    const position = box?.connectorPosition
+    if (box?.isLocked) { return 'top-right' }
+    if (!consts.boxConnectorPositions.includes(position)) { return 'top-right' }
+    return position
+  },
   cardHeightIsSingleLine (card) {
     if (!card?.height) { return }
     const height = card.truncateHeight || card.height
@@ -1512,7 +1520,10 @@ export default {
     x = x - offset
     let y = item.y
     y = y + offset
-    const connectorPosition = this.cardConnectorPosition(item)
+    let connectorPosition = this.cardConnectorPosition(item)
+    if (item.itemType === 'box') {
+      connectorPosition = this.boxConnectorPosition(item)
+    }
     if (connectorPosition.endsWith('-left')) {
       x = item.x + offset
     }

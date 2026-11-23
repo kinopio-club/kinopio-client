@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onUnmounted, watch, ref } from 'vue'
+import { reactive, computed, onUnmounted, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
@@ -209,7 +209,7 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  const classList = []
+  const classList = [`connector-${connectorPosition.value}`]
   if (isPaintSelecting.value) {
     classList.push('unselectable')
   }
@@ -331,6 +331,31 @@ const shrink = () => {
 // locked to background
 
 const isLocked = computed(() => props.box.isLocked)
+
+// connector position
+
+const connectorPosition = computed(() => utils.boxConnectorPosition(props.box))
+// slide the connector and name to their new positions in the box-info
+watch(connectorPosition, async () => {
+  const infoElement = document.querySelector(`.box-info[data-box-id="${props.box.id}"]`)
+  if (!infoElement) { return }
+  const children = [...infoElement.children]
+  const prevRects = children.map(child => child.getBoundingClientRect())
+  await nextTick()
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion) { return }
+  children.forEach((child, index) => {
+    const rect = child.getBoundingClientRect()
+    const scale = rect.width / child.offsetWidth || 1
+    const deltaX = (prevRects[index].x - rect.x) / scale
+    if (!deltaX) { return }
+    // translate instead of transform, to keep .connector's transform
+    child.animate([
+      { translate: `${deltaX}px 0` },
+      { translate: '0 0' }
+    ], { duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' })
+  })
+})
 
 // interacting
 
@@ -643,6 +668,7 @@ const clearFocus = () => {
   :data-info-height="normalizedBox.infoHeight"
   :data-background="normalizedBox.background"
   :data-is-locked="isLocked"
+  :data-connector-position="connectorPosition"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
 
@@ -827,6 +853,12 @@ const clearFocus = () => {
   .connected-colors
     left 1px
     top 5px
+  // connector before the name. margin instead of padding, so .connector-glow and .connected-colors stay aligned
+  &.connector-top-left
+    .connector
+      order -1
+      margin-left 8px
+      padding-right 0
 
   .locking-frame
     position absolute

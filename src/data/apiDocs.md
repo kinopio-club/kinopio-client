@@ -403,6 +403,7 @@ Name | Type | Description
 <code class="boxes">background</code>     | `String`  | The image url used by the box background
 <code class="boxes">backgroundIsStretch</code>     | `Boolean`  | Whether the box background image is stretched (default is `false`, to display images tiled)
 <code class="boxes">color</code>          | `String` | The color of the box
+<code class="boxes">connectorPosition</code> | `String` | Where the connector button is in the box info. Can be `top-left` or `top-right` (default). Locked boxes always use `top-right`
 <code class="boxes">createdAt</code>      | `String`  | The date when the box was created
 <code class="boxes">headerFontId</code>   | `Integer`  | An id representing the header font of the box. Default value is `0` for Recoletta. Similar to `card.headerFontId`
 <code class="boxes">headerFontSize</code> | `String`  | The header font size of the box. Can be either `s`(small-size, default), `m`(medium-size), or `l`(large-size). Similar to `card.headerFontSize`

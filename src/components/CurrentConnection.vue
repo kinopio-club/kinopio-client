@@ -78,6 +78,7 @@ const drawCurrentConnection = (event) => {
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   updateStartCardConnectorPosition(event)
+  updateStartBoxConnectorPosition(event)
   const endItemId = checkCurrentConnectionSuccess(event)
   const color = connectionStore.getNewConnectionColor
   globalStore.currentConnectionShiftKeyIsActive = event.shiftKey
@@ -126,6 +127,36 @@ const updateStartCardConnectorPosition = (event) => {
   const currentConnectorPosition = utils.cardConnectorPosition(card)
   if (currentConnectorPosition === connectorPosition) { return }
   cardStore.updateCard({ id: card.id, connectorPosition })
+}
+
+// move connector to the nearest top corner when dragging within the start box info
+
+const startBoxInfoElementAtCursor = (event) => {
+  if (!event) { return }
+  const startItemIds = globalStore.currentConnectionStartItemIds
+  if (startItemIds.length !== 1) { return }
+  const box = boxStore.getBox(props.startItemId)
+  if (!box || box.isLocked) { return }
+  const position = utils.cursorPositionInViewport(event)
+  const elements = document.elementsFromPoint(position.x, position.y)
+  const boxInfoElement = elements.find(element => element.closest('.box-info'))?.closest('.box-info')
+  if (boxInfoElement?.dataset.boxId !== box.id) { return }
+  return boxInfoElement
+}
+const updateStartBoxConnectorPosition = (event) => {
+  const boxInfoElement = startBoxInfoElementAtCursor(event)
+  if (!boxInfoElement) { return }
+  const box = boxStore.getBox(props.startItemId)
+  const position = utils.cursorPositionInViewport(event)
+  const rect = boxInfoElement.getBoundingClientRect()
+  const centerX = rect.x + (rect.width / 2)
+  let connectorPosition = 'top-right'
+  if (position.x < centerX) {
+    connectorPosition = 'top-left'
+  }
+  const currentConnectorPosition = utils.boxConnectorPosition(box)
+  if (currentConnectorPosition === connectorPosition) { return }
+  boxStore.updateBox({ id: box.id, connectorPosition })
 }
 
 // connect to item
@@ -191,6 +222,7 @@ const addConnections = async (event) => {
     return
   }
   if (startCardElementAtCursor(event)) { return }
+  if (startBoxInfoElementAtCursor(event)) { return }
   if (currentConnectionSuccess.id) {
     endItemId = currentConnectionSuccess.id
   } else {
