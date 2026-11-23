@@ -60,6 +60,7 @@ const state = reactive({
   lockingAlpha: 0,
   isVisibleInViewport: false,
   shouldRenderParent: false,
+  preventDraggedButtonFromToggling: false,
   // connections
   isRemoteConnecting: false,
   remoteConnectionColor: ''
@@ -225,6 +226,7 @@ const selectListAndConnectedCards = () => {
   globalStore.shouldCancelNextMouseUpInteraction = true
 }
 const endListInfoInteraction = (event) => {
+  state.preventDraggedButtonFromToggling = globalStore.preventDraggedListFromShowingDetails
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
@@ -573,8 +575,16 @@ const buttonClasses = computed(() => {
 
 // actions
 
-const toggleIsCollapsed = async () => {
+const listWasDraggedFromButton = (event) => {
+  if (!event) { return }
+  if (event.type === 'touchend') {
+    return !touchIsNearTouchPosition(event)
+  }
+  return state.preventDraggedButtonFromToggling
+}
+const toggleIsCollapsed = async (event) => {
   cancelLocking()
+  if (listWasDraggedFromButton(event)) { return }
   const value = !props.list.isCollapsed
   updateIsCollapsed(value)
   globalStore.clearAllSelected()
