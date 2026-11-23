@@ -360,7 +360,12 @@ export const useListStore = defineStore('lists', {
       this.updateSnapAlignListsCardsDisplay(lists)
       globalStore.listsWereDragged = true
       if (endCursor && globalStore.getInteractingWithItemType === 'list') {
-        boxStore.updateBoxSnapGuides({ items: lists, isChildren: true, cursor: endCursor })
+        const snapItems = lists.map(list => {
+          const isCollapsed = this.getList(list.id)?.isCollapsed
+          if (!isCollapsed) { return list }
+          return { ...list, height: consts.listInfoHeight }
+        })
+        boxStore.updateBoxSnapGuides({ items: snapItems, isChildren: true, cursor: endCursor })
       }
       globalStore.updateItemSnapAlignGuides()
       // lists = lists.map(list => this.getList(list.id))
