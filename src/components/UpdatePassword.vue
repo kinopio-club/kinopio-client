@@ -18,6 +18,7 @@ const state = reactive({
   error: {
     passwordMatch: false,
     unknownServerError: false,
+    passwordIsExposed: false,
     tooManyAttempts: false,
     passwordTooShort: false
   },
@@ -66,12 +67,15 @@ const handleErrors = async (response) => {
   state.loading = false
   state.error.tooManyAttempts = false
   state.error.unknownServerError = false
+  state.error.passwordIsExposed = false
   if (!response) {
     state.error.unknownServerError = true
     return
   }
   if (response.status === 429) {
     state.error.tooManyAttempts = true
+  } else if (response.status === 400 && response.message === 'password is exposed') {
+    state.error.passwordIsExposed = true
   } else {
     state.error.unknownServerError = true
   }
@@ -116,6 +120,8 @@ section
       .badge.danger Too many attempts, try again in 10 minutes
     .row(v-if="state.error.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+    .row(v-if="state.error.passwordIsExposed")
+      .badge.danger Password has been exposed in another company's data breach, try a different password
     .row
       button(type="submit" :class="{active : state.loading}")
         span Update Password
