@@ -453,6 +453,7 @@ Name | Type | Description
 --- | --- | ---
 <code class="lists">id</code>                                         | `String` | The unique ID of the list. Is not user updateable
 <code class="lists">color</code>                                      | `String` | The color of the list
+<code class="lists">connectorPosition</code>                          | `String` | Where the connector button is in the list info. Can be `top-left` (before the list name) or `top-right` (default, after the list buttons)
 <code class="lists">createdAt</code>                                  | `String`  | The date when the list was created
 <code class="lists">name</code>                                       | `String` | The name of the list
 <code class="lists">height</code>                                     | `String` | The rendered height of the list

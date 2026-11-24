@@ -1153,6 +1153,7 @@ export default {
     if (element.dataset.isCollapsed === 'true') {
       list.height = consts.listInfoHeight
     }
+    list.connectorPosition = element.dataset.connectorPosition
     list.itemType = 'list'
     return list
   },
@@ -1504,6 +1505,12 @@ export default {
     if (!consts.boxConnectorPositions.includes(position)) { return 'top-right' }
     return position
   },
+  // a list's valid connector position in its list-info, invalid or missing values use 'top-right'
+  listConnectorPosition (list) {
+    const position = list?.connectorPosition
+    if (!consts.listConnectorPositions.includes(position)) { return 'top-right' }
+    return position
+  },
   cardHeightIsSingleLine (card) {
     if (!card?.height) { return }
     const height = card.truncateHeight || card.height
@@ -1523,6 +1530,8 @@ export default {
     let connectorPosition = this.cardConnectorPosition(item)
     if (item.itemType === 'box') {
       connectorPosition = this.boxConnectorPosition(item)
+    } else if (item.itemType === 'list') {
+      connectorPosition = this.listConnectorPosition(item)
     }
     if (connectorPosition.endsWith('-left')) {
       x = item.x + offset

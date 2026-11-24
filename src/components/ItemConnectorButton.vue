@@ -4,6 +4,7 @@ import { reactive, computed, watch, ref, nextTick } from 'vue'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -17,6 +18,7 @@ const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const cardStore = useCardStore()
 const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
@@ -292,7 +294,7 @@ const startConnecting = (event) => {
   }
   globalStore.updateCurrentUserIsDrawingConnection(true)
 }
-// double click resets a card or box connector to its default top-right position
+// double click resets a card, box, or list connector to its default top-right position
 const resetConnectorPosition = () => {
   if (isDisabled.value) { return }
   if (props.card) {
@@ -303,6 +305,10 @@ const resetConnectorPosition = () => {
     const connectorPosition = utils.boxConnectorPosition(props.box)
     if (connectorPosition === 'top-right') { return }
     boxStore.updateBox({ id: props.box.id, connectorPosition: null })
+  } else if (props.list) {
+    const connectorPosition = utils.listConnectorPosition(props.list)
+    if (connectorPosition === 'top-right') { return }
+    listStore.updateList({ id: props.list.id, connectorPosition: null })
   }
 }
 const handleMouseEnterConnector = (event) => {

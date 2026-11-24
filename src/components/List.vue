@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, watch, ref } from 'vue'
+import { reactive, computed, watch, ref, nextTick } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useListStore } from '@/stores/useListStore'
@@ -545,6 +545,7 @@ const listClasses = computed(() => {
 })
 const infoClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: color.value })
+  classes.push(`connector-${connectorPosition.value}`)
   if (state.isHover) {
     classes.push('hover')
   }
@@ -698,6 +699,31 @@ const placeholderStylesMap = computed(() => {
   return styles
 })
 
+// connector position
+
+const connectorPosition = computed(() => utils.listConnectorPosition(props.list))
+// slide the connector, name, and buttons to their new positions in the list-info
+watch(connectorPosition, async () => {
+  const rowElement = document.querySelector(`.list-info[data-list-id="${props.list.id}"] .list-info-row`)
+  if (!rowElement) { return }
+  const children = [...rowElement.children]
+  const prevRects = children.map(child => child.getBoundingClientRect())
+  await nextTick()
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion) { return }
+  children.forEach((child, index) => {
+    const rect = child.getBoundingClientRect()
+    const scale = rect.width / child.offsetWidth || 1
+    const deltaX = (prevRects[index].x - rect.x) / scale
+    if (!deltaX) { return }
+    // translate instead of transform, to keep .connector's transform
+    child.animate([
+      { translate: `${deltaX}px 0` },
+      { translate: '0 0' }
+    ], { duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' })
+  })
+})
+
 // focus
 
 const isFocusing = computed(() => props.list.id === globalStore.focusOnItemId)
@@ -716,6 +742,7 @@ const clearFocus = () => {
   :data-width="props.list.resizeWidth"
   :data-height="props.list.height"
   :data-is-collapsed="props.list.isCollapsed"
+  :data-connector-position="connectorPosition"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :style="listStyles"
@@ -795,19 +822,19 @@ const clearFocus = () => {
           button.small-button.inline-button
             img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
-        //- connector
-        ItemConnectorButton(
-          :list="props.list"
-          :isConnectingTo="isConnectingTo"
-          :isConnectingFrom="isConnectingFrom"
-          :isVisibleInViewport="state.isVisibleInViewport"
-          :isRemoteConnecting="state.isRemoteConnecting"
-          :remoteConnectionColor="state.remoteConnectionColor"
-          :currentBackgroundColor="color"
-          :backgroundIsTransparent="true"
-          :parentDetailsIsVisible="currentListDetailsIsVisible"
-          @shouldRenderParent="updateShouldRenderParent"
-        )
+      //- connector, outside of .right-side so it can be ordered before .left-side
+      ItemConnectorButton(
+        :list="props.list"
+        :isConnectingTo="isConnectingTo"
+        :isConnectingFrom="isConnectingFrom"
+        :isVisibleInViewport="state.isVisibleInViewport"
+        :isRemoteConnecting="state.isRemoteConnecting"
+        :remoteConnectionColor="state.remoteConnectionColor"
+        :currentBackgroundColor="color"
+        :backgroundIsTransparent="true"
+        :parentDetailsIsVisible="currentListDetailsIsVisible"
+        @shouldRenderParent="updateShouldRenderParent"
+      )
       //- resize collapsed
       .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
@@ -976,7 +1003,9 @@ const clearFocus = () => {
     display inline-block
     padding 8px
     padding-left 0
+    margin-left 8px // replaces the padding-right of the last .right-side button
     margin-right -8px // offsets .list-info-row padding
+    flex-shrink 0
     cursor cell
     transform translateY(1px)
     button
@@ -987,6 +1016,12 @@ const clearFocus = () => {
   .connected-colors
     left 1px
     top 9px
+  // connector before the name. margin instead of padding, so .connector-glow and .connected-colors stay aligned
+  &.connector-top-left
+    .connector
+      order -1
+      margin-left 0
+      margin-right 0
   // name
   .list-info-row
     width 100%
@@ -995,6 +1030,9 @@ const clearFocus = () => {
     display flex
     align-items center
     padding 0 8px
+    // keeps buttons on the right, now that .connector is also a child of the row
+    .right-side
+      margin-left auto
     .left-side
       display flex
       align-items center
