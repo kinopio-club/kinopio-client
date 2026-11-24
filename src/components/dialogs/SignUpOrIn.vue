@@ -59,7 +59,8 @@ const state = reactive({
     tooManyAttempts: false,
     passwordTooShort: false,
     passwordMatchesEmail: false,
-    resetUserEmailNotFound: false
+    resetUserEmailNotFound: false,
+    passwordIsExposed: false
   },
   loading: {
     signUpOrIn: false,
@@ -120,6 +121,7 @@ const handleErrors = async (response) => {
   state.error.accountAlreadyExists = false
   state.error.tooManyAttempts = false
   state.error.unknownServerError = false
+  state.error.passwordIsExposed = false
   if (!response) {
     state.error.unknownServerError = true
     return
@@ -130,6 +132,8 @@ const handleErrors = async (response) => {
     state.error.signInCredentials = true
   } else if (response.status === 429) {
     state.error.tooManyAttempts = true
+  } else if (response.status === 400 && response.message === 'password is exposed') {
+    state.error.passwordIsExposed = true
   } else {
     state.error.unknownServerError = true
   }
@@ -396,6 +400,7 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
       .badge.danger(v-if="state.error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="state.error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="state.error.passwordIsExposed") Password has been exposed in another company's data breach, try a different password
       button(name="signUp" type="submit" :class="{active : state.loading.signUpOrIn}" tabindex="0")
         span Sign Up
         Loader(:visible="state.loading.signUpOrIn")

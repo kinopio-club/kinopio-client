@@ -475,6 +475,8 @@ main.blog-page-wrap
         max-width 440px
         opacity 0.5
         font-size 13px
+        a
+          font-size 13px
       blockquote
         padding-left 8px
         margin 0
