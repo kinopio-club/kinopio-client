@@ -610,8 +610,9 @@ const updateIsCollapsed = async (value) => {
   connectionStore.updateConnectionPathsByItemIds(cardIds)
 }
 const addCard = async (event, shouldAppend) => {
-  if (globalStore.preventDraggedListFromShowingDetails) { return }
   cancelLocking()
+  if (listWasDraggedFromButton(event)) { return }
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
   updateIsCollapsed(false)
   const width = listItemWidth.value
   const card = {
