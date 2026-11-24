@@ -53,6 +53,12 @@ const newCardColor = computed(() => {
   return color || state.defaultColor
 })
 
+const userSettingsIsVisible = computed(() => globalStore.userSettingsIsVisible)
+const toggleUserSettingsIsVisible = () => {
+  const value = userSettingsIsVisible.value
+  globalStore.userSettingsIsVisible = !value
+}
+
 const toggleNewCardColorSettingsIsVisible = () => {
   const value = !state.newCardColorSettingsIsVisible
   globalStore.closeAllDialogs()
@@ -74,7 +80,10 @@ const isCardSnapEnabled = computed({
 .space-settings-buttons
   .segmented-buttons
     //- settings
-    button.small-button.translucent-button(title="Settings")
+    button.small-button.translucent-button(
+      @click.stop="toggleUserSettingsIsVisible"
+      title="Settings"
+    )
       img.icon.settings(src="@/assets/settings.svg")
     //- new card color
     button.small-button.translucent-button(
