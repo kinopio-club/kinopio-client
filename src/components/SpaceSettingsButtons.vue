@@ -59,31 +59,38 @@ const toggleNewCardColorSettingsIsVisible = () => {
   state.newCardColorSettingsIsVisible = value
 }
 
-// todo rename to shouldPreventSnapToItem includes box snap and card snap (snap into list still valid)
-const isCardSnapEnabled = computed(() => !spaceStore.shouldPreventSnapToCard)
+const isCardSnapEnabled = computed({
+  get () {
+    return !spaceStore.shouldPreventSnapToCard
+  },
+  set (value) {
+    spaceStore.updateSpace({ shouldPreventSnapToCard: !value })
+  }
+})
 
 </script>
 
 <template lang="pug">
 .space-settings-buttons
   .segmented-buttons
+    //- settings
     button.small-button.translucent-button(title="Settings")
       img.icon.settings(src="@/assets/settings.svg")
-
+    //- new card color
     button.small-button.translucent-button(
       @click.left.stop="toggleNewCardColorSettingsIsVisible"
       :class="{active: state.newCardColorSettingsIsVisible}"
       title="Space Settings"
     )
-      //- new card color
       .badge.small-badge.new-card-color-badge(:style="{ 'background-color': newCardColor }" title="New Card Color")
-      //- card snap enabled
-      //- img.icon.card-snap-disabled(src="@/assets/card-snap-disabled.svg" v-if="isCardSnapEnabled" title="Card Snap is Enabled")
-
-    label.small-button.translucent-button(:class="{active: isCardSnapEnabled}")
+    //- toggle snap
+    label.small-button.translucent-button(
+      :class="{active: isCardSnapEnabled}"
+      @click.left.stop
+      title="Toggle Card Snap"
+    )
       input(type="checkbox" v-model="isCardSnapEnabled")
       span Snap
-      //- img.icon.card-snap-disabled(src="@/assets/card-snap-disabled.svg" v-if="isCardSnapEnabled" title="Card Snap is Enabled")
 
   NewCardColorSettings(:visible="state.newCardColorSettingsIsVisible" :defaultColor="state.defaultColor")
 </template>
