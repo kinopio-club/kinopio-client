@@ -1488,27 +1488,14 @@ export default {
       y: position.y + offset
     }
   },
-  // a card's valid connector position, invalid or missing values and locked cards use 'top-right'
-  cardConnectorPosition (card) {
-    const position = card?.connectorPosition
-    if (card?.isLocked) { return 'top-right' }
-    if (!consts.cardConnectorPositions.includes(position)) { return 'top-right' }
-    if (this.cardHeightIsSingleLine(card)) {
+  connectorPosition (item, itemType = 'card') {
+    const position = item?.connectorPosition
+    const isPosition = consts.connectorPositions[itemType]?.includes(position)
+    if (item?.isLocked) { return 'top-right' }
+    if (!isPosition) { return 'top-right' }
+    if (itemType === 'card' && this.cardHeightIsSingleLine(item)) {
       return position.replace('bottom-', 'top-')
     }
-    return position
-  },
-  // a box's valid connector position in its box-info, invalid or missing values and locked boxes use 'top-right'
-  boxConnectorPosition (box) {
-    const position = box?.connectorPosition
-    if (box?.isLocked) { return 'top-right' }
-    if (!consts.boxConnectorPositions.includes(position)) { return 'top-right' }
-    return position
-  },
-  // a list's valid connector position in its list-info, invalid or missing values use 'top-right'
-  listConnectorPosition (list) {
-    const position = list?.connectorPosition
-    if (!consts.listConnectorPositions.includes(position)) { return 'top-right' }
     return position
   },
   cardHeightIsSingleLine (card) {
@@ -1527,12 +1514,7 @@ export default {
     x = x - offset
     let y = item.y
     y = y + offset
-    let connectorPosition = this.cardConnectorPosition(item)
-    if (item.itemType === 'box') {
-      connectorPosition = this.boxConnectorPosition(item)
-    } else if (item.itemType === 'list') {
-      connectorPosition = this.listConnectorPosition(item)
-    }
+    const connectorPosition = this.connectorPosition(item, item.itemType)
     if (connectorPosition.endsWith('-left')) {
       x = item.x + offset
     }

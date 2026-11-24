@@ -77,9 +77,7 @@ const drawCurrentConnection = (event) => {
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
-  updateStartCardConnectorPosition(event)
-  updateStartBoxConnectorPosition(event)
-  updateStartListConnectorPosition(event)
+  updateStartConnectorPosition(event)
   const endItemId = checkCurrentConnectionSuccess(event)
   const color = connectionStore.getNewConnectionColor
   globalStore.currentConnectionShiftKeyIsActive = event.shiftKey
@@ -95,29 +93,54 @@ const drawCurrentConnection = (event) => {
   broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
 }
 
-// connector card corner
+// connector position
 
-const startCardElementAtCursor = (event) => {
-  if (!event) { return }
+// the element that the connector can slide within
+const connectorAreaSelectors = {
+  card: '.card-wrap',
+  box: '.box-info',
+  list: '.list-info[data-list-id]'
+}
+const startItemWithType = () => {
   const startItemIds = globalStore.currentConnectionStartItemIds
   if (startItemIds.length !== 1) { return }
-  const card = cardStore.getCard(props.startItemId)
-  if (!card || card.isLocked) { return }
-  const position = utils.cursorPositionInViewport(event)
-  const cardElement = utils.cardElementFromPosition(position.x, position.y)
-  if (cardElement?.dataset.cardId !== card.id) { return }
-  return cardElement
+  const id = props.startItemId
+  const card = cardStore.getCard(id)
+  if (card) { return { item: card, itemType: 'card' } }
+  const box = boxStore.getBox(id)
+  if (box) { return { item: box, itemType: 'box' } }
+  const list = listStore.getList(id)
+  if (list) { return { item: list, itemType: 'list' } }
 }
-const updateStartCardConnectorPosition = (event) => {
-  const cardElement = startCardElementAtCursor(event)
-  if (!cardElement) { return }
-  const card = cardStore.getCard(props.startItemId)
+// the start item's connector area element, if the cursor is over it
+const startConnectorAreaElementAtCursor = (event) => {
+  if (!event) { return }
+  const start = startItemWithType()
+  if (!start || start.item.isLocked) { return }
+  const selector = connectorAreaSelectors[start.itemType]
   const position = utils.cursorPositionInViewport(event)
-  const rect = cardElement.querySelector('.card').getBoundingClientRect()
+  const elements = document.elementsFromPoint(position.x, position.y)
+  const element = elements.find(element => element.closest(selector))?.closest(selector)
+  if (element?.dataset[`${start.itemType}Id`] !== start.item.id) { return }
+  return element
+}
+// move the start item's connector to the corner nearest the cursor
+const updateStartConnectorPosition = (event) => {
+  const element = startConnectorAreaElementAtCursor(event)
+  if (!element) { return }
+  const { item, itemType } = startItemWithType()
+  let rectElement = element
+  if (itemType === 'card') {
+    rectElement = element.querySelector('.card')
+  }
+  const rect = rectElement.getBoundingClientRect()
+  const position = utils.cursorPositionInViewport(event)
   const centerX = rect.x + (rect.width / 2)
   const centerY = rect.y + (rect.height / 2)
+  // get position
+  const canUseBottom = itemType === 'card' && !utils.cardHeightIsSingleLine(item)
   let vertical = 'top'
-  if (position.y > centerY && !utils.cardHeightIsSingleLine(card)) {
+  if (canUseBottom && position.y > centerY) {
     vertical = 'bottom'
   }
   let horizontal = 'right'
@@ -125,70 +148,16 @@ const updateStartCardConnectorPosition = (event) => {
     horizontal = 'left'
   }
   const connectorPosition = `${vertical}-${horizontal}`
-  const currentConnectorPosition = utils.cardConnectorPosition(card)
-  if (currentConnectorPosition === connectorPosition) { return }
-  cardStore.updateCard({ id: card.id, connectorPosition })
-}
-
-// connector box top corner
-
-const startBoxInfoElementAtCursor = (event) => {
-  if (!event) { return }
-  const startItemIds = globalStore.currentConnectionStartItemIds
-  if (startItemIds.length !== 1) { return }
-  const box = boxStore.getBox(props.startItemId)
-  if (!box || box.isLocked) { return }
-  const position = utils.cursorPositionInViewport(event)
-  const elements = document.elementsFromPoint(position.x, position.y)
-  const boxInfoElement = elements.find(element => element.closest('.box-info'))?.closest('.box-info')
-  if (boxInfoElement?.dataset.boxId !== box.id) { return }
-  return boxInfoElement
-}
-const updateStartBoxConnectorPosition = (event) => {
-  const boxInfoElement = startBoxInfoElementAtCursor(event)
-  if (!boxInfoElement) { return }
-  const box = boxStore.getBox(props.startItemId)
-  const position = utils.cursorPositionInViewport(event)
-  const rect = boxInfoElement.getBoundingClientRect()
-  const centerX = rect.x + (rect.width / 2)
-  let connectorPosition = 'top-right'
-  if (position.x < centerX) {
-    connectorPosition = 'top-left'
+  // update item
+  if (utils.connectorPosition(item, itemType) === connectorPosition) { return }
+  const update = { id: item.id, connectorPosition }
+  if (itemType === 'card') {
+    cardStore.updateCard(update)
+  } else if (itemType === 'box') {
+    boxStore.updateBox(update)
+  } else {
+    listStore.updateList(update)
   }
-  const currentConnectorPosition = utils.boxConnectorPosition(box)
-  if (currentConnectorPosition === connectorPosition) { return }
-  boxStore.updateBox({ id: box.id, connectorPosition })
-}
-
-// connector list top corner
-
-const startListInfoElementAtCursor = (event) => {
-  if (!event) { return }
-  const startItemIds = globalStore.currentConnectionStartItemIds
-  if (startItemIds.length !== 1) { return }
-  const list = listStore.getList(props.startItemId)
-  if (!list) { return }
-  const position = utils.cursorPositionInViewport(event)
-  const elements = document.elementsFromPoint(position.x, position.y)
-  // the top .list-info, not .list-info-bottom
-  const listInfoElement = elements.find(element => element.closest('.list-info[data-list-id]'))?.closest('.list-info[data-list-id]')
-  if (listInfoElement?.dataset.listId !== list.id) { return }
-  return listInfoElement
-}
-const updateStartListConnectorPosition = (event) => {
-  const listInfoElement = startListInfoElementAtCursor(event)
-  if (!listInfoElement) { return }
-  const list = listStore.getList(props.startItemId)
-  const position = utils.cursorPositionInViewport(event)
-  const rect = listInfoElement.getBoundingClientRect()
-  const centerX = rect.x + (rect.width / 2)
-  let connectorPosition = 'top-right'
-  if (position.x < centerX) {
-    connectorPosition = 'top-left'
-  }
-  const currentConnectorPosition = utils.listConnectorPosition(list)
-  if (currentConnectorPosition === connectorPosition) { return }
-  listStore.updateList({ id: list.id, connectorPosition })
 }
 
 // connect to item
@@ -253,9 +222,8 @@ const addConnections = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
-  if (startCardElementAtCursor(event)) { return }
-  if (startBoxInfoElementAtCursor(event)) { return }
-  if (startListInfoElementAtCursor(event)) { return }
+  // releasing inside the start item only moves its connector
+  if (startConnectorAreaElementAtCursor(event)) { return }
   if (currentConnectionSuccess.id) {
     endItemId = currentConnectionSuccess.id
   } else {

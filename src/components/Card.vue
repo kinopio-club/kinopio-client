@@ -661,7 +661,7 @@ const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
 const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
-const connectorPosition = computed(() => utils.cardConnectorPosition(props.card))
+const connectorPosition = computed(() => utils.connectorPosition(props.card))
 const connectorPositionClass = computed(() => {
   if (isLocked.value) { return }
   return `connector-${connectorPosition.value}`

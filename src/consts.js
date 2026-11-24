@@ -21,9 +21,11 @@ export default {
   minLineYOutdent: 175,
   minListWidth: 200,
   normalCardWrapWidth: 200,
-  cardConnectorPositions: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
-  boxConnectorPositions: ['top-left', 'top-right'],
-  listConnectorPositions: ['top-left', 'top-right'],
+  connectorPositions: {
+    card: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+    box: ['top-left', 'top-right'],
+    list: ['top-left', 'top-right']
+  },
   wideCardWrapWidth: 390,
   minCardIframeWidth: 310,
   freeCardsCreatedLimit: 100,

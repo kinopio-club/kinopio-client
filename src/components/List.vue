@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, watch, ref, nextTick } from 'vue'
+import { reactive, computed, watch, ref } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useListStore } from '@/stores/useListStore'
@@ -11,6 +11,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
 import { useViewportObserver } from '@/composables/useViewportObserver.js'
+import { useConnectorSlide } from '@/composables/useConnectorSlide.js'
 
 import Frames from '@/components/Frames.vue'
 import utils from '@/utils.js'
@@ -701,27 +702,11 @@ const placeholderStylesMap = computed(() => {
 
 // connector position
 
-const connectorPosition = computed(() => utils.listConnectorPosition(props.list))
+const connectorPosition = computed(() => utils.connectorPosition(props.list, 'list'))
 // slide the connector, name, and buttons to their new positions in the list-info
-watch(connectorPosition, async () => {
-  const rowElement = document.querySelector(`.list-info[data-list-id="${props.list.id}"] .list-info-row`)
-  if (!rowElement) { return }
-  const children = [...rowElement.children]
-  const prevRects = children.map(child => child.getBoundingClientRect())
-  await nextTick()
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (prefersReducedMotion) { return }
-  children.forEach((child, index) => {
-    const rect = child.getBoundingClientRect()
-    const scale = rect.width / child.offsetWidth || 1
-    const deltaX = (prevRects[index].x - rect.x) / scale
-    if (!deltaX) { return }
-    // translate instead of transform, to keep .connector's transform
-    child.animate([
-      { translate: `${deltaX}px 0` },
-      { translate: '0 0' }
-    ], { duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' })
-  })
+useConnectorSlide({
+  connectorPosition,
+  parentElement: () => document.querySelector(`.list-info[data-list-id="${props.list.id}"] .list-info-row`)
 })
 
 // focus

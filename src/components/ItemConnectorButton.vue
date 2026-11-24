@@ -297,18 +297,20 @@ const startConnecting = (event) => {
 // double click resets a card, box, or list connector to its default top-right position
 const resetConnectorPosition = () => {
   if (isDisabled.value) { return }
-  if (props.card) {
-    const connectorPosition = utils.cardConnectorPosition(props.card)
-    if (connectorPosition === 'top-right') { return }
-    cardStore.updateCard({ id: props.card.id, connectorPosition: null })
-  } else if (props.box) {
-    const connectorPosition = utils.boxConnectorPosition(props.box)
-    if (connectorPosition === 'top-right') { return }
-    boxStore.updateBox({ id: props.box.id, connectorPosition: null })
+  let itemType = 'card'
+  if (props.box) {
+    itemType = 'box'
   } else if (props.list) {
-    const connectorPosition = utils.listConnectorPosition(props.list)
-    if (connectorPosition === 'top-right') { return }
-    listStore.updateList({ id: props.list.id, connectorPosition: null })
+    itemType = 'list'
+  }
+  if (utils.connectorPosition(item.value, itemType) === 'top-right') { return }
+  const update = { id: item.value.id, connectorPosition: null }
+  if (itemType === 'card') {
+    cardStore.updateCard(update)
+  } else if (itemType === 'box') {
+    boxStore.updateBox(update)
+  } else {
+    listStore.updateList(update)
   }
 }
 const handleMouseEnterConnector = (event) => {

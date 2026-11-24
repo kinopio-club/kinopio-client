@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onUnmounted, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onUnmounted, watch, ref } from 'vue'
 
 import { useGlobalStore } from '@/stores/useGlobalStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
 import { useViewportObserver } from '@/composables/useViewportObserver.js'
+import { useConnectorSlide } from '@/composables/useConnectorSlide.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -334,27 +335,11 @@ const isLocked = computed(() => props.box.isLocked)
 
 // connector position
 
-const connectorPosition = computed(() => utils.boxConnectorPosition(props.box))
+const connectorPosition = computed(() => utils.connectorPosition(props.box, 'box'))
 // slide the connector and name to their new positions in the box-info
-watch(connectorPosition, async () => {
-  const infoElement = document.querySelector(`.box-info[data-box-id="${props.box.id}"]`)
-  if (!infoElement) { return }
-  const children = [...infoElement.children]
-  const prevRects = children.map(child => child.getBoundingClientRect())
-  await nextTick()
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (prefersReducedMotion) { return }
-  children.forEach((child, index) => {
-    const rect = child.getBoundingClientRect()
-    const scale = rect.width / child.offsetWidth || 1
-    const deltaX = (prevRects[index].x - rect.x) / scale
-    if (!deltaX) { return }
-    // translate instead of transform, to keep .connector's transform
-    child.animate([
-      { translate: `${deltaX}px 0` },
-      { translate: '0 0' }
-    ], { duration: 200, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' })
-  })
+useConnectorSlide({
+  connectorPosition,
+  parentElement: () => document.querySelector(`.box-info[data-box-id="${props.box.id}"]`)
 })
 
 // interacting
