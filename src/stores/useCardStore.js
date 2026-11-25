@@ -1690,7 +1690,7 @@ export const useCardStore = defineStore('cards', {
       if (!items.length) { return }
       if (globalStore.shouldSnapAlign) { return }
       if (globalStore.multipleListsSelectedIds.length) { return }
-      if (spaceStore.shouldPreventSnapToCard) {
+      if (!spaceStore.shouldSnapToCard) {
         this.cardSnapGuides = []
         return
       }
