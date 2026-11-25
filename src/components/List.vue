@@ -714,7 +714,6 @@ const placeholderStylesMap = computed(() => {
 // connector position
 
 const connectorPosition = computed(() => utils.connectorPosition(props.list, 'list'))
-// slide the connector, name, and buttons to their new positions in the list-info
 useConnectorSlide({
   connectorPosition,
   parentElement: () => document.querySelector(`.list-info[data-list-id="${props.list.id}"] .list-info-row`)
@@ -818,7 +817,6 @@ const clearFocus = () => {
           button.small-button.inline-button
             img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
-      //- connector, outside of .right-side so it can be ordered before .left-side
       ItemConnectorButton(
         :list="props.list"
         :isConnectingTo="isConnectingTo"
@@ -999,7 +997,7 @@ const clearFocus = () => {
     display inline-block
     padding 8px
     padding-left 0
-    margin-left 8px // replaces the padding-right of the last .right-side button
+    margin-left 8px
     margin-right -8px // offsets .list-info-row padding
     flex-shrink 0
     cursor cell
@@ -1012,7 +1010,6 @@ const clearFocus = () => {
   .connected-colors
     left 1px
     top 9px
-  // connector before the name. margin instead of padding, so .connector-glow and .connected-colors stay aligned
   &.connector-top-left
     .connector
       order -1

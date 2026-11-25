@@ -336,7 +336,6 @@ const isLocked = computed(() => props.box.isLocked)
 // connector position
 
 const connectorPosition = computed(() => utils.connectorPosition(props.box, 'box'))
-// slide the connector and name to their new positions in the box-info
 useConnectorSlide({
   connectorPosition,
   parentElement: () => document.querySelector(`.box-info[data-box-id="${props.box.id}"]`)
@@ -838,7 +837,6 @@ const clearFocus = () => {
   .connected-colors
     left 1px
     top 5px
-  // connector before the name. margin instead of padding, so .connector-glow and .connected-colors stay aligned
   &.connector-top-left
     .connector
       order -1
