@@ -1501,7 +1501,8 @@ export default {
   cardHeightIsSingleLine (card) {
     if (!card?.height) { return }
     const height = card.truncateHeight || card.height
-    return height <= consts.emptyCard().height + 1
+    const threshold = 9
+    return height <= consts.emptyCard().height + threshold
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15
