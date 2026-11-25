@@ -72,12 +72,21 @@ const interact = (event) => {
 const currentConnectionColor = computed(() => globalStore.currentConnectionColor)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
+  // while the cursor is over the start item, only move its connector
+  if (startConnectorAreaElementAtCursor(event)) {
+    updateStartConnectorPosition(event)
+    globalStore.currentConnectionSuccess = {}
+    if (state.currentConnectionPath) {
+      state.currentConnectionPath = undefined
+      broadcastStore.update({ updates: { userId: userStore.id }, action: 'removeRemoteCurrentConnection' })
+    }
+    return
+  }
   const end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
-  updateStartConnectorPosition(event)
   const endItemId = checkCurrentConnectionSuccess(event)
   const color = connectionStore.getNewConnectionColor
   globalStore.currentConnectionShiftKeyIsActive = event.shiftKey
