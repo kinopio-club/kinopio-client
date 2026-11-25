@@ -394,16 +394,26 @@ export const useBoxStore = defineStore('boxes', {
     resizeBoxes (ids, delta) {
       const globalStore = useGlobalStore()
       const updates = []
+      const isTopCorner = globalStore.currentUserResizingBoxCorner === 'top-right'
       ids.forEach(id => {
         const rect = utils.boxElementDimensions({ id })
         let width = rect.width
         let height = rect.height
         width = width + delta.x
-        height = height + delta.y
         const infoPosition = utils.boxInfoPositionFromId(id)
         if (!infoPosition) { return }
         const { infoWidth, infoHeight } = infoPosition
-        const box = { id, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
+        const box = { id, resizeWidth: width, infoWidth, infoHeight }
+        if (isTopCorner) {
+          // keep the bottom edge in place by moving the top edge with the height change
+          height = Math.max(height, consts.minBoxSize)
+          const newHeight = Math.max(height - delta.y, consts.minBoxSize)
+          box.y = rect.y + (height - newHeight)
+          height = newHeight
+        } else {
+          height = height + delta.y
+        }
+        box.resizeHeight = height
         updates.push(box)
         this.updatePageSize(box)
         globalStore.currentUserIsResizingBox = true

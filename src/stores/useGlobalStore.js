@@ -140,6 +140,7 @@ export const useGlobalStore = defineStore('global', {
     // resizing boxes
     currentUserIsResizingBox: false,
     currentUserIsResizingBoxIds: [],
+    currentUserResizingBoxCorner: 'bottom-right', // 'bottom-right' or 'top-right'
     remoteUserResizingBoxes: [],
     // dragging boxes
     currentDraggingBoxId: '',
