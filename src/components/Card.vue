@@ -2292,8 +2292,7 @@ const toggleVideoIsPaused = () => {
           transform translate(-100%, -100%)
     // reserves space for the connector
     .card-content-wrap
-      &.connector-top-left,
-      &.connector-bottom-left
+      &.connector-top-left
         .card-content,
         .card-comment
           margin-left 22px // .connector width - .name margin-left
