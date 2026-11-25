@@ -72,9 +72,9 @@ const interact = (event) => {
 const currentConnectionColor = computed(() => globalStore.currentConnectionColor)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
-  // while the cursor is over the start item, only move its connector
-  if (startConnectorAreaElementAtCursor(event)) {
-    updateStartConnectorPosition(event)
+  updateStartConnectorPosition(event)
+  // while the cursor is over the start item, don't draw the connection line
+  if (cursorIsOverStartItem(event)) {
     globalStore.currentConnectionSuccess = {}
     if (state.currentConnectionPath) {
       state.currentConnectionPath = undefined
@@ -121,21 +121,25 @@ const startItemWithType = () => {
   const list = listStore.getList(id)
   if (list) { return { item: list, itemType: 'list' } }
 }
-// the start item's connector area element, if the cursor is over it
-const startConnectorAreaElementAtCursor = (event) => {
-  if (!event) { return }
+const startConnectorItemElement = () => {
   const start = startItemWithType()
   if (!start || start.item.isLocked) { return }
   const selector = connectorAreaSelectors[start.itemType]
+  return document.querySelector(`${selector}[data-${start.itemType}-id="${start.item.id}"]`)
+}
+const cursorIsOverStartItem = (event) => {
+  if (!event) { return }
+  const element = startConnectorItemElement()
+  if (!element) { return }
   const position = utils.cursorPositionInViewport(event)
   const elements = document.elementsFromPoint(position.x, position.y)
-  const element = elements.find(element => element.closest(selector))?.closest(selector)
-  if (element?.dataset[`${start.itemType}Id`] !== start.item.id) { return }
-  return element
+  const isOverElement = elements.some(elementAtCursor => element.contains(elementAtCursor))
+  if (!isOverElement) { return }
+  return true
 }
-// move the start item's connector to the corner nearest the cursor
 const updateStartConnectorPosition = (event) => {
-  const element = startConnectorAreaElementAtCursor(event)
+  if (!event) { return }
+  const element = startConnectorItemElement()
   if (!element) { return }
   const { item, itemType } = startItemWithType()
   let rectElement = element
@@ -232,7 +236,7 @@ const addConnections = async (event) => {
     return
   }
   // releasing inside the start item only moves its connector
-  if (startConnectorAreaElementAtCursor(event)) { return }
+  if (cursorIsOverStartItem(event)) { return }
   if (currentConnectionSuccess.id) {
     endItemId = currentConnectionSuccess.id
   } else {
