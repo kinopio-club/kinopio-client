@@ -666,6 +666,9 @@ const connectorPositionClass = computed(() => {
   if (isLocked.value) { return }
   return `connector-${connectorPosition.value}`
 })
+watch(connectorPosition, () => {
+  cardStore.updateCardDimensions(props.card.id)
+}, { flush: 'post' }) // after the DOM has re-rendered
 
 // card buttons
 
