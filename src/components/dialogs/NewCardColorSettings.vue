@@ -115,14 +115,6 @@ const clearSpaceNewCardColor = () => {
 const clearUserNewCardColor = () => {
   userStore.updateUser({ newCardColor: null })
 }
-
-// card snap
-// const shouldPreventSnapToCard = computed(() => spaceStore.shouldPreventSnapToCard)
-// const toggleShouldPreventSnapToCard = () => {
-//   const value = shouldPreventSnapToCard.value
-//   closeDialogs()
-//   spaceStore.updateSpace({ shouldPreventSnapToCard: !value })
-// }
 </script>
 
 <template lang="pug">

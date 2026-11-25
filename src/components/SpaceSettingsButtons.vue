@@ -65,14 +65,18 @@ const toggleNewCardColorSettingsIsVisible = () => {
   state.newCardColorSettingsIsVisible = value
 }
 
-const isCardSnapEnabled = computed({
+const shouldSnapToCard = computed({
   get () {
-    return !spaceStore.shouldPreventSnapToCard
+    return spaceStore.shouldSnapToCard
   },
   set (value) {
-    spaceStore.updateSpace({ shouldPreventSnapToCard: !value })
+    spaceStore.updateSpace({ shouldSnapToCard: value })
   }
 })
+const toggleShouldSnapToCard = () => {
+  const value = shouldSnapToCard.value
+  shouldSnapToCard.value = !value
+}
 
 </script>
 
@@ -94,11 +98,12 @@ const isCardSnapEnabled = computed({
       .badge.small-badge.new-card-color-badge(:style="{ 'background-color': newCardColor }" title="New Card Color")
     //- toggle snap
     label.small-button.translucent-button(
-      :class="{active: isCardSnapEnabled}"
-      @click.left.stop
+      :class="{active: shouldSnapToCard}"
+      @click.left.prevent="toggleShouldSnapToCard"
+      @keydown.stop.enter="toggleShouldSnapToCard"
       title="Toggle Card Snap"
     )
-      input(type="checkbox" v-model="isCardSnapEnabled")
+      input(type="checkbox" v-model="shouldSnapToCard")
       span Snap
 
   NewCardColorSettings(:visible="state.newCardColorSettingsIsVisible" :defaultColor="state.defaultColor")
