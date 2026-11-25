@@ -386,6 +386,7 @@ const updateIsHover = (value) => {
 }
 const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
+  if (isConnectingFrom.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }

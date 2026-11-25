@@ -229,6 +229,7 @@ const selectListAndConnectedCards = () => {
 const endListInfoInteraction = (event) => {
   state.preventDraggedButtonFromToggling = globalStore.preventDraggedListFromShowingDetails
   if (isConnectingTo.value) { return }
+  if (isConnectingFrom.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
