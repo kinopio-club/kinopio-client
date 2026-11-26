@@ -552,6 +552,11 @@ const updatePreviousResultItem = () => {
 }
 const nameSegmentsStyles = computed(() => {
   if (!isImageCard.value) { return }
+  if (nameIsBadge.value) { return } // the badge has the background instead
+  return { background: currentBackgroundColor.value }
+})
+const nameWrapStyles = computed(() => {
+  if (!nameIsBadge.value) { return }
   return { background: currentBackgroundColor.value }
 })
 const colorClasses = computed(() => {
@@ -910,6 +915,8 @@ const uploadFile = async (event) => {
 const hasTextSegments = computed(() => {
   return nameSegments.value.find(segment => segment.isText && segment.content)
 })
+// media card names, with their left buttons, are a badge over the media
+const nameIsBadge = computed(() => isImageCard.value && hasTextSegments.value)
 // name without urls, checkbox text, and hidden urls
 const normalizedName = computed(() => {
   let newName = props.card.name
@@ -1959,7 +1966,7 @@ const toggleVideoIsPaused = () => {
         //- Audio
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
-        .name-wrap
+        .name-wrap(:class="{'is-badge': nameIsBadge}" :style="nameWrapStyles")
           //- video pause
           .button-wrap.play-button-wrap.badge.secondary(
             v-if="state.formats.video && canEditCard"
@@ -1978,7 +1985,7 @@ const toggleVideoIsPaused = () => {
           //- [·]
           ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
           //- Name
-          p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
+          p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :isStrikeThrough="isChecked" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
         //- Vote Counter
@@ -2245,6 +2252,49 @@ const toggleVideoIsPaused = () => {
 
     .name-wrap
       min-width 40px
+
+    // left buttons and name flow inline, so wrapped name lines start at the card's left edge
+    .name-wrap
+      display block
+      padding 7px 0 8px 8px // replaces .name margins
+      .name
+        display inline
+        margin 0
+        &.has-checkbox
+          width auto
+      > .item-checkbox-button
+        vertical-align top
+        // keeps the larger hit area, but the negative margins keep its line box within the 18px name line-height
+        // so the first line is the same height as the others
+        padding 8px 0 8px 8px
+        margin -7px 8px -8px -8px
+    // media card names are a badge over the media
+    &.media-card
+      .name-wrap
+        padding 9px 0 2px 8px
+        > .play-button-wrap
+          display inline-block
+          vertical-align top
+          margin -2px 8px 0 0 // 20px tall button, -2px keeps it within the first line
+        > .item-checkbox-button
+          margin-top -9px
+        // the left buttons and name share one badge
+        &.is-badge
+          width fit-content
+          margin 7px 0 0 8px
+          padding 2px 5px
+          border-radius var(--entity-radius)
+          background-color var(--secondary-background)
+          .name
+            background-color transparent
+          // buttons are inset 2px from the badge edge, and stay within the 18px line-height
+          > .play-button-wrap
+            margin -1px 5px -1px -3px
+          > .item-checkbox-button
+            padding 0
+            margin 1px 5px 0 -3px
+          > .play-button-wrap + .item-checkbox-button
+            margin-left 0
     .connector,
     .url
       padding 8px
