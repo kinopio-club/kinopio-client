@@ -555,7 +555,7 @@ const nameSegmentsStyles = computed(() => {
   if (nameIsBadge.value) { return } // the badge has the background instead
   return { background: currentBackgroundColor.value }
 })
-const nameWrapStyles = computed(() => {
+const nameBadgeStyles = computed(() => {
   if (!nameIsBadge.value) { return }
   return { background: currentBackgroundColor.value }
 })
@@ -1966,7 +1966,7 @@ const toggleVideoIsPaused = () => {
         //- Audio
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
-        .name-wrap(:class="{'is-badge': nameIsBadge}" :style="nameWrapStyles")
+        .name-wrap(:class="{'has-badge': nameIsBadge}")
           //- video pause
           .button-wrap.play-button-wrap.badge.secondary(
             v-if="state.formats.video && canEditCard"
@@ -1982,12 +1982,14 @@ const toggleVideoIsPaused = () => {
             button.small-button
               img.icon.play(v-if="props.card.videoIsPaused" src="@/assets/play.svg" :class="colorClasses")
               img.icon.pause(v-else src="@/assets/pause.svg" :class="colorClasses")
-          //- [·]
-          ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
-          //- Name
-          p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
-            template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :isStrikeThrough="isChecked" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
+          //- checkbox and name, a badge on media cards
+          .name-badge(:class="{'is-badge': nameIsBadge}" :style="nameBadgeStyles")
+            //- [·]
+            ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
+            //- Name
+            p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+              template(v-for="segment in nameSegments")
+                NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :isStrikeThrough="isChecked" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
         //- Vote Counter
         .card-vote-wrap(v-if="props.card.counterIsVisible")
           CardVote(:card="card")
@@ -2260,12 +2262,14 @@ const toggleVideoIsPaused = () => {
       padding-right 0
       padding-bottom 8px
       padding-left 8px
+      .name-badge
+        display contents
       .name
         display inline
         margin 0
         &.has-checkbox
           width auto
-      > .item-checkbox-button
+      .name-badge > .item-checkbox-button
         vertical-align top
         // keeps the larger hit area, but the negative margins keep its line box within the 18px name line-height
         // so the first line is the same height as the others
@@ -2291,34 +2295,32 @@ const toggleVideoIsPaused = () => {
           margin-right 8px
           margin-bottom 0
           margin-left 0
-        > .item-checkbox-button
+        .name-badge > .item-checkbox-button
           margin-top -9px
-        // the left buttons and name share one badge
-        &.is-badge
+        // the play button is outside the badge, the checkbox and name share one badge
+        &.has-badge
+          display flex
+          align-items flex-start
+          padding-top 7px
+          padding-bottom 0
+          > .play-button-wrap
+            flex-shrink 0
+            margin-top 0
+        .name-badge.is-badge
+          display block
           width fit-content
-          margin-top 7px
-          margin-right 0
-          margin-bottom 0
-          margin-left 8px
           padding 2px 5px
           border-radius var(--entity-radius)
           background-color var(--secondary-background)
           .name
             background-color transparent
-          // buttons are inset 2px from the badge edge, and stay within the 18px line-height
-          > .play-button-wrap
-            margin-top -1px
-            margin-right 5px
-            margin-bottom -1px
-            margin-left -3px
+          // inset 2px from the badge edge, and within the 18px line-height
           > .item-checkbox-button
             padding 0
             margin-top 1px
             margin-right 5px
             margin-bottom 0
             margin-left -3px
-          > .play-button-wrap + .item-checkbox-button
-            margin-left 0
     .connector,
     .url
       padding 8px
