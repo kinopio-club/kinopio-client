@@ -72,6 +72,16 @@ const interact = (event) => {
 const currentConnectionColor = computed(() => globalStore.currentConnectionColor)
 const isDrawingConnection = computed(() => globalStore.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
+  updateStartConnectorPosition(event)
+  // while the cursor is over the start item, don't draw the connection line
+  if (cursorIsOverStartItem(event)) {
+    globalStore.currentConnectionSuccess = {}
+    if (state.currentConnectionPath) {
+      state.currentConnectionPath = undefined
+      broadcastStore.update({ updates: { userId: userStore.id }, action: 'removeRemoteCurrentConnection' })
+    }
+    return
+  }
   const end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
@@ -90,6 +100,69 @@ const drawCurrentConnection = (event) => {
     path
   }
   broadcastStore.update({ updates, action: 'updateRemoteCurrentConnection' })
+}
+
+// connector position
+
+// the element that the connector can slide within
+const connectorAreaSelectors = {
+  card: '.card-wrap',
+  box: '.box-info',
+  list: '.list-info[data-list-id]'
+}
+const startItemWithType = () => {
+  const startItemIds = globalStore.currentConnectionStartItemIds
+  if (startItemIds.length !== 1) { return }
+  const id = props.startItemId
+  const card = cardStore.getCard(id)
+  if (card) { return { item: card, itemType: 'card' } }
+  const box = boxStore.getBox(id)
+  if (box) { return { item: box, itemType: 'box' } }
+  const list = listStore.getList(id)
+  if (list) { return { item: list, itemType: 'list' } }
+}
+const startConnectorItemElement = () => {
+  const start = startItemWithType()
+  if (!start || start.item.isLocked) { return }
+  const selector = connectorAreaSelectors[start.itemType]
+  return document.querySelector(`${selector}[data-${start.itemType}-id="${start.item.id}"]`)
+}
+const cursorIsOverStartItem = (event) => {
+  if (!event) { return }
+  const element = startConnectorItemElement()
+  if (!element) { return }
+  const position = utils.cursorPositionInViewport(event)
+  const elements = document.elementsFromPoint(position.x, position.y)
+  const isOverElement = elements.some(elementAtCursor => element.contains(elementAtCursor))
+  if (!isOverElement) { return }
+  return true
+}
+const updateStartConnectorPosition = (event) => {
+  if (!event) { return }
+  const element = startConnectorItemElement()
+  if (!element) { return }
+  const { item, itemType } = startItemWithType()
+  let rectElement = element
+  if (itemType === 'card') {
+    rectElement = element.querySelector('.card')
+  }
+  const rect = rectElement.getBoundingClientRect()
+  const position = utils.cursorPositionInViewport(event)
+  const centerX = rect.x + (rect.width / 2)
+  let connectorPosition = 'top-right'
+  if (position.x < centerX) {
+    connectorPosition = 'top-left'
+  }
+  // update item
+  if (utils.connectorPosition(item, itemType) === connectorPosition) { return }
+  const update = { id: item.id, connectorPosition }
+  if (itemType === 'card') {
+    cardStore.updateCard(update)
+  } else if (itemType === 'box') {
+    boxStore.updateBox(update)
+  } else {
+    listStore.updateList(update)
+  }
 }
 
 // connect to item
@@ -154,6 +227,8 @@ const addConnections = async (event) => {
     globalStore.addNotificationWithPosition({ message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
+  // releasing inside the start item only moves its connector
+  if (cursorIsOverStartItem(event)) { return }
   if (currentConnectionSuccess.id) {
     endItemId = currentConnectionSuccess.id
   } else {

@@ -502,6 +502,7 @@ const resizeBoxes = async () => {
 const stopResizingBoxes = () => {
   if (!globalStore.currentUserIsResizingBox) { return }
   globalStore.currentUserIsResizingBox = false
+  globalStore.currentUserResizingBoxCorner = 'bottom-right'
   globalStore.updateCurrentUserToolbar('card')
   broadcastStore.update({ updates: { userId: currentUser.value.id }, action: 'removeRemoteUserResizingBoxes' })
   // globalStore.checkIfItemShouldIncreasePageSize(boxes[0])

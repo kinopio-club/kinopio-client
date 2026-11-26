@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
 import { useViewportObserver } from '@/composables/useViewportObserver.js'
+import { useConnectorSlide } from '@/composables/useConnectorSlide.js'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -209,7 +210,7 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  const classList = []
+  const classList = [`connector-${connectorPosition.value}`]
   if (isPaintSelecting.value) {
     classList.push('unselectable')
   }
@@ -276,11 +277,12 @@ const resizeIsVisible = computed(() => {
   if (userStore.getUserIsCommentOnly) { return }
   return true
 })
-const startResizing = (event) => {
+const startResizing = (event, corner = 'bottom-right') => {
   if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
   globalStore.closeAllDialogs()
   globalStore.currentUserIsResizingBox = true
+  globalStore.currentUserResizingBoxCorner = corner
   globalStore.preventMultipleSelectedActionsIsVisible = true
   let boxIds = [props.box.id]
   const multipleBoxesSelectedIds = globalStore.multipleBoxesSelectedIds
@@ -332,6 +334,14 @@ const shrink = () => {
 
 const isLocked = computed(() => props.box.isLocked)
 
+// connector position
+
+const connectorPosition = computed(() => utils.connectorPosition(props.box, 'box'))
+useConnectorSlide({
+  connectorPosition,
+  parentElement: () => document.querySelector(`.box-info[data-box-id="${props.box.id}"]`)
+})
+
 // interacting
 
 const isPaintSelecting = computed(() => globalStore.currentUserIsPaintSelecting)
@@ -377,6 +387,7 @@ const updateIsHover = (value) => {
 }
 const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
+  if (isConnectingFrom.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
@@ -643,6 +654,7 @@ const clearFocus = () => {
   :data-info-height="normalizedBox.infoHeight"
   :data-background="normalizedBox.background"
   :data-is-locked="isLocked"
+  :data-connector-position="connectorPosition"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
 
@@ -704,18 +716,33 @@ const clearFocus = () => {
       )
 
   //- resize
-  .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPaintSelecting}")
-    .inline-button-wrap(
-        @pointerover="updateIsHover(true)"
-        @pointerleave="updateIsHover(false)"
-        @mousedown.left="startResizing"
-        @touchstart="startResizing"
-        @dblclick="shrink"
-      )
-      button.inline-button(
-        tabindex="-1"
-      )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+  template(v-if="resizeIsVisible")
+    //- bottom right
+    .bottom-button-wrap(:class="{unselectable: isPaintSelecting}")
+      .inline-button-wrap(
+          @pointerover="updateIsHover(true)"
+          @pointerleave="updateIsHover(false)"
+          @mousedown.left="startResizing($event, 'bottom-right')"
+          @touchstart="startResizing($event, 'bottom-right')"
+          @dblclick="shrink"
+        )
+        button.inline-button(
+          tabindex="-1"
+        )
+          img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
+    //- top right
+    .bottom-button-wrap.top-right-resize(:class="{unselectable: isPaintSelecting}")
+      .inline-button-wrap(
+          @pointerover="updateIsHover(true)"
+          @pointerleave="updateIsHover(false)"
+          @mousedown.left="startResizing($event, 'top-right')"
+          @touchstart="startResizing($event, 'top-right')"
+          @dblclick="shrink"
+        )
+        button.inline-button(
+          tabindex="-1"
+        )
+          img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeButtonColorClass")
 </template>
 
 <style lang="stylus">
@@ -756,6 +783,17 @@ const clearFocus = () => {
       .resize-icon
         top 0
         left 0
+    // mirrors the bottom right resize button, .bottom-button-wrap styles are in TiltResizeTruncate.vue
+    &.top-right-resize
+      bottom auto
+      top 2px
+      .inline-button-wrap
+        transform translate(8px, -1px)
+        cursor nesw-resize
+        button
+          cursor nesw-resize
+        .resize-icon
+          transform scaleY(-1)
 
 .box-info
   --ease-out-circ cubic-bezier(0, 0.55, 0.45, 1) // https://easings.net/#easeOutCirc
@@ -827,6 +865,11 @@ const clearFocus = () => {
   .connected-colors
     left 1px
     top 5px
+  &.connector-top-left
+    .connector
+      order -1
+      margin-left 8px
+      padding-right 0
 
   .locking-frame
     position absolute

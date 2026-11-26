@@ -11,6 +11,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
 import { useStoreAction } from '@/composables/useStoreAction.js'
 import { useViewportObserver } from '@/composables/useViewportObserver.js'
+import { useConnectorSlide } from '@/composables/useConnectorSlide.js'
 
 import Frames from '@/components/Frames.vue'
 import utils from '@/utils.js'
@@ -228,6 +229,7 @@ const selectListAndConnectedCards = () => {
 const endListInfoInteraction = (event) => {
   state.preventDraggedButtonFromToggling = globalStore.preventDraggedListFromShowingDetails
   if (isConnectingTo.value) { return }
+  if (isConnectingFrom.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = userStore.id
   if (globalStore.currentUserIsPaintSelecting) { return }
@@ -547,6 +549,7 @@ const listClasses = computed(() => {
 })
 const infoClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: color.value })
+  classes.push(`connector-${connectorPosition.value}`)
   if (state.isHover) {
     classes.push('hover')
   }
@@ -608,8 +611,9 @@ const updateIsCollapsed = async (value) => {
   connectionStore.updateConnectionPathsByItemIds(cardIds)
 }
 const addCard = async (event, shouldAppend) => {
-  if (globalStore.preventDraggedListFromShowingDetails) { return }
   cancelLocking()
+  if (listWasDraggedFromButton(event)) { return }
+  if (globalStore.preventDraggedListFromShowingDetails) { return }
   updateIsCollapsed(false)
   const width = listItemWidth.value
   const card = {
@@ -708,6 +712,14 @@ const placeholderStylesMap = computed(() => {
   return styles
 })
 
+// connector position
+
+const connectorPosition = computed(() => utils.connectorPosition(props.list, 'list'))
+useConnectorSlide({
+  connectorPosition,
+  parentElement: () => document.querySelector(`.list-info[data-list-id="${props.list.id}"] .list-info-row`)
+})
+
 // focus
 
 const isFocusing = computed(() => props.list.id === globalStore.focusOnItemId)
@@ -726,6 +738,7 @@ const clearFocus = () => {
   :data-width="props.list.resizeWidth"
   :data-height="props.list.height"
   :data-is-collapsed="props.list.isCollapsed"
+  :data-connector-position="connectorPosition"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :style="listStyles"
@@ -805,19 +818,18 @@ const clearFocus = () => {
           button.small-button.inline-button
             img.icon.down-arrow(v-if="!props.list.isCollapsed" src="@/assets/down-arrow.svg")
             img.icon.right-arrow(v-else src="@/assets/right-arrow.svg")
-        //- connector
-        ItemConnectorButton(
-          :list="props.list"
-          :isConnectingTo="isConnectingTo"
-          :isConnectingFrom="isConnectingFrom"
-          :isVisibleInViewport="state.isVisibleInViewport"
-          :isRemoteConnecting="state.isRemoteConnecting"
-          :remoteConnectionColor="state.remoteConnectionColor"
-          :currentBackgroundColor="color"
-          :backgroundIsTransparent="true"
-          :parentDetailsIsVisible="currentListDetailsIsVisible"
-          @shouldRenderParent="updateShouldRenderParent"
-        )
+      ItemConnectorButton(
+        :list="props.list"
+        :isConnectingTo="isConnectingTo"
+        :isConnectingFrom="isConnectingFrom"
+        :isVisibleInViewport="state.isVisibleInViewport"
+        :isRemoteConnecting="state.isRemoteConnecting"
+        :remoteConnectionColor="state.remoteConnectionColor"
+        :currentBackgroundColor="color"
+        :backgroundIsTransparent="true"
+        :parentDetailsIsVisible="currentListDetailsIsVisible"
+        @shouldRenderParent="updateShouldRenderParent"
+      )
       //- resize collapsed
       .bottom-button-wrap(v-if="props.list.isCollapsed && resizeIsVisible" :class="{unselectable: isPaintSelecting}")
         .inline-button-wrap(
@@ -986,7 +998,9 @@ const clearFocus = () => {
     display inline-block
     padding 8px
     padding-left 0
+    margin-left 8px
     margin-right -8px // offsets .list-info-row padding
+    flex-shrink 0
     cursor cell
     transform translateY(1px)
     button
@@ -997,6 +1011,11 @@ const clearFocus = () => {
   .connected-colors
     left 1px
     top 9px
+  &.connector-top-left
+    .connector
+      order -1
+      margin-left 0
+      margin-right 0
   // name
   .list-info-row
     width 100%
@@ -1005,6 +1024,9 @@ const clearFocus = () => {
     display flex
     align-items center
     padding 0 8px
+    // keeps buttons on the right, now that .connector is also a child of the row
+    .right-side
+      margin-left auto
     .left-side
       display flex
       align-items center

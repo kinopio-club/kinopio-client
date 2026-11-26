@@ -279,6 +279,7 @@ Name | Type | Description
 <code class="cards">backgroundColor</code>          | `String`  | The background color for the card
 <code class="cards">createdAt</code>                | `String`  | The date when the card was created
 <code class="cards">codeBlockLanguage</code>        | `String`  | Code language syntax highlighting to use for markdown <code>```</code> code blocks
+<code class="cards">connectorPosition</code>        | `String`  | The corner of the card that its connector button is in. Can be `top-left` or `top-right` (default). Locked cards always use `top-right`
 <code class="cards">counterIsVisible</code>         | `Boolean`  | Whether the card counter for voting is visible
 <code class="cards">counterValue</code>             | `Integer`  | The incremented number of the card counter. Default value is `0`
 <code class="cards">frameId</code>                  | `Integer`  | The id of type of frame applied to the card, if any
@@ -402,6 +403,7 @@ Name | Type | Description
 <code class="boxes">background</code>     | `String`  | The image url used by the box background
 <code class="boxes">backgroundIsStretch</code>     | `Boolean`  | Whether the box background image is stretched (default is `false`, to display images tiled)
 <code class="boxes">color</code>          | `String` | The color of the box
+<code class="boxes">connectorPosition</code> | `String` | Where the connector button is in the box info area. Can be `top-left` or `top-right` (default). Locked boxes always use `top-right`
 <code class="boxes">createdAt</code>      | `String`  | The date when the box was created
 <code class="boxes">headerFontId</code>   | `Integer`  | An id representing the header font of the box. Default value is `0` for Recoletta. Similar to `card.headerFontId`
 <code class="boxes">headerFontSize</code> | `String`  | The header font size of the box. Can be either `s`(small-size, default), `m`(medium-size), or `l`(large-size). Similar to `card.headerFontSize`
@@ -451,6 +453,7 @@ Name | Type | Description
 --- | --- | ---
 <code class="lists">id</code>                                         | `String` | The unique ID of the list. Is not user updateable
 <code class="lists">color</code>                                      | `String` | The color of the list
+<code class="lists">connectorPosition</code>                          | `String` | Where the connector button is on the list. Can be `top-left` or `top-right` (default)
 <code class="lists">createdAt</code>                                  | `String`  | The date when the list was created
 <code class="lists">name</code>                                       | `String` | The name of the list
 <code class="lists">height</code>                                     | `String` | The rendered height of the list

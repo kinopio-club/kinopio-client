@@ -3,6 +3,8 @@ import { reactive, computed, watch, ref, nextTick } from 'vue'
 
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useListStore } from '@/stores/useListStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGlobalStore } from '@/stores/useGlobalStore'
@@ -15,6 +17,8 @@ import last from 'lodash-es/last'
 const globalStore = useGlobalStore()
 const connectionStore = useConnectionStore()
 const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const listStore = useListStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
@@ -290,6 +294,25 @@ const startConnecting = (event) => {
   }
   globalStore.updateCurrentUserIsDrawingConnection(true)
 }
+// double click resets a card, box, or list connector to its default top-right position
+const resetConnectorPosition = () => {
+  if (isDisabled.value) { return }
+  let itemType = 'card'
+  if (props.box) {
+    itemType = 'box'
+  } else if (props.list) {
+    itemType = 'list'
+  }
+  if (utils.connectorPosition(item.value, itemType) === 'top-right') { return }
+  const update = { id: item.value.id, connectorPosition: null }
+  if (itemType === 'card') {
+    cardStore.updateCard(update)
+  } else if (itemType === 'box') {
+    boxStore.updateBox(update)
+  } else {
+    listStore.updateList(update)
+  }
+}
 const handleMouseEnterConnector = (event) => {
   globalStore.currentUserIsHoveringOverConnectorItemId = item.value.id
   if (globalStore.currentUserIsDrawingConnection) { return }
@@ -310,6 +333,7 @@ const handleMouseLeaveConnector = () => {
   :key="item.id"
   @mousedown.left="startConnecting"
   @touchstart="startConnecting"
+  @dblclick="resetConnectorPosition"
   @mouseenter="handleMouseEnterConnector"
   @mouseleave="handleMouseLeaveConnector"
   :class="connectorClasses"

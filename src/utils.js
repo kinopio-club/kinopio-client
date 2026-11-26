@@ -1112,6 +1112,7 @@ export default {
     const cardId = card.id
     card.shouldRender = this.stringToBoolean(element.dataset.shouldRender)
     card.isLocked = this.stringToBoolean(element.dataset.isLocked)
+    card.connectorPosition = element.dataset.connectorPosition
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -1136,6 +1137,7 @@ export default {
     box.height = parseInt(element.dataset.resizeHeight)
     box.infoWidth = parseInt(element.dataset.infoWidth)
     box.infoHeight = parseInt(element.dataset.infoHeight)
+    box.connectorPosition = element.dataset.connectorPosition
     box.itemType = 'box'
     return box
   },
@@ -1151,6 +1153,7 @@ export default {
     if (element.dataset.isCollapsed === 'true') {
       list.height = consts.listInfoHeight
     }
+    list.connectorPosition = element.dataset.connectorPosition
     list.itemType = 'list'
     return list
   },
@@ -1485,6 +1488,19 @@ export default {
       y: position.y + offset
     }
   },
+  connectorPosition (item, itemType = 'card') {
+    const position = item?.connectorPosition
+    const isPosition = consts.connectorPositions[itemType]?.includes(position)
+    if (item?.isLocked) { return 'top-right' }
+    if (!isPosition) { return 'top-right' }
+    return position
+  },
+  cardHeightIsSingleLine (card) {
+    if (!card?.height) { return }
+    const height = card.truncateHeight || card.height
+    const threshold = 9
+    return height <= consts.emptyCard().height + threshold
+  },
   estimatedItemConnectorPosition (item) {
     const offset = 15
     if (item.itemType === 'box' && item.isLocked) {
@@ -1496,6 +1512,10 @@ export default {
     x = x - offset
     let y = item.y
     y = y + offset
+    const connectorPosition = this.connectorPosition(item, item.itemType)
+    if (connectorPosition === 'top-left') {
+      x = item.x + offset
+    }
     const position = {
       x: Math.round(x),
       y: Math.round(y)

@@ -552,6 +552,11 @@ const updatePreviousResultItem = () => {
 }
 const nameSegmentsStyles = computed(() => {
   if (!isImageCard.value) { return }
+  if (nameIsBadge.value) { return } // the badge has the background instead
+  return { background: currentBackgroundColor.value }
+})
+const nameBadgeStyles = computed(() => {
+  if (!nameIsBadge.value) { return }
   return { background: currentBackgroundColor.value }
 })
 const colorClasses = computed(() => {
@@ -661,6 +666,14 @@ const isConnectingFrom = computed(() => {
   return globalStore.currentConnectionStartItemIds.includes(props.card.id)
 })
 const connectedConnections = computed(() => connectionStore.getConnectionsByItemId(props.card.id))
+const connectorPosition = computed(() => utils.connectorPosition(props.card))
+const connectorPositionClass = computed(() => {
+  if (isLocked.value) { return }
+  return `connector-${connectorPosition.value}`
+})
+watch(connectorPosition, () => {
+  cardStore.updateCardDimensions(props.card.id)
+}, { flush: 'post' }) // after the DOM has re-rendered
 
 // card buttons
 
@@ -902,6 +915,8 @@ const uploadFile = async (event) => {
 const hasTextSegments = computed(() => {
   return nameSegments.value.find(segment => segment.isText && segment.content)
 })
+// media card names, with their left buttons, are a badge over the media
+const nameIsBadge = computed(() => isImageCard.value && hasTextSegments.value)
 // name without urls, checkbox text, and hidden urls
 const normalizedName = computed(() => {
   let newName = props.card.name
@@ -1358,10 +1373,14 @@ const isSelected = computed(() => {
   const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
   return multipleCardsSelectedIds.includes(props.card.id)
 })
+const selectedColorInList = (color) => {
+  if (!color || !isInList.value) { return color }
+  return colord(color).lighten(0.1).toHex()
+}
 const selectedColor = computed(() => {
   const color = currentUserColor.value
   if (isSelected.value) {
-    return color
+    return selectedColorInList(color)
   } else {
     return undefined
   }
@@ -1374,7 +1393,7 @@ const remoteSelectedColor = computed(() => {
   const selectedCard = globalStore.remoteCardsSelected.find(card => card.cardId === props.card.id)
   if (selectedCard) {
     const user = spaceStore.getSpaceUserById(selectedCard.userId)
-    return user.color
+    return selectedColorInList(user.color)
   } else {
     return undefined
   }
@@ -1432,6 +1451,7 @@ const remoteCardDetailsVisibleColor = computed(() => {
 const showCardDetails = (event) => {
   if (globalStore.currentUserIsResizingSidebar || globalStore.currentUserIsResizingCardDetails) { return }
   if (globalStore.cardDetailsIsVisibleForCardId) { return }
+  if (isConnectingFrom.value) { return }
   if (isLocked.value) { return }
   if (globalStore.currentUserIsPaintSelecting) { return }
   if (globalStore.getIsInteractingWithConnection) { return }
@@ -1835,6 +1855,7 @@ const toggleVideoIsPaused = () => {
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
+  :data-connector-position="connectorPosition"
   :data-tilt-degrees="card.tilt"
   :data-sticky-stretch-resistance="stickyState.stickyStretchResistance"
   :data-x="x"
@@ -1898,6 +1919,21 @@ const toggleVideoIsPaused = () => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:item="card")
 
+    //- Connector, positioned over the space reserved by .card-content-wrap margins
+    .connector-position-wrap(v-if="!isLocked" :class="connectorPositionClass")
+      ItemConnectorButton(
+        :card="card"
+        :isConnectingTo="isConnectingTo"
+        :isConnectingFrom="isConnectingFrom"
+        :isVisibleInViewport="state.isVisibleInViewport"
+        :isRemoteConnecting="state.isRemoteConnecting"
+        :remoteConnectionColor="state.remoteConnectionColor"
+        :defaultBackgroundColor="state.defaultBackgroundColor"
+        :currentBackgroundColor="currentBackgroundColor"
+        :parentDetailsIsVisible="currentCardDetailsIsVisible"
+        @shouldRenderParent="updateShouldRenderParent"
+      )
+
     template(v-if="isVisualCard || pendingUploadDataUrl")
       ImageOrVideo(
         :isSelectedOrDragging="isSelectedOrDragging"
@@ -1915,7 +1951,7 @@ const toggleVideoIsPaused = () => {
     TiltResizeTruncate(:card="card" :visible="tiltResizeIsVisible" :isInList="isInList")
 
     //- Content
-    span.card-content-wrap(:style="cardContentWrapStyles")
+    span.card-content-wrap(:style="cardContentWrapStyles" :class="connectorPositionClass")
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
@@ -1934,7 +1970,7 @@ const toggleVideoIsPaused = () => {
         //- Audio
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
-        .name-wrap
+        .name-wrap(:class="{'has-badge': nameIsBadge}")
           //- video pause
           .button-wrap.play-button-wrap.badge.secondary(
             v-if="state.formats.video && canEditCard"
@@ -1950,17 +1986,19 @@ const toggleVideoIsPaused = () => {
             button.small-button
               img.icon.play(v-if="props.card.videoIsPaused" src="@/assets/play.svg" :class="colorClasses")
               img.icon.pause(v-else src="@/assets/pause.svg" :class="colorClasses")
-          //- [·]
-          ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
-          //- Name
-          p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
-            template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :isStrikeThrough="isChecked" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
+          //- checkbox and name, a badge on media cards
+          .name-badge(:class="{'is-badge': nameIsBadge}" :style="nameBadgeStyles")
+            //- [·]
+            ItemCheckboxButton(:visible="hasCheckbox" :card="card" :canEditItem="canEditCard" @toggleItemChecked="cancelLocking")
+            //- Name
+            p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+              template(v-for="segment in nameSegments")
+                NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :isStrikeThrough="isChecked" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
         //- Vote Counter
         .card-vote-wrap(v-if="props.card.counterIsVisible")
           CardVote(:card="card")
 
-      //- Right buttons
+      //- Top Right buttons
       span.card-buttons-wrap
         //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
@@ -1969,26 +2007,11 @@ const toggleVideoIsPaused = () => {
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
         //- Lock
-        template(v-if="isLocked")
-          //- based on CardUnlockButtons.vue
-          //- .connector maintains connection paths when card is locked
-          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
-            button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
-              img.icon.lock-icon(src="@/assets/lock.svg")
-        template(v-else)
-          //- connector
-          ItemConnectorButton(
-            :card="card"
-            :isConnectingTo="isConnectingTo"
-            :isConnectingFrom="isConnectingFrom"
-            :isVisibleInViewport="state.isVisibleInViewport"
-            :isRemoteConnecting="state.isRemoteConnecting"
-            :remoteConnectionColor="state.remoteConnectionColor"
-            :defaultBackgroundColor="state.defaultBackgroundColor"
-            :currentBackgroundColor="currentBackgroundColor"
-            :parentDetailsIsVisible="currentCardDetailsIsVisible"
-            @shouldRenderParent="updateShouldRenderParent"
-          )
+        //- based on CardUnlockButtons.vue
+        //- .connector maintains connection paths when card is locked
+        .lock-button-wrap.inline-button-wrap(v-if="isLocked" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
+          button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
+            img.icon.lock-icon(src="@/assets/lock.svg")
     .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="groupInviteUrl")
         GroupInvitePreview(
@@ -2235,6 +2258,73 @@ const toggleVideoIsPaused = () => {
 
     .name-wrap
       min-width 40px
+
+    // left buttons and name flow inline, so wrapped name lines start at the card's left edge
+    .name-wrap
+      display block
+      padding-top 7px // replaces .name margins
+      padding-right 0
+      padding-bottom 8px
+      padding-left 8px
+      .name-badge
+        display contents
+      .name
+        display inline
+        margin 0
+        &.has-checkbox
+          width auto
+      .name-badge > .item-checkbox-button
+        vertical-align top
+        // keeps the larger hit area, but the negative margins keep its line box within the 18px name line-height
+        // so the first line is the same height as the others
+        padding-top 8px
+        padding-right 0
+        padding-bottom 8px
+        padding-left 8px
+        margin-top -7px
+        margin-right 5px
+        margin-bottom -8px
+        margin-left -8px
+    // media card names are a badge over the media
+    &.media-card
+      .name-wrap
+        padding-top 9px
+        padding-right 0
+        padding-bottom 2px
+        padding-left 8px
+        > .play-button-wrap
+          display inline-block
+          vertical-align top
+          margin-top -2px // 20px tall button, -2px keeps it within the first line
+          margin-right 8px
+          margin-bottom 0
+          margin-left 0
+        .name-badge > .item-checkbox-button
+          margin-top -9px
+        // the play button is outside the badge, the checkbox and name share one badge
+        &.has-badge
+          display flex
+          align-items flex-start
+          padding-top 7px
+          padding-bottom 0
+          > .play-button-wrap
+            flex-shrink 0
+            margin-top 0
+        .name-badge.is-badge
+          display block
+          width fit-content
+          padding 2px 5px
+          border-radius var(--entity-radius)
+          background-color var(--secondary-background)
+          .name
+            background-color transparent
+          // inset 2px from the badge edge, and within the 18px line-height
+          > .item-checkbox-button
+            padding 0
+            margin-top 1px
+            margin-right 5px
+            margin-bottom 0
+            margin-left -3px
     .connector,
     .url
       padding 8px
@@ -2244,6 +2334,48 @@ const toggleVideoIsPaused = () => {
         z-index 1
     .connector
       padding-top 9px
+
+    // overlays the card so the connector can sit in either top corner.
+    // .card isn't positioned, so this is positioned to .card-wrap and doesn't scroll with truncated cards
+    .connector-position-wrap
+      position absolute
+      top 0
+      left 0
+      width 100%
+      height 100%
+      z-index 2
+      pointer-events none
+      .connector
+        position absolute
+        top 0
+        left 0
+        transform translate(0, 0)
+        --connector-easing cubic-bezier(0.2, 0.8, 0.2, 1)
+        transition left 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
+        @media (prefers-reduced-motion)
+          transition none
+        &:not(.is-disabled)
+          pointer-events auto
+      // 100% puts the connector outside the card, translate pulls it back in by its own size.
+      // left is used instead of right so position changes can animate
+      &.connector-top-right
+        .connector
+          left 100%
+          transform translate(-100%, 0)
+    // reserves space for the connector
+    .card-content-wrap
+      &.connector-top-left
+        .card-content,
+        .card-comment
+          margin-left 22px // .connector width - .name margin-left
+        // without buttons there's no .card-content padding-right to cancel out
+        .card-buttons-wrap:empty
+          margin-left 0
+      &.connector-top-right
+        .card-buttons-wrap
+          margin-right 30px // .connector width
+          .url-wrap:only-child
+            padding-right 0
 
     .url-wrap
       padding 0

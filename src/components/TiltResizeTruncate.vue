@@ -97,7 +97,8 @@ const isTilting = computed(() => {
 
 const isComment = computed(() => cardStore.getIsCommentCard(props.card))
 const resizeTruncateIsVisible = computed(() => {
-  return props.visible && !isComment.value
+  const shouldHide = !props.card.truncateHeight && utils.cardHeightIsSingleLine(props.card)
+  return props.visible && !isComment.value && !shouldHide
 })
 const resizeWidthIsVisible = computed(() => resizeTruncateIsVisible.value && !props.isInList)
 const isResizing = computed(() => {
