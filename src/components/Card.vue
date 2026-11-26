@@ -2256,7 +2256,10 @@ const toggleVideoIsPaused = () => {
     // left buttons and name flow inline, so wrapped name lines start at the card's left edge
     .name-wrap
       display block
-      padding 7px 0 8px 8px // replaces .name margins
+      padding-top 7px // replaces .name margins
+      padding-right 0
+      padding-bottom 8px
+      padding-left 8px
       .name
         display inline
         margin 0
@@ -2266,22 +2269,37 @@ const toggleVideoIsPaused = () => {
         vertical-align top
         // keeps the larger hit area, but the negative margins keep its line box within the 18px name line-height
         // so the first line is the same height as the others
-        padding 8px 0 8px 8px
-        margin -7px 8px -8px -8px
+        padding-top 8px
+        padding-right 0
+        padding-bottom 8px
+        padding-left 8px
+        margin-top -7px
+        margin-right 5px
+        margin-bottom -8px
+        margin-left -8px
     // media card names are a badge over the media
     &.media-card
       .name-wrap
-        padding 9px 0 2px 8px
+        padding-top 9px
+        padding-right 0
+        padding-bottom 2px
+        padding-left 8px
         > .play-button-wrap
           display inline-block
           vertical-align top
-          margin -2px 8px 0 0 // 20px tall button, -2px keeps it within the first line
+          margin-top -2px // 20px tall button, -2px keeps it within the first line
+          margin-right 8px
+          margin-bottom 0
+          margin-left 0
         > .item-checkbox-button
           margin-top -9px
         // the left buttons and name share one badge
         &.is-badge
           width fit-content
-          margin 7px 0 0 8px
+          margin-top 7px
+          margin-right 0
+          margin-bottom 0
+          margin-left 8px
           padding 2px 5px
           border-radius var(--entity-radius)
           background-color var(--secondary-background)
@@ -2289,10 +2307,16 @@ const toggleVideoIsPaused = () => {
             background-color transparent
           // buttons are inset 2px from the badge edge, and stay within the 18px line-height
           > .play-button-wrap
-            margin -1px 5px -1px -3px
+            margin-top -1px
+            margin-right 5px
+            margin-bottom -1px
+            margin-left -3px
           > .item-checkbox-button
             padding 0
-            margin 1px 5px 0 -3px
+            margin-top 1px
+            margin-right 5px
+            margin-bottom 0
+            margin-left -3px
           > .play-button-wrap + .item-checkbox-button
             margin-left 0
     .connector,
