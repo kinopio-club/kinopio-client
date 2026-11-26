@@ -149,18 +149,10 @@ const updateStartConnectorPosition = (event) => {
   const rect = rectElement.getBoundingClientRect()
   const position = utils.cursorPositionInViewport(event)
   const centerX = rect.x + (rect.width / 2)
-  const centerY = rect.y + (rect.height / 2)
-  // get position
-  const canUseBottom = itemType === 'card' && !utils.cardHeightIsSingleLine(item)
-  let vertical = 'top'
-  if (canUseBottom && position.y > centerY) {
-    vertical = 'bottom'
-  }
-  let horizontal = 'right'
+  let connectorPosition = 'top-right'
   if (position.x < centerX) {
-    horizontal = 'left'
+    connectorPosition = 'top-left'
   }
-  const connectorPosition = `${vertical}-${horizontal}`
   // update item
   if (utils.connectorPosition(item, itemType) === connectorPosition) { return }
   const update = { id: item.id, connectorPosition }

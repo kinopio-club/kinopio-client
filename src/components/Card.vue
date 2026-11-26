@@ -2329,7 +2329,7 @@ const toggleVideoIsPaused = () => {
     .connector
       padding-top 9px
 
-    // overlays the card so the connector can sit in any corner.
+    // overlays the card so the connector can sit in either top corner.
     // .card isn't positioned, so this is positioned to .card-wrap and doesn't scroll with truncated cards
     .connector-position-wrap
       position absolute
@@ -2345,29 +2345,17 @@ const toggleVideoIsPaused = () => {
         left 0
         transform translate(0, 0)
         --connector-easing cubic-bezier(0.2, 0.8, 0.2, 1)
-        transition left 0.2s var(--connector-easing), top 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
+        transition left 0.2s var(--connector-easing), transform 0.2s var(--connector-easing)
         @media (prefers-reduced-motion)
           transition none
         &:not(.is-disabled)
           pointer-events auto
-        // inline buttons get line-height space below them, which would offset bottom positions
-        button
-          display block
       // 100% puts the connector outside the card, translate pulls it back in by its own size.
-      // left/top are used instead of right/bottom so position changes can animate
+      // left is used instead of right so position changes can animate
       &.connector-top-right
         .connector
           left 100%
           transform translate(-100%, 0)
-      &.connector-bottom-left
-        .connector
-          top 100%
-          transform translate(0, -100%)
-      &.connector-bottom-right
-        .connector
-          left 100%
-          top 100%
-          transform translate(-100%, -100%)
     // reserves space for the connector
     .card-content-wrap
       &.connector-top-left
@@ -2377,8 +2365,7 @@ const toggleVideoIsPaused = () => {
         // without buttons there's no .card-content padding-right to cancel out
         .card-buttons-wrap:empty
           margin-left 0
-      &.connector-top-right,
-      &.connector-bottom-right
+      &.connector-top-right
         .card-buttons-wrap
           margin-right 30px // .connector width
           .url-wrap:only-child

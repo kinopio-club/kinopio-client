@@ -1493,9 +1493,6 @@ export default {
     const isPosition = consts.connectorPositions[itemType]?.includes(position)
     if (item?.isLocked) { return 'top-right' }
     if (!isPosition) { return 'top-right' }
-    if (itemType === 'card' && this.cardHeightIsSingleLine(item)) {
-      return position.replace('bottom-', 'top-')
-    }
     return position
   },
   cardHeightIsSingleLine (card) {
@@ -1516,11 +1513,8 @@ export default {
     let y = item.y
     y = y + offset
     const connectorPosition = this.connectorPosition(item, item.itemType)
-    if (connectorPosition.endsWith('-left')) {
+    if (connectorPosition === 'top-left') {
       x = item.x + offset
-    }
-    if (connectorPosition.startsWith('bottom-')) {
-      y = item.y + item.height - offset
     }
     const position = {
       x: Math.round(x),

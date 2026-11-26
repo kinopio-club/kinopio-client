@@ -1865,7 +1865,7 @@ export const useCardStore = defineStore('cards', {
  * @property {any[]} atUserMentions
  * @property {string} codeBlockLanguage
  * @property {boolean} counterIsVisible
- * @property {'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} [connectorPosition='top-right']
+ * @property {'top-left' | 'top-right'} [connectorPosition='top-right']
  * @property {number} [counterValue=0]
  *
  * @typedef {Partial<Card>} CardUpdate

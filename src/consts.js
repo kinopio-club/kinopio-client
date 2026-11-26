@@ -22,7 +22,7 @@ export default {
   minListWidth: 200,
   normalCardWrapWidth: 200,
   connectorPositions: {
-    card: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+    card: ['top-left', 'top-right'],
     box: ['top-left', 'top-right'],
     list: ['top-left', 'top-right']
   },
