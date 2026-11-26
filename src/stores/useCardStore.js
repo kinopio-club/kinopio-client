@@ -1690,13 +1690,9 @@ export const useCardStore = defineStore('cards', {
       if (!items.length) { return }
       if (globalStore.shouldSnapAlign) { return }
       if (globalStore.multipleListsSelectedIds.length) { return }
-      if (!spaceStore.shouldSnapToCard) {
-        this.cardSnapGuides = []
-        return
-      }
       const targetCards = this.getCardsSelectableInViewport()
       const isSnappingToList = Boolean(listStore.listSnapGuides.listId) || globalStore.shouldSnapBackToList
-      const canSnapToCard = userStore.getUserIsSpaceMember && !isSnappingToList
+      const shouldSnapToCard = userStore.getUserIsSpaceMember && !isSnappingToList && spaceStore.shouldSnapToCard // always snap to list card
       /** @type {SnapGuide[]} */
       let snapGuides = []
       // find
@@ -1704,7 +1700,7 @@ export const useCardStore = defineStore('cards', {
       if (!card) { return }
       targetCards.forEach(target => {
         if (target.id === card.id) { return }
-        if (!target.listId && !canSnapToCard) { return }
+        if (!target.listId && !shouldSnapToCard) { return }
         const isTargetSelected = globalStore.multipleCardsSelectedIds.includes(target.id)
         if (isTargetSelected) { return }
         // assign card sides
