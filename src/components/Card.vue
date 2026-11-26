@@ -1373,10 +1373,14 @@ const isSelected = computed(() => {
   const multipleCardsSelectedIds = globalStore.multipleCardsSelectedIds
   return multipleCardsSelectedIds.includes(props.card.id)
 })
+const selectedColorInList = (color) => {
+  if (!color || !isInList.value) { return color }
+  return colord(color).lighten(0.1).toHex()
+}
 const selectedColor = computed(() => {
   const color = currentUserColor.value
   if (isSelected.value) {
-    return color
+    return selectedColorInList(color)
   } else {
     return undefined
   }
@@ -1389,7 +1393,7 @@ const remoteSelectedColor = computed(() => {
   const selectedCard = globalStore.remoteCardsSelected.find(card => card.cardId === props.card.id)
   if (selectedCard) {
     const user = spaceStore.getSpaceUserById(selectedCard.userId)
-    return user.color
+    return selectedColorInList(user.color)
   } else {
     return undefined
   }
